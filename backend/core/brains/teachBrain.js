@@ -95,19 +95,21 @@ Ask a warm, conversational question in ${ctx.lang_name} about what the learner a
 Respond ONLY with JSON:
 {
   "message": "your ${ctx.lang_name} diagnostic question",
+  "captionEn": "one plain-English line saying the same thing — shown as a caption under the ${ctx.lang_name} speech",
   "decision": "DIAGNOSE",
   "behaviourSignal": "engaged"
 }`;
 
   const text = await callAI({ system, userMessage: `Begin the diagnosis for "${nodeLabel}".`, maxTokens: 1024, temperature: 0.7 });
-  return safeParseJSON(text, { message: text, decision: 'DIAGNOSE', behaviourSignal: 'engaged' });
+  return safeParseJSON(text, { message: text, captionEn: null, decision: 'DIAGNOSE', behaviourSignal: 'engaged' });
 }
 
 // ─── generateInstruction() ─────────────────────────────────────────────────────
 async function generateInstruction({
   nodeLabel, clusterLabel, language, approach = 'native_concept',
   approachesAlreadyUsed = [], conversationHistory = [], loopCount = 0,
-  behaviourSignal = 'engaged', learnerContext = {}, culturalExamples = [], nodeSpec = null
+  behaviourSignal = 'engaged', learnerContext = {}, culturalExamples = [], nodeSpec = null,
+  learnerRequestedCheck = false
 }) {
   const ctx = LANGUAGE_CONTEXTS[language];
   const approachGuide = (APPROACH_GUIDES[approach] || APPROACH_GUIDES.native_concept)(ctx.region);
@@ -135,6 +137,9 @@ SYSTEM PROMPT RULES:
 - When you have explained sufficiently, set decision to CHECK and provide the mastery check question
 - Mastery check must require the learner to USE the concept — not recall it. Ask in ${ctx.lang_name}.
 - Approaches already used at this node (never repeat): ${approachesAlreadyUsed.join(', ') || 'none'}
+- "captionEn" is a caption, not the lesson: 1–2 plain-English sentences glossing what you just said. Compose "message" natively in ${ctx.lang_name} first; never translate the lesson from English.
+- The message will usually be spoken aloud by a text-to-speech voice: keep sentences short, and put code and diagrams ONLY in "code"/"mermaid", never inside "message".${learnerRequestedCheck ? `
+- THE LEARNER HAS SAID THEY ARE READY FOR THE MASTERY CHECK. Set decision to CHECK this turn, give a short encouraging line, and provide the check question.` : ''}
 
 CONVERSATION HISTORY (last 6 turns):
 ${formatHistory(conversationHistory) || '(session start)'}
@@ -142,6 +147,7 @@ ${formatHistory(conversationHistory) || '(session start)'}
 Respond ONLY with JSON:
 {
   "message": "native-language instruction text",
+  "captionEn": "1-2 sentence plain-English caption of the message",
   "decision": "CONTINUE | CHECK",
   "checkQuestion": "mastery check question in learner language — only if decision=CHECK, else null",
   "mermaid": "mermaid diagram string — optional, for logic flow, else null",
@@ -157,7 +163,7 @@ Respond ONLY with JSON:
 
   const text = await callAI({ system, userMessage: lastMessage, maxTokens: 2048, temperature: 0.7 });
   return safeParseJSON(text, {
-    message: text, decision: 'CONTINUE', checkQuestion: null, mermaid: null, code: null,
+    message: text, captionEn: null, decision: 'CONTINUE', checkQuestion: null, mermaid: null, code: null,
     behaviourSignal: 'engaged', approachesUsed: [approach], culturalExampleUsed: null
   });
 }

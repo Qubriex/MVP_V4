@@ -67,32 +67,4 @@ export const MOCK_MASTERY_LOG = {
   qubirex_note: 'This Mastery Log reflects demonstrated understanding only. Readiness classification and external scoring are intentionally left blank — owned by the commissioning institution.'
 };
 
-export const MOCK_LEARNER_DASHBOARD = {
-  engagement_title: 'Python Fundamentals — Batch 1',
-  progress_pct: 55,
-  nodes_mastered: 6,
-  total_nodes: 11,
-  current_node_label: 'Loops — for/while',
-  current_cluster_label: 'Control Flow',
-  overall_status: 'active'
-};
-
-export const MOCK_MASTERY_RECORD = [
-  { node_label: 'Variables & Data Types', cluster_label: 'Core Syntax & Variables', mastery_attainment: 0.95, attempt_count: 1 },
-  { node_label: 'Operators & Expressions', cluster_label: 'Core Syntax & Variables', mastery_attainment: 0.90, attempt_count: 2 },
-  { node_label: 'Conditionals', cluster_label: 'Control Flow', mastery_attainment: 0.91, attempt_count: 1 }
-];
-
-export const MOCK_SESSION_START = {
-  session_id: 'demo-session-1',
-  node_label: 'Loops — for/while',
-  cluster_label: 'Control Flow',
-  approach: 'analogy',
-  loop_count: 0,
-  history: [
-    {
-      role: 'ai', type: 'diagnosis',
-      content: 'నమస్కారం! ఈరోజు మనం "Loops" గురించి నేర్చుకుందాం — ఒక పనిని మళ్ళీ మళ్ళీ చేయాల్సి వస్తే, మీరు ఎలా చేస్తారు? ఉదాహరణకు, 1 నుండి 10 వరకు అన్ని సంఖ్యలను ప్రింట్ చేయాలంటే?'
-    }
-  ]
-};
+// Learner-side (/learn/*) fallbacks live in learnerMockData.js.

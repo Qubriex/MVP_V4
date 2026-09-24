@@ -31,6 +31,7 @@ All protected routes require: `Authorization: Bearer <token>`
 | POST | `/institution/engagements` | `{capability_target_id, title, language, learner_ids}` |
 | GET | `/institution/engagements` | List engagements |
 | GET | `/institution/engagements/:id` | Engagement detail + cohort progress (structural only — never session content) |
+| GET | `/institution/engagements/:id/skill-requests` | Skills learners asked to add, aggregated (skill, learner count, pending) — no learner identities |
 | POST | `/institution/engagements/:id/produce-mastery-logs` | Compile all Mastery Logs |
 | GET | `/institution/engagements/:id/mastery-logs` | Get produced logs |
 
@@ -43,7 +44,7 @@ All protected routes require: `Authorization: Bearer <token>`
 | GET | `/learner/dashboard` | Dashboard + progress + streak |
 | GET | `/learner/progress` | Full node-by-node progress map |
 | POST | `/learner/session/start` | Start or resume session for the current node. Fresh sessions run DIAGNOSE via ORCH. |
-| POST | `/learner/session/message` | `{content, session_id?}` — primary interaction endpoint. ORCH classifies the request as `DIAGNOSIS_RESPONSE`, `LEARNER_MESSAGE`, or `CHECK_RESPONSE` from session state; `session_id` may be omitted to use the learner's current active session. |
+| POST | `/learner/session/message` | `{content, session_id?, input_mode?, request_check?}` — primary interaction endpoint. ORCH classifies the request as `DIAGNOSIS_RESPONSE`, `LEARNER_MESSAGE`, or `CHECK_RESPONSE` from session state; `session_id` may be omitted to use the learner's current active session. |
 | POST | `/learner/session/check` | Alias for `/learner/session/message` |
 | GET | `/learner/session/:sessionId/history` | Full session message history |
 | GET | `/learner/doubts` | List learner doubts |
@@ -53,8 +54,48 @@ All protected routes require: `Authorization: Bearer <token>`
 | POST | `/learner/study-plans` | `{planned_date, planned_duration_minutes?, notes?}` |
 | GET | `/learner/streak` | Current and longest streak |
 | GET | `/learner/certificates` | Earned cluster certificates + programme certificate |
-| GET | `/learner/profile` | Learner profile + engagement info + notification settings |
+| GET | `/learner/mastery-record` | Mastered nodes only, newest first (dashboard, resume) |
+| GET | `/learner/path` | The learner's own skill path & record: clusters with node status (mastered / current / upcoming), summary stats, evidence per mastered node. Never includes session content. |
+| POST | `/learner/session/voice` | Multipart `audio` (+ `session_id?`, `request_check?`). Transcribed server-side, then handled like `/session/message` with `input_mode: 'voice'`; response adds `transcript`. Browsers with on-device speech recognition post text to `/session/message` instead. Speech out is synthesised in the browser. |
+| POST | `/learner/session/heartbeat` | `{session_id, minutes}` — adds active time (≤2 min per call) while the session page is visible |
 | PUT | `/learner/notifications` | Update notification preferences |
+
+### Learner portfolio (profile, resume, skill requests)
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/learner/profile` | Profile: institution fields (name, ref — read-only), contact, headline, about, goals, self-declared skills, experience, certifications, education[], projects[], `verified_skills` (mastered nodes), `ui_language`, `voice_prefs`, `completeness {pct, sections, missing}`, `has_profile` |
+| PUT | `/learner/profile` | Partial update of any editable field. `education` and `projects` are replace-all lists. |
+| POST | `/learner/profile/summary-from-speech` | `{transcript}` — learner described themselves in Telugu/Hindi; returns an English resume `summary` |
+| POST | `/learner/transcribe` | Multipart `audio` → `{transcript}` (speech-to-text fallback) |
+| GET | `/learner/resume` | Latest resume version (or a default draft), version list, profile, saved jobs |
+| GET | `/learner/resume/versions/:version` | One saved version |
+| POST | `/learner/resume` | `{template, sections[{key,on}], summary, skill_order?, tailored_job_id?}` — saves a new version; never changes the profile |
+| POST | `/learner/resume/tailor` | `{job_id}` → `{summary, skill_order}`; only skills that are verified or self-declared can appear |
+| GET | `/learner/skill-requests` | Skills this learner asked the institution to add |
+| POST | `/learner/skill-requests` | `{skill_name, source?}` — the institution owns the pathway, so learners request, never add |
+
+---
+
+## MARKET (requires learner token)
+
+All market figures are **sample data** (`core/market/sampleMarket.js`) and every response carries `sample: true`. Gap scoring is live against the learner's own mastery.
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/market/jobs` | `?q&city&mode&min_salary&min_match&tab=all|saved|applied&sort=match|recent|salary` — scored job cards with skill chips and counts |
+| GET | `/market/trends` | `?city` — headline numbers, last six months of demand, skills JDs ask for most (each tagged with the learner's status) |
+| GET | `/market/jobs/:id` | Full JD + gap: match %, skills covered, hours to close the gap, per-skill status and evidence |
+| GET | `/market/jobs/:id/gap` | Gap only |
+| POST / DELETE | `/market/jobs/:id/save` | Save / unsave |
+| POST | `/market/jobs/:id/applied` | Mark as applied |
+| POST | `/market/jobs/:id/read-aloud` | Spoken walk-through of the JD in the learner's language (`text`, `caption_en`) |
+| POST | `/market/jobs/:id/interview` | `{turns[]}` — voice interview practice, 5 questions with feedback. Stateless, not stored, not evidence of mastery |
+| GET | `/market/topics` | `?sector` — featured topic + grid, with learning steps tagged by the learner's status |
+| POST | `/market/topics/:id/intro` | Spoken two-minute intro in the learner's language |
+| GET | `/market/snapshot` | Home dashboard cards: top 3 jobs, skills worth learning next, 3 topics |
+
+Skill status values: `mastered`, `in_progress`, `in_path`, `declared` (self-declared), `requested`, `not_in_path`.
 
 ### `/learner/session/message` response shapes
 
@@ -63,6 +104,7 @@ All protected routes require: `Authorization: Bearer <token>`
 {
   "session_id": "...",
   "message": "native-language text",
+  "caption_en": "1–2 sentence English caption | null",
   "decision": "CONTINUE | CHECK",
   "check_question": "... | null",
   "mermaid": "... | null",
@@ -71,6 +113,8 @@ All protected routes require: `Authorization: Bearer <token>`
   "approach": "native_concept | analogy | worked_example | decomposition | socratic"
 }
 ```
+
+`request_check: true` is the "I'm ready for the check" button: `content` may be empty, and TEACH is told to set the mastery check this turn. ADVANCE and LOOP responses also carry `caption_en`, `mermaid` and `code`; all three are stored on the message and returned in session history.
 
 **ADVANCE (mastery check passed):**
 ```json

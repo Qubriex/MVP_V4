@@ -16,6 +16,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth',        require('./api/routes/auth'));
 app.use('/api/institution', require('./api/routes/institution'));
 app.use('/api/learner',     require('./api/routes/learner'));
+app.use('/api/learner',     require('./api/routes/portfolio'));   // profile, resume, skill requests, transcribe
+app.use('/api/market',      require('./api/routes/market'));      // job market, JD gap, emerging topics
 app.use('/api/admin',       require('./api/routes/admin'));
 
 // ─── Health check ─────────────────────────────────────────────────────────────

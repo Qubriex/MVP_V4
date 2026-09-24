@@ -82,7 +82,8 @@ frontend/
     ├── App.js
     ├── context/
     │   ├── AuthContext.js
-    │   └── ThemeContext.js          # light/dark state, persisted to localStorage
+    │   ├── ThemeContext.js          # light/dark state, persisted to localStorage
+    │   └── UiLangContext.js         # learner interface language (Telugu / Hindi / English)
     ├── hooks/useReveal.js           # scroll-reveal IntersectionObserver hook
     ├── styles/
     │   ├── tokens.css               # design tokens — see DESIGN SYSTEM below
@@ -91,8 +92,12 @@ frontend/
     │   ├── NavBar.js / Footer.js    # shared page chrome
     │   ├── PhoenixMark.js           # brand mark (placeholder, see note below)
     │   ├── ThemeToggle.js / Reveal.js / PageTransition.js
-    │   └── DevNav.js                # dev-only page navigator, not part of the app UI
-    ├── utils/api.js
+    │   ├── DevNav.js                # dev-only page navigator, not part of the app UI
+    │   └── learn/                   # LearnerLayout (sidebar shell), ProfileSections, MermaidDiagram, ui.js
+    ├── utils/
+    │   ├── api.js                   # axios instance + getOr() dev-fallback helper
+    │   ├── voice.js                 # browser speech in (recognition / recording) and out (TTS)
+    │   └── mockData.js / learnerMockData.js   # dev-only fallbacks
     └── pages/
         ├── LandingPage.js
         ├── InstitutionLogin.js / LearnerLogin.js
@@ -100,8 +105,17 @@ frontend/
         ├── CapabilityTargetUpload.js
         ├── EngagementSetup.js / EngagementDetail.js
         ├── MasteryLogView.js
-        ├── LearnerDashboard.js
-        └── LearningSession.js
+        └── learn/                   # learner side, all under /learn/*
+            ├── Dashboard.js         # /learn/dashboard
+            ├── Welcome.js           # /learn/welcome — first-run setup
+            ├── Session.js           # /learn/session — voice session (desktop + phone)
+            ├── Record.js            # /learn/record — skill path & own mastery record
+            ├── JobMarket.js         # /learn/market
+            ├── JobDetail.js         # /learn/market/:jobId — JD + skill gap
+            ├── Interview.js         # /learn/market/:jobId/interview — voice practice
+            ├── Topics.js            # /learn/topics — emerging topics
+            ├── Profile.js           # /learn/profile
+            └── Resume.js            # /learn/resume
 
 docs/
 ├── README.md

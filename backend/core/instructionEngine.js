@@ -48,6 +48,22 @@ async function callAI({ system, userMessage, maxTokens = 1024, temperature = 0.7
   return result.response.text();
 }
 
+// ─── callAIWithAudio() ────────────────────────────────────────────────────────
+// Same wrapper, with one inline audio part ahead of the text prompt. Used for
+// speech-to-text when the learner's browser has no on-device recognition.
+async function callAIWithAudio({ system, userMessage, audioBase64, mimeType, maxTokens = 1024, temperature = 0.2 }) {
+  const model = genAI.getGenerativeModel({
+    model: MODEL_NAME,
+    systemInstruction: system,
+    generationConfig: { temperature, maxOutputTokens: maxTokens, responseMimeType: 'text/plain' }
+  });
+  const result = await model.generateContent([
+    { inlineData: { mimeType, data: audioBase64 } },
+    { text: userMessage }
+  ]);
+  return result.response.text();
+}
+
 // ─── safeParseJSON() ──────────────────────────────────────────────────────────
 // All AI responses go through this. Strips markdown fences before parsing.
 // Returns the fallback object on any parse error — the system never crashes
@@ -136,6 +152,7 @@ function calculateSimulationReadiness(nodeMasteryRecords) {
 
 module.exports = {
   callAI,
+  callAIWithAudio,
   safeParseJSON,
   getMasteryIncrement,
   selectNextApproach,

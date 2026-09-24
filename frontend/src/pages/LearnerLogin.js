@@ -1,69 +1,115 @@
 // src/pages/LearnerLogin.js
+// Learner sign-in: learner reference + engagement ID + PIN (unchanged auth),
+// with the interface language picked up front. The choice is stored locally
+// right away and written to the learner's profile after sign-in.
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useUiLang, UI_LANGS } from '../context/UiLangContext';
 import api from '../utils/api';
-import NavBar from '../components/NavBar';
-import Reveal from '../components/Reveal';
+import PhoenixMark from '../components/PhoenixMark';
+
+const COPY = {
+  telugu: { title: 'లెర్నర్ సైన్ ఇన్', sub: 'మీ సంస్థ ఇచ్చిన వివరాలు వాడండి.', ref: 'లెర్నర్ రిఫరెన్స్ నంబర్', eng: 'ఎంగేజ్‌మెంట్ ID', pin: '6 అంకెల PIN', keep: 'ఈ పరికరంలో సైన్ ఇన్‌లో ఉంచండి', go: 'సైన్ ఇన్', lang: 'ఇంటర్‌ఫేస్ భాష' },
+  hindi: { title: 'लर्नर साइन इन', sub: 'अपने संस्थान से मिली जानकारी डालें।', ref: 'लर्नर रेफ़रेंस नंबर', eng: 'एंगेजमेंट ID', pin: '6 अंकों का PIN', keep: 'इस डिवाइस पर साइन इन रखें', go: 'साइन इन', lang: 'इंटरफ़ेस भाषा' },
+  english: { title: 'Learner sign in', sub: 'Use the details your institution gave you.', ref: 'Learner reference number', eng: 'Engagement ID', pin: '6-digit PIN', keep: 'Keep me signed in on this device', go: 'Sign in', lang: 'Interface language' }
+};
 
 export default function LearnerLogin() {
   const [ref, setRef] = useState('');
   const [engagementId, setEngagementId] = useState('');
   const [pin, setPin] = useState('');
+  const [keep, setKeep] = useState(true);
   const [error, setError] = useState('');
+  const [showPinHelp, setShowPinHelp] = useState(false);
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+  const { lang, setLang } = useUiLang();
   const navigate = useNavigate();
+  const c = COPY[lang];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true); setError('');
     try {
-      const res = await api.post('/auth/learner/login', { learner_ref: ref, engagement_id: engagementId, pin });
-      login(res.data.token, res.data.learner, 'learner');
+      const res = await api.post('/auth/learner/login', { learner_ref: ref.trim(), engagement_id: engagementId.trim(), pin });
+      login(res.data.token, res.data.learner, 'learner', { persist: keep });
+      // First sign-in (no profile saved yet) goes through the short welcome
+      // flow, which saves the interface language with the rest. Otherwise
+      // remember the language choice, best effort.
+      const profile = await api.get('/learner/profile').then(r => r.data).catch(() => null);
+      if (profile && profile.has_profile === false) { navigate('/learn/welcome'); return; }
+      api.put('/learner/profile', { ui_language: lang }).catch(() => {});
       navigate('/learn/dashboard');
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed. Check your learner reference, engagement ID, and PIN.');
+      setError(err.response?.data?.error || 'Login failed. Check your learner reference, engagement ID and PIN.');
     }
     setLoading(false);
   };
 
   return (
-    <>
-      <NavBar />
-      <main style={{ position: 'relative', overflow: 'hidden', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'var(--space-12) var(--gutter)' }}>
-        <div className="hero-wash" style={{ opacity: 0.6 }} />
-        <Reveal className="card" style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 420, padding: 'var(--space-10) var(--space-8)' }}>
-          <div className="caption accent-text" style={{ marginBottom: 'var(--space-2)' }}>QUBIREX</div>
-          <h2 style={{ marginBottom: 'var(--space-1)' }}>Learner Login</h2>
-          <p className="small text-muted" style={{ marginBottom: 'var(--space-6)' }}>Enter your learner reference and engagement code</p>
-          {error && <div className="badge badge-danger" style={{ display: 'block', marginBottom: 'var(--space-4)', padding: 'var(--space-3)' }}>{error}</div>}
-          <form onSubmit={handleSubmit}>
-            <div className="field">
-              <label className="label">Learner Reference Number</label>
-              <input className="input" value={ref} onChange={e => setRef(e.target.value)} placeholder="e.g. LRNR-001" required />
-            </div>
-            <div className="field">
-              <label className="label">Engagement ID</label>
-              <input className="input" value={engagementId} onChange={e => setEngagementId(e.target.value)} placeholder="Provided by your institution" required />
-            </div>
-            <div className="field">
-              <label className="label">PIN</label>
-              <input className="input" type="password" inputMode="numeric" maxLength={6} value={pin} onChange={e => setPin(e.target.value)} placeholder="6-digit PIN from your institution" required />
-            </div>
-            <button className="btn btn-primary btn-block" type="submit" disabled={loading} style={{ marginTop: 'var(--space-8)' }}>
-              {loading ? 'Entering…' : 'Enter Learning Space'}
-            </button>
-          </form>
-          <div className="row gap-2" style={{ justifyContent: 'center', marginTop: 'var(--space-6)' }}>
-            <span className="badge badge-accent">हिंदी</span>
-            <span className="badge badge-accent">తెలుగు</span>
-          </div>
-          <p className="small text-muted" style={{ textAlign: 'center', marginTop: 'var(--space-5)' }}>
-            <a href="/login" className="accent-text" style={{ fontWeight: 600 }}>← Institution Login</a>
+    <div className="ln-login">
+      <aside className="ln-login-aside">
+        <span className="ln-brand" style={{ fontSize: 24, padding: 0 }}><PhoenixMark size={36} />Qubirex</span>
+        <div className="ln-col ln-hide-phone" style={{ gap: 24 }}>
+          <h1 style={{ fontSize: 'clamp(34px, 3vw + 12px, 52px)' }}>Learn in your language.<br />Speak, listen, build.</h1>
+          <p style={{ fontSize: 17, lineHeight: 1.65, color: 'var(--stage-muted)', maxWidth: 460 }}>
+            Your institution has set a path for you. Professor Qubirex teaches it in Telugu or Hindi, by voice or text, and shows you which jobs your skills open up.
           </p>
-        </Reveal>
-      </main>
-    </>
+          <ul className="ln-col" style={{ gap: 12, paddingTop: 8 }}>
+            {['Voice sessions in తెలుగు and हिंदी', 'Job market matched to your skills', 'A resume built from what you have mastered'].map((text, i) => (
+              <li key={text} className="ln-row" style={{ gap: 14 }}><span className="ln-login-num">0{i + 1}</span><span className="ln-indic" style={{ fontSize: 15 }}>{text}</span></li>
+            ))}
+          </ul>
+        </div>
+        <span className="ln-small ln-hide-phone" style={{ color: 'var(--stage-muted)' }}>Receive. Build. Return.</span>
+      </aside>
+
+      <div className="ln-login-main">
+        <form className="ln-login-form ln-indic" onSubmit={handleSubmit}>
+          <div className="ln-col" style={{ gap: 8 }}>
+            <h2 style={{ fontSize: 34, fontFamily: 'var(--font-display), var(--font-indic)' }}>{c.title}</h2>
+            <p className="ln-muted" style={{ fontSize: 15 }}>{c.sub}</p>
+          </div>
+
+          <fieldset style={{ border: 0, margin: 0, padding: 0 }}>
+            <legend className="ln-label" style={{ marginBottom: 8, padding: 0 }}>{c.lang}</legend>
+            <div className="ln-seg">
+              {UI_LANGS.map(l => (
+                <button key={l.id} type="button" aria-pressed={lang === l.id} onClick={() => setLang(l.id)} lang={l.bcp47}>{l.label}</button>
+              ))}
+            </div>
+          </fieldset>
+
+          {error && <div className="ln-error" role="alert">{error}</div>}
+
+          <div className="ln-field">
+            <label className="ln-label" htmlFor="lref">{c.ref}</label>
+            <input id="lref" className="ln-input" style={{ minHeight: 48, fontSize: 15 }} value={ref} onChange={e => setRef(e.target.value)} placeholder="LRNR-001" autoComplete="username" required />
+          </div>
+          <div className="ln-field">
+            <label className="ln-label" htmlFor="leng">{c.eng}</label>
+            <input id="leng" className="ln-input" style={{ minHeight: 48, fontSize: 15 }} value={engagementId} onChange={e => setEngagementId(e.target.value)} placeholder="From your institution" required />
+          </div>
+          <div className="ln-field">
+            <div className="ln-between">
+              <label className="ln-label" htmlFor="lpin">{c.pin}</label>
+              <button type="button" className="ln-link" style={{ fontSize: 13 }} onClick={() => setShowPinHelp(v => !v)} aria-expanded={showPinHelp}>Forgot PIN?</button>
+            </div>
+            <input id="lpin" className="ln-input" style={{ minHeight: 48, fontSize: 18, letterSpacing: '0.3em' }} type="password" inputMode="numeric" pattern="[0-9]*" maxLength={6}
+              value={pin} onChange={e => setPin(e.target.value.replace(/\D/g, ''))} placeholder="••••••" autoComplete="current-password" required />
+            {showPinHelp && <div className="ln-note">Your PIN is set by your institution. Ask your programme coordinator to issue a new one.</div>}
+          </div>
+
+          <label className="ln-check"><input type="checkbox" checked={keep} onChange={e => setKeep(e.target.checked)} />{c.keep}</label>
+
+          <button className="ln-btn ln-btn-primary ln-btn-block" type="submit" disabled={loading} style={{ minHeight: 52, fontSize: 16 }}>
+            {loading ? '…' : c.go}<ArrowRight size={18} aria-hidden="true" />
+          </button>
+          <p className="ln-small ln-muted" style={{ textAlign: 'center' }}>Are you an institution? <Link to="/login" className="ln-link" style={{ fontSize: 13 }}>Institution login</Link></p>
+        </form>
+      </div>
+    </div>
   );
 }

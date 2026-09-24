@@ -2,6 +2,7 @@
 // All routes require JWT authentication. Learner payload: id (learner_id),
 // el_id (engagement_learner_id), engagement_id, language.
 const express = require('express');
+const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
 const { getDb } = require('../../db/init');
 const { authenticateToken, requireRole } = require('../middleware/auth');
@@ -10,8 +11,12 @@ const { initMemorySchema } = require('../../core/stores/learnerMemoryStore');
 const { initCulturalSchema, seedInitialExamples } = require('../../core/stores/culturalStore');
 const { initRubricSchema } = require('../../core/stores/rubricStore');
 const { calculateMasteryAttainment, calculateConfidenceIndicator, selectNextApproach } = require('../../core/instructionEngine');
+const { transcribeAudio } = require('../../core/portfolio');
 
 const router = express.Router();
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+
+const confidenceLabel = (c) => (c >= 0.75 ? 'high' : c >= 0.55 ? 'solid' : 'building');
 
 // ─── Multi-brain store initialisation ─────────────────────────────────────────
 // Runs on module load. All IF NOT EXISTS operations — safe on every startup.
@@ -84,12 +89,46 @@ router.get('/dashboard', (req, res) => {
 
   const streak = db.prepare('SELECT current_streak, longest_streak FROM streaks WHERE engagement_learner_id = ?').get(req.user.el_id);
 
+  // "Continue learning" card: where the current node sits in the path, its
+  // estimated time, and how the last session on it went.
+  const pathNodes = db.prepare(`
+    SELECT sn.id, sn.estimated_minutes, sc.id as cluster_id FROM skill_nodes sn
+    JOIN skill_clusters sc ON sc.id = sn.cluster_id
+    WHERE sc.capability_target_id = (SELECT capability_target_id FROM engagements WHERE id = ?)
+    ORDER BY sc.sequence_order, sn.sequence_order
+  `).all(req.user.engagement_id);
+  const currentIndex = pathNodes.findIndex(n => n.id === el.current_node_id);
+  const lastSession = el.current_node_id ? db.prepare(`
+    SELECT current_approach, loop_count FROM learning_sessions
+    WHERE engagement_learner_id = ? AND skill_node_id = ? ORDER BY started_at DESC LIMIT 1
+  `).get(req.user.el_id, el.current_node_id) : null;
+  const mastered = new Set(db.prepare('SELECT skill_node_id FROM node_mastery WHERE engagement_learner_id = ? AND advanced_at IS NOT NULL')
+    .all(req.user.el_id).map(r => r.skill_node_id));
+  const clusterIds = [...new Set(pathNodes.map(n => n.cluster_id))];
+  const clustersDone = clusterIds.filter(cid => pathNodes.filter(n => n.cluster_id === cid).every(n => mastered.has(n.id))).length;
+  const week = db.prepare(`
+    SELECT COALESCE(SUM(active_minutes), 0) as minutes FROM learning_sessions
+    WHERE engagement_learner_id = ? AND started_at >= datetime('now', '-7 days')
+  `).get(req.user.el_id);
+  const recent = db.prepare(`
+    SELECT sn.node_label FROM node_mastery nm JOIN skill_nodes sn ON sn.id = nm.skill_node_id
+    WHERE nm.engagement_learner_id = ? AND nm.advanced_at IS NOT NULL ORDER BY nm.advanced_at DESC LIMIT 8
+  `).all(req.user.el_id).map(r => r.node_label);
+
   db.close();
   res.json({
     ...el,
     total_nodes: totalNodes.cnt,
     progress_pct: totalNodes.cnt > 0 ? Math.round((el.nodes_mastered / totalNodes.cnt) * 100) : 0,
-    streak: streak || { current_streak: 0, longest_streak: 0 }
+    streak: streak || { current_streak: 0, longest_streak: 0 },
+    current_node_index: currentIndex >= 0 ? currentIndex + 1 : null,
+    current_node_minutes: currentIndex >= 0 ? pathNodes[currentIndex].estimated_minutes : null,
+    last_approach: lastSession ? lastSession.current_approach : null,
+    last_loop_count: lastSession ? lastSession.loop_count : 0,
+    clusters_done: clustersDone,
+    total_clusters: clusterIds.length,
+    week_minutes: Math.round(week.minutes),
+    recently_mastered: recent
   });
 });
 
@@ -105,10 +144,84 @@ router.get('/progress', (req, res) => {
     ORDER BY nm.advanced_at
   `).all(req.user.el_id);
   db.close();
-  res.json(records.map(r => ({
-    ...r,
-    confidence_label: r.confidence_indicator >= 0.75 ? 'high' : r.confidence_indicator >= 0.55 ? 'solid' : 'building'
-  })));
+  res.json(records.map(r => ({ ...r, confidence_label: confidenceLabel(r.confidence_indicator) })));
+});
+
+// ─── GET mastered nodes only (dashboard "Recently mastered", resume) ──────────
+router.get('/mastery-record', (req, res) => {
+  const db = getDb();
+  const records = db.prepare(`
+    SELECT sn.node_label, sc.cluster_label, nm.mastery_attainment, nm.attempt_count,
+           nm.time_to_mastery_minutes, nm.confidence_indicator, nm.advanced_at
+    FROM node_mastery nm
+    JOIN skill_nodes sn ON sn.id = nm.skill_node_id
+    JOIN skill_clusters sc ON sc.id = sn.cluster_id
+    WHERE nm.engagement_learner_id = ? AND nm.advanced_at IS NOT NULL
+    ORDER BY nm.advanced_at DESC
+  `).all(req.user.el_id);
+  db.close();
+  res.json(records.map(r => ({ ...r, confidence_label: confidenceLabel(r.confidence_indicator) })));
+});
+
+// ─── GET the learner's own skill path & record (/learn/record) ────────────────
+// The learner-facing view of what the institution sees in the Mastery Log:
+// every cluster and node with its status, plus evidence for mastered nodes.
+// Session content, check questions and evaluations stay proprietary.
+router.get('/path', (req, res) => {
+  const db = getDb();
+  const el = db.prepare(`
+    SELECT el.current_node_id, el.overall_status, e.title as engagement_title
+    FROM engagement_learners el JOIN engagements e ON e.id = el.engagement_id WHERE el.id = ?
+  `).get(req.user.el_id);
+  if (!el) { db.close(); return res.status(404).json({ error: 'Not found' }); }
+
+  const rows = db.prepare(`
+    SELECT sc.id as cluster_id, sc.cluster_label, sc.cluster_ref, sn.id as node_id, sn.node_label, sn.estimated_minutes,
+           nm.mastery_attainment, nm.attempt_count, nm.time_to_mastery_minutes, nm.confidence_indicator, nm.advanced_at
+    FROM skill_clusters sc
+    JOIN skill_nodes sn ON sn.cluster_id = sc.id
+    LEFT JOIN node_mastery nm ON nm.skill_node_id = sn.id AND nm.engagement_learner_id = ?
+    WHERE sc.capability_target_id = (SELECT capability_target_id FROM engagements WHERE id = ?)
+    ORDER BY sc.sequence_order, sn.sequence_order
+  `).all(req.user.el_id, req.user.engagement_id);
+  const time = db.prepare('SELECT COALESCE(SUM(active_minutes), 0) as minutes FROM learning_sessions WHERE engagement_learner_id = ?').get(req.user.el_id);
+  db.close();
+
+  const clusters = [];
+  rows.forEach(r => {
+    let c = clusters.find(x => x.id === r.cluster_id);
+    if (!c) { c = { id: r.cluster_id, label: r.cluster_label, ref: r.cluster_ref, nodes: [] }; clusters.push(c); }
+    c.nodes.push({
+      id: r.node_id, label: r.node_label, estimated_minutes: r.estimated_minutes,
+      status: r.advanced_at ? 'mastered' : r.node_id === el.current_node_id ? 'current' : 'upcoming',
+      mastery_pct: r.advanced_at ? Math.round((r.mastery_attainment || 0) * 100) : null,
+      attempt_count: r.advanced_at ? r.attempt_count : null,
+      time_minutes: r.advanced_at ? Math.round(r.time_to_mastery_minutes || 0) : null,
+      confidence_label: r.advanced_at ? confidenceLabel(r.confidence_indicator) : null,
+      advanced_at: r.advanced_at
+    });
+  });
+  clusters.forEach(c => {
+    const done = c.nodes.filter(n => n.status === 'mastered').length;
+    c.mastered = done;
+    c.total = c.nodes.length;
+    c.status = done === c.total ? 'done' : c.nodes.some(n => n.status !== 'upcoming') ? 'now' : 'next';
+  });
+
+  const masteredNodes = clusters.flatMap(c => c.nodes.filter(n => n.status === 'mastered').map(n => ({ ...n, cluster: c.label })));
+  res.json({
+    engagement_title: el.engagement_title,
+    overall_status: el.overall_status,
+    summary: {
+      nodes_mastered: masteredNodes.length,
+      total_nodes: rows.length,
+      average_mastery_pct: masteredNodes.length ? Math.round(masteredNodes.reduce((sum, n) => sum + n.mastery_pct, 0) / masteredNodes.length) : null,
+      active_minutes: Math.round(time.minutes),
+      cluster_certificates: clusters.filter(c => c.status === 'done').length
+    },
+    clusters,
+    evidence: masteredNodes.sort((a, b) => String(b.advanced_at).localeCompare(String(a.advanced_at)))
+  });
 });
 
 // ─── Session: start or resume ─────────────────────────────────────────────────
@@ -140,7 +253,7 @@ router.post('/session/start', async (req, res) => {
   }
 
   const history = db.prepare(`
-    SELECT role, content, message_type FROM session_messages WHERE session_id = ? ORDER BY created_at
+    SELECT role, content, message_type, caption_en, mermaid, code, input_mode FROM session_messages WHERE session_id = ? ORDER BY created_at
   `).all(session.id);
   db.close();
 
@@ -162,16 +275,16 @@ router.post('/session/start', async (req, res) => {
 
     const msgDb = getDb();
     msgDb.prepare(`
-      INSERT INTO session_messages (id, session_id, role, content, message_type)
-      VALUES (?, ?, 'ai', ?, 'diagnosis')
-    `).run(uuidv4(), session.id, result.message);
+      INSERT INTO session_messages (id, session_id, role, content, message_type, caption_en)
+      VALUES (?, ?, 'ai', ?, 'diagnosis', ?)
+    `).run(uuidv4(), session.id, result.message, result.captionEn || null);
     msgDb.close();
 
     res.json({
       session_id: session.id, node_label: node.node_label, cluster_label: node.cluster_label,
       language: req.user.language, approach: session.current_approach, loop_count: session.loop_count,
-      message: result.message, decision: 'DIAGNOSE',
-      history: [{ role: 'ai', content: result.message, message_type: 'diagnosis' }]
+      message: result.message, caption_en: result.captionEn || null, decision: 'DIAGNOSE',
+      history: [{ role: 'ai', content: result.message, message_type: 'diagnosis', caption_en: result.captionEn || null }]
     });
   } catch (err) {
     res.status(500).json({ error: 'Failed to start session', detail: err.message });
@@ -181,8 +294,13 @@ router.post('/session/start', async (req, res) => {
 // ─── Session: primary interaction endpoint ────────────────────────────────────
 // Routes to DIAGNOSIS_RESPONSE, LEARNER_MESSAGE, or CHECK_RESPONSE based on
 // the last AI message's type in this session.
+// Optional body fields: input_mode ('voice' | 'text') is stored with the
+// learner's message; request_check: true is the "I'm ready for the check"
+// button — TEACH is told to set the check this turn (content may be empty).
 async function handleSessionMessage(req, res) {
-  const { content } = req.body;
+  const requestCheck = req.body.request_check === true || req.body.request_check === 'true';
+  const inputMode = ['voice', 'text'].includes(req.body.input_mode) ? req.body.input_mode : 'text';
+  const content = (req.body.content || '').trim() || (requestCheck ? "I'm ready for the mastery check." : '');
   let { session_id } = req.body;
   if (!content) return res.status(400).json({ error: 'content required' });
 
@@ -213,9 +331,9 @@ async function handleSessionMessage(req, res) {
   `).get(session.id);
 
   db.prepare(`
-    INSERT INTO session_messages (id, session_id, role, content, message_type)
-    VALUES (?, ?, 'learner', ?, 'response')
-  `).run(uuidv4(), session.id, content);
+    INSERT INTO session_messages (id, session_id, role, content, message_type, input_mode)
+    VALUES (?, ?, 'learner', ?, 'response', ?)
+  `).run(uuidv4(), session.id, content, inputMode);
   db.close();
 
   let requestType;
@@ -226,7 +344,8 @@ async function handleSessionMessage(req, res) {
   const sessionState = {
     clusterId: node.cluster_id, loopCount: session.loop_count, currentApproach: session.current_approach,
     approachesUsed, behaviourSignal: session.behaviour_signal,
-    checkQuestion: pendingCheck ? pendingCheck.question_text : null
+    checkQuestion: pendingCheck ? pendingCheck.question_text : null,
+    learnerRequestedCheck: requestCheck && requestType === 'LEARNER_MESSAGE'
   };
 
   try {
@@ -248,9 +367,9 @@ function handleInstructionResult({ res, session, result }) {
   const msgType = result.decision === 'CHECK' ? 'mastery_check' : 'instruction';
 
   db.prepare(`
-    INSERT INTO session_messages (id, session_id, role, content, message_type)
-    VALUES (?, ?, 'ai', ?, ?)
-  `).run(uuidv4(), session.id, result.message, msgType);
+    INSERT INTO session_messages (id, session_id, role, content, message_type, caption_en, mermaid, code)
+    VALUES (?, ?, 'ai', ?, ?, ?, ?, ?)
+  `).run(uuidv4(), session.id, result.message, msgType, result.captionEn || null, result.mermaid || null, result.code || null);
 
   if (result.approach) {
     db.prepare(`
@@ -274,7 +393,7 @@ function handleInstructionResult({ res, session, result }) {
 
   db.close();
   res.json({
-    session_id: session.id, message: result.message, decision: result.decision,
+    session_id: session.id, message: result.message, caption_en: result.captionEn || null, decision: result.decision,
     check_question: result.checkQuestion || null, mermaid: result.mermaid || null, code: result.code || null,
     behaviour_signal: result.behaviourSignal, approach: result.approach || session.current_approach
   });
@@ -290,9 +409,10 @@ function handleCheckResult({ res, session, result, learnerResponse, pendingCheck
   `).run(learnerResponse, evaluation.passed ? 1 : 0, evaluation.score, evaluation.evaluation, pendingCheck.id);
 
   db.prepare(`
-    INSERT INTO session_messages (id, session_id, role, content, message_type)
-    VALUES (?, ?, 'ai', ?, ?)
-  `).run(uuidv4(), session.id, result.message, result.decision === 'ADVANCE' ? 'advance_trigger' : 'loop_trigger');
+    INSERT INTO session_messages (id, session_id, role, content, message_type, caption_en, mermaid, code)
+    VALUES (?, ?, 'ai', ?, ?, ?, ?, ?)
+  `).run(uuidv4(), session.id, result.message, result.decision === 'ADVANCE' ? 'advance_trigger' : 'loop_trigger',
+    result.captionEn || null, result.mermaid || null, result.code || null);
 
   if (result.decision === 'ADVANCE') {
     const allChecks = db.prepare(`
@@ -347,7 +467,8 @@ function handleCheckResult({ res, session, result, learnerResponse, pendingCheck
 
     return res.json({
       result: 'advance', decision: 'ADVANCE', passed: true, score: evaluation.score,
-      feedback: evaluation.feedbackForLearner, message: result.message,
+      feedback: evaluation.feedbackForLearner, message: result.message, caption_en: result.captionEn || null,
+      mermaid: result.mermaid || null, code: result.code || null,
       mastery_increment: result.masteryIncrement, mastery_attainment: Math.round(masteryAttainment * 100),
       confidence_indicator: parseFloat(confidenceIndicator.toFixed(2)),
       next_node: advanceTo ? { id: advanceTo.id, label: advanceTo.node_label } : null,
@@ -369,12 +490,55 @@ function handleCheckResult({ res, session, result, learnerResponse, pendingCheck
   res.json({
     result: 'loop', decision: 'LOOP', passed: false, score: evaluation.score,
     feedback: evaluation.feedbackForLearner, understanding_gaps: evaluation.understandingGaps,
-    message: result.message, next_approach: result.nextApproach, loop_count: session.loop_count + 1
+    message: result.message, caption_en: result.captionEn || null, mermaid: result.mermaid || null, code: result.code || null,
+    next_approach: result.nextApproach, loop_count: session.loop_count + 1
   });
 }
 
 router.post('/session/message', handleSessionMessage);
 router.post('/session/check', handleSessionMessage); // alias for backwards compatibility
+
+// ─── Session: voice turn ───────────────────────────────────────────────────────
+// Speech in: multipart "audio" (webm/ogg/mp4/wav) + optional session_id and
+// request_check. Transcribed server-side, then handled exactly like a typed
+// message (input_mode 'voice'); the response adds `transcript`. Browsers with
+// on-device speech recognition skip this and post text to /session/message.
+// Speech out is synthesised in the browser from `message` — no audio is sent.
+router.post('/session/voice', upload.single('audio'), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'audio file required (multipart field "audio")' });
+  let transcript;
+  try {
+    transcript = await transcribeAudio({
+      audioBase64: req.file.buffer.toString('base64'),
+      mimeType: req.file.mimetype || 'audio/webm',
+      language: req.user.language
+    });
+  } catch (err) {
+    return res.status(502).json({ error: 'Transcription failed', detail: err.message });
+  }
+  if (!transcript) return res.status(422).json({ error: 'No speech heard — try again or type instead' });
+
+  // Reuse the text path; wrap res.json so the transcript rides along.
+  req.body = { ...req.body, content: transcript, input_mode: 'voice' };
+  const json = res.json.bind(res);
+  res.json = (body) => json({ ...body, transcript });
+  return handleSessionMessage(req, res);
+});
+
+// ─── Session: active-time heartbeat ────────────────────────────────────────────
+// The session page posts { session_id, minutes } about once a minute while it
+// is visible, so "time this week" counts active instruction time, not
+// calendar time. Capped per call so a stuck client cannot inflate it.
+router.post('/session/heartbeat', (req, res) => {
+  const minutes = Math.min(Math.max(parseFloat(req.body.minutes) || 0, 0), 2);
+  const db = getDb();
+  const r = db.prepare(`
+    UPDATE learning_sessions SET active_minutes = active_minutes + ?
+    WHERE id = ? AND engagement_learner_id = ? AND status = 'active'
+  `).run(minutes, req.body.session_id, req.user.el_id);
+  db.close();
+  res.json({ updated: r.changes > 0 });
+});
 
 // ─── Session history ───────────────────────────────────────────────────────────
 router.get('/session/:sessionId/history', (req, res) => {
@@ -491,21 +655,7 @@ router.get('/certificates', (req, res) => {
 });
 
 // ─── Profile ────────────────────────────────────────────────────────────────────
-router.get('/profile', (req, res) => {
-  const db = getDb();
-  const learner = db.prepare(`
-    SELECT l.id, l.name, l.email, l.learner_ref, l.language, l.profile_type, l.notification_prefs,
-           e.title as engagement_title
-    FROM learners l
-    JOIN engagement_learners el ON el.learner_id = l.id
-    JOIN engagements e ON e.id = el.engagement_id
-    WHERE l.id = ? AND el.id = ?
-  `).get(req.user.id, req.user.el_id);
-  db.close();
-  if (!learner) return res.status(404).json({ error: 'Not found' });
-  res.json({ ...learner, notification_prefs: learner.notification_prefs ? JSON.parse(learner.notification_prefs) : {} });
-});
-
+// GET/PUT /profile, resume and skill requests live in portfolio.js.
 router.put('/notifications', (req, res) => {
   const db = getDb();
   db.prepare('UPDATE learners SET notification_prefs = ? WHERE id = ?').run(JSON.stringify(req.body || {}), req.user.id);

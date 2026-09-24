@@ -289,6 +289,91 @@ function initDb() {
     );
 
     -- ═══════════════════════════════════════════════════════════════════════
+    -- V1.5 — LEARNER PORTFOLIO & CAREER TABLES (learner side, /learn/*)
+    -- All learner-private: never returned to institutions, except
+    -- skill_requests, which exist to be read by the institution.
+    -- ═══════════════════════════════════════════════════════════════════════
+
+    -- ─── LEARNER PROFILE (one row per learner; name/ref stay on learners) ────
+    CREATE TABLE IF NOT EXISTS learner_profiles (
+      learner_id TEXT PRIMARY KEY REFERENCES learners(id),
+      phone TEXT,
+      city TEXT,
+      link_url TEXT,                 -- LinkedIn or GitHub
+      headline TEXT,                 -- e.g. "Aspiring frontend developer"
+      about TEXT,                    -- resume summary, English
+      target_roles TEXT,             -- JSON array
+      preferred_cities TEXT,         -- JSON array
+      available_from TEXT,
+      expected_salary TEXT,          -- private, used for job filters only
+      self_skills TEXT,              -- JSON array — self-declared, never "verified"
+      experience TEXT,               -- JSON array of {role, org, period, notes}
+      certifications TEXT,           -- JSON array of {name, issuer, year}
+      ui_language TEXT DEFAULT 'telugu' CHECK(ui_language IN ('telugu','hindi','english')),
+      voice_prefs TEXT,              -- JSON: {voice, rate, startInVoice, showEnglishCaptions, dailyReminder}
+      updated_at TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS learner_education (
+      id TEXT PRIMARY KEY,
+      learner_id TEXT NOT NULL REFERENCES learners(id),
+      degree TEXT NOT NULL,
+      institution_name TEXT,
+      city TEXT,
+      start_year TEXT,
+      end_year TEXT,
+      grade TEXT,
+      sequence_order INTEGER DEFAULT 0
+    );
+
+    CREATE TABLE IF NOT EXISTS learner_projects (
+      id TEXT PRIMARY KEY,
+      learner_id TEXT NOT NULL REFERENCES learners(id),
+      title TEXT NOT NULL,
+      description TEXT,
+      tools TEXT,                    -- JSON array
+      link_url TEXT,
+      sequence_order INTEGER DEFAULT 0
+    );
+
+    -- ─── RESUME VERSIONS (each save is a new version; latest = highest) ─────
+    CREATE TABLE IF NOT EXISTS resume_versions (
+      id TEXT PRIMARY KEY,
+      learner_id TEXT NOT NULL REFERENCES learners(id),
+      version INTEGER NOT NULL,
+      template TEXT DEFAULT 'classic' CHECK(template IN ('classic','modern','compact')),
+      sections TEXT,                 -- JSON array of {key, on}
+      summary TEXT,                  -- resume-only summary; profile.about is untouched
+      skill_order TEXT,              -- JSON array of skill names
+      tailored_job_id TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      UNIQUE(learner_id, version)
+    );
+
+    -- ─── SAVED / APPLIED JOBS (job ids come from the market feed) ───────────
+    CREATE TABLE IF NOT EXISTS learner_jobs (
+      id TEXT PRIMARY KEY,
+      learner_id TEXT NOT NULL REFERENCES learners(id),
+      job_id TEXT NOT NULL,
+      status TEXT DEFAULT 'saved' CHECK(status IN ('saved','applied')),
+      created_at TEXT DEFAULT (datetime('now')),
+      UNIQUE(learner_id, job_id)
+    );
+
+    -- ─── SKILL REQUESTS — learner asks the institution to add a skill ───────
+    -- The institution owns the pathway, so a learner can only request.
+    CREATE TABLE IF NOT EXISTS skill_requests (
+      id TEXT PRIMARY KEY,
+      engagement_learner_id TEXT NOT NULL REFERENCES engagement_learners(id),
+      engagement_id TEXT NOT NULL REFERENCES engagements(id),
+      skill_name TEXT NOT NULL,
+      source TEXT,                   -- 'job:<id>' | 'topic:<id>' | 'dashboard'
+      status TEXT DEFAULT 'pending' CHECK(status IN ('pending','added','declined')),
+      created_at TEXT DEFAULT (datetime('now')),
+      UNIQUE(engagement_learner_id, skill_name)
+    );
+
+    -- ═══════════════════════════════════════════════════════════════════════
     -- V2 — RAG MULTI-BRAIN TABLES
     -- ═══════════════════════════════════════════════════════════════════════
 
@@ -413,6 +498,12 @@ function initDb() {
   if (!learnerColumns.includes('pin_hash')) {
     db.exec('ALTER TABLE learners ADD COLUMN pin_hash TEXT');
   }
+  // Voice session: English caption line + board content (diagram/code) per AI turn
+  const messageColumns = db.prepare("PRAGMA table_info(session_messages)").all().map(c => c.name);
+  if (!messageColumns.includes('caption_en')) db.exec('ALTER TABLE session_messages ADD COLUMN caption_en TEXT');
+  if (!messageColumns.includes('mermaid')) db.exec('ALTER TABLE session_messages ADD COLUMN mermaid TEXT');
+  if (!messageColumns.includes('code')) db.exec('ALTER TABLE session_messages ADD COLUMN code TEXT');
+  if (!messageColumns.includes('input_mode')) db.exec("ALTER TABLE session_messages ADD COLUMN input_mode TEXT"); // 'voice' | 'text'
 
   console.log('Qubirex database initialised at:', DB_PATH);
   db.close();

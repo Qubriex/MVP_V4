@@ -3,6 +3,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { UiLangProvider } from './context/UiLangContext';
 import DevNav from './components/DevNav';
 import PageTransition from './components/PageTransition';
 
@@ -15,8 +16,17 @@ import CapabilityTargetUpload from './pages/CapabilityTargetUpload';
 import EngagementSetup from './pages/EngagementSetup';
 import EngagementDetail from './pages/EngagementDetail';
 import MasteryLogView from './pages/MasteryLogView';
-import LearnerDashboard from './pages/LearnerDashboard';
-import LearningSession from './pages/LearningSession';
+import LearnerLayout from './components/learn/LearnerLayout';
+import LearnerHome from './pages/learn/Dashboard';
+import VoiceSession from './pages/learn/Session';
+import SkillRecord from './pages/learn/Record';
+import JobMarket from './pages/learn/JobMarket';
+import JobDetail from './pages/learn/JobDetail';
+import InterviewPractice from './pages/learn/Interview';
+import EmergingTopics from './pages/learn/Topics';
+import LearnerProfile from './pages/learn/Profile';
+import ResumeBuilder from './pages/learn/Resume';
+import Welcome from './pages/learn/Welcome';
 
 function ProtectedRoute({ children, requiredRole }) {
   const { token, role } = useAuth();
@@ -28,6 +38,7 @@ function ProtectedRoute({ children, requiredRole }) {
 export default function App() {
   return (
     <ThemeProvider>
+      <UiLangProvider>
       <AuthProvider>
         <BrowserRouter>
           <PageTransition>
@@ -49,12 +60,24 @@ export default function App() {
                 </ProtectedRoute>
               } />
 
-              {/* Learner routes */}
+              {/* Learner routes — all under /learn/*, sharing the sidebar shell
+                  except the voice session, which runs full screen. */}
               <Route path="/learn/*" element={
                 <ProtectedRoute requiredRole="learner">
                   <Routes>
-                    <Route path="dashboard" element={<LearnerDashboard />} />
-                    <Route path="session" element={<LearningSession />} />
+                    <Route path="session" element={<VoiceSession />} />
+                    <Route element={<LearnerLayout />}>
+                      <Route path="dashboard" element={<LearnerHome />} />
+                      <Route path="welcome" element={<Welcome />} />
+                      <Route path="record" element={<SkillRecord />} />
+                      <Route path="market" element={<JobMarket />} />
+                      <Route path="market/:jobId" element={<JobDetail />} />
+                      <Route path="market/:jobId/interview" element={<InterviewPractice />} />
+                      <Route path="topics" element={<EmergingTopics />} />
+                      <Route path="profile" element={<LearnerProfile />} />
+                      <Route path="resume" element={<ResumeBuilder />} />
+                      <Route path="*" element={<Navigate to="/learn/dashboard" replace />} />
+                    </Route>
                   </Routes>
                 </ProtectedRoute>
               } />
@@ -65,6 +88,7 @@ export default function App() {
           <DevNav />
         </BrowserRouter>
       </AuthProvider>
+      </UiLangProvider>
     </ThemeProvider>
   );
 }

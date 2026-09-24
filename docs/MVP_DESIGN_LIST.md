@@ -147,30 +147,48 @@ Every Mastery Log includes: *"This Mastery Log records capability movement and i
 
 ## MODULE 6 — LEARNER PORTAL
 
-### 6.1 Authentication
-- [ ] Login via learner reference number + engagement ID
-- [ ] No password required at MVP (ref + engagement = sufficient)
-- [ ] Language set at institution level, confirmed at login
+Nine pages under `/learn/*`, sharing one sidebar (Learn · Career · Me). The
+voice session runs full screen.
 
-### 6.2 Learning Dashboard
+### 6.1 Authentication (`/learner-login`)
+- [ ] Login via learner reference number + engagement ID + 6-digit PIN
+- [ ] Interface language picked on the login page: Telugu / Hindi / English (labels only — teaching language stays set by the institution)
+- [ ] "Keep me signed in" and a Forgot-PIN pointer to the institution
+- [ ] First sign-in goes through a 3-step setup (`/learn/welcome`): basics, goals, voice check
+
+### 6.2 Home Dashboard (`/learn/dashboard`)
 - [ ] Welcome in native language (नमस्ते / నమస్కారం)
-- [ ] Overall progress bar (nodes mastered / total)
-- [ ] Current skill node display
-- [ ] Start session button in native language
-- [ ] Mastery record: list of mastered nodes with stats
+- [ ] Continue learning: current node, node position, estimated time, last approach — voice-first start button, "type instead"
+- [ ] Overall progress, day streak, active time this week, clusters done
+- [ ] Jobs that fit your skills (match %), skills worth learning next, topics creating new jobs — labelled Sample data
+- [ ] Recently mastered nodes; nudge to finish the profile
 
-### 6.3 Learning Session Interface
-- [ ] Chat-based instruction in native language
-- [ ] AI messages clearly labelled (PROFESSOR QUBIREX)
-- [ ] Approach badge visible (shows current explanation method)
-- [ ] Loop counter visible when > 0
-- [ ] Language badge always visible
-- [ ] Ready for mastery check button (when learner feels ready)
-- [ ] Mastery check banner shown when in check mode
-- [ ] ADVANCE result: next node shown, option to continue
-- [ ] Programme complete state with celebratory message
+### 6.3 Voice Learning Session (`/learn/session`, desktop + phone)
+- [ ] Professor Qubirex speaks each turn (browser TTS); speaking / listening / thinking indicator
+- [ ] Live native-language caption with an English line under it (TEACH returns `captionEn`)
+- [ ] Big mic button (on-device speech recognition, or server transcription of recorded audio), replay, speed, pause
+- [ ] Switch to typing at any time
+- [ ] Side panel: transcript (every message replayable) and a Board tab for the diagrams (mermaid) and code TEACH sends
+- [ ] Approach badge, language badge, loop counter, session timer
+- [ ] "I'm ready for the check" button — asks TEACH to set the mastery check now
+- [ ] Mastery check banner in check mode; ADVANCE result with next node; programme-complete state
+- [ ] Active instruction time tracked by heartbeat, visible tab only
 
----
+### 6.4 Skill Path & Record (`/learn/record`)
+- [ ] The learner's own view of their mastery record: clusters, node status, evidence per mastered node (mastery %, attempts, time, confidence)
+- [ ] Session content stays private; share the record as text
+
+### 6.5 Career (`/learn/market`, `/learn/market/:jobId`, `/learn/topics`)
+- [ ] Job market: filters, headline numbers, monthly demand chart (with table view), skills JDs ask for most tagged mastered / in your path / not in path, job cards with match % and skill chips, saved / applied
+- [ ] Job detail: full JD, match score, skills you have (with evidence), skills to learn with hours, tailor resume, practise interview by voice, read the JD aloud in the learner's language
+- [ ] Emerging topics: featured topic with new roles and an ordered learning list, grid filtered by sector, 2-minute spoken intro
+- [ ] Skills outside the programme show **Request**, never "add to path" — the institution owns the pathway and sees aggregated requests
+- [ ] All market figures are sample data until a job feed is connected; every page showing them says so
+
+### 6.6 Me (`/learn/profile`, `/learn/resume`)
+- [ ] Profile: personal info, education, experience, projects, skills (verified by Qubirex vs self-declared), certifications, career goals, learning & voice preferences, account & PIN
+- [ ] Speak the "About you" summary in Telugu/Hindi; it is written in English
+- [ ] Resume builder: template, section toggles and order, tailoring to a saved job (only verified or declared skills), live A4 preview, PDF download, saved versions
 
 ## MODULE 7 — DATA ARCHITECTURE
 
@@ -225,9 +243,10 @@ Every Mastery Log includes: *"This Mastery Log records capability movement and i
 | Path B full AI automation | Process must be proven manually before automated |
 | Institutional readiness dashboards | These show readiness — Qubirex doesn't frame evidence as readiness |
 | Native LMS API integrations | Scaling feature — build after engine is validated |
-| Voice-based instruction | Month 12 target |
-| Personal capability portfolio | Month 9 target |
-| Employer connect | Year 2 target |
+| ~~Voice-based instruction~~ | **Moved into the MVP** (6.3) with the learner-side redesign — browser speech in/out, server transcription fallback. Server-side TTS voices remain post-MVP. |
+| ~~Personal capability portfolio~~ | **Partly moved into the MVP**: learner-facing record (6.4), profile and resume (6.6). Public verification links remain post-MVP. |
+| Live job feed | Market pages ship on sample data (6.5); feed ingestion + JD skill extraction is post-MVP |
+| Employer connect | Year 2 target (job pages link out; no employer-side accounts) |
 
 ---
 
