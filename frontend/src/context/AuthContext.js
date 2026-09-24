@@ -16,13 +16,18 @@ const AuthContext = createContext(null);
 const DEV_MODE = process.env.REACT_APP_DEV_MODE === 'true';
 const DEV_USERS = {
   institution: { token: 'dev-institution-token', role: 'institution', user: { id: 'dev-inst-1', name: 'Demo Institution (dev)' } },
-  learner: { token: 'dev-learner-token', role: 'learner', user: { id: 'dev-learner-1', name: 'Demo Learner (dev)', language: 'telugu' } }
+  learner: { token: 'dev-learner-token', role: 'learner', user: { id: 'dev-learner-1', name: 'Priya Reddy', language: 'telugu', learner_ref: 'LRNR-001' } }
 };
 
 // Computed synchronously as the initial state (not in an effect) — a
 // protected route reads token on the very first render, so setting it a
 // tick later in useEffect would still bounce that first render to /login.
+// "Keep me signed in" unticked: the session is marked session-only and the
+// marker in sessionStorage dies with the tab, so a later visit starts signed out.
 function loadInitialSession() {
+  if (localStorage.getItem('qubirex_session_only') && !sessionStorage.getItem('qubirex_alive')) {
+    ['qubirex_token', 'qubirex_user', 'qubirex_role', 'qubirex_session_only'].forEach(k => localStorage.removeItem(k));
+  }
   const t = localStorage.getItem('qubirex_token');
   const u = localStorage.getItem('qubirex_user');
   const r = localStorage.getItem('qubirex_role');
@@ -37,11 +42,13 @@ function loadInitialSession() {
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(loadInitialSession);
 
-  const login = (tokenVal, userData, roleVal) => {
+  const login = (tokenVal, userData, roleVal, { persist = true } = {}) => {
     setSession({ token: tokenVal, user: userData, role: roleVal });
     localStorage.setItem('qubirex_token', tokenVal);
     localStorage.setItem('qubirex_user', JSON.stringify(userData));
     localStorage.setItem('qubirex_role', roleVal);
+    if (persist) localStorage.removeItem('qubirex_session_only');
+    else { localStorage.setItem('qubirex_session_only', '1'); sessionStorage.setItem('qubirex_alive', '1'); }
   };
 
   const logout = () => {
@@ -49,6 +56,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('qubirex_token');
     localStorage.removeItem('qubirex_user');
     localStorage.removeItem('qubirex_role');
+    localStorage.removeItem('qubirex_session_only');
   };
 
   // Dev-only: instantly switch between institution/learner views, no real login.

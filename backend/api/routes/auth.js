@@ -85,7 +85,7 @@ router.post('/learner/login', (req, res) => {
     { expiresIn: '7d' }
   );
 
-  res.json({ token, learner: { id: data.id, name: data.name, language: data.language } });
+  res.json({ token, learner: { id: data.id, name: data.name, language: data.language, learner_ref: data.learner_ref } });
 });
 
 // ─── Admin login ──────────────────────────────────────────────────────────────

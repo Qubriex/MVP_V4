@@ -26,8 +26,16 @@ const SECTIONS = [
   },
   {
     group: 'Learner', role: 'learner', items: [
-      { path: '/learn/dashboard', label: 'Learner Dashboard' },
-      { path: '/learn/session', label: 'Learning Session' }
+      { path: '/learn/dashboard', label: 'Home dashboard' },
+      { path: '/learn/welcome', label: 'First-run setup' },
+      { path: '/learn/session', label: 'Voice session' },
+      { path: '/learn/record', label: 'Skill path & record' },
+      { path: '/learn/market', label: 'Job market' },
+      { path: '/learn/market/job-001', label: 'Job detail & skill gap' },
+      { path: '/learn/market/job-001/interview', label: 'Interview practice' },
+      { path: '/learn/topics', label: 'Emerging topics' },
+      { path: '/learn/profile', label: 'Profile & settings' },
+      { path: '/learn/resume', label: 'Resume builder' }
     ]
   }
 ];

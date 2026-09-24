@@ -104,7 +104,7 @@ async function processMessage(params) {
       });
 
       result = {
-        message: diagnosis.message, decision: 'DIAGNOSE', state: 'DIAGNOSE',
+        message: diagnosis.message, captionEn: diagnosis.captionEn || null, decision: 'DIAGNOSE', state: 'DIAGNOSE',
         culturalExamplesRetrieved: culturalExamples.length, nodeSpec, culturalExamples
       };
       break;
@@ -154,7 +154,8 @@ async function processMessage(params) {
         conversationHistory: _buildHistory(learnerContext, learnerMessage),
         loopCount: sessionState.loopCount || 0,
         behaviourSignal: sessionState.behaviourSignal || 'engaged',
-        learnerContext, culturalExamples, nodeSpec
+        learnerContext, culturalExamples, nodeSpec,
+        learnerRequestedCheck: !!sessionState.learnerRequestedCheck
       });
 
       await _writeTurn(learnerId, engagementLearnerId, nodeId, sessionState.clusterId, learnerMessage, instruction.message, {

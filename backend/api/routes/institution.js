@@ -281,6 +281,21 @@ router.get('/engagements/:id', (req, res) => {
 });
 
 // ─── Produce Mastery Logs ─────────────────────────────────────────────────────
+// ─── Skill requests from learners (the institution owns the pathway) ─────────
+router.get('/engagements/:id/skill-requests', (req, res) => {
+  const db = getDb();
+  const engagement = db.prepare('SELECT id FROM engagements WHERE id = ? AND institution_id = ?').get(req.params.id, req.user.id);
+  if (!engagement) { db.close(); return res.status(404).json({ error: 'Not found' }); }
+  const rows = db.prepare(`
+    SELECT skill_name, COUNT(*) as learner_count, MIN(created_at) as first_requested_at,
+      SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending
+    FROM skill_requests WHERE engagement_id = ?
+    GROUP BY skill_name ORDER BY learner_count DESC
+  `).all(req.params.id);
+  db.close();
+  res.json(rows);
+});
+
 router.post('/engagements/:id/produce-mastery-logs', (req, res) => {
   try {
     const logs = produceEngagementMasteryLogs(req.params.id);
