@@ -1,0 +1,195 @@
+/* ============================================================================
+   QUBIREX DESIGN TOKENS
+   ----------------------------------------------------------------------------
+   Single source of truth for color, type, spacing, radius, shadow and motion
+   values. Components should reference these CSS custom properties — never
+   hardcode a hex value or a pixel size directly in a component.
+
+   HOW TO RETUNE THE PALETTE
+   - Base surfaces (--color-bg / --color-surface / --color-border / --color-text)
+     control the warm paper/charcoal theme. Light values live on `:root`,
+     dark overrides live under `[data-theme="dark"]`.
+   - Brand accent (--accent-*) is sampled from the phoenix mark's gradient —
+     amber wingtips through burnt orange into deep maroon at the base. It is
+     identical in light and dark mode and is reserved for emphasis elements
+     (buttons, links, focus rings, active nav state, progress, small gradient
+     washes) — never a full-page or full-section background.
+   - Semantic status colors (--status-*) are for engagement/mastery states
+     (active, completed, warning, neutral) and are intentionally distinct
+     from the brand accent so a "New Engagement" button and an "active"
+     badge never compete for attention.
+   - Typography scale, spacing scale (4px base unit) and radii are set once
+     here and consumed everywhere via var(--space-4) etc.
+   - Toggle light/dark at runtime by setting `data-theme="light"|"dark"` on
+     <html> — see src/context/ThemeContext.js.
+   ========================================================================== */
+
+:root {
+  /* ---- Brand accent — sampled from the phoenix mark gradient ---- */
+  --accent-50:  #FDF3E7;
+  --accent-100: #FBE4C6;
+  --accent-200: #F7CE97;
+  --accent-300: #F7C170;
+  --accent-400: #F4A93A;  /* amber — wingtip highlight */
+  --accent-500: #EE9433;
+  --accent-600: #E8823C;  /* burnt orange — primary brand accent */
+  --accent-700: #C9642F;  /* hover / pressed shade */
+  --accent-800: #9B3A2A;  /* deep rust — transitional tone */
+  --accent-900: #7A2E24;  /* deep maroon — logo base tone */
+
+  /* Two gradients, deliberately different ranges — see the WCAG note below.
+     --gradient-accent (800→900) is dark enough that white text stays AA
+     throughout; use it wherever text or an icon sits directly on the fill
+     (buttons, the learner's chat bubbles). --gradient-accent-vivid is the
+     full amber→maroon sweep sampled from the logo; use it only where
+     nothing needs to read against it (progress/mastery bars, the hero
+     wash, the logo mark) — amber is simply too light for reliable overlaid
+     text at any weight. */
+  --gradient-accent: linear-gradient(135deg, var(--accent-800) 0%, var(--accent-900) 100%);
+  --gradient-accent-hover: linear-gradient(135deg, var(--accent-900) 0%, #5C231B 100%);
+  --gradient-accent-vivid: linear-gradient(135deg, var(--accent-400) 0%, var(--accent-600) 45%, var(--accent-800) 80%, var(--accent-900) 100%);
+  --gradient-accent-wash: linear-gradient(135deg, rgba(244,169,58,0.16) 0%, rgba(232,130,60,0.10) 45%, rgba(122,46,36,0.08) 100%);
+  --shadow-accent-glow: 0 8px 24px -8px rgba(232, 130, 60, 0.5);
+  --shadow-accent-glow-lg: 0 16px 40px -12px rgba(232, 130, 60, 0.55);
+
+  /* Accent color for TEXT, icons, links, and indicators read directly
+     against the page background (never a solid fill with overlaid text —
+     see --gradient-accent above for that case). accent-600/#E8823C — the
+     literal "burnt orange" the palette is named for — only reaches 2.6:1
+     against the cream background, well under the 4.5:1 AA floor for normal
+     text, so it's reserved for large/decorative use (borders, glows,
+     progress fills) and never for text. --accent-ink swaps per theme
+     (verified via WCAG's relative-luminance formula, both ≥6.5:1): dark
+     rust on light mode, lit amber on dark mode — the same warm hue family
+     tuned to stay legible on both grounds. */
+  --accent-ink: var(--accent-800);
+
+  /* ---- Base surfaces — light mode (default) ---- */
+  --color-bg: #FAF9F5;
+  --color-bg-alt: #F3F0E7;
+  --color-surface: #FFFFFE;
+  --color-surface-2: #EFEADD;
+  --color-border: #E4DECE;
+  --color-border-strong: #D6CDB6;
+  --color-text: #1F1E1C;
+  --color-text-muted: #6B6659;
+  --color-text-faint: #928C7B;
+  --color-overlay: rgba(31, 30, 28, 0.45);
+
+  /* ---- Semantic status colors (warm-tuned, distinct from brand accent) ---- */
+  --status-success: #3F7D53;
+  --status-success-bg: #E7F1E7;
+  --status-info: #4C6E8C;
+  --status-info-bg: #E7EEF3;
+  --status-warning: #B8842E;
+  --status-warning-bg: #F6EBD8;
+  --status-neutral: #746F63;
+  --status-neutral-bg: #ECE8DC;
+  --status-danger: #B14B3A;
+  --status-danger-bg: #F5E5DF;
+
+  /* ---- Typography ---- */
+  --font-display: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  --text-display: clamp(2.75rem, 1.5rem + 4.5vw, 4.75rem);
+  --text-h1: clamp(2.125rem, 1.6rem + 2vw, 3rem);
+  --text-h2: clamp(1.5rem, 1.3rem + 1vw, 1.875rem);
+  --text-h3: 1.375rem;
+  --text-h4: 1.125rem;
+  --text-body-lg: 1.125rem;
+  --text-body: 1rem;
+  --text-small: 0.875rem;
+  --text-caption: 0.75rem;
+
+  --leading-tight: 1.08;
+  --leading-snug: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.65;
+  --leading-loose: 1.75;
+
+  --tracking-tight: -0.02em;
+  --tracking-snug: -0.01em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.04em;
+  --tracking-widest: 0.12em;
+
+  /* ---- Spacing scale (4px base unit) ---- */
+  --space-1: 0.25rem;   /* 4px  */
+  --space-2: 0.5rem;    /* 8px  */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.25rem;   /* 20px */
+  --space-6: 1.5rem;    /* 24px */
+  --space-8: 2rem;      /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  --space-16: 4rem;     /* 64px */
+  --space-20: 5rem;     /* 80px */
+  --space-24: 6rem;     /* 96px */
+  --space-32: 8rem;     /* 128px */
+
+  /* ---- Radii ---- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 999px;
+
+  /* ---- Shadows (warm-tinted, never pure black) ---- */
+  --shadow-sm: 0 1px 2px rgba(31, 30, 28, 0.06);
+  --shadow-md: 0 6px 16px -4px rgba(31, 30, 28, 0.10);
+  --shadow-lg: 0 16px 36px -10px rgba(31, 30, 28, 0.14);
+
+  /* ---- Motion ---- */
+  --transition-fast: 150ms ease;
+  --transition-base: 220ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 420ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ---- Layout ---- */
+  --content-max: 1240px;
+  --gutter: clamp(20px, 5vw, 64px);
+  --nav-height: 68px;
+
+  /* ---- Z-index scale ---- */
+  --z-nav: 100;
+  --z-devnav: 9999;
+  --z-modal: 200;
+
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --color-bg: #1A1915;
+  --color-bg-alt: #201F1A;
+  --color-surface: #232221;
+  --color-surface-2: #2B2925;
+  --color-border: #3A3733;
+  --color-border-strong: #4A463F;
+  --color-text: #EDEAE2;
+  --color-text-muted: #ABA595;
+  --color-text-faint: #7D786A;
+  --color-overlay: rgba(0, 0, 0, 0.6);
+
+  --status-success: #7FBE7C;
+  --status-success-bg: #263329;
+  --status-info: #8FB6D6;
+  --status-info-bg: #232D35;
+  --status-warning: #E0AC5C;
+  --status-warning-bg: #362C1E;
+  --status-neutral: #A6A092;
+  --status-neutral-bg: #2A2823;
+  --status-danger: #E08872;
+  --status-danger-bg: #362320;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 8px 20px -6px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 20px 44px -12px rgba(0, 0, 0, 0.55);
+
+  --shadow-accent-glow: 0 8px 26px -6px rgba(244, 169, 58, 0.35);
+  --shadow-accent-glow-lg: 0 18px 44px -10px rgba(244, 169, 58, 0.4);
+
+  --accent-ink: var(--accent-400);
+
+  color-scheme: dark;
+}
