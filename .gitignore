@@ -1,6 +1,7 @@
 node_modules/
 frontend/build/
 .env
+!.env.example
 .env.*.local
 *.db
 *.db-shm

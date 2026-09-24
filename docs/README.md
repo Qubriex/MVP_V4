@@ -183,6 +183,27 @@ npm start
 
 Frontend runs on http://localhost:3000
 
+### Test accounts (local only)
+
+To click through the whole site, seed one institution and one learner with a
+small Full-Stack programme (some nodes already mastered):
+
+```bash
+cd backend
+npm run seed:test      # safe to re-run; resets the password and PIN below
+```
+
+| Login | URL | Credentials |
+|---|---|---|
+| Institution | http://localhost:3000/login | Email `test.institution@qubirex.local` · Password `QubirexTest2026!` |
+| Learner | http://localhost:3000/learner-login | Learner reference `TEST-LRNR-001` · Engagement ID `4a4c13c4-989e-4c03-b636-3bdba7fd1025` · PIN `410585` |
+
+These credentials are public in this repo, so the script refuses to run with
+`NODE_ENV=production`. Never seed them into a shared or deployed database.
+Voice-session replies, captions, transcription and resume tailoring need a
+real `GEMINI_API_KEY` in `.env`; without it the session page shows sample
+content.
+
 ### Seed Admin User
 
 ```bash
