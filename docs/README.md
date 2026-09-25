@@ -93,7 +93,8 @@ frontend/
     │   ├── PhoenixMark.js           # brand mark (placeholder, see note below)
     │   ├── ThemeToggle.js / Reveal.js / PageTransition.js
     │   ├── DevNav.js                # dev-only page navigator, not part of the app UI
-    │   └── learn/                   # LearnerLayout (sidebar shell), ProfileSections, MermaidDiagram, ui.js
+    │   ├── learn/                   # LearnerLayout (sidebar shell), ProfileSections, MermaidDiagram, ui.js
+    │   └── inst/                    # InstitutionLayout (dark staff shell), StaffProfileForm, AccessResults, CopyLink
     ├── utils/
     │   ├── api.js                   # axios instance + getOr() dev-fallback helper
     │   ├── voice.js                 # browser speech in (recognition / recording) and out (TTS)
@@ -104,7 +105,14 @@ frontend/
         ├── InstitutionDashboard.js
         ├── CapabilityTargetUpload.js
         ├── EngagementSetup.js / EngagementDetail.js
-        ├── MasteryLogView.js
+        ├── MasteryLogView.js        # /institution/mastery-log/:id
+        ├── LearnerInvite.js         # /learner-invite/:token — student sets their own PIN
+        ├── inst/                    # institution (staff) side, under /institution/*
+        │   ├── StaffLogin.js / StaffInvite.js / StaffWelcome.js / StaffProfile.js
+        │   ├── Home.js / Team.js
+        │   ├── Students.js / AddStudents.js
+        │   ├── Cohorts.js / NewCohort.js / Cohort.js
+        │   └── Curriculum.js / Standing.js
         └── learn/                   # learner side, all under /learn/*
             ├── Dashboard.js         # /learn/dashboard
             ├── Welcome.js           # /learn/welcome — first-run setup
@@ -185,18 +193,20 @@ Frontend runs on http://localhost:3000
 
 ### Test accounts (local only)
 
-To click through the whole site, seed one institution and one learner with a
-small Full-Stack programme (some nodes already mastered):
+To click through the whole site, seed one institution (admin + professor),
+one learner and a few classmates in different access states, on a small
+Full-Stack programme (some nodes already mastered):
 
 ```bash
 cd backend
-npm run seed:test      # safe to re-run; resets the password and PIN below
+npm run seed:test      # safe to re-run; resets the passwords and PIN below
 ```
 
 | Login | URL | Credentials |
 |---|---|---|
-| Institution | http://localhost:3000/login | Email `test.institution@qubirex.local` · Password `QubirexTest2026!` |
-| Learner | http://localhost:3000/learner-login | Learner reference `TEST-LRNR-001` · Engagement ID `4a4c13c4-989e-4c03-b636-3bdba7fd1025` · PIN `410585` |
+| Institution admin | http://localhost:3000/login | Email `test.institution@qubirex.local` · Password `QubirexTest2026!` |
+| Professor (sees only the test cohort) | http://localhost:3000/login | Email `test.professor@qubirex.local` · Password `QubirexTest2026!` |
+| Learner | http://localhost:3000/learner-login | Learner reference `TEST-LRNR-001` · Join code `QX-FSD-T01` (the old Engagement ID `4a4c13c4-989e-4c03-b636-3bdba7fd1025` also works) · PIN `410585` |
 
 These credentials are public in this repo, so the script refuses to run with
 `NODE_ENV=production`. Never seed them into a shared or deployed database.

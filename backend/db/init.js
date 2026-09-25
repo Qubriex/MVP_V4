@@ -47,13 +47,46 @@ function initDb() {
     );
 
     -- ─── INSTITUTION PORTAL USERS (admin/viewer seats on an institution account) ─
+    -- Staff: admins, professors, viewers. Each has their own login; a row is
+    -- created by an admin's invite and becomes 'active' when the invite is
+    -- accepted (password set). The institution's contact email signs in as
+    -- an admin row too (created on first login).
     CREATE TABLE IF NOT EXISTS institution_users (
       id TEXT PRIMARY KEY,
       institution_id TEXT NOT NULL REFERENCES institutions(id),
       email TEXT NOT NULL UNIQUE,
-      password_hash TEXT NOT NULL,
-      role TEXT DEFAULT 'viewer' CHECK(role IN ('admin','viewer')),
+      password_hash TEXT,            -- NULL until the invite is accepted
+      role TEXT DEFAULT 'professor' CHECK(role IN ('admin','professor','viewer')),
+      status TEXT DEFAULT 'invited' CHECK(status IN ('invited','active','disabled')),
+      name TEXT,
+      title TEXT,                    -- Dr., Prof., Mr., Ms.
+      designation TEXT,
+      department TEXT,
+      employee_id TEXT,              -- admin-only
+      phone TEXT,                    -- admin-only
+      qualification TEXT,
+      years_teaching INTEGER,
+      specialisations TEXT,          -- JSON array
+      teaching_languages TEXT,       -- JSON array: english | telugu | hindi
+      subjects TEXT,                 -- JSON array
+      office_hours TEXT,
+      target_roles TEXT,             -- JSON array
+      photo_data_url TEXT,           -- small resized image (client-side, ≤ ~200 KB)
+      notification_prefs TEXT,       -- JSON
+      profile_completed INTEGER DEFAULT 0,
+      invite_token_hash TEXT,        -- sha256 of the invite token; the token itself is never stored
+      invite_expires_at TEXT,
+      invited_by TEXT,
+      last_login_at TEXT,
       created_at TEXT DEFAULT (datetime('now'))
+    );
+
+    -- Which cohorts (engagements) a professor or viewer is assigned to.
+    CREATE TABLE IF NOT EXISTS staff_cohorts (
+      staff_id TEXT NOT NULL REFERENCES institution_users(id),
+      engagement_id TEXT NOT NULL REFERENCES engagements(id),
+      cohort_role TEXT DEFAULT 'co' CHECK(cohort_role IN ('lead','co')),
+      PRIMARY KEY (staff_id, engagement_id)
     );
 
     -- ─── LEARNERS ─────────────────────────────────────────────────────────────
@@ -373,6 +406,45 @@ function initDb() {
       UNIQUE(engagement_learner_id, skill_name)
     );
 
+    -- ─── STUDENT ACCESS — invites, access history, outgoing messages ──────
+    CREATE TABLE IF NOT EXISTS learner_invites (
+      id TEXT PRIMARY KEY,
+      learner_id TEXT NOT NULL REFERENCES learners(id),
+      engagement_learner_id TEXT NOT NULL REFERENCES engagement_learners(id),
+      token_hash TEXT NOT NULL UNIQUE,  -- sha256; the token is only ever in the link
+      expires_at TEXT NOT NULL,
+      used_at TEXT,
+      created_by TEXT,                  -- staff id
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+
+    -- Who did what to a student's access, and when. Shown on the roster.
+    CREATE TABLE IF NOT EXISTS access_events (
+      id TEXT PRIMARY KEY,
+      institution_id TEXT NOT NULL REFERENCES institutions(id),
+      learner_id TEXT REFERENCES learners(id),
+      engagement_learner_id TEXT,
+      event TEXT NOT NULL,              -- invited | invite_resent | pin_set | pin_reset | slip_issued | signed_in | locked | removed | restored | moved | pin_reset_requested
+      detail TEXT,
+      actor_staff_id TEXT,
+      resolved INTEGER DEFAULT 0,       -- for pin_reset_requested
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+
+    -- Emails the app would send. No mail provider is wired up yet, so they
+    -- are recorded here (and logged in development); the UI also shows the
+    -- links so staff can share them directly.
+    CREATE TABLE IF NOT EXISTS outbound_messages (
+      id TEXT PRIMARY KEY,
+      institution_id TEXT,
+      to_email TEXT NOT NULL,
+      subject TEXT NOT NULL,
+      body TEXT NOT NULL,
+      kind TEXT,                        -- staff_invite | learner_invite
+      status TEXT DEFAULT 'queued',
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+
     -- ═══════════════════════════════════════════════════════════════════════
     -- V2 — RAG MULTI-BRAIN TABLES
     -- ═══════════════════════════════════════════════════════════════════════
@@ -504,6 +576,49 @@ function initDb() {
   if (!messageColumns.includes('mermaid')) db.exec('ALTER TABLE session_messages ADD COLUMN mermaid TEXT');
   if (!messageColumns.includes('code')) db.exec('ALTER TABLE session_messages ADD COLUMN code TEXT');
   if (!messageColumns.includes('input_mode')) db.exec("ALTER TABLE session_messages ADD COLUMN input_mode TEXT"); // 'voice' | 'text'
+
+  // Staff table: the first version allowed only admin/viewer and required a
+  // password. SQLite can't alter a CHECK, so rebuild it once (nothing used it).
+  const staffSql = (db.prepare("SELECT sql FROM sqlite_master WHERE name = 'institution_users'").get() || {}).sql || '';
+  if (!staffSql.includes("'professor'")) {
+    db.exec(`
+      ALTER TABLE institution_users RENAME TO institution_users_v1;
+      CREATE TABLE institution_users (
+        id TEXT PRIMARY KEY, institution_id TEXT NOT NULL REFERENCES institutions(id), email TEXT NOT NULL UNIQUE,
+        password_hash TEXT, role TEXT DEFAULT 'professor' CHECK(role IN ('admin','professor','viewer')),
+        status TEXT DEFAULT 'invited' CHECK(status IN ('invited','active','disabled')),
+        name TEXT, title TEXT, designation TEXT, department TEXT, employee_id TEXT, phone TEXT, qualification TEXT,
+        years_teaching INTEGER, specialisations TEXT, teaching_languages TEXT, subjects TEXT, office_hours TEXT,
+        target_roles TEXT, photo_data_url TEXT, notification_prefs TEXT, profile_completed INTEGER DEFAULT 0,
+        invite_token_hash TEXT, invite_expires_at TEXT, invited_by TEXT, last_login_at TEXT,
+        created_at TEXT DEFAULT (datetime('now'))
+      );
+      INSERT INTO institution_users (id, institution_id, email, password_hash, role, status, created_at)
+        SELECT id, institution_id, email, password_hash, role, 'active', created_at FROM institution_users_v1;
+      DROP TABLE institution_users_v1;
+    `);
+  }
+
+  // Student access: join codes, per-enrolment access state, PIN lifecycle.
+  const engagementColumns = db.prepare("PRAGMA table_info(engagements)").all().map(c => c.name);
+  if (!engagementColumns.includes('join_code')) db.exec('ALTER TABLE engagements ADD COLUMN join_code TEXT');
+  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_engagements_join_code ON engagements(join_code)');
+  const { generateJoinCode } = require('../core/access');
+  db.prepare('SELECT id, title FROM engagements WHERE join_code IS NULL').all()
+    .forEach(e => db.prepare('UPDATE engagements SET join_code = ? WHERE id = ?').run(generateJoinCode(db, e.title), e.id));
+
+  const elColumns = db.prepare("PRAGMA table_info(engagement_learners)").all().map(c => c.name);
+  if (!elColumns.includes('access_status')) db.exec("ALTER TABLE engagement_learners ADD COLUMN access_status TEXT DEFAULT 'active'"); // active | removed
+  if (!elColumns.includes('last_login_at')) db.exec('ALTER TABLE engagement_learners ADD COLUMN last_login_at TEXT');
+  if (!elColumns.includes('failed_pin_attempts')) db.exec('ALTER TABLE engagement_learners ADD COLUMN failed_pin_attempts INTEGER DEFAULT 0');
+  if (!elColumns.includes('locked_at')) db.exec('ALTER TABLE engagement_learners ADD COLUMN locked_at TEXT');
+  if (!elColumns.includes('removed_at')) db.exec('ALTER TABLE engagement_learners ADD COLUMN removed_at TEXT');
+  if (!elColumns.includes('delivery')) db.exec('ALTER TABLE engagement_learners ADD COLUMN delivery TEXT'); // email | slip | legacy
+  if (!learnerColumns.includes('pin_must_change')) db.exec('ALTER TABLE learners ADD COLUMN pin_must_change INTEGER DEFAULT 0');
+  if (!learnerColumns.includes('pin_set_at')) db.exec('ALTER TABLE learners ADD COLUMN pin_set_at TEXT');
+
+  const profileColumns = db.prepare("PRAGMA table_info(learner_profiles)").all().map(c => c.name);
+  if (!profileColumns.includes('share_with_institution')) db.exec('ALTER TABLE learner_profiles ADD COLUMN share_with_institution INTEGER DEFAULT 0');
 
   console.log('Qubirex database initialised at:', DB_PATH);
   db.close();

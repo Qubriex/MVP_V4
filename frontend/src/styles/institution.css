@@ -1,0 +1,87 @@
+/* ============================================================================
+   INSTITUTION SIDE (/institution/*) — builds on learner.css (ln-* classes)
+   and tokens.css. The only structural difference is the dark staff sidebar,
+   so staff pages read as a different place from student pages.
+   Class prefix: in-
+   ========================================================================== */
+
+.in-sidebar {
+  background: var(--stage-bg); color: var(--stage-text); border-right: 1px solid #2B2925; gap: 18px;
+}
+.in-sidebar .ln-brand small { display: block; font-family: var(--font-body); font-size: 11px; font-weight: 500; letter-spacing: 0.08em; color: var(--stage-muted); }
+.in-org { display: flex; flex-direction: column; padding: 10px 12px; border-radius: var(--radius-md); border: 1px solid #3A3733; background: var(--stage-surface); font-size: 13px; }
+.in-org span { font-size: 11px; color: var(--stage-muted); }
+.in-sidebar .ln-navlabel { color: var(--stage-muted); }
+.in-sidebar .ln-navlink { color: #D9D4C8; }
+.in-sidebar .ln-navlink:hover { background: rgba(255, 255, 255, 0.05); }
+.in-sidebar .ln-navlink.is-active { background: #3A2A22; color: #F7C170; }
+.in-badge { margin-left: auto; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: var(--radius-full); background: var(--accent-400); color: #2A1608; }
+.in-me { display: flex; align-items: center; gap: 10px; padding: 12px 4px 0; border-top: 1px solid #3A3733; margin-top: auto; }
+.in-me .ln-avatar { background: var(--accent-400); color: #2A1608; width: 36px; height: 36px; font-size: 13px; font-weight: 700; overflow: hidden; }
+.in-me .ln-avatar img, .in-photo img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; display: block; }
+.in-iconbtn { width: 36px; height: 36px; border-radius: 8px; color: var(--stage-muted); display: flex; align-items: center; justify-content: center; background: none; border: 0; cursor: pointer; }
+.in-iconbtn:hover { background: rgba(255, 255, 255, 0.06); color: var(--stage-text); }
+@media (max-width: 960px) { .in-topbar { background: var(--stage-bg); color: var(--stage-text); border-bottom-color: #2B2925; } }
+
+/* Theme toggle inside the dark sidebar */
+.in-sidebar .theme-toggle { background: transparent; border-color: #3A3733; color: var(--stage-muted); }
+.in-sidebar .theme-toggle:hover { color: var(--accent-400); border-color: var(--accent-400); }
+
+/* Typed student rows on Add students */
+.in-rowedit { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1.3fr) auto; gap: 8px; align-items: center; }
+@media (max-width: 700px) { .in-rowedit { grid-template-columns: minmax(0, 1fr) auto; } .in-rowedit > input:not(:first-child) { grid-column: 1; } }
+
+/* Access states on the roster */
+.in-state-active { background: var(--status-success-bg); color: var(--status-success); }
+.in-state-invited { background: var(--status-info-bg); color: var(--status-info); }
+.in-state-never_signed_in { background: var(--status-warning-bg); color: #7A5418; }
+.in-state-locked { background: var(--status-danger-bg); color: var(--status-danger); }
+.in-state-removed { background: var(--status-neutral-bg); color: var(--color-text); }
+[data-theme='dark'] .in-state-never_signed_in { color: var(--status-warning); }
+
+.in-roster { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 20px; align-items: start; }
+@media (max-width: 1200px) { .in-roster { grid-template-columns: minmax(0, 1fr); } }
+.in-roster tr.is-selected td { background: var(--accent-50); }
+[data-theme='dark'] .in-roster tr.is-selected td { background: rgba(244, 169, 58, 0.07); }
+.in-roster tbody tr { cursor: pointer; }
+.in-bulkbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 14px; border-radius: var(--radius-lg); background: var(--stage-bg); color: var(--stage-text); }
+.in-bulkbar .ln-btn { background: transparent; color: var(--stage-text); border-color: var(--stage-border); min-height: 36px; }
+.in-bulkbar .ln-btn:hover:not(:disabled) { background: rgba(255, 255, 255, 0.06); }
+.in-bulkbar .in-danger { color: #F5C8BD; border-color: #8E3A2C; }
+.in-timeline { display: flex; flex-direction: column; gap: 10px; }
+.in-timeline > div { display: flex; gap: 10px; }
+.in-timeline > div::before { content: ''; width: 8px; height: 8px; border-radius: 99px; background: var(--accent-700); margin-top: 7px; flex-shrink: 0; }
+
+.in-code { font-family: ui-monospace, Menlo, monospace; font-weight: 700; letter-spacing: 0.06em; }
+.in-choice { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border-radius: var(--radius-lg); border: 1px solid var(--color-border-strong); background: var(--color-surface); text-align: left; cursor: pointer; color: var(--color-text); width: 100%; }
+.in-choice[aria-pressed='true'], .in-choice.is-on { border: 2px solid var(--accent-800); background: var(--accent-50); }
+[data-theme='dark'] .in-choice[aria-pressed='true'], [data-theme='dark'] .in-choice.is-on { border-color: var(--accent-400); background: rgba(244, 169, 58, 0.08); }
+.in-radio { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: var(--radius-lg); border: 1px solid var(--color-border-strong); cursor: pointer; }
+.in-radio input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--accent-800); }
+.in-radio:has(input:checked) { border: 2px solid var(--accent-800); background: var(--accent-50); }
+[data-theme='dark'] .in-radio:has(input:checked) { border-color: var(--accent-400); background: rgba(244, 169, 58, 0.08); }
+
+.in-steps { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 0; padding: 0; list-style: none; }
+.in-steps li { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--color-text-muted); }
+.in-steps li.is-now { color: var(--color-text); font-weight: 600; }
+.in-steps .in-dot { width: 24px; height: 24px; border-radius: 99px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; border: 1.5px solid var(--color-border-strong); }
+.in-steps li.is-done .in-dot { background: var(--status-success); color: #FFFFFE; border-color: transparent; }
+.in-steps li.is-now .in-dot { background: var(--accent-800); color: #FFFFFE; border-color: transparent; }
+.in-steps li + li::before { content: ''; width: 24px; height: 1px; background: var(--color-border-strong); }
+
+.in-modal-scrim { position: fixed; inset: 0; background: var(--color-overlay); z-index: var(--z-modal); display: flex; align-items: center; justify-content: center; padding: 16px; }
+.in-modal { width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; }
+
+/* Printable login slips: 2 columns of cut-out cards on A4. */
+.in-slips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.in-slip { border: 1.5px dashed var(--color-border-strong); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; background: #FFFFFF; color: #1F1E1C; font-size: 13px; }
+.in-slip b { font-size: 15px; }
+.in-slip .in-code { font-size: 18px; }
+@media print {
+  @page { size: A4; margin: 12mm; }
+  body * { visibility: hidden !important; }
+  .in-print, .in-print * { visibility: visible !important; }
+  .in-print { position: absolute; left: 0; top: 0; width: 100%; }
+  .in-slip { break-inside: avoid; }
+  .in-no-print { display: none !important; }
+}

@@ -119,31 +119,41 @@ Every Mastery Log includes: *"This Mastery Log records capability movement and i
 
 ## MODULE 5 — INSTITUTION PORTAL
 
-### 5.1 Onboarding
-- [ ] Institution registration with type classification
-- [ ] Contact details, city (Hyderabad default)
-- [ ] JWT authentication (7-day tokens)
+Ten pages under `/institution/*`, sharing one dark staff sidebar (Overview ·
+Teaching · Insights · Institution) with the signed-in staff member and Logout.
 
-### 5.2 Learner Management
-- [ ] Add individual learners (name, ref number, language, profile type)
-- [ ] Bulk import via JSON array
-- [ ] Language assignment per learner (Hindi or Telugu)
-- [ ] Learner reference is institution's own ID
+### 5.1 Staff accounts and roles
+- [ ] Institution registration with type classification; contact email signs in as the first admin
+- [ ] Admin invites staff by email from Team & roles; each has their own login (JWT, 7 days)
+- [ ] Roles: **Admin** (everything), **Professor** (assigned cohorts only), **Viewer** (read-only, e.g. placement cell, HOD)
+- [ ] Role and status checked on every request; disabling takes effect immediately
+- [ ] Invite acceptance: set password, then short profile setup (photo, designation, department, qualification, specialisation, teaching languages, subjects, office hours, notifications) with a preview of what students see
+- [ ] Students see their cohort's professors on their dashboard
 
-### 5.3 Engagement Management
-- [ ] Create engagement against confirmed capability target
-- [ ] Assign learner cohort to engagement
-- [ ] View cohort progress (current node, nodes mastered, status)
-- [ ] Engagement ID visible for learner login distribution
-- [ ] Produce Mastery Logs on completion
-- [ ] Download/view structured Mastery Log per learner
+### 5.2 Cohorts
+- [ ] Setup order: capability target → confirm extracted targets → pick language → build pathway in that language → name cohort and assign professors → add students
+- [ ] Each cohort gets a short join code (e.g. `QX-FSA-7K2`) that replaces the 36-character engagement ID at learner login
+- [ ] Cohort detail: KPIs, where students are in the pathway, hardest nodes (counts and loops only), pathway, students, mastery logs, settings
 
-### 5.4 Dashboard
-- [ ] List of all engagements with status
-- [ ] Learner count, completion count per engagement
-- [ ] Quick actions: upload target, start engagement
+### 5.3 Students & access
+- [ ] One "Add students" flow: type in, upload CSV, or pick existing students → cohort → email invite (student sets own PIN) or printed slip (one-time PIN, must change)
+- [ ] Row-by-row checks before committing; one server transaction creates learners, enrolments and access together (no half-created students)
+- [ ] Roster by access state: active, invited, never signed in, locked, removed; PIN reset requests from the learner login page
+- [ ] Resend invites, reset PINs (also unlocks), move between cohorts, remove access (blocks login and signs the student out; record kept), restore
+- [ ] Access history per student
+- [ ] 5 wrong PINs lock the enrolment
 
----
+### 5.4 Mastery logs
+- [ ] Produce current logs any time (replaces each learner's log) or final logs (marks cohort completed)
+- [ ] Scoped to the caller's institution and cohorts; view, print, export CSV
+
+### 5.5 Market insight (JD figures are sample data until a feed is connected)
+- [ ] Curriculum vs market: JD skills vs pathway (covered / partly / missing), cohort mastery, student requests, suggestions, emerging topics to add, topics rarely asked for
+- [ ] Where we stand: job-match index (verified skills only) vs regional benchmark, last year's batch or another cohort; fit by target role; where the cohort trails; opted-in students closest to job-ready
+
+### 5.6 Not built yet
+- [ ] Email delivery (invites are recorded in `outbound_messages` and shown as copyable links)
+- [ ] Syllabus PDF upload for Curriculum vs market; the "New ideas" roadmap board
 
 ## MODULE 6 — LEARNER PORTAL
 
@@ -151,7 +161,8 @@ Nine pages under `/learn/*`, sharing one sidebar (Learn · Career · Me). The
 voice session runs full screen.
 
 ### 6.1 Authentication (`/learner-login`)
-- [ ] Login via learner reference number + engagement ID + 6-digit PIN
+- [ ] Login via learner reference number + cohort join code + 6-digit PIN (engagement ID still accepted)
+- [ ] Students set their own PIN from an invite link, or change a one-time PIN at first sign-in; "Forgot PIN?" asks staff to reset
 - [ ] Interface language picked on the login page: Telugu / Hindi / English (labels only — teaching language stays set by the institution)
 - [ ] "Keep me signed in" and a Forgot-PIN pointer to the institution
 - [ ] First sign-in goes through a 3-step setup (`/learn/welcome`): basics, goals, voice check

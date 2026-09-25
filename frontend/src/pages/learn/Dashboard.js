@@ -22,12 +22,14 @@ export default function Dashboard() {
   const [market, setMarket] = useState(null);
   const [profile, setProfile] = useState(null);
   const [query, setQuery] = useState('');
+  const [professors, setProfessors] = useState([]);
   const requests = useSkillRequests();
 
   useEffect(() => {
     getOr('/learner/dashboard', MOCK_LEARNER_DASHBOARD, d => d && typeof d.progress_pct !== 'undefined').then(setData);
     getOr('/market/snapshot', MOCK_MARKET_SNAPSHOT, d => d && Array.isArray(d.jobs)).then(setMarket);
     getOr('/learner/profile', MOCK_PROFILE_BASICS, d => d && d.completeness).then(setProfile);
+    getOr('/learner/professors', [], Array.isArray).then(setProfessors);
   }, []);
 
   const firstName = (user?.name || '').split(' ')[0];
@@ -158,6 +160,21 @@ export default function Dashboard() {
             ))}
           </div>
         </section>
+        {professors.length > 0 && (
+          <section className="ln-card" style={{ gap: 12 }}>
+            <h2 className="ln-h2">Your professors</h2>
+            {professors.map(p => (
+              <div key={p.name} className="ln-row" style={{ gap: 12, alignItems: 'flex-start' }}>
+                <div className="ln-avatar" style={{ overflow: 'hidden' }}>{p.photo_data_url ? <img src={p.photo_data_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : (p.name || '?').split(' ').map(w => w[0]).slice(0, 2).join('')}</div>
+                <div className="ln-col" style={{ gap: 2 }}>
+                  <b>{[p.title, p.name].filter(Boolean).join(' ')}{p.cohort_role === 'lead' && <span className="ln-tag ln-tag-neutral" style={{ marginLeft: 6 }}>Lead</span>}</b>
+                  {(p.designation || p.department) && <span className="ln-small">{[p.designation, p.department].filter(Boolean).join(' · ')}</span>}
+                  {p.office_hours && <span className="ln-xs ln-muted">Office hours: {p.office_hours}</span>}
+                </div>
+              </div>
+            ))}
+          </section>
+        )}
         {profile?.completeness && profile.completeness.pct < 100 && (
           <section className="ln-card ln-card-warm" style={{ gap: 12 }}>
             <span style={{ fontSize: 15, fontWeight: 600 }}>Profile {profile.completeness.pct}% complete</span>

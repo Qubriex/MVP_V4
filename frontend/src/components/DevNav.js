@@ -11,17 +11,22 @@ const SECTIONS = [
   {
     group: 'Public', items: [
       { path: '/', label: 'Landing Page' },
-      { path: '/login', label: 'Institution Login' },
+      { path: '/login', label: 'Staff login' },
       { path: '/learner-login', label: 'Learner Login' }
     ]
   },
   {
     group: 'Institution', role: 'institution', items: [
-      { path: '/institution/dashboard', label: 'Institution Dashboard' },
-      { path: '/institution/upload-target', label: 'Upload Capability Target' },
-      { path: '/institution/engagement/new', label: 'Engagement Setup' },
-      { path: '/institution/engagement/demo-eng-1', label: 'Engagement Detail' },
-      { path: '/institution/mastery-log/demo-log-1', label: 'Mastery Log View' }
+      { path: '/institution/home', label: 'Home' },
+      { path: '/institution/welcome', label: 'Profile setup' },
+      { path: '/institution/team', label: 'Team & roles' },
+      { path: '/institution/students', label: 'Students & access' },
+      { path: '/institution/students/add', label: 'Add students' },
+      { path: '/institution/cohorts', label: 'Cohorts' },
+      { path: '/institution/cohorts/new', label: 'New cohort' },
+      { path: '/institution/curriculum', label: 'Curriculum vs market' },
+      { path: '/institution/benchmark', label: 'Where we stand' },
+      { path: '/institution/profile', label: 'My profile' }
     ]
   },
   {

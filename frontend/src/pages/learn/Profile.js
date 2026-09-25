@@ -2,7 +2,8 @@
 // Personal info, education, experience, projects, skills (verified by
 // Qubirex vs self-declared), certifications, career goals, learning & voice
 // preferences, and account. Saved in one go with "Save changes".
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import api from '../../utils/api';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Bar, initials } from '../../components/learn/ui';
@@ -17,6 +18,24 @@ const NAV = [
   ['goals', 'Career goals', 'goals'], ['preferences', 'Learning & voice', 'preferences'], ['account', 'Account & PIN', undefined]
 ];
 const MISSING_LABEL = { personal: 'your details', education: 'education', projects: 'projects', skills: 'skills', goals: 'goals' };
+
+function ChangePin() {
+  const [pin, setPin] = useState('');
+  const [msg, setMsg] = useState('');
+  const save = async (e) => {
+    e.preventDefault(); setMsg('');
+    if (!/^\d{6}$/.test(pin)) { setMsg('Your PIN must be exactly 6 digits.'); return; }
+    try { await api.put('/learner/pin', { new_pin: pin }); setPin(''); setMsg('PIN changed. Use it next time you sign in.'); } catch (err) { setMsg(err.response?.data?.error || 'Couldn’t change your PIN.'); }
+  };
+  return (
+    <form className="ln-row ln-wrap" style={{ gap: 10, alignItems: 'flex-end' }} onSubmit={save}>
+      <div className="ln-field" style={{ width: 200 }}><label className="ln-label" htmlFor="chpin">New PIN</label>
+        <input id="chpin" className="ln-input" type="password" inputMode="numeric" maxLength={6} autoComplete="new-password" value={pin} onChange={e => setPin(e.target.value.replace(/\D/g, ''))} /></div>
+      <button type="submit" className="ln-btn" disabled={pin.length !== 6}>Change PIN</button>
+      {msg && <span className="ln-small" role="status">{msg}</span>}
+    </form>
+  );
+}
 
 export default function Profile() {
   const form = useProfileDraft();
@@ -75,8 +94,14 @@ export default function Profile() {
           <CertificationsSection form={form} />
           <GoalsSection form={form} />
           <VoiceSection form={form} />
-          <Section id="account" title="Account and PIN">
-            <span className="ln-small">Your sign-in is your learner reference, engagement ID and a 6-digit PIN from your institution. To change or reset your PIN, ask your programme coordinator.</span>
+          <Section id="account" title="Account, PIN and sharing">
+            <span className="ln-small">You sign in with your learner reference, your cohort’s join code and your 6-digit PIN. Forgot it? Use “Forgot PIN?” on the sign-in page and your professor will reset it.</span>
+            <ChangePin />
+            <label className="ln-toggle-row" style={{ alignItems: 'flex-start' }}>
+              <span className="ln-col" style={{ gap: 2 }}><span>Share my capability record with my institution’s placement cell</span>
+                <span className="ln-xs ln-muted">Lets your professors list you among students closest to job-ready, with your verified skills and job match. Off by default; you can turn it off any time.</span></span>
+              <input type="checkbox" checked={!!draft.share_with_institution} onChange={e => form.set('share_with_institution', e.target.checked)} />
+            </label>
             <button type="button" className="ln-btn" style={{ alignSelf: 'flex-start' }} onClick={() => { logout(); navigate('/learner-login'); }}>Sign out of this device</button>
           </Section>
 
