@@ -11,7 +11,8 @@ import { useSpeechInput, useSpeechOutput } from '../../utils/voice';
 import { MOCK_PROFILE } from '../../utils/learnerMockData';
 
 const EDITABLE = ['email', 'phone', 'city', 'link_url', 'headline', 'about', 'target_roles', 'preferred_cities', 'available_from',
-  'expected_salary', 'self_skills', 'experience', 'certifications', 'ui_language', 'voice_prefs', 'education', 'projects'];
+  'expected_salary', 'self_skills', 'experience', 'certifications', 'ui_language', 'voice_prefs', 'education', 'projects',
+  'share_with_institution'];
 
 export function useProfileDraft() {
   const [profile, setProfile] = useState(null);

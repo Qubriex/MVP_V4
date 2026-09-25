@@ -149,6 +149,8 @@ function saveMasteryLog(engagementId, learnerId, logData) {
   const engagement = db.prepare('SELECT capability_target_id FROM engagements WHERE id = ?').get(engagementId);
   const ct = db.prepare('SELECT title, version FROM capability_targets WHERE id = ?').get(engagement.capability_target_id);
 
+  // One current log per learner per engagement: producing again replaces it.
+  db.prepare('DELETE FROM mastery_logs WHERE engagement_id = ? AND learner_id = ?').run(engagementId, learnerId);
   const id = uuidv4();
   db.prepare(`
     INSERT INTO mastery_logs (id, engagement_id, learner_id, capability_target_ref, log_data)
@@ -162,12 +164,15 @@ function saveMasteryLog(engagementId, learnerId, logData) {
 /**
  * Produce Mastery Logs for ALL learners in an engagement
  */
-function produceEngagementMasteryLogs(engagementId) {
+// Produce logs for a whole cohort, or only for `learnerIds`. `complete: true`
+// also marks the engagement completed (end of programme); producing logs
+// part-way (e.g. after a cluster) leaves the cohort active.
+function produceEngagementMasteryLogs(engagementId, { complete = false, learnerIds = null } = {}) {
   const db = getDb();
 
   const engagementLearners = db.prepare(`
     SELECT el.learner_id FROM engagement_learners el WHERE el.engagement_id = ?
-  `).all(engagementId);
+  `).all(engagementId).filter(el => !learnerIds || learnerIds.includes(el.learner_id));
 
   const logs = [];
   for (const el of engagementLearners) {
@@ -176,8 +181,10 @@ function produceEngagementMasteryLogs(engagementId) {
     logs.push({ learner_id: el.learner_id, log_id: logId, log });
   }
 
-  db.prepare(`UPDATE engagements SET status = 'completed', completed_at = datetime('now') WHERE id = ?`)
-    .run(engagementId);
+  if (complete) {
+    db.prepare(`UPDATE engagements SET status = 'completed', completed_at = datetime('now') WHERE id = ?`)
+      .run(engagementId);
+  }
 
   db.close();
   return logs;

@@ -5,7 +5,7 @@ const express = require('express');
 const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
 const { getDb } = require('../../db/init');
-const { authenticateToken, requireRole } = require('../middleware/auth');
+const { authenticateToken, requireRole, requireActiveLearner } = require('../middleware/auth');
 const { parseJSON } = require('../../core/market/skillGap');
 const market = require('../../core/market/sampleMarket');
 const portfolio = require('../../core/portfolio');
@@ -15,6 +15,7 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 
 
 router.use(authenticateToken);
 router.use(requireRole('learner'));
+router.use(requireActiveLearner);
 
 const DEFAULT_VOICE_PREFS = { voice: 'A', rate: 1, startInVoice: true, showEnglishCaptions: true, dailyReminder: false };
 const RESUME_SECTIONS = ['summary', 'skills', 'projects', 'education', 'experience', 'certifications', 'capability_record'];
@@ -58,6 +59,7 @@ function loadProfile(db, user) {
     self_skills: parseJSON(p.self_skills, []), experience: parseJSON(p.experience, []), certifications: parseJSON(p.certifications, []),
     ui_language: p.ui_language || learner.language,
     voice_prefs: { ...DEFAULT_VOICE_PREFS, ...parseJSON(p.voice_prefs, {}) },
+    share_with_institution: !!p.share_with_institution,
     education, projects,
     verified_skills: nodes.filter(n => n.advanced_at).map(n => n.node_label),
     learning_skills: nodes.filter(n => !n.advanced_at).slice(0, 4).map(n => n.node_label),
@@ -109,15 +111,16 @@ router.put('/profile', (req, res) => {
     if ('email' in b) db.prepare('UPDATE learners SET email = ? WHERE id = ?').run(clean(b.email, 200) || null, req.user.id);
     db.prepare(`
       INSERT INTO learner_profiles (learner_id, phone, city, link_url, headline, about, target_roles, preferred_cities,
-        available_from, expected_salary, self_skills, experience, certifications, ui_language, voice_prefs, updated_at)
+        available_from, expected_salary, self_skills, experience, certifications, ui_language, voice_prefs, share_with_institution, updated_at)
       VALUES (@learner_id, @phone, @city, @link_url, @headline, @about, @target_roles, @preferred_cities,
-        @available_from, @expected_salary, @self_skills, @experience, @certifications, @ui_language, @voice_prefs, datetime('now'))
+        @available_from, @expected_salary, @self_skills, @experience, @certifications, @ui_language, @voice_prefs, @share_with_institution, datetime('now'))
       ON CONFLICT(learner_id) DO UPDATE SET
         phone = excluded.phone, city = excluded.city, link_url = excluded.link_url, headline = excluded.headline,
         about = excluded.about, target_roles = excluded.target_roles, preferred_cities = excluded.preferred_cities,
         available_from = excluded.available_from, expected_salary = excluded.expected_salary,
         self_skills = excluded.self_skills, experience = excluded.experience, certifications = excluded.certifications,
-        ui_language = excluded.ui_language, voice_prefs = excluded.voice_prefs, updated_at = datetime('now')
+        ui_language = excluded.ui_language, voice_prefs = excluded.voice_prefs,
+        share_with_institution = excluded.share_with_institution, updated_at = datetime('now')
     `).run({
       learner_id: req.user.id,
       phone: pick('phone', v => clean(v, 40), current.phone),
@@ -133,7 +136,9 @@ router.put('/profile', (req, res) => {
       experience: JSON.stringify(pick('experience', v => (Array.isArray(v) ? v.slice(0, 20) : []), current.experience)),
       certifications: JSON.stringify(pick('certifications', v => (Array.isArray(v) ? v.slice(0, 20) : []), current.certifications)),
       ui_language: b.ui_language || current.ui_language,
-      voice_prefs: JSON.stringify({ ...current.voice_prefs, ...(b.voice_prefs || {}) })
+      voice_prefs: JSON.stringify({ ...current.voice_prefs, ...(b.voice_prefs || {}) }),
+      // Opt-in: lets the institution's "closest to job-ready" list include this learner.
+      share_with_institution: ('share_with_institution' in b ? !!b.share_with_institution : current.share_with_institution) ? 1 : 0
     });
 
     if (Array.isArray(b.education)) {

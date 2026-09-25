@@ -6,7 +6,7 @@
 const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const { getDb } = require('../../db/init');
-const { authenticateToken, requireRole } = require('../middleware/auth');
+const { authenticateToken, requireRole, requireActiveLearner } = require('../middleware/auth');
 const market = require('../../core/market/sampleMarket');
 const { getLearnerSkillState, classifySkill, scoreJob } = require('../../core/market/skillGap');
 const { explainJobAloud, explainTopicAloud, interviewTurn } = require('../../core/portfolio');
@@ -14,6 +14,7 @@ const { explainJobAloud, explainTopicAloud, interviewTurn } = require('../../cor
 const router = express.Router();
 router.use(authenticateToken);
 router.use(requireRole('learner'));
+router.use(requireActiveLearner);
 
 const META = { sample: true, source: market.SOURCE_LABEL, updated_at: market.UPDATED_AT };
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];

@@ -1,50 +1,39 @@
 // src/pages/MasteryLogView.js
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
+import { Printer } from 'lucide-react';
 import api from '../utils/api';
-import { MOCK_MASTERY_LOG } from '../utils/mockData';
-import NavBar from '../components/NavBar';
 import Reveal from '../components/Reveal';
 
 export default function MasteryLogView() {
   const { logId } = useParams();
-  const navigate = useNavigate();
-  const [log, setLog] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [record, setRecord] = useState(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    // Try to get from admin route. dev fallback — an unreachable backend can
-    // resolve with a 200 HTML page (SPA host rewrite) instead of erroring,
-    // so validate the shape too.
-    api.get(`/admin/mastery-logs/${logId}`).then(r => {
-      if (!r.data || !r.data.log_data || !Array.isArray(r.data.log_data.clusters)) throw new Error('unexpected response shape');
-      setLog(r.data.log_data);
-      setLoading(false);
-    }).catch(() => { setLog(MOCK_MASTERY_LOG); setLoading(false); });
+    // Institution-scoped route: staff see logs for cohorts in their scope.
+    // (This page used to call the platform-admin route, so institutions only
+    // ever saw mock data.)
+    api.get(`/institution/mastery-logs/${logId}`)
+      .then(r => { if (!r.data?.log_data?.clusters) throw new Error('unexpected response shape'); setRecord(r.data); })
+      .catch(e => setError(e.response?.status === 404 ? 'This Mastery Log doesn’t exist or isn’t in your cohorts.' : 'Couldn’t load the Mastery Log.'));
   }, [logId]);
 
-  if (loading || !log) {
-    return (
-      <>
-        <NavBar />
-        <main className="container" style={{ padding: 'var(--space-16) var(--gutter)', flex: 1 }}>
-          <p className={loading ? 'text-muted' : ''} style={!loading ? { color: 'var(--status-danger)' } : undefined}>
-            {loading ? 'Loading…' : 'Log not found'}
-          </p>
-        </main>
-      </>
-    );
-  }
+  if (error) return <div className="ln-error">{error}</div>;
+  if (!record) return <p className="ln-muted">Loading…</p>;
+  const log = record.log_data;
 
   const clustersCompleted = (log.clusters || []).filter(c => c.nodes.length > 0 && c.nodes.every(n => n.advanced)).length;
   const overallCompletion = log.clusters?.length ? Math.round((clustersCompleted / log.clusters.length) * 100) : 0;
 
   return (
     <>
-      <NavBar />
-      <main className="container" style={{ padding: 'var(--space-12) var(--gutter) var(--space-20)', flex: 1, width: '100%' }}>
-        <div style={{ maxWidth: 960, margin: '0 auto' }}>
-          <div className="small accent-text" style={{ cursor: 'pointer', marginBottom: 'var(--space-6)', fontWeight: 600 }} onClick={() => navigate(-1)}>← Back</div>
+      <div className="in-print">
+        <div style={{ maxWidth: 960, width: '100%' }}>
+          <div className="ln-between in-no-print" style={{ marginBottom: 'var(--space-6)' }}>
+            <Link to={`/institution/cohorts/${record.engagement_id}`} className="ln-link">← {record.engagement_title}</Link>
+            <button type="button" className="ln-btn ln-btn-sm" onClick={() => window.print()}><Printer size={14} aria-hidden="true" />Print or save as PDF</button>
+          </div>
 
           {/* Header — the one place a full accent-gradient wash is used, since this is the evidence document itself */}
           <Reveal
@@ -139,7 +128,7 @@ export default function MasteryLogView() {
             Produced by Qubirex · Inferexaa Private Limited · Receive. Build. Return.
           </div>
         </div>
-      </main>
+      </div>
     </>
   );
 }

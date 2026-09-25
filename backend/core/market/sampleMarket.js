@@ -39,77 +39,88 @@ const SKILLS = {
   networking:   { name: 'Networking basics', keywords: ['network', 'tcp', 'http'], hours: 5 },
   pipelines:    { name: 'Data pipelines', keywords: ['pipeline', 'etl'], hours: 8 },
   ev_basics:    { name: 'Battery and EV basics', keywords: ['battery', 'ev '], hours: 12 },
-  low_code:     { name: 'Low-code automation', keywords: ['low-code', 'automation', 'power automate', 'zapier'], hours: 5 }
+  low_code:     { name: 'Low-code automation', keywords: ['low-code', 'automation', 'power automate', 'zapier'], hours: 5 },
+  docker:       { name: 'Docker', keywords: ['docker', 'container'], hours: 5 },
+  deploy:       { name: 'Deployment basics', keywords: ['deploy', 'hosting', 'ci/cd'], hours: 3 }
 };
+
+// Topics that are still taught widely but rarely asked for in fresher JDs.
+const RARE_SKILLS = [
+  { key: 'jquery', name: 'jQuery', keywords: ['jquery'], share: 3 },
+  { key: 'php', name: 'PHP basics', keywords: ['php'], share: 5 },
+  { key: 'bootstrap', name: 'Bootstrap theming', keywords: ['bootstrap'], share: 6 },
+  { key: 'flash', name: 'Flash / ActionScript', keywords: ['flash', 'actionscript'], share: 0 },
+  { key: 'vb', name: 'Visual Basic', keywords: ['visual basic', 'vb.net', 'vb6'], share: 1 }
+];
 
 const s = (key, required = true) => ({ key, ...SKILLS[key], required });
 
 const JOBS = [
   {
-    id: 'job-001', title: 'Junior Frontend Developer', company: null, company_type: 'Product startup',
+    id: 'job-001', role: 'Frontend developer', title: 'Junior Frontend Developer', company: null, company_type: 'Product startup',
     city: 'Hyderabad', mode: 'Hybrid', salary_min: 4, salary_max: 6, experience: '0–1 yr', posted_days_ago: 2,
     about: 'You will build and maintain customer-facing screens in React, working with designers and a backend team. You will ship small features within your first month, with a senior developer reviewing your code.',
     responsibilities: ['Turn Figma designs into responsive React components', 'Connect screens to REST APIs and handle loading and error states', 'Write unit tests for components you build', 'Take part in code reviews and daily stand-ups'],
     skills: [s('javascript'), s('html_css'), s('react'), s('typescript'), s('git'), s('rest'), s('testing', false), s('a11y', false)]
   },
   {
-    id: 'job-002', title: 'UI Developer (Fresher)', company: null, company_type: 'Fintech',
+    id: 'job-002', role: 'UI developer', title: 'UI Developer (Fresher)', company: null, company_type: 'Fintech',
     city: 'Remote', mode: 'Remote', salary_min: 4, salary_max: 7, experience: '0–1 yr', posted_days_ago: 4,
     about: 'Build accessible, pixel-accurate interfaces for a payments dashboard used by small businesses.',
     responsibilities: ['Build screens from a shared component library', 'Fix layout and accessibility issues reported by QA', 'Work with the design team on new flows'],
     skills: [s('html_css'), s('javascript'), s('a11y'), s('react', false), s('git')]
   },
   {
-    id: 'job-003', title: 'Full-Stack Trainee', company: null, company_type: 'IT services',
+    id: 'job-003', role: 'Full-stack developer', title: 'Full-Stack Trainee', company: null, company_type: 'IT services',
     city: 'Hyderabad', mode: 'On-site', salary_min: 3.5, salary_max: 5, experience: '0–1 yr', posted_days_ago: 7,
     about: 'A six-month paid traineeship building internal tools for client projects, with a mentor assigned from day one.',
     responsibilities: ['Build small CRUD features end to end', 'Write SQL queries and simple REST endpoints', 'Document what you build'],
     skills: [s('javascript'), s('git'), s('sql'), s('rest'), s('node'), s('html_css', false)]
   },
   {
-    id: 'job-004', title: 'Associate Software Engineer', company: null, company_type: 'Global capability centre',
+    id: 'job-004', role: 'Software engineer', title: 'Associate Software Engineer', company: null, company_type: 'Global capability centre',
     city: 'Hyderabad', mode: 'Hybrid', salary_min: 5, salary_max: 8, experience: '0–1 yr', posted_days_ago: 8,
     about: 'Join a platform team maintaining services used across the group. Strong fundamentals matter more than any one framework.',
     responsibilities: ['Fix bugs and add small features to existing services', 'Write unit tests', 'Take part in on-call shadowing after six months'],
     skills: [s('javascript'), s('dsa'), s('java'), s('git'), s('sql', false)]
   },
   {
-    id: 'job-005', title: 'Python Developer Trainee', company: null, company_type: 'Analytics consultancy',
+    id: 'job-005', role: 'Python developer', title: 'Python Developer Trainee', company: null, company_type: 'Analytics consultancy',
     city: 'Bengaluru', mode: 'Hybrid', salary_min: 3.6, salary_max: 5.5, experience: '0–1 yr', posted_days_ago: 3,
     about: 'Write Python scripts that clean and move client data, and help build small internal APIs.',
     responsibilities: ['Write and test Python scripts', 'Query data with SQL', 'Automate recurring reports'],
     skills: [s('python'), s('sql'), s('git'), s('excel', false), s('rest', false)]
   },
   {
-    id: 'job-006', title: 'Junior Data Analyst', company: null, company_type: 'E-commerce',
+    id: 'job-006', role: 'Data analyst', title: 'Junior Data Analyst', company: null, company_type: 'E-commerce',
     city: 'Hyderabad', mode: 'On-site', salary_min: 3.5, salary_max: 5, experience: '0–1 yr', posted_days_ago: 5,
     about: 'Answer business questions from order and customer data, and build weekly dashboards for the operations team.',
     responsibilities: ['Write SQL to pull and join data', 'Build and maintain dashboards', 'Present findings to the ops team every week'],
     skills: [s('sql'), s('excel'), s('statistics'), s('python', false)]
   },
   {
-    id: 'job-007', title: 'LLM Application Developer (Junior)', company: null, company_type: 'AI startup',
+    id: 'job-007', role: 'LLM app developer', title: 'LLM Application Developer (Junior)', company: null, company_type: 'AI startup',
     city: 'Bengaluru', mode: 'Hybrid', salary_min: 6, salary_max: 10, experience: '0–2 yrs', posted_days_ago: 1,
     about: 'Build chat assistants and document-search features on top of large language models. Most of the work is ordinary web development plus a few new skills.',
     responsibilities: ['Build web features that call LLM APIs', 'Design prompts and structured outputs', 'Write tests that check AI answers'],
     skills: [s('javascript'), s('rest'), s('llm_api'), s('prompting'), s('retrieval', false), s('ai_eval', false), s('git')]
   },
   {
-    id: 'job-008', title: 'Cloud Support Associate', company: null, company_type: 'Cloud services partner',
+    id: 'job-008', role: 'Cloud support', title: 'Cloud Support Associate', company: null, company_type: 'Cloud services partner',
     city: 'Visakhapatnam', mode: 'On-site', salary_min: 3.2, salary_max: 4.8, experience: '0–1 yr', posted_days_ago: 9,
     about: 'Help customers troubleshoot cloud deployments, with training on the major platforms in your first quarter.',
     responsibilities: ['Resolve customer tickets', 'Reproduce issues on test accounts', 'Write knowledge-base articles'],
     skills: [s('linux'), s('networking'), s('cloud'), s('python', false)]
   },
   {
-    id: 'job-009', title: 'Automation Specialist (Fresher)', company: null, company_type: 'Shared services',
+    id: 'job-009', role: 'Automation specialist', title: 'Automation Specialist (Fresher)', company: null, company_type: 'Shared services',
     city: 'Vijayawada', mode: 'On-site', salary_min: 3, salary_max: 4.2, experience: '0–1 yr', posted_days_ago: 6,
     about: 'Automate office workflows for finance and HR teams using low-code tools and spreadsheets.',
     responsibilities: ['Map existing manual processes', 'Build and test automations', 'Train staff on new workflows'],
     skills: [s('low_code'), s('excel'), s('javascript', false)]
   },
   {
-    id: 'job-010', title: 'Node.js Backend Intern', company: null, company_type: 'SaaS product',
+    id: 'job-010', role: 'Backend developer', title: 'Node.js Backend Intern', company: null, company_type: 'SaaS product',
     city: 'Remote', mode: 'Remote', salary_min: 3, salary_max: 4.5, experience: '0 yr', posted_days_ago: 2,
     about: 'A six-month internship on the API team, with a conversion offer for strong interns.',
     responsibilities: ['Build REST endpoints in Express', 'Write SQL migrations', 'Add tests to existing endpoints'],
@@ -133,6 +144,32 @@ const SKILL_SHARE = [
   ['javascript', 71], ['react', 64], ['typescript', 62], ['rest', 55], ['sql', 48],
   ['git', 44], ['python', 41], ['ai_tools', 31]
 ];
+
+// Institution view: skills JDs ask for, share of JDs (0–100) and trend.
+const INSTITUTION_SKILLS = [
+  ['javascript', 71, 'Steady'], ['react', 64, 'Rising'], ['typescript', 62, 'Rising'], ['rest', 55, 'Steady'],
+  ['sql', 48, 'Steady'], ['git', 44, 'Steady'], ['python', 41, 'Steady'], ['cloud', 41, 'Rising'],
+  ['testing', 36, 'Steady'], ['html_css', 34, 'Steady'], ['node', 33, 'Steady'], ['ai_tools', 31, 'Rising fast'],
+  ['docker', 27, 'Rising'], ['dsa', 26, 'Steady'], ['excel', 18, 'Steady'], ['llm_api', 9, 'Rising fast']
+];
+const JDS_ANALYSED = 3412;
+
+// Open roles per role family in the region (sample).
+const ROLE_OPENINGS = {
+  'Frontend developer': 1284, 'UI developer': 410, 'Full-stack developer': 860, 'Software engineer': 1520,
+  'Python developer': 690, 'Data analyst': 740, 'LLM app developer': 230, 'Cloud support': 380,
+  'Automation specialist': 150, 'Backend developer': 520
+};
+
+// Anonymised comparison points for "Where we stand" (sample): job-match
+// index, student share per band (70+, 50–69, 30–49, <30), and the share of
+// students with each skill verified.
+const BENCHMARKS = {
+  regional: { label: 'Regional benchmark', score: 57, bands: [24, 38, 26, 12],
+    skills: { javascript: 62, html_css: 70, react: 44, typescript: 34, git: 58, rest: 40, sql: 45, node: 30, testing: 29, cloud: 21, python: 38, dsa: 33, a11y: 18 } },
+  last_year: { label: 'Last year’s batch', score: 49, bands: [15, 33, 32, 20],
+    skills: { javascript: 55, html_css: 66, react: 30, typescript: 12, git: 50, rest: 31, sql: 40, node: 22, testing: 14, cloud: 9, python: 35, dsa: 30, a11y: 10 } }
+};
 
 const MEDIAN_SALARY_LPA = 4.2;
 const FASTEST_GROWING_ROLE = 'LLM app developer';
@@ -174,6 +211,7 @@ const TOPICS = [
 
 module.exports = {
   SKILLS, JOBS, MONTHLY_DEMAND, SKILL_SHARE, MEDIAN_SALARY_LPA, FASTEST_GROWING_ROLE, SECTORS, TOPICS,
+  RARE_SKILLS, INSTITUTION_SKILLS, JDS_ANALYSED, ROLE_OPENINGS, BENCHMARKS,
   SOURCE_LABEL: 'Sample feed',
   UPDATED_AT: '2026-09-24T06:00:00Z'
 };

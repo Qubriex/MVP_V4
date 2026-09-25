@@ -24,4 +24,24 @@ function requireRole(...roles) {
   };
 }
 
-module.exports = { authenticateToken, requireRole };
+// Learner tokens last 7 days, so removal must be checked per request:
+// removing a student's access (or deactivating them) signs them out at once.
+function requireActiveLearner(req, res, next) {
+  if (req.user.role !== 'learner') return next();
+  const { getDb } = require('../../db/init');
+  const db = getDb();
+  const row = db.prepare(`
+    SELECT el.access_status, el.engagement_id, l.is_active FROM engagement_learners el JOIN learners l ON l.id = el.learner_id
+    WHERE el.id = ? AND l.id = ?
+  `).get(req.user.el_id, req.user.id);
+  db.close();
+  if (!row || row.access_status === 'removed' || !row.is_active) {
+    return res.status(401).json({ error: 'Your access to this cohort was removed. Please contact your institution.' });
+  }
+  if (row.engagement_id !== req.user.engagement_id) {
+    return res.status(401).json({ error: 'You were moved to another cohort. Sign in again with its join code.' });
+  }
+  next();
+}
+
+module.exports = { authenticateToken, requireRole, requireActiveLearner };

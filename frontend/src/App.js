@@ -1,6 +1,6 @@
 // src/App.js
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { UiLangProvider } from './context/UiLangContext';
@@ -9,13 +9,23 @@ import PageTransition from './components/PageTransition';
 
 // Pages
 import LandingPage from './pages/LandingPage';
-import InstitutionLogin from './pages/InstitutionLogin';
 import LearnerLogin from './pages/LearnerLogin';
-import InstitutionDashboard from './pages/InstitutionDashboard';
-import CapabilityTargetUpload from './pages/CapabilityTargetUpload';
-import EngagementSetup from './pages/EngagementSetup';
-import EngagementDetail from './pages/EngagementDetail';
 import MasteryLogView from './pages/MasteryLogView';
+import LearnerInvite from './pages/LearnerInvite';
+import InstitutionLayout from './components/inst/InstitutionLayout';
+import StaffLogin from './pages/inst/StaffLogin';
+import StaffInvite from './pages/inst/StaffInvite';
+import StaffWelcome from './pages/inst/StaffWelcome';
+import StaffProfile from './pages/inst/StaffProfile';
+import InstHome from './pages/inst/Home';
+import Team from './pages/inst/Team';
+import Students from './pages/inst/Students';
+import AddStudents from './pages/inst/AddStudents';
+import Cohorts from './pages/inst/Cohorts';
+import NewCohort from './pages/inst/NewCohort';
+import Cohort from './pages/inst/Cohort';
+import Curriculum from './pages/inst/Curriculum';
+import Standing from './pages/inst/Standing';
 import LearnerLayout from './components/learn/LearnerLayout';
 import LearnerHome from './pages/learn/Dashboard';
 import VoiceSession from './pages/learn/Session';
@@ -35,6 +45,11 @@ function ProtectedRoute({ children, requiredRole }) {
   return children;
 }
 
+function LegacyCohortRedirect() {
+  const { id } = useParams();
+  return <Navigate to={`/institution/cohorts/${id}`} replace />;
+}
+
 export default function App() {
   return (
     <ThemeProvider>
@@ -44,18 +59,35 @@ export default function App() {
           <PageTransition>
             <Routes>
               <Route path="/" element={<LandingPage />} />
-              <Route path="/login" element={<InstitutionLogin />} />
+              <Route path="/login" element={<StaffLogin />} />
+              <Route path="/institution/invite/:token" element={<StaffInvite />} />
               <Route path="/learner-login" element={<LearnerLogin />} />
+              <Route path="/learner-invite/:token" element={<LearnerInvite />} />
 
-              {/* Institution routes */}
+              {/* Institution (staff) routes — one dark-sidebar shell; profile
+                  setup after an invite runs full screen. Old URLs redirect. */}
               <Route path="/institution/*" element={
                 <ProtectedRoute requiredRole="institution">
                   <Routes>
-                    <Route path="dashboard" element={<InstitutionDashboard />} />
-                    <Route path="upload-target" element={<CapabilityTargetUpload />} />
-                    <Route path="engagement/new" element={<EngagementSetup />} />
-                    <Route path="engagement/:id" element={<EngagementDetail />} />
-                    <Route path="mastery-log/:logId" element={<MasteryLogView />} />
+                    <Route path="welcome" element={<StaffWelcome />} />
+                    <Route element={<InstitutionLayout />}>
+                      <Route path="home" element={<InstHome />} />
+                      <Route path="team" element={<Team />} />
+                      <Route path="students" element={<Students />} />
+                      <Route path="students/add" element={<AddStudents />} />
+                      <Route path="cohorts" element={<Cohorts />} />
+                      <Route path="cohorts/new" element={<NewCohort />} />
+                      <Route path="cohorts/:id" element={<Cohort />} />
+                      <Route path="curriculum" element={<Curriculum />} />
+                      <Route path="benchmark" element={<Standing />} />
+                      <Route path="profile" element={<StaffProfile />} />
+                      <Route path="mastery-log/:logId" element={<MasteryLogView />} />
+                      <Route path="dashboard" element={<Navigate to="/institution/home" replace />} />
+                      <Route path="upload-target" element={<Navigate to="/institution/cohorts/new" replace />} />
+                      <Route path="engagement/new" element={<Navigate to="/institution/cohorts/new" replace />} />
+                      <Route path="engagement/:id" element={<LegacyCohortRedirect />} />
+                      <Route path="*" element={<Navigate to="/institution/home" replace />} />
+                    </Route>
                   </Routes>
                 </ProtectedRoute>
               } />

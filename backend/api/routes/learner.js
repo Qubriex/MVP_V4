@@ -5,13 +5,14 @@ const express = require('express');
 const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
 const { getDb } = require('../../db/init');
-const { authenticateToken, requireRole } = require('../middleware/auth');
+const { authenticateToken, requireRole, requireActiveLearner } = require('../middleware/auth');
 const orchestrator = require('../../core/orchestrator');
 const { initMemorySchema } = require('../../core/stores/learnerMemoryStore');
 const { initCulturalSchema, seedInitialExamples } = require('../../core/stores/culturalStore');
 const { initRubricSchema } = require('../../core/stores/rubricStore');
 const { calculateMasteryAttainment, calculateConfidenceIndicator, selectNextApproach } = require('../../core/instructionEngine');
 const { transcribeAudio } = require('../../core/portfolio');
+const { isValidPin, hashPin, logEvent } = require('../../core/access');
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
@@ -31,6 +32,7 @@ const confidenceLabel = (c) => (c >= 0.75 ? 'high' : c >= 0.55 ? 'solid' : 'buil
 
 router.use(authenticateToken);
 router.use(requireRole('learner', 'admin'));
+router.use(requireActiveLearner);
 
 // ─── Streak logic (doc section 11.4) ──────────────────────────────────────────
 function updateStreak(db, elId) {
@@ -656,6 +658,31 @@ router.get('/certificates', (req, res) => {
 
 // ─── Profile ────────────────────────────────────────────────────────────────────
 // GET/PUT /profile, resume and skill requests live in portfolio.js.
+// ─── Change PIN (required after a printed slip or a reset) ─────────────────────
+router.put('/pin', (req, res) => {
+  const { new_pin } = req.body;
+  if (!isValidPin(new_pin)) return res.status(400).json({ error: 'Your PIN must be exactly 6 digits.' });
+  const db = getDb();
+  db.prepare("UPDATE learners SET pin_hash = ?, pin_must_change = 0, pin_set_at = datetime('now') WHERE id = ?").run(hashPin(new_pin), req.user.id);
+  const e = db.prepare('SELECT institution_id FROM engagements WHERE id = ?').get(req.user.engagement_id);
+  if (e) logEvent(db, { institutionId: e.institution_id, learnerId: req.user.id, elId: req.user.el_id, event: 'pin_set', detail: 'Chose a new PIN after a one-time PIN' });
+  db.close();
+  res.json({ message: 'PIN updated' });
+});
+
+// ─── The learner's professors (what the professor profile preview shows) ──────
+router.get('/professors', (req, res) => {
+  const db = getDb();
+  const rows = db.prepare(`
+    SELECT u.name, u.title, u.designation, u.department, u.specialisations, u.office_hours, u.photo_data_url, sc.cohort_role
+    FROM staff_cohorts sc JOIN institution_users u ON u.id = sc.staff_id
+    WHERE sc.engagement_id = ? AND u.status = 'active' AND u.role = 'professor'
+    ORDER BY sc.cohort_role = 'lead' DESC, u.name
+  `).all(req.user.engagement_id);
+  db.close();
+  res.json(rows.map(r => ({ ...r, specialisations: r.specialisations ? JSON.parse(r.specialisations) : [] })));
+});
+
 router.put('/notifications', (req, res) => {
   const db = getDb();
   db.prepare('UPDATE learners SET notification_prefs = ? WHERE id = ?').run(JSON.stringify(req.body || {}), req.user.id);
