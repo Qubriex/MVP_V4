@@ -5,6 +5,7 @@ import express from 'express';
 import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import { legacyHandle as getDb } from '../../core/db/dal.js';
+import { aiRateLimitPosts } from '../middleware/rateLimit.js';
 import { authenticateToken, requireRole, requireActiveLearner } from '../middleware/auth.js';
 import * as orchestrator from '../../core/orchestrator.js';
 import { calculateMasteryAttainment, calculateConfidenceIndicator, selectNextApproach } from '../../core/instructionEngine.js';
@@ -20,6 +21,9 @@ const confidenceLabel = (c) => (c >= 0.75 ? 'high' : c >= 0.55 ? 'solid' : 'buil
 router.use(authenticateToken);
 router.use(requireRole('learner', 'admin'));
 router.use(requireActiveLearner);
+// AI-calling routes are POSTs; limited per learner and per institution (v4.3 §22).
+// (Mounted before portfolio.js on /api/learner, so this also covers it.)
+router.use(aiRateLimitPosts);
 
 // ─── Streak logic (doc section 11.4) ──────────────────────────────────────────
 function updateStreak(db, elId) {
@@ -457,7 +461,7 @@ function handleCheckResult({ res, session, result, learnerResponse, pendingCheck
     db.close();
 
     return res.json({
-      result: 'advance', decision: 'ADVANCE', passed: true, score: evaluation.score,
+      result: 'advance', decision: 'ADVANCE', passed: true,
       feedback: evaluation.feedbackForLearner, message: result.message, caption_en: result.captionEn || null,
       mermaid: result.mermaid || null, code: result.code || null,
       mastery_increment: result.masteryIncrement, mastery_attainment: Math.round(masteryAttainment * 100),
@@ -479,7 +483,7 @@ function handleCheckResult({ res, session, result, learnerResponse, pendingCheck
 
   db.close();
   res.json({
-    result: 'loop', decision: 'LOOP', passed: false, score: evaluation.score,
+    result: 'loop', decision: 'LOOP', passed: false,
     feedback: evaluation.feedbackForLearner, understanding_gaps: evaluation.understandingGaps,
     message: result.message, caption_en: result.captionEn || null, mermaid: result.mermaid || null, code: result.code || null,
     next_approach: result.nextApproach, loop_count: session.loop_count + 1

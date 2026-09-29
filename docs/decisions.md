@@ -79,8 +79,8 @@ shared counter store; both are listed for the PostgreSQL move.
 falls back to), `core/access.js` and `core/outboundMail.js` (existing; the
 latter renamed from `core/outbox.js` so it is not confused with the event
 outbox), `api/app.js` (app factory for tests), and the existing
-`api/routes/institution{Team,Students,Insights}.js`, which will be folded into
-`api/routes/institution.js` when those screens are rebuilt.
+`api/routes/institution{Team,Students,Insights}.js`. v4.3 Appendix B lists
+`api/routes/institution*`, so the split is within the module map.
 
 **D-009 — Stored confidence removed; the Mastery Log still shows a computed one** · §2 sign facts compute labels, §6 `node_mastery` · *staged*
 `node_mastery.confidence_indicator` is dropped. The legacy stability measure is
@@ -128,11 +128,13 @@ Stores now import the DAL directly.
 `secure-config/` fails outright. The check covers every file git would commit
 (tracked and untracked-not-ignored) across the whole repository.
 
-**D-014 — Priors come from §8, pending Appendix A** · §2 closed core, §8 · *proposed erratum*
-Appendix A of the PDF was not available to this build. `config/priors.js`
-holds every number stated in §8 (and §10, §7) of the prompt, which §8 declares
-to be the priors. Proposed erratum: confirm that §8's numbers equal Appendix A,
-or supply Appendix A so any difference is recorded here.
+**D-014 — Priors match Appendix A** · §2 closed core, v4.3 Appendix A · *resolved*
+The build began without the dossier, using the numbers in §8 of the prompt.
+Checked against v4.3 Appendix A on receipt: no value differed. The Appendix A
+constants and the section-text constants that were missing (graph, learner
+model, early warnings, JRI_projected, bridge targets, chunking, retrieval gold
+set, name-check honorifics, low-bandwidth) were added, and the A.1 calibration
+register now lives in `config/priors.js` and in the admin quality report.
 
 **D-015 — AI gateway, foundation scope** · §8.11 · *staged*
 The gateway routes every task to one adapter (`AI_ADAPTER`; gemini by default,
@@ -148,3 +150,34 @@ the Quality step.
 Invalid, expired or pre-upgrade tokens answer 401 (previously 403), so the
 frontend signs the user out instead of leaving them on a page that cannot load.
 Authorisation failures (wrong actor, wrong role, CSRF) answer 403.
+
+**D-017 — Employer roles are owner, recruiter, viewer** · v4.3 §14.1 · *correction*
+0002 used owner/admin/member. Migration 0003 rebuilds `employer_users` with
+the §14.1 roles (admin and member become recruiter). KYB gating follows §14.1:
+an unapproved company may search but may not request access.
+
+**D-018 — Legacy behaviour brought in line before its step is rebuilt** · v4.3 §2A.2, §6, §7.3, §7.7, §17.3 · *interim*
+Found by the gap audit (`docs/v4.3-gap-audit.md`):
+- EVAL no longer uses other learners' model-scored answers as few-shots, and
+  no longer writes them back. It scores zero-shot until the gold set exists.
+  The learner's answer is fenced as data.
+- The behaviour fingerprint is persisted only for confirmed adults.
+- Check responses no longer return the evaluator's score to the learner.
+- Simulation-ready follows §7.7.
+Still open: **TEACH writes the check question** (breaks "the teacher never
+writes the check", §7). The import wall cannot see it, because the question
+travels as data. It is replaced by item-family instances in the Evidence step,
+together with a test that the TEACH contract has no check field. CKB ranking
+by effectiveness is replaced in the Teaching-loop step.
+
+**D-019 — Learner PIN unlock: staff reset vs delayed unlock** · v4.3 §22 · *open question*
+§22 says learner PINs use "lockout with delayed unlock". Today five wrong PINs
+lock the enrolment until staff reset the PIN (the behaviour approved in the
+institution redesign). Proposal: keep staff reset, and also unlock
+automatically after a delay (prior 30 minutes, in params). This waits for the
+product owner's confirmation.
+
+**D-020 — AI-call rate limits** · v4.3 §22 · *interpretation*
+POST routes under `/api/learner` and `/api/market` (the AI-calling routes) are
+limited per learner (30/min) and per institution (600/min). Both are priors in
+params. Daily quotas per institution arrive with the cost meter (Quality step).

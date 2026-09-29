@@ -3,6 +3,7 @@ import express from 'express';
 import { legacyHandle as getDb } from '../../core/db/dal.js';
 import { authenticateToken, requireRole } from '../middleware/auth.js';
 import { getMasteryLog, nodeConfidence } from '../../core/masteryLog.js';
+import { calibrationRegister } from '../../config/params.js';
 
 const router = express.Router();
 
@@ -86,6 +87,7 @@ router.get('/quality-report', (req, res) => {
   res.json({
     node_difficulty_ranking: nodeStats,
     approach_effectiveness: loopStats,
+    calibration_register: calibrationRegister(),   // v4.3 Appendix A.1
     note: 'High avg_attempts on a node signals a potential explanation-architecture issue, not learner failure'
   });
 });

@@ -23,7 +23,9 @@ export function loadEmployer(req, res, next) {
   next();
 }
 
-/** Routes that need a KYB-verified company (search, access requests, …). */
+/** Routes that need a KYB-approved company. v4.3 §14.1: until approved an
+ *  employer can search but cannot request access, so this guards access
+ *  requests (and anything that releases learner data), not search. */
 export function requireKybVerified(req, res, next) {
   if (req.employer?.kyb_status !== 'verified') return deny(res, 403, 'kyb_pending', 'Your company verification is still pending.');
   next();

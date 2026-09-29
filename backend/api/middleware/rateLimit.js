@@ -69,6 +69,26 @@ export function clearLoginFailures(actorType, account) {
   dal.run('DELETE FROM login_failures WHERE actor_type = ? AND account_key = ?', actorType, String(account || '').toLowerCase());
 }
 
+// ─── AI calls (v4.3 §22): per account and per institution ───────────────────
+const actorKey = (req) => (req.session ? `${req.session.actor_type}:${req.session.actor_id}` : null);
+const institutionKey = (req) => req.session?.institution_id || null;
+
+/** Rate limits for routes that call the AI gateway. Mount after authentication. */
+export const aiRateLimits = [
+  rateLimit({ name: 'ai:account', limit: () => params.get('security.rateLimits.ai.perAccountPerMinute'), windowMs: 60000, key: actorKey,
+    message: 'You are going a little fast. Wait a moment and try again.' }),
+  rateLimit({ name: 'ai:institution', limit: () => params.get('security.rateLimits.ai.perInstitutionPerMinute'), windowMs: 60000, key: institutionKey,
+    message: 'Qubirex is busy for your institution right now. Try again in a minute.' })
+];
+
+/** Apply aiRateLimits to POST requests only (the routes that call the model). */
+export function aiRateLimitPosts(req, res, next) {
+  if (req.method !== 'POST') return next();
+  let i = 0;
+  const step = (err) => (err || i >= aiRateLimits.length ? next(err) : aiRateLimits[i++](req, res, step));
+  return step();
+}
+
 const loginWindowMs = () => params.get('security.rateLimits.login.windowMinutes') * 60000;
 
 /** Per-IP and per-account request limits in front of every login route. */

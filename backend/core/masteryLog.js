@@ -107,7 +107,7 @@ function produceLearnerMasteryLog(engagementId, learnerId) {
     const simulationReadiness = calculateSimulationReadiness(
       nodes.map(n => {
         const mr = db.prepare(`SELECT * FROM node_mastery WHERE engagement_learner_id = ? AND skill_node_id = ?`).get(learner.el_id, n.id);
-        return { mastery_attainment: mr ? mr.mastery_attainment || 0 : 0, confidence_indicator: mr ? nodeConfidence(db, learner.el_id, n.id) : 0 };
+        return { mastery_attainment: mr ? mr.mastery_attainment || 0 : 0, passed: !!(mr && mr.advanced_at) };
       })
     );
 

@@ -13,7 +13,7 @@ describe('migrations', () => {
 
   it('are recorded and idempotent', async () => {
     const ids = dal.all('SELECT id FROM schema_migrations ORDER BY id').map(r => r.id);
-    expect(ids).toEqual(['0001_baseline', '0002_foundation']);
+    expect(ids).toEqual(['0001_baseline', '0002_foundation', '0003_employer_roles']);
     expect(await migrate()).toEqual([]);
   });
 
@@ -100,5 +100,27 @@ describe('DAL transactions', () => {
     const h = dal.legacyHandle();
     h.close();
     expect(dal.one('SELECT 1 AS ok').ok).toBe(1);
+  });
+});
+
+describe('employer roles (v4.3 §14.1)', () => {
+  beforeAll(freshDb);
+  it('are owner, recruiter or viewer', () => {
+    const now = dal.nowIso();
+    dal.run("INSERT INTO employers (id, name, domain, created_at, updated_at) VALUES ('e1', 'E', 'e.test', ?, ?)", now, now);
+    for (const role of ['owner', 'recruiter', 'viewer']) {
+      dal.run('INSERT INTO employer_users (id, employer_id, email, password_hash, role, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        `u-${role}`, 'e1', `${role}@e.test`, 'x', role, now, now);
+    }
+    expect(() => dal.run("INSERT INTO employer_users (id, employer_id, email, password_hash, role, created_at, updated_at) VALUES ('u-x', 'e1', 'x@e.test', 'x', 'admin', ?, ?)", now, now)).toThrow();
+  });
+});
+
+describe('calibration register (v4.3 Appendix A.1)', () => {
+  it('lists every parameter group with a stage and a trigger', async () => {
+    const { calibrationRegister } = await import('../../config/params.js');
+    const reg = calibrationRegister();
+    expect(reg).toHaveLength(11);
+    for (const g of reg) expect(g).toMatchObject({ stage: expect.any(String), trigger: expect.any(String), overriddenBySecureConfig: false });
   });
 });
