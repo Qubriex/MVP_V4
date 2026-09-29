@@ -3,7 +3,7 @@
 // QUBIREX INSTRUCTION ENGINE — shared utilities used across all six brains.
 //
 // This module holds NO teaching logic of its own. It exports:
-//   - callAI(): the single Gemini API wrapper every brain calls through
+//   - callAI(): the model-call wrapper every brain uses (routes through core/ai/gateway.js)
 //   - getMasteryIncrement(): mastery scoring on ADVANCE
 //   - selectNextApproach(): loop approach rotation — never repeat at a node
 //   - calculateMasteryAttainment() / calculateConfidenceIndicator() /
@@ -14,11 +14,7 @@
 // Mastery Log. Mastery gates progression, never elapsed time.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-require('dotenv').config();
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const MODEL_NAME = 'gemini-3.6-flash';
+import { generate } from './ai/gateway.js';
 
 // ─── Five explanation approaches — tried in order, never repeated at a node ──
 const EXPLANATION_APPROACHES = [
@@ -29,39 +25,21 @@ const EXPLANATION_APPROACHES = [
   'socratic'          // No explanation — questions that guide the learner to the concept
 ];
 
-// ─── Gemini API wrapper ───────────────────────────────────────────────────────
-// systemInstruction and userMessage are kept as two separate arguments —
-// callers assemble RAG context into userMessage; system holds the persona
-// and response-format rules.
-async function callAI({ system, userMessage, maxTokens = 1024, temperature = 0.7 }) {
-  const model = genAI.getGenerativeModel({
-    model: MODEL_NAME,
-    systemInstruction: system,
-    generationConfig: {
-      temperature,
-      maxOutputTokens: maxTokens,
-      responseMimeType: 'text/plain'
-    }
-  });
-
-  const result = await model.generateContent(userMessage);
-  return result.response.text();
+// ─── Model calls ──────────────────────────────────────────────────────────────
+// Thin wrappers over core/ai/gateway.js, which owns model choice, retries,
+// fallback and logging. systemInstruction and userMessage stay separate:
+// callers assemble RAG context into userMessage; system holds the persona and
+// response-format rules. `task` names the gateway route (spec §8.11).
+async function callAI({ system, userMessage, maxTokens = 1024, temperature = 0.7, task = 'LEGACY.callAI' }) {
+  const { text } = await generate({ task, system, input: userMessage, maxTokens, temperature });
+  return text;
 }
 
-// ─── callAIWithAudio() ────────────────────────────────────────────────────────
-// Same wrapper, with one inline audio part ahead of the text prompt. Used for
+// Same, with one inline audio part ahead of the text prompt. Used for
 // speech-to-text when the learner's browser has no on-device recognition.
-async function callAIWithAudio({ system, userMessage, audioBase64, mimeType, maxTokens = 1024, temperature = 0.2 }) {
-  const model = genAI.getGenerativeModel({
-    model: MODEL_NAME,
-    systemInstruction: system,
-    generationConfig: { temperature, maxOutputTokens: maxTokens, responseMimeType: 'text/plain' }
-  });
-  const result = await model.generateContent([
-    { inlineData: { mimeType, data: audioBase64 } },
-    { text: userMessage }
-  ]);
-  return result.response.text();
+async function callAIWithAudio({ system, userMessage, audioBase64, mimeType, maxTokens = 1024, temperature = 0.2, task = 'VOICE.transcribe' }) {
+  const { text } = await generate({ task, system, input: userMessage, audio: { base64: audioBase64, mimeType }, maxTokens, temperature });
+  return text;
 }
 
 // ─── safeParseJSON() ──────────────────────────────────────────────────────────
@@ -140,6 +118,7 @@ function computeVariance(arr) {
 
 // ─── calculateSimulationReadiness() ───────────────────────────────────────────
 // true if ALL: every node mastery >= 0.70, avg mastery >= 0.75, avg confidence >= 0.60
+// (confidence_indicator on each record is computed by the caller, never read from storage)
 function calculateSimulationReadiness(nodeMasteryRecords) {
   if (!nodeMasteryRecords || nodeMasteryRecords.length === 0) return false;
 
@@ -150,14 +129,4 @@ function calculateSimulationReadiness(nodeMasteryRecords) {
   return allNodesComplete && avgMastery >= 0.75 && avgConfidence >= 0.60;
 }
 
-module.exports = {
-  callAI,
-  callAIWithAudio,
-  safeParseJSON,
-  getMasteryIncrement,
-  selectNextApproach,
-  calculateMasteryAttainment,
-  calculateConfidenceIndicator,
-  calculateSimulationReadiness,
-  EXPLANATION_APPROACHES
-};
+export { callAI, callAIWithAudio, safeParseJSON, getMasteryIncrement, selectNextApproach, calculateMasteryAttainment, calculateConfidenceIndicator, calculateSimulationReadiness, EXPLANATION_APPROACHES };

@@ -1,7 +1,7 @@
 // core/stores/culturalStore.js — CULT brain's store: the Cultural Knowledge Base (CKB)
 // Tables: cultural_knowledge_base, cultural_usage_log
-const { v4: uuidv4 } = require('uuid');
-const { getDb } = require('../../db/init');
+import { v4 as uuidv4 } from 'uuid';
+import { legacyHandle as getDb } from '../db/dal.js';
 
 const ALPHA = 0.3; // exponential moving average weight — recent outcomes matter more
 
@@ -72,10 +72,8 @@ function seedInitialExamples(db) {
     INSERT INTO cultural_knowledge_base (id, concept_tag, language, region, vocabulary_level, entry_point, explanation_text, effectiveness_score)
     VALUES (?, ?, ?, ?, 'beginner', ?, ?, ?)
   `);
-  const insertMany = db.transaction((rows) => rows.forEach(r =>
-    insert.run(uuidv4(), r.tag, r.language, r.region, r.entry, r.text, r.eff)
-  ));
-  insertMany(SEED_EXAMPLES);
+  // Runs inside the baseline migration's transaction.
+  SEED_EXAMPLES.forEach(r => insert.run(uuidv4(), r.tag, r.language, r.region, r.entry, r.text, r.eff));
 }
 
 // ─── Three-tier fallback retrieval ────────────────────────────────────────────
@@ -133,9 +131,4 @@ function logOutcome(ckbEntryId, learnerId, sessionId, nodeId, outcome) {
   db.close();
 }
 
-module.exports = {
-  initCulturalSchema,
-  seedInitialExamples,
-  retrieveByConceptTag,
-  logOutcome
-};
+export { initCulturalSchema, seedInitialExamples, retrieveByConceptTag, logOutcome };

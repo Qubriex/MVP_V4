@@ -13,13 +13,13 @@
 //
 // Professors act only on their assigned cohorts; viewers are read-only.
 // ─────────────────────────────────────────────────────────────────────────────
-const express = require('express');
-const { v4: uuidv4 } = require('uuid');
-const { getDb } = require('../../db/init');
-const { authenticateToken, requireRole } = require('../middleware/auth');
-const { staffMiddleware, requireStaffRole, findScopedEngagement, scopeClause } = require('../middleware/staff');
-const { generatePin, hashPin, createLearnerInvite, logEvent, accessState } = require('../../core/access');
-const { queueEmail, appUrl } = require('../../core/outbox');
+import express from 'express';
+import { v4 as uuidv4 } from 'uuid';
+import { legacyHandle as getDb } from '../../core/db/dal.js';
+import { authenticateToken, requireRole } from '../middleware/auth.js';
+import { staffMiddleware, requireStaffRole, findScopedEngagement, scopeClause } from '../middleware/staff.js';
+import { generatePin, hashPin, createLearnerInvite, logEvent, accessState, openResetRequest, resolvePinResetRequests } from '../../core/access.js';
+import { queueEmail, appUrl } from '../../core/outboundMail.js';
 
 const router = express.Router();
 router.use(authenticateToken);
@@ -43,7 +43,7 @@ const ROSTER_SQL = `
     e.title as cohort_title, e.join_code, e.capability_target_id,
     (SELECT COUNT(*) FROM node_mastery nm WHERE nm.engagement_learner_id = el.id AND nm.advanced_at IS NOT NULL) as mastered,
     (SELECT COUNT(*) FROM skill_nodes sn JOIN skill_clusters sc ON sc.id = sn.cluster_id WHERE sc.capability_target_id = e.capability_target_id) as total_nodes,
-    EXISTS (SELECT 1 FROM access_events ae WHERE ae.engagement_learner_id = el.id AND ae.event = 'pin_reset_requested' AND ae.resolved = 0) as reset_requested,
+    EXISTS (SELECT 1 FROM access_events ae WHERE ae.engagement_learner_id = el.id AND ${openResetRequest('ae')}) as reset_requested,
     EXISTS (SELECT 1 FROM learner_invites li WHERE li.engagement_learner_id = el.id AND li.used_at IS NULL AND li.expires_at >= ?) as invite_pending
   FROM engagement_learners el
   JOIN learners l ON l.id = el.learner_id
@@ -287,7 +287,7 @@ router.post('/students/actions', requireStaffRole('admin', 'professor'), (req, r
       const learner = db.prepare('SELECT * FROM learners WHERE id = ?').get(r.learner_id);
       const engagement = db.prepare('SELECT * FROM engagements WHERE id = ?').get(r.engagement_id);
       const ev = (event, detail) => logEvent(db, { institutionId: req.user.id, learnerId: r.learner_id, elId: r.el_id, event, detail, actorStaffId: actor });
-      const resolveRequests = () => db.prepare("UPDATE access_events SET resolved = 1 WHERE learner_id = ? AND event = 'pin_reset_requested'").run(r.learner_id);
+      const resolveRequests = () => resolvePinResetRequests(db, { institutionId: req.user.id, learnerId: r.learner_id, actorStaffId: actor });
 
       if (action === 'remove') {
         if (r.access === 'removed') return out.skipped.push({ name: r.name, reason: 'Already removed' });
@@ -340,4 +340,4 @@ router.post('/students/actions', requireStaffRole('admin', 'professor'), (req, r
   }
 });
 
-module.exports = router;
+export default router;

@@ -2,12 +2,12 @@
 // Mounted at /api/institution. JD figures are sample data (sample: true in
 // every response); pathway coverage, mastery and job-match are computed from
 // the institution's own pathways and students' verified skills.
-const express = require('express');
-const { getDb } = require('../../db/init');
-const { authenticateToken, requireRole } = require('../middleware/auth');
-const { staffMiddleware, findScopedEngagement, scopeClause } = require('../middleware/staff');
-const { curriculumCoverage, cohortStanding } = require('../../core/insights');
-const market = require('../../core/market/sampleMarket');
+import express from 'express';
+import { legacyHandle as getDb } from '../../core/db/dal.js';
+import { authenticateToken, requireRole } from '../middleware/auth.js';
+import { staffMiddleware, findScopedEngagement, scopeClause } from '../middleware/staff.js';
+import { curriculumCoverage, cohortStanding } from '../../core/insights.js';
+import * as market from '../../core/market/sampleMarket.js';
 
 const router = express.Router();
 router.use(authenticateToken);
@@ -73,4 +73,4 @@ router.get('/insights/standing', (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

@@ -15,7 +15,7 @@
 // Tokens issued before staff accounts existed have no staff_id: they are the
 // institution's contact login and act as admin.
 // ─────────────────────────────────────────────────────────────────────────────
-const { getDb } = require('../../db/init');
+import { legacyHandle as getDb } from '../../core/db/dal.js';
 
 function loadStaff(req, res, next) {
   if (req.user.role === 'admin') { // Inferexaa platform admin
@@ -71,4 +71,4 @@ function scopeClause(db, req, column) {
 
 const staffMiddleware = [loadStaff, blockViewerWrites];
 
-module.exports = { loadStaff, requireStaffRole, blockViewerWrites, scopedEngagementIds, findScopedEngagement, scopeClause, staffMiddleware };
+export { loadStaff, requireStaffRole, blockViewerWrites, scopedEngagementIds, findScopedEngagement, scopeClause, staffMiddleware };

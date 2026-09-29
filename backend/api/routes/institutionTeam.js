@@ -3,14 +3,16 @@
 // each accepts the invite (auth.js), sets a password, then fills in a profile
 // whose public part (name, photo, designation, specialisation, office hours)
 // is what their students see.
-const express = require('express');
-const bcrypt = require('bcryptjs');
-const { v4: uuidv4 } = require('uuid');
-const { getDb } = require('../../db/init');
-const { authenticateToken, requireRole } = require('../middleware/auth');
-const { staffMiddleware, requireStaffRole } = require('../middleware/staff');
-const { newToken, hashToken, inviteExpiry } = require('../../core/access');
-const { queueEmail, appUrl } = require('../../core/outbox');
+import express from 'express';
+import bcrypt from 'bcryptjs';
+import { v4 as uuidv4 } from 'uuid';
+import { legacyHandle as getDb } from '../../core/db/dal.js';
+import { authenticateToken, requireRole } from '../middleware/auth.js';
+import { staffMiddleware, requireStaffRole } from '../middleware/staff.js';
+import { newToken, hashToken, inviteExpiry } from '../../core/access.js';
+import { queueEmail, appUrl } from '../../core/outboundMail.js';
+import * as dal from '../../core/db/dal.js';
+import params from '../../config/params.js';
 
 const router = express.Router();
 router.use(authenticateToken);
@@ -89,11 +91,15 @@ router.put('/me', (req, res) => {
 
 router.put('/me/password', (req, res) => {
   const { current_password, new_password } = req.body;
-  if (!new_password || String(new_password).length < 10) return res.status(400).json({ error: 'Choose a password of at least 10 characters.' });
+  const min = params.get('security.passwordMinLength');
+  if (!new_password || String(new_password).length < min) return res.status(400).json({ error: `Choose a password of at least ${min} characters.` });
   const db = getDb();
   const row = db.prepare('SELECT password_hash FROM institution_users WHERE id = ?').get(req.staff.id);
   if (!row || !bcrypt.compareSync(String(current_password || ''), row.password_hash || '')) { db.close(); return res.status(401).json({ error: 'Current password is wrong.' }); }
   db.prepare('UPDATE institution_users SET password_hash = ? WHERE id = ?').run(bcrypt.hashSync(new_password, 10), req.staff.id);
+  // Sign out every other session of this staff member; keep the current one.
+  dal.run("UPDATE auth_sessions SET revoked_at = ? WHERE actor_type = 'staff' AND actor_id = ? AND id != ? AND revoked_at IS NULL",
+    dal.nowIso(), req.staff.id, req.session.id);
   db.close();
   res.json({ message: 'Password changed' });
 });
@@ -209,4 +215,4 @@ router.put('/team/:id', requireStaffRole('admin'), (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

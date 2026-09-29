@@ -1,7 +1,7 @@
 // core/stores/rubricStore.js — EVAL brain's store
 // Tables: eval_rubrics, eval_example_responses
-const { v4: uuidv4 } = require('uuid');
-const { getDb } = require('../../db/init');
+import { v4 as uuidv4 } from 'uuid';
+import { legacyHandle as getDb } from '../db/dal.js';
 
 function initRubricSchema(db) {
   db.exec(`
@@ -99,10 +99,4 @@ function writeEvaluation(nodeLabel, language, responseText, outcome, score, gaps
   db.close();
 }
 
-module.exports = {
-  initRubricSchema,
-  retrieveRubric,
-  retrieveExampleResponses,
-  writeEvaluation,
-  DEFAULT_GAP_TAXONOMY
-};
+export { initRubricSchema, retrieveRubric, retrieveExampleResponses, writeEvaluation, DEFAULT_GAP_TAXONOMY };

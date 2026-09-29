@@ -6,3 +6,8 @@ frontend/build/
 *.db
 *.db-shm
 *.db-wal
+
+# Closed core: calibrated parameters, rubrics, mutants, prompts, CKB lexicons
+# and the canary set live in the private secure-config repository, mounted at
+# runtime. Never commit them here (scripts/check-secrets.js enforces this).
+secure-config/

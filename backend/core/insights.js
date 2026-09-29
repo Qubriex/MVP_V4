@@ -17,8 +17,8 @@
 // Pathway, mastery and requests are live data; JD shares, openings and
 // benchmarks come from sampleMarket.js and are labelled sample in the UI.
 // ─────────────────────────────────────────────────────────────────────────────
-const market = require('./market/sampleMarket');
-const { matches } = require('./market/skillGap');
+import * as market from './market/sampleMarket.js';
+import { matches } from './market/skillGap.js';
 
 const skillOf = (key) => ({ key, ...market.SKILLS[key] });
 
@@ -226,4 +226,4 @@ function cohortStanding(db, engagement, { roles = null, compare = 'regional', co
   };
 }
 
-module.exports = { curriculumCoverage, cohortStanding, pathwayNodes };
+export { curriculumCoverage, cohortStanding, pathwayNodes };

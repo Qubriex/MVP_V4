@@ -1,46 +1,21 @@
 // server.js — Qubirex Backend (Inferexaa Private Limited)
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const { initDb } = require('./db/init');
+// Applies migrations, starts the outbox worker, then listens.
+import 'dotenv/config';
+import params from './config/params.js';
+import { migrate } from './core/db/migrate.js';
+import { createWorker } from './core/events/worker.js';
+import { createApp } from './api/app.js';
+import { logger } from './core/logger.js';
 
-const app = express();
 const PORT = process.env.PORT || 3001;
 
-// ─── Middleware ───────────────────────────────────────────────────────────────
-app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:3000', credentials: true }));
-app.use(express.json({ limit: '5mb' }));
-app.use(express.urlencoded({ extended: true }));
+params.load(); // fails fast in production without secure-config/
+await migrate();
+const worker = createWorker();
+worker.start();
 
-// ─── Routes ───────────────────────────────────────────────────────────────────
-app.use('/api/auth',        require('./api/routes/auth'));
-app.use('/api/institution', require('./api/routes/institution'));
-app.use('/api/institution', require('./api/routes/institutionTeam'));      // /me, /team
-app.use('/api/institution', require('./api/routes/institutionStudents'));  // students & access
-app.use('/api/institution', require('./api/routes/institutionInsights'));  // curriculum vs market, where we stand
-app.use('/api/learner',     require('./api/routes/learner'));
-app.use('/api/learner',     require('./api/routes/portfolio'));   // profile, resume, skill requests, transcribe
-app.use('/api/market',      require('./api/routes/market'));      // job market, JD gap, emerging topics
-app.use('/api/admin',       require('./api/routes/admin'));
-
-// ─── Health check ─────────────────────────────────────────────────────────────
-app.get('/api/health', (req, res) => res.json({
-  status: 'ok',
-  service: 'Qubirex',
-  company: 'Inferexaa Private Limited',
-  tagline: 'Receive. Build. Return.',
-  timestamp: new Date().toISOString()
-}));
-
-// ─── Error handler ────────────────────────────────────────────────────────────
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Internal server error' });
-});
-
-// ─── Start ────────────────────────────────────────────────────────────────────
-initDb();
-app.listen(PORT, () => {
+createApp().listen(PORT, () => {
+  logger.info('server.started', { port: Number(PORT), params: params.report().every(p => p.stage === 'prior') ? 'priors' : 'secure-config' });
   console.log(`\nQubirex backend running on http://localhost:${PORT}`);
-  console.log(`   RECEIVE · BUILD · RETURN\n`);
+  console.log('   RECEIVE · BUILD · RETURN\n');
 });

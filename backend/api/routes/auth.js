@@ -1,60 +1,67 @@
 // api/routes/auth.js
-const express = require('express');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const { v4: uuidv4 } = require('uuid');
-const { getDb } = require('../../db/init');
-const { MAX_PIN_ATTEMPTS, normaliseJoinCode, hashToken, hashPin, isValidPin, logEvent } = require('../../core/access');
-require('dotenv').config();
-
+import express from 'express';
+import bcrypt from 'bcryptjs';
+import { v4 as uuidv4 } from 'uuid';
+import { legacyHandle as getDb } from '../../core/db/dal.js';
+import * as dal from '../../core/db/dal.js';
+import { ulid } from '../../core/db/ulid.js';
+import { emit } from '../../core/events/outbox.js';
+import params from '../../config/params.js';
+import { issueSession, revokeSession, clearSessionCookies, rotateCsrf, authenticate } from '../middleware/auth.js';
+import { loginRateLimits, rateLimit, clientIp, isLockedOut, recordLoginFailure, clearLoginFailures } from '../middleware/rateLimit.js';
+import { MAX_PIN_ATTEMPTS, normaliseJoinCode, hashToken, hashPin, isValidPin, logEvent, openResetRequest } from '../../core/access.js';
+import 'dotenv/config';
 const router = express.Router();
+
+const minPassword = () => params.get('security.passwordMinLength');
+const LOCKED_MSG = 'Too many failed sign-ins. Wait 15 minutes and try again.';
 
 // ─── Staff login (admins, professors, viewers) ───────────────────────────────
 // Staff sign in with their own email and password. The institution's contact
 // email still works: on first use it becomes an admin staff row with the same
 // password, so every signed-in staff member has a staff_id from then on.
-function staffToken(staff) {
-  return jwt.sign(
-    { id: staff.institution_id, staff_id: staff.id, role: 'institution', name: staff.name },
-    process.env.JWT_SECRET,
-    { expiresIn: '7d' }
-  );
-}
-function staffResponse(db, staff) {
+function staffResponse(req, res, db, staff) {
   const inst = db.prepare('SELECT id, name, type FROM institutions WHERE id = ?').get(staff.institution_id);
   db.prepare("UPDATE institution_users SET last_login_at = datetime('now') WHERE id = ?").run(staff.id);
+  const session = issueSession(res, {
+    actorType: 'staff', actorId: staff.id, institutionId: staff.institution_id, req,
+    claims: { id: staff.institution_id, staff_id: staff.id, name: staff.name }
+  });
   return {
-    token: staffToken(staff),
+    token: session.token,
+    csrf_token: session.csrfToken,
     institution: inst,
     staff: { id: staff.id, name: staff.name, title: staff.title, role: staff.role, department: staff.department, profile_completed: !!staff.profile_completed }
   };
 }
 
-router.post('/institution/login', (req, res) => {
+router.post('/institution/login', loginRateLimits(), (req, res) => {
   const email = String(req.body.email || '').trim().toLowerCase();
   const { password } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+  const ip = clientIp(req);
+  if (isLockedOut('staff', email, ip)) return res.status(429).json({ error: LOCKED_MSG });
+  const bad = () => { recordLoginFailure('staff', email, ip); return res.status(401).json({ error: 'Invalid credentials' }); };
+  const ok = (db, staff) => { clearLoginFailures('staff', email); return res.json(staffResponse(req, res, db, staff)); };
 
   const db = getDb();
   try {
     const staff = db.prepare('SELECT * FROM institution_users WHERE lower(email) = ?').get(email);
     if (staff && staff.status === 'active' && staff.password_hash) {
-      if (!bcrypt.compareSync(password, staff.password_hash)) return res.status(401).json({ error: 'Invalid credentials' });
-      return res.json(staffResponse(db, staff));
+      if (!bcrypt.compareSync(String(password), staff.password_hash)) return bad();
+      return ok(db, staff);
     }
     if (staff && staff.status === 'invited') return res.status(401).json({ error: 'Your invite hasn’t been accepted yet. Open the link from your invite email, or use “I have an invite”.' });
     if (staff && staff.status === 'disabled') return res.status(401).json({ error: 'Your staff account is disabled. Ask your institution admin.' });
 
     const institution = db.prepare('SELECT * FROM institutions WHERE lower(contact_email) = ?').get(email);
-    if (!institution || !bcrypt.compareSync(password, institution.password_hash)) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
+    if (!institution || !bcrypt.compareSync(String(password), institution.password_hash)) return bad();
     const id = uuidv4();
     db.prepare(`
       INSERT INTO institution_users (id, institution_id, email, password_hash, role, status, name)
       VALUES (?, ?, ?, ?, 'admin', 'active', ?)
     `).run(id, institution.id, institution.contact_email, institution.password_hash, institution.contact_name || institution.name);
-    return res.json(staffResponse(db, db.prepare('SELECT * FROM institution_users WHERE id = ?').get(id)));
+    return ok(db, db.prepare('SELECT * FROM institution_users WHERE id = ?').get(id));
   } finally {
     db.close();
   }
@@ -90,7 +97,7 @@ router.get('/staff/invite/:token', (req, res) => {
 
 router.post('/staff/invite/:token/accept', (req, res) => {
   const { password } = req.body;
-  if (!password || String(password).length < 10) return res.status(400).json({ error: 'Choose a password of at least 10 characters.' });
+  if (!password || String(password).length < minPassword()) return res.status(400).json({ error: `Choose a password of at least ${minPassword()} characters.` });
   const db = getDb();
   try {
     const invite = findStaffInvite(db, req.params.token);
@@ -101,7 +108,7 @@ router.post('/staff/invite/:token/accept', (req, res) => {
       UPDATE institution_users SET password_hash = ?, status = 'active', invite_token_hash = NULL, invite_expires_at = NULL
       WHERE id = ?
     `).run(bcrypt.hashSync(password, 10), invite.id);
-    res.json(staffResponse(db, db.prepare('SELECT * FROM institution_users WHERE id = ?').get(invite.id)));
+    res.json(staffResponse(req, res, db, db.prepare('SELECT * FROM institution_users WHERE id = ?').get(invite.id)));
   } finally {
     db.close();
   }
@@ -113,6 +120,7 @@ router.post('/institution/register', (req, res) => {
   if (!name || !contact_email || !password) {
     return res.status(400).json({ error: 'Name, email and password required' });
   }
+  if (String(password).length < minPassword()) return res.status(400).json({ error: `Choose a password of at least ${minPassword()} characters.` });
 
   const db = getDb();
   const existing = db.prepare('SELECT id FROM institutions WHERE contact_email = ?').get(contact_email);
@@ -149,15 +157,22 @@ function findEnrolment(db, learnerRef, cohort) {
   `).get(String(learnerRef || '').trim(), engagement.id);
 }
 
-function learnerToken(data) {
-  return jwt.sign(
-    { id: data.id, el_id: data.el_id, engagement_id: data.engagement_id, role: 'learner', language: data.language },
-    process.env.JWT_SECRET,
-    { expiresIn: '7d' }
-  );
+function learnerSession(req, res, data) {
+  return issueSession(res, {
+    actorType: 'learner', actorId: data.id, institutionId: data.eng_institution_id, req,
+    claims: { id: data.id, el_id: data.el_id, engagement_id: data.engagement_id, language: data.language }
+  });
 }
 
-router.post('/learner/login', (req, res) => {
+// PINs are locked per enrolment after MAX_PIN_ATTEMPTS; this per-IP limit
+// stops one client from walking a whole roster.
+const learnerLoginLimit = rateLimit({
+  name: 'login:learner:ip',
+  limit: () => params.get('security.rateLimits.login.perIp'),
+  windowMs: 15 * 60000
+});
+
+router.post('/learner/login', learnerLoginLimit, (req, res) => {
   const { learner_ref, pin } = req.body;
   const cohort = req.body.join_code || req.body.engagement_id;
   if (!learner_ref || !cohort || !pin) {
@@ -188,8 +203,10 @@ router.post('/learner/login', (req, res) => {
     db.prepare("UPDATE engagement_learners SET failed_pin_attempts = 0, last_login_at = datetime('now') WHERE id = ?").run(data.el_id);
     if (!data.last_login_at) logEvent(db, { institutionId: data.eng_institution_id, learnerId: data.id, elId: data.el_id, event: 'signed_in', detail: 'First sign-in' });
 
+    const session = learnerSession(req, res, data);
     res.json({
-      token: learnerToken(data),
+      token: session.token,
+      csrf_token: session.csrfToken,
       learner: { id: data.id, name: data.name, language: data.language, learner_ref: data.learner_ref },
       must_change_pin: !!data.pin_must_change
     });
@@ -238,8 +255,10 @@ router.post('/learner/invite/:token/accept', (req, res) => {
       logEvent(db, { institutionId: inv.institution_id, learnerId: inv.learner_id, elId: inv.engagement_learner_id, event: 'pin_set', detail: 'Set their own PIN from the invite' });
     })();
     const data = findEnrolment(db, inv.learner_ref, inv.engagement_id);
+    const session = learnerSession(req, res, data);
     res.json({
-      token: learnerToken(data),
+      token: session.token,
+      csrf_token: session.csrfToken,
       learner: { id: data.id, name: data.name, language: data.language, learner_ref: data.learner_ref },
       join_code: inv.join_code
     });
@@ -255,7 +274,7 @@ router.post('/learner/pin-reset-request', (req, res) => {
   try {
     const data = findEnrolment(db, req.body.learner_ref, req.body.join_code || req.body.engagement_id);
     if (data && data.access_status !== 'removed') {
-      const open = db.prepare("SELECT 1 FROM access_events WHERE engagement_learner_id = ? AND event = 'pin_reset_requested' AND resolved = 0").get(data.el_id);
+      const open = db.prepare(`SELECT 1 FROM access_events ae WHERE ae.engagement_learner_id = ? AND ${openResetRequest('ae')}`).get(data.el_id);
       if (!open) logEvent(db, { institutionId: data.eng_institution_id, learnerId: data.id, elId: data.el_id, event: 'pin_reset_requested', detail: 'From the learner login page' });
     }
   } finally {
@@ -264,23 +283,82 @@ router.post('/learner/pin-reset-request', (req, res) => {
   res.json({ message: 'If those details match a student, your professor has been asked to reset your PIN.' });
 });
 
-// ─── Admin login ──────────────────────────────────────────────────────────────
-router.post('/admin/login', (req, res) => {
-  const { email, password } = req.body;
-  const db = getDb();
-  const admin = db.prepare('SELECT * FROM admin_users WHERE email = ?').get(email);
-  db.close();
-
-  if (!admin || !bcrypt.compareSync(password, admin.password_hash)) {
+// ─── Admin login (Inferexaa platform staff) ───────────────────────────────────
+router.post('/admin/login', loginRateLimits(), (req, res) => {
+  const email = String(req.body.email || '').trim().toLowerCase();
+  const { password } = req.body;
+  if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+  const ip = clientIp(req);
+  if (isLockedOut('admin', email, ip)) return res.status(429).json({ error: LOCKED_MSG });
+  const admin = dal.one('SELECT * FROM admin_users WHERE lower(email) = ?', email);
+  if (!admin || !bcrypt.compareSync(String(password), admin.password_hash)) {
+    recordLoginFailure('admin', email, ip);
     return res.status(401).json({ error: 'Invalid credentials' });
   }
-
-  const token = jwt.sign(
-    { id: admin.id, role: 'admin', email: admin.email },
-    process.env.JWT_SECRET,
-    { expiresIn: '1d' }
-  );
-  res.json({ token });
+  clearLoginFailures('admin', email);
+  const session = issueSession(res, { actorType: 'admin', actorId: admin.id, req, claims: { id: admin.id, email: admin.email } });
+  res.json({ token: session.token, csrf_token: session.csrfToken });
 });
 
-module.exports = router;
+// ─── Employer register (KYB pending) and login ───────────────────────────────
+// New routes use the v4.3.1 error shape {error: {code, message}} (spec §9).
+const v2 = (res, status, code, message) => res.status(status).json({ error: { code, message } });
+const EMAIL_RE = /^[^\s@]+@([^\s@]+\.[^\s@]+)$/;
+
+router.post('/employer/register', rateLimit({ name: 'employer:register:ip', limit: 10, windowMs: 3600000, legacyErrors: false }), (req, res) => {
+  const companyName = String(req.body.company_name || '').trim();
+  const name = String(req.body.name || '').trim();
+  const email = String(req.body.email || '').trim().toLowerCase();
+  const password = String(req.body.password || '');
+  const website = req.body.website ? String(req.body.website).trim() : null;
+  const m = EMAIL_RE.exec(email);
+  if (!companyName || !name || !m) return v2(res, 400, 'invalid_request', 'Company name, your name and a work email are required.');
+  if (password.length < minPassword()) return v2(res, 400, 'weak_password', `Choose a password of at least ${minPassword()} characters.`);
+  if (dal.one('SELECT 1 FROM employer_users WHERE email = ?', email)) return v2(res, 409, 'email_taken', 'That email is already registered. Sign in instead.');
+
+  const now = dal.nowIso();
+  const employerId = ulid();
+  const userId = ulid();
+  dal.tx(() => {
+    dal.run(`INSERT INTO employers (id, name, domain, website, kyb_status, created_at, updated_at) VALUES (?, ?, ?, ?, 'pending', ?, ?)`,
+      employerId, companyName, m[1], website, now, now);
+    dal.run(`INSERT INTO employer_users (id, employer_id, email, password_hash, name, role, status, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, 'owner', 'active', ?, ?)`, userId, employerId, email,
+    bcrypt.hashSync(password, params.get('security.bcryptRounds')), name, now, now);
+    emit('EMPLOYER_REGISTERED', { aggregateType: 'employer', aggregateId: employerId, payload: { domain: m[1] } });
+  });
+  res.status(201).json({ employer: { id: employerId, name: companyName, domain: m[1], kyb_status: 'pending' } });
+});
+
+router.post('/employer/login', loginRateLimits(), (req, res) => {
+  const email = String(req.body.email || '').trim().toLowerCase();
+  const password = String(req.body.password || '');
+  if (!email || !password) return v2(res, 400, 'invalid_request', 'Email and password required');
+  const ip = clientIp(req);
+  if (isLockedOut('employer', email, ip)) return v2(res, 429, 'locked_out', LOCKED_MSG);
+  const user = dal.one(`SELECT u.*, e.kyb_status FROM employer_users u JOIN employers e ON e.id = u.employer_id WHERE u.email = ?`, email);
+  if (!user || !bcrypt.compareSync(password, user.password_hash)) {
+    recordLoginFailure('employer', email, ip);
+    return v2(res, 401, 'invalid_credentials', 'Invalid credentials');
+  }
+  if (user.status !== 'active' || user.kyb_status === 'suspended' || user.kyb_status === 'rejected') {
+    return v2(res, 403, 'account_inactive', 'This employer account is not active.');
+  }
+  clearLoginFailures('employer', email);
+  dal.run('UPDATE employer_users SET last_login_at = ? WHERE id = ?', dal.nowIso(), user.id);
+  const session = issueSession(res, { actorType: 'employer', actorId: user.id, employerId: user.employer_id, req, claims: { id: user.id, employer_id: user.employer_id } });
+  res.json({ token: session.token, csrf_token: session.csrfToken, employer: { id: user.employer_id, kyb_status: user.kyb_status } });
+});
+
+// ─── Session: logout and CSRF token refresh (any actor) ──────────────────────
+router.post('/logout', authenticate(), (req, res) => {
+  revokeSession(req.session.id);
+  clearSessionCookies(res);
+  res.json({ ok: true });
+});
+
+router.get('/csrf', authenticate(), (req, res) => {
+  res.json({ csrf_token: rotateCsrf(req, res) });
+});
+
+export default router;

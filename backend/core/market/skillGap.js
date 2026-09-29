@@ -89,4 +89,4 @@ function scoreJob(job, state) {
   };
 }
 
-module.exports = { getLearnerSkillState, classifySkill, scoreJob, parseJSON, matches };
+export { getLearnerSkillState, classifySkill, scoreJob, parseJSON, matches };

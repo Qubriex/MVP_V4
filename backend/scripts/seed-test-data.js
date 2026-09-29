@@ -11,6 +11,10 @@
 //     Email:     test.professor@qubirex.local
 //     Password:  QubirexTest2026!
 //
+//   Employer     API only for now (POST /api/auth/employer/login)
+//     Email:     test.employer@qubirex.local
+//     Password:  QubirexTest2026!     (company verification: pending)
+//
 //   Learner      http://localhost:3000/learner-login
 //     Learner reference: TEST-LRNR-001
 //     Join code:         QX-FSD-T01   (the old Engagement ID below also works)
@@ -22,9 +26,10 @@
 // NODE_ENV=production — these credentials are public in the repo.
 //
 // Usage (from backend/):  npm run seed:test
-require('dotenv').config();
-const bcrypt = require('bcryptjs');
-const { initDb, getDb } = require('../db/init');
+import 'dotenv/config';
+import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
+import { initDb, getDb } from '../db/init.js';
 
 if (process.env.NODE_ENV === 'production') {
   console.error('Refusing to seed test accounts with NODE_ENV=production.');
@@ -38,6 +43,7 @@ const CT_ID = 'test-ct-0001';
 const EL_ID = 'test-el-0001';
 const JOIN_CODE = 'QX-FSD-T01';
 const PROFESSOR = { id: 'test-staff-prof-0001', email: 'test.professor@qubirex.local', name: 'Lakshmi Rao' };
+const EMPLOYER = { id: 'test-employer-0001', userId: 'test-employer-user-0001', name: '[Company name] (test)', domain: 'qubirex.local', email: 'test.employer@qubirex.local', userName: 'Test Hiring Lead' };
 
 // Classmates in different access states, so Students & access has something
 // to show. None of them can sign in with a known PIN.
@@ -50,7 +56,8 @@ const CLASSMATES = [
   ['TEST-LRNR-007', 'Pooja Shetty', null, 'removed', 1]
 ];
 
-// Clusters and nodes, in order. `m` = already mastered: [attainment, attempts, minutes, confidence].
+// Clusters and nodes, in order. `m` = already mastered: [attainment, attempts, minutes, last check score].
+// Confidence is never seeded: it is computed from the seeded sessions and checks.
 const PROGRAMME = [
   ['Web Basics', [['HTML semantics', [0.92, 1, 20, 0.82]], ['CSS box model', [0.86, 2, 30, 0.64]], ['CSS flexbox', [0.9, 1, 24, 0.8]], ['Responsive design', [0.83, 2, 36, 0.6]], ['Git basics', [0.88, 1, 18, 0.78]]]],
   ['JavaScript Core', [['Variables and types', [0.94, 1, 16, 0.85]], ['Functions and scope', [0.87, 2, 38, 0.66]], ['Array methods', [0.79, 3, 62, 0.52]], ['DOM events', null], ['Async and fetch', null]]],
@@ -59,8 +66,22 @@ const PROGRAMME = [
 ];
 const CURRENT_NODE = 'DOM events';
 
-initDb();
+await initDb();
 const db = getDb();
+
+// The facts behind a mastered node: one completed session with `attempts`
+// checks, the last one passed. Confidence and labels are computed from these.
+function seedFacts(elId, nodeId, key, attempts, score, daysAgo) {
+  const sid = `test-ls-${key}`;
+  const when = `-${daysAgo} days`;
+  db.prepare(`INSERT OR IGNORE INTO learning_sessions (id, engagement_learner_id, skill_node_id, language, status, started_at, completed_at, loop_count)
+    VALUES (?, ?, ?, 'telugu', 'completed', datetime('now', ?), datetime('now', ?), ?)`).run(sid, elId, nodeId, when, when, attempts - 1);
+  for (let i = 1; i <= attempts; i += 1) {
+    const passed = i === attempts;
+    db.prepare(`INSERT OR IGNORE INTO mastery_checks (id, session_id, skill_node_id, engagement_learner_id, check_number, question_text, passed, score, evaluated_at, created_at)
+      VALUES (?, ?, ?, ?, ?, 'Seeded check', ?, ?, datetime('now', ?), datetime('now', ?))`).run(`${sid}-c${i}`, sid, nodeId, elId, i, passed ? 1 : 0, passed ? score : 0.5, when, when);
+  }
+}
 try {
   const seed = db.transaction(() => {
     // ── Institution (password reset on every run) ────────────────────────────
@@ -135,12 +156,13 @@ try {
     PROGRAMME.forEach(([, nodes]) => nodes.forEach(([label, m]) => {
       if (!m) return;
       db.prepare(`
-        INSERT OR IGNORE INTO node_mastery (id, engagement_learner_id, skill_node_id, mastery_attainment, attempt_count, time_to_mastery_minutes, confidence_indicator, advanced_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now', ?))
-      `).run(`test-nm-${nodeIds[label].id}`, EL_ID, nodeIds[label].id, m[0], m[1], m[2], m[3], `-${10 - Object.keys(nodeIds).indexOf(label)} days`);
+        INSERT OR IGNORE INTO node_mastery (id, engagement_learner_id, skill_node_id, mastery_attainment, attempt_count, time_to_mastery_minutes, advanced_at)
+        VALUES (?, ?, ?, ?, ?, ?, datetime('now', ?))
+      `).run(`test-nm-${nodeIds[label].id}`, EL_ID, nodeIds[label].id, m[0], m[1], m[2], `-${10 - Object.keys(nodeIds).indexOf(label)} days`);
+      seedFacts(EL_ID, nodeIds[label].id, nodeIds[label].id, m[1], m[3], 10 - Object.keys(nodeIds).indexOf(label));
     }));
     // ── Classmates ───────────────────────────────────────────────────────────
-    const lockedPin = bcrypt.hashSync(require('crypto').randomBytes(8).toString('hex'), 4);
+    const lockedPin = bcrypt.hashSync(crypto.randomBytes(8).toString('hex'), 4);
     const firstNode = nodeIds['HTML semantics'];
     CLASSMATES.forEach(([ref, name, email, state, mastered], i) => {
       const lid = `test-learner-${String(i + 2).padStart(4, '0')}`;
@@ -156,10 +178,13 @@ try {
         ['active', 'locked', 'removed'].includes(state) ? new Date(Date.now() - i * 86400000).toISOString().replace('T', ' ').slice(0, 19) : null,
         state === 'locked' ? new Date().toISOString() : null, state === 'removed' ? new Date().toISOString() : null,
         email ? 'email' : 'slip');
-      labels.slice(0, mastered).forEach((label, k) => db.prepare(`
-        INSERT OR IGNORE INTO node_mastery (id, engagement_learner_id, skill_node_id, mastery_attainment, attempt_count, time_to_mastery_minutes, confidence_indicator, advanced_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now', ?))
-      `).run(`test-nm-${elId}-${k}`, elId, nodeIds[label].id, 0.78 + (k % 3) * 0.06, 1 + (k % 2), 25, 0.7, `-${12 - k} days`));
+      labels.slice(0, mastered).forEach((label, k) => {
+        db.prepare(`
+          INSERT OR IGNORE INTO node_mastery (id, engagement_learner_id, skill_node_id, mastery_attainment, attempt_count, time_to_mastery_minutes, advanced_at)
+          VALUES (?, ?, ?, ?, ?, ?, datetime('now', ?))
+        `).run(`test-nm-${elId}-${k}`, elId, nodeIds[label].id, 0.78 + (k % 3) * 0.06, 1 + (k % 2), 25, `-${12 - k} days`);
+        seedFacts(elId, nodeIds[label].id, `${elId}-${k}`, 1 + (k % 2), 0.78 + (k % 3) * 0.06, 12 - k);
+      });
       db.prepare(`INSERT OR IGNORE INTO access_events (id, institution_id, learner_id, engagement_learner_id, event, detail, created_at)
         VALUES (?, ?, ?, ?, ?, ?, datetime('now', '-14 days'))`).run(`test-ev-${elId}`, INSTITUTION.id, lid, elId,
         email ? 'invited' : 'slip_issued', email ? 'Invited to the test cohort by email' : 'Added with a printed login slip');
@@ -174,6 +199,16 @@ try {
   });
   seed();
 
+  // ── Employer (password reset on every run) ────────────────────────────────
+  const now = new Date().toISOString();
+  db.prepare(`INSERT OR IGNORE INTO employers (id, name, domain, kyb_status, created_at, updated_at) VALUES (?, ?, ?, 'pending', ?, ?)`)
+    .run(EMPLOYER.id, EMPLOYER.name, EMPLOYER.domain, now, now);
+  db.prepare(`INSERT OR IGNORE INTO employer_users (id, employer_id, email, password_hash, name, role, status, created_at, updated_at)
+    VALUES (?, ?, ?, '', ?, 'owner', 'active', ?, ?)`).run(EMPLOYER.userId, EMPLOYER.id, EMPLOYER.email, EMPLOYER.userName, now, now);
+  db.prepare("UPDATE employer_users SET password_hash = ?, status = 'active', updated_at = ? WHERE id = ?")
+    .run(bcrypt.hashSync(INSTITUTION.password, 10), now, EMPLOYER.userId);
+  db.prepare("DELETE FROM login_failures WHERE account_key IN (?, ?, ?)").run(INSTITUTION.email, PROFESSOR.email, EMPLOYER.email);
+
   console.log('\nTest accounts ready.\n');
   console.log('  Institution  http://localhost:3000/login');
   console.log(`    Email:     ${INSTITUTION.email}`);
@@ -181,6 +216,9 @@ try {
   console.log('  Professor    http://localhost:3000/login');
   console.log(`    Email:     ${PROFESSOR.email}`);
   console.log(`    Password:  ${INSTITUTION.password}\n`);
+  console.log('  Employer     API only: POST /api/auth/employer/login');
+  console.log(`    Email:     ${EMPLOYER.email}`);
+  console.log(`    Password:  ${INSTITUTION.password}   (company verification pending)\n`);
   console.log('  Learner      http://localhost:3000/learner-login');
   console.log(`    Learner reference: ${LEARNER.ref}`);
   console.log(`    Join code:         ${JOIN_CODE}   (or Engagement ID ${ENGAGEMENT_ID})`);

@@ -2,14 +2,14 @@
 // Every learner message enters through ORCH. It classifies the request type,
 // dispatches brains in parallel via Promise.all(), assembles the response,
 // and returns it to the API route. Learners never see ORCH — only TEACH output.
-const { v4: uuidv4 } = require('uuid');
-const { getDb } = require('../db/init');
-const memBrain = require('./brains/memBrain');
-const cultBrain = require('./brains/cultBrain');
-const currBrain = require('./brains/currBrain');
-const teachBrain = require('./brains/teachBrain');
-const evalBrain = require('./brains/evalBrain');
-const { getMasteryIncrement, selectNextApproach } = require('./instructionEngine');
+import { v4 as uuidv4 } from 'uuid';
+import { legacyHandle as getDb } from './db/dal.js';
+import * as memBrain from './brains/memBrain.js';
+import * as cultBrain from './brains/cultBrain.js';
+import * as currBrain from './brains/currBrain.js';
+import * as teachBrain from './brains/teachBrain.js';
+import * as evalBrain from './brains/evalBrain.js';
+import { getMasteryIncrement, selectNextApproach } from './instructionEngine.js';
 
 // ─── Private helpers ────────────────────────────────────────────────────────────
 
@@ -260,4 +260,4 @@ async function processMessage(params) {
   return result;
 }
 
-module.exports = { processMessage };
+export { processMessage };

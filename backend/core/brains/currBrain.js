@@ -3,8 +3,8 @@
 // cluster decomposition into atomic skill nodes, and node spec retrieval
 // that TEACH uses at session start. Uses RAG for brief ingestion — retrieves
 // similar past confirmed briefs as extraction templates before extracting.
-const briefStore = require('../stores/briefStore');
-const { callAI, safeParseJSON } = require('../instructionEngine');
+import * as briefStore from '../stores/briefStore.js';
+import { callAI, safeParseJSON } from '../instructionEngine.js';
 
 // ─── inferDomain() ──────────────────────────────────────────────────────────────
 const DOMAIN_KEYWORDS = [
@@ -148,10 +148,4 @@ function confirmBrief(briefId) {
   return briefStore.confirmBrief(briefId);
 }
 
-module.exports = {
-  extractCapabilityTargets,
-  decomposeClusterToNodes,
-  retrieveNodeContext,
-  confirmBrief,
-  inferDomain
-};
+export { extractCapabilityTargets, decomposeClusterToNodes, retrieveNodeContext, confirmBrief, inferDomain };

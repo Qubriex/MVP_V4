@@ -7,16 +7,16 @@
 // the whole institution, professors only their assigned cohorts, viewers
 // everything read-only. Cohort ("engagement") routes always check the cohort
 // belongs to the caller's institution AND is in their scope.
-const express = require('express');
-const { v4: uuidv4 } = require('uuid');
-const { getDb } = require('../../db/init');
-const { authenticateToken, requireRole } = require('../middleware/auth');
-const { staffMiddleware, requireStaffRole, findScopedEngagement, scopeClause } = require('../middleware/staff');
-const currBrain = require('../../core/brains/currBrain');
-const { writeNodeSpec } = require('../../core/stores/briefStore');
-const { produceEngagementMasteryLogs, getMasteryLog } = require('../../core/masteryLog');
-const { generateJoinCode, accessState } = require('../../core/access');
-const { curriculumCoverage, cohortStanding } = require('../../core/insights');
+import express from 'express';
+import { v4 as uuidv4 } from 'uuid';
+import { legacyHandle as getDb } from '../../core/db/dal.js';
+import { authenticateToken, requireRole } from '../middleware/auth.js';
+import { staffMiddleware, requireStaffRole, findScopedEngagement, scopeClause } from '../middleware/staff.js';
+import * as currBrain from '../../core/brains/currBrain.js';
+import { writeNodeSpec } from '../../core/stores/briefStore.js';
+import { produceEngagementMasteryLogs, getMasteryLog } from '../../core/masteryLog.js';
+import { generateJoinCode, accessState, openResetRequest } from '../../core/access.js';
+import { curriculumCoverage, cohortStanding } from '../../core/insights.js';
 
 const router = express.Router();
 router.use(authenticateToken);
@@ -452,7 +452,7 @@ router.get('/overview', (req, res) => {
     `).get(...ids) : null;
     const resetRequests = ids.length ? db.prepare(`
       SELECT COUNT(*) as n FROM access_events ae JOIN engagement_learners el ON el.id = ae.engagement_learner_id
-      WHERE ae.event = 'pin_reset_requested' AND ae.resolved = 0 AND el.engagement_id IN ${inList}
+      WHERE ${openResetRequest('ae')} AND el.engagement_id IN ${inList}
     `).get(...ids).n : 0;
     const neverSignedIn = cohorts.reduce((a, c) => a + c.not_signed_in, 0);
     const logsReady = ids.length ? db.prepare(`
@@ -506,4 +506,4 @@ router.get('/overview', (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

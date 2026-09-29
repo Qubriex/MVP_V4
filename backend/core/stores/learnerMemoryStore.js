@@ -1,7 +1,7 @@
 // core/stores/learnerMemoryStore.js — MEM brain's store
 // Tables: learner_memory, learner_behaviour_fingerprint
-const { v4: uuidv4 } = require('uuid');
-const { getDb } = require('../../db/init');
+import { v4 as uuidv4 } from 'uuid';
+import { legacyHandle as getDb } from '../db/dal.js';
 
 // Defensive — safe to run on every startup, mirrors db/init.js.
 function initMemorySchema(db) {
@@ -162,10 +162,4 @@ function writeStrugglePattern(learnerId, elId, opts) {
   db.close();
 }
 
-module.exports = {
-  initMemorySchema,
-  retrieveLearnerContext,
-  writeInteraction,
-  updateBehaviourFingerprint,
-  writeStrugglePattern
-};
+export { initMemorySchema, retrieveLearnerContext, writeInteraction, updateBehaviourFingerprint, writeStrugglePattern };
