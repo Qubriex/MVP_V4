@@ -12,9 +12,21 @@
 // These two fields are ALWAYS BLANK in every version of the Mastery Log.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const { getDb } = require('../db/init');
-const { calculateSimulationReadiness } = require('./instructionEngine');
-const { v4: uuidv4 } = require('uuid');
+import { legacyHandle as getDb } from './db/dal.js';
+import { calculateSimulationReadiness, calculateConfidenceIndicator } from './instructionEngine.js';
+import { v4 as uuidv4 } from 'uuid';
+
+// Confidence is computed from the facts (mastery checks and loops) whenever it
+// is read. It is never stored: sign facts, compute labels (spec §2, §6).
+function nodeConfidence(db, elId, nodeId) {
+  const checks = db.prepare(`
+    SELECT score, passed FROM mastery_checks
+    WHERE engagement_learner_id = ? AND skill_node_id = ? AND passed IS NOT NULL ORDER BY created_at
+  `).all(elId, nodeId).map(c => ({ score: c.score, passed: !!c.passed }));
+  const loops = db.prepare('SELECT COALESCE(MAX(loop_count), 0) AS n FROM learning_sessions WHERE engagement_learner_id = ? AND skill_node_id = ?')
+    .get(elId, nodeId).n;
+  return calculateConfidenceIndicator(checks, loops);
+}
 
 function confidenceLabel(confidenceIndicator, hasRecord) {
   if (!hasRecord) return 'not_started';
@@ -87,7 +99,7 @@ function produceLearnerMasteryLog(engagementId, learnerId) {
         mastery_attainment: masteryRecord ? Math.round((masteryRecord.mastery_attainment || 0) * 100) : null,
         time_to_mastery_minutes: masteryRecord ? Math.round(masteryRecord.time_to_mastery_minutes || 0) : null,
         attempt_count: masteryRecord ? (masteryRecord.attempt_count || 0) : (checkResults.length || 0),
-        confidence_indicator: confidenceLabel(masteryRecord ? masteryRecord.confidence_indicator || 0 : 0, !!masteryRecord),
+        confidence_indicator: confidenceLabel(masteryRecord ? nodeConfidence(db, learner.el_id, node.id) : 0, !!masteryRecord),
         advanced: !!(masteryRecord && masteryRecord.advanced_at)
       });
     }
@@ -95,7 +107,7 @@ function produceLearnerMasteryLog(engagementId, learnerId) {
     const simulationReadiness = calculateSimulationReadiness(
       nodes.map(n => {
         const mr = db.prepare(`SELECT * FROM node_mastery WHERE engagement_learner_id = ? AND skill_node_id = ?`).get(learner.el_id, n.id);
-        return { mastery_attainment: mr ? mr.mastery_attainment || 0 : 0, confidence_indicator: mr ? mr.confidence_indicator || 0 : 0 };
+        return { mastery_attainment: mr ? mr.mastery_attainment || 0 : 0, confidence_indicator: mr ? nodeConfidence(db, learner.el_id, n.id) : 0 };
       })
     );
 
@@ -201,9 +213,4 @@ function getMasteryLog(logId) {
   return { ...record, log_data: JSON.parse(record.log_data) };
 }
 
-module.exports = {
-  produceLearnerMasteryLog,
-  saveMasteryLog,
-  produceEngagementMasteryLogs,
-  getMasteryLog
-};
+export { nodeConfidence, confidenceLabel, produceLearnerMasteryLog, saveMasteryLog, produceEngagementMasteryLogs, getMasteryLog };

@@ -1,14 +1,14 @@
 // api/routes/portfolio.js — Learner profile, resume, skill requests, speech-to-text
 // Mounted at /api/learner alongside learner.js. All learner-private except
 // skill_requests, which the institution reads to decide on its pathway.
-const express = require('express');
-const multer = require('multer');
-const { v4: uuidv4 } = require('uuid');
-const { getDb } = require('../../db/init');
-const { authenticateToken, requireRole, requireActiveLearner } = require('../middleware/auth');
-const { parseJSON } = require('../../core/market/skillGap');
-const market = require('../../core/market/sampleMarket');
-const portfolio = require('../../core/portfolio');
+import express from 'express';
+import multer from 'multer';
+import { v4 as uuidv4 } from 'uuid';
+import { legacyHandle as getDb } from '../../core/db/dal.js';
+import { authenticateToken, requireRole, requireActiveLearner } from '../middleware/auth.js';
+import { parseJSON } from '../../core/market/skillGap.js';
+import * as market from '../../core/market/sampleMarket.js';
+import * as portfolio from '../../core/portfolio.js';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
@@ -290,5 +290,5 @@ router.post('/skill-requests', (req, res) => {
   res.status(201).json(row);
 });
 
-module.exports = router;
-module.exports.loadProfile = loadProfile;
+export default router;
+export { loadProfile };

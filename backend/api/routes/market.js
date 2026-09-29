@@ -3,13 +3,13 @@
 // core/market/sampleMarket.js and every response carries `sample: true`
 // until a real job feed replaces it. Gap scoring is live: it reads the
 // learner's own skill nodes, mastery and self-declared skills.
-const express = require('express');
-const { v4: uuidv4 } = require('uuid');
-const { getDb } = require('../../db/init');
-const { authenticateToken, requireRole, requireActiveLearner } = require('../middleware/auth');
-const market = require('../../core/market/sampleMarket');
-const { getLearnerSkillState, classifySkill, scoreJob } = require('../../core/market/skillGap');
-const { explainJobAloud, explainTopicAloud, interviewTurn } = require('../../core/portfolio');
+import express from 'express';
+import { v4 as uuidv4 } from 'uuid';
+import { legacyHandle as getDb } from '../../core/db/dal.js';
+import { authenticateToken, requireRole, requireActiveLearner } from '../middleware/auth.js';
+import * as market from '../../core/market/sampleMarket.js';
+import { getLearnerSkillState, classifySkill, scoreJob } from '../../core/market/skillGap.js';
+import { explainJobAloud, explainTopicAloud, interviewTurn } from '../../core/portfolio.js';
 
 const router = express.Router();
 router.use(authenticateToken);
@@ -272,4 +272,4 @@ router.get('/snapshot', (req, res) => {
   });
 });
 
-module.exports = router;
+export default router;

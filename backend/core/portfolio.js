@@ -8,7 +8,7 @@
 // has mastered (verified by a Qubirex check) or declared themselves, and keep
 // the two apart. Never invent employers, projects, grades or numbers.
 // ─────────────────────────────────────────────────────────────────────────────
-const { callAI, callAIWithAudio, safeParseJSON } = require('./instructionEngine');
+import { callAI, callAIWithAudio, safeParseJSON } from './instructionEngine.js';
 
 const LANG_NAMES = { telugu: 'Telugu', hindi: 'Hindi', english: 'English' };
 
@@ -103,4 +103,4 @@ Respond ONLY with JSON: {"text": "what you say, ${lang}", "captionEn": "one-line
   return { text: (parsed.text || '').trim(), caption_en: parsed.captionEn || null, done, question_number: done ? null : asked + 1, total: INTERVIEW_QUESTIONS };
 }
 
-module.exports = { transcribeAudio, summaryFromSpeech, tailorResume, explainJobAloud, explainTopicAloud, interviewTurn };
+export { transcribeAudio, summaryFromSpeech, tailorResume, explainJobAloud, explainTopicAloud, interviewTurn };

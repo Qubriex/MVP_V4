@@ -2,7 +2,7 @@
 // Retrieves curated, culturally-grounded examples and analogies before every
 // TEACH call. Examples that lead to ADVANCE outcomes gain effectiveness over
 // time — the CKB is self-improving.
-const culturalStore = require('../stores/culturalStore');
+import * as culturalStore from '../stores/culturalStore.js';
 
 const REGION_MAP = {
   telugu: 'telangana',
@@ -60,4 +60,4 @@ function logOutcome(ckbEntryId, learnerId, sessionId, nodeId, outcome) {
   return culturalStore.logOutcome(ckbEntryId, learnerId, sessionId, nodeId, outcome);
 }
 
-module.exports = { retrieveExamples, logOutcome, getConceptTag, CONCEPT_TAG_MAP, REGION_MAP };
+export { retrieveExamples, logOutcome, getConceptTag, CONCEPT_TAG_MAP, REGION_MAP };

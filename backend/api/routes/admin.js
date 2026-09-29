@@ -1,8 +1,8 @@
 // api/routes/admin.js — Inferexaa admin portal (Qubirex platform)
-const express = require('express');
-const { getDb } = require('../../db/init');
-const { authenticateToken, requireRole } = require('../middleware/auth');
-const { getMasteryLog } = require('../../core/masteryLog');
+import express from 'express';
+import { legacyHandle as getDb } from '../../core/db/dal.js';
+import { authenticateToken, requireRole } from '../middleware/auth.js';
+import { getMasteryLog, nodeConfidence } from '../../core/masteryLog.js';
 
 const router = express.Router();
 
@@ -59,18 +59,22 @@ router.get('/mastery-logs/:id', (req, res) => {
 router.get('/quality-report', (req, res) => {
   const db = getDb();
   const nodeStats = db.prepare(`
-    SELECT sn.node_label, sc.cluster_label,
+    SELECT nm.skill_node_id, sn.node_label, sc.cluster_label,
       COUNT(DISTINCT nm.engagement_learner_id) as learners_attempted,
       AVG(nm.mastery_attainment) as avg_mastery,
       AVG(nm.attempt_count) as avg_attempts,
-      AVG(nm.time_to_mastery_minutes) as avg_time_minutes,
-      AVG(nm.confidence_indicator) as avg_confidence
+      AVG(nm.time_to_mastery_minutes) as avg_time_minutes
     FROM node_mastery nm
     JOIN skill_nodes sn ON sn.id = nm.skill_node_id
     JOIN skill_clusters sc ON sc.id = sn.cluster_id
     GROUP BY nm.skill_node_id
     ORDER BY avg_attempts DESC
-  `).all();
+  `).all().map(row => {
+    // Confidence is computed from the checks, never stored.
+    const els = db.prepare('SELECT engagement_learner_id FROM node_mastery WHERE skill_node_id = ?').all(row.skill_node_id);
+    const avg = els.reduce((sum, r) => sum + nodeConfidence(db, r.engagement_learner_id, row.skill_node_id), 0) / (els.length || 1);
+    return { ...row, avg_confidence: avg };
+  });
 
   const loopStats = db.prepare(`
     SELECT current_approach, COUNT(*) as usage_count,
@@ -86,4 +90,4 @@ router.get('/quality-report', (req, res) => {
   });
 });
 
-module.exports = router;
+export default router;

@@ -166,8 +166,11 @@ up automatically since nothing hardcodes a hex value.
 ## QUICK START
 
 ### Prerequisites
-- Node.js 18+
+- Node.js 22+
 - A Google Gemini API key (https://aistudio.google.com/app/apikey)
+
+The backend's own README (`backend/README.md`) covers environment variables,
+migrations, secure-config and tests.
 
 ### Backend Setup
 
@@ -176,7 +179,7 @@ cd backend
 npm install
 cp .env.example .env
 # Edit .env — add your GEMINI_API_KEY and JWT_SECRET
-node server.js
+npm start            # applies migrations, starts the event worker, listens
 ```
 
 Backend runs on http://localhost:3001
@@ -207,6 +210,7 @@ npm run seed:test      # safe to re-run; resets the passwords and PIN below
 | Institution admin | http://localhost:3000/login | Email `test.institution@qubirex.local` · Password `QubirexTest2026!` |
 | Professor (sees only the test cohort) | http://localhost:3000/login | Email `test.professor@qubirex.local` · Password `QubirexTest2026!` |
 | Learner | http://localhost:3000/learner-login | Learner reference `TEST-LRNR-001` · Join code `QX-FSD-T01` (the old Engagement ID `4a4c13c4-989e-4c03-b636-3bdba7fd1025` also works) · PIN `410585` |
+| Employer (API only for now; company verification pending) | `POST /api/auth/employer/login` | Email `test.employer@qubirex.local` · Password `QubirexTest2026!` |
 
 These credentials are public in this repo, so the script refuses to run with
 `NODE_ENV=production`. Never seed them into a shared or deployed database.
@@ -217,9 +221,8 @@ content.
 ### Seed Admin User
 
 ```bash
-curl -X POST http://localhost:3001/api/admin/seed-admin \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@inferexaa.com","password":"your_password","secret":"your_jwt_secret"}'
+cd backend
+npm run seed:admin -- admin@inferexaa.com 'a-password-of-10+-characters'
 ```
 
 ---

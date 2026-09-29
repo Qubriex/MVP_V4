@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      # Closed core: no secure-config, rubric, mutant or prompt content in this repo.
+      - run: npm run check:secrets
+      # Structural guarantees run first and fail the build on their own.
+      - run: npm run test:structural
+      - run: npm run test:rest

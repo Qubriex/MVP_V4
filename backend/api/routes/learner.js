@@ -1,34 +1,21 @@
 // api/routes/learner.js — Learner Portal
 // All routes require JWT authentication. Learner payload: id (learner_id),
 // el_id (engagement_learner_id), engagement_id, language.
-const express = require('express');
-const multer = require('multer');
-const { v4: uuidv4 } = require('uuid');
-const { getDb } = require('../../db/init');
-const { authenticateToken, requireRole, requireActiveLearner } = require('../middleware/auth');
-const orchestrator = require('../../core/orchestrator');
-const { initMemorySchema } = require('../../core/stores/learnerMemoryStore');
-const { initCulturalSchema, seedInitialExamples } = require('../../core/stores/culturalStore');
-const { initRubricSchema } = require('../../core/stores/rubricStore');
-const { calculateMasteryAttainment, calculateConfidenceIndicator, selectNextApproach } = require('../../core/instructionEngine');
-const { transcribeAudio } = require('../../core/portfolio');
-const { isValidPin, hashPin, logEvent } = require('../../core/access');
+import express from 'express';
+import multer from 'multer';
+import { v4 as uuidv4 } from 'uuid';
+import { legacyHandle as getDb } from '../../core/db/dal.js';
+import { authenticateToken, requireRole, requireActiveLearner } from '../middleware/auth.js';
+import * as orchestrator from '../../core/orchestrator.js';
+import { calculateMasteryAttainment, calculateConfidenceIndicator, selectNextApproach } from '../../core/instructionEngine.js';
+import { nodeConfidence } from '../../core/masteryLog.js';
+import { transcribeAudio } from '../../core/portfolio.js';
+import { isValidPin, hashPin, logEvent } from '../../core/access.js';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
 const confidenceLabel = (c) => (c >= 0.75 ? 'high' : c >= 0.55 ? 'solid' : 'building');
-
-// ─── Multi-brain store initialisation ─────────────────────────────────────────
-// Runs on module load. All IF NOT EXISTS operations — safe on every startup.
-(function initMultiBrainStores() {
-  const db = getDb();
-  initMemorySchema(db);
-  initCulturalSchema(db);
-  initRubricSchema(db);
-  seedInitialExamples(db);
-  db.close();
-})();
 
 router.use(authenticateToken);
 router.use(requireRole('learner', 'admin'));
@@ -144,7 +131,7 @@ router.get('/progress', (req, res) => {
     JOIN skill_clusters sc ON sc.id = sn.cluster_id
     WHERE nm.engagement_learner_id = ?
     ORDER BY nm.advanced_at
-  `).all(req.user.el_id);
+  `).all(req.user.el_id).map(r => ({ ...r, confidence_indicator: nodeConfidence(db, req.user.el_id, r.skill_node_id) }));
   db.close();
   res.json(records.map(r => ({ ...r, confidence_label: confidenceLabel(r.confidence_indicator) })));
 });
@@ -153,14 +140,14 @@ router.get('/progress', (req, res) => {
 router.get('/mastery-record', (req, res) => {
   const db = getDb();
   const records = db.prepare(`
-    SELECT sn.node_label, sc.cluster_label, nm.mastery_attainment, nm.attempt_count,
-           nm.time_to_mastery_minutes, nm.confidence_indicator, nm.advanced_at
+    SELECT nm.skill_node_id, sn.node_label, sc.cluster_label, nm.mastery_attainment, nm.attempt_count,
+           nm.time_to_mastery_minutes, nm.advanced_at
     FROM node_mastery nm
     JOIN skill_nodes sn ON sn.id = nm.skill_node_id
     JOIN skill_clusters sc ON sc.id = sn.cluster_id
     WHERE nm.engagement_learner_id = ? AND nm.advanced_at IS NOT NULL
     ORDER BY nm.advanced_at DESC
-  `).all(req.user.el_id);
+  `).all(req.user.el_id).map(r => ({ ...r, confidence_indicator: nodeConfidence(db, req.user.el_id, r.skill_node_id) }));
   db.close();
   res.json(records.map(r => ({ ...r, confidence_label: confidenceLabel(r.confidence_indicator) })));
 });
@@ -179,13 +166,14 @@ router.get('/path', (req, res) => {
 
   const rows = db.prepare(`
     SELECT sc.id as cluster_id, sc.cluster_label, sc.cluster_ref, sn.id as node_id, sn.node_label, sn.estimated_minutes,
-           nm.mastery_attainment, nm.attempt_count, nm.time_to_mastery_minutes, nm.confidence_indicator, nm.advanced_at
+           nm.mastery_attainment, nm.attempt_count, nm.time_to_mastery_minutes, nm.advanced_at
     FROM skill_clusters sc
     JOIN skill_nodes sn ON sn.cluster_id = sc.id
     LEFT JOIN node_mastery nm ON nm.skill_node_id = sn.id AND nm.engagement_learner_id = ?
     WHERE sc.capability_target_id = (SELECT capability_target_id FROM engagements WHERE id = ?)
     ORDER BY sc.sequence_order, sn.sequence_order
-  `).all(req.user.el_id, req.user.engagement_id);
+  `).all(req.user.el_id, req.user.engagement_id)
+    .map(r => ({ ...r, confidence_indicator: r.advanced_at ? nodeConfidence(db, req.user.el_id, r.node_id) : null }));
   const time = db.prepare('SELECT COALESCE(SUM(active_minutes), 0) as minutes FROM learning_sessions WHERE engagement_learner_id = ?').get(req.user.el_id);
   db.close();
 
@@ -423,16 +411,17 @@ function handleCheckResult({ res, session, result, learnerResponse, pendingCheck
     `).all(session.engagement_learner_id, session.skill_node_id).map(c => ({ score: c.score, passed: !!c.passed }));
 
     const masteryAttainment = calculateMasteryAttainment(allChecks);
+    // Computed for the response only; never stored (sign facts, compute labels).
     const confidenceIndicator = calculateConfidenceIndicator(allChecks, session.loop_count);
     const timeToMastery = (Date.now() - new Date(session.started_at).getTime()) / 60000;
 
     db.prepare(`
-      INSERT INTO node_mastery (id, engagement_learner_id, skill_node_id, mastery_attainment, time_to_mastery_minutes, attempt_count, confidence_indicator, advanced_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
+      INSERT INTO node_mastery (id, engagement_learner_id, skill_node_id, mastery_attainment, time_to_mastery_minutes, attempt_count, advanced_at)
+      VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
       ON CONFLICT(engagement_learner_id, skill_node_id) DO UPDATE SET
         mastery_attainment = excluded.mastery_attainment, time_to_mastery_minutes = excluded.time_to_mastery_minutes,
-        attempt_count = excluded.attempt_count, confidence_indicator = excluded.confidence_indicator, advanced_at = datetime('now')
-    `).run(uuidv4(), session.engagement_learner_id, session.skill_node_id, masteryAttainment, timeToMastery, allChecks.length, confidenceIndicator);
+        attempt_count = excluded.attempt_count, advanced_at = datetime('now')
+    `).run(uuidv4(), session.engagement_learner_id, session.skill_node_id, masteryAttainment, timeToMastery, allChecks.length);
 
     db.prepare(`UPDATE learning_sessions SET status = 'completed', completed_at = datetime('now'), behaviour_signal = 'accelerating' WHERE id = ?`).run(session.id);
 
@@ -690,4 +679,4 @@ router.put('/notifications', (req, res) => {
   res.json({ message: 'Notification preferences updated' });
 });
 
-module.exports = router;
+export default router;

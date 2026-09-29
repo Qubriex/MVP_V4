@@ -4,10 +4,10 @@
 // Usage:
 //   node scripts/seed-admin.js <email> <password> [name]
 //   ADMIN_EMAIL=... ADMIN_PASSWORD=... node scripts/seed-admin.js
-require('dotenv').config();
-const bcrypt = require('bcryptjs');
-const { v4: uuidv4 } = require('uuid');
-const { getDb } = require('../db/init');
+import 'dotenv/config';
+import bcrypt from 'bcryptjs';
+import { v4 as uuidv4 } from 'uuid';
+import { getDb, initDb } from '../db/init.js';
 
 const email = process.argv[2] || process.env.ADMIN_EMAIL;
 const password = process.argv[3] || process.env.ADMIN_PASSWORD;
@@ -18,7 +18,12 @@ if (!email || !password) {
   console.error('   or: ADMIN_EMAIL=... ADMIN_PASSWORD=... node scripts/seed-admin.js');
   process.exit(1);
 }
+if (String(password).length < 10) {
+  console.error('Admin passwords must be at least 10 characters.');
+  process.exit(1);
+}
 
+await initDb();
 const db = getDb();
 try {
   const id = uuidv4();

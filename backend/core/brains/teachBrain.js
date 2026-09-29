@@ -3,7 +3,7 @@
 // explanations grounded in retrieved cultural examples (CULT), learner
 // history (MEM), and node specifications (CURR). Never invents cultural
 // examples when retrieval returns results.
-const { callAI, safeParseJSON } = require('../instructionEngine');
+import { callAI, safeParseJSON } from '../instructionEngine.js';
 
 // ─── LANGUAGE_CONTEXTS ─────────────────────────────────────────────────────────
 const LANGUAGE_CONTEXTS = {
@@ -188,10 +188,4 @@ Respond ONLY with JSON:
   return safeParseJSON(text, { answer: text, approach_used: 'direct_answer' });
 }
 
-module.exports = {
-  LANGUAGE_CONTEXTS,
-  APPROACH_GUIDES,
-  runDiagnosis,
-  generateInstruction,
-  answerDoubt
-};
+export { LANGUAGE_CONTEXTS, APPROACH_GUIDES, runDiagnosis, generateInstruction, answerDoubt };

@@ -1,7 +1,7 @@
 // core/stores/briefStore.js — CURR brain's store
 // Tables: brief_store, curriculum_node_specs
-const { v4: uuidv4 } = require('uuid');
-const { getDb } = require('../../db/init');
+import { v4 as uuidv4 } from 'uuid';
+import { legacyHandle as getDb } from '../db/dal.js';
 
 function initBriefSchema(db) {
   db.exec(`
@@ -115,12 +115,4 @@ function retrieveNodeSpecByLabel(nodeLabel) {
   return parseNodeSpecRow(row);
 }
 
-module.exports = {
-  initBriefSchema,
-  retrieveSimilarBriefs,
-  writeBrief,
-  confirmBrief,
-  writeNodeSpec,
-  retrieveNodeSpecById,
-  retrieveNodeSpecByLabel
-};
+export { initBriefSchema, retrieveSimilarBriefs, writeBrief, confirmBrief, writeNodeSpec, retrieveNodeSpecById, retrieveNodeSpecByLabel };

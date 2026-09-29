@@ -9,10 +9,13 @@
 // - Invite tokens: 32 random bytes in the link; only the sha256 is stored.
 // - Access state for the roster is derived, never stored twice.
 // - Every access change writes an access_events row (the roster's history).
+//   The table is append-only (triggers reject UPDATE/DELETE): a PIN-reset
+//   request is closed by a later pin_reset_resolved event, never by a flag.
 // ─────────────────────────────────────────────────────────────────────────────
-const crypto = require('crypto');
-const bcrypt = require('bcryptjs');
-const { v4: uuidv4 } = require('uuid');
+import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
+import { v4 as uuidv4 } from 'uuid';
+import { ulid } from './db/ulid.js';
 
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no 0/O, 1/I
 const INVITE_DAYS = 7;
@@ -51,9 +54,23 @@ const inviteExpiry = () => new Date(Date.now() + INVITE_DAYS * 86400000).toISOSt
 
 function logEvent(db, { institutionId, learnerId = null, elId = null, event, detail = null, actorStaffId = null }) {
   db.prepare(`
-    INSERT INTO access_events (id, institution_id, learner_id, engagement_learner_id, event, detail, actor_staff_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `).run(uuidv4(), institutionId, learnerId, elId, event, detail, actorStaffId);
+    INSERT INTO access_events (id, institution_id, learner_id, engagement_learner_id, event, detail, actor_staff_id, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(ulid(), institutionId, learnerId, elId, event, detail, actorStaffId, new Date().toISOString());
+}
+
+// SQL predicate: access_events row `alias` is a PIN-reset request that no
+// later pin_reset_resolved event has closed.
+const openResetRequest = (alias = 'ae') => `${alias}.event = 'pin_reset_requested' AND NOT EXISTS (
+  SELECT 1 FROM access_events r WHERE r.engagement_learner_id = ${alias}.engagement_learner_id
+    AND r.event = 'pin_reset_resolved' AND r.created_at >= ${alias}.created_at)`;
+
+// Close every open PIN-reset request for a learner (the PIN is per learner).
+function resolvePinResetRequests(db, { institutionId, learnerId, actorStaffId = null }) {
+  const open = db.prepare(`SELECT DISTINCT ae.engagement_learner_id AS el_id FROM access_events ae
+    WHERE ae.learner_id = ? AND ${openResetRequest('ae')}`).all(learnerId);
+  open.forEach(r => logEvent(db, { institutionId, learnerId, elId: r.el_id, event: 'pin_reset_resolved', detail: 'PIN reset by staff', actorStaffId }));
+  return open.length;
 }
 
 // Create a learner invite for one enrolment; returns the plaintext token.
@@ -82,8 +99,4 @@ function accessState(row) {
   return 'active';
 }
 
-module.exports = {
-  MAX_PIN_ATTEMPTS, INVITE_DAYS,
-  generateJoinCode, normaliseJoinCode, generatePin, hashPin, isValidPin,
-  newToken, hashToken, inviteExpiry, logEvent, createLearnerInvite, accessState
-};
+export { MAX_PIN_ATTEMPTS, INVITE_DAYS, generateJoinCode, normaliseJoinCode, generatePin, hashPin, isValidPin, newToken, hashToken, inviteExpiry, logEvent, openResetRequest, resolvePinResetRequests, createLearnerInvite, accessState };

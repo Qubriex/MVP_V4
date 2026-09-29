@@ -1,5 +1,6 @@
 // src/context/AuthContext.js
 import React, { createContext, useContext, useState } from 'react';
+import api from '../utils/api';
 
 const AuthContext = createContext(null);
 
@@ -52,6 +53,13 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
+    // End the session on the server too, so the token stops working at once.
+    // The header is passed explicitly: localStorage is cleared below before
+    // the request interceptor runs.
+    const current = localStorage.getItem('qubirex_token');
+    if (current && !current.startsWith('dev-')) {
+      api.post('/auth/logout', null, { headers: { Authorization: `Bearer ${current}` } }).catch(() => {});
+    }
     setSession({ token: null, user: null, role: null });
     localStorage.removeItem('qubirex_token');
     localStorage.removeItem('qubirex_user');

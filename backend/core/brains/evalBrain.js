@@ -2,8 +2,8 @@
 // The only brain that does NOT activate during instruction. Activates ONLY
 // when the learner responds to a mastery check question. Temperature 0.3 —
 // lower than TEACH — for deterministic evaluation.
-const rubricStore = require('../stores/rubricStore');
-const { callAI, safeParseJSON } = require('../instructionEngine');
+import * as rubricStore from '../stores/rubricStore.js';
+import { callAI, safeParseJSON } from '../instructionEngine.js';
 
 const ADVANCE_THRESHOLD = 0.70;
 const PERSISTENCE_LOOP_COUNT = 5;
@@ -84,4 +84,4 @@ async function evaluate({ nodeLabel, language, question, learnerResponse, loopCo
   return result;
 }
 
-module.exports = { evaluate };
+export { evaluate };
