@@ -40,19 +40,19 @@ function _buildHistory(learnerContext, learnerMessage) {
 async function _writeTurn(learnerId, elId, nodeId, clusterId, learnerMessage, aiMessage, extra = {}) {
   const writes = [];
   if (learnerMessage !== undefined && learnerMessage !== null) {
-    writes.push(memBrain.writeAfterTurn(learnerId, elId, { role: 'learner', content: learnerMessage, nodeId, clusterId }));
+    writes.push(await memBrain.writeAfterTurn(learnerId, elId, { role: 'learner', content: learnerMessage, nodeId, clusterId }));
   }
-  writes.push(memBrain.writeAfterTurn(learnerId, elId, { role: 'ai', content: aiMessage, nodeId, clusterId, ...extra }));
+  writes.push(await memBrain.writeAfterTurn(learnerId, elId, { role: 'ai', content: aiMessage, nodeId, clusterId, ...extra }));
   await Promise.all(writes);
 }
 
 // Finds the cultural example that was used (by entry_point match) and calls
 // cultBrain.logOutcome() if an outcome is available. A no-op for CONTINUE/CHECK
 // turns, where no ADVANCE/LOOP outcome exists yet.
-function _cultLog(culturalExamples, culturalExampleUsed, learnerId, sessionId, nodeId, outcome) {
+async function _cultLog(culturalExamples, culturalExampleUsed, learnerId, sessionId, nodeId, outcome) {
   if (!culturalExampleUsed || !outcome) return;
   const entry = (culturalExamples || []).find(e => e.entry_point === culturalExampleUsed);
-  if (entry) cultBrain.logOutcome(entry.id, learnerId, sessionId, nodeId, outcome);
+  if (entry) await cultBrain.logOutcome(entry.id, learnerId, sessionId, nodeId, outcome);
 }
 
 // Determines the first teaching approach from the diagnostic response content.
@@ -64,9 +64,9 @@ function _selectApproachFromDiagnosis(diagnosisResponse, usedApproaches = []) {
   return selectNextApproach(usedApproaches);
 }
 
-function _logOrchestration(sessionId, learnerId, requestType, brainsActivated, processingMs) {
+async function _logOrchestration(sessionId, learnerId, requestType, brainsActivated, processingMs) {
   const db = getDb();
-  db.prepare(`
+  await db.prepare(`
     INSERT INTO orchestration_log (id, session_id, learner_id, request_type, brains_activated, processing_ms)
     VALUES (?, ?, ?, ?, ?, ?)
   `).run(uuidv4(), sessionId || null, learnerId || null, requestType, JSON.stringify(brainsActivated), processingMs);
@@ -90,9 +90,9 @@ async function processMessage(params) {
     case 'SESSION_START': {
       brainsActivated = ['MEM', 'CULT', 'CURR'];
       const [learnerContext, culturalExamples, nodeSpec] = await Promise.all([
-        Promise.resolve(memBrain.retrieve(learnerId, nodeId)),
-        Promise.resolve(cultBrain.retrieveExamples(nodeLabel, language, _vocabHint(sessionState))),
-        Promise.resolve(currBrain.retrieveNodeContext(nodeId, nodeLabel))
+        Promise.resolve(await memBrain.retrieve(learnerId, nodeId)),
+        Promise.resolve(await cultBrain.retrieveExamples(nodeLabel, language, _vocabHint(sessionState))),
+        Promise.resolve(await currBrain.retrieveNodeContext(nodeId, nodeLabel))
       ]);
 
       brainsActivated.push('TEACH');
@@ -115,9 +115,9 @@ async function processMessage(params) {
       brainsActivated = ['MEM', 'CULT', 'CURR'];
       const approach = _selectApproachFromDiagnosis(learnerMessage, sessionState.approachesUsed || []);
       const [learnerContext, culturalExamples, nodeSpec] = await Promise.all([
-        Promise.resolve(memBrain.retrieve(learnerId, nodeId)),
-        Promise.resolve(cultBrain.retrieveExamples(nodeLabel, language, _vocabHint(sessionState))),
-        Promise.resolve(currBrain.retrieveNodeContext(nodeId, nodeLabel))
+        Promise.resolve(await memBrain.retrieve(learnerId, nodeId)),
+        Promise.resolve(await cultBrain.retrieveExamples(nodeLabel, language, _vocabHint(sessionState))),
+        Promise.resolve(await currBrain.retrieveNodeContext(nodeId, nodeLabel))
       ]);
 
       brainsActivated.push('TEACH');
@@ -131,7 +131,7 @@ async function processMessage(params) {
       await _writeTurn(learnerId, engagementLearnerId, nodeId, sessionState.clusterId, learnerMessage, instruction.message, {
         decision: instruction.decision, approachUsed: approach, behaviourSignal: instruction.behaviourSignal
       });
-      _cultLog(culturalExamples, instruction.culturalExampleUsed, learnerId, sessionId, nodeId, null);
+      await _cultLog(culturalExamples, instruction.culturalExampleUsed, learnerId, sessionId, nodeId, null);
 
       result = { ...instruction, approach, culturalExamples };
       break;
@@ -142,9 +142,9 @@ async function processMessage(params) {
       brainsActivated = ['MEM', 'CULT', 'CURR'];
       const approach = sessionState.currentApproach || 'native_concept';
       const [learnerContext, culturalExamples, nodeSpec] = await Promise.all([
-        Promise.resolve(memBrain.retrieve(learnerId, nodeId)),
-        Promise.resolve(cultBrain.retrieveExamples(nodeLabel, language, _vocabHint(sessionState))),
-        Promise.resolve(currBrain.retrieveNodeContext(nodeId, nodeLabel))
+        Promise.resolve(await memBrain.retrieve(learnerId, nodeId)),
+        Promise.resolve(await cultBrain.retrieveExamples(nodeLabel, language, _vocabHint(sessionState))),
+        Promise.resolve(await currBrain.retrieveNodeContext(nodeId, nodeLabel))
       ]);
 
       brainsActivated.push('TEACH');
@@ -161,7 +161,7 @@ async function processMessage(params) {
       await _writeTurn(learnerId, engagementLearnerId, nodeId, sessionState.clusterId, learnerMessage, instruction.message, {
         decision: instruction.decision, approachUsed: approach, behaviourSignal: instruction.behaviourSignal
       });
-      _cultLog(culturalExamples, instruction.culturalExampleUsed, learnerId, sessionId, nodeId, null);
+      await _cultLog(culturalExamples, instruction.culturalExampleUsed, learnerId, sessionId, nodeId, null);
 
       result = { ...instruction, approach, culturalExamples };
       break;
@@ -174,12 +174,12 @@ async function processMessage(params) {
       // before TEACH sees the outcome; EVAL is only called here for callers
       // that have not assessed the answer yet.
       const [learnerContext, evaluation, culturalExamples, nodeSpec] = await Promise.all([
-        Promise.resolve(memBrain.retrieve(learnerId, nodeId)),
-        sessionState.evaluation ? Promise.resolve(sessionState.evaluation) : evalBrain.evaluate({
+        Promise.resolve(await memBrain.retrieve(learnerId, nodeId)),
+        sessionState.evaluation ? Promise.resolve(sessionState.evaluation) : await evalBrain.evaluate({
           nodeLabel, language, question: sessionState.checkQuestion, learnerResponse: learnerMessage
         }),
-        Promise.resolve(cultBrain.retrieveExamples(nodeLabel, language, _vocabHint(sessionState))),
-        Promise.resolve(currBrain.retrieveNodeContext(nodeId, nodeLabel))
+        Promise.resolve(await cultBrain.retrieveExamples(nodeLabel, language, _vocabHint(sessionState))),
+        Promise.resolve(await currBrain.retrieveNodeContext(nodeId, nodeLabel))
       ]);
 
       if (evaluation.passed) {
@@ -197,7 +197,7 @@ async function processMessage(params) {
         await _writeTurn(learnerId, engagementLearnerId, nodeId, sessionState.clusterId, learnerMessage, advanceMessage.message, {
           decision: 'ADVANCE', masteryScore: evaluation.score, behaviourSignal: 'accelerating'
         });
-        _cultLog(culturalExamples, advanceMessage.culturalExampleUsed, learnerId, sessionId, nodeId, 'ADVANCE');
+        await _cultLog(culturalExamples, advanceMessage.culturalExampleUsed, learnerId, sessionId, nodeId, 'ADVANCE');
 
         result = { decision: 'ADVANCE', masteryIncrement, evaluation, ...advanceMessage };
       } else {
@@ -214,7 +214,7 @@ async function processMessage(params) {
           learnerContext, culturalExamples, nodeSpec
         });
 
-        memBrain.writeStruggle(learnerId, engagementLearnerId, {
+        await memBrain.writeStruggle(learnerId, engagementLearnerId, {
           nodeId, loopCount: newLoopCount, approachThatFailed: sessionState.currentApproach || 'native_concept',
           approachThatResolved: null, gapsIdentified: evaluation.understandingGaps || [], content: evaluation.evaluation
         });
@@ -222,7 +222,7 @@ async function processMessage(params) {
         await _writeTurn(learnerId, engagementLearnerId, nodeId, sessionState.clusterId, learnerMessage, loopInstruction.message, {
           decision: 'LOOP', behaviourSignal: 'confused'
         });
-        _cultLog(culturalExamples, loopInstruction.culturalExampleUsed, learnerId, sessionId, nodeId, 'LOOP');
+        await _cultLog(culturalExamples, loopInstruction.culturalExampleUsed, learnerId, sessionId, nodeId, 'LOOP');
 
         result = { decision: 'LOOP', nextApproach, evaluation, culturalExamples, ...loopInstruction };
       }
@@ -233,9 +233,9 @@ async function processMessage(params) {
     case 'DOUBT_QUERY': {
       brainsActivated = ['MEM', 'CULT', 'CURR'];
       const [learnerContext, culturalExamples, nodeSpec] = await Promise.all([
-        Promise.resolve(memBrain.retrieve(learnerId, nodeId)),
-        Promise.resolve(cultBrain.retrieveExamples(nodeLabel, language, _vocabHint(sessionState))),
-        Promise.resolve(currBrain.retrieveNodeContext(nodeId, nodeLabel))
+        Promise.resolve(await memBrain.retrieve(learnerId, nodeId)),
+        Promise.resolve(await cultBrain.retrieveExamples(nodeLabel, language, _vocabHint(sessionState))),
+        Promise.resolve(await currBrain.retrieveNodeContext(nodeId, nodeLabel))
       ]);
 
       brainsActivated.push('TEACH');
@@ -258,7 +258,7 @@ async function processMessage(params) {
       throw new Error(`Unknown requestType: ${requestType}`);
   }
 
-  _logOrchestration(sessionId, learnerId, requestType, brainsActivated, Date.now() - startedAt);
+  await _logOrchestration(sessionId, learnerId, requestType, brainsActivated, Date.now() - startedAt);
   return result;
 }
 

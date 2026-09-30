@@ -3,30 +3,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { legacyHandle as getDb } from '../db/dal.js';
 
-function initRubricSchema(db) {
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS eval_rubrics (
-      id TEXT PRIMARY KEY,
-      node_label TEXT NOT NULL,
-      language TEXT NOT NULL,
-      passing_criteria TEXT,
-      failing_indicators TEXT,
-      gap_taxonomy TEXT,
-      created_at TEXT DEFAULT (datetime('now')),
-      UNIQUE(node_label, language)
-    );
-    CREATE TABLE IF NOT EXISTS eval_example_responses (
-      id TEXT PRIMARY KEY,
-      node_label TEXT NOT NULL,
-      language TEXT NOT NULL,
-      response_text TEXT NOT NULL,
-      outcome TEXT NOT NULL CHECK(outcome IN ('pass','fail')),
-      score REAL,
-      gaps_identified TEXT,
-      created_at TEXT DEFAULT (datetime('now'))
-    );
-  `);
-}
 
 // ─── Default rubric — used when no node-specific rubric exists ───────────────
 const DEFAULT_PASSING_CRITERIA = [
@@ -54,9 +30,9 @@ const DEFAULT_GAP_TAXONOMY = {
 };
 
 // ─── retrieveRubric() ──────────────────────────────────────────────────────────
-function retrieveRubric(nodeLabel, language) {
+async function retrieveRubric(nodeLabel, language) {
   const db = getDb();
-  const row = db.prepare(`
+  const row = await db.prepare(`
     SELECT * FROM eval_rubrics WHERE node_label = ? AND language = ?
   `).get(nodeLabel, language);
   db.close();
@@ -77,9 +53,9 @@ function retrieveRubric(nodeLabel, language) {
 }
 
 // ─── retrieveExampleResponses() ───────────────────────────────────────────────
-function retrieveExampleResponses(nodeLabel, language, outcome, limit = 2) {
+async function retrieveExampleResponses(nodeLabel, language, outcome, limit = 2) {
   const db = getDb();
-  const rows = db.prepare(`
+  const rows = await db.prepare(`
     SELECT * FROM eval_example_responses
     WHERE node_label = ? AND language = ? AND outcome = ?
     ORDER BY created_at DESC LIMIT ?
@@ -91,13 +67,13 @@ function retrieveExampleResponses(nodeLabel, language, outcome, limit = 2) {
 // ─── writeEvaluation() ─────────────────────────────────────────────────────────
 // Not called: v4.3 §7.3 forbids reusing raw model-scored answers as examples.
 // Kept until the gold set (faculty-labelled, consent level 6) replaces it.
-function writeEvaluation(nodeLabel, language, responseText, outcome, score, gapsIdentified = []) {
+async function writeEvaluation(nodeLabel, language, responseText, outcome, score, gapsIdentified = []) {
   const db = getDb();
-  db.prepare(`
+  await db.prepare(`
     INSERT INTO eval_example_responses (id, node_label, language, response_text, outcome, score, gaps_identified)
     VALUES (?, ?, ?, ?, ?, ?, ?)
   `).run(uuidv4(), nodeLabel, language, responseText, outcome, score, JSON.stringify(gapsIdentified));
   db.close();
 }
 
-export { initRubricSchema, retrieveRubric, retrieveExampleResponses, writeEvaluation, DEFAULT_GAP_TAXONOMY };
+export { retrieveRubric, retrieveExampleResponses, writeEvaluation, DEFAULT_GAP_TAXONOMY };

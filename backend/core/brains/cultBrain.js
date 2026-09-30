@@ -49,15 +49,15 @@ function getConceptTag(nodeLabel) {
 }
 
 // ─── retrieveExamples() ────────────────────────────────────────────────────────
-function retrieveExamples(nodeLabel, language, vocabularyLevel = 'beginner') {
+async function retrieveExamples(nodeLabel, language, vocabularyLevel = 'beginner') {
   const conceptTag = getConceptTag(nodeLabel);
   const region = REGION_MAP[language] || 'telangana';
-  return culturalStore.retrieveByConceptTag(conceptTag, language, region, vocabularyLevel);
+  return await culturalStore.retrieveByConceptTag(conceptTag, language, region, vocabularyLevel);
 }
 
 // ─── logOutcome() ───────────────────────────────────────────────────────────────
-function logOutcome(ckbEntryId, learnerId, sessionId, nodeId, outcome) {
-  return culturalStore.logOutcome(ckbEntryId, learnerId, sessionId, nodeId, outcome);
+async function logOutcome(ckbEntryId, learnerId, sessionId, nodeId, outcome) {
+  return await culturalStore.logOutcome(ckbEntryId, learnerId, sessionId, nodeId, outcome);
 }
 
 export { retrieveExamples, logOutcome, getConceptTag, CONCEPT_TAG_MAP, REGION_MAP };

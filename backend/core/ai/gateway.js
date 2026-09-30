@@ -64,9 +64,9 @@ export function parseJson(text) {
 
 const satisfies = (obj, schema) => obj && typeof obj === 'object' && (schema.required || []).every(k => k in obj);
 
-function logCall(entry) {
+async function logCall(entry) {
   try {
-    dal.run(`INSERT INTO model_calls (id, task, adapter, model_id, model_version, prompt_id, prompt_version, tokens_in, tokens_out, ms, cost, institution_id, status, error, created_at)
+    await dal.run(`INSERT INTO model_calls (id, task, adapter, model_id, model_version, prompt_id, prompt_version, tokens_in, tokens_out, ms, cost, institution_id, status, error, created_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     ulid(), entry.task, entry.adapter, entry.model, entry.modelVersion ?? null, entry.promptId ?? null, entry.promptVersion ?? null,
     entry.tokensIn ?? null, entry.tokensOut ?? null, entry.ms, null, entry.institutionId ?? null, entry.status, entry.error ?? null, dal.nowIso());
@@ -113,15 +113,15 @@ export async function generate(req) {
         json = parseJson(result.text);
       }
       if (!satisfies(json, req.schema)) {
-        logCall({ ...base, ms: Date.now() - started, status: 'schema_failed', modelVersion: result.modelVersion, tokensIn: result.tokensIn, tokensOut: result.tokensOut });
+        await logCall({ ...base, ms: Date.now() - started, status: 'schema_failed', modelVersion: result.modelVersion, tokensIn: result.tokensIn, tokensOut: result.tokensOut });
         throw new GatewayError('schema_failed', `Model output for ${req.task} did not match its schema`);
       }
     }
-    logCall({ ...base, adapter: used.adapter, model: used.model, ms: Date.now() - started, status: fellBack ? 'fallback' : 'ok', modelVersion: result.modelVersion, tokensIn: result.tokensIn, tokensOut: result.tokensOut });
+    await logCall({ ...base, adapter: used.adapter, model: used.model, ms: Date.now() - started, status: fellBack ? 'fallback' : 'ok', modelVersion: result.modelVersion, tokensIn: result.tokensIn, tokensOut: result.tokensOut });
     return { text: result.text, json, modelId: used.model, modelVersion: result.modelVersion, adapter: used.adapter };
   } catch (err) {
     if (!(err instanceof GatewayError && err.code === 'schema_failed')) {
-      logCall({ ...base, ms: Date.now() - started, status: 'error', error: String(err.message).slice(0, 300) });
+      await logCall({ ...base, ms: Date.now() - started, status: 'error', error: String(err.message).slice(0, 300) });
     }
     throw err;
   }

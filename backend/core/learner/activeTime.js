@@ -12,9 +12,9 @@ import params from '../../config/params.js';
  * @param {{sessionId: string, elId: string, occurredAt?: string, lastInputAt?: string, visible?: boolean}} hb
  * @returns {{credited: number, reason: string|null}} seconds credited
  */
-export function heartbeat({ sessionId, elId, occurredAt, lastInputAt, visible = true }) {
+export async function heartbeat({ sessionId, elId, occurredAt, lastInputAt, visible = true }) {
   const { intervalSeconds, inputWithinMinutes } = params.get('learner.heartbeat');
-  const session = dal.one("SELECT id, last_heartbeat_at FROM learning_sessions WHERE id = ? AND engagement_learner_id = ? AND status = 'active'", sessionId, elId);
+  const session = await dal.one("SELECT id, last_heartbeat_at FROM learning_sessions WHERE id = ? AND engagement_learner_id = ? AND status = 'active'", sessionId, elId);
   if (!session) return { credited: 0, reason: 'no_active_session' };
   const now = Date.now();
   let at = Date.parse(occurredAt || '');
@@ -24,7 +24,7 @@ export function heartbeat({ sessionId, elId, occurredAt, lastInputAt, visible = 
   if (!Number.isFinite(input) || at - input > inputWithinMinutes * 60000) return { credited: 0, reason: 'idle' };
   const last = Date.parse(session.last_heartbeat_at || '');
   if (Number.isFinite(last) && Math.abs(at - last) < (intervalSeconds - 5) * 1000) return { credited: 0, reason: 'too_soon' };
-  dal.run(`UPDATE learning_sessions SET active_minutes = active_minutes + ?,
+  await dal.run(`UPDATE learning_sessions SET active_minutes = active_minutes + ?,
     last_heartbeat_at = CASE WHEN last_heartbeat_at IS NULL OR last_heartbeat_at < ? THEN ? ELSE last_heartbeat_at END WHERE id = ?`,
   intervalSeconds / 60, new Date(at).toISOString(), new Date(at).toISOString(), sessionId);
   return { credited: intervalSeconds, reason: null };

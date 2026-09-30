@@ -2,7 +2,9 @@
 
 The API, core engines and data model for institutions, learners, employers
 and the public verifier. Node 22, Express, plain ES modules with JSDoc,
-SQLite (WAL) behind a data-access layer.
+PostgreSQL behind an async data-access layer: a hosted server (Neon on Vercel)
+when `DATABASE_URL` is set, otherwise PGlite (PostgreSQL in WebAssembly,
+in-process) for local development and tests. Deployment: `../docs/DEPLOY-VERCEL.md`.
 
 **Build status:** Phase 0: Foundation, plus the v4.3 core that the site needs
 end to end: Capability Graph, checks written outside TEACH with the A0/A1
@@ -31,8 +33,14 @@ npm start                   # http://localhost:3001
 |---|---|---|
 | `PORT` | `3001` | HTTP port |
 | `FRONTEND_URL` | `http://localhost:3000` | CORS origin and links in emails |
-| `DB_PATH` | `./qubirex.db` | SQLite file (`:memory:` in tests) |
-| `DB_DRIVER` | `sqlite` | `postgres` is a stub until the Phase 1 driver swap |
+| `DATABASE_URL` (or `POSTGRES_URL`) | — | PostgreSQL connection string; when set, the pg driver is used |
+| `DB_PATH` | `./data/pglite` | PGlite data directory when `DATABASE_URL` is not set (`:memory:` in tests) |
+| `PG_POOL_MAX` | `5` | Connections per process (pg driver) |
+| `SUBJECT_SECRET`, `ITEM_SEED_SECRET` | dev fallbacks | Required in production: credential subject IDs, check-instance seeds |
+| `SIGNING_KEY_PEM`, `SIGNING_KEY_ID` | — | Production signing key (or secure-config/keys); `npm run secrets:generate` |
+| `SECURE_CONFIG_PARAMS_JSON` | — | secure-config `params.json` content, for hosts without the mounted directory |
+| `QBX_ALLOW_PRIORS`, `QBX_ECHO_EMAIL_CODES` | off | Staging only: run production on priors; show employer domain codes on screen |
+| `CRON_SECRET` | — | Authorises `/api/cron/outbox` (Vercel Cron) |
 | `JWT_SECRET` | — (required) | Signs session tokens |
 | `AI_ADAPTER` | `gemini` (`mock` in tests) | Model adapter behind `core/ai/gateway.js` |
 | `GEMINI_API_KEY`, `GEMINI_MODEL` | — / `gemini-3.6-flash` | Gemini adapter |
@@ -87,7 +95,9 @@ api/middleware/rateLimit.js  rate limits and login lockout
 api/middleware/employerAuth.js, staff.js
 api/routes/*.js            auth (4 actors), institution*, learner, portfolio, market, employer, admin
 config/params.js, priors.js
-core/db/{dal,sqlite,postgres,migrate,ulid}.js
+core/db/{dal,sql,pg,pglite,migrate,ulid}.js   async DAL, ? → $n translation, drivers
+core/util/seq.js           mapSeq/filterSeq/… for async callbacks, run in order
+vercel/handler.js          the app as a Vercel Function (outbox drained after writes)
 core/events/{outbox,worker,subscribers}.js   transactional outbox
 core/ai/gateway.js, core/ai/adapters/{gemini,mock}.js
 core/consent/levels.js     append-only consents, withdraw()

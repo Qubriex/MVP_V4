@@ -13,9 +13,9 @@ let B;
 beforeAll(async () => {
   await freshDb();
   app = await makeApp();
-  A = seedInstitution('a');
-  B = seedInstitution('b');
-  seedAdmin();
+  A = await seedInstitution('a');
+  B = await seedInstitution('b');
+  await seedAdmin();
 });
 beforeEach(() => resetRateLimits());
 
@@ -82,7 +82,7 @@ describe('staff', () => {
 });
 
 describe('lockout: 5 failures in 15 minutes, per account and per IP', () => {
-  afterEach(() => dal.run('DELETE FROM login_failures'));
+  afterEach(async () => await dal.run('DELETE FROM login_failures'));
 
   it('locks the account, even against the right password', async () => {
     for (let i = 0; i < 5; i += 1) {
@@ -101,10 +101,10 @@ describe('lockout: 5 failures in 15 minutes, per account and per IP', () => {
 
   it('a success clears the account counter', async () => {
     for (let i = 0; i < 4; i += 1) await request(app).post('/api/auth/employer/login').send({ email: 'no@x.test', password: 'x' });
-    dal.run('DELETE FROM login_failures'); // isolate the account rule from the IP rule
+    await dal.run('DELETE FROM login_failures'); // isolate the account rule from the IP rule
     for (let i = 0; i < 4; i += 1) await request(app).post('/api/auth/institution/login').send({ email: B.profEmail, password: 'wrong-password' });
     await request(app).post('/api/auth/institution/login').send({ email: B.profEmail, password: PASSWORD }).expect(200);
-    expect(dal.one("SELECT COUNT(*) n FROM login_failures WHERE account_key = ?", B.profEmail).n).toBe(0);
+    expect((await dal.one("SELECT COUNT(*) n FROM login_failures WHERE account_key = ?", B.profEmail)).n).toBe(0);
   });
 
   it('passwords must be at least 10 characters', async () => {
@@ -123,9 +123,9 @@ describe('learner', () => {
   it('is signed out at once when access is removed', async () => {
     const { agent } = await login(app, '/api/auth/learner/login', { learner_ref: B.learnerRef, join_code: B.joinCode, pin: PIN });
     await agent.get('/api/learner/mastery-record').expect(200);
-    dal.run("UPDATE engagement_learners SET access_status = 'removed' WHERE id = ?", B.elId);
+    await dal.run("UPDATE engagement_learners SET access_status = 'removed' WHERE id = ?", B.elId);
     await agent.get('/api/learner/mastery-record').expect(401);
-    dal.run("UPDATE engagement_learners SET access_status = 'active' WHERE id = ?", B.elId);
+    await dal.run("UPDATE engagement_learners SET access_status = 'active' WHERE id = ?", B.elId);
   });
 
   it('cannot reach staff, employer or admin routes', async () => {
@@ -144,7 +144,7 @@ describe('employer', () => {
     expect(r.status).toBe(201);
     expect(r.body.employer).toMatchObject({ kyb_status: 'pending', domain: 'company.test' });
     employer = r.body.employer;
-    expect(dal.one("SELECT type FROM domain_events WHERE aggregate_type = 'employer' AND aggregate_id = ?", employer.id).type).toBe('EMPLOYER_REGISTERED');
+    expect((await dal.one("SELECT type FROM domain_events WHERE aggregate_type = 'employer' AND aggregate_id = ?", employer.id)).type).toBe('EMPLOYER_REGISTERED');
   });
 
   it('answers errors as {error: {code, message}}', async () => {
@@ -174,9 +174,9 @@ describe('employer', () => {
 
   it('a suspended company is locked out immediately', async () => {
     const { agent } = await login(app, '/api/auth/employer/login', { email: 'lead@company.test', password: PASSWORD });
-    dal.run("UPDATE employers SET kyb_status = 'suspended' WHERE id = ?", employer.id);
+    await dal.run("UPDATE employers SET kyb_status = 'suspended' WHERE id = ?", employer.id);
     await agent.get('/api/employer/me').expect(403);
-    dal.run("UPDATE employers SET kyb_status = 'pending' WHERE id = ?", employer.id);
+    await dal.run("UPDATE employers SET kyb_status = 'pending' WHERE id = ?", employer.id);
   });
 });
 
@@ -203,14 +203,14 @@ describe('tenancy scoping', () => {
   });
 
   it('a professor sees only their own cohorts', async () => {
-    dal.run("INSERT INTO engagements (id, institution_id, capability_target_id, title, language, join_code) VALUES ('eng-a2', 'inst-a', 'ct-a', 'Other', 'telugu', 'QX-OTH-A22')");
+    await dal.run("INSERT INTO engagements (id, institution_id, capability_target_id, title, language, join_code) VALUES ('eng-a2', 'inst-a', 'ct-a', 'Other', 'telugu', 'QX-OTH-A22')");
     const { agent } = await login(app, '/api/auth/institution/login', { email: A.profEmail, password: PASSWORD });
     await agent.get(`/api/institution/engagements/${A.engagementId}`).expect(200);
     await agent.get('/api/institution/engagements/eng-a2').expect(404);
   });
 
-  it('every session carries its tenant', () => {
-    const rows = dal.all('SELECT actor_type, institution_id, employer_id FROM auth_sessions');
+  it('every session carries its tenant', async () => {
+    const rows = await dal.all('SELECT actor_type, institution_id, employer_id FROM auth_sessions');
     for (const r of rows) {
       if (r.actor_type === 'staff' || r.actor_type === 'learner') expect(r.institution_id).toBeTruthy();
       if (r.actor_type === 'employer') expect(r.employer_id).toBeTruthy();
@@ -234,7 +234,7 @@ describe('password change', () => {
 describe('admin ontology review (v4.3 §3.2)', () => {
   it('turns a queued text into a permanent alias and re-maps pathway nodes', async () => {
     const { resolveSkill } = await import('../../core/graph/resolveSkill.js');
-    resolveSkill('Sequelize ORM queries', { source: 'jd' });
+    await resolveSkill('Sequelize ORM queries', { source: 'jd' });
     const { agent } = await login(app, '/api/auth/admin/login', { email: 'root@qubirex.test', password: PASSWORD });
     const q = await agent.get('/api/admin/ontology-review').expect(200);
     const item = q.body.items.find(i => i.text_norm === 'sequelize orm queries');
@@ -242,7 +242,7 @@ describe('admin ontology review (v4.3 §3.2)', () => {
     const csrf = (await agent.get('/api/auth/csrf')).body.csrf_token;
     await agent.post(`/api/admin/ontology-review/${item.id}`).set('X-CSRF-Token', csrf).send({ action: 'alias', skill_id: 'nope' }).expect(400);
     await agent.post(`/api/admin/ontology-review/${item.id}`).set('X-CSRF-Token', csrf).send({ action: 'alias', skill_id: 'sql_select' }).expect(200);
-    expect(resolveSkill('Sequelize ORM queries', { queue: false })).toMatchObject({ skill: { skill_id: 'sql_select' }, via: 'alias' });
+    expect(await resolveSkill('Sequelize ORM queries', { queue: false })).toMatchObject({ skill: { skill_id: 'sql_select' }, via: 'alias' });
     await agent.post(`/api/admin/ontology-review/${item.id}`).set('X-CSRF-Token', csrf).send({ action: 'reject' }).expect(409);
   });
 });

@@ -18,6 +18,13 @@ describe('signing keys', () => {
     expect(offenders).toEqual([]);
   });
 
+  it('only core/return/signing.js reads the SIGNING_KEY environment variables', () => {
+    const offenders = listSourceFiles(ROOT, { skip: ['tests', 'scripts'] })
+      .filter(f => f !== 'core/return/signing.js')
+      .filter(f => /SIGNING_KEY_(PEM|ID)/.test(fs.readFileSync(path.join(ROOT, f), 'utf8')));
+    expect(offenders).toEqual([]);
+  });
+
   it('the signing module exists (the check is not vacuous)', () => {
     const src = fs.readFileSync(path.join(ROOT, 'core/return/signing.js'), 'utf8');
     expect(KEY_PATTERNS.some(re => re.test(src))).toBe(true);

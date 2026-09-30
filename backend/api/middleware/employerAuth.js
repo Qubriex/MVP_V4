@@ -16,19 +16,19 @@ import { authenticateKey } from '../../core/employer/apiKeys.js';
 const deny = (res, status, code, message) => res.status(status).json({ error: { code, message } });
 const sessionAuth = [authenticate({ errors: 'v2' }), requireActor('employer')];
 
-function loadCompany(req, res) {
-  const employer = dal.one(`SELECT id, name, domain, website, kyb_status, domain_verified_at, gstin, gst_state_code, contact_name, contact_phone, city, kyb_note
+async function loadCompany(req, res) {
+  const employer = await dal.one(`SELECT id, name, domain, website, kyb_status, domain_verified_at, gstin, gst_state_code, contact_name, contact_phone, city, kyb_note
     FROM employers WHERE id = ?`, req.tenant.employerId);
   if (!employer || ['suspended', 'rejected'].includes(employer.kyb_status)) { deny(res, 403, 'account_inactive', 'This employer account is not active.'); return null; }
   return employer;
 }
 
-export function loadEmployer(req, res, next) {
+export async function loadEmployer(req, res, next) {
   if (!req.tenant || req.tenant.kind !== 'employer') return deny(res, 403, 'forbidden', 'Not allowed');
-  const user = dal.one('SELECT id, employer_id, email, name, role, status FROM employer_users WHERE id = ? AND employer_id = ?',
+  const user = await dal.one('SELECT id, employer_id, email, name, role, status FROM employer_users WHERE id = ? AND employer_id = ?',
     req.tenant.employerUserId, req.tenant.employerId);
   if (!user || user.status !== 'active') return deny(res, 401, 'account_inactive', 'Your employer account is not active.');
-  const employer = loadCompany(req, res);
+  const employer = await loadCompany(req, res);
   if (!employer) return undefined;
   req.employerUser = user;
   req.employer = employer;
@@ -40,16 +40,16 @@ export function loadEmployer(req, res, next) {
  * Routes that change the account (users, keys, company) accept sessions only.
  */
 export function employerAuth({ scope = null, sessionOnly = false } = {}) {
-  return (req, res, next) => {
+  return async (req, res, next) => {
     const presented = req.headers['x-qbx-api-key'];
     if (presented && !sessionOnly) {
-      const r = authenticateKey(presented);
+      const r = await authenticateKey(presented);
       if (!r) return deny(res, 401, 'invalid_api_key', 'Invalid or revoked API key.');
       if (scope && !r.key.scopes.includes(scope)) return deny(res, 403, 'insufficient_scope', `This key needs the ${scope} scope.`);
       req.tenant = { kind: 'employer', employerId: r.employerId, apiKeyId: r.key.id };
       req.apiKey = r.key;
       req.employerUser = null;
-      const employer = loadCompany(req, res);
+      const employer = await loadCompany(req, res);
       if (!employer) return undefined;
       req.employer = employer;
       return next();

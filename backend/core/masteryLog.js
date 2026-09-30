@@ -20,16 +20,17 @@ import { canonicalBytes } from './return/canonical.js';
 import { signBytes } from './return/signing.js';
 import { newEvidenceId } from './qep/evidenceId.js';
 import { emit } from './events/outbox.js';
+import { mapSeq } from './util/seq.js';
 
 // Confidence is computed from the facts (mastery checks and loops) whenever it
 // is read. It is never stored: sign facts, compute labels (spec §2, §6).
-function nodeConfidence(db, elId, nodeId) {
-  const checks = db.prepare(`
+async function nodeConfidence(db, elId, nodeId) {
+  const checks = (await db.prepare(`
     SELECT score, passed FROM mastery_checks
     WHERE engagement_learner_id = ? AND skill_node_id = ? AND passed IS NOT NULL ORDER BY created_at
-  `).all(elId, nodeId).map(c => ({ score: c.score, passed: !!c.passed }));
-  const loops = db.prepare('SELECT COALESCE(MAX(loop_count), 0) AS n FROM learning_sessions WHERE engagement_learner_id = ? AND skill_node_id = ?')
-    .get(elId, nodeId).n;
+  `).all(elId, nodeId)).map(c => ({ score: c.score, passed: !!c.passed }));
+  const loops = (await db.prepare('SELECT COALESCE(MAX(loop_count), 0) AS n FROM learning_sessions WHERE engagement_learner_id = ? AND skill_node_id = ?')
+    .get(elId, nodeId)).n;
   return calculateConfidenceIndicator(checks, loops);
 }
 
@@ -43,11 +44,11 @@ function confidenceLabel(confidenceIndicator, hasRecord) {
 /**
  * Produce the Mastery Log for a learner in an engagement
  */
-function produceLearnerMasteryLog(engagementId, learnerId) {
+async function produceLearnerMasteryLog(engagementId, learnerId) {
   const db = getDb();
 
   // ─── Fetch core data ─────────────────────────────────────────────────────
-  const engagement = db.prepare(`
+  const engagement = await db.prepare(`
     SELECT e.*, ct.version as ct_version, ct.title as ct_title,
            ct.extracted_targets, i.name as institution_name
     FROM engagements e
@@ -56,7 +57,7 @@ function produceLearnerMasteryLog(engagementId, learnerId) {
     WHERE e.id = ?
   `).get(engagementId);
 
-  const learner = db.prepare(`
+  const learner = await db.prepare(`
     SELECT l.*, el.id as el_id, el.overall_status
     FROM learners l
     JOIN engagement_learners el ON el.learner_id = l.id
@@ -69,7 +70,7 @@ function produceLearnerMasteryLog(engagementId, learnerId) {
   }
 
   // ─── Fetch clusters for this engagement ──────────────────────────────────
-  const clusters = db.prepare(`
+  const clusters = await db.prepare(`
     SELECT sc.* FROM skill_clusters sc
     WHERE sc.capability_target_id = ?
     ORDER BY sc.sequence_order
@@ -79,7 +80,7 @@ function produceLearnerMasteryLog(engagementId, learnerId) {
 
   for (const cluster of clusters) {
     // ─── Fetch skill nodes for this cluster ────────────────────────────────
-    const nodes = db.prepare(`
+    const nodes = await db.prepare(`
       SELECT sn.* FROM skill_nodes sn
       WHERE sn.cluster_id = ?
       ORDER BY sn.sequence_order
@@ -88,12 +89,12 @@ function produceLearnerMasteryLog(engagementId, learnerId) {
     const nodeLogs = [];
 
     for (const node of nodes) {
-      const masteryRecord = db.prepare(`
+      const masteryRecord = await db.prepare(`
         SELECT nm.* FROM node_mastery nm
         WHERE nm.engagement_learner_id = ? AND nm.skill_node_id = ?
       `).get(learner.el_id, node.id);
 
-      const checkResults = db.prepare(`
+      const checkResults = await db.prepare(`
         SELECT mc.* FROM mastery_checks mc
         WHERE mc.engagement_learner_id = ? AND mc.skill_node_id = ?
         ORDER BY mc.created_at
@@ -104,14 +105,14 @@ function produceLearnerMasteryLog(engagementId, learnerId) {
         mastery_attainment: masteryRecord ? Math.round((masteryRecord.mastery_attainment || 0) * 100) : null,
         time_to_mastery_minutes: masteryRecord ? Math.round(masteryRecord.time_to_mastery_minutes || 0) : null,
         attempt_count: masteryRecord ? (masteryRecord.attempt_count || 0) : (checkResults.length || 0),
-        confidence_indicator: confidenceLabel(masteryRecord ? nodeConfidence(db, learner.el_id, node.id) : 0, !!masteryRecord),
+        confidence_indicator: confidenceLabel(masteryRecord ? await nodeConfidence(db, learner.el_id, node.id) : 0, !!masteryRecord),
         advanced: !!(masteryRecord && masteryRecord.advanced_at)
       });
     }
 
     const simulationReadiness = calculateSimulationReadiness(
-      nodes.map(n => {
-        const mr = db.prepare(`SELECT * FROM node_mastery WHERE engagement_learner_id = ? AND skill_node_id = ?`).get(learner.el_id, n.id);
+      await mapSeq(nodes, async n => {
+        const mr = await db.prepare(`SELECT * FROM node_mastery WHERE engagement_learner_id = ? AND skill_node_id = ?`).get(learner.el_id, n.id);
         return { mastery_attainment: mr ? mr.mastery_attainment || 0 : 0, passed: !!(mr && mr.advanced_at) };
       })
     );
@@ -160,31 +161,31 @@ function produceLearnerMasteryLog(engagementId, learnerId) {
 /**
  * Save a completed Mastery Log to the database
  */
-function saveMasteryLog(engagementId, learnerId, logData) {
+async function saveMasteryLog(engagementId, learnerId, logData) {
   const db = getDb();
 
-  const engagement = db.prepare('SELECT capability_target_id FROM engagements WHERE id = ?').get(engagementId);
-  const ct = db.prepare('SELECT title, version FROM capability_targets WHERE id = ?').get(engagement.capability_target_id);
+  const engagement = await db.prepare('SELECT capability_target_id FROM engagements WHERE id = ?').get(engagementId);
+  const ct = await db.prepare('SELECT title, version FROM capability_targets WHERE id = ?').get(engagement.capability_target_id);
 
   // Integrity (v4.3 §9): an Evidence ID and the SHA-256 of the canonical
   // (RFC 8785) JSON, signed. The Evidence ID is kept across re-production.
-  const previous = db.prepare('SELECT evidence_id FROM mastery_logs WHERE engagement_id = ? AND learner_id = ?').get(engagementId, learnerId);
+  const previous = await db.prepare('SELECT evidence_id FROM mastery_logs WHERE engagement_id = ? AND learner_id = ?').get(engagementId, learnerId);
   const evidenceId = previous?.evidence_id || newEvidenceId();
   const bytes = canonicalBytes({ ...logData, evidence_id: evidenceId });
   const sha256 = crypto.createHash('sha256').update(bytes).digest('hex');
-  const signature = signBytes(bytes);
-  const el = db.prepare('SELECT id FROM engagement_learners WHERE engagement_id = ? AND learner_id = ?').get(engagementId, learnerId);
+  const signature = await signBytes(bytes);
+  const el = await db.prepare('SELECT id FROM engagement_learners WHERE engagement_id = ? AND learner_id = ?').get(engagementId, learnerId);
 
   // One current log per learner per engagement: producing again replaces it.
   const id = uuidv4();
-  db.transaction(() => {
-    db.prepare('DELETE FROM mastery_logs WHERE engagement_id = ? AND learner_id = ?').run(engagementId, learnerId);
-    db.prepare(`
+  await db.transaction(async () => {
+    await db.prepare('DELETE FROM mastery_logs WHERE engagement_id = ? AND learner_id = ?').run(engagementId, learnerId);
+    await db.prepare(`
       INSERT INTO mastery_logs (id, engagement_id, learner_id, capability_target_ref, log_data, evidence_id, sha256, signature_json)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `).run(id, engagementId, learnerId, `${ct.title} v${ct.version}`, JSON.stringify({ ...logData, evidence_id: evidenceId }), evidenceId, sha256, JSON.stringify(signature));
     // MASTERY_LOG_PRODUCED → PASSPORT.issue (v4.3 §7).
-    if (el) emit('MASTERY_LOG_PRODUCED', { aggregateType: 'enrolment', aggregateId: el.id, payload: { el_id: el.id, log_id: id, evidence_id: evidenceId } }, db);
+    if (el) await emit('MASTERY_LOG_PRODUCED', { aggregateType: 'enrolment', aggregateId: el.id, payload: { el_id: el.id, log_id: id, evidence_id: evidenceId } }, db);
   })();
 
   db.close();
@@ -197,22 +198,22 @@ function saveMasteryLog(engagementId, learnerId, logData) {
 // Produce logs for a whole cohort, or only for `learnerIds`. `complete: true`
 // also marks the engagement completed (end of programme); producing logs
 // part-way (e.g. after a cluster) leaves the cohort active.
-function produceEngagementMasteryLogs(engagementId, { complete = false, learnerIds = null } = {}) {
+async function produceEngagementMasteryLogs(engagementId, { complete = false, learnerIds = null } = {}) {
   const db = getDb();
 
-  const engagementLearners = db.prepare(`
+  const engagementLearners = (await db.prepare(`
     SELECT el.learner_id FROM engagement_learners el WHERE el.engagement_id = ?
-  `).all(engagementId).filter(el => !learnerIds || learnerIds.includes(el.learner_id));
+  `).all(engagementId)).filter(el => !learnerIds || learnerIds.includes(el.learner_id));
 
   const logs = [];
   for (const el of engagementLearners) {
-    const log = produceLearnerMasteryLog(engagementId, el.learner_id);
-    const logId = saveMasteryLog(engagementId, el.learner_id, log);
+    const log = await produceLearnerMasteryLog(engagementId, el.learner_id);
+    const logId = await saveMasteryLog(engagementId, el.learner_id, log);
     logs.push({ learner_id: el.learner_id, log_id: logId, log });
   }
 
   if (complete) {
-    db.prepare(`UPDATE engagements SET status = 'completed', completed_at = datetime('now') WHERE id = ?`)
+    await db.prepare(`UPDATE engagements SET status = 'completed', completed_at = datetime('now') WHERE id = ?`)
       .run(engagementId);
   }
 
@@ -223,9 +224,9 @@ function produceEngagementMasteryLogs(engagementId, { complete = false, learnerI
 /**
  * Get a saved Mastery Log
  */
-function getMasteryLog(logId) {
+async function getMasteryLog(logId) {
   const db = getDb();
-  const record = db.prepare('SELECT * FROM mastery_logs WHERE id = ?').get(logId);
+  const record = await db.prepare('SELECT * FROM mastery_logs WHERE id = ?').get(logId);
   db.close();
   if (!record) return null;
   return { ...record, log_data: JSON.parse(record.log_data) };

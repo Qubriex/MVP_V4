@@ -2,7 +2,7 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    pool: 'forks',          // better-sqlite3 is a native module
+    pool: 'forks',          // PGlite (WASM) per test file
     env: {
       NODE_ENV: 'test',
       DB_PATH: ':memory:',  // each test file gets its own in-memory database

@@ -17,19 +17,19 @@ import { encodedList } from '../../core/qep/statusList.js';
 const router = express.Router();
 const HOUR = 3600000;
 
-router.get('/jwks.json', (req, res) => {
+router.get('/jwks.json', async (req, res) => {
   res.set('Cache-Control', 'public, max-age=3600');
-  res.json(jwks());
+  res.json(await jwks());
 });
 
-router.get('/status/:listId', (req, res) => {
-  const list = encodedList(req.params.listId);
+router.get('/status/:listId', async (req, res) => {
+  const list = await encodedList(req.params.listId);
   if (!list) return res.status(404).json({ error: { code: 'not_found', message: 'Unknown status list' } });
   res.set('Cache-Control', `public, max-age=${params.get('credential.statusCacheHours') * 3600}`);
   res.json(list);
 });
 
-router.get('/:evidenceId', (req, res) => {
+router.get('/:evidenceId', async (req, res) => {
   const ip = clientIp(req);
   const v = params.get('verify');
   if (!hit('verify:ip', ip, v.perIpPerHour, HOUR).allowed) {
@@ -39,7 +39,7 @@ router.get('/:evidenceId', (req, res) => {
   if (peek('verify:nf', ip) >= v.notFoundPerHour) {
     return res.status(429).json({ error: { code: 'rate_limited', message: 'Too many unknown IDs from this network. Try again later.' } });
   }
-  const result = verify(req.params.evidenceId);
+  const result = await verify(req.params.evidenceId);
   if (result.status === 'malformed') return res.status(400).json({ status: 'malformed', error: { code: 'malformed', message: 'That is not a valid Evidence ID. Check for typos.' } });
   if (result.status === 'not_found') {
     hit('verify:nf', ip, v.notFoundPerHour, HOUR);

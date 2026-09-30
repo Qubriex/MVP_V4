@@ -12,9 +12,9 @@ export function registerHandlers() {
   registered = true;
 
   // MASTERY_LOG_PRODUCED → PASSPORT.issue (idempotent: a newer log reissues).
-  subscribe('MASTERY_LOG_PRODUCED', 'PASSPORT.issue', (event) => {
+  subscribe('MASTERY_LOG_PRODUCED', 'PASSPORT.issue', async (event) => {
     const { el_id: elId } = event.payload;
-    const r = issueCredential(elId, { reason: 'mastery_log' });
+    const r = await issueCredential(elId, { reason: 'mastery_log' });
     if (r) logger.info('passport.issued', { evidenceId: r.evidence_id, version: r.version });
   });
 

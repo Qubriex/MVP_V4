@@ -2,35 +2,10 @@
 // Tables: cultural_knowledge_base, cultural_usage_log
 import { v4 as uuidv4 } from 'uuid';
 import { legacyHandle as getDb } from '../db/dal.js';
+import { eachSeq } from '../util/seq.js';
 
 const ALPHA = 0.3; // exponential moving average weight — recent outcomes matter more
 
-function initCulturalSchema(db) {
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS cultural_knowledge_base (
-      id TEXT PRIMARY KEY,
-      concept_tag TEXT NOT NULL,
-      language TEXT NOT NULL CHECK(language IN ('telugu','hindi')),
-      region TEXT NOT NULL,
-      vocabulary_level TEXT DEFAULT 'beginner',
-      entry_point TEXT NOT NULL,
-      explanation_text TEXT,
-      effectiveness_score REAL DEFAULT 0.75,
-      advance_count INTEGER DEFAULT 0,
-      loop_count INTEGER DEFAULT 0,
-      created_at TEXT DEFAULT (datetime('now'))
-    );
-    CREATE TABLE IF NOT EXISTS cultural_usage_log (
-      id TEXT PRIMARY KEY,
-      ckb_entry_id TEXT NOT NULL,
-      learner_id TEXT,
-      session_id TEXT,
-      node_id TEXT,
-      outcome TEXT CHECK(outcome IN ('ADVANCE','LOOP')),
-      created_at TEXT DEFAULT (datetime('now'))
-    );
-  `);
-}
 
 // ─── CKB seed data — current entries (doc section 4.6) ────────────────────────
 // vocabulary_level defaults to 'beginner' for all seed rows; the store falls
@@ -64,33 +39,33 @@ const SEED_EXAMPLES = [
   { tag: 'algorithms', language: 'telugu', region: 'telangana', entry: 'వంట రెసిపీ steps వరుసగా పాటించడం (following a recipe\'s steps in order)', text: 'A recipe is a precise, ordered set of steps that reliably produces the same dish — an algorithm is that same idea for solving a problem.', eff: 0.80 }
 ];
 
-function seedInitialExamples(db) {
-  const count = db.prepare('SELECT COUNT(*) as cnt FROM cultural_knowledge_base').get().cnt;
+async function seedInitialExamples(db = getDb()) {
+  const count = (await db.prepare('SELECT COUNT(*) as cnt FROM cultural_knowledge_base').get()).cnt;
   if (count > 0) return; // already seeded
 
   const insert = db.prepare(`
     INSERT INTO cultural_knowledge_base (id, concept_tag, language, region, vocabulary_level, entry_point, explanation_text, effectiveness_score)
     VALUES (?, ?, ?, ?, 'beginner', ?, ?, ?)
   `);
-  // Runs inside the baseline migration's transaction.
-  SEED_EXAMPLES.forEach(r => insert.run(uuidv4(), r.tag, r.language, r.region, r.entry, r.text, r.eff));
+  // Runs inside migration 0002.
+  await eachSeq(SEED_EXAMPLES, async r => await insert.run(uuidv4(), r.tag, r.language, r.region, r.entry, r.text, r.eff));
 }
 
 // ─── Three-tier fallback retrieval ────────────────────────────────────────────
 // Tier 1 (exact): concept_tag + language + region + vocabulary_level
 // Tier 2 (relax region): concept_tag + language + vocabulary_level
 // Tier 3 (relax all): concept_tag + language only
-function retrieveByConceptTag(conceptTag, language, region, vocabularyLevel) {
+async function retrieveByConceptTag(conceptTag, language, region, vocabularyLevel) {
   const db = getDb();
 
-  let rows = db.prepare(`
+  let rows = await db.prepare(`
     SELECT * FROM cultural_knowledge_base
     WHERE concept_tag = ? AND language = ? AND region = ? AND vocabulary_level = ?
     ORDER BY effectiveness_score DESC LIMIT 3
   `).all(conceptTag, language, region, vocabularyLevel);
 
   if (rows.length === 0) {
-    rows = db.prepare(`
+    rows = await db.prepare(`
       SELECT * FROM cultural_knowledge_base
       WHERE concept_tag = ? AND language = ? AND vocabulary_level = ?
       ORDER BY effectiveness_score DESC LIMIT 3
@@ -98,7 +73,7 @@ function retrieveByConceptTag(conceptTag, language, region, vocabularyLevel) {
   }
 
   if (rows.length === 0) {
-    rows = db.prepare(`
+    rows = await db.prepare(`
       SELECT * FROM cultural_knowledge_base
       WHERE concept_tag = ? AND language = ?
       ORDER BY effectiveness_score DESC LIMIT 3
@@ -110,17 +85,17 @@ function retrieveByConceptTag(conceptTag, language, region, vocabularyLevel) {
 }
 
 // ─── Effectiveness scoring — exponential moving average ──────────────────────
-function logOutcome(ckbEntryId, learnerId, sessionId, nodeId, outcome) {
+async function logOutcome(ckbEntryId, learnerId, sessionId, nodeId, outcome) {
   const db = getDb();
-  db.prepare(`
+  await db.prepare(`
     INSERT INTO cultural_usage_log (id, ckb_entry_id, learner_id, session_id, node_id, outcome)
     VALUES (?, ?, ?, ?, ?, ?)
   `).run(uuidv4(), ckbEntryId, learnerId, sessionId, nodeId, outcome);
 
-  const entry = db.prepare('SELECT * FROM cultural_knowledge_base WHERE id = ?').get(ckbEntryId);
+  const entry = await db.prepare('SELECT * FROM cultural_knowledge_base WHERE id = ?').get(ckbEntryId);
   if (entry) {
     const newEffectiveness = (1 - ALPHA) * (entry.effectiveness_score || 0.75) + ALPHA * (outcome === 'ADVANCE' ? 1.0 : 0.0);
-    db.prepare(`
+    await db.prepare(`
       UPDATE cultural_knowledge_base SET
         effectiveness_score = ?,
         advance_count = advance_count + ?,
@@ -131,4 +106,4 @@ function logOutcome(ckbEntryId, learnerId, sessionId, nodeId, outcome) {
   db.close();
 }
 
-export { initCulturalSchema, seedInitialExamples, retrieveByConceptTag, logOutcome };
+export { seedInitialExamples, retrieveByConceptTag, logOutcome };

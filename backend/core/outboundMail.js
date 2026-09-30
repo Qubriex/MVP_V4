@@ -8,8 +8,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 const appUrl = () => (process.env.FRONTEND_URL || 'http://localhost:3000').replace(/\/$/, '');
 
-function queueEmail(db, { institutionId = null, to, subject, body, kind }) {
-  db.prepare(`
+async function queueEmail(db, { institutionId = null, to, subject, body, kind }) {
+  await db.prepare(`
     INSERT INTO outbound_messages (id, institution_id, to_email, subject, body, kind)
     VALUES (?, ?, ?, ?, ?, ?)
   `).run(uuidv4(), institutionId, to, subject, body, kind || null);

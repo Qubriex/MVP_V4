@@ -14,3 +14,4 @@ secure-config/
 
 # Development signing keys (generated on first use; production keys live in secure-config)
 backend/data/
+.vercel

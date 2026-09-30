@@ -4,8 +4,13 @@
 // ./secure-config, never committed here). This module deep-merges
 // secure-config/params.json over the priors in config/priors.js.
 //
+// On hosts without a mounted directory (Vercel), SECURE_CONFIG_PARAMS_JSON
+// carries the same params.json content in an environment variable.
+//
 // Production (NODE_ENV=production) refuses to run on priors alone: a missing
-// or unreadable secure-config is a startup error, not a silent fallback.
+// or unreadable secure-config is a startup error, not a silent fallback. A
+// staging or pilot deployment may opt in to priors with QBX_ALLOW_PRIORS=1;
+// it is logged at every start and reported by /api/health.
 //
 //   params.get('label.confirmed.minPasses')  → 3
 //   params.stage('label.confirmed.minPasses') → 'prior' | 'secure-config'
@@ -41,14 +46,23 @@ export function secureConfigDir() {
 export function load({ env = process.env.NODE_ENV, dir = secureConfigDir() } = {}) {
   const file = path.join(dir, 'params.json');
   let override = null;
-  if (fs.existsSync(file)) {
+  let source = 'priors';
+  if (process.env.SECURE_CONFIG_PARAMS_JSON) {
+    try { override = JSON.parse(process.env.SECURE_CONFIG_PARAMS_JSON); } catch { throw new Error('SECURE_CONFIG_PARAMS_JSON is not valid JSON'); }
+    source = 'env:SECURE_CONFIG_PARAMS_JSON';
+  } else if (fs.existsSync(file)) {
     override = JSON.parse(fs.readFileSync(file, 'utf8'));
+    source = file;
   } else if (env === 'production') {
-    throw new Error(`secure-config not found at ${dir}: production will not run on prior defaults`);
+    if (process.env.QBX_ALLOW_PRIORS !== '1') {
+      throw new Error(`secure-config not found at ${dir} and SECURE_CONFIG_PARAMS_JSON is not set: production will not run on prior defaults`);
+    }
+    console.warn('[qubirex] QBX_ALLOW_PRIORS=1: running in production on prior parameters (staging/pilot only).');
+    source = 'priors (QBX_ALLOW_PRIORS)';
   }
   const overridden = new Set();
   const values = deepFreeze(deepMerge(PRIORS, override, '', overridden));
-  loaded = { values, overridden, source: override ? file : 'priors' };
+  loaded = { values, overridden, source };
   return loaded;
 }
 
@@ -73,6 +87,9 @@ export function flag(name) {
   return !!get(`flags.${name}`);
 }
 
+/** Where the parameters came from: a file, the environment, or priors. */
+export const source = () => state().source;
+
 /** Every leaf key with its stage, for the status report. */
 export function report() {
   const out = [];
@@ -91,5 +108,5 @@ export function calibrationRegister() {
   return CALIBRATION_REGISTER.map(g => ({ ...g, overriddenBySecureConfig: g.keys.some(touches) }));
 }
 
-export const params = { get, stage, flag, load, report, calibrationRegister };
+export const params = { get, stage, flag, load, report, calibrationRegister, source };
 export default params;

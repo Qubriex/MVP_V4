@@ -31,14 +31,14 @@ export function jaccard(a, b) {
 }
 
 /** Queue text the ontology cannot place; repeated text counts occurrences. */
-export function queueForReview(text, source, context = null) {
+export async function queueForReview(text, source, context = null) {
   const norm = normalise(text);
   if (!norm) return;
-  const existing = dal.one('SELECT id FROM ontology_review_queue WHERE text_norm = ?', norm);
+  const existing = await dal.one('SELECT id FROM ontology_review_queue WHERE text_norm = ?', norm);
   if (existing) {
-    dal.run("UPDATE ontology_review_queue SET occurrences = occurrences + 1 WHERE id = ? AND status = 'pending'", existing.id);
+    await dal.run("UPDATE ontology_review_queue SET occurrences = occurrences + 1 WHERE id = ? AND status = 'pending'", existing.id);
   } else {
-    dal.run(`INSERT INTO ontology_review_queue (id, text, text_norm, source, context_json, occurrences, status, created_at)
+    await dal.run(`INSERT INTO ontology_review_queue (id, text, text_norm, source, context_json, occurrences, status, created_at)
       VALUES (?, ?, ?, ?, ?, 1, 'pending', ?)`, ulid(), String(text).slice(0, 300), norm, source, context ? JSON.stringify(context) : null, dal.nowIso());
   }
 }
@@ -48,15 +48,15 @@ export function queueForReview(text, source, context = null) {
  * @param {{ source?: string, context?: object, queue?: boolean }} [opts]
  * @returns {{ skill: {skill_id: string, name: string}|null, conf: number, via: 'alias'|'token'|'unmapped' }}
  */
-export function resolveSkill(text, { source = 'unknown', context = null, queue = true } = {}) {
+export async function resolveSkill(text, { source = 'unknown', context = null, queue = true } = {}) {
   const t = normalise(text);
   if (!t) return { skill: null, conf: 0, via: 'unmapped' };
-  const exact = dal.one('SELECT s.skill_id, s.name FROM skill_aliases a JOIN skills s ON s.skill_id = a.skill_id WHERE a.alias_norm = ?', t);
+  const exact = await dal.one('SELECT s.skill_id, s.name FROM skill_aliases a JOIN skills s ON s.skill_id = a.skill_id WHERE a.alias_norm = ?', t);
   if (exact) return { skill: exact, conf: 1.0, via: 'alias' };
 
   const tt = tokens(t);
   const like = [...tt].map(() => "(' ' || a.alias_norm || ' ') LIKE ?").join(' OR ');
-  const cands = dal.all(`SELECT a.alias_norm, s.skill_id, s.name FROM skill_aliases a JOIN skills s ON s.skill_id = a.skill_id WHERE ${like}`,
+  const cands = await dal.all(`SELECT a.alias_norm, s.skill_id, s.name FROM skill_aliases a JOIN skills s ON s.skill_id = a.skill_id WHERE ${like}`,
     ...[...tt].map(w => `% ${w} %`));
   let best = null;
   for (const c of cands) {
@@ -66,6 +66,6 @@ export function resolveSkill(text, { source = 'unknown', context = null, queue =
   if (best && best.j >= params.get('graph.resolveJaccard')) {
     return { skill: { skill_id: best.skill_id, name: best.name }, conf: Math.round(best.j * 100) / 100, via: 'token' };
   }
-  if (queue) queueForReview(text, source, context);
+  if (queue) await queueForReview(text, source, context);
   return { skill: null, conf: 0, via: 'unmapped' };
 }

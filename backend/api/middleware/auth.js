@@ -59,12 +59,12 @@ function cookieOptions(maxAgeMs, httpOnly) {
  *          employerId?: string|null, claims?: object, req?: import('express').Request}} s
  * @returns {{token: string, csrfToken: string, sessionId: string}}
  */
-export function issueSession(res, { actorType, actorId, institutionId = null, employerId = null, claims = {}, req = null }) {
+export async function issueSession(res, { actorType, actorId, institutionId = null, employerId = null, claims = {}, req = null }) {
   const hours = params.get(`security.session.${actorType}Hours`);
   const sid = ulid();
   const csrfToken = crypto.randomBytes(32).toString('base64url');
   const now = new Date();
-  dal.run(`INSERT INTO auth_sessions (id, actor_type, actor_id, institution_id, employer_id, csrf_hash, ip, created_at, expires_at)
+  await dal.run(`INSERT INTO auth_sessions (id, actor_type, actor_id, institution_id, employer_id, csrf_hash, ip, created_at, expires_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, sid, actorType, actorId, institutionId, employerId, sha256(csrfToken),
   req ? clientIp(req) : null, now.toISOString(), new Date(now.getTime() + hours * 3600000).toISOString());
   const token = jwt.sign({ ...claims, role: ROLE_OF[actorType], actor: actorType, sid }, secret(), { expiresIn: `${hours}h` });
@@ -73,13 +73,13 @@ export function issueSession(res, { actorType, actorId, institutionId = null, em
   return { token, csrfToken, sessionId: sid };
 }
 
-export function revokeSession(sid) {
-  dal.run('UPDATE auth_sessions SET revoked_at = ? WHERE id = ? AND revoked_at IS NULL', dal.nowIso(), sid);
+export async function revokeSession(sid) {
+  await dal.run('UPDATE auth_sessions SET revoked_at = ? WHERE id = ? AND revoked_at IS NULL', dal.nowIso(), sid);
 }
 
 /** Revoke every live session of an actor (disable, remove access, password change). */
-export function revokeActorSessions(actorType, actorId) {
-  dal.run('UPDATE auth_sessions SET revoked_at = ? WHERE actor_type = ? AND actor_id = ? AND revoked_at IS NULL', dal.nowIso(), actorType, actorId);
+export async function revokeActorSessions(actorType, actorId) {
+  await dal.run('UPDATE auth_sessions SET revoked_at = ? WHERE actor_type = ? AND actor_id = ? AND revoked_at IS NULL', dal.nowIso(), actorType, actorId);
 }
 
 export function clearSessionCookies(res) {
@@ -88,9 +88,9 @@ export function clearSessionCookies(res) {
 }
 
 /** New CSRF token for the current session (the stored one is only a hash). */
-export function rotateCsrf(req, res) {
+export async function rotateCsrf(req, res) {
   const csrfToken = crypto.randomBytes(32).toString('base64url');
-  dal.run('UPDATE auth_sessions SET csrf_hash = ? WHERE id = ?', sha256(csrfToken), req.session.id);
+  await dal.run('UPDATE auth_sessions SET csrf_hash = ? WHERE id = ?', sha256(csrfToken), req.session.id);
   const remaining = Math.max(0, new Date(req.session.expires_at).getTime() - Date.now());
   res.cookie(CSRF_COOKIE, csrfToken, cookieOptions(remaining, false));
   return csrfToken;
@@ -104,7 +104,7 @@ const timingSafeEqualHex = (a, b) => a.length === b.length && crypto.timingSafeE
  */
 export function authenticate({ errors = 'legacy' } = {}) {
   const fail = (res, status, code, message) => res.status(status).json({ error: errors === 'v2' ? { code, message } : message });
-  return (req, res, next) => {
+  return async (req, res, next) => {
     const header = req.headers.authorization || '';
     const bearer = header.startsWith('Bearer ') ? header.slice(7).trim() : null;
     const cookieToken = parseCookies(req.headers.cookie)[SESSION_COOKIE] || null;
@@ -120,7 +120,7 @@ export function authenticate({ errors = 'legacy' } = {}) {
       return fail(res, 401, 'invalid_session', 'Invalid or expired token');
     }
     if (!payload.sid) return fail(res, 401, 'invalid_session', 'Your session has ended. Please sign in again.');
-    const session = dal.one('SELECT * FROM auth_sessions WHERE id = ?', payload.sid);
+    const session = await dal.one('SELECT * FROM auth_sessions WHERE id = ?', payload.sid);
     if (!session || session.revoked_at || session.expires_at <= dal.nowIso() || ROLE_OF[session.actor_type] !== payload.role) {
       return fail(res, 401, 'invalid_session', 'Your session has ended. Please sign in again.');
     }
@@ -189,9 +189,9 @@ export function requireTenant(...kinds) {
 // removing a student's access (or deactivating them) signs them out at once.
 // Age status is loaded here too, so read paths can apply the age policy
 // (unknown age is treated as a minor, spec §8.10).
-export function requireActiveLearner(req, res, next) {
+export async function requireActiveLearner(req, res, next) {
   if (req.user.role !== 'learner') return next();
-  const row = dal.one(`
+  const row = await dal.one(`
     SELECT el.access_status, el.engagement_id, l.is_active, l.age_status FROM engagement_learners el JOIN learners l ON l.id = el.learner_id
     WHERE el.id = ? AND l.id = ?
   `, req.user.el_id, req.user.id);

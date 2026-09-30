@@ -56,23 +56,23 @@ export function rateLimit({ name, limit, windowMs, key = clientIp, message = 'To
 // ─── Login lockout ───────────────────────────────────────────────────────────
 const windowStart = () => new Date(Date.now() - params.get('security.lockout.windowMinutes') * 60000).toISOString();
 
-export function isLockedOut(actorType, account, ip) {
+export async function isLockedOut(actorType, account, ip) {
   const max = params.get('security.lockout.maxFailures');
   const since = windowStart();
-  const byAccount = dal.one('SELECT COUNT(*) AS n FROM login_failures WHERE actor_type = ? AND account_key = ? AND created_at >= ?',
-    actorType, String(account || '').toLowerCase(), since).n;
-  const byIp = dal.one('SELECT COUNT(*) AS n FROM login_failures WHERE ip = ? AND created_at >= ?', ip, since).n;
+  const byAccount = (await dal.one('SELECT COUNT(*) AS n FROM login_failures WHERE actor_type = ? AND account_key = ? AND created_at >= ?',
+    actorType, String(account || '').toLowerCase(), since)).n;
+  const byIp = (await dal.one('SELECT COUNT(*) AS n FROM login_failures WHERE ip = ? AND created_at >= ?', ip, since)).n;
   return byAccount >= max || byIp >= max;
 }
 
-export function recordLoginFailure(actorType, account, ip) {
-  dal.run('INSERT INTO login_failures (id, actor_type, account_key, ip, created_at) VALUES (?, ?, ?, ?, ?)',
+export async function recordLoginFailure(actorType, account, ip) {
+  await dal.run('INSERT INTO login_failures (id, actor_type, account_key, ip, created_at) VALUES (?, ?, ?, ?, ?)',
     ulid(), actorType, String(account || '').toLowerCase(), ip, dal.nowIso());
   logger.warn('login.failed', { actorType, ip });
 }
 
-export function clearLoginFailures(actorType, account) {
-  dal.run('DELETE FROM login_failures WHERE actor_type = ? AND account_key = ?', actorType, String(account || '').toLowerCase());
+export async function clearLoginFailures(actorType, account) {
+  await dal.run('DELETE FROM login_failures WHERE actor_type = ? AND account_key = ?', actorType, String(account || '').toLowerCase());
 }
 
 // ─── AI calls (v4.3 §22): per account and per institution ───────────────────

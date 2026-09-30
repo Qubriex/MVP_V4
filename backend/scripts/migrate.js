@@ -5,4 +5,4 @@ import { close } from '../core/db/dal.js';
 
 const applied = await migrate();
 console.log(applied.length ? `Applied: ${applied.join(', ')}` : 'Database is up to date.');
-close();
+await close();

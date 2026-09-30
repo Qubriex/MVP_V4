@@ -26,8 +26,8 @@ function script() {
 beforeAll(async () => {
   await freshDb();
   app = await makeApp();
-  A = seedInstitution('a');
-  P = seedPathway(A);
+  A = await seedInstitution('a');
+  P = await seedPathway(A);
   learner = await login(app, '/api/auth/learner/login', { learner_ref: A.learnerRef, join_code: A.joinCode, pin: PIN });
 });
 afterEach(() => restore());
@@ -50,9 +50,9 @@ describe('the teacher never writes the check (v4.3 §7)', () => {
     expect(check.decision).toBe('CHECK');
     expect(check.check_question).toMatch(/^Generated question/);
     expect(check.check_question).not.toContain('TEACH WROTE');
-    const mc = dal.one("SELECT question_text, instance_id FROM mastery_checks WHERE engagement_learner_id = ? AND passed IS NULL", A.elId);
+    const mc = await dal.one("SELECT question_text, instance_id FROM mastery_checks WHERE engagement_learner_id = ? AND passed IS NULL", A.elId);
     expect(mc.question_text).toBe(check.check_question);
-    const inst = dal.one('SELECT family_id, purpose, attempt_no, seed FROM family_instances WHERE id = ?', mc.instance_id);
+    const inst = await dal.one('SELECT family_id, purpose, attempt_no, seed FROM family_instances WHERE id = ?', mc.instance_id);
     expect(inst).toMatchObject({ family_id: `gen:${P.nodes[0]}`, purpose: 'check', attempt_no: 1 });
     expect(inst.seed).toMatch(/^[0-9a-f]{64}$/);
   });
@@ -61,33 +61,33 @@ describe('the teacher never writes the check (v4.3 §7)', () => {
 describe('authenticity gate (v4.3 §7.11)', () => {
   it('A0 (no provenance or bulk paste) stops: no evaluation, no demonstration, the check stays open', async () => {
     script();
-    const sid = dal.one("SELECT id FROM learning_sessions WHERE engagement_learner_id = ? AND status = 'active'", A.elId).id;
+    const sid = (await dal.one("SELECT id FROM learning_sessions WHERE engagement_learner_id = ? AND status = 'active'", A.elId)).id;
     const r1 = await post('/api/learner/session/message', { content: 'answer', session_id: sid });
     expect(r1.body).toMatchObject({ result: 'hold', reason: 'no_provenance' });
     const r2 = await post('/api/learner/session/message', { content: 'x'.repeat(200), session_id: sid, provenance: { mode: 'typed', pasted_chars: 200, paste_events: 1, largest_paste: 200 } });
     expect(r2.body).toMatchObject({ result: 'hold', reason: 'bulk_paste' });
-    expect(dal.all("SELECT assurance FROM evidence_records WHERE el_id = ?", A.elId).map(r => r.assurance)).toEqual(['A0', 'A0']);
-    expect(dal.one('SELECT COUNT(*) n FROM demonstrations WHERE el_id = ?', A.elId).n).toBe(0);
-    expect(dal.one('SELECT COUNT(*) n FROM mastery_checks WHERE engagement_learner_id = ? AND passed IS NULL', A.elId).n).toBe(1);
+    expect((await dal.all("SELECT assurance FROM evidence_records WHERE el_id = ?", A.elId)).map(r => r.assurance)).toEqual(['A0', 'A0']);
+    expect((await dal.one('SELECT COUNT(*) n FROM demonstrations WHERE el_id = ?', A.elId)).n).toBe(0);
+    expect((await dal.one('SELECT COUNT(*) n FROM mastery_checks WHERE engagement_learner_id = ? AND passed IS NULL', A.elId)).n).toBe(1);
   });
 
   it('A1 passes through to EVAL; a pass advances, records evidence, a mastery demonstration, a review in 3 days and events', async () => {
     script();
     evalScores = [0.95];
-    const sid = dal.one("SELECT id FROM learning_sessions WHERE engagement_learner_id = ? AND status = 'active'", A.elId).id;
+    const sid = (await dal.one("SELECT id FROM learning_sessions WHERE engagement_learner_id = ? AND status = 'active'", A.elId)).id;
     const r = await post('/api/learner/session/message', { content: 'A SELECT reads rows from a table where the filter matches.', session_id: sid, provenance: typed });
     expect(r.body).toMatchObject({ result: 'advance', passed: true, provisional: false });
     expect(r.body).not.toHaveProperty('score');
-    expect(dal.one("SELECT assurance, level, passed, theta FROM evidence_records WHERE el_id = ? AND assurance = 'A1'", A.elId))
+    expect(await dal.one("SELECT assurance, level, passed, theta FROM evidence_records WHERE el_id = ? AND assurance = 'A1'", A.elId))
       .toEqual({ assurance: 'A1', level: 'L1', passed: 1, theta: 0.75 });
-    expect(dal.one('SELECT kind, passed, assurance, level FROM demonstrations WHERE el_id = ?', A.elId)).toEqual({ kind: 'mastery', passed: 1, assurance: 'A1', level: 'L1' });
-    const ret = dal.one('SELECT interval_days, due_at FROM node_retention WHERE el_id = ? AND node_id = ?', A.elId, P.nodes[0]);
+    expect(await dal.one('SELECT kind, passed, assurance, level FROM demonstrations WHERE el_id = ?', A.elId)).toEqual({ kind: 'mastery', passed: 1, assurance: 'A1', level: 'L1' });
+    const ret = await dal.one('SELECT interval_days, due_at FROM node_retention WHERE el_id = ? AND node_id = ?', A.elId, P.nodes[0]);
     expect(ret.interval_days).toBe(3);
     expect(Date.parse(ret.due_at) - Date.now()).toBeGreaterThan(2.9 * 86400000);
-    const types = dal.all("SELECT type FROM domain_events WHERE aggregate_id = ? ORDER BY id", A.elId).map(e => e.type);
+    const types = (await dal.all("SELECT type FROM domain_events WHERE aggregate_id = ? ORDER BY id", A.elId)).map(e => e.type);
     expect(types).toEqual(expect.arrayContaining(['CHECK_EVALUATED', 'NODE_ADVANCED']));
-    expect(dal.one('SELECT current_node_id FROM engagement_learners WHERE id = ?', A.elId).current_node_id).toBe(P.nodes[1]);
-    expect(dal.one('SELECT provisional, persistence, theta FROM node_mastery WHERE engagement_learner_id = ?', A.elId)).toEqual({ provisional: 0, persistence: 0, theta: 0.75 });
+    expect((await dal.one('SELECT current_node_id FROM engagement_learners WHERE id = ?', A.elId)).current_node_id).toBe(P.nodes[1]);
+    expect(await dal.one('SELECT provisional, persistence, theta FROM node_mastery WHERE engagement_learner_id = ?', A.elId)).toEqual({ provisional: 0, persistence: 0, theta: 0.75 });
   });
 });
 
@@ -98,9 +98,9 @@ describe('borderline second pass (v4.3 §7.3)', () => {
     evalScores = [0.78, 0.70]; // first passes θ 0.75, second (temp 0, shuffled rubric) fails
     const r = await post('/api/learner/session/message', { content: 'Joins combine rows from two tables.', session_id: sessionId, provenance: typed });
     expect(r.body).toMatchObject({ result: 'advance', provisional: true, review_pending: true });
-    const q = dal.one("SELECT stratum, reason, priority FROM review_queue WHERE node_id = ?", P.nodes[1]);
+    const q = await dal.one("SELECT stratum, reason, priority FROM review_queue WHERE node_id = ?", P.nodes[1]);
     expect(q).toEqual({ stratum: 'decision', reason: 'borderline', priority: 4 });
-    expect(dal.one('SELECT provisional FROM node_mastery WHERE skill_node_id = ?', P.nodes[1]).provisional).toBe(1);
+    expect((await dal.one('SELECT provisional FROM node_mastery WHERE skill_node_id = ?', P.nodes[1])).provisional).toBe(1);
   });
 
   it('a clear result gets no second pass', async () => {
@@ -115,6 +115,6 @@ describe('borderline second pass (v4.3 §7.3)', () => {
     const r = await post('/api/learner/session/message', { content: 'Loops repeat.', session_id: sessionId, provenance: typed });
     expect(r.body).toMatchObject({ result: 'loop', passed: false });
     expect(evalCalls).toBe(1);
-    expect(dal.all("SELECT type FROM domain_events WHERE type = 'NODE_LOOPED'")).toHaveLength(1);
+    expect(await dal.all("SELECT type FROM domain_events WHERE type = 'NODE_LOOPED'")).toHaveLength(1);
   });
 });

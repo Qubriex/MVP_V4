@@ -8,6 +8,7 @@ import 'dotenv/config';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 import { getDb, initDb } from '../db/init.js';
+import { close as closeDb } from '../core/db/dal.js';
 
 const email = process.argv[2] || process.env.ADMIN_EMAIL;
 const password = process.argv[3] || process.env.ADMIN_PASSWORD;
@@ -28,7 +29,7 @@ const db = getDb();
 try {
   const id = uuidv4();
   const password_hash = bcrypt.hashSync(password, 10);
-  const result = db
+  const result = await db
     .prepare('INSERT OR IGNORE INTO admin_users (id, email, password_hash, name) VALUES (?, ?, ?, ?)')
     .run(id, email, password_hash, name);
 
@@ -38,5 +39,5 @@ try {
     console.log(`Admin account created for ${email}.`);
   }
 } finally {
-  db.close();
+  await closeDb();
 }

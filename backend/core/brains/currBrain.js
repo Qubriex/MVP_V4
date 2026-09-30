@@ -6,11 +6,12 @@
 import * as briefStore from '../stores/briefStore.js';
 import { callAI, safeParseJSON } from '../instructionEngine.js';
 import * as dal from '../db/dal.js';
+import { eachSeq, filterSeq, mapSeq } from '../util/seq.js';
 
 // CURR must return skill IDs from the ontology (v4.3 §3.2); its output is
 // validated against this list and anything else is dropped.
-const ontologyList = () => dal.all('SELECT skill_id, name FROM skills ORDER BY skill_id').map(s => `${s.skill_id} (${s.name})`).join('; ');
-const knownSkill = (id) => !!dal.one('SELECT 1 FROM skills WHERE skill_id = ?', id);
+const ontologyList = async () => (await dal.all('SELECT skill_id, name FROM skills ORDER BY skill_id')).map(s => `${s.skill_id} (${s.name})`).join('; ');
+const knownSkill = async (id) => !!await dal.one('SELECT 1 FROM skills WHERE skill_id = ?', id);
 
 // ─── inferDomain() ──────────────────────────────────────────────────────────────
 const DOMAIN_KEYWORDS = [
@@ -33,7 +34,7 @@ async function extractCapabilityTargets({ rawInput, language, institutionId }) {
   const domain = inferDomain(rawInput);
 
   // RAG: retrieve up to 2 confirmed briefs from the same domain/language as templates
-  const templates = briefStore.retrieveSimilarBriefs(domain, language, null, 2);
+  const templates = await briefStore.retrieveSimilarBriefs(domain, language, null, 2);
   const templateContext = templates.length
     ? `PAST CONFIRMED EXTRACTIONS FROM THIS DOMAIN (use as a structural template, do not copy content):\n${templates.map((t, i) => `Template ${i + 1}: ${JSON.stringify(t.extracted_clusters)}`).join('\n')}`
     : 'No confirmed briefs exist yet for this domain — extract from first principles.';
@@ -79,7 +80,7 @@ Respond ONLY with JSON:
   });
   extracted.domain = extracted.domain || domain;
 
-  const briefId = briefStore.writeBrief(
+  const briefId = await briefStore.writeBrief(
     institutionId, domain, language,
     (rawInput || '').slice(0, 500), extracted, extracted.extraction_confidence || 0
   );
@@ -112,7 +113,7 @@ Respond ONLY with JSON:
 }
 
 ONTOLOGY — "skills" must use only these IDs. Weight is the share of the skill this node teaches (1.0 = the whole skill). If nothing fits, return an empty list; never invent an ID:
-${ontologyList()}`;
+${await ontologyList()}`;
 
   const text = await callAI({
     system,
@@ -122,17 +123,16 @@ ${ontologyList()}`;
   });
 
   const decomposed = safeParseJSON(text, { nodes: [] });
-  const nodes = (Array.isArray(decomposed.nodes) ? decomposed.nodes : []).map(n => ({
+  const nodes = await mapSeq(Array.isArray(decomposed.nodes) ? decomposed.nodes : [], async n => ({
     ...n,
-    skills: (Array.isArray(n.skills) ? n.skills : [])
-      .filter(s => s && knownSkill(s.skill_id))
+    skills: (await filterSeq(Array.isArray(n.skills) ? n.skills : [], async s => s && await knownSkill(s.skill_id)))
       .map(s => ({ skill_id: s.skill_id, weight: Math.min(1, Math.max(0.05, Number(s.weight) || 1)) }))
   }));
 
   // Node spec storage — only if skillNodeIds is provided, in the same order as nodes.
   if (skillNodeIds.length === nodes.length) {
-    nodes.forEach((n, i) => {
-      briefStore.writeNodeSpec(skillNodeIds[i], {
+    await eachSeq(nodes, async (n, i) => {
+      await briefStore.writeNodeSpec(skillNodeIds[i], {
         nodeLabel: n.label,
         clusterLabel,
         learningObjectives: n.learning_objectives || [],
@@ -152,15 +152,15 @@ ${ontologyList()}`;
 // ─── retrieveNodeContext() ────────────────────────────────────────────────────────
 // Tries by skillNodeId first (precise). Falls back to label lookup. Returns
 // null if not found — TEACH handles that gracefully with general knowledge.
-function retrieveNodeContext(nodeId, nodeLabel) {
-  const bySkillNodeId = briefStore.retrieveNodeSpecById(nodeId);
+async function retrieveNodeContext(nodeId, nodeLabel) {
+  const bySkillNodeId = await briefStore.retrieveNodeSpecById(nodeId);
   if (bySkillNodeId) return bySkillNodeId;
-  return briefStore.retrieveNodeSpecByLabel(nodeLabel) || null;
+  return await briefStore.retrieveNodeSpecByLabel(nodeLabel) || null;
 }
 
 // ─── confirmBrief() ────────────────────────────────────────────────────────────────
-function confirmBrief(briefId) {
-  return briefStore.confirmBrief(briefId);
+async function confirmBrief(briefId) {
+  return await briefStore.confirmBrief(briefId);
 }
 
 export { extractCapabilityTargets, decomposeClusterToNodes, retrieveNodeContext, confirmBrief, inferDomain };

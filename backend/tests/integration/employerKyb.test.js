@@ -11,7 +11,7 @@ const op = (path, body) => owner.agent.post(path).set('X-CSRF-Token', owner.csrf
 beforeAll(async () => {
   await freshDb();
   app = await makeApp();
-  seedAdmin();
+  await seedAdmin();
   const r = await request(app).post('/api/auth/employer/register').send({ company_name: '[Company name]', name: 'Owner', email: 'owner@company.test', password: PASSWORD }).expect(201);
   employerId = r.body.employer.id;
   owner = await login(app, '/api/auth/employer/login', { email: 'owner@company.test', password: PASSWORD });
@@ -44,7 +44,7 @@ describe('KYB flow', () => {
   it('domain OTP: wrong code counts, the right code verifies, and the email is recorded', async () => {
     const req = await op('/api/employer/verify-domain/request', {}).expect(200);
     expect(req.body.dev_code).toMatch(/^\d{6}$/);
-    expect(dal.one("SELECT to_email FROM outbound_messages WHERE kind = 'employer_domain_otp'").to_email).toBe('owner@company.test');
+    expect((await dal.one("SELECT to_email FROM outbound_messages WHERE kind = 'employer_domain_otp'")).to_email).toBe('owner@company.test');
     await op('/api/employer/verify-domain/confirm', { code: '000000' === req.body.dev_code ? '111111' : '000000' }).expect(400);
     await op('/api/employer/verify-domain/confirm', { code: req.body.dev_code }).expect(200);
     const me = await owner.agent.get('/api/employer/me').expect(200);
@@ -81,7 +81,7 @@ describe('API keys', () => {
     await op('/api/employer/api-keys', { name: 'ATS', scopes: ['everything'] }).expect(400);
     const k = await op('/api/employer/api-keys', { name: 'ATS', scopes: ['verify'] }).expect(201);
     expect(k.body.key).toMatch(/^qbx_[a-z0-9]{8}_/);
-    const row = dal.one('SELECT key_hash, prefix FROM employer_api_keys WHERE id = ?', k.body.id);
+    const row = await dal.one('SELECT key_hash, prefix FROM employer_api_keys WHERE id = ?', k.body.id);
     expect(row.key_hash).toMatch(/^\$2[aby]\$/);
     expect(row.key_hash).not.toContain(k.body.key.split('_')[2]);
     const list = await owner.agent.get('/api/employer/api-keys').expect(200);

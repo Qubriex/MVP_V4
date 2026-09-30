@@ -61,10 +61,10 @@ function templateQuestion(node, params, language) {
   return `Take a ${params.context} with ${params.count} items and a limit of ${params.threshold}. In your own words, ${VARIANT[params.variant]} using "${node.node_label}".`;
 }
 
-function nodeSpec(nodeId) {
-  const node = dal.one(`SELECT sn.id, sn.node_label, sn.node_type, sn.description, sc.cluster_label FROM skill_nodes sn
+async function nodeSpec(nodeId) {
+  const node = await dal.one(`SELECT sn.id, sn.node_label, sn.node_type, sn.description, sc.cluster_label FROM skill_nodes sn
     JOIN skill_clusters sc ON sc.id = sn.cluster_id WHERE sn.id = ?`, nodeId);
-  const spec = dal.one('SELECT learning_objectives FROM curriculum_node_specs WHERE skill_node_id = ?', nodeId);
+  const spec = await dal.one('SELECT learning_objectives FROM curriculum_node_specs WHERE skill_node_id = ?', nodeId);
   let objectives = [];
   try { objectives = JSON.parse(spec?.learning_objectives || '[]'); } catch { objectives = []; }
   return { ...node, objectives };
@@ -75,13 +75,13 @@ function nodeSpec(nodeId) {
  * @returns {Promise<{id: string, question_text: string, family_id: string, attempt_no: number, params: object, generator: string}>}
  */
 export async function issueInstance({ elId, learnerId, nodeId, language, purpose = 'check', institutionId = null }) {
-  const node = nodeSpec(nodeId);
+  const node = await nodeSpec(nodeId);
   if (!node) throw new Error('Unknown node');
   const familyId = `gen:${nodeId}`;
-  const attemptNo = dal.one('SELECT COUNT(*) n FROM family_instances WHERE el_id = ? AND family_id = ?', elId, familyId).n + 1;
+  const attemptNo = (await dal.one('SELECT COUNT(*) n FROM family_instances WHERE el_id = ? AND family_id = ?', elId, familyId)).n + 1;
   const seed = deriveSeed(learnerId, familyId, attemptNo);
   const params = paramsFromSeed(seed, language);
-  const previous = dal.all('SELECT question_text FROM family_instances WHERE el_id = ? AND family_id = ? ORDER BY attempt_no DESC LIMIT 5', elId, familyId)
+  const previous = (await dal.all('SELECT question_text FROM family_instances WHERE el_id = ? AND family_id = ? ORDER BY attempt_no DESC LIMIT 5', elId, familyId))
     .map(r => r.question_text);
 
   let question = null;
@@ -111,7 +111,7 @@ Previous questions (do not repeat): ${previous.join(' | ') || 'none'}`
   if (!question) question = templateQuestion(node, params, language);
 
   const id = ulid();
-  dal.run(`INSERT INTO family_instances (id, el_id, learner_id, node_id, family_id, family_version, purpose, attempt_no, seed, params_json, question_text, generator, prompt_version, created_at)
+  await dal.run(`INSERT INTO family_instances (id, el_id, learner_id, node_id, family_id, family_version, purpose, attempt_no, seed, params_json, question_text, generator, prompt_version, created_at)
     VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?)`, id, elId, learnerId, nodeId, familyId, purpose, attemptNo, seed,
   JSON.stringify(params), question, generator, generator === 'model' ? PROMPT_VERSION : null, dal.nowIso());
   return { id, question_text: question, family_id: familyId, attempt_no: attemptNo, params, generator };

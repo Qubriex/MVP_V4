@@ -6,21 +6,21 @@ import { theilSen } from '../../core/readiness/learningCurve.js';
 
 let app; let A; let P;
 
-function master(elId, nodeId, loops, minutes, daysAgo) {
+async function master(elId, nodeId, loops, minutes, daysAgo) {
   const sid = `ls-${elId}-${nodeId}`;
-  dal.run("INSERT INTO learning_sessions (id, engagement_learner_id, skill_node_id, language, status, active_minutes, loop_count) VALUES (?, ?, ?, 'telugu', 'completed', ?, ?)", sid, elId, nodeId, minutes, loops);
-  dal.run('INSERT INTO node_mastery (id, engagement_learner_id, skill_node_id, mastery_attainment, advanced_at, loops, provisional) VALUES (?, ?, ?, 0.8, ?, ?, 0)',
+  await dal.run("INSERT INTO learning_sessions (id, engagement_learner_id, skill_node_id, language, status, active_minutes, loop_count) VALUES (?, ?, ?, 'telugu', 'completed', ?, ?)", sid, elId, nodeId, minutes, loops);
+  await dal.run('INSERT INTO node_mastery (id, engagement_learner_id, skill_node_id, mastery_attainment, advanced_at, loops, provisional) VALUES (?, ?, ?, 0.8, ?, ?, 0)',
     `nm-${sid}`, elId, nodeId, new Date(Date.now() - daysAgo * 86400000).toISOString(), loops);
 }
 
 beforeAll(async () => {
   await freshDb();
   app = await makeApp();
-  A = seedInstitution('a');
-  P = seedPathway(A);
-  master(A.elId, P.nodes[0], 3, 60, 5);
-  master(A.elId, P.nodes[1], 1, 30, 3);
-  master(A.elId, P.nodes[2], 0, 20, 1);
+  A = await seedInstitution('a');
+  P = await seedPathway(A);
+  await master(A.elId, P.nodes[0], 3, 60, 5);
+  await master(A.elId, P.nodes[1], 1, 30, 3);
+  await master(A.elId, P.nodes[2], 0, 20, 1);
 });
 
 describe('learning curve (§12.3)', () => {
@@ -40,7 +40,7 @@ describe('learning curve (§12.3)', () => {
     const prof = await login(app, '/api/auth/institution/login', { email: A.profEmail, password: PASSWORD });
     const p = (await prof.agent.get(`/api/institution/students/${A.elId}/learning-curve`).expect(200)).body;
     expect(p.student.learner_ref).toBe(A.learnerRef);
-    const B = seedInstitution('b');
+    const B = await seedInstitution('b');
     await prof.agent.get(`/api/institution/students/${B.elId}/learning-curve`).expect(404);
   });
 });
@@ -48,16 +48,16 @@ describe('learning curve (§12.3)', () => {
 describe('benchmarks (§16)', () => {
   it('the regional median is withheld below 3 other institutions, then published without names', async () => {
     const admin = await login(app, '/api/auth/institution/login', { email: A.adminEmail, password: PASSWORD });
-    dal.run("UPDATE institutions SET city = 'Hyderabad'");
+    await dal.run("UPDATE institutions SET city = 'Hyderabad'");
     let b = (await admin.agent.get(`/api/institution/insights/benchmarks?engagement_id=${A.engagementId}`).expect(200)).body;
     expect(b.ours).toMatchObject({ learners: 1, progress_pct: 100, mastered_per_learner: 3 });
     expect(b.regional.published).toBe(false);
     for (const tag of ['c', 'd', 'e']) {
-      const X = seedInstitution(tag);
-      const Q = seedPathway(X);
-      master(X.elId, Q.nodes[0], 2, 40, 2);
+      const X = await seedInstitution(tag);
+      const Q = await seedPathway(X);
+      await master(X.elId, Q.nodes[0], 2, 40, 2);
     }
-    dal.run("UPDATE institutions SET city = 'Hyderabad'");
+    await dal.run("UPDATE institutions SET city = 'Hyderabad'");
     b = (await admin.agent.get(`/api/institution/insights/benchmarks?engagement_id=${A.engagementId}`).expect(200)).body;
     expect(b.regional).toMatchObject({ published: true, institutions: 4 });
     expect(b.regional.values.progress_pct).toBeCloseTo(33.3, 0);
