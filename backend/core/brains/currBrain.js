@@ -5,6 +5,12 @@
 // similar past confirmed briefs as extraction templates before extracting.
 import * as briefStore from '../stores/briefStore.js';
 import { callAI, safeParseJSON } from '../instructionEngine.js';
+import * as dal from '../db/dal.js';
+
+// CURR must return skill IDs from the ontology (v4.3 §3.2); its output is
+// validated against this list and anything else is dropped.
+const ontologyList = () => dal.all('SELECT skill_id, name FROM skills ORDER BY skill_id').map(s => `${s.skill_id} (${s.name})`).join('; ');
+const knownSkill = (id) => !!dal.one('SELECT 1 FROM skills WHERE skill_id = ?', id);
 
 // ─── inferDomain() ──────────────────────────────────────────────────────────────
 const DOMAIN_KEYWORDS = [
@@ -99,10 +105,14 @@ Respond ONLY with JSON:
       "estimated_minutes": 20,
       "concept_tags": ["variables"],
       "learning_objectives": ["objective 1", "objective 2", "objective 3"],
-      "mastery_threshold": 0.70
+      "mastery_threshold": 0.70,
+      "skills": [{ "skill_id": "an id from the ontology below", "weight": 1.0 }]
     }
   ]
-}`;
+}
+
+ONTOLOGY — "skills" must use only these IDs. Weight is the share of the skill this node teaches (1.0 = the whole skill). If nothing fits, return an empty list; never invent an ID:
+${ontologyList()}`;
 
   const text = await callAI({
     system,
@@ -112,7 +122,12 @@ Respond ONLY with JSON:
   });
 
   const decomposed = safeParseJSON(text, { nodes: [] });
-  const nodes = decomposed.nodes || [];
+  const nodes = (Array.isArray(decomposed.nodes) ? decomposed.nodes : []).map(n => ({
+    ...n,
+    skills: (Array.isArray(n.skills) ? n.skills : [])
+      .filter(s => s && knownSkill(s.skill_id))
+      .map(s => ({ skill_id: s.skill_id, weight: Math.min(1, Math.max(0.05, Number(s.weight) || 1)) }))
+  }));
 
   // Node spec storage — only if skillNodeIds is provided, in the same order as nodes.
   if (skillNodeIds.length === nodes.length) {

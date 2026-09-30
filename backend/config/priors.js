@@ -67,6 +67,9 @@ export const PRIORS = {
     parityNaturalisticShareLater: 0.30, parityLaterLearners: 500,  // §5.6
     faculty: {
       minutesPerReview: 2,                         // §7.8 load forecast
+      decisionRatePrior: 0.15,                     // share of checks in the decision stratum before data
+      defaultWeeks: 8,
+      bootstrapSamples: 1000,
       borderline: 0.10, calibrationTarget: 30, calibrationWeeks: 8, minSampleRate: 0.10, maxSampleRate: 1.0,
       kappa: { minN: 20, minLower: 0.50, minPoint: 0.60, ci: 0.90 }
     },

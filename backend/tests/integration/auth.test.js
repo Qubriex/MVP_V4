@@ -230,3 +230,19 @@ describe('password change', () => {
     await current.agent.get('/api/institution/me').expect(200);
   });
 });
+
+describe('admin ontology review (v4.3 §3.2)', () => {
+  it('turns a queued text into a permanent alias and re-maps pathway nodes', async () => {
+    const { resolveSkill } = await import('../../core/graph/resolveSkill.js');
+    resolveSkill('Sequelize ORM queries', { source: 'jd' });
+    const { agent } = await login(app, '/api/auth/admin/login', { email: 'root@qubirex.test', password: PASSWORD });
+    const q = await agent.get('/api/admin/ontology-review').expect(200);
+    const item = q.body.items.find(i => i.text_norm === 'sequelize orm queries');
+    expect(item).toBeTruthy();
+    const csrf = (await agent.get('/api/auth/csrf')).body.csrf_token;
+    await agent.post(`/api/admin/ontology-review/${item.id}`).set('X-CSRF-Token', csrf).send({ action: 'alias', skill_id: 'nope' }).expect(400);
+    await agent.post(`/api/admin/ontology-review/${item.id}`).set('X-CSRF-Token', csrf).send({ action: 'alias', skill_id: 'sql_select' }).expect(200);
+    expect(resolveSkill('Sequelize ORM queries', { queue: false })).toMatchObject({ skill: { skill_id: 'sql_select' }, via: 'alias' });
+    await agent.post(`/api/admin/ontology-review/${item.id}`).set('X-CSRF-Token', csrf).send({ action: 'reject' }).expect(409);
+  });
+});

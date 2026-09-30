@@ -11,3 +11,6 @@ frontend/build/
 # and the canary set live in the private secure-config repository, mounted at
 # runtime. Never commit them here (scripts/check-secrets.js enforces this).
 secure-config/
+
+# Development signing keys (generated on first use; production keys live in secure-config)
+backend/data/

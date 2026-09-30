@@ -10,10 +10,15 @@ import institutionRoutes from './routes/institution.js';
 import institutionTeamRoutes from './routes/institutionTeam.js';
 import institutionStudentsRoutes from './routes/institutionStudents.js';
 import institutionInsightsRoutes from './routes/institutionInsights.js';
+import institutionReviewRoutes from './routes/institutionReview.js';
 import learnerRoutes from './routes/learner.js';
 import portfolioRoutes from './routes/portfolio.js';
 import marketRoutes from './routes/market.js';
 import employerRoutes from './routes/employer.js';
+import learnerEvidenceRoutes from './routes/learnerEvidence.js';
+import verifyRoutes from './routes/verify.js';
+import { didDocument } from '../core/return/keyRegistry.js';
+import { issuerHost } from '../core/return/credentialEngine.js';
 import adminRoutes from './routes/admin.js';
 
 // Mount table; scripts/openapi.js reads it to generate openapi.json.
@@ -23,10 +28,13 @@ export const MOUNTS = [
   ['/api/institution', institutionTeamRoutes],      // /me, /team
   ['/api/institution', institutionStudentsRoutes],  // students & access
   ['/api/institution', institutionInsightsRoutes],  // curriculum vs market, where we stand
+  ['/api/institution', institutionReviewRoutes],    // faculty review queue, κ, review load
   ['/api/learner', learnerRoutes],
   ['/api/learner', portfolioRoutes],                // profile, resume, skill requests, transcribe
+  ['/api/learner', learnerEvidenceRoutes],          // reviews, rechecks, passport, renewal
   ['/api/market', marketRoutes],                    // job market, JD gap, emerging topics
   ['/api/employer', employerRoutes],
+  ['/api/verify', verifyRoutes],                    // public verifier (v4.3 §10)
   ['/api/admin', adminRoutes]
 ];
 
@@ -53,6 +61,9 @@ export function createApp() {
   });
 
   MOUNTS.forEach(([prefix, router]) => app.use(prefix, router));
+
+  // did:web document for the issuer (v4.3 §9.3); retired keys stay listed.
+  app.get('/.well-known/did.json', (req, res) => { res.set('Cache-Control', 'public, max-age=3600'); res.json(didDocument(issuerHost())); });
 
   app.get('/api/health', (req, res) => res.json({
     status: 'ok',

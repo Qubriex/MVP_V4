@@ -14,7 +14,8 @@ const PUBLIC = new Set([
   'POST /api/auth/admin/login', 'POST /api/auth/employer/login', 'POST /api/auth/employer/register',
   'GET /api/auth/staff/invite/{token}', 'POST /api/auth/staff/invite/{token}/accept',
   'GET /api/auth/learner/invite/{token}', 'POST /api/auth/learner/invite/{token}/accept',
-  'POST /api/auth/learner/pin-reset-request', 'GET /api/health'
+  'POST /api/auth/learner/pin-reset-request', 'GET /api/health',
+  'GET /api/verify/{evidenceId}', 'GET /api/verify/jwks.json', 'GET /api/verify/status/{listId}'
 ]);
 const UNSAFE = new Set(['post', 'put', 'patch', 'delete']);
 
@@ -44,6 +45,7 @@ export async function buildSpec() {
     }
   }
   add('get', '/api/health', 'health');
+  add('get', '/.well-known/did.json', 'verify');
   const sorted = Object.fromEntries(Object.keys(paths).sort().map(k => [k, paths[k]]));
   return {
     openapi: '3.1.0',

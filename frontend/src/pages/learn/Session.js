@@ -8,8 +8,15 @@
 // voice (on-device recognition, or recorded audio transcribed by the server)
 // or by typing, switchable at any time. The side panel keeps the transcript —
 // every message can be replayed — and a Board tab for the diagrams and code
-// TEACH sends with its turns. TEACH still decides when a mastery check is
-// due; "I'm ready for the check" asks it to set one now.
+// TEACH sends with its turns. TEACH decides WHEN a mastery check is due;
+// the check question itself comes from the assessment system (v4.3 §7).
+// "I'm ready for the check" asks TEACH to set one now.
+//
+// Check answers (v4.3 §7.11, §19): a spoken answer lands in an editable
+// transcript and is submitted explicitly; the share edited and any pasted
+// text are reported as provenance for the authenticity gate. Active time is
+// a 30-second heartbeat that counts only while the page is visible and the
+// learner gave input in the last 3 minutes (§6); offline beats are queued.
 //
 // Desktop: stage + side panel. Phone (≤900px): full-screen stage, the panel
 // becomes a bottom sheet (see learner.css).
@@ -23,6 +30,9 @@ import api, { getOr } from '../../utils/api';
 import { useSpeechInput, useSpeechOutput, hasVoiceFor } from '../../utils/voice';
 import { MOCK_SESSION_START, MOCK_PROFILE, MOCK_LEARNER_DASHBOARD } from '../../utils/learnerMockData';
 import MermaidDiagram from '../../components/learn/MermaidDiagram';
+import { newTracker, recordPaste, provenanceFor } from '../../utils/provenance';
+import { enqueue, flush } from '../../utils/offlineQueue';
+import { useLowBandwidth, recorderOptions } from '../../utils/lowBandwidth';
 
 const APPROACH_NAMES = { native_concept: 'Native concept', analogy: 'Analogy', worked_example: 'Worked example', decomposition: 'Building blocks', socratic: 'Socratic' };
 const LANG_LABEL = { telugu: 'తెలుగు', hindi: 'हिंदी' };
@@ -62,9 +72,17 @@ export default function Session() {
   const [voiceVariant, setVoiceVariant] = useState('A');
   const [elapsed, setElapsed] = useState(0);
   const [transcribing, setTranscribing] = useState(false);
+  const [notice, setNotice] = useState('');
+  const [lowBw] = useLowBandwidth();
   const endRef = useRef(null);
   const modeRef = useRef(mode);
   modeRef.current = mode;
+  const phaseRef = useRef(phase);
+  phaseRef.current = phase;
+  const trackerRef = useRef(newTracker());
+  const lastInputRef = useRef(Date.now());
+  const lowBwRef = useRef(lowBw);
+  lowBwRef.current = lowBw;
 
   const speech = useSpeechOutput({ lang: bcp47, rate, variant: voiceVariant });
 
@@ -89,7 +107,7 @@ export default function Session() {
     const last = [...history].reverse().find(m => m.role === 'ai');
     if (last?.type === 'mastery_check') setPhase('mastery_check');
     setBusy(false);
-    if (last && modeRef.current === 'voice') speech.speak(last.content, last.id);
+    if (last && modeRef.current === 'voice' && !lowBwRef.current) speech.speak(last.content, last.id);
   }, [speech]);
 
   useEffect(() => {
@@ -112,36 +130,65 @@ export default function Session() {
     const tick = setInterval(() => { if (document.visibilityState === 'visible') setElapsed(s => s + 1); }, 1000);
     return () => clearInterval(tick);
   }, []);
+  // Input anywhere on the page counts as activity; hidden time is reported with check answers.
+  useEffect(() => {
+    const mark = () => { lastInputRef.current = Date.now(); };
+    const vis = () => {
+      const tr = trackerRef.current;
+      if (document.visibilityState === 'hidden') tr.hiddenSince = Date.now();
+      else if (tr.hiddenSince) { tr.tab_hidden_ms += Date.now() - tr.hiddenSince; tr.hiddenSince = null; }
+    };
+    window.addEventListener('keydown', mark);
+    window.addEventListener('pointerdown', mark);
+    document.addEventListener('visibilitychange', vis);
+    return () => { window.removeEventListener('keydown', mark); window.removeEventListener('pointerdown', mark); document.removeEventListener('visibilitychange', vis); };
+  }, []);
   useEffect(() => {
     if (!sessionId || sessionId.startsWith('demo')) return undefined;
+    flush();
     const beat = setInterval(() => {
-      if (document.visibilityState === 'visible') api.post('/learner/session/heartbeat', { session_id: sessionId, minutes: 1 }).catch(() => {});
-    }, 60000);
+      if (document.visibilityState !== 'visible') return;
+      const body = { session_id: sessionId, visible: true, last_input_at: new Date(lastInputRef.current).toISOString(), occurred_at: new Date().toISOString() };
+      api.post('/learner/session/heartbeat', body).catch((e) => { if (!e.response) enqueue('heartbeat', body); });
+    }, 30000);
     return () => clearInterval(beat);
   }, [sessionId]);
 
   // ── Turn handling ───────────────────────────────────────────────────────────
   const applyResponse = useCallback((data) => {
     const ai = withId({ role: 'ai', content: data.message, caption_en: data.caption_en, mermaid: data.mermaid, code: data.code });
-    if (data.result === 'advance') {
+    const extra = [];
+    setNotice('');
+    if (data.result === 'hold') {
+      // Authenticity gate (A0): not evaluated; answer again in your own words.
+      ai.type = 'feedback';
+      setPhase('mastery_check');
+      setNotice(data.caption_en || 'Please answer in your own words.');
+    } else if (data.result === 'advance') {
       ai.type = 'advance_trigger';
       setResult(data);
       setPhase('result');
+      if (data.provisional) setNotice('Your professor will double-check this answer. You can keep going.');
     } else if (data.result === 'loop') {
       ai.type = 'loop_trigger';
       setLoopCount(data.loop_count);
       if (data.next_approach) setApproach(data.next_approach);
       setPhase('instruction');
     } else {
-      ai.type = data.decision === 'CHECK' ? 'mastery_check' : 'instruction';
+      ai.type = 'instruction';
       if (data.approach) setApproach(data.approach);
+      if (data.decision === 'CHECK' && data.check_question) {
+        extra.push(withId({ role: 'ai', content: data.check_question, type: 'mastery_check' }));
+        trackerRef.current = newTracker();
+      }
       setPhase(data.decision === 'CHECK' ? 'mastery_check' : 'instruction');
     }
-    setMessages(prev => [...prev, ai]);
-    if (modeRef.current === 'voice') speech.speak(ai.content, ai.id);
+    setMessages(prev => [...prev, ai, ...extra]);
+    const speakNow = extra.length ? extra[extra.length - 1] : ai;
+    if (modeRef.current === 'voice' && !lowBwRef.current) speech.speak(extra.length ? `${ai.content} ${speakNow.content}` : ai.content, speakNow.id);
   }, [speech]);
 
-  const send = useCallback(async (content, inputMode, { requestCheck = false } = {}) => {
+  const send = useCallback(async (content, inputMode, { requestCheck = false, provenance = null } = {}) => {
     const text = (content || '').trim();
     if ((!text && !requestCheck) || busy) return;
     speech.stop();
@@ -149,14 +196,23 @@ export default function Session() {
     setMessages(prev => [...prev, withId({ role: 'learner', content: text || t('session.ready'), type: 'response', input_mode: inputMode })]);
     setBusy(true);
     try {
-      const res = await api.post('/learner/session/message', { content: text, session_id: sessionId, input_mode: inputMode, request_check: requestCheck });
+      const res = await api.post('/learner/session/message', { content: text, session_id: sessionId, input_mode: inputMode, request_check: requestCheck, ...(provenance ? { provenance } : {}) });
       if (!res.data || !res.data.message) throw new Error('unexpected response shape');
       applyResponse(res.data);
     } catch (e) {
-      setError('Couldn’t reach Professor Qubirex. Check your connection and try again.');
+      setError(navigator.onLine ? 'Couldn’t reach Professor Qubirex. Try again.' : 'You are offline. Lessons and checks need a connection — your time and doubts are saved and will sync.');
     }
     setBusy(false);
   }, [busy, sessionId, speech, applyResponse, t]);
+
+  // A spoken check answer goes into the editable transcript, never straight in.
+  const toCheckDraft = useCallback((text) => {
+    const tr = trackerRef.current;
+    trackerRef.current = { ...tr, mode: 'voice', original: `${tr.original ? `${tr.original} ` : ''}${text}`.trim() };
+    setDraft(d => `${d ? `${d} ` : ''}${text}`.trim());
+    setMode('typing');
+    setNotice('Check your spoken answer, fix anything misheard, then press Send.');
+  }, []);
 
   const sendAudio = useCallback(async (blob) => {
     setTranscribing(true); setBusy(true); setError('');
@@ -165,6 +221,7 @@ export default function Session() {
       form.append('audio', blob, 'answer.webm');
       if (sessionId) form.append('session_id', sessionId);
       const res = await api.post('/learner/session/voice', form);
+      if (res.data?.check_pending) { toCheckDraft(res.data.transcript || ''); setTranscribing(false); setBusy(false); return; }
       if (!res.data || !res.data.message) throw new Error('unexpected response shape');
       setMessages(prev => [...prev, withId({ role: 'learner', content: res.data.transcript, type: 'response', input_mode: 'voice' })]);
       applyResponse(res.data);
@@ -172,9 +229,14 @@ export default function Session() {
       setError(e.response?.data?.error || 'Couldn’t hear that. Try again, or type your answer.');
     }
     setTranscribing(false); setBusy(false);
-  }, [sessionId, applyResponse]);
+  }, [sessionId, applyResponse, toCheckDraft]);
 
-  const mic = useSpeechInput({ lang: bcp47, onFinal: (text) => send(text, 'voice'), onAudio: sendAudio });
+  const mic = useSpeechInput({
+    lang: bcp47,
+    onFinal: (text) => { lastInputRef.current = Date.now(); if (phaseRef.current === 'mastery_check') toCheckDraft(text); else send(text, 'voice'); },
+    onAudio: sendAudio,
+    recorder: recorderOptions(lowBw)
+  });
 
   const toggleMic = () => {
     if (mic.listening) { mic.stop(); return; }
@@ -188,7 +250,18 @@ export default function Session() {
     speech.stop();
     setMode('typing');
   };
-  const submitDraft = () => { const text = draft; setDraft(''); send(text, 'text'); };
+  const submitDraft = () => {
+    const text = draft;
+    setDraft('');
+    if (phase === 'mastery_check') {
+      const tr = trackerRef.current;
+      const provenance = provenanceFor(tr, text);
+      trackerRef.current = newTracker();
+      send(text, tr.mode === 'voice' ? 'voice' : 'text', { provenance });
+      return;
+    }
+    send(text, 'text');
+  };
 
   // ── Derived view state ─────────────────────────────────────────────────────
   const lastAi = useMemo(() => [...messages].reverse().find(m => m.role === 'ai'), [messages]);
@@ -267,6 +340,7 @@ export default function Session() {
             )}
           </div>
 
+          {notice && !error && <div className="ln-banner-check" role="status">{notice}</div>}
           {(error || mic.error) && <div className="ln-banner-check" role="alert" style={{ borderColor: 'var(--status-danger)', color: '#F5C8BD' }}>{error || mic.error}</div>}
 
           {mode === 'typing' && phase !== 'result' && (
@@ -275,6 +349,7 @@ export default function Session() {
               <textarea id="typed" rows={2} value={draft} disabled={busy} autoFocus
                 placeholder={t('session.typeHere')}
                 onChange={e => setDraft(e.target.value)}
+                onPaste={e => { if (phase === 'mastery_check') trackerRef.current = recordPaste(trackerRef.current, e.clipboardData.getData('text')); }}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitDraft(); } }} />
               <button type="button" className="ln-btn ln-btn-amber ln-indic" style={{ borderRadius: 'var(--radius-lg)' }} onClick={submitDraft} disabled={busy || !draft.trim()}>{t('session.send')}</button>
             </div>

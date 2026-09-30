@@ -30,6 +30,7 @@ import 'dotenv/config';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { initDb, getDb } from '../db/init.js';
+import { mapPathway } from '../core/graph/coverage.js';
 
 if (process.env.NODE_ENV === 'production') {
   console.error('Refusing to seed test accounts with NODE_ENV=production.');
@@ -198,6 +199,8 @@ try {
     `).run(EL_ID);
   });
   seed();
+  // Map the programme's nodes onto the Capability Graph (v4.3 §3).
+  mapPathway(CT_ID);
 
   // ── Employer (password reset on every run) ────────────────────────────────
   const now = new Date().toISOString();

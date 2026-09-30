@@ -4,6 +4,9 @@ import { legacyHandle as getDb } from '../../core/db/dal.js';
 import { authenticateToken, requireRole } from '../middleware/auth.js';
 import { getMasteryLog, nodeConfidence } from '../../core/masteryLog.js';
 import { calibrationRegister } from '../../config/params.js';
+import * as dal from '../../core/db/dal.js';
+import { listSkills, addAlias, createSkill, getSkill, addPrereq } from '../../core/graph/ontology.js';
+import { mapPathway } from '../../core/graph/coverage.js';
 
 const router = express.Router();
 
@@ -90,6 +93,58 @@ router.get('/quality-report', (req, res) => {
     calibration_register: calibrationRegister(),   // v4.3 Appendix A.1
     note: 'High avg_attempts on a node signals a potential explanation-architecture issue, not learner failure'
   });
+});
+
+// ─── Capability Graph: ontology and review queue (v4.3 §3) ──────────────────
+router.get('/skills', (req, res) => {
+  res.json({ skills: listSkills() });
+});
+
+router.get('/ontology-review', (req, res) => {
+  const status = ['pending', 'aliased', 'created', 'rejected'].includes(req.query.status) ? req.query.status : 'pending';
+  const items = dal.all('SELECT * FROM ontology_review_queue WHERE status = ? ORDER BY occurrences DESC, created_at LIMIT 200', status)
+    .map(r => ({ ...r, context: r.context_json ? JSON.parse(r.context_json) : null, context_json: undefined }));
+  const counts = Object.fromEntries(dal.all('SELECT status, COUNT(*) n FROM ontology_review_queue GROUP BY status').map(r => [r.status, r.n]));
+  res.json({ items, counts });
+});
+
+// Resolve one queued text: make it an alias of an existing skill, create a
+// new skill (optionally under a parent), or reject it. Approved text becomes
+// a permanent part of the ontology, and unmapped pathway nodes are re-mapped.
+router.post('/ontology-review/:id', (req, res) => {
+  const item = dal.one('SELECT * FROM ontology_review_queue WHERE id = ?', req.params.id);
+  if (!item) return res.status(404).json({ error: 'Not found' });
+  if (item.status !== 'pending') return res.status(409).json({ error: 'Already resolved' });
+  const { action } = req.body;
+  try {
+    let skillId = null;
+    dal.tx(() => {
+      if (action === 'alias') {
+        if (!getSkill(req.body.skill_id)) throw Object.assign(new Error('Pick an existing skill'), { status: 400 });
+        addAlias(item.text, req.body.skill_id, 'review');
+        skillId = req.body.skill_id;
+      } else if (action === 'create') {
+        skillId = createSkill({ id: req.body.skill_id || undefined, name: String(req.body.name || item.text).trim(), domain: req.body.domain || 'general', parent: req.body.parent || null, hours: req.body.hours ? Number(req.body.hours) : null });
+        if (item.text.trim().toLowerCase() !== String(req.body.name || item.text).trim().toLowerCase()) addAlias(item.text, skillId, 'review');
+        (req.body.prereqs || []).forEach(p => addPrereq(skillId, p));
+      } else if (action !== 'reject') {
+        throw Object.assign(new Error('action must be alias, create or reject'), { status: 400 });
+      }
+      dal.run('UPDATE ontology_review_queue SET status = ?, resolved_skill_id = ?, resolved_by = ?, resolved_at = ? WHERE id = ?',
+        action === 'alias' ? 'aliased' : action === 'create' ? 'created' : 'rejected', skillId, req.user.id, dal.nowIso(), item.id);
+    });
+    let remapped = 0;
+    if (skillId) {
+      dal.all('SELECT id FROM capability_targets').forEach(t => {
+        const before = dal.one(`SELECT COUNT(*) n FROM skill_nodes sn JOIN skill_clusters sc ON sc.id = sn.cluster_id
+          WHERE sc.capability_target_id = ? AND NOT EXISTS (SELECT 1 FROM node_skill_map m WHERE m.node_id = sn.id)`, t.id).n;
+        if (before) remapped += before - mapPathway(t.id).unmapped.length;
+      });
+    }
+    res.json({ ok: true, skill_id: skillId, remapped_nodes: remapped });
+  } catch (err) {
+    res.status(err.status || (err.code === 'cycle' ? 400 : 400)).json({ error: err.message });
+  }
 });
 
 export default router;

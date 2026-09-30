@@ -134,12 +134,12 @@ SYSTEM PROMPT RULES:
 - Introduce the English technical term ONLY AFTER the concept is understood in ${ctx.lang_name}
 - Never say "wrong", "incorrect", "failed" — on loop use: "${ctx.loop_message}"
 - Code examples are ALWAYS in English. Explanation of code is in ${ctx.lang_name}.
-- When you have explained sufficiently, set decision to CHECK and provide the mastery check question
-- Mastery check must require the learner to USE the concept — not recall it. Ask in ${ctx.lang_name}.
+- When you have explained sufficiently, set decision to CHECK and tell the learner, in one short line, that a check is next.
+- You never write the check question: the assessment system writes it separately, from the node spec. Do not include a question to be graded.
 - Approaches already used at this node (never repeat): ${approachesAlreadyUsed.join(', ') || 'none'}
 - "captionEn" is a caption, not the lesson: 1–2 plain-English sentences glossing what you just said. Compose "message" natively in ${ctx.lang_name} first; never translate the lesson from English.
 - The message will usually be spoken aloud by a text-to-speech voice: keep sentences short, and put code and diagrams ONLY in "code"/"mermaid", never inside "message".${learnerRequestedCheck ? `
-- THE LEARNER HAS SAID THEY ARE READY FOR THE MASTERY CHECK. Set decision to CHECK this turn, give a short encouraging line, and provide the check question.` : ''}
+- THE LEARNER HAS SAID THEY ARE READY FOR THE MASTERY CHECK. Set decision to CHECK this turn and give a short encouraging line (no question).` : ''}
 
 CONVERSATION HISTORY (last 6 turns):
 ${formatHistory(conversationHistory) || '(session start)'}
@@ -149,7 +149,6 @@ Respond ONLY with JSON:
   "message": "native-language instruction text",
   "captionEn": "1-2 sentence plain-English caption of the message",
   "decision": "CONTINUE | CHECK",
-  "checkQuestion": "mastery check question in learner language — only if decision=CHECK, else null",
   "mermaid": "mermaid diagram string — optional, for logic flow, else null",
   "code": "code snippet in English — optional, else null",
   "behaviourSignal": "engaged | confused | disengaged | accelerating",
@@ -162,10 +161,15 @@ Respond ONLY with JSON:
     : `Begin teaching "${nodeLabel}" using the ${approach} approach.`;
 
   const text = await callAI({ system, userMessage: lastMessage, maxTokens: 2048, temperature: 0.7 });
-  return safeParseJSON(text, {
-    message: text, captionEn: null, decision: 'CONTINUE', checkQuestion: null, mermaid: null, code: null,
+  const out = safeParseJSON(text, {
+    message: text, captionEn: null, decision: 'CONTINUE', mermaid: null, code: null,
     behaviourSignal: 'engaged', approachesUsed: [approach], culturalExampleUsed: null
   });
+  // v4.3 §7: the teacher never writes the check it is judged by. Anything the
+  // model puts in a question field is dropped here, whatever the prompt said.
+  delete out.checkQuestion;
+  delete out.check_question;
+  return out;
 }
 
 // ─── answerDoubt() ──────────────────────────────────────────────────────────────

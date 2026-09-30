@@ -57,3 +57,14 @@ export async function login(app, path, body) {
   const res = await agent.post(path).send(body);
   return { agent, res, token: res.body.token, csrf: res.body.csrf_token };
 }
+
+/** Give an institution fixture a two-cluster pathway and put its learner on the first node. */
+export function seedPathway(f, { theta = 0.75 } = {}) {
+  const ct = `ct-${f.institutionId.slice(5)}`;
+  [['c1', 'SQL', 0], ['c2', 'Python', 1]].forEach(([c, label, i]) =>
+    dal.run('INSERT INTO skill_clusters (id, capability_target_id, cluster_label, mastery_threshold, sequence_order) VALUES (?, ?, ?, ?, ?)', `${ct}-${c}`, ct, label, theta, i));
+  [['n1', 'c1', 'SQL queries', 0], ['n2', 'c1', 'Joins', 1], ['n3', 'c2', 'Python loops', 0]].forEach(([n, c, label, i]) =>
+    dal.run('INSERT INTO skill_nodes (id, cluster_id, node_label, sequence_order, estimated_minutes) VALUES (?, ?, ?, ?, 20)', `${ct}-${n}`, `${ct}-${c}`, label, i));
+  dal.run('UPDATE engagement_learners SET current_node_id = ?, current_cluster_id = ? WHERE id = ?', `${ct}-n1`, `${ct}-c1`, f.elId);
+  return { ct, nodes: [`${ct}-n1`, `${ct}-n2`, `${ct}-n3`] };
+}

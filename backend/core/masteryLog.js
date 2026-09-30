@@ -15,6 +15,11 @@
 import { legacyHandle as getDb } from './db/dal.js';
 import { calculateSimulationReadiness, calculateConfidenceIndicator } from './instructionEngine.js';
 import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
+import { canonicalBytes } from './return/canonical.js';
+import { signBytes } from './return/signing.js';
+import { newEvidenceId } from './qep/evidenceId.js';
+import { emit } from './events/outbox.js';
 
 // Confidence is computed from the facts (mastery checks and loops) whenever it
 // is read. It is never stored: sign facts, compute labels (spec §2, §6).
@@ -161,13 +166,26 @@ function saveMasteryLog(engagementId, learnerId, logData) {
   const engagement = db.prepare('SELECT capability_target_id FROM engagements WHERE id = ?').get(engagementId);
   const ct = db.prepare('SELECT title, version FROM capability_targets WHERE id = ?').get(engagement.capability_target_id);
 
+  // Integrity (v4.3 §9): an Evidence ID and the SHA-256 of the canonical
+  // (RFC 8785) JSON, signed. The Evidence ID is kept across re-production.
+  const previous = db.prepare('SELECT evidence_id FROM mastery_logs WHERE engagement_id = ? AND learner_id = ?').get(engagementId, learnerId);
+  const evidenceId = previous?.evidence_id || newEvidenceId();
+  const bytes = canonicalBytes({ ...logData, evidence_id: evidenceId });
+  const sha256 = crypto.createHash('sha256').update(bytes).digest('hex');
+  const signature = signBytes(bytes);
+  const el = db.prepare('SELECT id FROM engagement_learners WHERE engagement_id = ? AND learner_id = ?').get(engagementId, learnerId);
+
   // One current log per learner per engagement: producing again replaces it.
-  db.prepare('DELETE FROM mastery_logs WHERE engagement_id = ? AND learner_id = ?').run(engagementId, learnerId);
   const id = uuidv4();
-  db.prepare(`
-    INSERT INTO mastery_logs (id, engagement_id, learner_id, capability_target_ref, log_data)
-    VALUES (?, ?, ?, ?, ?)
-  `).run(id, engagementId, learnerId, `${ct.title} v${ct.version}`, JSON.stringify(logData));
+  db.transaction(() => {
+    db.prepare('DELETE FROM mastery_logs WHERE engagement_id = ? AND learner_id = ?').run(engagementId, learnerId);
+    db.prepare(`
+      INSERT INTO mastery_logs (id, engagement_id, learner_id, capability_target_ref, log_data, evidence_id, sha256, signature_json)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(id, engagementId, learnerId, `${ct.title} v${ct.version}`, JSON.stringify({ ...logData, evidence_id: evidenceId }), evidenceId, sha256, JSON.stringify(signature));
+    // MASTERY_LOG_PRODUCED → PASSPORT.issue (v4.3 §7).
+    if (el) emit('MASTERY_LOG_PRODUCED', { aggregateType: 'enrolment', aggregateId: el.id, payload: { el_id: el.id, log_id: id, evidence_id: evidenceId } }, db);
+  })();
 
   db.close();
   return id;

@@ -30,6 +30,12 @@ export function hit(name, key, limit, windowMs, now = Date.now()) {
   return { allowed: entry.count <= limit, remaining: Math.max(0, limit - entry.count), retryAfterS: Math.ceil((entry.resetAt - now) / 1000) };
 }
 
+/** Current count without counting a hit. */
+export function peek(name, key, now = Date.now()) {
+  const entry = buckets.get(name)?.get(key);
+  return !entry || entry.resetAt <= now ? 0 : entry.count;
+}
+
 export function resetRateLimits() {
   buckets.clear();
 }

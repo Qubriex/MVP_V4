@@ -9,7 +9,8 @@ export default defineConfig({
       JWT_SECRET: 'test-secret-not-for-production',
       AI_ADAPTER: 'mock',
       LOG_LEVEL: 'silent',
-      SECURE_CONFIG_DIR: './tests/no-secure-config'
+      SECURE_CONFIG_DIR: './tests/no-secure-config',
+      DEV_KEY_DIR: './data/test-keys'
     },
     testTimeout: 20000
   }
