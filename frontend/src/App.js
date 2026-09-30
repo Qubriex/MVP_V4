@@ -41,10 +41,25 @@ import Welcome from './pages/learn/Welcome';
 import Reviews from './pages/learn/Reviews';
 import Passport from './pages/learn/Passport';
 import Verify from './pages/Verify';
+import EmployerLogin from './pages/employer/Login';
+import EmployerInvite from './pages/employer/Invite';
+import EmployerLayout from './pages/employer/Layout';
+import EmployerHome from './pages/employer/Home';
+import EmployerCompany from './pages/employer/Company';
+import EmployerTeam from './pages/employer/Team';
+import EmployerApiKeys from './pages/employer/ApiKeys';
+import AdminLogin from './pages/admin/Login';
+import AdminLayout from './pages/admin/Layout';
+import AdminOverview from './pages/admin/Overview';
+import AdminEmployers from './pages/admin/Employers';
+import AdminOntology from './pages/admin/Ontology';
+import AdminQuality from './pages/admin/Quality';
+
+const LOGIN_FOR = { learner: '/learner-login', employer: '/employer/login', admin: '/admin/login' };
 
 function ProtectedRoute({ children, requiredRole }) {
   const { token, role } = useAuth();
-  if (!token) return <Navigate to="/login" replace />;
+  if (!token) return <Navigate to={LOGIN_FOR[requiredRole] || '/login'} replace />;
   if (requiredRole && role !== requiredRole && role !== 'admin') return <Navigate to="/" replace />;
   return children;
 }
@@ -69,6 +84,36 @@ export default function App() {
               <Route path="/learner-invite/:token" element={<LearnerInvite />} />
               <Route path="/verify" element={<Verify />} />
               <Route path="/verify/:id" element={<Verify />} />
+              <Route path="/employer/login" element={<EmployerLogin />} />
+              <Route path="/employer/register" element={<EmployerLogin />} />
+              <Route path="/employer/invite/:token" element={<EmployerInvite />} />
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/employer/*" element={
+                <ProtectedRoute requiredRole="employer">
+                  <Routes>
+                    <Route element={<EmployerLayout />}>
+                      <Route path="home" element={<EmployerHome />} />
+                      <Route path="company" element={<EmployerCompany />} />
+                      <Route path="team" element={<EmployerTeam />} />
+                      <Route path="api-keys" element={<EmployerApiKeys />} />
+                      <Route path="*" element={<Navigate to="/employer/home" replace />} />
+                    </Route>
+                  </Routes>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/*" element={
+                <ProtectedRoute requiredRole="admin">
+                  <Routes>
+                    <Route element={<AdminLayout />}>
+                      <Route path="overview" element={<AdminOverview />} />
+                      <Route path="employers" element={<AdminEmployers />} />
+                      <Route path="ontology" element={<AdminOntology />} />
+                      <Route path="quality" element={<AdminQuality />} />
+                      <Route path="*" element={<Navigate to="/admin/overview" replace />} />
+                    </Route>
+                  </Routes>
+                </ProtectedRoute>
+              } />
 
               {/* Institution (staff) routes — one dark-sidebar shell; profile
                   setup after an invite runs full screen. Old URLs redirect. */}

@@ -19,7 +19,7 @@ api.interceptors.response.use(
       localStorage.removeItem('qubirex_role');
       const home = { learner: '/learner-login', employer: '/employer/login', admin: '/admin/login' }[role] || '/login';
       // Public pages (verifier, sign-in screens) never redirect.
-      if (!/^\/(verify|employer\/login|employer\/register|admin\/login|login|learner-login)/.test(window.location.pathname)) window.location.href = home;
+      if (!/^\/(verify|employer\/login|employer\/register|employer\/invite|admin\/login|login|learner-login)/.test(window.location.pathname)) window.location.href = home;
     }
     return Promise.reject(err);
   }
