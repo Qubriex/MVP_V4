@@ -20,7 +20,7 @@ describe('AI gateway', () => {
 
   it('logs every call to model_calls with task and model', async () => {
     await generate({ task: 'EVAL.mastery', input: 'x', institutionId: 'inst-1', promptId: 'EVAL.mastery', promptVersion: 'v1' });
-    const row = dal.one("SELECT * FROM model_calls WHERE task = 'EVAL.mastery' ORDER BY created_at DESC");
+    const row = await dal.one("SELECT * FROM model_calls WHERE task = 'EVAL.mastery' ORDER BY created_at DESC");
     expect(row).toMatchObject({ adapter: 'mock', model_id: 'mock', status: 'ok', institution_id: 'inst-1', prompt_version: 'v1' });
   });
 
@@ -36,7 +36,7 @@ describe('AI gateway', () => {
     restore = setResponder(() => ({ wrong: true }));
     await expect(generate({ task: 'TEACH.instruct', input: 'y', schema: { required: ['decision'] } }))
       .rejects.toMatchObject({ name: 'GatewayError', code: 'schema_failed' });
-    expect(dal.one("SELECT status FROM model_calls WHERE status = 'schema_failed'")).toBeTruthy();
+    expect(await dal.one("SELECT status FROM model_calls WHERE status = 'schema_failed'")).toBeTruthy();
   });
 
   it('retries a 5xx once, then surfaces a typed upstream error', async () => {

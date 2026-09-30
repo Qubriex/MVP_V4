@@ -9,6 +9,7 @@ import { authenticateToken, requireRole, requireActiveLearner } from '../middlew
 import { parseJSON } from '../../core/market/skillGap.js';
 import * as market from '../../core/market/sampleMarket.js';
 import * as portfolio from '../../core/portfolio.js';
+import { eachSeq } from '../../core/util/seq.js';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
@@ -22,8 +23,8 @@ const RESUME_SECTIONS = ['summary', 'skills', 'projects', 'education', 'experien
 const DEFAULT_SECTIONS = RESUME_SECTIONS.map(key => ({ key, on: !['experience', 'certifications'].includes(key) }));
 
 // ─── Shared reads ──────────────────────────────────────────────────────────────
-function loadProfile(db, user) {
-  const learner = db.prepare(`
+async function loadProfile(db, user) {
+  const learner = await db.prepare(`
     SELECT l.id, l.name, l.email, l.learner_ref, l.language, l.profile_type,
            e.title as engagement_title, i.name as institution_name
     FROM learners l
@@ -34,11 +35,11 @@ function loadProfile(db, user) {
   `).get(user.id, user.el_id);
   if (!learner) return null;
 
-  const p = db.prepare('SELECT * FROM learner_profiles WHERE learner_id = ?').get(user.id) || {};
-  const education = db.prepare('SELECT * FROM learner_education WHERE learner_id = ? ORDER BY sequence_order').all(user.id);
-  const projects = db.prepare('SELECT * FROM learner_projects WHERE learner_id = ? ORDER BY sequence_order').all(user.id)
+  const p = await db.prepare('SELECT * FROM learner_profiles WHERE learner_id = ?').get(user.id) || {};
+  const education = await db.prepare('SELECT * FROM learner_education WHERE learner_id = ? ORDER BY sequence_order').all(user.id);
+  const projects = (await db.prepare('SELECT * FROM learner_projects WHERE learner_id = ? ORDER BY sequence_order').all(user.id))
     .map(x => ({ ...x, tools: parseJSON(x.tools, []) }));
-  const nodes = db.prepare(`
+  const nodes = await db.prepare(`
     SELECT sn.node_label, sc.cluster_label, nm.advanced_at, sn.id = el.current_node_id as is_current
     FROM skill_nodes sn
     JOIN skill_clusters sc ON sc.id = sn.cluster_id
@@ -85,9 +86,9 @@ function completeness(p) {
 }
 
 // ─── Profile ───────────────────────────────────────────────────────────────────
-router.get('/profile', (req, res) => {
+router.get('/profile', async (req, res) => {
   const db = getDb();
-  const profile = loadProfile(db, req.user);
+  const profile = await loadProfile(db, req.user);
   db.close();
   if (!profile) return res.status(404).json({ error: 'Not found' });
   res.json(profile);
@@ -97,19 +98,19 @@ const clean = (v, max = 2000) => (typeof v === 'string' ? v.trim().slice(0, max)
 const cleanList = (v, max = 30) => (Array.isArray(v) ? v.map(x => clean(String(x), 120)).filter(Boolean).slice(0, max) : []);
 
 // Replace-all semantics for education and projects: the client sends the whole list.
-router.put('/profile', (req, res) => {
+router.put('/profile', async (req, res) => {
   const b = req.body || {};
   if (b.ui_language && !['telugu', 'hindi', 'english'].includes(b.ui_language)) {
     return res.status(400).json({ error: 'ui_language must be telugu, hindi or english' });
   }
   const db = getDb();
-  const current = loadProfile(db, req.user);
+  const current = await loadProfile(db, req.user);
   if (!current) { db.close(); return res.status(404).json({ error: 'Not found' }); }
   const pick = (key, fn, fallback) => (key in b ? fn(b[key]) : fallback);
 
-  const write = db.transaction(() => {
-    if ('email' in b) db.prepare('UPDATE learners SET email = ? WHERE id = ?').run(clean(b.email, 200) || null, req.user.id);
-    db.prepare(`
+  const write = db.transaction(async () => {
+    if ('email' in b) await db.prepare('UPDATE learners SET email = ? WHERE id = ?').run(clean(b.email, 200) || null, req.user.id);
+    await db.prepare(`
       INSERT INTO learner_profiles (learner_id, phone, city, link_url, headline, about, target_roles, preferred_cities,
         available_from, expected_salary, self_skills, experience, certifications, ui_language, voice_prefs, share_with_institution, updated_at)
       VALUES (@learner_id, @phone, @city, @link_url, @headline, @about, @target_roles, @preferred_cities,
@@ -142,23 +143,23 @@ router.put('/profile', (req, res) => {
     });
 
     if (Array.isArray(b.education)) {
-      db.prepare('DELETE FROM learner_education WHERE learner_id = ?').run(req.user.id);
+      await db.prepare('DELETE FROM learner_education WHERE learner_id = ?').run(req.user.id);
       const ins = db.prepare(`INSERT INTO learner_education (id, learner_id, degree, institution_name, city, start_year, end_year, grade, sequence_order)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`);
-      b.education.filter(e => clean(e.degree)).slice(0, 10).forEach((e, i) =>
-        ins.run(uuidv4(), req.user.id, clean(e.degree, 160), clean(e.institution_name, 160), clean(e.city, 80),
+      await eachSeq(b.education.filter(e => clean(e.degree)).slice(0, 10), async (e, i) =>
+        await ins.run(uuidv4(), req.user.id, clean(e.degree, 160), clean(e.institution_name, 160), clean(e.city, 80),
           clean(e.start_year, 10), clean(e.end_year, 10), clean(e.grade, 40), i));
     }
     if (Array.isArray(b.projects)) {
-      db.prepare('DELETE FROM learner_projects WHERE learner_id = ?').run(req.user.id);
+      await db.prepare('DELETE FROM learner_projects WHERE learner_id = ?').run(req.user.id);
       const ins = db.prepare(`INSERT INTO learner_projects (id, learner_id, title, description, tools, link_url, sequence_order)
         VALUES (?, ?, ?, ?, ?, ?, ?)`);
-      b.projects.filter(p => clean(p.title)).slice(0, 20).forEach((p, i) =>
-        ins.run(uuidv4(), req.user.id, clean(p.title, 160), clean(p.description, 1000), JSON.stringify(cleanList(p.tools, 15)), clean(p.link_url, 300), i));
+      await eachSeq(b.projects.filter(p => clean(p.title)).slice(0, 20), async (p, i) =>
+        await ins.run(uuidv4(), req.user.id, clean(p.title, 160), clean(p.description, 1000), JSON.stringify(cleanList(p.tools, 15)), clean(p.link_url, 300), i));
     }
   });
-  write();
-  const updated = loadProfile(db, req.user);
+  await write();
+  const updated = await loadProfile(db, req.user);
   db.close();
   res.json(updated);
 });
@@ -168,7 +169,7 @@ router.post('/profile/summary-from-speech', async (req, res) => {
   const transcript = clean(req.body && req.body.transcript, 4000);
   if (!transcript) return res.status(400).json({ error: 'transcript required' });
   const db = getDb();
-  const profile = loadProfile(db, req.user);
+  const profile = await loadProfile(db, req.user);
   db.close();
   try {
     const summary = await portfolio.summaryFromSpeech({
@@ -212,12 +213,12 @@ function resumeRow(row) {
   return { ...row, sections: normalizeSections(parseJSON(row.sections, DEFAULT_SECTIONS)), skill_order: parseJSON(row.skill_order, null) };
 }
 
-router.get('/resume', (req, res) => {
+router.get('/resume', async (req, res) => {
   const db = getDb();
-  const profile = loadProfile(db, req.user);
-  const latest = resumeRow(db.prepare('SELECT * FROM resume_versions WHERE learner_id = ? ORDER BY version DESC LIMIT 1').get(req.user.id));
-  const versions = db.prepare('SELECT version, template, tailored_job_id, created_at FROM resume_versions WHERE learner_id = ? ORDER BY version DESC').all(req.user.id);
-  const saved = db.prepare('SELECT job_id FROM learner_jobs WHERE learner_id = ?').all(req.user.id).map(r => r.job_id);
+  const profile = await loadProfile(db, req.user);
+  const latest = resumeRow(await db.prepare('SELECT * FROM resume_versions WHERE learner_id = ? ORDER BY version DESC LIMIT 1').get(req.user.id));
+  const versions = await db.prepare('SELECT version, template, tailored_job_id, created_at FROM resume_versions WHERE learner_id = ? ORDER BY version DESC').all(req.user.id);
+  const saved = (await db.prepare('SELECT job_id FROM learner_jobs WHERE learner_id = ?').all(req.user.id)).map(r => r.job_id);
   db.close();
   res.json({
     profile,
@@ -227,27 +228,27 @@ router.get('/resume', (req, res) => {
   });
 });
 
-router.get('/resume/versions/:version', (req, res) => {
+router.get('/resume/versions/:version', async (req, res) => {
   const db = getDb();
-  const row = resumeRow(db.prepare('SELECT * FROM resume_versions WHERE learner_id = ? AND version = ?').get(req.user.id, parseInt(req.params.version, 10)));
+  const row = resumeRow(await db.prepare('SELECT * FROM resume_versions WHERE learner_id = ? AND version = ?').get(req.user.id, parseInt(req.params.version, 10)));
   db.close();
   if (!row) return res.status(404).json({ error: 'Version not found' });
   res.json(row);
 });
 
-router.post('/resume', (req, res) => {
+router.post('/resume', async (req, res) => {
   const b = req.body || {};
   const template = ['classic', 'modern', 'compact'].includes(b.template) ? b.template : 'classic';
   const sections = normalizeSections(b.sections);
   const db = getDb();
-  const next = (db.prepare('SELECT MAX(version) as v FROM resume_versions WHERE learner_id = ?').get(req.user.id).v || 0) + 1;
-  db.prepare(`
+  const next = ((await db.prepare('SELECT MAX(version) as v FROM resume_versions WHERE learner_id = ?').get(req.user.id)).v || 0) + 1;
+  await db.prepare(`
     INSERT INTO resume_versions (id, learner_id, version, template, sections, summary, skill_order, tailored_job_id)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `).run(uuidv4(), req.user.id, next, template, JSON.stringify(sections), clean(b.summary, 1500) || null,
     Array.isArray(b.skill_order) ? JSON.stringify(cleanList(b.skill_order, 60)) : null,
     market.JOBS.some(j => j.id === b.tailored_job_id) ? b.tailored_job_id : null);
-  const row = resumeRow(db.prepare('SELECT * FROM resume_versions WHERE learner_id = ? AND version = ?').get(req.user.id, next));
+  const row = resumeRow(await db.prepare('SELECT * FROM resume_versions WHERE learner_id = ? AND version = ?').get(req.user.id, next));
   db.close();
   res.status(201).json(row);
 });
@@ -256,7 +257,7 @@ router.post('/resume/tailor', async (req, res) => {
   const job = market.JOBS.find(j => j.id === (req.body && req.body.job_id));
   if (!job) return res.status(404).json({ error: 'Job not found' });
   const db = getDb();
-  const profile = loadProfile(db, req.user);
+  const profile = await loadProfile(db, req.user);
   db.close();
   try {
     const tailored = await portfolio.tailorResume({
@@ -270,22 +271,22 @@ router.post('/resume/tailor', async (req, res) => {
 });
 
 // ─── Skill requests — ask the institution to add a skill to the pathway ───────
-router.get('/skill-requests', (req, res) => {
+router.get('/skill-requests', async (req, res) => {
   const db = getDb();
-  const rows = db.prepare('SELECT id, skill_name, source, status, created_at FROM skill_requests WHERE engagement_learner_id = ? ORDER BY created_at DESC').all(req.user.el_id);
+  const rows = await db.prepare('SELECT id, skill_name, source, status, created_at FROM skill_requests WHERE engagement_learner_id = ? ORDER BY created_at DESC').all(req.user.el_id);
   db.close();
   res.json(rows);
 });
 
-router.post('/skill-requests', (req, res) => {
+router.post('/skill-requests', async (req, res) => {
   const skillName = clean(req.body && req.body.skill_name, 120);
   if (!skillName) return res.status(400).json({ error: 'skill_name required' });
   const db = getDb();
-  db.prepare(`
+  await db.prepare(`
     INSERT OR IGNORE INTO skill_requests (id, engagement_learner_id, engagement_id, skill_name, source)
     VALUES (?, ?, ?, ?, ?)
   `).run(uuidv4(), req.user.el_id, req.user.engagement_id, skillName, clean(req.body.source, 80) || null);
-  const row = db.prepare('SELECT id, skill_name, source, status, created_at FROM skill_requests WHERE engagement_learner_id = ? AND skill_name = ?').get(req.user.el_id, skillName);
+  const row = await db.prepare('SELECT id, skill_name, source, status, created_at FROM skill_requests WHERE engagement_learner_id = ? AND skill_name = ?').get(req.user.el_id, skillName);
   db.close();
   res.status(201).json(row);
 });

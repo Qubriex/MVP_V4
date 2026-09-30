@@ -17,22 +17,20 @@ export const EVENT_TYPES = new Set([
   'EMPLOYER_REGISTERED', 'CONSENT_GRANTED', 'CONSENT_WITHDRAWN'
 ]);
 
-const inTx = (conn) => (typeof conn.inTransaction === 'function' ? conn.inTransaction() : !!conn.inTransaction);
-
 /**
  * Record a domain event inside the caller's transaction.
  * @param {string} type one of EVENT_TYPES
  * @param {{aggregateType: string, aggregateId: string, payload?: object}} event
- * @param {object} [conn] a DAL driver or legacy handle; defaults to the shared connection
- * @returns {string} the event id
+ * @param {object} [_conn] ignored; kept so legacy call sites that pass a handle still work
+ * @returns {Promise<string>} the event id
  */
-export function emit(type, { aggregateType, aggregateId, payload = {} }, conn = dal.db()) {
+export async function emit(type, { aggregateType, aggregateId, payload = {} }, _conn) {
   if (!EVENT_TYPES.has(type)) throw new Error(`Unknown event type "${type}"`);
   if (!aggregateType || !aggregateId) throw new Error('emit() needs aggregateType and aggregateId');
-  if (!inTx(conn)) throw new Error(`emit(${type}) must run inside the transaction that makes the state change`);
+  if (!dal.inTransaction()) throw new Error(`emit(${type}) must run inside the transaction that makes the state change`);
   const id = ulid();
   const now = dal.nowIso();
-  conn.prepare(`INSERT INTO domain_events (id, type, aggregate_type, aggregate_id, payload_json, created_at, next_attempt_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?)`).run(id, type, aggregateType, String(aggregateId), JSON.stringify(payload), now, now);
+  await dal.run(`INSERT INTO domain_events (id, type, aggregate_type, aggregate_id, payload_json, created_at, next_attempt_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?)`, id, type, aggregateType, String(aggregateId), JSON.stringify(payload), now, now);
   return id;
 }

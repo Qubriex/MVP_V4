@@ -27,7 +27,15 @@ describe('model SDK boundary', () => {
 });
 
 describe('database driver boundary', () => {
-  it('better-sqlite3 is imported only by core/db/sqlite.js', () => {
-    expect(importers(/^better-sqlite3$/)).toEqual(['core/db/sqlite.js']);
+  it('pg is imported only by core/db/pg.js', () => {
+    expect(importers(/^pg$/)).toEqual(['core/db/pg.js']);
+  });
+
+  it('PGlite is imported only by core/db/pglite.js', () => {
+    expect(importers(/^@electric-sql\/pglite/)).toEqual(['core/db/pglite.js']);
+  });
+
+  it('nothing imports SQLite any more', () => {
+    expect(importers(/sqlite/)).toEqual([]);
   });
 });

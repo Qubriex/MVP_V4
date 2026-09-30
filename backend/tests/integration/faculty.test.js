@@ -11,8 +11,8 @@ const typed = { mode: 'typed', pasted_chars: 0, paste_events: 0, largest_paste: 
 beforeAll(async () => {
   await freshDb();
   app = await makeApp();
-  A = seedInstitution('a');
-  P = seedPathway(A);
+  A = await seedInstitution('a');
+  P = await seedPathway(A);
   learner = await login(app, '/api/auth/learner/login', { learner_ref: A.learnerRef, join_code: A.joinCode, pin: PIN });
   prof = await login(app, '/api/auth/institution/login', { email: A.profEmail, password: PASSWORD });
 });
@@ -52,15 +52,15 @@ describe('blind review queue', () => {
     const r = await prof.agent.post(`/api/institution/review-queue/${item.id}/verdict`).set('X-CSRF-Token', prof.csrf).send({ verdict: 'fail', band: '0.5-0.69' }).expect(200);
     expect(r.body.outcome).toMatchObject({ agree: false, recheck: true });
     expect(r.body.item.learner.learner_ref).toBe(A.learnerRef);
-    expect(dal.one('SELECT recheck_required, provisional FROM node_mastery WHERE skill_node_id = ?', P.nodes[0])).toEqual({ recheck_required: 1, provisional: 0 });
-    expect(dal.one("SELECT kind, passed FROM demonstrations WHERE kind = 'faculty'")).toEqual({ kind: 'faculty', passed: 0 });
-    expect(() => dal.run('DELETE FROM faculty_reviews')).toThrow(/append-only/);
+    expect(await dal.one('SELECT recheck_required, provisional FROM node_mastery WHERE skill_node_id = ?', P.nodes[0])).toEqual({ recheck_required: 1, provisional: 0 });
+    expect(await dal.one("SELECT kind, passed FROM demonstrations WHERE kind = 'faculty'")).toEqual({ kind: 'faculty', passed: 0 });
+    await expect((async () => await dal.run('DELETE FROM faculty_reviews'))()).rejects.toThrow(/append-only/);
     await prof.agent.post(`/api/institution/review-queue/${item.id}/verdict`).set('X-CSRF-Token', prof.csrf).send({ verdict: 'pass', band: '0.7-0.89' }).expect(409);
-    expect(dal.one("SELECT COUNT(*) n FROM domain_events WHERE type = 'FACULTY_REVIEW_DONE'").n).toBe(1);
+    expect((await dal.one("SELECT COUNT(*) n FROM domain_events WHERE type = 'FACULTY_REVIEW_DONE'")).n).toBe(1);
   });
 
   it('staff of another institution cannot see or decide the item', async () => {
-    const B = seedInstitution('b');
+    const B = await seedInstitution('b');
     const other = await login(app, '/api/auth/institution/login', { email: B.adminEmail, password: PASSWORD });
     const q = await other.agent.get('/api/institution/review-queue?status=done').expect(200);
     expect(q.body.items).toHaveLength(0);

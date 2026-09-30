@@ -71,7 +71,7 @@ export default function EmployerHome() {
             : otp && !otp.already_verified ? (
               <form className="ln-col" style={{ gap: 10 }} onSubmit={confirm}>
                 <p className="ln-small" style={{ margin: 0 }}>We sent a 6-digit code to <b>{otp.sent_to}</b>. It expires in {otp.expires_minutes} minutes.</p>
-                {otp.dev_code && <div className="ln-note ln-xs">Development build: no mail is sent. Your code is <b>{otp.dev_code}</b>.</div>}
+                {otp.dev_code && <div className="ln-note ln-xs">No email is sent on this test deployment. Your code is <b>{otp.dev_code}</b>.</div>}
                 <div className="ln-row ln-wrap" style={{ gap: 8 }}>
                   <input className="ln-input" style={{ maxWidth: 160, letterSpacing: '0.2em' }} inputMode="numeric" pattern="[0-9]{6}" maxLength={6} aria-label="Verification code" value={code} onChange={ev => setCode(ev.target.value.replace(/\D/g, ''))} required />
                   <button type="submit" className="ln-btn ln-btn-primary" disabled={busy || code.length !== 6}>Verify</button>

@@ -17,7 +17,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import { legacyHandle as getDb } from '../../core/db/dal.js';
 
-function loadStaff(req, res, next) {
+async function loadStaff(req, res, next) {
   if (req.user.role === 'admin') { // Inferexaa platform admin
     req.staff = { id: null, role: 'admin', name: 'Qubirex admin', platformAdmin: true };
     return next();
@@ -27,7 +27,7 @@ function loadStaff(req, res, next) {
     return next();
   }
   const db = getDb();
-  const row = db.prepare('SELECT id, name, title, role, status, department FROM institution_users WHERE id = ? AND institution_id = ?')
+  const row = await db.prepare('SELECT id, name, title, role, status, department FROM institution_users WHERE id = ? AND institution_id = ?')
     .get(req.user.staff_id, req.user.id);
   db.close();
   if (!row || row.status !== 'active') return res.status(401).json({ error: 'Your staff account is not active. Ask your institution admin.' });
@@ -48,24 +48,24 @@ function blockViewerWrites(req, res, next) {
 }
 
 // Engagement ids the caller may see, or null for "all in the institution".
-function scopedEngagementIds(db, req) {
+async function scopedEngagementIds(db, req) {
   if (req.staff.role !== 'professor') return null;
-  return db.prepare('SELECT engagement_id FROM staff_cohorts WHERE staff_id = ?').all(req.staff.id).map(r => r.engagement_id);
+  return (await db.prepare('SELECT engagement_id FROM staff_cohorts WHERE staff_id = ?').all(req.staff.id)).map(r => r.engagement_id);
 }
 
 // The engagement if it belongs to the caller's institution and is in scope.
-function findScopedEngagement(db, req, engagementId) {
-  const e = db.prepare('SELECT * FROM engagements WHERE id = ? AND institution_id = ?').get(engagementId, req.user.id);
+async function findScopedEngagement(db, req, engagementId) {
+  const e = await db.prepare('SELECT * FROM engagements WHERE id = ? AND institution_id = ?').get(engagementId, req.user.id);
   if (!e) return null;
-  const scope = scopedEngagementIds(db, req);
+  const scope = await scopedEngagementIds(db, req);
   return !scope || scope.includes(e.id) ? e : null;
 }
 
 // SQL fragment + params restricting `alias.engagement_id` (or e.id) to scope.
-function scopeClause(db, req, column) {
-  const scope = scopedEngagementIds(db, req);
+async function scopeClause(db, req, column) {
+  const scope = await scopedEngagementIds(db, req);
   if (!scope) return { sql: '', params: [] };
-  if (!scope.length) return { sql: ' AND 0', params: [] };
+  if (!scope.length) return { sql: ' AND FALSE', params: [] };
   return { sql: ` AND ${column} IN (${scope.map(() => '?').join(',')})`, params: scope };
 }
 

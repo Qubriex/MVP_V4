@@ -7,7 +7,10 @@
 //     dead-letters;
 //   - subscribers are idempotent on event id: each successful (event,
 //     subscriber) pair is recorded in event_consumptions and never re-run.
-// One worker per process in Phase 0 (docs/decisions.md D-007).
+// Several processes may drain at once (serverless instances, a cron call):
+// each event is claimed with FOR UPDATE SKIP LOCKED and delivered inside that
+// transaction, so a subscriber's writes and the delivery mark commit together
+// and no event is delivered twice.
 import * as dal from '../db/dal.js';
 import params from '../../config/params.js';
 import { logger } from '../logger.js';
@@ -29,14 +32,24 @@ const HEADS_SQL = `
   ORDER BY e.created_at, e.id
   LIMIT ?`;
 
+// Each subscriber runs in its own savepoint: its writes and its consumption
+// record commit together, and a later subscriber's failure does not undo them.
+// Returns the first error, or null when every subscriber has consumed it.
 async function deliver(event, nowIso) {
   const parsed = { ...event, payload: JSON.parse(event.payload_json || '{}') };
   for (const [name, handler] of subscribersFor(event.type)) {
-    const done = dal.one('SELECT 1 FROM event_consumptions WHERE event_id = ? AND subscriber = ?', event.id, name);
+    const done = await dal.one('SELECT 1 FROM event_consumptions WHERE event_id = ? AND subscriber = ?', event.id, name);
     if (done) continue;
-    await handler(parsed);
-    dal.run('INSERT OR IGNORE INTO event_consumptions (event_id, subscriber, consumed_at) VALUES (?, ?, ?)', event.id, name, nowIso());
+    try {
+      await dal.tx(async () => {
+        await handler(parsed);
+        await dal.run('INSERT OR IGNORE INTO event_consumptions (event_id, subscriber, consumed_at) VALUES (?, ?, ?)', event.id, name, nowIso());
+      });
+    } catch (err) {
+      return err;
+    }
   }
+  return null;
 }
 
 /**
@@ -59,29 +72,33 @@ export function createWorker(opts = {}) {
     const blocked = new Set(); // aggregates that failed during this tick
     try {
       for (let guard = 0; guard < batch; guard += 1) {
-        const heads = dal.all(HEADS_SQL, nowIso(), batch).filter(e => !blocked.has(`${e.aggregate_type}:${e.aggregate_id}`));
+        const heads = (await dal.all(HEADS_SQL, nowIso(), batch)).filter(e => !blocked.has(`${e.aggregate_type}:${e.aggregate_id}`));
         if (!heads.length) break;
         for (const event of heads) {
-          try {
-            await deliver(event, nowIso);
-            dal.run('UPDATE domain_events SET delivered_at = ?, attempts = attempts + 1, last_error = NULL WHERE id = ?', nowIso(), event.id);
-            out.delivered += 1;
-          } catch (err) {
-            blocked.add(`${event.aggregate_type}:${event.aggregate_id}`);
-            const attempts = event.attempts + 1;
-            if (attempts > backoff.length) {
-              dal.run('UPDATE domain_events SET attempts = ?, last_error = ?, dead_lettered_at = ? WHERE id = ?',
-                attempts, String(err?.message || err).slice(0, 500), nowIso(), event.id);
-              out.deadLettered += 1;
-              log.error('event.dead_lettered', { eventId: event.id, type: event.type, attempts, error: err?.message });
-            } else {
-              const next = new Date(now() + backoff[attempts - 1] * 60000).toISOString();
-              dal.run('UPDATE domain_events SET attempts = ?, last_error = ?, next_attempt_at = ? WHERE id = ?',
-                attempts, String(err?.message || err).slice(0, 500), next, event.id);
-              out.failed += 1;
-              log.warn('event.retry_scheduled', { eventId: event.id, type: event.type, attempts, next });
+          const result = await dal.tx(async () => {
+            const row = await dal.one(`SELECT * FROM domain_events WHERE id = ? AND delivered_at IS NULL AND dead_lettered_at IS NULL
+              FOR UPDATE SKIP LOCKED`, event.id);
+            if (!row) return 'skipped';
+            const err = await deliver(row, nowIso);
+            if (!err) {
+              await dal.run('UPDATE domain_events SET delivered_at = ?, attempts = attempts + 1, last_error = NULL WHERE id = ?', nowIso(), row.id);
+              return 'delivered';
             }
-          }
+            blocked.add(`${row.aggregate_type}:${row.aggregate_id}`);
+            const attempts = row.attempts + 1;
+            const message = String(err?.message || err).slice(0, 500);
+            if (attempts > backoff.length) {
+              await dal.run('UPDATE domain_events SET attempts = ?, last_error = ?, dead_lettered_at = ? WHERE id = ?', attempts, message, nowIso(), row.id);
+              log.error('event.dead_lettered', { eventId: row.id, type: row.type, attempts, error: err?.message });
+              return 'deadLettered';
+            }
+            const next = new Date(now() + backoff[attempts - 1] * 60000).toISOString();
+            await dal.run('UPDATE domain_events SET attempts = ?, last_error = ?, next_attempt_at = ? WHERE id = ?', attempts, message, next, row.id);
+            log.warn('event.retry_scheduled', { eventId: row.id, type: row.type, attempts, next });
+            return 'failed';
+          });
+          if (result !== 'skipped') out[result] += 1;
+          else blocked.add(`${event.aggregate_type}:${event.aggregate_id}`);
         }
         if (out.delivered + out.failed + out.deadLettered >= batch) break;
       }

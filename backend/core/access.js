@@ -17,6 +17,7 @@ import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 import { ulid } from './db/ulid.js';
 import params from '../config/params.js';
+import { eachSeq } from './util/seq.js';
 
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no 0/O, 1/I
 const INVITE_DAYS = 7;
@@ -30,10 +31,10 @@ function codePrefix(title = '') {
   return (letters + 'QXQ').slice(0, 3);
 }
 
-function generateJoinCode(db, title) {
+async function generateJoinCode(db, title) {
   for (let i = 0; i < 20; i += 1) {
     const code = `QX-${codePrefix(title)}-${randomChars(3)}`;
-    if (!db.prepare('SELECT 1 FROM engagements WHERE join_code = ?').get(code)) return code;
+    if (!await db.prepare('SELECT 1 FROM engagements WHERE join_code = ?').get(code)) return code;
   }
   return `QX-${randomChars(3)}-${randomChars(4)}`;
 }
@@ -53,8 +54,8 @@ const newToken = () => crypto.randomBytes(32).toString('base64url');
 const hashToken = (token) => crypto.createHash('sha256').update(String(token)).digest('hex');
 const inviteExpiry = () => new Date(Date.now() + INVITE_DAYS * 86400000).toISOString();
 
-function logEvent(db, { institutionId, learnerId = null, elId = null, event, detail = null, actorStaffId = null }) {
-  db.prepare(`
+async function logEvent(db, { institutionId, learnerId = null, elId = null, event, detail = null, actorStaffId = null }) {
+  await db.prepare(`
     INSERT INTO access_events (id, institution_id, learner_id, engagement_learner_id, event, detail, actor_staff_id, created_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `).run(ulid(), institutionId, learnerId, elId, event, detail, actorStaffId, new Date().toISOString());
@@ -67,19 +68,19 @@ const openResetRequest = (alias = 'ae') => `${alias}.event = 'pin_reset_requeste
     AND r.event = 'pin_reset_resolved' AND r.created_at >= ${alias}.created_at)`;
 
 // Close every open PIN-reset request for a learner (the PIN is per learner).
-function resolvePinResetRequests(db, { institutionId, learnerId, actorStaffId = null }) {
-  const open = db.prepare(`SELECT DISTINCT ae.engagement_learner_id AS el_id FROM access_events ae
+async function resolvePinResetRequests(db, { institutionId, learnerId, actorStaffId = null }) {
+  const open = await db.prepare(`SELECT DISTINCT ae.engagement_learner_id AS el_id FROM access_events ae
     WHERE ae.learner_id = ? AND ${openResetRequest('ae')}`).all(learnerId);
-  open.forEach(r => logEvent(db, { institutionId, learnerId, elId: r.el_id, event: 'pin_reset_resolved', detail: 'PIN reset by staff', actorStaffId }));
+  await eachSeq(open, async r => await logEvent(db, { institutionId, learnerId, elId: r.el_id, event: 'pin_reset_resolved', detail: 'PIN reset by staff', actorStaffId }));
   return open.length;
 }
 
 // Create a learner invite for one enrolment; returns the plaintext token.
-function createLearnerInvite(db, { learnerId, elId, staffId }) {
+async function createLearnerInvite(db, { learnerId, elId, staffId }) {
   const token = newToken();
-  db.prepare('UPDATE learner_invites SET used_at = COALESCE(used_at, ?) WHERE engagement_learner_id = ? AND used_at IS NULL')
+  await db.prepare('UPDATE learner_invites SET used_at = COALESCE(used_at, ?) WHERE engagement_learner_id = ? AND used_at IS NULL')
     .run('superseded', elId);
-  db.prepare(`
+  await db.prepare(`
     INSERT INTO learner_invites (id, learner_id, engagement_learner_id, token_hash, expires_at, created_by)
     VALUES (?, ?, ?, ?, ?, ?)
   `).run(uuidv4(), learnerId, elId, hashToken(token), inviteExpiry(), staffId || null);

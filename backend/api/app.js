@@ -2,9 +2,12 @@
 // can mount it with supertest. server.js runs migrations, starts the outbox
 // worker and listens.
 import express from 'express';
+import './asyncErrors.js';
 import cors from 'cors';
 import crypto from 'crypto';
 import { logger } from '../core/logger.js';
+import * as dal from '../core/db/dal.js';
+import params from '../config/params.js';
 import authRoutes from './routes/auth.js';
 import institutionRoutes from './routes/institution.js';
 import institutionTeamRoutes from './routes/institutionTeam.js';
@@ -41,7 +44,11 @@ export const MOUNTS = [
 // Routes answering in the v4.3.1 error shape {error: {code, message}}.
 const V2_PREFIXES = ['/api/employer', '/api/verify', '/api/practical'];
 
-export function createApp() {
+/**
+ * @param {{ drainOutbox?: () => Promise<object> }} [opts] drainOutbox runs the
+ *   outbox once; the serverless handler passes it for the cron backstop.
+ */
+export function createApp({ drainOutbox = null } = {}) {
   const app = express();
   app.disable('x-powered-by');
   app.set('trust proxy', process.env.TRUST_PROXY ? Number(process.env.TRUST_PROXY) || process.env.TRUST_PROXY : false);
@@ -63,19 +70,44 @@ export function createApp() {
   MOUNTS.forEach(([prefix, router]) => app.use(prefix, router));
 
   // did:web document for the issuer (v4.3 §9.3); retired keys stay listed.
-  app.get('/.well-known/did.json', (req, res) => { res.set('Cache-Control', 'public, max-age=3600'); res.json(didDocument(issuerHost())); });
+  app.get('/.well-known/did.json', async (req, res) => { res.set('Cache-Control', 'public, max-age=3600'); res.json(await didDocument(issuerHost())); });
 
-  app.get('/api/health', (req, res) => res.json({
-    status: 'ok',
-    service: 'Qubirex',
-    company: 'Inferexaa Private Limited',
-    tagline: 'Receive. Build. Return.',
-    timestamp: new Date().toISOString()
-  }));
+  // Vercel Cron (vercel.json) calls this with Authorization: Bearer $CRON_SECRET.
+  app.get('/api/cron/outbox', async (req, res) => {
+    if (!process.env.CRON_SECRET || req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) return res.status(401).json({ error: 'Unauthorized' });
+    if (!drainOutbox) return res.status(404).json({ error: 'Not available: the server runs its own outbox worker' });
+    res.json({ ok: true, ...(await drainOutbox()) });
+  });
+
+  // ?deep=1 also checks the database round trip.
+  app.get('/api/health', async (req, res) => {
+    const body = {
+      status: 'ok',
+      service: 'Qubirex',
+      company: 'Inferexaa Private Limited',
+      tagline: 'Receive. Build. Return.',
+      timestamp: new Date().toISOString()
+    };
+    if (req.query.deep === '1') {
+      try {
+        const m = await dal.one('SELECT MAX(id) AS latest, COUNT(*) AS n FROM schema_migrations');
+        body.database = { ok: true, driver: dal.driverKind(), migrations: m.n, latest: m.latest };
+        body.outbox = await dal.one(`SELECT COUNT(*) FILTER (WHERE delivered_at IS NULL AND dead_lettered_at IS NULL) AS pending,
+          COUNT(*) FILTER (WHERE dead_lettered_at IS NOT NULL) AS dead_lettered, MAX(last_error) AS last_error FROM domain_events`);
+      } catch (err) {
+        body.status = 'degraded';
+        body.database = { ok: false, driver: dal.driverKind(), error: err.message };
+      }
+      body.params = params.source();
+      body.ai = { adapter: process.env.AI_ADAPTER || (process.env.NODE_ENV === 'test' ? 'mock' : 'gemini'), key_set: !!process.env.GEMINI_API_KEY };
+    }
+    res.status(body.status === 'ok' ? 200 : 503).json(body);
+  });
 
   // Errors: generic text only, never internal detail (spec §9).
   // eslint-disable-next-line no-unused-vars
   app.use((err, req, res, next) => {
+    if (res.headersSent) return next(err);
     const status = err.status && err.status >= 400 && err.status < 500 ? err.status : 500;
     (req.log || logger).error('http.error', { error: err, path: req.path });
     const message = status === 500 ? 'Internal server error' : 'Bad request';

@@ -7,6 +7,7 @@ import { calibrationRegister } from '../../config/params.js';
 import * as dal from '../../core/db/dal.js';
 import { listSkills, addAlias, createSkill, getSkill, addPrereq } from '../../core/graph/ontology.js';
 import { mapPathway } from '../../core/graph/coverage.js';
+import { eachSeq, mapSeq, reduceSeq } from '../../core/util/seq.js';
 
 const router = express.Router();
 
@@ -20,28 +21,28 @@ router.use(authenticateToken);
 router.use(requireRole('admin'));
 
 // ─── Dashboard stats ──────────────────────────────────────────────────────────
-router.get('/stats', (req, res) => {
+router.get('/stats', async (req, res) => {
   const db = getDb();
   const stats = {
-    institutions: db.prepare('SELECT COUNT(*) as cnt FROM institutions').get().cnt,
-    learners: db.prepare('SELECT COUNT(*) as cnt FROM learners').get().cnt,
-    engagements: db.prepare('SELECT COUNT(*) as cnt FROM engagements').get().cnt,
-    active_engagements: db.prepare("SELECT COUNT(*) as cnt FROM engagements WHERE status = 'active'").get().cnt,
-    mastery_logs_produced: db.prepare('SELECT COUNT(*) as cnt FROM mastery_logs').get().cnt,
-    sessions_total: db.prepare('SELECT COUNT(*) as cnt FROM learning_sessions').get().cnt,
-    checks_passed: db.prepare("SELECT COUNT(*) as cnt FROM mastery_checks WHERE passed = 1").get().cnt,
-    checks_failed: db.prepare("SELECT COUNT(*) as cnt FROM mastery_checks WHERE passed = 0").get().cnt,
-    avg_mastery: db.prepare('SELECT AVG(mastery_attainment) as avg FROM node_mastery WHERE mastery_attainment IS NOT NULL').get().avg,
-    avg_loops: db.prepare('SELECT AVG(loop_count) as avg FROM learning_sessions').get().avg
+    institutions: (await db.prepare('SELECT COUNT(*) as cnt FROM institutions').get()).cnt,
+    learners: (await db.prepare('SELECT COUNT(*) as cnt FROM learners').get()).cnt,
+    engagements: (await db.prepare('SELECT COUNT(*) as cnt FROM engagements').get()).cnt,
+    active_engagements: (await db.prepare("SELECT COUNT(*) as cnt FROM engagements WHERE status = 'active'").get()).cnt,
+    mastery_logs_produced: (await db.prepare('SELECT COUNT(*) as cnt FROM mastery_logs').get()).cnt,
+    sessions_total: (await db.prepare('SELECT COUNT(*) as cnt FROM learning_sessions').get()).cnt,
+    checks_passed: (await db.prepare("SELECT COUNT(*) as cnt FROM mastery_checks WHERE passed = 1").get()).cnt,
+    checks_failed: (await db.prepare("SELECT COUNT(*) as cnt FROM mastery_checks WHERE passed = 0").get()).cnt,
+    avg_mastery: (await db.prepare('SELECT AVG(mastery_attainment) as avg FROM node_mastery WHERE mastery_attainment IS NOT NULL').get()).avg,
+    avg_loops: (await db.prepare('SELECT AVG(loop_count) as avg FROM learning_sessions').get()).avg
   };
   db.close();
   res.json(stats);
 });
 
 // ─── List all institutions ────────────────────────────────────────────────────
-router.get('/institutions', (req, res) => {
+router.get('/institutions', async (req, res) => {
   const db = getDb();
-  const rows = db.prepare(`
+  const rows = await db.prepare(`
     SELECT i.*, COUNT(DISTINCT e.id) as engagement_count, COUNT(DISTINCT l.id) as learner_count
     FROM institutions i
     LEFT JOIN engagements e ON e.institution_id = i.id
@@ -53,16 +54,16 @@ router.get('/institutions', (req, res) => {
 });
 
 // ─── Get a Mastery Log ────────────────────────────────────────────────────────
-router.get('/mastery-logs/:id', (req, res) => {
-  const log = getMasteryLog(req.params.id);
+router.get('/mastery-logs/:id', async (req, res) => {
+  const log = await getMasteryLog(req.params.id);
   if (!log) return res.status(404).json({ error: 'Not found' });
   res.json(log);
 });
 
 // ─── Instruction quality report ───────────────────────────────────────────────
-router.get('/quality-report', (req, res) => {
+router.get('/quality-report', async (req, res) => {
   const db = getDb();
-  const nodeStats = db.prepare(`
+  const nodeStats = await mapSeq(await db.prepare(`
     SELECT nm.skill_node_id, sn.node_label, sc.cluster_label,
       COUNT(DISTINCT nm.engagement_learner_id) as learners_attempted,
       AVG(nm.mastery_attainment) as avg_mastery,
@@ -71,16 +72,16 @@ router.get('/quality-report', (req, res) => {
     FROM node_mastery nm
     JOIN skill_nodes sn ON sn.id = nm.skill_node_id
     JOIN skill_clusters sc ON sc.id = sn.cluster_id
-    GROUP BY nm.skill_node_id
+    GROUP BY nm.skill_node_id, sn.node_label, sc.cluster_label
     ORDER BY avg_attempts DESC
-  `).all().map(row => {
+  `).all(), async row => {
     // Confidence is computed from the checks, never stored.
-    const els = db.prepare('SELECT engagement_learner_id FROM node_mastery WHERE skill_node_id = ?').all(row.skill_node_id);
-    const avg = els.reduce((sum, r) => sum + nodeConfidence(db, r.engagement_learner_id, row.skill_node_id), 0) / (els.length || 1);
+    const els = await db.prepare('SELECT engagement_learner_id FROM node_mastery WHERE skill_node_id = ?').all(row.skill_node_id);
+    const avg = await reduceSeq(els, async (sum, r) => sum + await nodeConfidence(db, r.engagement_learner_id, row.skill_node_id), 0) / (els.length || 1);
     return { ...row, avg_confidence: avg };
   });
 
-  const loopStats = db.prepare(`
+  const loopStats = await db.prepare(`
     SELECT current_approach, COUNT(*) as usage_count,
       AVG(loop_count) as avg_loops
     FROM learning_sessions GROUP BY current_approach
@@ -96,49 +97,49 @@ router.get('/quality-report', (req, res) => {
 });
 
 // ─── Capability Graph: ontology and review queue (v4.3 §3) ──────────────────
-router.get('/skills', (req, res) => {
-  res.json({ skills: listSkills() });
+router.get('/skills', async (req, res) => {
+  res.json({ skills: await listSkills() });
 });
 
-router.get('/ontology-review', (req, res) => {
+router.get('/ontology-review', async (req, res) => {
   const status = ['pending', 'aliased', 'created', 'rejected'].includes(req.query.status) ? req.query.status : 'pending';
-  const items = dal.all('SELECT * FROM ontology_review_queue WHERE status = ? ORDER BY occurrences DESC, created_at LIMIT 200', status)
+  const items = (await dal.all('SELECT * FROM ontology_review_queue WHERE status = ? ORDER BY occurrences DESC, created_at LIMIT 200', status))
     .map(r => ({ ...r, context: r.context_json ? JSON.parse(r.context_json) : null, context_json: undefined }));
-  const counts = Object.fromEntries(dal.all('SELECT status, COUNT(*) n FROM ontology_review_queue GROUP BY status').map(r => [r.status, r.n]));
+  const counts = Object.fromEntries((await dal.all('SELECT status, COUNT(*) n FROM ontology_review_queue GROUP BY status')).map(r => [r.status, r.n]));
   res.json({ items, counts });
 });
 
 // Resolve one queued text: make it an alias of an existing skill, create a
 // new skill (optionally under a parent), or reject it. Approved text becomes
 // a permanent part of the ontology, and unmapped pathway nodes are re-mapped.
-router.post('/ontology-review/:id', (req, res) => {
-  const item = dal.one('SELECT * FROM ontology_review_queue WHERE id = ?', req.params.id);
+router.post('/ontology-review/:id', async (req, res) => {
+  const item = await dal.one('SELECT * FROM ontology_review_queue WHERE id = ?', req.params.id);
   if (!item) return res.status(404).json({ error: 'Not found' });
   if (item.status !== 'pending') return res.status(409).json({ error: 'Already resolved' });
   const { action } = req.body;
   try {
     let skillId = null;
-    dal.tx(() => {
+    await dal.tx(async () => {
       if (action === 'alias') {
-        if (!getSkill(req.body.skill_id)) throw Object.assign(new Error('Pick an existing skill'), { status: 400 });
-        addAlias(item.text, req.body.skill_id, 'review');
+        if (!await getSkill(req.body.skill_id)) throw Object.assign(new Error('Pick an existing skill'), { status: 400 });
+        await addAlias(item.text, req.body.skill_id, 'review');
         skillId = req.body.skill_id;
       } else if (action === 'create') {
-        skillId = createSkill({ id: req.body.skill_id || undefined, name: String(req.body.name || item.text).trim(), domain: req.body.domain || 'general', parent: req.body.parent || null, hours: req.body.hours ? Number(req.body.hours) : null });
-        if (item.text.trim().toLowerCase() !== String(req.body.name || item.text).trim().toLowerCase()) addAlias(item.text, skillId, 'review');
-        (req.body.prereqs || []).forEach(p => addPrereq(skillId, p));
+        skillId = await createSkill({ id: req.body.skill_id || undefined, name: String(req.body.name || item.text).trim(), domain: req.body.domain || 'general', parent: req.body.parent || null, hours: req.body.hours ? Number(req.body.hours) : null });
+        if (item.text.trim().toLowerCase() !== String(req.body.name || item.text).trim().toLowerCase()) await addAlias(item.text, skillId, 'review');
+        await eachSeq(req.body.prereqs || [], async p => await addPrereq(skillId, p));
       } else if (action !== 'reject') {
         throw Object.assign(new Error('action must be alias, create or reject'), { status: 400 });
       }
-      dal.run('UPDATE ontology_review_queue SET status = ?, resolved_skill_id = ?, resolved_by = ?, resolved_at = ? WHERE id = ?',
+      await dal.run('UPDATE ontology_review_queue SET status = ?, resolved_skill_id = ?, resolved_by = ?, resolved_at = ? WHERE id = ?',
         action === 'alias' ? 'aliased' : action === 'create' ? 'created' : 'rejected', skillId, req.user.id, dal.nowIso(), item.id);
     });
     let remapped = 0;
     if (skillId) {
-      dal.all('SELECT id FROM capability_targets').forEach(t => {
-        const before = dal.one(`SELECT COUNT(*) n FROM skill_nodes sn JOIN skill_clusters sc ON sc.id = sn.cluster_id
-          WHERE sc.capability_target_id = ? AND NOT EXISTS (SELECT 1 FROM node_skill_map m WHERE m.node_id = sn.id)`, t.id).n;
-        if (before) remapped += before - mapPathway(t.id).unmapped.length;
+      await eachSeq(await dal.all('SELECT id FROM capability_targets'), async t => {
+        const before = (await dal.one(`SELECT COUNT(*) n FROM skill_nodes sn JOIN skill_clusters sc ON sc.id = sn.cluster_id
+          WHERE sc.capability_target_id = ? AND NOT EXISTS (SELECT 1 FROM node_skill_map m WHERE m.node_id = sn.id)`, t.id)).n;
+        if (before) remapped += before - (await mapPathway(t.id)).unmapped.length;
       });
     }
     res.json({ ok: true, skill_id: skillId, remapped_nodes: remapped });
@@ -148,26 +149,26 @@ router.post('/ontology-review/:id', (req, res) => {
 });
 
 // ─── Employer KYB (v4.3 §14.1): manual approval after domain verification ─────
-router.get('/employers', (req, res) => {
+router.get('/employers', async (req, res) => {
   const status = ['pending', 'verified', 'rejected', 'suspended'].includes(req.query.status) ? req.query.status : null;
-  const rows = dal.all(`SELECT e.*, (SELECT COUNT(*) FROM employer_users u WHERE u.employer_id = e.id) AS users,
+  const rows = await dal.all(`SELECT e.*, (SELECT COUNT(*) FROM employer_users u WHERE u.employer_id = e.id) AS users,
       (SELECT email FROM employer_users u WHERE u.employer_id = e.id AND u.role = 'owner' ORDER BY created_at LIMIT 1) AS owner_email
     FROM employers e ${status ? 'WHERE e.kyb_status = ?' : ''} ORDER BY e.created_at DESC LIMIT 200`, ...(status ? [status] : []));
-  const counts = Object.fromEntries(dal.all('SELECT kyb_status, COUNT(*) n FROM employers GROUP BY kyb_status').map(r => [r.kyb_status, r.n]));
+  const counts = Object.fromEntries((await dal.all('SELECT kyb_status, COUNT(*) n FROM employers GROUP BY kyb_status')).map(r => [r.kyb_status, r.n]));
   res.json({ employers: rows, counts });
 });
 
-router.post('/employers/:id/kyb', (req, res) => {
-  const e = dal.one('SELECT * FROM employers WHERE id = ?', req.params.id);
+router.post('/employers/:id/kyb', async (req, res) => {
+  const e = await dal.one('SELECT * FROM employers WHERE id = ?', req.params.id);
   if (!e) return res.status(404).json({ error: 'Not found' });
   const decision = req.body.decision;
   const allowed = { pending: ['verified', 'rejected'], verified: ['suspended'], suspended: ['verified'], rejected: ['pending'] };
   if (!(allowed[e.kyb_status] || []).includes(decision)) return res.status(400).json({ error: `Cannot move from ${e.kyb_status} to ${decision}.` });
   if (decision === 'verified' && !e.domain_verified_at) return res.status(400).json({ error: 'The company domain email has not been verified yet.' });
-  dal.run('UPDATE employers SET kyb_status = ?, kyb_note = ?, kyb_decided_by = ?, kyb_decided_at = ?, updated_at = ? WHERE id = ?',
+  await dal.run('UPDATE employers SET kyb_status = ?, kyb_note = ?, kyb_decided_by = ?, kyb_decided_at = ?, updated_at = ? WHERE id = ?',
     decision, req.body.note ? String(req.body.note).slice(0, 500) : null, req.user.id, dal.nowIso(), dal.nowIso(), e.id);
   if (decision === 'suspended' || decision === 'rejected') {
-    dal.run(`UPDATE auth_sessions SET revoked_at = ? WHERE actor_type = 'employer' AND employer_id = ? AND revoked_at IS NULL`, dal.nowIso(), e.id);
+    await dal.run(`UPDATE auth_sessions SET revoked_at = ? WHERE actor_type = 'employer' AND employer_id = ? AND revoked_at IS NULL`, dal.nowIso(), e.id);
   }
   res.json({ ok: true, kyb_status: decision });
 });

@@ -207,3 +207,50 @@ There is no mail provider yet. Outside `NODE_ENV=production`, the domain
 verification code is returned in the response and shown in the portal, so the
 KYB flow can be tested. Production only sends it by email (queued in
 outbound_mail).
+
+**D-026 — PostgreSQL everywhere; SQLite retired** · v4.3 §20, §24 · *approved 30 Sep 2026*
+The product owner chose to host everything on Vercel with a Postgres
+database. Serverless functions have no persistent disk, so SQLite could not
+stay. The data-access layer is now async, and every call site awaits it.
+There is one SQL dialect:
+- `pg` against `DATABASE_URL` in production (Neon via the Vercel Marketplace);
+- PGlite (PostgreSQL in WebAssembly) in-process for local development and
+  tests, so tests run the production dialect with no server.
+
+Migrations 0001–0008 are replaced by `0001_schema` (the same 70 tables, types
+mapped, triggers rewritten in PL/pgSQL) and `0002_reference_data` (ontology
+and CKB seed). No deployed database existed, so nothing is lost. Other details:
+- Timestamps stay TEXT, and a `datetime()` SQL function reproduces SQLite's
+  format, so every comparison is unchanged.
+- `rowid` tiebreaks became a `seq BIGSERIAL` column.
+- `tests/structural/sql.test.js` PREPAREs every static statement against the
+  schema.
+
+**D-027 — Outbox on serverless: drain after writes, claim with SKIP LOCKED** · v4.3 §7 · *interpretation*
+There is no always-on worker on Vercel. After any non-GET request the handler
+responds first, then drains the outbox with `waitUntil()`. A daily Vercel Cron
+(`/api/cron/outbox`, `CRON_SECRET`) is the backstop. Several instances may
+drain at once, so each event is claimed with `FOR UPDATE SKIP LOCKED` and
+delivered in that transaction. Each subscriber runs in its own savepoint:
+its writes and its consumption record commit together, and a later
+subscriber's failure does not undo them. `npm start` still runs the 2-second
+polling worker.
+
+**D-028 — Secrets from the environment on hosts without secure-config** · v4.3 §10, §22 · *interpretation*
+Vercel cannot mount the private secure-config repository, so two things
+come from environment variables:
+- `SECURE_CONFIG_PARAMS_JSON` carries `params.json`;
+- `SIGNING_KEY_PEM` and `SIGNING_KEY_ID` carry the signing key.
+
+`core/return/signing.js` is still the only module that reads the key; the
+structural test now also checks the variable names. Production still
+refuses to run without secure-config parameters. A staging deployment may
+opt in with `QBX_ALLOW_PRIORS=1`, which is logged at every start and shown by
+`/api/health?deep=1`. A cold start with a required secret missing answers 503
+and names it.
+
+**D-029 — `QBX_ECHO_EMAIL_CODES` for staging** · v4.3 §14.1 · *temporary*
+Extends D-025. There is still no mail provider. On a staging deployment
+(`NODE_ENV=production`), `QBX_ECHO_EMAIL_CODES=1` shows the employer domain
+code on screen, so KYB can be verified end to end. It is off unless set, and
+is removed when a mail provider is connected.

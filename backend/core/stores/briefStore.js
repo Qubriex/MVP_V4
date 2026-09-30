@@ -3,43 +3,14 @@
 import { v4 as uuidv4 } from 'uuid';
 import { legacyHandle as getDb } from '../db/dal.js';
 
-function initBriefSchema(db) {
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS brief_store (
-      id TEXT PRIMARY KEY,
-      institution_id TEXT NOT NULL,
-      domain TEXT NOT NULL,
-      language TEXT NOT NULL,
-      raw_input_summary TEXT,
-      extracted_clusters TEXT,
-      extraction_confidence REAL,
-      confirmed INTEGER DEFAULT 0,
-      created_at TEXT DEFAULT (datetime('now'))
-    );
-    CREATE TABLE IF NOT EXISTS curriculum_node_specs (
-      id TEXT PRIMARY KEY,
-      skill_node_id TEXT NOT NULL UNIQUE,
-      node_label TEXT NOT NULL,
-      cluster_label TEXT,
-      learning_objectives TEXT,
-      prerequisite_labels TEXT,
-      mastery_threshold REAL DEFAULT 0.70,
-      phase INTEGER DEFAULT 1,
-      difficulty_level INTEGER DEFAULT 1,
-      estimated_minutes INTEGER DEFAULT 20,
-      concept_tags TEXT,
-      created_at TEXT DEFAULT (datetime('now'))
-    );
-  `);
-}
 
 // ─── retrieveSimilarBriefs() — RAG extraction templates ───────────────────────
 // Only confirmed=1 briefs are used (institution-validated). Higher
 // extraction_confidence appears first. If none exist, extraction proceeds
 // from first principles.
-function retrieveSimilarBriefs(domain, language, proficiencyLevel, limit = 2) {
+async function retrieveSimilarBriefs(domain, language, proficiencyLevel, limit = 2) {
   const db = getDb();
-  const rows = db.prepare(`
+  const rows = await db.prepare(`
     SELECT * FROM brief_store
     WHERE domain = ? AND language = ? AND confirmed = 1
     ORDER BY extraction_confidence DESC LIMIT ?
@@ -49,10 +20,10 @@ function retrieveSimilarBriefs(domain, language, proficiencyLevel, limit = 2) {
 }
 
 // ─── writeBrief() — extraction result written immediately as confirmed=false ──
-function writeBrief(institutionId, domain, language, rawInputSummary, extractedClusters, extractionConfidence) {
+async function writeBrief(institutionId, domain, language, rawInputSummary, extractedClusters, extractionConfidence) {
   const db = getDb();
   const id = uuidv4();
-  db.prepare(`
+  await db.prepare(`
     INSERT INTO brief_store (id, institution_id, domain, language, raw_input_summary, extracted_clusters, extraction_confidence, confirmed)
     VALUES (?, ?, ?, ?, ?, ?, ?, 0)
   `).run(id, institutionId, domain, language, rawInputSummary, JSON.stringify(extractedClusters), extractionConfidence);
@@ -61,16 +32,16 @@ function writeBrief(institutionId, domain, language, rawInputSummary, extractedC
 }
 
 // ─── confirmBrief() — only confirmed briefs are used as extraction templates ──
-function confirmBrief(briefId) {
+async function confirmBrief(briefId) {
   const db = getDb();
-  db.prepare(`UPDATE brief_store SET confirmed = 1 WHERE id = ?`).run(briefId);
+  await db.prepare(`UPDATE brief_store SET confirmed = 1 WHERE id = ?`).run(briefId);
   db.close();
 }
 
 // ─── writeNodeSpec() — creates the node spec TEACH retrieves at SESSION_START ─
-function writeNodeSpec(skillNodeId, spec) {
+async function writeNodeSpec(skillNodeId, spec) {
   const db = getDb();
-  db.prepare(`
+  await db.prepare(`
     INSERT INTO curriculum_node_specs
       (id, skill_node_id, node_label, cluster_label, learning_objectives, prerequisite_labels, mastery_threshold, phase, difficulty_level, estimated_minutes, concept_tags)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -100,19 +71,19 @@ function parseNodeSpecRow(row) {
 }
 
 // ─── retrieveNodeSpecById() — precise lookup ──────────────────────────────────
-function retrieveNodeSpecById(skillNodeId) {
+async function retrieveNodeSpecById(skillNodeId) {
   const db = getDb();
-  const row = db.prepare('SELECT * FROM curriculum_node_specs WHERE skill_node_id = ?').get(skillNodeId);
+  const row = await db.prepare('SELECT * FROM curriculum_node_specs WHERE skill_node_id = ?').get(skillNodeId);
   db.close();
   return parseNodeSpecRow(row);
 }
 
 // ─── retrieveNodeSpecByLabel() — fallback lookup ──────────────────────────────
-function retrieveNodeSpecByLabel(nodeLabel) {
+async function retrieveNodeSpecByLabel(nodeLabel) {
   const db = getDb();
-  const row = db.prepare('SELECT * FROM curriculum_node_specs WHERE node_label = ? ORDER BY created_at DESC LIMIT 1').get(nodeLabel);
+  const row = await db.prepare('SELECT * FROM curriculum_node_specs WHERE node_label = ? ORDER BY created_at DESC LIMIT 1').get(nodeLabel);
   db.close();
   return parseNodeSpecRow(row);
 }
 
-export { initBriefSchema, retrieveSimilarBriefs, writeBrief, confirmBrief, writeNodeSpec, retrieveNodeSpecById, retrieveNodeSpecByLabel };
+export { retrieveSimilarBriefs, writeBrief, confirmBrief, writeNodeSpec, retrieveNodeSpecById, retrieveNodeSpecByLabel };

@@ -15,54 +15,55 @@ import * as dal from '../db/dal.js';
 import params from '../../config/params.js';
 import { resolveSkill } from './resolveSkill.js';
 import { children, mapNode } from './ontology.js';
+import { eachSeq, filterSeq, mapSeq, reduceSeq } from '../util/seq.js';
 
-export function pathwayNodes(capabilityTargetId) {
-  return dal.all(`SELECT sn.id, sn.node_label, sn.concept_tags, sn.estimated_minutes, sn.sequence_order, sc.id AS cluster_id, sc.cluster_label
+export async function pathwayNodes(capabilityTargetId) {
+  return await dal.all(`SELECT sn.id, sn.node_label, sn.concept_tags, sn.estimated_minutes, sn.sequence_order, sc.id AS cluster_id, sc.cluster_label
     FROM skill_nodes sn JOIN skill_clusters sc ON sc.id = sn.cluster_id
     WHERE sc.capability_target_id = ? ORDER BY sc.sequence_order, sn.sequence_order`, capabilityTargetId);
 }
 
 /** Map every unmapped node of a pathway, then rebalance weights. */
-export function mapPathway(capabilityTargetId, { curr = {} } = {}) {
-  const nodes = pathwayNodes(capabilityTargetId);
+export async function mapPathway(capabilityTargetId, { curr = {} } = {}) {
+  const nodes = await pathwayNodes(capabilityTargetId);
   const unmapped = [];
   for (const n of nodes) {
-    const explicit = (curr[n.id] || []).filter(s => dal.one('SELECT 1 FROM skills WHERE skill_id = ?', s.skill_id));
+    const explicit = await filterSeq(curr[n.id] || [], async s => await dal.one('SELECT 1 FROM skills WHERE skill_id = ?', s.skill_id));
     if (explicit.length) {
-      explicit.forEach(s => mapNode(n.id, s.skill_id, { weight: s.weight ?? 1, source: 'curr', confidence: s.confidence ?? 0.8 }));
+      await eachSeq(explicit, async s => await mapNode(n.id, s.skill_id, { weight: s.weight ?? 1, source: 'curr', confidence: s.confidence ?? 0.8 }));
       continue;
     }
-    if (dal.one('SELECT 1 FROM node_skill_map WHERE node_id = ?', n.id)) continue;
+    if (await dal.one('SELECT 1 FROM node_skill_map WHERE node_id = ?', n.id)) continue;
     const ctx = { capabilityTargetId, nodeId: n.id, cluster: n.cluster_label };
-    let r = resolveSkill(n.node_label, { source: 'node', context: ctx, queue: false });
+    let r = await resolveSkill(n.node_label, { source: 'node', context: ctx, queue: false });
     if (!r.skill) {
       let tags = [];
       try { tags = JSON.parse(n.concept_tags || '[]'); } catch { tags = []; }
       for (const tag of tags) {
-        r = resolveSkill(String(tag).replace(/_/g, ' '), { source: 'node', queue: false });
+        r = await resolveSkill(String(tag).replace(/_/g, ' '), { source: 'node', queue: false });
         if (r.skill) break;
       }
     }
-    if (r.skill) mapNode(n.id, r.skill.skill_id, { source: 'resolve', confidence: r.conf });
-    else { resolveSkill(n.node_label, { source: 'node', context: ctx }); unmapped.push(n.node_label); }
+    if (r.skill) await mapNode(n.id, r.skill.skill_id, { source: 'resolve', confidence: r.conf });
+    else { await resolveSkill(n.node_label, { source: 'node', context: ctx }); unmapped.push(n.node_label); }
   }
-  rebalance(capabilityTargetId);
+  await rebalance(capabilityTargetId);
   return { nodes: nodes.length, unmapped };
 }
 
 /** Automatic mappings share a skill evenly across the pathway's nodes. */
-export function rebalance(capabilityTargetId) {
-  const rows = dal.all(`SELECT m.node_id, m.skill_id, m.source FROM node_skill_map m
+export async function rebalance(capabilityTargetId) {
+  const rows = await dal.all(`SELECT m.node_id, m.skill_id, m.source FROM node_skill_map m
     JOIN skill_nodes sn ON sn.id = m.node_id JOIN skill_clusters sc ON sc.id = sn.cluster_id
     WHERE sc.capability_target_id = ? AND m.source != 'curr'`, capabilityTargetId);
   const count = new Map();
   rows.forEach(r => count.set(r.skill_id, (count.get(r.skill_id) || 0) + 1));
-  rows.forEach(r => dal.run('UPDATE node_skill_map SET weight = ? WHERE node_id = ? AND skill_id = ?', 1 / count.get(r.skill_id), r.node_id, r.skill_id));
+  await eachSeq(rows, async r => await dal.run('UPDATE node_skill_map SET weight = ? WHERE node_id = ? AND skill_id = ?', 1 / count.get(r.skill_id), r.node_id, r.skill_id));
 }
 
 /** node_id → [{skill_id, weight}] for a pathway */
-export function pathwayMap(capabilityTargetId) {
-  const rows = dal.all(`SELECT m.node_id, m.skill_id, m.weight FROM node_skill_map m
+export async function pathwayMap(capabilityTargetId) {
+  const rows = await dal.all(`SELECT m.node_id, m.skill_id, m.weight FROM node_skill_map m
     JOIN skill_nodes sn ON sn.id = m.node_id JOIN skill_clusters sc ON sc.id = sn.cluster_id
     WHERE sc.capability_target_id = ?`, capabilityTargetId);
   const bySkill = new Map();
@@ -74,13 +75,13 @@ export function pathwayMap(capabilityTargetId) {
  * Coverage of one skill by a pathway map. `onlyNodes` restricts to a node set
  * (e.g. a learner's mastered nodes) to get that learner's verified coverage.
  */
-export function coverageOf(skillId, map, { onlyNodes = null, memo = new Map() } = {}) {
+export async function coverageOf(skillId, map, { onlyNodes = null, memo = new Map() } = {}) {
   if (memo.has(skillId)) return memo.get(skillId);
   const direct = (map.bySkill.get(skillId) || [])
     .filter(r => !onlyNodes || onlyNodes.has(r.node_id))
     .reduce((a, r) => a + r.weight, 0);
-  const kids = children(skillId);
-  const childPart = kids.length ? kids.reduce((a, k) => a + coverageOf(k, map, { onlyNodes, memo }), 0) / kids.length : 0;
+  const kids = await children(skillId);
+  const childPart = kids.length ? await reduceSeq(kids, async (a, k) => a + await coverageOf(k, map, { onlyNodes, memo }), 0) / kids.length : 0;
   const c = Math.min(1, direct + childPart);
   memo.set(skillId, c);
   return c;
@@ -93,21 +94,21 @@ export function coverageStatus(c) {
 }
 
 /** Node ids in the pathway that teach a skill or any of its descendants. */
-export function nodesForSkill(skillId, map) {
+export async function nodesForSkill(skillId, map) {
   const ids = new Set();
-  const walk = (s) => { (map.bySkill.get(s) || []).forEach(r => ids.add(r.node_id)); children(s).forEach(walk); };
-  walk(skillId);
+  const walk = async (s) => { (map.bySkill.get(s) || []).forEach(r => ids.add(r.node_id)); (await children(s)).forEach(walk); };
+  await walk(skillId);
   return ids;
 }
 
 /** Full coverage report for a pathway: every skill the pathway touches. */
-export function pathwayCoverage(capabilityTargetId) {
-  const map = pathwayMap(capabilityTargetId);
+export async function pathwayCoverage(capabilityTargetId) {
+  const map = await pathwayMap(capabilityTargetId);
   const memo = new Map();
-  const skills = dal.all('SELECT skill_id, name, parent_skill_id, domain FROM skills').map(s => ({
-    ...s, coverage: Math.round(coverageOf(s.skill_id, map, { memo }) * 100) / 100
-  })).filter(s => s.coverage > 0);
-  const unmapped = dal.all(`SELECT sn.id, sn.node_label FROM skill_nodes sn JOIN skill_clusters sc ON sc.id = sn.cluster_id
+  const skills = (await mapSeq(await dal.all('SELECT skill_id, name, parent_skill_id, domain FROM skills'), async s => ({
+    ...s, coverage: Math.round(await coverageOf(s.skill_id, map, { memo }) * 100) / 100
+  }))).filter(s => s.coverage > 0);
+  const unmapped = await dal.all(`SELECT sn.id, sn.node_label FROM skill_nodes sn JOIN skill_clusters sc ON sc.id = sn.cluster_id
     WHERE sc.capability_target_id = ? AND NOT EXISTS (SELECT 1 FROM node_skill_map m WHERE m.node_id = sn.id)`, capabilityTargetId);
   return {
     skills: skills.map(s => ({ ...s, status: coverageStatus(s.coverage) })).sort((a, b) => b.coverage - a.coverage),

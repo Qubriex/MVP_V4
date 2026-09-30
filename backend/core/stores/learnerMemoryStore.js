@@ -4,55 +4,28 @@ import { v4 as uuidv4 } from 'uuid';
 import { legacyHandle as getDb } from '../db/dal.js';
 
 // Defensive — safe to run on every startup, mirrors db/init.js.
-function initMemorySchema(db) {
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS learner_memory (
-      id TEXT PRIMARY KEY,
-      learner_id TEXT NOT NULL,
-      engagement_learner_id TEXT NOT NULL,
-      memory_type TEXT NOT NULL CHECK(memory_type IN ('interaction','struggle','vocabulary','milestone')),
-      node_id TEXT,
-      cluster_id TEXT,
-      content TEXT,
-      metadata TEXT,
-      created_at TEXT DEFAULT (datetime('now')),
-      updated_at TEXT DEFAULT (datetime('now'))
-    );
-    CREATE TABLE IF NOT EXISTS learner_behaviour_fingerprint (
-      id TEXT PRIMARY KEY,
-      learner_id TEXT NOT NULL UNIQUE,
-      avg_response_time_seconds REAL DEFAULT 0,
-      disengagement_rate REAL DEFAULT 0,
-      avg_loops_per_node REAL DEFAULT 0,
-      preferred_approach TEXT,
-      vocabulary_level TEXT DEFAULT 'beginner',
-      session_count INTEGER DEFAULT 0,
-      updated_at TEXT DEFAULT (datetime('now'))
-    );
-  `);
-}
 
 // ─── retrieveLearnerContext() ─────────────────────────────────────────────────
 // Returns everything TEACH needs about this learner at this node.
-function retrieveLearnerContext(learnerId, nodeId) {
+async function retrieveLearnerContext(learnerId, nodeId) {
   const db = getDb();
 
-  const recentHistory = db.prepare(`
+  const recentHistory = (await db.prepare(`
     SELECT content, metadata, memory_type, created_at
     FROM learner_memory
     WHERE learner_id = ? AND memory_type = 'interaction'
     ORDER BY created_at DESC LIMIT 20
-  `).all(learnerId).map(row => ({
+  `).all(learnerId)).map(row => ({
     ...row,
     metadata: row.metadata ? JSON.parse(row.metadata) : {}
   }));
 
-  const nodeStruggles = db.prepare(`
+  const nodeStruggles = (await db.prepare(`
     SELECT content, metadata, created_at
     FROM learner_memory
     WHERE learner_id = ? AND node_id = ? AND memory_type = 'struggle'
     ORDER BY created_at
-  `).all(learnerId, nodeId).map(row => ({
+  `).all(learnerId, nodeId)).map(row => ({
     ...row,
     metadata: row.metadata ? JSON.parse(row.metadata) : {}
   }));
@@ -68,7 +41,7 @@ function retrieveLearnerContext(learnerId, nodeId) {
     .slice(0, 5)
     .map(h => h.metadata.behaviourSignal);
 
-  const fingerprint = db.prepare(`
+  const fingerprint = await db.prepare(`
     SELECT * FROM learner_behaviour_fingerprint WHERE learner_id = ?
   `).get(learnerId) || {
     vocabulary_level: 'beginner', avg_loops_per_node: 0,
@@ -81,9 +54,9 @@ function retrieveLearnerContext(learnerId, nodeId) {
 }
 
 // ─── writeInteraction() ───────────────────────────────────────────────────────
-function writeInteraction(learnerId, elId, turnData) {
+async function writeInteraction(learnerId, elId, turnData) {
   const db = getDb();
-  db.prepare(`
+  await db.prepare(`
     INSERT INTO learner_memory (id, learner_id, engagement_learner_id, memory_type, node_id, cluster_id, content, metadata)
     VALUES (?, ?, ?, 'interaction', ?, ?, ?, ?)
   `).run(
@@ -100,9 +73,9 @@ function writeInteraction(learnerId, elId, turnData) {
 
 // ─── updateBehaviourFingerprint() ─────────────────────────────────────────────
 // Running averages: newAvg = ((oldAvg * (n-1)) + newValue) / n where n = session_count + 1
-function updateBehaviourFingerprint(learnerId, turnData) {
+async function updateBehaviourFingerprint(learnerId, turnData) {
   const db = getDb();
-  const existing = db.prepare('SELECT * FROM learner_behaviour_fingerprint WHERE learner_id = ?').get(learnerId);
+  const existing = await db.prepare('SELECT * FROM learner_behaviour_fingerprint WHERE learner_id = ?').get(learnerId);
 
   const n = (existing ? existing.session_count : 0) + 1;
   const runningAvg = (oldAvg, newValue) => ((oldAvg * (n - 1)) + newValue) / n;
@@ -117,7 +90,7 @@ function updateBehaviourFingerprint(learnerId, turnData) {
   const preferredApproach = turnData.approachUsed || (existing ? existing.preferred_approach : null);
   const vocabularyLevel = turnData.vocabularyLevel || (existing ? existing.vocabulary_level : 'beginner');
 
-  db.prepare(`
+  await db.prepare(`
     INSERT INTO learner_behaviour_fingerprint
       (id, learner_id, avg_response_time_seconds, disengagement_rate, avg_loops_per_node, preferred_approach, vocabulary_level, session_count, updated_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
@@ -136,9 +109,9 @@ function updateBehaviourFingerprint(learnerId, turnData) {
 
 // ─── writeStrugglePattern() ───────────────────────────────────────────────────
 // Upsert: if a struggle record already exists for this learner at this node, update it.
-function writeStrugglePattern(learnerId, elId, opts) {
+async function writeStrugglePattern(learnerId, elId, opts) {
   const db = getDb();
-  const existing = db.prepare(`
+  const existing = await db.prepare(`
     SELECT id FROM learner_memory WHERE learner_id = ? AND node_id = ? AND memory_type = 'struggle'
   `).get(learnerId, opts.nodeId);
 
@@ -150,11 +123,11 @@ function writeStrugglePattern(learnerId, elId, opts) {
   });
 
   if (existing) {
-    db.prepare(`
+    await db.prepare(`
       UPDATE learner_memory SET content = ?, metadata = ?, updated_at = datetime('now') WHERE id = ?
     `).run(opts.content || '', metadata, existing.id);
   } else {
-    db.prepare(`
+    await db.prepare(`
       INSERT INTO learner_memory (id, learner_id, engagement_learner_id, memory_type, node_id, content, metadata)
       VALUES (?, ?, ?, 'struggle', ?, ?, ?)
     `).run(uuidv4(), learnerId, elId, opts.nodeId, opts.content || '', metadata);
@@ -162,4 +135,4 @@ function writeStrugglePattern(learnerId, elId, opts) {
   db.close();
 }
 
-export { initMemorySchema, retrieveLearnerContext, writeInteraction, updateBehaviourFingerprint, writeStrugglePattern };
+export { retrieveLearnerContext, writeInteraction, updateBehaviourFingerprint, writeStrugglePattern };

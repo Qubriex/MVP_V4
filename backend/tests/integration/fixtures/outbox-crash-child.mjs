@@ -10,9 +10,9 @@ import { createWorker } from '../../../core/events/worker.js';
 
 dal.connect({ file: process.argv[2] });
 await migrate();
-dal.tx(() => {
-  dal.run("UPDATE learners SET city = 'Warangal' WHERE id = 'crash-learner'");
-  for (let i = 1; i <= 3; i += 1) emit('NODE_ADVANCED', { aggregateType: 'learner', aggregateId: 'crash-learner', payload: { n: i } });
+await dal.tx(async () => {
+  await dal.run("UPDATE learners SET city = 'Warangal' WHERE id = 'crash-learner'");
+  for (let i = 1; i <= 3; i += 1) await emit('NODE_ADVANCED', { aggregateType: 'learner', aggregateId: 'crash-learner', payload: { n: i } });
 });
 let seen = 0;
 subscribe('NODE_ADVANCED', 'test.recorder', () => {

@@ -4,6 +4,7 @@
 // institutions in the region contribute, and never names them.
 import * as dal from './db/dal.js';
 import params from '../config/params.js';
+import { eachSeq, mapSeq } from './util/seq.js';
 
 const median = (xs) => {
   const s = xs.filter(x => x != null).sort((a, b) => a - b);
@@ -23,16 +24,16 @@ export const METRICS = [
   { key: 'provisional_share', label: 'Passes awaiting faculty review', unit: '%', higher: false }
 ];
 
-export function cohortMetrics(engagementId) {
-  const els = dal.all("SELECT id FROM engagement_learners WHERE engagement_id = ? AND COALESCE(access_status,'active') != 'removed'", engagementId).map(r => r.id);
-  const total = dal.one(`SELECT COUNT(*) n FROM skill_nodes sn JOIN skill_clusters sc ON sc.id = sn.cluster_id JOIN engagements e ON e.capability_target_id = sc.capability_target_id WHERE e.id = ?`, engagementId).n;
+export async function cohortMetrics(engagementId) {
+  const els = (await dal.all("SELECT id FROM engagement_learners WHERE engagement_id = ? AND COALESCE(access_status,'active') != 'removed'", engagementId)).map(r => r.id);
+  const total = (await dal.one(`SELECT COUNT(*) n FROM skill_nodes sn JOIN skill_clusters sc ON sc.id = sn.cluster_id JOIN engagements e ON e.capability_target_id = sc.capability_target_id WHERE e.id = ?`, engagementId)).n;
   if (!els.length) return { learners: 0 };
   const inList = els.map(() => '?').join(',');
-  const mastery = dal.all(`SELECT nm.engagement_learner_id el, nm.loops, nm.provisional,
+  const mastery = await dal.all(`SELECT nm.engagement_learner_id el, nm.loops, nm.provisional,
       COALESCE((SELECT SUM(active_minutes) FROM learning_sessions ls WHERE ls.engagement_learner_id = nm.engagement_learner_id AND ls.skill_node_id = nm.skill_node_id), 0) AS minutes
     FROM node_mastery nm WHERE nm.advanced_at IS NOT NULL AND nm.engagement_learner_id IN (${inList})`, ...els);
-  const reviews = dal.one(`SELECT COUNT(*) n, SUM(passed) p FROM demonstrations WHERE kind = 'review' AND el_id IN (${inList})`, ...els);
-  const checks = dal.one(`SELECT COUNT(*) n, SUM(CASE WHEN assurance != 'A0' THEN 1 ELSE 0 END) a1 FROM evidence_records WHERE el_id IN (${inList})`, ...els);
+  const reviews = await dal.one(`SELECT COUNT(*) n, SUM(passed) p FROM demonstrations WHERE kind = 'review' AND el_id IN (${inList})`, ...els);
+  const checks = await dal.one(`SELECT COUNT(*) n, SUM(CASE WHEN assurance != 'A0' THEN 1 ELSE 0 END) a1 FROM evidence_records WHERE el_id IN (${inList})`, ...els);
   return {
     learners: els.length,
     progress_pct: r1(total ? (mastery.length / (els.length * total)) * 100 : 0),
@@ -45,17 +46,16 @@ export function cohortMetrics(engagementId) {
   };
 }
 
-export function benchmarks(institutionId, engagementId) {
-  const inst = dal.one('SELECT city FROM institutions WHERE id = ?', institutionId);
-  const ours = cohortMetrics(engagementId);
-  const cohorts = dal.all('SELECT id, title FROM engagements WHERE institution_id = ? AND id != ? ORDER BY created_at DESC', institutionId, engagementId)
-    .map(e => ({ id: e.id, title: e.title, ...cohortMetrics(e.id) })).filter(c => c.learners > 0);
+export async function benchmarks(institutionId, engagementId) {
+  const inst = await dal.one('SELECT city FROM institutions WHERE id = ?', institutionId);
+  const ours = await cohortMetrics(engagementId);
+  const cohorts = (await mapSeq(await dal.all('SELECT id, title FROM engagements WHERE institution_id = ? AND id != ? ORDER BY created_at DESC', institutionId, engagementId), async e => ({ id: e.id, title: e.title, ...await cohortMetrics(e.id) }))).filter(c => c.learners > 0);
 
   const region = inst?.city || null;
-  const others = region ? dal.all(`SELECT i.id, e.id AS eid FROM institutions i JOIN engagements e ON e.institution_id = i.id
+  const others = region ? await dal.all(`SELECT i.id, e.id AS eid FROM institutions i JOIN engagements e ON e.institution_id = i.id
     WHERE i.id != ? AND lower(COALESCE(i.city, '')) = lower(?)`, institutionId, region) : [];
   const byInst = new Map();
-  others.forEach(o => { const m = cohortMetrics(o.eid); if (m.learners > 0) { if (!byInst.has(o.id)) byInst.set(o.id, []); byInst.get(o.id).push(m); } });
+  await eachSeq(others, async o => { const m = await cohortMetrics(o.eid); if (m.learners > 0) { if (!byInst.has(o.id)) byInst.set(o.id, []); byInst.get(o.id).push(m); } });
   const minInst = params.get('institution.benchmarkMinInstitutions');
   const published = byInst.size >= minInst;
   const perInst = [...byInst.values()].map(ms => Object.fromEntries(METRICS.map(({ key }) => [key, median(ms.map(m => m[key]))])));

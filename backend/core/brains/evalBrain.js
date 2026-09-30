@@ -66,7 +66,7 @@ Respond ONLY with this JSON:
 
 // ─── evaluate() ─────────────────────────────────────────────────────────────────
 async function evaluate({ nodeLabel, language, question, learnerResponse, theta = DEFAULT_THETA, temperature = 0.3, shuffleRubric = false }) {
-  const base = rubricStore.retrieveRubric(nodeLabel, language);
+  const base = await rubricStore.retrieveRubric(nodeLabel, language);
   const rubric = shuffleRubric
     ? { ...base, passingCriteria: shuffled(base.passingCriteria), failingIndicators: shuffled(base.failingIndicators) }
     : base;

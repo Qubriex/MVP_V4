@@ -13,29 +13,29 @@ import { emit } from '../events/outbox.js';
 
 export const LEVELS = Object.freeze({ BUILD: 1, INSTITUTION_SHARE: 2, DISCOVERABLE: 3, EMPLOYER_ACCESS: 4, OUTCOMES: 5, GOLD_PARITY: 6 });
 
-export function grant({ learnerId, institutionId, level, purpose, textVersion, grantedBy = 'learner', guardianRef = null, scope = null }) {
+export async function grant({ learnerId, institutionId, level, purpose, textVersion, grantedBy = 'learner', guardianRef = null, scope = null }) {
   if (!Number.isInteger(level) || level < 1 || level > 6) throw new Error('Consent level must be 1–6');
-  return dal.tx(() => {
+  return await dal.tx(async () => {
     const id = ulid();
-    dal.run(`INSERT INTO consents (id, learner_id, institution_id, level, purpose, text_version, granted_by, guardian_ref, scope_json, granted_at)
+    await dal.run(`INSERT INTO consents (id, learner_id, institution_id, level, purpose, text_version, granted_by, guardian_ref, scope_json, granted_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, id, learnerId, institutionId, level, purpose, textVersion, grantedBy, guardianRef,
     scope ? JSON.stringify(scope) : null, dal.nowIso());
-    emit('CONSENT_GRANTED', { aggregateType: 'learner', aggregateId: learnerId, payload: { consentId: id, level } });
+    await emit('CONSENT_GRANTED', { aggregateType: 'learner', aggregateId: learnerId, payload: { consentId: id, level } });
     return id;
   });
 }
 
 /** The one dedicated way to withdraw consent. */
-export function withdraw(consentId) {
-  return dal.tx(() => {
-    const row = dal.one('SELECT learner_id, level, withdrawn_at FROM consents WHERE id = ?', consentId);
+export async function withdraw(consentId) {
+  return await dal.tx(async () => {
+    const row = await dal.one('SELECT learner_id, level, withdrawn_at FROM consents WHERE id = ?', consentId);
     if (!row || row.withdrawn_at) return false;
-    dal.run('UPDATE consents SET withdrawn_at = ? WHERE id = ?', dal.nowIso(), consentId);
-    emit('CONSENT_WITHDRAWN', { aggregateType: 'learner', aggregateId: row.learner_id, payload: { consentId, level: row.level } });
+    await dal.run('UPDATE consents SET withdrawn_at = ? WHERE id = ?', dal.nowIso(), consentId);
+    await emit('CONSENT_WITHDRAWN', { aggregateType: 'learner', aggregateId: row.learner_id, payload: { consentId, level: row.level } });
     return true;
   });
 }
 
-export function isActive(learnerId, level) {
-  return !!dal.one('SELECT 1 FROM consents WHERE learner_id = ? AND level = ? AND withdrawn_at IS NULL', learnerId, level);
+export async function isActive(learnerId, level) {
+  return !!await dal.one('SELECT 1 FROM consents WHERE learner_id = ? AND level = ? AND withdrawn_at IS NULL', learnerId, level);
 }

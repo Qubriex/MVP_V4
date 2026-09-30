@@ -38,8 +38,9 @@ see output from TEACH.
 Four knowledge stores back the brains: `learnerMemoryStore`, `culturalStore`
 (the CKB), `rubricStore`, and `briefStore` (curriculum store).
 
-AI engine: **Google Gemini 1.5 Flash**. Database: **SQLite** (better-sqlite3,
-WAL mode, foreign keys on).
+AI engine: **Google Gemini** (via `core/ai/gateway.js`). Database:
+**PostgreSQL**. Production uses Neon on Vercel (`DATABASE_URL`); local
+development and tests use PGlite in-process. See `DEPLOY-VERCEL.md`.
 
 ---
 
@@ -222,7 +223,9 @@ add company details, request the domain code (shown on screen outside
 production), then approve the company as the admin.
 
 These credentials are public in this repo, so the script refuses to run with
-`NODE_ENV=production`. Never seed them into a shared or deployed database.
+`NODE_ENV=production`. It also refuses a remote `DATABASE_URL` unless you
+confirm with `QBX_SEED_REMOTE=1`. Use that only for a staging database
+(`DEPLOY-VERCEL.md`), never a production one.
 Voice-session replies, captions, transcription and resume tailoring need a
 real `GEMINI_API_KEY` in `.env`; without it the session page shows sample
 content. `AI_ADAPTER=mock` runs every AI call offline with placeholder text, so

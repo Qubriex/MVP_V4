@@ -1,0 +1,9 @@
+{
+  "name": "qubirex",
+  "private": true,
+  "type": "module",
+  "description": "Vercel project root: the React site (frontend/) and the API function (api/ → backend/).",
+  "engines": {
+    "node": "22.x"
+  }
+}

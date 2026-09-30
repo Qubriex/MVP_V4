@@ -16,9 +16,9 @@ router.use(authenticateToken);
 router.use(requireRole('institution'));
 router.use(...staffMiddleware);
 
-function cohortsInScope(db, req) {
-  const scope = scopeClause(db, req, 'e.id');
-  return db.prepare(`
+async function cohortsInScope(db, req) {
+  const scope = await scopeClause(db, req, 'e.id');
+  return await db.prepare(`
     SELECT e.id, e.title, e.capability_target_id, ct.title as ct_title, ct.version as ct_version
     FROM engagements e JOIN capability_targets ct ON ct.id = e.capability_target_id
     WHERE e.institution_id = ? ${scope.sql} ORDER BY e.created_at DESC
@@ -26,13 +26,13 @@ function cohortsInScope(db, req) {
 }
 
 // ?engagement_id= (defaults to the most recent cohort in scope)
-router.get('/insights/curriculum', (req, res) => {
+router.get('/insights/curriculum', async (req, res) => {
   const db = getDb();
   try {
-    const cohorts = cohortsInScope(db, req);
+    const cohorts = await cohortsInScope(db, req);
     const pick = req.query.engagement_id ? cohorts.find(c => c.id === req.query.engagement_id) : cohorts[0];
     if (!pick) return res.json({ cohorts, empty: true });
-    const data = curriculumCoverage(db, { capabilityTargetId: pick.capability_target_id, engagementId: pick.id });
+    const data = await curriculumCoverage(db, { capabilityTargetId: pick.capability_target_id, engagementId: pick.id });
     res.json({ cohorts, cohort: pick, regions: Object.keys(market.MONTHLY_DEMAND).filter(c => c !== 'all'), ...data });
   } finally {
     db.close();
@@ -40,27 +40,27 @@ router.get('/insights/curriculum', (req, res) => {
 });
 
 // ?engagement_id=&compare=regional|last_year|<other engagement id>&roles=a,b
-router.get('/insights/standing', (req, res) => {
+router.get('/insights/standing', async (req, res) => {
   const db = getDb();
   try {
-    const cohorts = cohortsInScope(db, req);
+    const cohorts = await cohortsInScope(db, req);
     const pickId = req.query.engagement_id || (cohorts[0] && cohorts[0].id);
-    const engagement = pickId ? findScopedEngagement(db, req, pickId) : null;
+    const engagement = pickId ? await findScopedEngagement(db, req, pickId) : null;
     if (!engagement) return res.json({ cohorts, empty: true });
     const compare = req.query.compare || 'regional';
     let compareEngagement = null;
     if (!market.BENCHMARKS[compare]) {
-      compareEngagement = findScopedEngagement(db, req, compare);
+      compareEngagement = await findScopedEngagement(db, req, compare);
       if (!compareEngagement) return res.status(404).json({ error: 'Comparison cohort not found' });
     }
     // Target roles: ?roles=, else what the cohort's professors set on their profiles.
     let roles = req.query.roles ? String(req.query.roles).split(',').map(s => s.trim()).filter(Boolean) : null;
     if (!roles) {
-      const set = db.prepare(`SELECT u.target_roles FROM staff_cohorts sc JOIN institution_users u ON u.id = sc.staff_id WHERE sc.engagement_id = ?`).all(engagement.id)
+      const set = (await db.prepare(`SELECT u.target_roles FROM staff_cohorts sc JOIN institution_users u ON u.id = sc.staff_id WHERE sc.engagement_id = ?`).all(engagement.id))
         .flatMap(r => { try { return JSON.parse(r.target_roles || '[]'); } catch { return []; } });
       roles = set.length ? [...new Set(set)] : null;
     }
-    const data = cohortStanding(db, engagement, { roles, compare: compareEngagement ? 'engagement' : compare, compareEngagement });
+    const data = await cohortStanding(db, engagement, { roles, compare: compareEngagement ? 'engagement' : compare, compareEngagement });
     res.json({
       cohorts, cohort: { id: engagement.id, title: engagement.title },
       compare_options: [
@@ -77,22 +77,22 @@ router.get('/insights/standing', (req, res) => {
 
 // Benchmarks (v4.3 §16): this cohort vs our other cohorts vs the anonymised
 // regional median (published only with ≥ 3 other institutions).
-router.get('/insights/benchmarks', (req, res) => {
+router.get('/insights/benchmarks', async (req, res) => {
   const db = getDb();
-  const e = findScopedEngagement(db, req, req.query.engagement_id);
+  const e = await findScopedEngagement(db, req, req.query.engagement_id);
   db.close();
   if (!e) return res.status(404).json({ error: 'Cohort not found' });
-  res.json({ cohort: { id: e.id, title: e.title }, ...benchmarks(req.user.id, e.id) });
+  res.json({ cohort: { id: e.id, title: e.title }, ...await benchmarks(req.user.id, e.id) });
 });
 
 // Learning-curve signals for one student (v4.3 §12.3), in the caller's scope.
-router.get('/students/:elId/learning-curve', (req, res) => {
+router.get('/students/:elId/learning-curve', async (req, res) => {
   const db = getDb();
-  const el = db.prepare('SELECT el.engagement_id, l.name, l.learner_ref FROM engagement_learners el JOIN learners l ON l.id = el.learner_id WHERE el.id = ?').get(req.params.elId);
-  const e = el ? findScopedEngagement(db, req, el.engagement_id) : null;
+  const el = await db.prepare('SELECT el.engagement_id, l.name, l.learner_ref FROM engagement_learners el JOIN learners l ON l.id = el.learner_id WHERE el.id = ?').get(req.params.elId);
+  const e = el ? await findScopedEngagement(db, req, el.engagement_id) : null;
   db.close();
   if (!e) return res.status(404).json({ error: 'Student not found' });
-  res.json({ student: { name: el.name, learner_ref: el.learner_ref }, ...learningCurve(req.params.elId) });
+  res.json({ student: { name: el.name, learner_ref: el.learner_ref }, ...await learningCurve(req.params.elId) });
 });
 
 export default router;

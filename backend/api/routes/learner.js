@@ -24,6 +24,7 @@ import { scheduleFirstReview } from '../../core/retention/schedule.js';
 const sha256 = (t) => crypto.createHash('sha256').update(String(t)).digest('hex');
 import { transcribeAudio } from '../../core/portfolio.js';
 import { isValidPin, hashPin, logEvent } from '../../core/access.js';
+import { eachSeq, mapSeq } from '../../core/util/seq.js';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
@@ -38,13 +39,13 @@ router.use(requireActiveLearner);
 router.use(aiRateLimitPosts);
 
 // ─── Streak logic (doc section 11.4) ──────────────────────────────────────────
-function updateStreak(db, elId) {
+async function updateStreak(db, elId) {
   const today = new Date().toISOString().slice(0, 10);
   const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-  const existing = db.prepare('SELECT * FROM streaks WHERE engagement_learner_id = ?').get(elId);
+  const existing = await db.prepare('SELECT * FROM streaks WHERE engagement_learner_id = ?').get(elId);
 
   if (!existing) {
-    db.prepare(`
+    await db.prepare(`
       INSERT INTO streaks (id, engagement_learner_id, current_streak, longest_streak, total_session_days, last_session_date)
       VALUES (?, ?, 1, 1, 1, ?)
     `).run(uuidv4(), elId, today);
@@ -53,15 +54,15 @@ function updateStreak(db, elId) {
   if (existing.last_session_date === today) return; // already counted today
 
   const newStreak = existing.last_session_date === yesterday ? existing.current_streak + 1 : 1;
-  db.prepare(`
-    UPDATE streaks SET current_streak = ?, longest_streak = MAX(longest_streak, ?),
+  await db.prepare(`
+    UPDATE streaks SET current_streak = ?, longest_streak = GREATEST(longest_streak, ?),
       total_session_days = total_session_days + 1, last_session_date = ?
     WHERE engagement_learner_id = ?
   `).run(newStreak, newStreak, today, elId);
 }
 
-function getNodeWithCluster(db, nodeId) {
-  return db.prepare(`
+async function getNodeWithCluster(db, nodeId) {
+  return await db.prepare(`
     SELECT sn.*, sc.cluster_label, sc.mastery_threshold AS cluster_threshold, ct.institution_id
     FROM skill_nodes sn
     JOIN skill_clusters sc ON sc.id = sn.cluster_id
@@ -71,9 +72,9 @@ function getNodeWithCluster(db, nodeId) {
 }
 
 // ─── GET dashboard ─────────────────────────────────────────────────────────────
-router.get('/dashboard', (req, res) => {
+router.get('/dashboard', async (req, res) => {
   const db = getDb();
-  const el = db.prepare(`
+  const el = await db.prepare(`
     SELECT el.*, e.title as engagement_title, e.language,
       (SELECT COUNT(*) FROM node_mastery nm WHERE nm.engagement_learner_id = el.id AND nm.advanced_at IS NOT NULL) as nodes_mastered,
       sn.node_label as current_node_label,
@@ -86,7 +87,7 @@ router.get('/dashboard', (req, res) => {
   `).get(req.user.el_id);
   if (!el) { db.close(); return res.status(404).json({ error: 'Not found' }); }
 
-  const totalNodes = db.prepare(`
+  const totalNodes = await db.prepare(`
     SELECT COUNT(*) as cnt FROM skill_nodes sn
     JOIN skill_clusters sc ON sc.id = sn.cluster_id
     JOIN capability_targets ct ON ct.id = sc.capability_target_id
@@ -94,33 +95,33 @@ router.get('/dashboard', (req, res) => {
     WHERE e.id = ?
   `).get(req.user.engagement_id);
 
-  const streak = db.prepare('SELECT current_streak, longest_streak FROM streaks WHERE engagement_learner_id = ?').get(req.user.el_id);
+  const streak = await db.prepare('SELECT current_streak, longest_streak FROM streaks WHERE engagement_learner_id = ?').get(req.user.el_id);
 
   // "Continue learning" card: where the current node sits in the path, its
   // estimated time, and how the last session on it went.
-  const pathNodes = db.prepare(`
+  const pathNodes = await db.prepare(`
     SELECT sn.id, sn.estimated_minutes, sc.id as cluster_id FROM skill_nodes sn
     JOIN skill_clusters sc ON sc.id = sn.cluster_id
     WHERE sc.capability_target_id = (SELECT capability_target_id FROM engagements WHERE id = ?)
     ORDER BY sc.sequence_order, sn.sequence_order
   `).all(req.user.engagement_id);
   const currentIndex = pathNodes.findIndex(n => n.id === el.current_node_id);
-  const lastSession = el.current_node_id ? db.prepare(`
+  const lastSession = el.current_node_id ? await db.prepare(`
     SELECT current_approach, loop_count FROM learning_sessions
     WHERE engagement_learner_id = ? AND skill_node_id = ? ORDER BY started_at DESC LIMIT 1
   `).get(req.user.el_id, el.current_node_id) : null;
-  const mastered = new Set(db.prepare('SELECT skill_node_id FROM node_mastery WHERE engagement_learner_id = ? AND advanced_at IS NOT NULL')
-    .all(req.user.el_id).map(r => r.skill_node_id));
+  const mastered = new Set((await db.prepare('SELECT skill_node_id FROM node_mastery WHERE engagement_learner_id = ? AND advanced_at IS NOT NULL')
+    .all(req.user.el_id)).map(r => r.skill_node_id));
   const clusterIds = [...new Set(pathNodes.map(n => n.cluster_id))];
   const clustersDone = clusterIds.filter(cid => pathNodes.filter(n => n.cluster_id === cid).every(n => mastered.has(n.id))).length;
-  const week = db.prepare(`
+  const week = await db.prepare(`
     SELECT COALESCE(SUM(active_minutes), 0) as minutes FROM learning_sessions
     WHERE engagement_learner_id = ? AND started_at >= datetime('now', '-7 days')
   `).get(req.user.el_id);
-  const recent = db.prepare(`
+  const recent = (await db.prepare(`
     SELECT sn.node_label FROM node_mastery nm JOIN skill_nodes sn ON sn.id = nm.skill_node_id
     WHERE nm.engagement_learner_id = ? AND nm.advanced_at IS NOT NULL ORDER BY nm.advanced_at DESC LIMIT 8
-  `).all(req.user.el_id).map(r => r.node_label);
+  `).all(req.user.el_id)).map(r => r.node_label);
 
   db.close();
   res.json({
@@ -140,24 +141,24 @@ router.get('/dashboard', (req, res) => {
 });
 
 // ─── GET full node-by-node progress map ───────────────────────────────────────
-router.get('/progress', (req, res) => {
+router.get('/progress', async (req, res) => {
   const db = getDb();
-  const records = db.prepare(`
+  const records = await mapSeq(await db.prepare(`
     SELECT nm.*, sn.node_label, sc.cluster_label
     FROM node_mastery nm
     JOIN skill_nodes sn ON sn.id = nm.skill_node_id
     JOIN skill_clusters sc ON sc.id = sn.cluster_id
     WHERE nm.engagement_learner_id = ?
     ORDER BY nm.advanced_at
-  `).all(req.user.el_id).map(r => ({ ...r, confidence_indicator: nodeConfidence(db, req.user.el_id, r.skill_node_id) }));
+  `).all(req.user.el_id), async r => ({ ...r, confidence_indicator: await nodeConfidence(db, req.user.el_id, r.skill_node_id) }));
   db.close();
   res.json(records.map(r => ({ ...r, confidence_label: confidenceLabel(r.confidence_indicator) })));
 });
 
 // ─── GET mastered nodes only (dashboard "Recently mastered", resume) ──────────
-router.get('/mastery-record', (req, res) => {
+router.get('/mastery-record', async (req, res) => {
   const db = getDb();
-  const records = db.prepare(`
+  const records = await mapSeq(await db.prepare(`
     SELECT nm.skill_node_id, sn.node_label, sc.cluster_label, nm.mastery_attainment, nm.attempt_count,
            nm.time_to_mastery_minutes, nm.advanced_at
     FROM node_mastery nm
@@ -165,7 +166,7 @@ router.get('/mastery-record', (req, res) => {
     JOIN skill_clusters sc ON sc.id = sn.cluster_id
     WHERE nm.engagement_learner_id = ? AND nm.advanced_at IS NOT NULL
     ORDER BY nm.advanced_at DESC
-  `).all(req.user.el_id).map(r => ({ ...r, confidence_indicator: nodeConfidence(db, req.user.el_id, r.skill_node_id) }));
+  `).all(req.user.el_id), async r => ({ ...r, confidence_indicator: await nodeConfidence(db, req.user.el_id, r.skill_node_id) }));
   db.close();
   res.json(records.map(r => ({ ...r, confidence_label: confidenceLabel(r.confidence_indicator) })));
 });
@@ -174,15 +175,15 @@ router.get('/mastery-record', (req, res) => {
 // The learner-facing view of what the institution sees in the Mastery Log:
 // every cluster and node with its status, plus evidence for mastered nodes.
 // Session content, check questions and evaluations stay proprietary.
-router.get('/path', (req, res) => {
+router.get('/path', async (req, res) => {
   const db = getDb();
-  const el = db.prepare(`
+  const el = await db.prepare(`
     SELECT el.current_node_id, el.overall_status, e.title as engagement_title
     FROM engagement_learners el JOIN engagements e ON e.id = el.engagement_id WHERE el.id = ?
   `).get(req.user.el_id);
   if (!el) { db.close(); return res.status(404).json({ error: 'Not found' }); }
 
-  const rows = db.prepare(`
+  const rows = await mapSeq(await db.prepare(`
     SELECT sc.id as cluster_id, sc.cluster_label, sc.cluster_ref, sn.id as node_id, sn.node_label, sn.estimated_minutes,
            nm.mastery_attainment, nm.attempt_count, nm.time_to_mastery_minutes, nm.advanced_at
     FROM skill_clusters sc
@@ -190,9 +191,8 @@ router.get('/path', (req, res) => {
     LEFT JOIN node_mastery nm ON nm.skill_node_id = sn.id AND nm.engagement_learner_id = ?
     WHERE sc.capability_target_id = (SELECT capability_target_id FROM engagements WHERE id = ?)
     ORDER BY sc.sequence_order, sn.sequence_order
-  `).all(req.user.el_id, req.user.engagement_id)
-    .map(r => ({ ...r, confidence_indicator: r.advanced_at ? nodeConfidence(db, req.user.el_id, r.node_id) : null }));
-  const time = db.prepare('SELECT COALESCE(SUM(active_minutes), 0) as minutes FROM learning_sessions WHERE engagement_learner_id = ?').get(req.user.el_id);
+  `).all(req.user.el_id, req.user.engagement_id), async r => ({ ...r, confidence_indicator: r.advanced_at ? await nodeConfidence(db, req.user.el_id, r.node_id) : null }));
+  const time = await db.prepare('SELECT COALESCE(SUM(active_minutes), 0) as minutes FROM learning_sessions WHERE engagement_learner_id = ?').get(req.user.el_id);
   db.close();
 
   const clusters = [];
@@ -235,33 +235,33 @@ router.get('/path', (req, res) => {
 // ─── Session: start or resume ─────────────────────────────────────────────────
 router.post('/session/start', async (req, res) => {
   const db = getDb();
-  const el = db.prepare('SELECT * FROM engagement_learners WHERE id = ?').get(req.user.el_id);
+  const el = await db.prepare('SELECT * FROM engagement_learners WHERE id = ?').get(req.user.el_id);
   if (!el || !el.current_node_id) { db.close(); return res.status(400).json({ error: 'No active skill node' }); }
 
-  const node = getNodeWithCluster(db, el.current_node_id);
+  const node = await getNodeWithCluster(db, el.current_node_id);
 
-  let session = db.prepare(`
+  let session = await db.prepare(`
     SELECT * FROM learning_sessions
     WHERE engagement_learner_id = ? AND skill_node_id = ? AND status = 'active'
     ORDER BY started_at DESC LIMIT 1
   `).get(el.id, el.current_node_id);
 
-  const approachesUsed = db.prepare(`
+  const approachesUsed = (await db.prepare(`
     SELECT approach FROM loop_approaches_used WHERE engagement_learner_id = ? AND skill_node_id = ?
-  `).all(el.id, el.current_node_id).map(r => r.approach);
+  `).all(el.id, el.current_node_id)).map(r => r.approach);
 
   if (!session) {
     const sessionId = uuidv4();
     const approach = approachesUsed.length === 0 ? 'native_concept' : selectNextApproach(approachesUsed);
-    db.prepare(`
+    await db.prepare(`
       INSERT INTO learning_sessions (id, engagement_learner_id, skill_node_id, session_number, language, loop_count, current_approach, behaviour_signal)
       VALUES (?, ?, ?, 1, ?, 0, ?, 'engaged')
     `).run(sessionId, el.id, el.current_node_id, req.user.language, approach);
-    session = db.prepare('SELECT * FROM learning_sessions WHERE id = ?').get(sessionId);
+    session = await db.prepare('SELECT * FROM learning_sessions WHERE id = ?').get(sessionId);
   }
 
-  const history = db.prepare(`
-    SELECT role, content, message_type, caption_en, mermaid, code, input_mode FROM session_messages WHERE session_id = ? ORDER BY created_at, rowid
+  const history = await db.prepare(`
+    SELECT role, content, message_type, caption_en, mermaid, code, input_mode FROM session_messages WHERE session_id = ? ORDER BY created_at, seq
   `).all(session.id);
   db.close();
 
@@ -282,7 +282,7 @@ router.post('/session/start', async (req, res) => {
     });
 
     const msgDb = getDb();
-    msgDb.prepare(`
+    await msgDb.prepare(`
       INSERT INTO session_messages (id, session_id, role, content, message_type, caption_en)
       VALUES (?, ?, 'ai', ?, 'diagnosis', ?)
     `).run(uuidv4(), session.id, result.message, result.captionEn || null);
@@ -319,11 +319,11 @@ const HOLD_MESSAGE = {
 };
 const HOLD_CAPTION = 'This answer needs to be in your own words. Please answer again — by voice, or by typing without pasting.';
 
-function pendingCheckFor(db, sessionId) {
-  return db.prepare(`
+async function pendingCheckFor(db, sessionId) {
+  return await db.prepare(`
     SELECT mc.*, fi.params_json, fi.family_id, fi.family_version, fi.purpose AS instance_purpose
     FROM mastery_checks mc LEFT JOIN family_instances fi ON fi.id = mc.instance_id
-    WHERE mc.session_id = ? AND mc.passed IS NULL ORDER BY mc.created_at DESC, mc.rowid DESC LIMIT 1
+    WHERE mc.session_id = ? AND mc.passed IS NULL ORDER BY mc.created_at DESC, mc.seq DESC LIMIT 1
   `).get(sessionId);
 }
 
@@ -337,28 +337,28 @@ async function handleSessionMessage(req, res) {
   const db = getDb();
 
   if (!session_id) {
-    const el = db.prepare('SELECT * FROM engagement_learners WHERE id = ?').get(req.user.el_id);
+    const el = await db.prepare('SELECT * FROM engagement_learners WHERE id = ?').get(req.user.el_id);
     const active = el && el.current_node_id
-      ? db.prepare(`SELECT * FROM learning_sessions WHERE engagement_learner_id = ? AND skill_node_id = ? AND status = 'active' ORDER BY started_at DESC LIMIT 1`).get(el.id, el.current_node_id)
+      ? await db.prepare(`SELECT * FROM learning_sessions WHERE engagement_learner_id = ? AND skill_node_id = ? AND status = 'active' ORDER BY started_at DESC LIMIT 1`).get(el.id, el.current_node_id)
       : null;
     session_id = active ? active.id : null;
   }
 
   const session = session_id
-    ? db.prepare('SELECT * FROM learning_sessions WHERE id = ? AND engagement_learner_id = ?').get(session_id, req.user.el_id)
+    ? await db.prepare('SELECT * FROM learning_sessions WHERE id = ? AND engagement_learner_id = ?').get(session_id, req.user.el_id)
     : null;
   if (!session) { db.close(); return res.status(404).json({ error: 'No active session found — call /session/start first' }); }
 
-  const node = getNodeWithCluster(db, session.skill_node_id);
-  const lastAiMsg = db.prepare(`
-    SELECT * FROM session_messages WHERE session_id = ? AND role = 'ai' ORDER BY created_at DESC, rowid DESC LIMIT 1
+  const node = await getNodeWithCluster(db, session.skill_node_id);
+  const lastAiMsg = await db.prepare(`
+    SELECT * FROM session_messages WHERE session_id = ? AND role = 'ai' ORDER BY created_at DESC, seq DESC LIMIT 1
   `).get(session.id);
-  const approachesUsed = db.prepare(`
+  const approachesUsed = (await db.prepare(`
     SELECT approach FROM loop_approaches_used WHERE engagement_learner_id = ? AND skill_node_id = ?
-  `).all(req.user.el_id, session.skill_node_id).map(r => r.approach);
-  const pendingCheck = pendingCheckFor(db, session.id);
+  `).all(req.user.el_id, session.skill_node_id)).map(r => r.approach);
+  const pendingCheck = await pendingCheckFor(db, session.id);
 
-  db.prepare(`
+  await db.prepare(`
     INSERT INTO session_messages (id, session_id, role, content, message_type, input_mode)
     VALUES (?, ?, 'learner', ?, 'response', ?)
   `).run(uuidv4(), session.id, content, inputMode);
@@ -374,7 +374,7 @@ async function handleSessionMessage(req, res) {
     approachesUsed, behaviourSignal: session.behaviour_signal,
     checkQuestion: pendingCheck ? pendingCheck.question_text : null,
     learnerRequestedCheck: requestCheck && requestType === 'LEARNER_MESSAGE',
-    vocabularyLevel: vocabularyLevel(req.user.id)
+    vocabularyLevel: await vocabularyLevel(req.user.id)
   };
 
   try {
@@ -383,7 +383,7 @@ async function handleSessionMessage(req, res) {
     if (requestType === 'CHECK_RESPONSE') {
       // 1. Authenticity gate (v4.3 §7.11): A0 stops, never a demonstration.
       gate = authenticityGate(req.body.provenance || null, content);
-      if (gate.assurance === 'A0') return holdForAuthenticity({ req, res, session, node, pendingCheck, gate, answer: content });
+      if (gate.assurance === 'A0') return await holdForAuthenticity({ req, res, session, node, pendingCheck, gate, answer: content });
       // 2. Blind EVAL with θ, borderline second pass and persistence (§4.3, §7.3).
       assessment = await assessConcept({
         nodeLabel: node.node_label, language: req.user.language, question: pendingCheck.question_text, answer: content,
@@ -401,7 +401,7 @@ async function handleSessionMessage(req, res) {
     });
 
     if (requestType === 'CHECK_RESPONSE') {
-      return handleCheckResult({ req, res, session, node, result, learnerResponse: content, pendingCheck, gate, assessment });
+      return await handleCheckResult({ req, res, session, node, result, learnerResponse: content, pendingCheck, gate, assessment });
     }
     return await handleInstructionResult({ req, res, session, node, result });
   } catch (err) {
@@ -412,18 +412,18 @@ async function handleSessionMessage(req, res) {
 
 // A0: record the attempt (learning progress only), keep the check open, and
 // ask for the answer again in the learner's own words.
-function holdForAuthenticity({ req, res, session, node, pendingCheck, gate, answer }) {
+async function holdForAuthenticity({ req, res, session, node, pendingCheck, gate, answer }) {
   const db = getDb();
   const message = HOLD_MESSAGE[req.user.language] || HOLD_CAPTION;
-  db.transaction(() => {
+  await db.transaction(async () => {
     const evidenceId = ulid();
-    db.prepare(`INSERT INTO evidence_records (id, el_id, node_id, family_id, instance_id, purpose, answer_hash, passed, assurance, authentic, flags_json, theta, created_at)
+    await db.prepare(`INSERT INTO evidence_records (id, el_id, node_id, family_id, instance_id, purpose, answer_hash, passed, assurance, authentic, flags_json, theta, created_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, NULL, 'A0', 0, ?, ?, ?)`).run(evidenceId, session.engagement_learner_id, node.id, pendingCheck.family_id || null,
       pendingCheck.instance_id || null, pendingCheck.purpose || 'check', sha256(answer), JSON.stringify([gate.reason]),
       resolveTheta(node.mastery_threshold, node.cluster_threshold), new Date().toISOString());
-    insertProvenance(db, evidenceId, gate.provenance);
-    insertAnswer(db, evidenceId, answer);
-    db.prepare(`INSERT INTO session_messages (id, session_id, role, content, message_type, caption_en) VALUES (?, ?, 'ai', ?, 'feedback', ?)`)
+    await insertProvenance(db, evidenceId, gate.provenance);
+    await insertAnswer(db, evidenceId, answer);
+    await db.prepare(`INSERT INTO session_messages (id, session_id, role, content, message_type, caption_en) VALUES (?, ?, 'ai', ?, 'feedback', ?)`)
       .run(uuidv4(), session.id, message, HOLD_CAPTION);
   })();
   db.close();
@@ -433,12 +433,12 @@ function holdForAuthenticity({ req, res, session, node, pendingCheck, gate, answ
   });
 }
 
-function insertAnswer(db, evidenceId, text) {
-  db.prepare('INSERT INTO check_answers (evidence_id, answer_text, created_at) VALUES (?, ?, ?)').run(evidenceId, String(text).slice(0, 20000), new Date().toISOString());
+async function insertAnswer(db, evidenceId, text) {
+  await db.prepare('INSERT INTO check_answers (evidence_id, answer_text, created_at) VALUES (?, ?, ?)').run(evidenceId, String(text).slice(0, 20000), new Date().toISOString());
 }
 
-function insertProvenance(db, evidenceId, p) {
-  db.prepare(`INSERT INTO answer_provenance (evidence_id, mode, answer_chars, pasted_chars, paste_events, largest_paste, edit_ratio, tab_hidden_ms, device_id)
+async function insertProvenance(db, evidenceId, p) {
+  await db.prepare(`INSERT INTO answer_provenance (evidence_id, mode, answer_chars, pasted_chars, paste_events, largest_paste, edit_ratio, tab_hidden_ms, device_id)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(evidenceId, p.mode, p.answer_chars ?? null, p.pasted_chars ?? null, p.paste_events ?? null,
     p.largest_paste ?? null, p.edit_ratio ?? null, p.tab_hidden_ms ?? null, p.device_id ?? null);
 }
@@ -452,31 +452,31 @@ async function handleInstructionResult({ req, res, session, node, result }) {
   }) : null;
 
   const db = getDb();
-  db.transaction(() => {
-    db.prepare(`
+  await db.transaction(async () => {
+    await db.prepare(`
       INSERT INTO session_messages (id, session_id, role, content, message_type, caption_en, mermaid, code)
       VALUES (?, ?, 'ai', ?, 'instruction', ?, ?, ?)
     `).run(uuidv4(), session.id, result.message, result.captionEn || null, result.mermaid || null, result.code || null);
 
     if (result.approach) {
-      db.prepare(`
+      await db.prepare(`
         INSERT OR IGNORE INTO loop_approaches_used (id, engagement_learner_id, skill_node_id, approach)
         VALUES (?, ?, ?, ?)
       `).run(uuidv4(), session.engagement_learner_id, session.skill_node_id, result.approach);
-      db.prepare(`UPDATE learning_sessions SET current_approach = ?, behaviour_signal = ? WHERE id = ?`)
+      await db.prepare(`UPDATE learning_sessions SET current_approach = ?, behaviour_signal = ? WHERE id = ?`)
         .run(result.approach, result.behaviourSignal || session.behaviour_signal, session.id);
     } else {
-      db.prepare(`UPDATE learning_sessions SET behaviour_signal = ? WHERE id = ?`)
+      await db.prepare(`UPDATE learning_sessions SET behaviour_signal = ? WHERE id = ?`)
         .run(result.behaviourSignal || session.behaviour_signal, session.id);
     }
 
     if (instance) {
-      const checkCount = db.prepare('SELECT COUNT(*) as cnt FROM mastery_checks WHERE session_id = ?').get(session.id).cnt;
-      db.prepare(`
+      const checkCount = (await db.prepare('SELECT COUNT(*) as cnt FROM mastery_checks WHERE session_id = ?').get(session.id)).cnt;
+      await db.prepare(`
         INSERT INTO mastery_checks (id, session_id, skill_node_id, engagement_learner_id, check_number, question_text, instance_id, purpose)
         VALUES (?, ?, ?, ?, ?, ?, ?, 'check')
       `).run(uuidv4(), session.id, session.skill_node_id, session.engagement_learner_id, checkCount + 1, instance.question_text, instance.id);
-      db.prepare(`INSERT INTO session_messages (id, session_id, role, content, message_type) VALUES (?, ?, 'ai', ?, 'mastery_check')`)
+      await db.prepare(`INSERT INTO session_messages (id, session_id, role, content, message_type) VALUES (?, ?, 'ai', ?, 'mastery_check')`)
         .run(uuidv4(), session.id, instance.question_text);
     }
   })();
@@ -489,7 +489,7 @@ async function handleInstructionResult({ req, res, session, node, result }) {
   });
 }
 
-function handleCheckResult({ req, res, session, node, result, learnerResponse, pendingCheck, gate, assessment }) {
+async function handleCheckResult({ req, res, session, node, result, learnerResponse, pendingCheck, gate, assessment }) {
   const db = getDb();
   const evaluation = result.evaluation;
   const passed = assessment.passed;
@@ -502,33 +502,33 @@ function handleCheckResult({ req, res, session, node, result, learnerResponse, p
   let confidenceIndicator = null;
   let review = null;
 
-  const nextNodeAfter = () => {
-    const nextNode = db.prepare(`
+  const nextNodeAfter = async () => {
+    const nextNode = await db.prepare(`
       SELECT sn.* FROM skill_nodes sn
       WHERE sn.cluster_id = (SELECT cluster_id FROM skill_nodes WHERE id = ?)
       AND sn.sequence_order > (SELECT sequence_order FROM skill_nodes WHERE id = ?)
       ORDER BY sn.sequence_order LIMIT 1
     `).get(session.skill_node_id, session.skill_node_id);
     if (nextNode) return nextNode;
-    const currentCluster = db.prepare('SELECT cluster_id FROM skill_nodes WHERE id = ?').get(session.skill_node_id);
-    const nextCluster = db.prepare(`
+    const currentCluster = await db.prepare('SELECT cluster_id FROM skill_nodes WHERE id = ?').get(session.skill_node_id);
+    const nextCluster = await db.prepare(`
       SELECT sc.id FROM skill_clusters sc
       WHERE sc.capability_target_id = (SELECT capability_target_id FROM skill_clusters WHERE id = ?)
       AND sc.sequence_order > (SELECT sequence_order FROM skill_clusters WHERE id = ?)
       ORDER BY sc.sequence_order LIMIT 1
     `).get(currentCluster.cluster_id, currentCluster.cluster_id);
-    return nextCluster ? db.prepare('SELECT * FROM skill_nodes WHERE cluster_id = ? ORDER BY sequence_order LIMIT 1').get(nextCluster.id) : null;
+    return nextCluster ? await db.prepare('SELECT * FROM skill_nodes WHERE cluster_id = ? ORDER BY sequence_order LIMIT 1').get(nextCluster.id) : null;
   };
 
-  db.transaction(() => {
-    db.prepare(`
+  await db.transaction(async () => {
+    await db.prepare(`
       UPDATE mastery_checks SET learner_response = ?, passed = ?, score = ?, ai_evaluation = ?, evaluated_at = datetime('now')
       WHERE id = ?
     `).run(learnerResponse, passed ? 1 : 0, assessment.r_c, evaluation.evaluation, pendingCheck.id);
 
     // Evidence record + provenance (v4.3 §7, §20).
     const evidenceId = ulid();
-    db.prepare(`INSERT INTO evidence_records (id, el_id, node_id, family_id, instance_id, purpose, answer_hash, per_point_json, r_c, fused_score,
+    await db.prepare(`INSERT INTO evidence_records (id, el_id, node_id, family_id, instance_id, purpose, answer_hash, per_point_json, r_c, fused_score,
         passed, level, assurance, authentic, flags_json, provisional, theta, model_id, prompt_version, rubric_version, family_version, active_ms, created_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
       evidenceId, elId, node.id, pendingCheck.family_id || null, pendingCheck.instance_id || null, pendingCheck.purpose || 'check',
@@ -536,34 +536,34 @@ function handleCheckResult({ req, res, session, node, result, learnerResponse, p
       assessment.r_c, assessment.r_c, passed ? 1 : 0, assessment.level, gate.assurance, JSON.stringify(assessment.flags),
       assessment.provisional ? 1 : 0, assessment.theta, 'gateway', 'EVAL.mastery.v1', evaluation.rubricVersion || 'default',
       pendingCheck.family_version || null, Math.round((session.active_minutes || 0) * 60000), now);
-    insertProvenance(db, evidenceId, gate.provenance);
-    insertAnswer(db, evidenceId, learnerResponse);
+    await insertProvenance(db, evidenceId, gate.provenance);
+    await insertAnswer(db, evidenceId, learnerResponse);
 
     // Faculty review: decision stratum (persistence, borderline disagreement) or calibration sample (§7.8).
-    review = enqueueReview({ evidenceId, elId, nodeId: node.id, institutionId: node.institution_id, engagementId: req.user.engagement_id, decision: assessment.review });
+    review = await enqueueReview({ evidenceId, elId, nodeId: node.id, institutionId: node.institution_id, engagementId: req.user.engagement_id, decision: assessment.review });
 
     // Vocabulary level (§6).
-    recordVocabulary(req.user.id, { passed, vocabGap });
+    await recordVocabulary(req.user.id, { passed, vocabGap });
 
-    db.prepare(`
+    await db.prepare(`
       INSERT INTO session_messages (id, session_id, role, content, message_type, caption_en, mermaid, code)
       VALUES (?, ?, 'ai', ?, ?, ?, ?, ?)
     `).run(uuidv4(), session.id, result.message, passed ? 'advance_trigger' : 'loop_trigger',
       result.captionEn || null, result.mermaid || null, result.code || null);
 
-    emit('CHECK_EVALUATED', { aggregateType: 'enrolment', aggregateId: elId, payload: { evidenceId, nodeId: node.id, passed, assurance: gate.assurance, provisional: assessment.provisional } }, db);
+    await emit('CHECK_EVALUATED', { aggregateType: 'enrolment', aggregateId: elId, payload: { evidenceId, nodeId: node.id, passed, assurance: gate.assurance, provisional: assessment.provisional } }, db);
 
     if (passed) {
-      const allChecks = db.prepare(`
+      const allChecks = (await db.prepare(`
         SELECT score, passed FROM mastery_checks
         WHERE engagement_learner_id = ? AND skill_node_id = ? AND passed IS NOT NULL ORDER BY created_at
-      `).all(elId, session.skill_node_id).map(c => ({ score: c.score, passed: !!c.passed }));
+      `).all(elId, session.skill_node_id)).map(c => ({ score: c.score, passed: !!c.passed }));
       masteryAttainment = calculateMasteryAttainment(allChecks);
       // Computed for the response only; never stored (sign facts, compute labels).
       confidenceIndicator = calculateConfidenceIndicator(allChecks, session.loop_count);
       const timeToMastery = (Date.now() - new Date(session.started_at).getTime()) / 60000;
 
-      db.prepare(`
+      await db.prepare(`
         INSERT INTO node_mastery (id, engagement_learner_id, skill_node_id, mastery_attainment, time_to_mastery_minutes, attempt_count, advanced_at,
           theta, evidence_level, persistence, provisional, recheck_required, loops, active_minutes)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'L1', ?, ?, 0, ?, ?)
@@ -576,30 +576,30 @@ function handleCheckResult({ req, res, session, node, result, learnerResponse, p
         assessment.theta, assessment.persistence ? 1 : 0, assessment.provisional ? 1 : 0, session.loop_count, session.active_minutes || 0);
 
       // The mastery pass is the first dated demonstration (§9.1).
-      db.prepare(`INSERT INTO demonstrations (id, el_id, node_id, kind, date, passed, score, level, assurance, evidence_id, created_at)
+      await db.prepare(`INSERT INTO demonstrations (id, el_id, node_id, kind, date, passed, score, level, assurance, evidence_id, created_at)
         VALUES (?, ?, ?, 'mastery', ?, 1, ?, 'L1', ?, ?, ?)`).run(ulid(), elId, node.id, now, assessment.r_c, gate.assurance, evidenceId, now);
-      scheduleFirstReview(db, elId, node.id, now);
+      await scheduleFirstReview(db, elId, node.id, now);
 
-      db.prepare(`UPDATE learning_sessions SET status = 'completed', completed_at = datetime('now'), behaviour_signal = 'accelerating' WHERE id = ?`).run(session.id);
-      advanceTo = nextNodeAfter();
+      await db.prepare(`UPDATE learning_sessions SET status = 'completed', completed_at = datetime('now'), behaviour_signal = 'accelerating' WHERE id = ?`).run(session.id);
+      advanceTo = await nextNodeAfter();
       if (advanceTo) {
-        db.prepare(`UPDATE engagement_learners SET current_node_id = ?, current_cluster_id = ? WHERE id = ?`)
+        await db.prepare(`UPDATE engagement_learners SET current_node_id = ?, current_cluster_id = ? WHERE id = ?`)
           .run(advanceTo.id, advanceTo.cluster_id, elId);
       } else {
-        db.prepare(`UPDATE engagement_learners SET overall_status = 'completed' WHERE id = ?`).run(elId);
-        emit('CURRICULUM_COMPLETE', { aggregateType: 'enrolment', aggregateId: elId, payload: {} }, db);
+        await db.prepare(`UPDATE engagement_learners SET overall_status = 'completed' WHERE id = ?`).run(elId);
+        await emit('CURRICULUM_COMPLETE', { aggregateType: 'enrolment', aggregateId: elId, payload: {} }, db);
       }
-      updateStreak(db, elId);
-      emit('NODE_ADVANCED', { aggregateType: 'enrolment', aggregateId: elId, payload: { nodeId: node.id, evidenceId, provisional: assessment.provisional } }, db);
+      await updateStreak(db, elId);
+      await emit('NODE_ADVANCED', { aggregateType: 'enrolment', aggregateId: elId, payload: { nodeId: node.id, evidenceId, provisional: assessment.provisional } }, db);
     } else {
-      db.prepare(`
+      await db.prepare(`
         INSERT OR IGNORE INTO loop_approaches_used (id, engagement_learner_id, skill_node_id, approach)
         VALUES (?, ?, ?, ?)
       `).run(uuidv4(), elId, session.skill_node_id, session.current_approach);
-      db.prepare(`
+      await db.prepare(`
         UPDATE learning_sessions SET loop_count = loop_count + 1, current_approach = ?, behaviour_signal = 'confused' WHERE id = ?
       `).run(result.nextApproach, session.id);
-      emit('NODE_LOOPED', { aggregateType: 'enrolment', aggregateId: elId, payload: { nodeId: node.id, evidenceId, loops: session.loop_count + 1 } }, db);
+      await emit('NODE_LOOPED', { aggregateType: 'enrolment', aggregateId: elId, payload: { nodeId: node.id, evidenceId, loops: session.loop_count + 1 } }, db);
     }
   })();
   db.close();
@@ -653,8 +653,8 @@ router.post('/session/voice', upload.single('audio'), async (req, res) => {
   // editing and the edit share feeds the authenticity gate.
   if (req.body.session_id) {
     const db = getDb();
-    const session = db.prepare('SELECT id FROM learning_sessions WHERE id = ? AND engagement_learner_id = ?').get(req.body.session_id, req.user.el_id);
-    const pending = session ? pendingCheckFor(db, session.id) : null;
+    const session = await db.prepare('SELECT id FROM learning_sessions WHERE id = ? AND engagement_learner_id = ?').get(req.body.session_id, req.user.el_id);
+    const pending = session ? await pendingCheckFor(db, session.id) : null;
     db.close();
     if (pending) return res.json({ transcript, check_pending: true });
   }
@@ -663,7 +663,7 @@ router.post('/session/voice', upload.single('audio'), async (req, res) => {
   req.body = { ...req.body, content: transcript, input_mode: 'voice', provenance: { mode: 'voice', edit_ratio: 0 } };
   const json = res.json.bind(res);
   res.json = (body) => json({ ...body, transcript });
-  return handleSessionMessage(req, res);
+  return await handleSessionMessage(req, res);
 });
 
 // ─── Session: active-time heartbeat (v4.3 §6) ─────────────────────────────────
@@ -671,12 +671,12 @@ router.post('/session/voice', upload.single('audio'), async (req, res) => {
 // occurred_at }. Time counts only while the tab is visible and the learner gave
 // input in the last 3 minutes. Offline-queued heartbeats keep their original
 // occurred_at (low-bandwidth mode, §19); a batch may be posted as { beats: [...] }.
-router.post('/session/heartbeat', (req, res) => {
+router.post('/session/heartbeat', async (req, res) => {
   const beats = Array.isArray(req.body.beats) ? req.body.beats.slice(0, 200) : [req.body];
   let credited = 0;
   const reasons = [];
-  beats.forEach(b => {
-    const r = heartbeat({ sessionId: b.session_id || req.body.session_id, elId: req.user.el_id, occurredAt: b.occurred_at, lastInputAt: b.last_input_at, visible: b.visible !== false });
+  await eachSeq(beats, async b => {
+    const r = await heartbeat({ sessionId: b.session_id || req.body.session_id, elId: req.user.el_id, occurredAt: b.occurred_at, lastInputAt: b.last_input_at, visible: b.visible !== false });
     credited += r.credited;
     if (r.reason) reasons.push(r.reason);
   });
@@ -684,19 +684,19 @@ router.post('/session/heartbeat', (req, res) => {
 });
 
 // ─── Session history ───────────────────────────────────────────────────────────
-router.get('/session/:sessionId/history', (req, res) => {
+router.get('/session/:sessionId/history', async (req, res) => {
   const db = getDb();
-  const session = db.prepare('SELECT id FROM learning_sessions WHERE id = ? AND engagement_learner_id = ?').get(req.params.sessionId, req.user.el_id);
+  const session = await db.prepare('SELECT id FROM learning_sessions WHERE id = ? AND engagement_learner_id = ?').get(req.params.sessionId, req.user.el_id);
   if (!session) { db.close(); return res.status(404).json({ error: 'Session not found' }); }
-  const messages = db.prepare(`SELECT * FROM session_messages WHERE session_id = ? ORDER BY created_at, rowid`).all(req.params.sessionId);
+  const messages = await db.prepare(`SELECT * FROM session_messages WHERE session_id = ? ORDER BY created_at, seq`).all(req.params.sessionId);
   db.close();
   res.json(messages);
 });
 
 // ─── Doubts ─────────────────────────────────────────────────────────────────────
-router.get('/doubts', (req, res) => {
+router.get('/doubts', async (req, res) => {
   const db = getDb();
-  const doubts = db.prepare('SELECT * FROM doubts WHERE engagement_learner_id = ? ORDER BY created_at DESC').all(req.user.el_id);
+  const doubts = await db.prepare('SELECT * FROM doubts WHERE engagement_learner_id = ? ORDER BY created_at DESC').all(req.user.el_id);
   db.close();
   res.json(doubts);
 });
@@ -706,9 +706,9 @@ router.post('/doubts', async (req, res) => {
   if (!question_text) return res.status(400).json({ error: 'question_text required' });
 
   const db = getDb();
-  const el = db.prepare('SELECT * FROM engagement_learners WHERE id = ?').get(req.user.el_id);
+  const el = await db.prepare('SELECT * FROM engagement_learners WHERE id = ?').get(req.user.el_id);
   const nodeId = skill_node_id || (el ? el.current_node_id : null);
-  const node = nodeId ? getNodeWithCluster(db, nodeId) : null;
+  const node = nodeId ? await getNodeWithCluster(db, nodeId) : null;
   db.close();
 
   try {
@@ -721,7 +721,7 @@ router.post('/doubts', async (req, res) => {
 
     const writeDb = getDb();
     const doubtId = uuidv4();
-    writeDb.prepare(`
+    await writeDb.prepare(`
       INSERT INTO doubts (id, engagement_learner_id, skill_node_id, question_text, ai_answer, status)
       VALUES (?, ?, ?, ?, ?, 'answered')
     `).run(doubtId, req.user.el_id, nodeId || null, question_text, result.answer);
@@ -733,29 +733,29 @@ router.post('/doubts', async (req, res) => {
   }
 });
 
-router.post('/doubts/:id/escalate', (req, res) => {
+router.post('/doubts/:id/escalate', async (req, res) => {
   const db = getDb();
-  const doubt = db.prepare('SELECT * FROM doubts WHERE id = ? AND engagement_learner_id = ?').get(req.params.id, req.user.el_id);
+  const doubt = await db.prepare('SELECT * FROM doubts WHERE id = ? AND engagement_learner_id = ?').get(req.params.id, req.user.el_id);
   if (!doubt) { db.close(); return res.status(404).json({ error: 'Not found' }); }
-  db.prepare(`UPDATE doubts SET status = 'escalated' WHERE id = ?`).run(req.params.id);
+  await db.prepare(`UPDATE doubts SET status = 'escalated' WHERE id = ?`).run(req.params.id);
   db.close();
   res.json({ message: 'Doubt escalated for human review' });
 });
 
 // ─── Study plans ────────────────────────────────────────────────────────────────
-router.get('/study-plans', (req, res) => {
+router.get('/study-plans', async (req, res) => {
   const db = getDb();
-  const plans = db.prepare('SELECT * FROM study_plans WHERE engagement_learner_id = ? ORDER BY planned_date').all(req.user.el_id);
+  const plans = await db.prepare('SELECT * FROM study_plans WHERE engagement_learner_id = ? ORDER BY planned_date').all(req.user.el_id);
   db.close();
   res.json(plans);
 });
 
-router.post('/study-plans', (req, res) => {
+router.post('/study-plans', async (req, res) => {
   const { planned_date, planned_duration_minutes, notes } = req.body;
   if (!planned_date) return res.status(400).json({ error: 'planned_date required' });
   const db = getDb();
   const id = uuidv4();
-  db.prepare(`
+  await db.prepare(`
     INSERT INTO study_plans (id, engagement_learner_id, planned_date, planned_duration_minutes, notes)
     VALUES (?, ?, ?, ?, ?)
   `).run(id, req.user.el_id, planned_date, planned_duration_minutes || 30, notes || null);
@@ -764,18 +764,18 @@ router.post('/study-plans', (req, res) => {
 });
 
 // ─── Streak ─────────────────────────────────────────────────────────────────────
-router.get('/streak', (req, res) => {
+router.get('/streak', async (req, res) => {
   const db = getDb();
-  const streak = db.prepare('SELECT * FROM streaks WHERE engagement_learner_id = ?').get(req.user.el_id);
+  const streak = await db.prepare('SELECT * FROM streaks WHERE engagement_learner_id = ?').get(req.user.el_id);
   db.close();
   res.json(streak || { current_streak: 0, longest_streak: 0, total_session_days: 0 });
 });
 
 // ─── Certificates (derived — no dedicated table) ───────────────────────────────
-router.get('/certificates', (req, res) => {
+router.get('/certificates', async (req, res) => {
   const db = getDb();
-  const el = db.prepare('SELECT * FROM engagement_learners WHERE id = ?').get(req.user.el_id);
-  const clusters = db.prepare(`
+  const el = await db.prepare('SELECT * FROM engagement_learners WHERE id = ?').get(req.user.el_id);
+  const clusters = await db.prepare(`
     SELECT sc.id, sc.cluster_label,
       COUNT(sn.id) as total_nodes,
       SUM(CASE WHEN nm.advanced_at IS NOT NULL THEN 1 ELSE 0 END) as nodes_mastered
@@ -800,21 +800,21 @@ router.get('/certificates', (req, res) => {
 // ─── Profile ────────────────────────────────────────────────────────────────────
 // GET/PUT /profile, resume and skill requests live in portfolio.js.
 // ─── Change PIN (required after a printed slip or a reset) ─────────────────────
-router.put('/pin', (req, res) => {
+router.put('/pin', async (req, res) => {
   const { new_pin } = req.body;
   if (!isValidPin(new_pin)) return res.status(400).json({ error: 'Your PIN must be exactly 6 digits.' });
   const db = getDb();
-  db.prepare("UPDATE learners SET pin_hash = ?, pin_must_change = 0, pin_set_at = datetime('now') WHERE id = ?").run(hashPin(new_pin), req.user.id);
-  const e = db.prepare('SELECT institution_id FROM engagements WHERE id = ?').get(req.user.engagement_id);
-  if (e) logEvent(db, { institutionId: e.institution_id, learnerId: req.user.id, elId: req.user.el_id, event: 'pin_set', detail: 'Chose a new PIN after a one-time PIN' });
+  await db.prepare("UPDATE learners SET pin_hash = ?, pin_must_change = 0, pin_set_at = datetime('now') WHERE id = ?").run(hashPin(new_pin), req.user.id);
+  const e = await db.prepare('SELECT institution_id FROM engagements WHERE id = ?').get(req.user.engagement_id);
+  if (e) await logEvent(db, { institutionId: e.institution_id, learnerId: req.user.id, elId: req.user.el_id, event: 'pin_set', detail: 'Chose a new PIN after a one-time PIN' });
   db.close();
   res.json({ message: 'PIN updated' });
 });
 
 // ─── The learner's professors (what the professor profile preview shows) ──────
-router.get('/professors', (req, res) => {
+router.get('/professors', async (req, res) => {
   const db = getDb();
-  const rows = db.prepare(`
+  const rows = await db.prepare(`
     SELECT u.name, u.title, u.designation, u.department, u.specialisations, u.office_hours, u.photo_data_url, sc.cohort_role
     FROM staff_cohorts sc JOIN institution_users u ON u.id = sc.staff_id
     WHERE sc.engagement_id = ? AND u.status = 'active' AND u.role = 'professor'
@@ -824,9 +824,9 @@ router.get('/professors', (req, res) => {
   res.json(rows.map(r => ({ ...r, specialisations: r.specialisations ? JSON.parse(r.specialisations) : [] })));
 });
 
-router.put('/notifications', (req, res) => {
+router.put('/notifications', async (req, res) => {
   const db = getDb();
-  db.prepare('UPDATE learners SET notification_prefs = ? WHERE id = ?').run(JSON.stringify(req.body || {}), req.user.id);
+  await db.prepare('UPDATE learners SET notification_prefs = ? WHERE id = ?').run(JSON.stringify(req.body || {}), req.user.id);
   db.close();
   res.json({ message: 'Notification preferences updated' });
 });

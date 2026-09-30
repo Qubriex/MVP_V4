@@ -18,6 +18,7 @@ import { ulid } from '../db/ulid.js';
 import params from '../../config/params.js';
 import { emit } from '../events/outbox.js';
 import { BANDS, bandOf, pNode } from './calibration.js';
+import { reduceSeq } from '../util/seq.js';
 
 const bandIndex = (b) => BANDS.indexOf(b);
 
@@ -61,10 +62,10 @@ export function bootstrapKappa(pairs, { samples = params.get('evidence.faculty.b
 }
 
 /** Calibration status of one node from its calibration-stratum reviews. */
-export function nodeCalibration(nodeId) {
+export async function nodeCalibration(nodeId) {
   const k = params.get('evidence.faculty.kappa');
-  const pairs = dal.all(`SELECT e.r_c, f.band FROM faculty_reviews f JOIN review_queue q ON q.id = f.queue_id
-    JOIN evidence_records e ON e.id = f.evidence_id WHERE q.node_id = ? AND q.stratum = 'calibration'`, nodeId)
+  const pairs = (await dal.all(`SELECT e.r_c, f.band FROM faculty_reviews f JOIN review_queue q ON q.id = f.queue_id
+    JOIN evidence_records e ON e.id = f.evidence_id WHERE q.node_id = ? AND q.stratum = 'calibration'`, nodeId))
     .map(r => [bandIndex(bandOf(r.r_c ?? 0)), bandIndex(r.band)]);
   const n = pairs.length;
   const { point, lower, upper } = bootstrapKappa(pairs);
@@ -78,68 +79,68 @@ export function nodeCalibration(nodeId) {
  * Apply a faculty verdict. Returns what changed for the learner.
  * @param {{queueId: string, staffId: string|null, verdict: 'pass'|'fail', band: string, notes?: string, secondsSpent?: number}} v
  */
-export function applyVerdict({ queueId, staffId, verdict, band, notes = null, secondsSpent = null }) {
+export async function applyVerdict({ queueId, staffId, verdict, band, notes = null, secondsSpent = null }) {
   if (!['pass', 'fail'].includes(verdict)) throw Object.assign(new Error('verdict must be pass or fail'), { status: 400 });
   if (!BANDS.includes(band)) throw Object.assign(new Error('band must be one of the four bands'), { status: 400 });
-  return dal.tx(() => {
-    const q = dal.one('SELECT * FROM review_queue WHERE id = ?', queueId);
+  return await dal.tx(async () => {
+    const q = await dal.one('SELECT * FROM review_queue WHERE id = ?', queueId);
     if (!q) throw Object.assign(new Error('Not found'), { status: 404 });
     if (q.status === 'done') throw Object.assign(new Error('Already reviewed'), { status: 409 });
-    const ev = dal.one('SELECT * FROM evidence_records WHERE id = ?', q.evidence_id);
+    const ev = await dal.one('SELECT * FROM evidence_records WHERE id = ?', q.evidence_id);
     const now = dal.nowIso();
     const reviewId = ulid();
-    dal.run(`INSERT INTO faculty_reviews (id, queue_id, evidence_id, reviewer_staff_id, verdict, band, notes, seconds_spent, created_at)
+    await dal.run(`INSERT INTO faculty_reviews (id, queue_id, evidence_id, reviewer_staff_id, verdict, band, notes, seconds_spent, created_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, reviewId, queueId, q.evidence_id, staffId, verdict, band, notes, secondsSpent, now);
-    dal.run("UPDATE review_queue SET status = 'done', done_at = ? WHERE id = ?", now, queueId);
+    await dal.run("UPDATE review_queue SET status = 'done', done_at = ? WHERE id = ?", now, queueId);
 
     const aiPass = !!ev.passed;
     const agree = aiPass === (verdict === 'pass');
     const outcome = { agree, recheck: false, lifted: false, provisionalCleared: false };
-    const mastery = dal.one('SELECT * FROM node_mastery WHERE engagement_learner_id = ? AND skill_node_id = ?', q.el_id, q.node_id);
+    const mastery = await dal.one('SELECT * FROM node_mastery WHERE engagement_learner_id = ? AND skill_node_id = ?', q.el_id, q.node_id);
 
     if (aiPass && verdict === 'fail') {
       // Disagreement on a PASS: the learner gets a fresh instance (a recheck).
-      if (mastery) dal.run('UPDATE node_mastery SET recheck_required = 1, provisional = 0 WHERE id = ?', mastery.id);
-      dal.run(`INSERT INTO demonstrations (id, el_id, node_id, kind, date, passed, score, level, assurance, evidence_id, created_at)
+      if (mastery) await dal.run('UPDATE node_mastery SET recheck_required = 1, provisional = 0 WHERE id = ?', mastery.id);
+      await dal.run(`INSERT INTO demonstrations (id, el_id, node_id, kind, date, passed, score, level, assurance, evidence_id, created_at)
         VALUES (?, ?, ?, 'faculty', ?, 0, NULL, 'L1', ?, ?, ?)`, ulid(), q.el_id, q.node_id, now, ev.assurance === 'A0' ? 'A1' : ev.assurance, ev.id, now);
       outcome.recheck = true;
     } else if (aiPass && verdict === 'pass') {
-      if (mastery && mastery.provisional) { dal.run('UPDATE node_mastery SET provisional = 0 WHERE id = ?', mastery.id); outcome.provisionalCleared = true; }
-      if (nodeCalibration(q.node_id).status === 'calibrated' || q.stratum === 'decision') {
+      if (mastery && mastery.provisional) { await dal.run('UPDATE node_mastery SET provisional = 0 WHERE id = ?', mastery.id); outcome.provisionalCleared = true; }
+      if ((await nodeCalibration(q.node_id)).status === 'calibrated' || q.stratum === 'decision') {
         // Faculty-confirmed on a calibrated node → L3 (v4.3 §7.1, §7.8).
-        const lift = nodeCalibration(q.node_id).status === 'calibrated';
-        if (lift && mastery) dal.run("UPDATE node_mastery SET evidence_level = 'L3' WHERE id = ?", mastery.id);
-        dal.run(`INSERT INTO demonstrations (id, el_id, node_id, kind, date, passed, score, level, assurance, evidence_id, created_at)
+        const lift = (await nodeCalibration(q.node_id)).status === 'calibrated';
+        if (lift && mastery) await dal.run("UPDATE node_mastery SET evidence_level = 'L3' WHERE id = ?", mastery.id);
+        await dal.run(`INSERT INTO demonstrations (id, el_id, node_id, kind, date, passed, score, level, assurance, evidence_id, created_at)
           VALUES (?, ?, ?, 'faculty', ?, 1, ?, ?, ?, ?, ?)`, ulid(), q.el_id, q.node_id, now, ev.r_c, lift ? 'L3' : 'L1', ev.assurance === 'A0' ? 'A1' : ev.assurance, ev.id, now);
         outcome.lifted = lift;
       }
     }
-    emit('FACULTY_REVIEW_DONE', { aggregateType: 'enrolment', aggregateId: q.el_id, payload: { reviewId, evidenceId: ev.id, verdict, agree, stratum: q.stratum } });
+    await emit('FACULTY_REVIEW_DONE', { aggregateType: 'enrolment', aggregateId: q.el_id, payload: { reviewId, evidenceId: ev.id, verdict, agree, stratum: q.stratum } });
     return outcome;
   });
 }
 
 /** Review-load forecast for a cohort (minutes per week), and whether it fits the contract. */
-export function loadForecast(engagementId) {
+export async function loadForecast(engagementId) {
   const f = params.get('evidence.faculty');
-  const e = dal.one(`SELECT e.id, e.institution_id, ct.id AS ct_id, COALESCE(ct.time_window_weeks, ?) AS weeks, i.review_minutes_per_100
+  const e = await dal.one(`SELECT e.id, e.institution_id, ct.id AS ct_id, COALESCE(ct.time_window_weeks, ?) AS weeks, i.review_minutes_per_100
     FROM engagements e JOIN capability_targets ct ON ct.id = e.capability_target_id JOIN institutions i ON i.id = e.institution_id WHERE e.id = ?`, f.defaultWeeks, engagementId);
   if (!e) return null;
-  const learners = dal.one("SELECT COUNT(*) n FROM engagement_learners WHERE engagement_id = ? AND COALESCE(access_status,'active') != 'removed'", engagementId).n;
-  const nodes = dal.all('SELECT sn.id FROM skill_nodes sn JOIN skill_clusters sc ON sc.id = sn.cluster_id WHERE sc.capability_target_id = ?', e.ct_id);
+  const learners = (await dal.one("SELECT COUNT(*) n FROM engagement_learners WHERE engagement_id = ? AND COALESCE(access_status,'active') != 'removed'", engagementId)).n;
+  const nodes = await dal.all('SELECT sn.id FROM skill_nodes sn JOIN skill_clusters sc ON sc.id = sn.cluster_id WHERE sc.capability_target_id = ?', e.ct_id);
   const weeks = Math.max(1, e.weeks || f.defaultWeeks);
-  const hist = dal.one(`SELECT COUNT(*) total, SUM(CASE WHEN q.stratum = 'decision' THEN 1 ELSE 0 END) decision
+  const hist = await dal.one(`SELECT COUNT(*) total, SUM(CASE WHEN q.stratum = 'decision' THEN 1 ELSE 0 END) decision
     FROM evidence_records r LEFT JOIN review_queue q ON q.evidence_id = r.id
     WHERE r.el_id IN (SELECT id FROM engagement_learners WHERE engagement_id = ?) AND r.assurance != 'A0'`, engagementId);
   const decisionRate = hist.total >= 50 ? (hist.decision || 0) / hist.total : f.decisionRatePrior;
   const perLearnerPerNode = 1.5;
   const checksPerWeek = (learners * nodes.length * perLearnerPerNode) / weeks;
-  const calibrationPerWeek = nodes.reduce((a, n) => a + pNode(engagementId, n.id) * (learners * perLearnerPerNode) / weeks, 0);
+  const calibrationPerWeek = await reduceSeq(nodes, async (a, n) => a + await pNode(engagementId, n.id) * (learners * perLearnerPerNode) / weeks, 0);
   const a2Escalations = 0; // instance-bound challenge not yet live (docs/v4.3-gap-audit.md)
   const minutes = f.minutesPerReview * (decisionRate * checksPerWeek + calibrationPerWeek + a2Escalations);
   const contracted = e.review_minutes_per_100 != null ? Math.round(e.review_minutes_per_100 * learners / 100) : null;
   const weekStart = new Date(Date.now() - 7 * 86400000).toISOString();
-  const doneThisWeek = dal.one(`SELECT COUNT(*) n FROM faculty_reviews f JOIN review_queue q ON q.id = f.queue_id WHERE q.engagement_id = ? AND f.created_at >= ?`, engagementId, weekStart).n;
+  const doneThisWeek = (await dal.one(`SELECT COUNT(*) n FROM faculty_reviews f JOIN review_queue q ON q.id = f.queue_id WHERE q.engagement_id = ? AND f.created_at >= ?`, engagementId, weekStart)).n;
   return {
     learners, nodes: nodes.length, weeks,
     decision_rate: Math.round(decisionRate * 1000) / 1000,
@@ -149,7 +150,7 @@ export function loadForecast(engagementId) {
     contracted_minutes_per_week: contracted,
     contracted_minutes_per_100: e.review_minutes_per_100 ?? null,
     over_contract: contracted != null && minutes > contracted,
-    open_items: dal.one("SELECT COUNT(*) n FROM review_queue WHERE engagement_id = ? AND status = 'open'", engagementId).n,
+    open_items: (await dal.one("SELECT COUNT(*) n FROM review_queue WHERE engagement_id = ? AND status = 'open'", engagementId)).n,
     minutes_used_this_week: doneThisWeek * f.minutesPerReview,
     advice: contracted == null
       ? 'Set the contracted review minutes per 100 learners to compare.'

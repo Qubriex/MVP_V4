@@ -9,12 +9,12 @@ import params from '../../config/params.js';
 
 const LEVELS = ['beginner', 'intermediate', 'advanced'];
 
-export const vocabularyLevel = (learnerId) => dal.one('SELECT level FROM learner_vocabulary WHERE learner_id = ?', learnerId)?.level || 'beginner';
+export const vocabularyLevel = async (learnerId) => (await dal.one('SELECT level FROM learner_vocabulary WHERE learner_id = ?', learnerId))?.level || 'beginner';
 
 /** Apply one evaluated check. `vocabGap` = EVAL reported a vocabulary_barrier gap. Returns the new level. */
-export function recordAttempt(learnerId, { passed, vocabGap }) {
+export async function recordAttempt(learnerId, { passed, vocabGap }) {
   const v = params.get('learner.vocabulary');
-  const row = dal.one('SELECT * FROM learner_vocabulary WHERE learner_id = ?', learnerId) || { level: 'beginner', clean_pass_streak: 0, recent_json: '[]' };
+  const row = await dal.one('SELECT * FROM learner_vocabulary WHERE learner_id = ?', learnerId) || { level: 'beginner', clean_pass_streak: 0, recent_json: '[]' };
   const recent = [...JSON.parse(row.recent_json || '[]'), vocabGap ? 1 : 0].slice(-v.demoteWindow);
   let streak = passed && !vocabGap ? row.clean_pass_streak + 1 : 0;
   let idx = LEVELS.indexOf(row.level);
@@ -23,7 +23,7 @@ export function recordAttempt(learnerId, { passed, vocabGap }) {
   } else if (streak >= v.promoteAfterPasses && idx < LEVELS.length - 1) {
     idx += 1; streak = 0;
   }
-  dal.run(`INSERT INTO learner_vocabulary (learner_id, level, clean_pass_streak, recent_json, updated_at) VALUES (?, ?, ?, ?, ?)
+  await dal.run(`INSERT INTO learner_vocabulary (learner_id, level, clean_pass_streak, recent_json, updated_at) VALUES (?, ?, ?, ?, ?)
     ON CONFLICT(learner_id) DO UPDATE SET level = excluded.level, clean_pass_streak = excluded.clean_pass_streak,
       recent_json = excluded.recent_json, updated_at = excluded.updated_at`, learnerId, LEVELS[idx], streak, JSON.stringify(recent), dal.nowIso());
   return LEVELS[idx];

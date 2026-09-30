@@ -17,6 +17,7 @@
 import { resolveSkill } from '../graph/resolveSkill.js';
 import { descendants } from '../graph/ontology.js';
 import { pathwayMap, nodesForSkill, coverageOf, coverageStatus } from '../graph/coverage.js';
+import { mapSeq, someSeq } from '../util/seq.js';
 
 const CREDIT = { mastered: 1, in_progress: 0.6, declared: 0.5, in_path: 0.4, requested: 0, not_in_path: 0 };
 
@@ -28,8 +29,8 @@ function parseJSON(text, fallback) {
 // Everything about the learner that gap scoring needs, in one read. Skills
 // are matched through the Capability Graph (v4.3 §3): a JD skill is taught by
 // the pathway nodes mapped to it or to one of its child skills.
-function getLearnerSkillState(db, user) {
-  const nodes = db.prepare(`
+async function getLearnerSkillState(db, user) {
+  const nodes = await db.prepare(`
     SELECT sn.id, sn.node_label, sn.estimated_minutes, sc.cluster_label,
            nm.advanced_at, nm.mastery_attainment
     FROM skill_nodes sn
@@ -38,21 +39,21 @@ function getLearnerSkillState(db, user) {
     WHERE sc.capability_target_id = (SELECT capability_target_id FROM engagements WHERE id = ?)
     ORDER BY sc.sequence_order, sn.sequence_order
   `).all(user.el_id, user.engagement_id);
-  const eng = db.prepare('SELECT capability_target_id FROM engagements WHERE id = ?').get(user.engagement_id);
-  const el = db.prepare('SELECT current_node_id FROM engagement_learners WHERE id = ?').get(user.el_id);
-  const profile = db.prepare('SELECT self_skills FROM learner_profiles WHERE learner_id = ?').get(user.id);
-  const requested = db.prepare('SELECT skill_name FROM skill_requests WHERE engagement_learner_id = ?')
-    .all(user.el_id).map(r => r.skill_name);
+  const eng = await db.prepare('SELECT capability_target_id FROM engagements WHERE id = ?').get(user.engagement_id);
+  const el = await db.prepare('SELECT current_node_id FROM engagement_learners WHERE id = ?').get(user.el_id);
+  const profile = await db.prepare('SELECT self_skills FROM learner_profiles WHERE learner_id = ?').get(user.id);
+  const requested = (await db.prepare('SELECT skill_name FROM skill_requests WHERE engagement_learner_id = ?')
+    .all(user.el_id)).map(r => r.skill_name);
 
   const declaredText = parseJSON(profile && profile.self_skills, []).map(x => String(x));
   // Self-declared skills resolve through the ontology; unknown text is queued for review.
-  const declared = new Set(declaredText.map(t => resolveSkill(t, { source: 'declared' }).skill?.skill_id).filter(Boolean));
-  const requestedIds = new Set(requested.map(t => resolveSkill(t, { source: 'declared', queue: false }).skill?.skill_id).filter(Boolean));
+  const declared = new Set((await mapSeq(declaredText, async t => (await resolveSkill(t, { source: 'declared' })).skill?.skill_id)).filter(Boolean));
+  const requestedIds = new Set((await mapSeq(requested, async t => (await resolveSkill(t, { source: 'declared', queue: false })).skill?.skill_id)).filter(Boolean));
 
   return {
     nodes,
     byId: new Map(nodes.map(n => [n.id, n])),
-    map: eng ? pathwayMap(eng.capability_target_id) : { rows: [], bySkill: new Map() },
+    map: eng ? await pathwayMap(eng.capability_target_id) : { rows: [], bySkill: new Map() },
     currentNodeId: el ? el.current_node_id : null,
     declared,
     requested: new Set([...requestedIds, ...requested.map(r => r.toLowerCase())])
@@ -61,11 +62,11 @@ function getLearnerSkillState(db, user) {
 
 // A declared skill counts for a JD skill if it is that skill, a child of it,
 // or its parent.
-const related = (a, b) => a === b || descendants(b).includes(a) || descendants(a).includes(b);
+const related = async (a, b) => a === b || (await descendants(b)).includes(a) || (await descendants(a)).includes(b);
 
-function classifySkill(skill, state) {
-  const hits = [...nodesForSkill(skill.key, state.map)].map(id => state.byId.get(id)).filter(Boolean);
-  const coverage = coverageOf(skill.key, state.map);
+async function classifySkill(skill, state) {
+  const hits = [...await nodesForSkill(skill.key, state.map)].map(id => state.byId.get(id)).filter(Boolean);
+  const coverage = await coverageOf(skill.key, state.map);
   if (hits.length) {
     const mastered = hits.filter(n => n.advanced_at);
     const partlyTaught = coverageStatus(coverage) !== 'covered';
@@ -80,17 +81,17 @@ function classifySkill(skill, state) {
     const minutes = hits.reduce((sum, n) => sum + (n.estimated_minutes || 20), 0);
     return { status: 'in_path', evidence: partlyTaught ? 'Partly in your path' : 'In your path', node_label: hits[0].node_label, path_minutes: minutes, coverage };
   }
-  if ([...state.declared].some(d => related(d, skill.key))) return { status: 'declared', evidence: 'Self-declared' };
+  if (await someSeq([...state.declared], async d => await related(d, skill.key))) return { status: 'declared', evidence: 'Self-declared' };
   if (state.requested.has(skill.key) || state.requested.has(skill.name.toLowerCase())) return { status: 'requested', evidence: 'Requested' };
   return { status: 'not_in_path', evidence: 'Not in your programme' };
 }
 
-function scoreJob(job, state) {
+async function scoreJob(job, state) {
   let earned = 0;
   let possible = 0;
   let gapHours = 0;
-  const skills = job.skills.map(skill => {
-    const c = classifySkill(skill, state);
+  const skills = await mapSeq(job.skills, async skill => {
+    const c = await classifySkill(skill, state);
     const weight = skill.required ? 1 : 0.5;
     earned += weight * CREDIT[c.status];
     possible += weight;
