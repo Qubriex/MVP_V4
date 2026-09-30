@@ -26,6 +26,7 @@ import NewCohort from './pages/inst/NewCohort';
 import Cohort from './pages/inst/Cohort';
 import Curriculum from './pages/inst/Curriculum';
 import Standing from './pages/inst/Standing';
+import FacultyReview from './pages/inst/Review';
 import LearnerLayout from './components/learn/LearnerLayout';
 import LearnerHome from './pages/learn/Dashboard';
 import VoiceSession from './pages/learn/Session';
@@ -37,6 +38,9 @@ import EmergingTopics from './pages/learn/Topics';
 import LearnerProfile from './pages/learn/Profile';
 import ResumeBuilder from './pages/learn/Resume';
 import Welcome from './pages/learn/Welcome';
+import Reviews from './pages/learn/Reviews';
+import Passport from './pages/learn/Passport';
+import Verify from './pages/Verify';
 
 function ProtectedRoute({ children, requiredRole }) {
   const { token, role } = useAuth();
@@ -63,6 +67,8 @@ export default function App() {
               <Route path="/institution/invite/:token" element={<StaffInvite />} />
               <Route path="/learner-login" element={<LearnerLogin />} />
               <Route path="/learner-invite/:token" element={<LearnerInvite />} />
+              <Route path="/verify" element={<Verify />} />
+              <Route path="/verify/:id" element={<Verify />} />
 
               {/* Institution (staff) routes — one dark-sidebar shell; profile
                   setup after an invite runs full screen. Old URLs redirect. */}
@@ -80,6 +86,7 @@ export default function App() {
                       <Route path="cohorts/:id" element={<Cohort />} />
                       <Route path="curriculum" element={<Curriculum />} />
                       <Route path="benchmark" element={<Standing />} />
+                      <Route path="review" element={<FacultyReview />} />
                       <Route path="profile" element={<StaffProfile />} />
                       <Route path="mastery-log/:logId" element={<MasteryLogView />} />
                       <Route path="dashboard" element={<Navigate to="/institution/home" replace />} />
@@ -108,6 +115,8 @@ export default function App() {
                       <Route path="topics" element={<EmergingTopics />} />
                       <Route path="profile" element={<LearnerProfile />} />
                       <Route path="resume" element={<ResumeBuilder />} />
+                      <Route path="reviews" element={<Reviews />} />
+                      <Route path="passport" element={<Passport />} />
                       <Route path="*" element={<Navigate to="/learn/dashboard" replace />} />
                     </Route>
                   </Routes>

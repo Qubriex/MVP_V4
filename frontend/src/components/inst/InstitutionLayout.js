@@ -6,7 +6,7 @@
 // and shared through useStaff(), so pages know the caller's role.
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Home, LayoutGrid, Users, TrendingUp, BarChart3, ShieldCheck, UserRound, LogOut, Menu, X } from 'lucide-react';
+import { Home, LayoutGrid, Users, TrendingUp, BarChart3, ShieldCheck, UserRound, LogOut, Menu, X, ClipboardCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 import PhoenixMark from '../PhoenixMark';
@@ -46,7 +46,8 @@ export default function InstitutionLayout() {
     { label: 'Overview', items: [{ to: '/institution/home', label: 'Home', icon: Home, badge: alerts || null }] },
     { label: 'Teaching', items: [
       { to: '/institution/cohorts', label: 'Cohorts', icon: LayoutGrid },
-      { to: '/institution/students', label: 'Students & access', icon: Users }
+      { to: '/institution/students', label: 'Students & access', icon: Users },
+      { to: '/institution/review', label: 'Faculty review', icon: ClipboardCheck }
     ] },
     { label: 'Insights', items: [
       { to: '/institution/curriculum', label: 'Curriculum vs market', icon: TrendingUp },

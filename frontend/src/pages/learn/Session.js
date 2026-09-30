@@ -73,6 +73,7 @@ export default function Session() {
   const [elapsed, setElapsed] = useState(0);
   const [transcribing, setTranscribing] = useState(false);
   const [notice, setNotice] = useState('');
+  const [warmups, setWarmups] = useState(0);
   const [lowBw] = useLowBandwidth();
   const endRef = useRef(null);
   const modeRef = useRef(mode);
@@ -119,6 +120,10 @@ export default function Session() {
       if (v.voice) setVoiceVariant(v.voice);
       if (v.startInVoice === false && !params.get('mode')) setMode('typing');
     });
+    // Warm-ups (v4.3 §8): up to 2 due reviews come before new material.
+    let skipped = false;
+    try { skipped = sessionStorage.getItem('qubirex_warmup_later') === '1'; } catch { /* storage blocked */ }
+    if (!skipped) api.get('/learner/reviews/due').then(r => setWarmups((r.data.warmups || []).length)).catch(() => {});
     getOr('/learner/dashboard', MOCK_LEARNER_DASHBOARD, d => d && typeof d.total_nodes !== 'undefined')
       .then(d => d.current_node_index && setNodePos({ i: d.current_node_index, n: d.total_nodes }));
   }, []);
@@ -200,7 +205,7 @@ export default function Session() {
       if (!res.data || !res.data.message) throw new Error('unexpected response shape');
       applyResponse(res.data);
     } catch (e) {
-      setError(navigator.onLine ? 'Couldn’t reach Professor Qubirex. Try again.' : 'You are offline. Lessons and checks need a connection — your time and doubts are saved and will sync.');
+      setError(navigator.onLine ? 'Couldn’t reach Professor Qubirex. Try again.' : 'You are offline. Lessons and checks need a connection — your active time is saved and will sync.');
     }
     setBusy(false);
   }, [busy, sessionId, speech, applyResponse, t]);
@@ -303,6 +308,15 @@ export default function Session() {
         <section className="ln-stage" aria-label="Voice stage">
           {phase === 'mastery_check' && (
             <div className="ln-banner-check ln-indic" role="status"><Award size={18} aria-hidden="true" /><span>{t('session.check')}</span></div>
+          )}
+          {warmups > 0 && (
+            <div className="ln-banner-check" role="status" style={{ flexWrap: 'wrap', gap: 10 }}>
+              <span>Warm-up first: {warmups} short review{warmups === 1 ? '' : 's'} of earlier skills (about 2 minutes).</span>
+              <span className="ln-row" style={{ gap: 8 }}>
+                <button type="button" className="ln-btn ln-btn-sm ln-btn-amber" onClick={() => navigate('/learn/reviews?warmup=1')}>Start warm-up</button>
+                <button type="button" className="ln-btn ln-btn-sm ln-btn-ghost-dark" onClick={() => { setWarmups(0); try { sessionStorage.setItem('qubirex_warmup_later', '1'); } catch { /* ignore */ } }}>Later</button>
+              </span>
+            </div>
           )}
 
           <div className="ln-col ln-stage-main" style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 22, width: '100%' }}>

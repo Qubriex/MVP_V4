@@ -13,6 +13,11 @@ export default function Standing() {
   const [compare, setCompare] = useState('regional');
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
+  const [bench, setBench] = useState(null);
+  useEffect(() => {
+    if (!cohortId) return;
+    api.get(`/institution/insights/benchmarks?engagement_id=${cohortId}`).then(r => setBench(r.data)).catch(() => setBench(null));
+  }, [cohortId]);
 
   useEffect(() => {
     const p = new URLSearchParams({ compare });
@@ -50,6 +55,35 @@ export default function Standing() {
           {data.compare_options.map(o => <button key={o.id} type="button" role="tab" className="ln-pilltab" aria-selected={compare === o.id} onClick={() => setCompare(o.id)}>{o.label}{o.sample ? '' : ' (live)'}</button>)}
         </div>
       </div>
+
+      {bench && (
+        <section className="ln-card" style={{ gap: 12 }} aria-label="Benchmarks">
+          <div className="ln-between ln-wrap" style={{ gap: 8 }}>
+            <div className="ln-col" style={{ gap: 2 }}><h2 className="ln-h2">Benchmarks (live)</h2>
+              <span className="ln-small ln-muted">The same measures for this cohort, your other cohorts and the anonymised median of other institutions in {bench.regional.region || 'your region'}.</span></div>
+            <span className={`ln-tag ${bench.regional.published ? 'ln-tag-success' : 'ln-tag-neutral'}`}>{bench.regional.published ? `Regional median · ${bench.regional.institutions} institutions` : 'Regional median not published'}</span>
+          </div>
+          <div className="ln-tablewrap">
+            <table className="ln-table">
+              <thead><tr><th>Measure</th><th>{bench.cohort.title}</th>{bench.cohorts.slice(0, 3).map(c => <th key={c.id}>{c.title}</th>)}<th>Regional median</th></tr></thead>
+              <tbody>
+                {bench.metrics.map(m => {
+                  const f = (v) => (v == null ? '—' : `${v}${m.unit === '%' ? '%' : m.unit ? ` ${m.unit}` : ''}`);
+                  return (
+                    <tr key={m.key}>
+                      <td>{m.label}<span className="ln-xs ln-muted" style={{ display: 'block' }}>{m.higher ? 'Higher is better' : 'Lower is better'}</span></td>
+                      <td><b>{f(bench.ours[m.key])}</b></td>
+                      {bench.cohorts.slice(0, 3).map(c => <td key={c.id}>{f(c[m.key])}</td>)}
+                      <td>{bench.regional.published ? f(bench.regional.values[m.key]) : '—'}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <span className="ln-xs ln-muted">{bench.regional.note}</span>
+        </section>
+      )}
 
       <div className="ln-grid ln-g-2" style={{ gap: 20 }}>
         <section className="ln-card ln-card-dark" style={{ gap: 12 }}>

@@ -17,7 +17,9 @@ api.interceptors.response.use(
       localStorage.removeItem('qubirex_token');
       localStorage.removeItem('qubirex_user');
       localStorage.removeItem('qubirex_role');
-      window.location.href = role === 'learner' ? '/learner-login' : '/login';
+      const home = { learner: '/learner-login', employer: '/employer/login', admin: '/admin/login' }[role] || '/login';
+      // Public pages (verifier, sign-in screens) never redirect.
+      if (!/^\/(verify|employer\/login|employer\/register|admin\/login|login|learner-login)/.test(window.location.pathname)) window.location.href = home;
     }
     return Promise.reject(err);
   }

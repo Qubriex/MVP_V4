@@ -6,9 +6,10 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Check, Copy } from 'lucide-react';
-import { getOr } from '../../utils/api';
+import api, { getOr } from '../../utils/api';
 import { MOCK_PATH } from '../../utils/learnerMockData';
 import { minutes } from '../../components/learn/ui';
+import LearningCurve from '../../components/learn/LearningCurve';
 
 const CLUSTER_TAG = { done: ['Certificate earned', 'ln-tag-success'], now: ['In progress', 'ln-tag-accent'], next: ['Upcoming', 'ln-tag-neutral'] };
 const CONFIDENCE = { high: 'High', solid: 'Solid', building: 'Building' };
@@ -22,8 +23,10 @@ function NodePill({ n }) {
 export default function Record() {
   const [data, setData] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [curve, setCurve] = useState(null);
 
   useEffect(() => { getOr('/learner/path', MOCK_PATH, d => d && Array.isArray(d.clusters)).then(setData); }, []);
+  useEffect(() => { api.get('/learner/learning-curve').then(r => setCurve(r.data)).catch(() => {}); }, []);
 
   const share = async () => {
     const s = data.summary;
@@ -55,6 +58,14 @@ export default function Record() {
         <div className="ln-card ln-card-sm"><span className="ln-small ln-muted">Active learning time</span><span className="ln-stat">{minutes(s.active_minutes)}</span></div>
         <div className="ln-card ln-card-sm"><span className="ln-small ln-muted">Cluster certificates</span><span className="ln-stat">{s.cluster_certificates}</span></div>
       </div>
+
+      {curve && curve.points.length > 1 && (
+        <section className="ln-card" style={{ gap: 12 }} aria-label="Learning curve">
+          <div className="ln-col" style={{ gap: 2 }}><h2 className="ln-h2">Your learning curve</h2>
+            <span className="ln-small ln-muted">How much of your path you have mastered for the hours you have put in, next to the median of your cohort. Only you and your institution see this.</span></div>
+          <LearningCurve data={curve} />
+        </section>
+      )}
 
       <section className="ln-col" style={{ gap: 14 }}>
         <div className="ln-between ln-wrap">

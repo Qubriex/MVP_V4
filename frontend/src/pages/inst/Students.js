@@ -8,6 +8,7 @@ import { Plus, Search, KeyRound } from 'lucide-react';
 import api from '../../utils/api';
 import { useStaff } from '../../components/inst/InstitutionLayout';
 import AccessResults from '../../components/inst/AccessResults';
+import LearningCurve from '../../components/learn/LearningCurve';
 
 export const ACCESS = { active: 'Active', invited: 'Invited', never_signed_in: 'Never signed in', locked: 'Locked', removed: 'Removed' };
 const FILTERS = [['all', 'All'], ['active', 'Active'], ['invited', 'Invited'], ['never_signed_in', 'Never signed in'], ['locked', 'Locked'], ['removed', 'Removed'], ['reset_requested', 'PIN reset requested']];
@@ -65,6 +66,7 @@ export default function Students() {
   const [selected, setSelected] = useState([]);
   const [detail, setDetail] = useState(null);
   const [modal, setModal] = useState(null);
+  const [curve, setCurve] = useState(null);
   const [results, setResults] = useState(null);
   const [error, setError] = useState('');
 
@@ -196,6 +198,7 @@ export default function Students() {
                   ))}
                 </div>
               </div>
+              <button type="button" className="ln-btn" onClick={() => api.get(`/institution/students/${detail.el_id}/learning-curve`).then(r => setCurve(r.data)).catch(() => setCurve({ error: true }))}>Learning curve</button>
               {canManage && (
                 <div className="ln-col" style={{ gap: 8 }}>
                   {detail.access !== 'removed' && <button type="button" className="ln-btn" onClick={() => ask('reset_pin', [detail.el_id])}>Reset PIN</button>}
@@ -211,6 +214,16 @@ export default function Students() {
           )}
         </aside>
       </div>
+
+      {curve && (
+        <div className="in-modal-scrim" role="dialog" aria-modal="true" aria-label="Learning curve" onClick={() => setCurve(null)}>
+          <div className="ln-card in-modal" style={{ maxWidth: 720, width: '100%', gap: 14 }} onClick={e => e.stopPropagation()}>
+            <div className="ln-between"><h2 className="ln-h2">Learning curve{curve.student ? ` · ${curve.student.name}` : ''}</h2><button type="button" className="ln-btn ln-btn-sm" onClick={() => setCurve(null)}>Close</button></div>
+            {curve.error ? <div className="ln-error">Couldn’t load the learning curve.</div> : <LearningCurve data={curve} />}
+            <span className="ln-xs ln-muted">Loops, time and attempts stay inside Qubirex. They are never shown to employers or used to rank anyone.</span>
+          </div>
+        </div>
+      )}
 
       {modal && (
         <ActionModal action={modal.action} count={modal.ids.length}

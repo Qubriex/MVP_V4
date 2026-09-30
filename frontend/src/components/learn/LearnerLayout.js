@@ -4,7 +4,7 @@
 // 960px the sidebar becomes a drawer opened from a slim top bar.
 import React, { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Mic, Route as RouteIcon, Briefcase, TrendingUp, User, FileText, Settings, LogOut, Menu, X } from 'lucide-react';
+import { Home, Mic, Route as RouteIcon, Briefcase, TrendingUp, User, FileText, Settings, LogOut, Menu, X, RotateCcw, BadgeCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useUiLang, UI_LANGS } from '../../context/UiLangContext';
 import PhoenixMark from '../PhoenixMark';
@@ -15,7 +15,9 @@ const GROUPS = [
   { label: 'nav.learn', items: [
     { to: '/learn/dashboard', label: 'nav.home', icon: Home },
     { to: '/learn/session', label: 'nav.session', icon: Mic },
-    { to: '/learn/record', label: 'nav.path', icon: RouteIcon }
+    { to: '/learn/record', label: 'nav.path', icon: RouteIcon },
+    { to: '/learn/reviews', label: 'nav.reviews', icon: RotateCcw },
+    { to: '/learn/passport', label: 'nav.passport', icon: BadgeCheck }
   ] },
   { label: 'nav.career', items: [
     { to: '/learn/market', label: 'nav.market', icon: Briefcase },
