@@ -147,7 +147,7 @@ export default function Review() {
               <span className="ln-kicker">Contracted review time</span>
               <span className="ln-small ln-muted">Minutes of faculty review per 100 students per week, as agreed in the engagement contract.</span>
               <div className="ln-row" style={{ gap: 8 }}>
-                <input className="ln-input" type="number" min="0" placeholder="e.g. 120" value={contract} onChange={e => setContract(e.target.value)} aria-label="Minutes per 100 students per week" />
+                <input className="ln-input" type="number" min="0" placeholder={load.contracted_minutes_per_100 != null ? `Now ${load.contracted_minutes_per_100}` : 'e.g. 120'} value={contract} onChange={e => setContract(e.target.value)} aria-label="Minutes per 100 students per week" />
                 <button type="button" className="ln-btn ln-btn-primary" disabled={contract === ''} onClick={saveContract}>Save</button>
               </div>
             </div>

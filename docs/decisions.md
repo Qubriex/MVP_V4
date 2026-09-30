@@ -164,20 +164,46 @@ Found by the gap audit (`docs/v4.3-gap-audit.md`):
 - The behaviour fingerprint is persisted only for confirmed adults.
 - Check responses no longer return the evaluator's score to the learner.
 - Simulation-ready follows §7.7.
-Still open: **TEACH writes the check question** (breaks "the teacher never
+Fixed later (see the gap audit update): **TEACH writes the check question** (breaks "the teacher never
 writes the check", §7). The import wall cannot see it, because the question
 travels as data. It is replaced by item-family instances in the Evidence step,
 together with a test that the TEACH contract has no check field. CKB ranking
 by effectiveness is replaced in the Teaching-loop step.
 
-**D-019 — Learner PIN unlock: staff reset vs delayed unlock** · v4.3 §22 · *open question*
+**D-019 — Learner PIN unlock: staff reset vs delayed unlock** · v4.3 §22 · *approved 30 Sep 2026*
 §22 says learner PINs use "lockout with delayed unlock". Today five wrong PINs
 lock the enrolment until staff reset the PIN (the behaviour approved in the
 institution redesign). Proposal: keep staff reset, and also unlock
-automatically after a delay (prior 30 minutes, in params). This waits for the
-product owner's confirmation.
+automatically after a delay (prior 30 minutes, in params). Approved by the
+product owner and built (`security.pinUnlockMinutes`).
 
 **D-020 — AI-call rate limits** · v4.3 §22 · *interpretation*
 POST routes under `/api/learner` and `/api/market` (the AI-calling routes) are
 limited per learner (30/min) and per institution (600/min). Both are priors in
 params. Daily quotas per institution arrive with the cost meter (Quality step).
+
+**D-021 — No demonstrations for pre-v4.3 mastery** · v4.3 §7.11, §9.1 · *interpretation*
+Mastery recorded before migration 0005 has no answer provenance, so it cannot
+claim A1. Migration 0005 creates no demonstrations from it. Those nodes show
+without an assurance level until the learner passes a review, which records a
+demonstration with provenance.
+
+**D-022 — Evidence IDs never contain an adjacent 0/Z pair** · v4.3 §9.3 · *interpretation*
+Luhn mod-32 over this alphabet catches every single-character error, and every
+adjacent swap except 0↔Z. IDs with a 0 next to a Z are never issued, so every
+adjacent swap is caught. This costs under 1% of the ID space.
+
+**D-023 — A skill's label follows its weakest mapped node** · v4.3 §9.1 · *interpretation*
+When several pathway nodes map to one skill, the passport line takes the lowest
+label among them. A skill is never shown stronger than its least-shown part.
+
+**D-024 — Phase 0 verification reads the issuer's own records** · v4.3 §10 · *interpretation*
+`/api/verify/:id` checks the stored SD-JWT signature against the published
+JWKS and the status list. It does not accept an uploaded credential yet.
+Holder-presented SD-JWT verification arrives with employer access (P1).
+
+**D-025 — Employer domain codes are shown on screen outside production** · v4.3 §14.1 · *temporary*
+There is no mail provider yet. Outside `NODE_ENV=production`, the domain
+verification code is returned in the response and shown in the portal, so the
+KYB flow can be tested. Production only sends it by email (queued in
+outbound_mail).

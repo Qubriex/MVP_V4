@@ -101,11 +101,11 @@ export default function Passport() {
             <span className={`ln-tag ln-tag-lg ${p.status === 'valid' ? 'ln-tag-success' : 'ln-tag-warning'}`}><ShieldCheck size={14} aria-hidden="true" />{p.status === 'valid' ? 'Valid' : p.status}</span>
           </div>
           <span className="ln-small" style={{ color: 'var(--stage-muted)' }}>Version {p.version} · valid {fmtDate(p.valid_from)} – {fmtDate(p.valid_until)}</span>
-          <label className="ln-toggle-row in-no-print" style={{ gap: 10 }}>
-            <input type="checkbox" checked={!!p.public} disabled={busy} onChange={e => share(e.target.checked)} />
+          <label className="ln-toggle-row in-no-print" style={{ gap: 10, justifyContent: 'flex-start' }}>
+            <input type="checkbox" style={{ flexShrink: 0 }} checked={!!p.public} disabled={busy} onChange={e => share(e.target.checked)} />
             <span>Let anyone with this Evidence ID see my skill details. Off: they only see that the passport is authentic.</span>
           </label>
-          <a className="ln-link in-no-print" href={`/verify/${p.evidence_id}`} target="_blank" rel="noreferrer" style={{ color: 'var(--accent-400)' }}>Open the public check <ExternalLink size={13} aria-hidden="true" /></a>
+          <a className="ln-link in-no-print" href={`/verify/${p.evidence_id}`} target="_blank" rel="noreferrer" style={{ color: 'var(--accent-400)', alignSelf: 'flex-start', display: 'inline-flex', gap: 4, alignItems: 'center' }}>Open the public check <ExternalLink size={13} aria-hidden="true" /></a>
         </section>
       )}
 

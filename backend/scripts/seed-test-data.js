@@ -11,9 +11,13 @@
 //     Email:     test.professor@qubirex.local
 //     Password:  QubirexTest2026!
 //
-//   Employer     API only for now (POST /api/auth/employer/login)
+//   Employer     http://localhost:3000/employer/login
 //     Email:     test.employer@qubirex.local
 //     Password:  QubirexTest2026!     (company verification: pending)
+//
+//   Admin        http://localhost:3000/admin/login   (Qubirex platform staff)
+//     Email:     test.admin@qubirex.local
+//     Password:  QubirexTest2026!
 //
 //   Learner      http://localhost:3000/learner-login
 //     Learner reference: TEST-LRNR-001
@@ -31,6 +35,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { initDb, getDb } from '../db/init.js';
 import { mapPathway } from '../core/graph/coverage.js';
+import { produceEngagementMasteryLogs } from '../core/masteryLog.js';
 
 if (process.env.NODE_ENV === 'production') {
   console.error('Refusing to seed test accounts with NODE_ENV=production.');
@@ -82,6 +87,88 @@ function seedFacts(elId, nodeId, key, attempts, score, daysAgo) {
     db.prepare(`INSERT OR IGNORE INTO mastery_checks (id, session_id, skill_node_id, engagement_learner_id, check_number, question_text, passed, score, evaluated_at, created_at)
       VALUES (?, ?, ?, ?, ?, 'Seeded check', ?, ?, datetime('now', ?), datetime('now', ?))`).run(`${sid}-c${i}`, sid, nodeId, elId, i, passed ? 1 : 0, passed ? score : 0.5, when, when);
   }
+}
+
+// ── v4.3 evidence for the test learner (§7, §8, §9) ──────────────────────────
+// Each mastered node gets the check it passed (family instance, evidence
+// record with typed-answer provenance → A1) and its mastery demonstration.
+// Older nodes also carry a passed review. Retention: two reviews are due now.
+function seedEvidence(elId, learnerId, nodes) {
+  const ins = (sql, ...a) => db.prepare(sql).run(...a);
+  nodes.forEach(({ id: nodeId, label, score, daysAgo }, i) => {
+    const at = new Date(Date.now() - daysAgo * 86400000).toISOString();
+    const fi = `test-fi-${nodeId}`; const ev = `test-ev-${nodeId}`;
+    ins(`INSERT OR IGNORE INTO family_instances (id, el_id, learner_id, node_id, family_id, purpose, attempt_no, seed, params_json, question_text, generator, created_at)
+      VALUES (?, ?, ?, ?, ?, 'check', 1, 'seed', '{}', ?, 'template', ?)`, fi, elId, learnerId, nodeId, `gen:${nodeId}`, `In your own words: how would you use ${label} in a small project, and what goes wrong if you get it wrong?`, at);
+    ins(`INSERT OR IGNORE INTO evidence_records (id, el_id, node_id, family_id, instance_id, purpose, answer_hash, r_c, passed, level, assurance, authentic, provisional, theta, created_at)
+      VALUES (?, ?, ?, ?, ?, 'check', ?, ?, 1, 'L1', 'A1', 1, 0, 0.6, ?)`, ev, elId, nodeId, `gen:${nodeId}`, fi, crypto.createHash('sha256').update(ev).digest('hex'), score, at);
+    ins(`INSERT OR IGNORE INTO answer_provenance (evidence_id, mode, answer_chars, pasted_chars, paste_events, largest_paste, edit_ratio) VALUES (?, 'typed', 240, 0, 0, 0, 0.1)`, ev);
+    ins(`INSERT OR IGNORE INTO demonstrations (id, el_id, node_id, kind, date, passed, score, level, assurance, evidence_id, created_at)
+      VALUES (?, ?, ?, 'mastery', ?, 1, ?, 'L1', 'A1', ?, ?)`, `test-demo-${nodeId}`, elId, nodeId, at, score, ev, at);
+    ins('UPDATE node_mastery SET theta = 0.6, evidence_level = \'L1\', loops = ? WHERE engagement_learner_id = ? AND skill_node_id = ?', i % 3 === 1 ? 1 : 0, elId, nodeId);
+    const reviewed = daysAgo >= 7;
+    if (reviewed) {
+      const rAt = new Date(Date.now() - (daysAgo - 3) * 86400000).toISOString();
+      ins(`INSERT OR IGNORE INTO demonstrations (id, el_id, node_id, kind, date, passed, score, level, assurance, created_at)
+        VALUES (?, ?, ?, 'review', ?, 1, ?, 'L1', 'A1', ?)`, `test-demo-r-${nodeId}`, elId, nodeId, rAt, Math.min(0.95, score + 0.04), rAt);
+    }
+    // Two nodes due for review now; the rest later.
+    const due = new Date(Date.now() + (i < 2 ? -86400000 : (i + 2) * 86400000)).toISOString();
+    ins(`INSERT INTO node_retention (el_id, node_id, interval_days, due_at, last_review_at, last_result, reviews_passed, reviews_failed, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?) ON CONFLICT(el_id, node_id) DO UPDATE SET due_at = excluded.due_at`,
+      elId, nodeId, reviewed ? 7.5 : 3, due, reviewed ? at : null, reviewed ? 'pass' : null, reviewed ? 1 : 0, at);
+  });
+}
+
+// ── Faculty review queue (§7.8): one borderline decision, one random sample ──
+function seedReviewQueue(elId, nodeId, answer, reason, stratum, key) {
+  const at = new Date(Date.now() - 3600000).toISOString();
+  const fi = `test-fi-rq-${key}`; const ev = `test-ev-rq-${key}`;
+  db.prepare(`INSERT OR IGNORE INTO family_instances (id, el_id, learner_id, node_id, family_id, purpose, attempt_no, seed, params_json, question_text, generator, created_at)
+    SELECT ?, ?, learner_id, ?, ?, 'check', 2, 'seed', '{}', ?, 'template', ? FROM engagement_learners WHERE id = ?`)
+    .run(fi, elId, nodeId, `gen:${nodeId}`, 'A shop page shows 12 product cards. Explain how you would lay them out so they wrap neatly on a phone and a laptop, and why.', at, elId);
+  db.prepare(`INSERT OR IGNORE INTO evidence_records (id, el_id, node_id, family_id, instance_id, purpose, answer_hash, r_c, passed, level, assurance, authentic, provisional, theta, created_at)
+    VALUES (?, ?, ?, ?, ?, 'check', ?, ?, 1, 'L1', 'A1', 1, ?, 0.6, ?)`).run(ev, elId, nodeId, `gen:${nodeId}`, fi, crypto.createHash('sha256').update(answer).digest('hex'), reason === 'borderline' ? 0.64 : 0.82, reason === 'borderline' ? 1 : 0, at);
+  db.prepare('INSERT OR IGNORE INTO check_answers (evidence_id, answer_text, created_at) VALUES (?, ?, ?)').run(ev, answer, at);
+  db.prepare(`INSERT OR IGNORE INTO review_queue (id, evidence_id, el_id, node_id, institution_id, engagement_id, stratum, reason, priority, status, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'open', ?)`).run(`test-rq-${key}`, ev, elId, nodeId, INSTITUTION.id, ENGAGEMENT_ID, stratum, reason, reason === 'borderline' ? 4 : 5, at);
+}
+
+// ── Regional benchmark peers (§16): three other Hyderabad institutions ─────────
+// The regional median is published only with ≥ 3 other institutions, never named.
+function seedPeers() {
+  const hash = bcrypt.hashSync(crypto.randomBytes(12).toString('hex'), 4);
+  [['Peer College A', 0.55, 2], ['Peer College B', 0.4, 1], ['Peer Institute C', 0.7, 3]].forEach(([name, share, loops], p) => {
+    const inst = `test-peer-inst-${p + 1}`; const ct = `test-peer-ct-${p + 1}`; const eng = `test-peer-eng-${p + 1}`;
+    db.prepare(`INSERT OR IGNORE INTO institutions (id, name, type, contact_name, contact_email, city, password_hash) VALUES (?, ?, 'coding_bootcamp', 'Peer', ?, 'Hyderabad', ?)`)
+      .run(inst, `${name} (benchmark sample)`, `peer${p + 1}@peer.test`, hash);
+    db.prepare(`INSERT OR IGNORE INTO capability_targets (id, institution_id, version, title, path, domain, raw_input, confirmed, confirmed_at, status)
+      VALUES (?, ?, '1.0', 'Web Developer Track', 'A', 'software', 'benchmark sample', 1, datetime('now'), 'active')`).run(ct, inst);
+    const nodes = [];
+    for (let c = 0; c < 2; c += 1) {
+      const cl = `${ct}-c${c}`;
+      db.prepare(`INSERT OR IGNORE INTO skill_clusters (id, capability_target_id, cluster_label, cluster_ref, sequence_order) VALUES (?, ?, ?, ?, ?)`).run(cl, ct, c ? 'JavaScript' : 'Web Basics', `C${c + 1}`, c + 1);
+      for (let n = 0; n < 5; n += 1) {
+        const nid = `${cl}-n${n}`; nodes.push({ id: nid, cl });
+        db.prepare(`INSERT OR IGNORE INTO skill_nodes (id, cluster_id, node_label, sequence_order, difficulty_level, estimated_minutes) VALUES (?, ?, ?, ?, 2, 20)`).run(nid, cl, `Topic ${c + 1}.${n + 1}`, n + 1);
+      }
+    }
+    db.prepare(`INSERT OR IGNORE INTO engagements (id, institution_id, capability_target_id, title, language, status, started_at) VALUES (?, ?, ?, 'Web batch', 'telugu', 'active', datetime('now', '-30 days'))`).run(eng, inst, ct);
+    for (let l = 0; l < 4; l += 1) {
+      const lid = `test-peer-l-${p + 1}-${l}`; const el = `test-peer-el-${p + 1}-${l}`;
+      db.prepare(`INSERT OR IGNORE INTO learners (id, institution_id, name, learner_ref, language) VALUES (?, ?, ?, ?, 'telugu')`).run(lid, inst, `Peer learner ${l + 1}`, `PEER-${p + 1}-${l}`);
+      db.prepare(`INSERT OR IGNORE INTO engagement_learners (id, engagement_id, learner_id, current_node_id, current_cluster_id) VALUES (?, ?, ?, ?, ?)`).run(el, eng, lid, nodes[0].id, nodes[0].cl);
+      const mastered = Math.round(nodes.length * share) - (l % 2);
+      nodes.slice(0, mastered).forEach((n, k) => {
+        db.prepare(`INSERT OR IGNORE INTO node_mastery (id, engagement_learner_id, skill_node_id, mastery_attainment, attempt_count, advanced_at, loops, provisional)
+          VALUES (?, ?, ?, 0.8, 1, datetime('now', ?), ?, ?)`).run(`${el}-nm-${k}`, el, n.id, `-${20 - k} days`, (k + l) % (loops + 1), k % 7 === 0 ? 1 : 0);
+        db.prepare(`INSERT OR IGNORE INTO learning_sessions (id, engagement_learner_id, skill_node_id, language, status, started_at, completed_at, loop_count, active_minutes)
+          VALUES (?, ?, ?, 'telugu', 'completed', datetime('now', ?), datetime('now', ?), 0, ?)`).run(`${el}-ls-${k}`, el, n.id, `-${20 - k} days`, `-${20 - k} days`, 14 + p * 4 + (k % 5));
+        if (k % 3 === 0) db.prepare(`INSERT OR IGNORE INTO demonstrations (id, el_id, node_id, kind, date, passed, score, level, assurance, created_at)
+          VALUES (?, ?, ?, 'review', datetime('now', ?), ?, 0.75, 'L1', 'A1', datetime('now'))`).run(`${el}-rv-${k}`, el, n.id, `-${10 - (k % 5)} days`, (k + p) % 4 ? 1 : 0);
+      });
+    }
+  });
 }
 try {
   const seed = db.transaction(() => {
@@ -202,6 +289,27 @@ try {
   // Map the programme's nodes onto the Capability Graph (v4.3 §3).
   mapPathway(CT_ID);
 
+  db.transaction(() => {
+    const ordered = [];
+    PROGRAMME.forEach(([, nodes], ci) => nodes.forEach(([label, m], ni) => { if (m) ordered.push({ id: `test-node-${ci + 1}-${ni + 1}`, label, score: m[3] }); }));
+    ordered.forEach((n, i) => { n.daysAgo = 10 - i; });
+    seedEvidence(EL_ID, LEARNER.id, ordered);
+    seedReviewQueue('test-el-0002', 'test-node-1-4', 'I would use flexbox with flex-wrap so the cards go onto new lines. On a phone each card is full width and on a laptop they sit three or four in a row. I think media queries also help with the widths.', 'borderline', 'decision', 'kavya');
+    seedReviewQueue('test-el-0006', 'test-node-1-4', 'Use CSS grid: grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)). The browser fits as many 220px columns as there is room for, so the cards wrap on a phone without any media query, and the 1fr shares out the spare space evenly.', 'random', 'calibration', 'farhan');
+    db.prepare('UPDATE institutions SET review_minutes_per_100 = COALESCE(review_minutes_per_100, 120) WHERE id = ?').run(INSTITUTION.id);
+    seedPeers();
+  })();
+
+  // A Mastery Log for the test learner (once): its MASTERY_LOG_PRODUCED event
+  // issues the Capability Passport when the server's outbox worker runs.
+  if (!db.prepare('SELECT 1 FROM mastery_logs WHERE learner_id = ?').get(LEARNER.id)) {
+    produceEngagementMasteryLogs(ENGAGEMENT_ID, { learnerIds: [LEARNER.id] });
+  }
+
+  // ── Admin (Qubirex platform staff; password reset on every run) ───────────
+  db.prepare(`INSERT INTO admin_users (id, email, password_hash, name) VALUES ('test-admin-0001', 'test.admin@qubirex.local', ?, 'Test Admin')
+    ON CONFLICT(email) DO UPDATE SET password_hash = excluded.password_hash`).run(bcrypt.hashSync(INSTITUTION.password, 10));
+
   // ── Employer (password reset on every run) ────────────────────────────────
   const now = new Date().toISOString();
   db.prepare(`INSERT OR IGNORE INTO employers (id, name, domain, kyb_status, created_at, updated_at) VALUES (?, ?, ?, 'pending', ?, ?)`)
@@ -210,7 +318,7 @@ try {
     VALUES (?, ?, ?, '', ?, 'owner', 'active', ?, ?)`).run(EMPLOYER.userId, EMPLOYER.id, EMPLOYER.email, EMPLOYER.userName, now, now);
   db.prepare("UPDATE employer_users SET password_hash = ?, status = 'active', updated_at = ? WHERE id = ?")
     .run(bcrypt.hashSync(INSTITUTION.password, 10), now, EMPLOYER.userId);
-  db.prepare("DELETE FROM login_failures WHERE account_key IN (?, ?, ?)").run(INSTITUTION.email, PROFESSOR.email, EMPLOYER.email);
+  db.prepare("DELETE FROM login_failures WHERE account_key IN (?, ?, ?, ?)").run(INSTITUTION.email, PROFESSOR.email, EMPLOYER.email, 'test.admin@qubirex.local');
 
   console.log('\nTest accounts ready.\n');
   console.log('  Institution  http://localhost:3000/login');
@@ -219,9 +327,12 @@ try {
   console.log('  Professor    http://localhost:3000/login');
   console.log(`    Email:     ${PROFESSOR.email}`);
   console.log(`    Password:  ${INSTITUTION.password}\n`);
-  console.log('  Employer     API only: POST /api/auth/employer/login');
+  console.log('  Employer     http://localhost:3000/employer/login');
   console.log(`    Email:     ${EMPLOYER.email}`);
   console.log(`    Password:  ${INSTITUTION.password}   (company verification pending)\n`);
+  console.log('  Admin        http://localhost:3000/admin/login');
+  console.log(`    Email:     test.admin@qubirex.local`);
+  console.log(`    Password:  ${INSTITUTION.password}\n`);
   console.log('  Learner      http://localhost:3000/learner-login');
   console.log(`    Learner reference: ${LEARNER.ref}`);
   console.log(`    Join code:         ${JOIN_CODE}   (or Engagement ID ${ENGAGEMENT_ID})`);

@@ -147,6 +147,7 @@ export function loadForecast(engagementId) {
     expected_checks_per_week: Math.round(checksPerWeek),
     forecast_minutes_per_week: Math.round(minutes),
     contracted_minutes_per_week: contracted,
+    contracted_minutes_per_100: e.review_minutes_per_100 ?? null,
     over_contract: contracted != null && minutes > contracted,
     open_items: dal.one("SELECT COUNT(*) n FROM review_queue WHERE engagement_id = ? AND status = 'open'", engagementId).n,
     minutes_used_this_week: doneThisWeek * f.minutesPerReview,
