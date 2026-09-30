@@ -3,14 +3,14 @@
 // Market insight for institutions. Two questions:
 //
 //   curriculumCoverage — does our pathway teach what JDs ask for?
-//     Each JD skill is matched (by keyword) against the capability target's
-//     skill nodes and cluster labels: covered (a cluster, or 2+ nodes),
-//     partly (1 node) or missing. Adds the cohort's mastery on those nodes
-//     and how many students requested the skill.
+//     Each JD skill's coverage comes from the Capability Graph (v4.3 §3.3):
+//     min(1, Σ node weights + mean child coverage); covered ≥ 0.8, partly
+//     ≥ 0.3, else missing. Adds the cohort's mastery on those nodes and how
+//     many students requested the skill.
 //
 //   cohortStanding — how job-ready are our students?
 //     A student's match for a JD is the weighted share of its skills they
-//     have VERIFIED (a mastered skill node). Self-declared skills don't
+//     have VERIFIED: their mastered nodes cover the skill at least 'partly'. Self-declared skills don't
 //     count. Job-match index = average over students of their average match
 //     across the cohort's target-role JDs.
 //
@@ -18,7 +18,7 @@
 // benchmarks come from sampleMarket.js and are labelled sample in the UI.
 // ─────────────────────────────────────────────────────────────────────────────
 import * as market from './market/sampleMarket.js';
-import { matches } from './market/skillGap.js';
+import { pathwayMap, coverageOf, coverageStatus, nodesForSkill } from './graph/coverage.js';
 
 const skillOf = (key) => ({ key, ...market.SKILLS[key] });
 
@@ -60,12 +60,15 @@ function curriculumCoverage(db, { capabilityTargetId, engagementId = null }) {
     ? db.prepare('SELECT lower(skill_name) as name, COUNT(*) as n FROM skill_requests WHERE engagement_id = ? GROUP BY lower(skill_name)').all(engagementId)
     : [];
 
+  const map = pathwayMap(capabilityTargetId);
+  const memo = new Map();
   const skills = market.INSTITUTION_SKILLS.map(([key, share, trend]) => {
     const skill = skillOf(key);
-    const hit = nodes.filter(n => matches(n.node_label, skill));
-    const clusterHit = [...new Set(nodes.map(n => n.cluster_label))].filter(c => matches(c, skill));
-    const coverage = clusterHit.length || hit.length >= 2 ? 'covered' : hit.length === 1 ? 'partly' : 'missing';
-    const where = clusterHit.length ? clusterHit : [...new Set(hit.map(n => n.cluster_label))];
+    const hitIds = nodesForSkill(key, map);
+    const hit = nodes.filter(n => hitIds.has(n.id));
+    const coverageValue = coverageOf(key, map, { memo });
+    const coverage = coverageStatus(coverageValue);
+    const where = [...new Set(hit.map(n => n.cluster_label))];
 
     let mastery = null;
     let masteryNote = coverage === 'missing' ? '—' : 'No students yet';
@@ -82,7 +85,7 @@ function curriculumCoverage(db, { capabilityTargetId, engagementId = null }) {
     }
     const req = requests.find(r => r.name === skill.name.toLowerCase());
     return {
-      key, name: skill.name, share, trend, coverage,
+      key, name: skill.name, share, trend, coverage, coverage_value: Math.round(coverageValue * 100) / 100,
       where: where.length ? where.join(', ') : 'Not in pathway',
       nodes_matched: hit.length, mastery, mastery_note: masteryNote,
       suggestion: coverage === 'covered' ? 'Keep' : coverage === 'partly' ? 'Extend' : 'Add cluster',
@@ -96,15 +99,17 @@ function curriculumCoverage(db, { capabilityTargetId, engagementId = null }) {
   const missing = skills.filter(s => s.coverage === 'missing');
 
   const rare = market.RARE_SKILLS.map(r => {
-    const hit = nodes.filter(n => matches(n.node_label, r) || matches(n.cluster_label, r));
+    const ids = nodesForSkill(r.key, map);
+    const hit = nodes.filter(n => ids.has(n.id));
     return hit.length ? { name: r.name, share: r.share, hours: Math.round(hit.reduce((a, n) => a + (n.estimated_minutes || 20), 0) / 60 * 10) / 10 } : null;
   }).filter(Boolean);
 
+  const taught = (st) => coverageStatus(coverageOf(st.key, map, { memo })) !== 'missing';
   const topics = market.TOPICS.map(t => {
-    const covered = t.steps.filter(st => nodes.some(n => matches(n.node_label, st))).length;
+    const covered = t.steps.filter(taught).length;
     return covered < t.steps.length ? {
       id: t.id, name: t.name, growth: t.growth, sector: t.sector,
-      why: `${t.desc} Your pathway covers ${covered} of ${t.steps.length} steps; missing: ${t.steps.filter(st => !nodes.some(n => matches(n.node_label, st))).map(st => st.name).join(', ')}.`,
+      why: `${t.desc} Your pathway covers ${covered} of ${t.steps.length} steps; missing: ${t.steps.filter(st => !taught(st)).map(st => st.name).join(', ')}.`,
       steps: t.steps.map(st => st.name)
     } : null;
   }).filter(Boolean).slice(0, 4);
@@ -120,24 +125,29 @@ function curriculumCoverage(db, { capabilityTargetId, engagementId = null }) {
       rare_hours: Math.round(rare.reduce((a, r) => a + r.hours, 0) * 10) / 10
     },
     skills, rare, topics,
-    pathway_nodes: nodes.length
+    pathway_nodes: nodes.length,
+    unmapped_nodes: nodes.filter(n => !map.rows.some(r => r.node_id === n.id)).map(n => n.node_label)
   };
 }
 
 // ─── Where we stand ────────────────────────────────────────────────────────────
-function jobMatch(job, verifiedNodeLabels) {
+// A learner has verified a skill when their mastered nodes cover it at least
+// 'partly' in the Capability Graph.
+const verifiedSkill = (key, map, masteredIds) => coverageStatus(coverageOf(key, map, { onlyNodes: masteredIds })) !== 'missing';
+
+function jobMatch(job, isVerified) {
   let earned = 0; let possible = 0;
   job.skills.forEach(sk => {
     const w = sk.required ? 1 : 0.5;
     possible += w;
-    if (verifiedNodeLabels.some(l => matches(l, sk))) earned += w;
+    if (isVerified(sk.key)) earned += w;
   });
   return possible ? earned / possible : 0;
 }
 
 // Target-role JDs for a cohort: jobs in the given roles, or else every job
 // where the pathway teaches at least one required skill.
-function targetJobs(nodes, roles) {
+function targetJobs(map, roles) {
   if (roles && roles.length) {
     const wanted = roles.map(r => r.toLowerCase());
     const byRole = market.JOBS.filter(j => wanted.some(w => j.role.toLowerCase().includes(w) || w.includes(j.role.toLowerCase())));
@@ -145,17 +155,19 @@ function targetJobs(nodes, roles) {
   }
   // No roles given: JDs where the pathway teaches at least half the required
   // skills; if none qualify, any JD it teaches something for.
-  const share = (j) => { const req = j.skills.filter(sk => sk.required); return req.filter(sk => nodes.some(n => matches(n.node_label, sk))).length / (req.length || 1); };
+  const share = (j) => { const req = j.skills.filter(sk => sk.required); return req.filter(sk => coverageStatus(coverageOf(sk.key, map)) !== 'missing').length / (req.length || 1); };
   const strong = market.JOBS.filter(j => share(j) >= 0.5);
   return strong.length ? strong : market.JOBS.filter(j => share(j) > 0);
 }
 
 function standingFor(db, engagement, { roles = null, before = null } = {}) {
   const nodes = pathwayNodes(db, engagement.capability_target_id);
-  const labelOf = new Map(nodes.map(n => [n.id, n.node_label]));
-  const jobs = targetJobs(nodes, roles);
+  const map = pathwayMap(engagement.capability_target_id);
+  const jobs = targetJobs(map, roles);
   const students = cohortStudents(db, engagement.id, { before }).map(st => {
-    const verified = [...st.mastered.keys()].map(id => labelOf.get(id)).filter(Boolean);
+    const masteredIds = new Set(st.mastered.keys());
+    const cache = new Map();
+    const verified = (key) => { if (!cache.has(key)) cache.set(key, verifiedSkill(key, map, masteredIds)); return cache.get(key); };
     const perJob = jobs.map(j => ({ job: j, m: jobMatch(j, verified) }));
     const avg = perJob.length ? perJob.reduce((a, x) => a + x.m, 0) / perJob.length : 0;
     const best = perJob.reduce((b, x) => (!b || x.m > b.m ? x : b), null);
@@ -166,7 +178,7 @@ function standingFor(db, engagement, { roles = null, before = null } = {}) {
   const bandOf = (m) => (m >= 0.7 ? 0 : m >= 0.5 ? 1 : m >= 0.3 ? 2 : 3);
   const bandCounts = [0, 0, 0, 0];
   students.forEach(s => { bandCounts[bandOf(s.best)] += 1; });
-  return { nodes, jobs, students, index, bandCounts, bands: bandCounts.map(c => Math.round((c / n) * 100)) };
+  return { nodes, map, jobs, students, index, bandCounts, bands: bandCounts.map(c => Math.round((c / n) * 100)) };
 }
 
 function cohortStanding(db, engagement, { roles = null, compare = 'regional', compareEngagement = null } = {}) {
@@ -176,8 +188,7 @@ function cohortStanding(db, engagement, { roles = null, compare = 'regional', co
   // Share of students with each JD skill verified.
   const skillKeys = [...new Set(now.jobs.flatMap(j => j.skills.map(sk => sk.key)))];
   const ours = Object.fromEntries(skillKeys.map(k => {
-    const sk = skillOf(k);
-    const have = now.students.filter(st => st.verified.some(l => matches(l, sk))).length;
+    const have = now.students.filter(st => st.verified(k)).length;
     return [k, now.students.length ? Math.round((have / now.students.length) * 100) : 0];
   }));
 
@@ -185,8 +196,7 @@ function cohortStanding(db, engagement, { roles = null, compare = 'regional', co
   if (compare === 'engagement' && compareEngagement) {
     const other = standingFor(db, compareEngagement, { roles });
     const otherSkills = Object.fromEntries(skillKeys.map(k => {
-      const sk = skillOf(k);
-      const have = other.students.filter(st => st.verified.some(l => matches(l, sk))).length;
+      const have = other.students.filter(st => st.verified(k)).length;
       return [k, other.students.length ? Math.round((have / other.students.length) * 100) : 0];
     }));
     comparison = { label: compareEngagement.title, score: other.index, bands: other.bands, skills: otherSkills, sample: false };

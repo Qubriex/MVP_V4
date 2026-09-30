@@ -210,13 +210,23 @@ npm run seed:test      # safe to re-run; resets the passwords and PIN below
 | Institution admin | http://localhost:3000/login | Email `test.institution@qubirex.local` · Password `QubirexTest2026!` |
 | Professor (sees only the test cohort) | http://localhost:3000/login | Email `test.professor@qubirex.local` · Password `QubirexTest2026!` |
 | Learner | http://localhost:3000/learner-login | Learner reference `TEST-LRNR-001` · Join code `QX-FSD-T01` (the old Engagement ID `4a4c13c4-989e-4c03-b636-3bdba7fd1025` also works) · PIN `410585` |
-| Employer (API only for now; company verification pending) | `POST /api/auth/employer/login` | Email `test.employer@qubirex.local` · Password `QubirexTest2026!` |
+| Employer owner (company verification pending) | http://localhost:3000/employer/login | Email `test.employer@qubirex.local` · Password `QubirexTest2026!` |
+| Qubirex admin (employer KYB, skills ontology, evaluator quality) | http://localhost:3000/admin/login | Email `test.admin@qubirex.local` · Password `QubirexTest2026!` |
+
+The seed also gives the test learner an issued Capability Passport (open it
+under Capability Passport, then check its Evidence ID at
+http://localhost:3000/verify), two reviews due, two items in the institution's
+Faculty review queue, and three sample Hyderabad institutions so the regional
+benchmark publishes. To try employer KYB end to end: sign in as the employer,
+add company details, request the domain code (shown on screen outside
+production), then approve the company as the admin.
 
 These credentials are public in this repo, so the script refuses to run with
 `NODE_ENV=production`. Never seed them into a shared or deployed database.
 Voice-session replies, captions, transcription and resume tailoring need a
 real `GEMINI_API_KEY` in `.env`; without it the session page shows sample
-content.
+content. `AI_ADAPTER=mock` runs every AI call offline with placeholder text, so
+flows can be clicked through, but its grading is not meaningful.
 
 ### Seed Admin User
 

@@ -9,7 +9,7 @@ import { emit } from '../../core/events/outbox.js';
 import params from '../../config/params.js';
 import { issueSession, revokeSession, clearSessionCookies, rotateCsrf, authenticate } from '../middleware/auth.js';
 import { loginRateLimits, rateLimit, clientIp, isLockedOut, recordLoginFailure, clearLoginFailures } from '../middleware/rateLimit.js';
-import { MAX_PIN_ATTEMPTS, normaliseJoinCode, hashToken, hashPin, isValidPin, logEvent, openResetRequest } from '../../core/access.js';
+import { MAX_PIN_ATTEMPTS, normaliseJoinCode, hashToken, hashPin, isValidPin, logEvent, lockActive, openResetRequest } from '../../core/access.js';
 import 'dotenv/config';
 const router = express.Router();
 
@@ -186,7 +186,15 @@ router.post('/learner/login', learnerLoginLimit, (req, res) => {
     if (data.access_status === 'removed' || !data.is_active) {
       return res.status(403).json({ error: 'Your access to this cohort was removed. Please contact your institution.' });
     }
-    if (data.locked_at) return res.status(423).json({ error: 'Too many wrong PINs. Ask your professor to reset your PIN.', locked: true });
+    if (data.locked_at) {
+      if (lockActive(data.locked_at)) {
+        return res.status(423).json({ error: `Too many wrong PINs. Try again in ${params.get('security.pinUnlockMinutes')} minutes, or ask your professor to reset your PIN.`, locked: true });
+      }
+      // Delayed unlock (v4.3 §22): the lock has lapsed; start counting afresh.
+      db.prepare('UPDATE engagement_learners SET locked_at = NULL, failed_pin_attempts = 0 WHERE id = ?').run(data.el_id);
+      logEvent(db, { institutionId: data.eng_institution_id, learnerId: data.id, elId: data.el_id, event: 'unlocked', detail: `Unlocked automatically after ${params.get('security.pinUnlockMinutes')} minutes` });
+      data.failed_pin_attempts = 0;
+    }
     if (!data.pin_hash) return res.status(401).json({ error: 'You haven’t set a PIN yet. Open the invite link your institution sent you.' });
 
     if (!bcrypt.compareSync(String(pin), data.pin_hash)) {
@@ -194,7 +202,7 @@ router.post('/learner/login', learnerLoginLimit, (req, res) => {
       if (attempts >= MAX_PIN_ATTEMPTS) {
         db.prepare("UPDATE engagement_learners SET failed_pin_attempts = ?, locked_at = datetime('now') WHERE id = ?").run(attempts, data.el_id);
         logEvent(db, { institutionId: data.eng_institution_id, learnerId: data.id, elId: data.el_id, event: 'locked', detail: `${attempts} wrong PINs` });
-        return res.status(423).json({ error: 'Too many wrong PINs. Ask your professor to reset your PIN.', locked: true });
+        return res.status(423).json({ error: `Too many wrong PINs. Try again in ${params.get('security.pinUnlockMinutes')} minutes, or ask your professor to reset your PIN.`, locked: true });
       }
       db.prepare('UPDATE engagement_learners SET failed_pin_attempts = ? WHERE id = ?').run(attempts, data.el_id);
       return res.status(401).json({ error: `Invalid PIN. ${MAX_PIN_ATTEMPTS - attempts} attempt${MAX_PIN_ATTEMPTS - attempts === 1 ? '' : 's'} left.` });
@@ -348,6 +356,33 @@ router.post('/employer/login', loginRateLimits(), (req, res) => {
   dal.run('UPDATE employer_users SET last_login_at = ? WHERE id = ?', dal.nowIso(), user.id);
   const session = issueSession(res, { actorType: 'employer', actorId: user.id, employerId: user.employer_id, req, claims: { id: user.id, employer_id: user.employer_id } });
   res.json({ token: session.token, csrf_token: session.csrfToken, employer: { id: user.employer_id, kyb_status: user.kyb_status } });
+});
+
+// ─── Employer invite (owner invited a recruiter or viewer, v4.3 §14.1) ───────
+const findEmployerInvite = (token) => dal.one(`SELECT i.*, e.name AS employer_name FROM employer_invites i JOIN employers e ON e.id = i.employer_id
+  WHERE i.token_hash = ? AND i.used_at IS NULL AND i.expires_at > ?`, hashToken(token), dal.nowIso());
+
+router.get('/employer/invite/:token', (req, res) => {
+  const inv = findEmployerInvite(req.params.token);
+  if (!inv) return v2(res, 404, 'not_found', 'This invite link is invalid or has expired.');
+  res.json({ email: inv.email, name: inv.name, role: inv.role, employer_name: inv.employer_name, expires_at: inv.expires_at });
+});
+
+router.post('/employer/invite/:token/accept', (req, res) => {
+  const inv = findEmployerInvite(req.params.token);
+  if (!inv) return v2(res, 404, 'not_found', 'This invite link is invalid or has expired.');
+  const password = String(req.body.password || '');
+  if (password.length < minPassword()) return v2(res, 400, 'weak_password', `Choose a password of at least ${minPassword()} characters.`);
+  if (dal.one('SELECT 1 FROM employer_users WHERE email = ?', inv.email)) return v2(res, 409, 'email_taken', 'That email already has an account. Sign in instead.');
+  const now = dal.nowIso();
+  const userId = ulid();
+  dal.tx(() => {
+    dal.run(`INSERT INTO employer_users (id, employer_id, email, password_hash, name, role, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 'active', ?, ?)`,
+      userId, inv.employer_id, inv.email, bcrypt.hashSync(password, params.get('security.bcryptRounds')), String(req.body.name || inv.name || '').trim() || null, inv.role, now, now);
+    dal.run('UPDATE employer_invites SET used_at = ? WHERE id = ?', now, inv.id);
+  });
+  const session = issueSession(res, { actorType: 'employer', actorId: userId, employerId: inv.employer_id, req, claims: { id: userId, employer_id: inv.employer_id } });
+  res.status(201).json({ token: session.token, csrf_token: session.csrfToken, employer: { id: inv.employer_id } });
 });
 
 // ─── Session: logout and CSRF token refresh (any actor) ──────────────────────

@@ -5,10 +5,23 @@ import express from 'express';
 import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import { legacyHandle as getDb } from '../../core/db/dal.js';
+import { aiRateLimitPosts } from '../middleware/rateLimit.js';
 import { authenticateToken, requireRole, requireActiveLearner } from '../middleware/auth.js';
 import * as orchestrator from '../../core/orchestrator.js';
 import { calculateMasteryAttainment, calculateConfidenceIndicator, selectNextApproach } from '../../core/instructionEngine.js';
 import { nodeConfidence } from '../../core/masteryLog.js';
+import crypto from 'crypto';
+import { ulid } from '../../core/db/ulid.js';
+import { emit } from '../../core/events/outbox.js';
+import { issueInstance } from '../../core/evidence/checkWriter.js';
+import { authenticityGate } from '../../core/evidence/assurance.js';
+import { assessConcept, resolveTheta } from '../../core/evidence/assess.js';
+import { enqueueReview } from '../../core/evidence/calibration.js';
+import { recordAttempt as recordVocabulary, vocabularyLevel } from '../../core/learner/vocabulary.js';
+import { heartbeat } from '../../core/learner/activeTime.js';
+import { scheduleFirstReview } from '../../core/retention/schedule.js';
+
+const sha256 = (t) => crypto.createHash('sha256').update(String(t)).digest('hex');
 import { transcribeAudio } from '../../core/portfolio.js';
 import { isValidPin, hashPin, logEvent } from '../../core/access.js';
 
@@ -20,6 +33,9 @@ const confidenceLabel = (c) => (c >= 0.75 ? 'high' : c >= 0.55 ? 'solid' : 'buil
 router.use(authenticateToken);
 router.use(requireRole('learner', 'admin'));
 router.use(requireActiveLearner);
+// AI-calling routes are POSTs; limited per learner and per institution (v4.3 §22).
+// (Mounted before portfolio.js on /api/learner, so this also covers it.)
+router.use(aiRateLimitPosts);
 
 // ─── Streak logic (doc section 11.4) ──────────────────────────────────────────
 function updateStreak(db, elId) {
@@ -46,8 +62,10 @@ function updateStreak(db, elId) {
 
 function getNodeWithCluster(db, nodeId) {
   return db.prepare(`
-    SELECT sn.*, sc.cluster_label FROM skill_nodes sn
+    SELECT sn.*, sc.cluster_label, sc.mastery_threshold AS cluster_threshold, ct.institution_id
+    FROM skill_nodes sn
     JOIN skill_clusters sc ON sc.id = sn.cluster_id
+    JOIN capability_targets ct ON ct.id = sc.capability_target_id
     WHERE sn.id = ?
   `).get(nodeId);
 }
@@ -243,7 +261,7 @@ router.post('/session/start', async (req, res) => {
   }
 
   const history = db.prepare(`
-    SELECT role, content, message_type, caption_en, mermaid, code, input_mode FROM session_messages WHERE session_id = ? ORDER BY created_at
+    SELECT role, content, message_type, caption_en, mermaid, code, input_mode FROM session_messages WHERE session_id = ? ORDER BY created_at, rowid
   `).all(session.id);
   db.close();
 
@@ -283,10 +301,32 @@ router.post('/session/start', async (req, res) => {
 
 // ─── Session: primary interaction endpoint ────────────────────────────────────
 // Routes to DIAGNOSIS_RESPONSE, LEARNER_MESSAGE, or CHECK_RESPONSE based on
-// the last AI message's type in this session.
-// Optional body fields: input_mode ('voice' | 'text') is stored with the
-// learner's message; request_check: true is the "I'm ready for the check"
-// button — TEACH is told to set the check this turn (content may be empty).
+// the session state. Optional body fields: input_mode ('voice' | 'text') is
+// stored with the learner's message; request_check: true is the "I'm ready
+// for the check" button — TEACH decides to check this turn (content may be
+// empty). A check answer carries `provenance` (v4.3 §7.11): mode, pasted
+// characters, paste events, largest paste, transcript edit ratio.
+//
+// Checks (v4.3 §7): TEACH only decides WHEN. The question is written by
+// core/evidence/checkWriter from the node spec with a per-learner seed; the
+// answer goes through the authenticity gate (A0 stops, A1 proceeds), EVAL
+// (blind, with the borderline second pass), and the result, its evidence
+// record, demonstration, review-queue entry and outbox events are written in
+// one transaction.
+const HOLD_MESSAGE = {
+  telugu: 'ఈ సమాధానం మీ సొంత మాటల్లో ఉండాలి. దయచేసి మళ్లీ చెప్పండి — మాట్లాడి గానీ, కాపీ చేయకుండా టైప్ చేసి గానీ.',
+  hindi: 'यह जवाब आपके अपने शब्दों में होना चाहिए। कृपया फिर से बताइए — बोलकर, या बिना कॉपी किए टाइप करके।'
+};
+const HOLD_CAPTION = 'This answer needs to be in your own words. Please answer again — by voice, or by typing without pasting.';
+
+function pendingCheckFor(db, sessionId) {
+  return db.prepare(`
+    SELECT mc.*, fi.params_json, fi.family_id, fi.family_version, fi.purpose AS instance_purpose
+    FROM mastery_checks mc LEFT JOIN family_instances fi ON fi.id = mc.instance_id
+    WHERE mc.session_id = ? AND mc.passed IS NULL ORDER BY mc.created_at DESC, mc.rowid DESC LIMIT 1
+  `).get(sessionId);
+}
+
 async function handleSessionMessage(req, res) {
   const requestCheck = req.body.request_check === true || req.body.request_check === 'true';
   const inputMode = ['voice', 'text'].includes(req.body.input_mode) ? req.body.input_mode : 'text';
@@ -311,14 +351,12 @@ async function handleSessionMessage(req, res) {
 
   const node = getNodeWithCluster(db, session.skill_node_id);
   const lastAiMsg = db.prepare(`
-    SELECT * FROM session_messages WHERE session_id = ? AND role = 'ai' ORDER BY created_at DESC LIMIT 1
+    SELECT * FROM session_messages WHERE session_id = ? AND role = 'ai' ORDER BY created_at DESC, rowid DESC LIMIT 1
   `).get(session.id);
   const approachesUsed = db.prepare(`
     SELECT approach FROM loop_approaches_used WHERE engagement_learner_id = ? AND skill_node_id = ?
   `).all(req.user.el_id, session.skill_node_id).map(r => r.approach);
-  const pendingCheck = db.prepare(`
-    SELECT * FROM mastery_checks WHERE session_id = ? AND passed IS NULL ORDER BY created_at DESC LIMIT 1
-  `).get(session.id);
+  const pendingCheck = pendingCheckFor(db, session.id);
 
   db.prepare(`
     INSERT INTO session_messages (id, session_id, role, content, message_type, input_mode)
@@ -327,161 +365,262 @@ async function handleSessionMessage(req, res) {
   db.close();
 
   let requestType;
-  if (!lastAiMsg || lastAiMsg.message_type === 'diagnosis') requestType = 'DIAGNOSIS_RESPONSE';
-  else if (lastAiMsg.message_type === 'mastery_check' && pendingCheck) requestType = 'CHECK_RESPONSE';
+  if (pendingCheck && lastAiMsg && ['mastery_check', 'feedback'].includes(lastAiMsg.message_type)) requestType = 'CHECK_RESPONSE';
+  else if (!lastAiMsg || lastAiMsg.message_type === 'diagnosis') requestType = 'DIAGNOSIS_RESPONSE';
   else requestType = 'LEARNER_MESSAGE';
 
   const sessionState = {
     clusterId: node.cluster_id, loopCount: session.loop_count, currentApproach: session.current_approach,
     approachesUsed, behaviourSignal: session.behaviour_signal,
     checkQuestion: pendingCheck ? pendingCheck.question_text : null,
-    learnerRequestedCheck: requestCheck && requestType === 'LEARNER_MESSAGE'
+    learnerRequestedCheck: requestCheck && requestType === 'LEARNER_MESSAGE',
+    vocabularyLevel: vocabularyLevel(req.user.id)
   };
 
   try {
+    let gate = null;
+    let assessment = null;
+    if (requestType === 'CHECK_RESPONSE') {
+      // 1. Authenticity gate (v4.3 §7.11): A0 stops, never a demonstration.
+      gate = authenticityGate(req.body.provenance || null, content);
+      if (gate.assurance === 'A0') return holdForAuthenticity({ req, res, session, node, pendingCheck, gate, answer: content });
+      // 2. Blind EVAL with θ, borderline second pass and persistence (§4.3, §7.3).
+      assessment = await assessConcept({
+        nodeLabel: node.node_label, language: req.user.language, question: pendingCheck.question_text, answer: content,
+        theta: resolveTheta(node.mastery_threshold, node.cluster_threshold), loops: session.loop_count
+      });
+      sessionState.evaluation = {
+        ...assessment.evaluation, passed: assessment.passed, score: assessment.r_c
+      };
+    }
+
     const result = await orchestrator.processMessage({
       requestType, learnerId: req.user.id, engagementLearnerId: req.user.el_id, sessionId: session.id,
       nodeId: node.id, nodeLabel: node.node_label, clusterLabel: node.cluster_label,
       language: req.user.language, learnerMessage: content, sessionState
     });
 
-    if (requestType === 'CHECK_RESPONSE') return handleCheckResult({ res, session, result, learnerResponse: content, pendingCheck });
-    return handleInstructionResult({ res, session, result });
+    if (requestType === 'CHECK_RESPONSE') {
+      return handleCheckResult({ req, res, session, node, result, learnerResponse: content, pendingCheck, gate, assessment });
+    }
+    return await handleInstructionResult({ req, res, session, node, result });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    req.log?.error('session.message_failed', { error: err });
+    res.status(500).json({ error: 'Something went wrong. Please try again.' });
   }
 }
 
-function handleInstructionResult({ res, session, result }) {
+// A0: record the attempt (learning progress only), keep the check open, and
+// ask for the answer again in the learner's own words.
+function holdForAuthenticity({ req, res, session, node, pendingCheck, gate, answer }) {
   const db = getDb();
-  const msgType = result.decision === 'CHECK' ? 'mastery_check' : 'instruction';
-
-  db.prepare(`
-    INSERT INTO session_messages (id, session_id, role, content, message_type, caption_en, mermaid, code)
-    VALUES (?, ?, 'ai', ?, ?, ?, ?, ?)
-  `).run(uuidv4(), session.id, result.message, msgType, result.captionEn || null, result.mermaid || null, result.code || null);
-
-  if (result.approach) {
-    db.prepare(`
-      INSERT OR IGNORE INTO loop_approaches_used (id, engagement_learner_id, skill_node_id, approach)
-      VALUES (?, ?, ?, ?)
-    `).run(uuidv4(), session.engagement_learner_id, session.skill_node_id, result.approach);
-    db.prepare(`UPDATE learning_sessions SET current_approach = ?, behaviour_signal = ? WHERE id = ?`)
-      .run(result.approach, result.behaviourSignal || session.behaviour_signal, session.id);
-  } else {
-    db.prepare(`UPDATE learning_sessions SET behaviour_signal = ? WHERE id = ?`)
-      .run(result.behaviourSignal || session.behaviour_signal, session.id);
-  }
-
-  if (msgType === 'mastery_check' && result.checkQuestion) {
-    const checkCount = db.prepare('SELECT COUNT(*) as cnt FROM mastery_checks WHERE session_id = ?').get(session.id).cnt;
-    db.prepare(`
-      INSERT INTO mastery_checks (id, session_id, skill_node_id, engagement_learner_id, check_number, question_text)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `).run(uuidv4(), session.id, session.skill_node_id, session.engagement_learner_id, checkCount + 1, result.checkQuestion);
-  }
-
+  const message = HOLD_MESSAGE[req.user.language] || HOLD_CAPTION;
+  db.transaction(() => {
+    const evidenceId = ulid();
+    db.prepare(`INSERT INTO evidence_records (id, el_id, node_id, family_id, instance_id, purpose, answer_hash, passed, assurance, authentic, flags_json, theta, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, NULL, 'A0', 0, ?, ?, ?)`).run(evidenceId, session.engagement_learner_id, node.id, pendingCheck.family_id || null,
+      pendingCheck.instance_id || null, pendingCheck.purpose || 'check', sha256(answer), JSON.stringify([gate.reason]),
+      resolveTheta(node.mastery_threshold, node.cluster_threshold), new Date().toISOString());
+    insertProvenance(db, evidenceId, gate.provenance);
+    insertAnswer(db, evidenceId, answer);
+    db.prepare(`INSERT INTO session_messages (id, session_id, role, content, message_type, caption_en) VALUES (?, ?, 'ai', ?, 'feedback', ?)`)
+      .run(uuidv4(), session.id, message, HOLD_CAPTION);
+  })();
   db.close();
   res.json({
+    session_id: session.id, result: 'hold', decision: 'HOLD', reason: gate.reason,
+    message, caption_en: HOLD_CAPTION, check_question: pendingCheck.question_text
+  });
+}
+
+function insertAnswer(db, evidenceId, text) {
+  db.prepare('INSERT INTO check_answers (evidence_id, answer_text, created_at) VALUES (?, ?, ?)').run(evidenceId, String(text).slice(0, 20000), new Date().toISOString());
+}
+
+function insertProvenance(db, evidenceId, p) {
+  db.prepare(`INSERT INTO answer_provenance (evidence_id, mode, answer_chars, pasted_chars, paste_events, largest_paste, edit_ratio, tab_hidden_ms, device_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(evidenceId, p.mode, p.answer_chars ?? null, p.pasted_chars ?? null, p.paste_events ?? null,
+    p.largest_paste ?? null, p.edit_ratio ?? null, p.tab_hidden_ms ?? null, p.device_id ?? null);
+}
+
+async function handleInstructionResult({ req, res, session, node, result }) {
+  const isCheck = result.decision === 'CHECK';
+  // v4.3 §7: the check is written outside TEACH, from the node spec.
+  const instance = isCheck ? await issueInstance({
+    elId: session.engagement_learner_id, learnerId: req.user.id, nodeId: session.skill_node_id,
+    language: req.user.language, purpose: 'check', institutionId: node.institution_id
+  }) : null;
+
+  const db = getDb();
+  db.transaction(() => {
+    db.prepare(`
+      INSERT INTO session_messages (id, session_id, role, content, message_type, caption_en, mermaid, code)
+      VALUES (?, ?, 'ai', ?, 'instruction', ?, ?, ?)
+    `).run(uuidv4(), session.id, result.message, result.captionEn || null, result.mermaid || null, result.code || null);
+
+    if (result.approach) {
+      db.prepare(`
+        INSERT OR IGNORE INTO loop_approaches_used (id, engagement_learner_id, skill_node_id, approach)
+        VALUES (?, ?, ?, ?)
+      `).run(uuidv4(), session.engagement_learner_id, session.skill_node_id, result.approach);
+      db.prepare(`UPDATE learning_sessions SET current_approach = ?, behaviour_signal = ? WHERE id = ?`)
+        .run(result.approach, result.behaviourSignal || session.behaviour_signal, session.id);
+    } else {
+      db.prepare(`UPDATE learning_sessions SET behaviour_signal = ? WHERE id = ?`)
+        .run(result.behaviourSignal || session.behaviour_signal, session.id);
+    }
+
+    if (instance) {
+      const checkCount = db.prepare('SELECT COUNT(*) as cnt FROM mastery_checks WHERE session_id = ?').get(session.id).cnt;
+      db.prepare(`
+        INSERT INTO mastery_checks (id, session_id, skill_node_id, engagement_learner_id, check_number, question_text, instance_id, purpose)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'check')
+      `).run(uuidv4(), session.id, session.skill_node_id, session.engagement_learner_id, checkCount + 1, instance.question_text, instance.id);
+      db.prepare(`INSERT INTO session_messages (id, session_id, role, content, message_type) VALUES (?, ?, 'ai', ?, 'mastery_check')`)
+        .run(uuidv4(), session.id, instance.question_text);
+    }
+  })();
+  db.close();
+
+  res.json({
     session_id: session.id, message: result.message, caption_en: result.captionEn || null, decision: result.decision,
-    check_question: result.checkQuestion || null, mermaid: result.mermaid || null, code: result.code || null,
+    check_question: instance ? instance.question_text : null, mermaid: result.mermaid || null, code: result.code || null,
     behaviour_signal: result.behaviourSignal, approach: result.approach || session.current_approach
   });
 }
 
-function handleCheckResult({ res, session, result, learnerResponse, pendingCheck }) {
+function handleCheckResult({ req, res, session, node, result, learnerResponse, pendingCheck, gate, assessment }) {
   const db = getDb();
   const evaluation = result.evaluation;
+  const passed = assessment.passed;
+  const now = new Date().toISOString();
+  const elId = session.engagement_learner_id;
+  const vocabGap = evaluation.loopApproachIfFailed === 'vocabulary_barrier'
+    || (evaluation.understandingGaps || []).some(g => /vocabulary_barrier/i.test(String(g)));
+  let advanceTo = null;
+  let masteryAttainment = null;
+  let confidenceIndicator = null;
+  let review = null;
 
-  db.prepare(`
-    UPDATE mastery_checks SET learner_response = ?, passed = ?, score = ?, ai_evaluation = ?, evaluated_at = datetime('now')
-    WHERE id = ?
-  `).run(learnerResponse, evaluation.passed ? 1 : 0, evaluation.score, evaluation.evaluation, pendingCheck.id);
-
-  db.prepare(`
-    INSERT INTO session_messages (id, session_id, role, content, message_type, caption_en, mermaid, code)
-    VALUES (?, ?, 'ai', ?, ?, ?, ?, ?)
-  `).run(uuidv4(), session.id, result.message, result.decision === 'ADVANCE' ? 'advance_trigger' : 'loop_trigger',
-    result.captionEn || null, result.mermaid || null, result.code || null);
-
-  if (result.decision === 'ADVANCE') {
-    const allChecks = db.prepare(`
-      SELECT score, passed FROM mastery_checks
-      WHERE engagement_learner_id = ? AND skill_node_id = ? AND passed IS NOT NULL ORDER BY created_at
-    `).all(session.engagement_learner_id, session.skill_node_id).map(c => ({ score: c.score, passed: !!c.passed }));
-
-    const masteryAttainment = calculateMasteryAttainment(allChecks);
-    // Computed for the response only; never stored (sign facts, compute labels).
-    const confidenceIndicator = calculateConfidenceIndicator(allChecks, session.loop_count);
-    const timeToMastery = (Date.now() - new Date(session.started_at).getTime()) / 60000;
-
-    db.prepare(`
-      INSERT INTO node_mastery (id, engagement_learner_id, skill_node_id, mastery_attainment, time_to_mastery_minutes, attempt_count, advanced_at)
-      VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
-      ON CONFLICT(engagement_learner_id, skill_node_id) DO UPDATE SET
-        mastery_attainment = excluded.mastery_attainment, time_to_mastery_minutes = excluded.time_to_mastery_minutes,
-        attempt_count = excluded.attempt_count, advanced_at = datetime('now')
-    `).run(uuidv4(), session.engagement_learner_id, session.skill_node_id, masteryAttainment, timeToMastery, allChecks.length);
-
-    db.prepare(`UPDATE learning_sessions SET status = 'completed', completed_at = datetime('now'), behaviour_signal = 'accelerating' WHERE id = ?`).run(session.id);
-
+  const nextNodeAfter = () => {
     const nextNode = db.prepare(`
       SELECT sn.* FROM skill_nodes sn
       WHERE sn.cluster_id = (SELECT cluster_id FROM skill_nodes WHERE id = ?)
       AND sn.sequence_order > (SELECT sequence_order FROM skill_nodes WHERE id = ?)
       ORDER BY sn.sequence_order LIMIT 1
     `).get(session.skill_node_id, session.skill_node_id);
+    if (nextNode) return nextNode;
+    const currentCluster = db.prepare('SELECT cluster_id FROM skill_nodes WHERE id = ?').get(session.skill_node_id);
+    const nextCluster = db.prepare(`
+      SELECT sc.id FROM skill_clusters sc
+      WHERE sc.capability_target_id = (SELECT capability_target_id FROM skill_clusters WHERE id = ?)
+      AND sc.sequence_order > (SELECT sequence_order FROM skill_clusters WHERE id = ?)
+      ORDER BY sc.sequence_order LIMIT 1
+    `).get(currentCluster.cluster_id, currentCluster.cluster_id);
+    return nextCluster ? db.prepare('SELECT * FROM skill_nodes WHERE cluster_id = ? ORDER BY sequence_order LIMIT 1').get(nextCluster.id) : null;
+  };
 
-    let advanceTo = nextNode;
-    if (!advanceTo) {
-      const currentCluster = db.prepare('SELECT cluster_id FROM skill_nodes WHERE id = ?').get(session.skill_node_id);
-      const nextCluster = db.prepare(`
-        SELECT sc.id FROM skill_clusters sc
-        WHERE sc.capability_target_id = (SELECT capability_target_id FROM skill_clusters WHERE id = ?)
-        AND sc.sequence_order > (SELECT sequence_order FROM skill_clusters WHERE id = ?)
-        ORDER BY sc.sequence_order LIMIT 1
-      `).get(currentCluster.cluster_id, currentCluster.cluster_id);
-      if (nextCluster) {
-        advanceTo = db.prepare('SELECT * FROM skill_nodes WHERE cluster_id = ? ORDER BY sequence_order LIMIT 1').get(nextCluster.id);
+  db.transaction(() => {
+    db.prepare(`
+      UPDATE mastery_checks SET learner_response = ?, passed = ?, score = ?, ai_evaluation = ?, evaluated_at = datetime('now')
+      WHERE id = ?
+    `).run(learnerResponse, passed ? 1 : 0, assessment.r_c, evaluation.evaluation, pendingCheck.id);
+
+    // Evidence record + provenance (v4.3 §7, §20).
+    const evidenceId = ulid();
+    db.prepare(`INSERT INTO evidence_records (id, el_id, node_id, family_id, instance_id, purpose, answer_hash, per_point_json, r_c, fused_score,
+        passed, level, assurance, authentic, flags_json, provisional, theta, model_id, prompt_version, rubric_version, family_version, active_ms, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
+      evidenceId, elId, node.id, pendingCheck.family_id || null, pendingCheck.instance_id || null, pendingCheck.purpose || 'check',
+      sha256(learnerResponse), JSON.stringify({ gaps: evaluation.understandingGaps || [], second_pass: assessment.second ? assessment.second.score : null }),
+      assessment.r_c, assessment.r_c, passed ? 1 : 0, assessment.level, gate.assurance, JSON.stringify(assessment.flags),
+      assessment.provisional ? 1 : 0, assessment.theta, 'gateway', 'EVAL.mastery.v1', evaluation.rubricVersion || 'default',
+      pendingCheck.family_version || null, Math.round((session.active_minutes || 0) * 60000), now);
+    insertProvenance(db, evidenceId, gate.provenance);
+    insertAnswer(db, evidenceId, learnerResponse);
+
+    // Faculty review: decision stratum (persistence, borderline disagreement) or calibration sample (§7.8).
+    review = enqueueReview({ evidenceId, elId, nodeId: node.id, institutionId: node.institution_id, engagementId: req.user.engagement_id, decision: assessment.review });
+
+    // Vocabulary level (§6).
+    recordVocabulary(req.user.id, { passed, vocabGap });
+
+    db.prepare(`
+      INSERT INTO session_messages (id, session_id, role, content, message_type, caption_en, mermaid, code)
+      VALUES (?, ?, 'ai', ?, ?, ?, ?, ?)
+    `).run(uuidv4(), session.id, result.message, passed ? 'advance_trigger' : 'loop_trigger',
+      result.captionEn || null, result.mermaid || null, result.code || null);
+
+    emit('CHECK_EVALUATED', { aggregateType: 'enrolment', aggregateId: elId, payload: { evidenceId, nodeId: node.id, passed, assurance: gate.assurance, provisional: assessment.provisional } }, db);
+
+    if (passed) {
+      const allChecks = db.prepare(`
+        SELECT score, passed FROM mastery_checks
+        WHERE engagement_learner_id = ? AND skill_node_id = ? AND passed IS NOT NULL ORDER BY created_at
+      `).all(elId, session.skill_node_id).map(c => ({ score: c.score, passed: !!c.passed }));
+      masteryAttainment = calculateMasteryAttainment(allChecks);
+      // Computed for the response only; never stored (sign facts, compute labels).
+      confidenceIndicator = calculateConfidenceIndicator(allChecks, session.loop_count);
+      const timeToMastery = (Date.now() - new Date(session.started_at).getTime()) / 60000;
+
+      db.prepare(`
+        INSERT INTO node_mastery (id, engagement_learner_id, skill_node_id, mastery_attainment, time_to_mastery_minutes, attempt_count, advanced_at,
+          theta, evidence_level, persistence, provisional, recheck_required, loops, active_minutes)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'L1', ?, ?, 0, ?, ?)
+        ON CONFLICT(engagement_learner_id, skill_node_id) DO UPDATE SET
+          mastery_attainment = excluded.mastery_attainment, time_to_mastery_minutes = excluded.time_to_mastery_minutes,
+          attempt_count = excluded.attempt_count, advanced_at = excluded.advanced_at, theta = excluded.theta,
+          evidence_level = excluded.evidence_level, persistence = excluded.persistence, provisional = excluded.provisional,
+          recheck_required = 0, loops = excluded.loops, active_minutes = excluded.active_minutes
+      `).run(uuidv4(), elId, session.skill_node_id, masteryAttainment, timeToMastery, allChecks.length, now,
+        assessment.theta, assessment.persistence ? 1 : 0, assessment.provisional ? 1 : 0, session.loop_count, session.active_minutes || 0);
+
+      // The mastery pass is the first dated demonstration (§9.1).
+      db.prepare(`INSERT INTO demonstrations (id, el_id, node_id, kind, date, passed, score, level, assurance, evidence_id, created_at)
+        VALUES (?, ?, ?, 'mastery', ?, 1, ?, 'L1', ?, ?, ?)`).run(ulid(), elId, node.id, now, assessment.r_c, gate.assurance, evidenceId, now);
+      scheduleFirstReview(db, elId, node.id, now);
+
+      db.prepare(`UPDATE learning_sessions SET status = 'completed', completed_at = datetime('now'), behaviour_signal = 'accelerating' WHERE id = ?`).run(session.id);
+      advanceTo = nextNodeAfter();
+      if (advanceTo) {
+        db.prepare(`UPDATE engagement_learners SET current_node_id = ?, current_cluster_id = ? WHERE id = ?`)
+          .run(advanceTo.id, advanceTo.cluster_id, elId);
+      } else {
+        db.prepare(`UPDATE engagement_learners SET overall_status = 'completed' WHERE id = ?`).run(elId);
+        emit('CURRICULUM_COMPLETE', { aggregateType: 'enrolment', aggregateId: elId, payload: {} }, db);
       }
-    }
-
-    if (advanceTo) {
-      db.prepare(`UPDATE engagement_learners SET current_node_id = ?, current_cluster_id = ? WHERE id = ?`)
-        .run(advanceTo.id, advanceTo.cluster_id, session.engagement_learner_id);
+      updateStreak(db, elId);
+      emit('NODE_ADVANCED', { aggregateType: 'enrolment', aggregateId: elId, payload: { nodeId: node.id, evidenceId, provisional: assessment.provisional } }, db);
     } else {
-      db.prepare(`UPDATE engagement_learners SET overall_status = 'completed' WHERE id = ?`).run(session.engagement_learner_id);
+      db.prepare(`
+        INSERT OR IGNORE INTO loop_approaches_used (id, engagement_learner_id, skill_node_id, approach)
+        VALUES (?, ?, ?, ?)
+      `).run(uuidv4(), elId, session.skill_node_id, session.current_approach);
+      db.prepare(`
+        UPDATE learning_sessions SET loop_count = loop_count + 1, current_approach = ?, behaviour_signal = 'confused' WHERE id = ?
+      `).run(result.nextApproach, session.id);
+      emit('NODE_LOOPED', { aggregateType: 'enrolment', aggregateId: elId, payload: { nodeId: node.id, evidenceId, loops: session.loop_count + 1 } }, db);
     }
+  })();
+  db.close();
 
-    updateStreak(db, session.engagement_learner_id);
-    db.close();
-
+  // Scores are never shown to the learner (v4.3 §2A.2); a provisional pass says so.
+  const common = {
+    session_id: session.id, feedback: evaluation.feedbackForLearner, message: result.message, caption_en: result.captionEn || null,
+    mermaid: result.mermaid || null, code: result.code || null, provisional: assessment.provisional,
+    review_pending: !!(review && review.stratum === 'decision')
+  };
+  if (passed) {
     return res.json({
-      result: 'advance', decision: 'ADVANCE', passed: true, score: evaluation.score,
-      feedback: evaluation.feedbackForLearner, message: result.message, caption_en: result.captionEn || null,
-      mermaid: result.mermaid || null, code: result.code || null,
+      ...common, result: 'advance', decision: 'ADVANCE', passed: true,
       mastery_increment: result.masteryIncrement, mastery_attainment: Math.round(masteryAttainment * 100),
       confidence_indicator: parseFloat(confidenceIndicator.toFixed(2)),
       next_node: advanceTo ? { id: advanceTo.id, label: advanceTo.node_label } : null,
       programme_complete: !advanceTo
     });
   }
-
-  // ── LOOP ──────────────────────────────────────────────────────────────────
-  db.prepare(`
-    INSERT OR IGNORE INTO loop_approaches_used (id, engagement_learner_id, skill_node_id, approach)
-    VALUES (?, ?, ?, ?)
-  `).run(uuidv4(), session.engagement_learner_id, session.skill_node_id, session.current_approach);
-
-  db.prepare(`
-    UPDATE learning_sessions SET loop_count = loop_count + 1, current_approach = ?, behaviour_signal = 'confused' WHERE id = ?
-  `).run(result.nextApproach, session.id);
-
-  db.close();
-  res.json({
-    result: 'loop', decision: 'LOOP', passed: false, score: evaluation.score,
-    feedback: evaluation.feedbackForLearner, understanding_gaps: evaluation.understandingGaps,
-    message: result.message, caption_en: result.captionEn || null, mermaid: result.mermaid || null, code: result.code || null,
+  return res.json({
+    ...common, result: 'loop', decision: 'LOOP', passed: false, understanding_gaps: evaluation.understandingGaps,
     next_approach: result.nextApproach, loop_count: session.loop_count + 1
   });
 }
@@ -509,26 +648,39 @@ router.post('/session/voice', upload.single('audio'), async (req, res) => {
   }
   if (!transcript) return res.status(422).json({ error: 'No speech heard — try again or type instead' });
 
+  // A check answer must be reviewed and submitted explicitly (v4.3 §19): while
+  // a check is pending, return the transcript only; the page shows it for
+  // editing and the edit share feeds the authenticity gate.
+  if (req.body.session_id) {
+    const db = getDb();
+    const session = db.prepare('SELECT id FROM learning_sessions WHERE id = ? AND engagement_learner_id = ?').get(req.body.session_id, req.user.el_id);
+    const pending = session ? pendingCheckFor(db, session.id) : null;
+    db.close();
+    if (pending) return res.json({ transcript, check_pending: true });
+  }
+
   // Reuse the text path; wrap res.json so the transcript rides along.
-  req.body = { ...req.body, content: transcript, input_mode: 'voice' };
+  req.body = { ...req.body, content: transcript, input_mode: 'voice', provenance: { mode: 'voice', edit_ratio: 0 } };
   const json = res.json.bind(res);
   res.json = (body) => json({ ...body, transcript });
   return handleSessionMessage(req, res);
 });
 
-// ─── Session: active-time heartbeat ────────────────────────────────────────────
-// The session page posts { session_id, minutes } about once a minute while it
-// is visible, so "time this week" counts active instruction time, not
-// calendar time. Capped per call so a stuck client cannot inflate it.
+// ─── Session: active-time heartbeat (v4.3 §6) ─────────────────────────────────
+// Posted every 30 s by the session page: { session_id, visible, last_input_at,
+// occurred_at }. Time counts only while the tab is visible and the learner gave
+// input in the last 3 minutes. Offline-queued heartbeats keep their original
+// occurred_at (low-bandwidth mode, §19); a batch may be posted as { beats: [...] }.
 router.post('/session/heartbeat', (req, res) => {
-  const minutes = Math.min(Math.max(parseFloat(req.body.minutes) || 0, 0), 2);
-  const db = getDb();
-  const r = db.prepare(`
-    UPDATE learning_sessions SET active_minutes = active_minutes + ?
-    WHERE id = ? AND engagement_learner_id = ? AND status = 'active'
-  `).run(minutes, req.body.session_id, req.user.el_id);
-  db.close();
-  res.json({ updated: r.changes > 0 });
+  const beats = Array.isArray(req.body.beats) ? req.body.beats.slice(0, 200) : [req.body];
+  let credited = 0;
+  const reasons = [];
+  beats.forEach(b => {
+    const r = heartbeat({ sessionId: b.session_id || req.body.session_id, elId: req.user.el_id, occurredAt: b.occurred_at, lastInputAt: b.last_input_at, visible: b.visible !== false });
+    credited += r.credited;
+    if (r.reason) reasons.push(r.reason);
+  });
+  res.json({ updated: credited > 0, credited_seconds: credited, ignored: reasons.length, reasons: [...new Set(reasons)] });
 });
 
 // ─── Session history ───────────────────────────────────────────────────────────
@@ -536,7 +688,7 @@ router.get('/session/:sessionId/history', (req, res) => {
   const db = getDb();
   const session = db.prepare('SELECT id FROM learning_sessions WHERE id = ? AND engagement_learner_id = ?').get(req.params.sessionId, req.user.el_id);
   if (!session) { db.close(); return res.status(404).json({ error: 'Session not found' }); }
-  const messages = db.prepare(`SELECT * FROM session_messages WHERE session_id = ? ORDER BY created_at`).all(req.params.sessionId);
+  const messages = db.prepare(`SELECT * FROM session_messages WHERE session_id = ? ORDER BY created_at, rowid`).all(req.params.sessionId);
   db.close();
   res.json(messages);
 });

@@ -9,8 +9,33 @@ import path from 'path';
 const IMPORT_RE = /(?:^|[\s;])(?:import|export)\s+(?:[\s\S]*?\sfrom\s+)?['"]([^'"]+)['"]/g;
 const DYNAMIC_RE = /import\(\s*([^)]*?)\s*\)/g;
 
+/**
+ * Remove comments with a scanner that respects string and template literals,
+ * so text like "core/match/*" inside a line comment cannot open a block
+ * comment and hide the imports that follow (a checker that goes blind would
+ * let a wall violation pass silently).
+ */
+export function stripComments(source) {
+  let out = '';
+  let i = 0;
+  const n = source.length;
+  while (i < n) {
+    const c = source[i];
+    const d = source[i + 1];
+    if (c === '/' && d === '/') { while (i < n && source[i] !== '\n') i += 1; continue; }
+    if (c === '/' && d === '*') { const end = source.indexOf('*/', i + 2); i = end < 0 ? n : end + 2; out += ' '; continue; }
+    if (c === '"' || c === "'" || c === '`') {
+      const q = c; out += c; i += 1;
+      while (i < n && source[i] !== q) { if (source[i] === '\\') { out += source[i]; i += 1; } out += source[i]; i += 1; }
+      out += q; i += 1; continue;
+    }
+    out += c; i += 1;
+  }
+  return out;
+}
+
 export function parseImports(source) {
-  const code = source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:'"`])\/\/.*$/gm, '$1');
+  const code = stripComments(source);
   const specs = new Set();
   const computed = [];
   for (const m of code.matchAll(IMPORT_RE)) specs.add(m[1]);

@@ -17,6 +17,8 @@ import { writeNodeSpec } from '../../core/stores/briefStore.js';
 import { produceEngagementMasteryLogs, getMasteryLog } from '../../core/masteryLog.js';
 import { generateJoinCode, accessState, openResetRequest } from '../../core/access.js';
 import { curriculumCoverage, cohortStanding } from '../../core/insights.js';
+import { mapPathway, pathwayCoverage } from '../../core/graph/coverage.js';
+import { checkAcyclic } from '../../core/graph/ontology.js';
 
 const router = express.Router();
 router.use(authenticateToken);
@@ -119,6 +121,7 @@ router.post('/capability-targets/:id/build-pathway', requireStaffRole('admin'), 
   `);
 
   const results = [];
+  const currSkills = {}; // node id → CURR's ontology skills, validated
   for (let i = 0; i < clusters.length; i++) {
     const c = clusters[i];
     const clusterId = uuidv4();
@@ -130,6 +133,11 @@ router.post('/capability-targets/:id/build-pathway', requireStaffRole('admin'), 
         clusterLabel: c.label, clusterDescription: c.description, proficiencyLevel: c.required_proficiency, language
       });
       const skillNodeIds = decomposed.nodes.map(() => uuidv4());
+      // Prerequisites form a DAG (v4.3 §4.2): a cycle drops the offending links.
+      let prereqEdges = decomposed.nodes.flatMap((n, j) => (n.prerequisite_indices || []).filter(pi => pi !== j && skillNodeIds[pi]).map(pi => [j, pi]));
+      try { checkAcyclic(prereqEdges); } catch { prereqEdges = prereqEdges.filter(([j, pi]) => pi < j); }
+      decomposed.nodes.forEach((n, j) => { n.prerequisite_indices = prereqEdges.filter(([a]) => a === j).map(([, pi]) => pi); });
+      decomposed.nodes.forEach((n, j) => { if (n.skills.length) currSkills[skillNodeIds[j]] = n.skills; });
       decomposed.nodes.forEach((n, j) => {
         const prereqIds = (n.prerequisite_indices || []).map(pi => skillNodeIds[pi]).filter(Boolean);
         insertNode.run(skillNodeIds[j], clusterId, n.label, n.description, JSON.stringify(prereqIds), j,
@@ -149,8 +157,18 @@ router.post('/capability-targets/:id/build-pathway', requireStaffRole('admin'), 
       results.push({ cluster: c.label, error: err.message });
     }
   }
+  const mapping = mapPathway(ct.id, { curr: currSkills });
   db.close();
-  res.json({ message: 'Pathway built', language, results });
+  res.json({ message: 'Pathway built', language, results, unmapped_nodes: mapping.unmapped });
+});
+
+// Skill coverage of a pathway through the Capability Graph (v4.3 §3.3).
+router.get(['/capability-targets/:id/coverage', '/targets/:id/coverage'], (req, res) => {
+  const db = getDb();
+  const ct = db.prepare('SELECT id, title FROM capability_targets WHERE id = ? AND institution_id = ?').get(req.params.id, req.user.id);
+  db.close();
+  if (!ct) return res.status(404).json({ error: 'Not found' });
+  res.json({ target: ct, ...pathwayCoverage(ct.id) });
 });
 
 // ─── Cohorts (engagements) ─────────────────────────────────────────────────────

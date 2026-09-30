@@ -4,7 +4,13 @@ The API, core engines and data model for institutions, learners, employers
 and the public verifier. Node 22, Express, plain ES modules with JSDoc,
 SQLite (WAL) behind a data-access layer.
 
-**Build status:** Phase 0, step 1 (Foundation) — see
+**Build status:** Phase 0: Foundation, plus the v4.3 core that the site needs
+end to end: Capability Graph, checks written outside TEACH with the A0/A1
+gate, faculty review and κ, retention, the signed Capability Passport with
+public verification and renewal, learning curves, benchmarks, and employer
+KYB with API keys. `../docs/v4.3-gap-audit.md` lists what is built and what
+is still planned. See
+
 [`../docs/decisions.md`](../docs/decisions.md) for every interpretation of the
 build prompt, and the phase status reports in the pull request history.
 
@@ -15,7 +21,7 @@ cd backend
 npm install
 cp .env.example .env        # set JWT_SECRET (and GEMINI_API_KEY for live AI)
 npm run migrate             # optional: npm start also migrates
-npm run seed:test           # local test accounts (refuses NODE_ENV=production)
+npm run seed:test           # test accounts for every portal (refuses NODE_ENV=production)
 npm start                   # http://localhost:3001
 ```
 
@@ -32,6 +38,9 @@ npm start                   # http://localhost:3001
 | `GEMINI_API_KEY`, `GEMINI_MODEL` | — / `gemini-3.6-flash` | Gemini adapter |
 | `SECURE_CONFIG_DIR` | `./secure-config` | Where the private secure-config repository is mounted |
 | `TRUST_PROXY` | off | Proxy hops, so rate limits and lockout see the client IP |
+| `PUBLIC_HOST`, `PUBLIC_URL` | `qubirex.in` / `FRONTEND_URL` | Issuer did:web host and the base of status-list and verify links |
+| `DEV_KEY_DIR` | `./data/dev-keys` | Development signing keys (production keys come from secure-config) |
+| `ITEM_SEED_SECRET` | dev fallback | HMAC secret for check-instance seeds |
 | `LOG_LEVEL` | `info` (`silent` in tests) | Structured JSON logs |
 | `FEATURE_*` | off | Feature flags (erratum E7), e.g. `FEATURE_COOKIE_ONLY_AUTH=1` |
 
@@ -69,7 +78,7 @@ without it**; development and tests fall back to the priors.
 Each wall test has a self-test against deliberately broken fixtures in
 `tests/structural/fixtures/bad/`, so a checker that stops working fails too.
 
-## Layout (Phase 0, step 1)
+## Layout
 
 ```
 api/app.js                 Express app factory (MOUNTS table → openapi.json)
@@ -82,6 +91,13 @@ core/db/{dal,sqlite,postgres,migrate,ulid}.js
 core/events/{outbox,worker,subscribers}.js   transactional outbox
 core/ai/gateway.js, core/ai/adapters/{gemini,mock}.js
 core/consent/levels.js     append-only consents, withdraw()
+core/graph/                ontology, resolveSkill, coverage, θ
+core/evidence/             checkWriter, authenticity gate, assess, faculty review and κ
+core/learner/              vocabulary level, active time
+core/retention/, core/qep/ review schedule; label_v1, Evidence IDs, SD-JWT, status lists
+core/return/               signing (the only module with keys), credentials, renewal
+core/employer/             GSTIN check, API keys
+core/readiness/, core/benchmarks.js   learning curve; regional benchmarks
 core/logger.js
 migrations/NNNN_*.js       applied in order; never edited once applied
 tests/{structural,unit,integration,property,e2e}/

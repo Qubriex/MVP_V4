@@ -88,15 +88,15 @@ export function useSpeechOutput({ lang = 'te-IN', rate = 1, variant = 'A' } = {}
   return { speak, stop, pause, resume, speakingId, paused, supported: canSpeak };
 }
 
-export function useSpeechInput({ lang = 'te-IN', onFinal, onAudio } = {}) {
+export function useSpeechInput({ lang = 'te-IN', onFinal, onAudio, recorder = undefined } = {}) {
   const [listening, setListening] = useState(false);
   const [interim, setInterim] = useState('');
   const [error, setError] = useState('');
   const recRef = useRef(null);
   const finalRef = useRef('');
   const mediaRef = useRef(null);
-  const handlers = useRef({ onFinal, onAudio });
-  handlers.current = { onFinal, onAudio };
+  const handlers = useRef({ onFinal, onAudio, recorder });
+  handlers.current = { onFinal, onAudio, recorder };
 
   const start = useCallback(async () => {
     setError('');
@@ -130,7 +130,8 @@ export function useSpeechInput({ lang = 'te-IN', onFinal, onAudio } = {}) {
     if (canRecord) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const rec = new MediaRecorder(stream);
+        let rec;
+        try { rec = new MediaRecorder(stream, handlers.current.recorder); } catch { rec = new MediaRecorder(stream); }
         const chunks = [];
         rec.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
         rec.onstop = () => {

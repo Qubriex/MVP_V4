@@ -25,3 +25,16 @@ describe('rate limiter', () => {
     await request(app).post('/x').send({ email: 'b' }).expect(200);
   });
 });
+
+describe('AI rate limits (v4.3 §22)', () => {
+  it('limit POSTs per account, skip GETs', async () => {
+    const { aiRateLimitPosts } = await import('../../api/middleware/rateLimit.js');
+    const app = express();
+    app.use((req, res, next) => { req.session = { actor_type: 'learner', actor_id: 'l1', institution_id: 'i1' }; next(); });
+    app.use(aiRateLimitPosts);
+    app.all('/x', (req, res) => res.json({ ok: true }));
+    for (let i = 0; i < 30; i += 1) await request(app).post('/x').expect(200);
+    await request(app).post('/x').expect(429);
+    await request(app).get('/x').expect(200);
+  });
+});

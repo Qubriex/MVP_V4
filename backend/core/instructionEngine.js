@@ -117,16 +117,17 @@ function computeVariance(arr) {
 }
 
 // ─── calculateSimulationReadiness() ───────────────────────────────────────────
-// true if ALL: every node mastery >= 0.70, avg mastery >= 0.75, avg confidence >= 0.60
-// (confidence_indicator on each record is computed by the caller, never read from storage)
+// v4.3 §7.7: simulation-ready = every node passed, mean attainment >= 0.75,
+// and no unresolved failed review. (Reviews arrive with the Retention step;
+// until then records carry no failed_review flag.) Confidence plays no part.
 function calculateSimulationReadiness(nodeMasteryRecords) {
   if (!nodeMasteryRecords || nodeMasteryRecords.length === 0) return false;
 
   const avgMastery = nodeMasteryRecords.reduce((s, n) => s + (n.mastery_attainment || 0), 0) / nodeMasteryRecords.length;
-  const avgConfidence = nodeMasteryRecords.reduce((s, n) => s + (n.confidence_indicator || 0), 0) / nodeMasteryRecords.length;
-  const allNodesComplete = nodeMasteryRecords.every(n => n.mastery_attainment >= 0.70);
+  const allNodesPassed = nodeMasteryRecords.every(n => n.passed ?? n.mastery_attainment >= 0.70);
+  const unresolvedFailedReview = nodeMasteryRecords.some(n => n.failed_review);
 
-  return allNodesComplete && avgMastery >= 0.75 && avgConfidence >= 0.60;
+  return allNodesPassed && avgMastery >= 0.75 && !unresolvedFailedReview;
 }
 
 export { callAI, callAIWithAudio, safeParseJSON, getMasteryIncrement, selectNextApproach, calculateMasteryAttainment, calculateConfidenceIndicator, calculateSimulationReadiness, EXPLANATION_APPROACHES };

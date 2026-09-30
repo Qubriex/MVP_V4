@@ -8,6 +8,8 @@ import { authenticateToken, requireRole } from '../middleware/auth.js';
 import { staffMiddleware, findScopedEngagement, scopeClause } from '../middleware/staff.js';
 import { curriculumCoverage, cohortStanding } from '../../core/insights.js';
 import * as market from '../../core/market/sampleMarket.js';
+import { benchmarks } from '../../core/benchmarks.js';
+import { learningCurve } from '../../core/readiness/learningCurve.js';
 
 const router = express.Router();
 router.use(authenticateToken);
@@ -71,6 +73,26 @@ router.get('/insights/standing', (req, res) => {
   } finally {
     db.close();
   }
+});
+
+// Benchmarks (v4.3 §16): this cohort vs our other cohorts vs the anonymised
+// regional median (published only with ≥ 3 other institutions).
+router.get('/insights/benchmarks', (req, res) => {
+  const db = getDb();
+  const e = findScopedEngagement(db, req, req.query.engagement_id);
+  db.close();
+  if (!e) return res.status(404).json({ error: 'Cohort not found' });
+  res.json({ cohort: { id: e.id, title: e.title }, ...benchmarks(req.user.id, e.id) });
+});
+
+// Learning-curve signals for one student (v4.3 §12.3), in the caller's scope.
+router.get('/students/:elId/learning-curve', (req, res) => {
+  const db = getDb();
+  const el = db.prepare('SELECT el.engagement_id, l.name, l.learner_ref FROM engagement_learners el JOIN learners l ON l.id = el.learner_id WHERE el.id = ?').get(req.params.elId);
+  const e = el ? findScopedEngagement(db, req, el.engagement_id) : null;
+  db.close();
+  if (!e) return res.status(404).json({ error: 'Student not found' });
+  res.json({ student: { name: el.name, learner_ref: el.learner_ref }, ...learningCurve(req.params.elId) });
 });
 
 export default router;

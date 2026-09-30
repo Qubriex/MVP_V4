@@ -170,11 +170,13 @@ async function processMessage(params) {
     // ── CHECK_RESPONSE — the most complex flow ─────────────────────────────
     case 'CHECK_RESPONSE': {
       brainsActivated = ['MEM', 'EVAL', 'CULT', 'CURR'];
+      // The route runs the authenticity gate and EVAL (core/evidence/assess.js)
+      // before TEACH sees the outcome; EVAL is only called here for callers
+      // that have not assessed the answer yet.
       const [learnerContext, evaluation, culturalExamples, nodeSpec] = await Promise.all([
         Promise.resolve(memBrain.retrieve(learnerId, nodeId)),
-        evalBrain.evaluate({
-          nodeLabel, language, question: sessionState.checkQuestion,
-          learnerResponse: learnerMessage, loopCount: sessionState.loopCount || 0
+        sessionState.evaluation ? Promise.resolve(sessionState.evaluation) : evalBrain.evaluate({
+          nodeLabel, language, question: sessionState.checkQuestion, learnerResponse: learnerMessage
         }),
         Promise.resolve(cultBrain.retrieveExamples(nodeLabel, language, _vocabHint(sessionState))),
         Promise.resolve(currBrain.retrieveNodeContext(nodeId, nodeLabel))

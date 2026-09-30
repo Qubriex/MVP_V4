@@ -23,6 +23,8 @@ const STRINGS = {
   'nav.home':       { telugu: 'హోమ్', hindi: 'होम', english: 'Home' },
   'nav.session':    { telugu: 'వాయిస్ సెషన్', hindi: 'वॉइस सेशन', english: 'Voice session' },
   'nav.path':       { telugu: 'నైపుణ్య మార్గం & రికార్డ్', hindi: 'स्किल पाथ और रिकॉर्ड', english: 'Skill path & record' },
+  'nav.reviews':    { telugu: 'రివ్యూలు', hindi: 'रिव्यू', english: 'Reviews' },
+  'nav.passport':   { telugu: 'కేపబిలిటీ పాస్‌పోర్ట్', hindi: 'कैपेबिलिटी पासपोर्ट', english: 'Capability Passport' },
   'nav.career':     { telugu: 'కెరీర్', hindi: 'करियर', english: 'Career' },
   'nav.market':     { telugu: 'ఉద్యోగ మార్కెట్', hindi: 'जॉब मार्केट', english: 'Job market' },
   'nav.topics':     { telugu: 'కొత్త అంశాలు', hindi: 'उभरते विषय', english: 'Emerging topics' },

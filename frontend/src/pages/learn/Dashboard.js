@@ -7,9 +7,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Mic, Keyboard, Check, Search } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useUiLang } from '../../context/UiLangContext';
-import { getOr } from '../../utils/api';
+import api, { getOr } from '../../utils/api';
 import { MOCK_LEARNER_DASHBOARD, MOCK_MARKET_SNAPSHOT, MOCK_PROFILE_BASICS } from '../../utils/learnerMockData';
 import { Bar, SampleBadge, StatusTag, salary, minutes, RequestButton, useSkillRequests } from '../../components/learn/ui';
+import { useLowBandwidth, slowConnection, cacheOutlines, cachedOutlines } from '../../utils/lowBandwidth';
 
 const APPROACH_NAMES = { native_concept: 'Native concept', analogy: 'Analogy', worked_example: 'Worked example', decomposition: 'Building blocks', socratic: 'Socratic' };
 const SECTION_NAMES = { personal: 'your details', education: 'education', projects: 'your projects', skills: 'skills', goals: 'career goals' };
@@ -24,12 +25,22 @@ export default function Dashboard() {
   const [query, setQuery] = useState('');
   const [professors, setProfessors] = useState([]);
   const requests = useSkillRequests();
+  const [due, setDue] = useState(0);
+  const [lowBw, setLowBw] = useLowBandwidth();
+  const suggestLowBw = !lowBw && slowConnection();
 
   useEffect(() => {
     getOr('/learner/dashboard', MOCK_LEARNER_DASHBOARD, d => d && typeof d.progress_pct !== 'undefined').then(setData);
     getOr('/market/snapshot', MOCK_MARKET_SNAPSHOT, d => d && Array.isArray(d.jobs)).then(setMarket);
     getOr('/learner/profile', MOCK_PROFILE_BASICS, d => d && d.completeness).then(setProfile);
     getOr('/learner/professors', [], Array.isArray).then(setProfessors);
+    api.get('/learner/reviews/due').then(r => setDue(r.data.due?.length || 0)).catch(() => {});
+    // Low-bandwidth mode (v4.3 §19): keep the next two lessons' outlines on the device.
+    api.get('/learner/path').then(r => {
+      const nodes = (r.data.clusters || []).flatMap(c => c.nodes.map(n => ({ ...n, cluster: c.label })));
+      const i = nodes.findIndex(n => n.status === 'current');
+      if (i >= 0) cacheOutlines(nodes.slice(i, i + 2).map(n => ({ label: n.label, cluster: n.cluster, minutes: n.estimated_minutes })));
+    }).catch(() => {});
   }, []);
 
   const firstName = (user?.name || '').split(' ')[0];
@@ -49,6 +60,26 @@ export default function Dashboard() {
           <input aria-label="Search jobs and skills" placeholder="Search jobs and skills" value={query} onChange={e => setQuery(e.target.value)} />
         </form>
       </header>
+
+      {suggestLowBw && (
+        <div className="ln-note ln-between ln-wrap" role="status" style={{ gap: 10 }}>
+          <span>Your connection looks slow. Low-bandwidth mode shows lessons as text first and sends smaller voice clips.</span>
+          <button type="button" className="ln-btn ln-btn-sm" onClick={() => setLowBw(true)}>Turn on</button>
+        </div>
+      )}
+      {!navigator.onLine && cachedOutlines()?.outlines?.length > 0 && (
+        <section className="ln-card" style={{ gap: 8 }} aria-label="Saved for offline">
+          <strong>You are offline — coming up next (saved on this device)</strong>
+          {cachedOutlines().outlines.map(o => <span key={o.label}>{o.label} <span className="ln-small ln-muted">· {o.cluster} · about {o.minutes || 20} min</span></span>)}
+          <span className="ln-xs ln-muted">Lessons and checks need a connection. Your active time syncs when you are back online.</span>
+        </section>
+      )}
+      {due > 0 && (
+        <Link to="/learn/reviews" className="ln-card ln-card-link ln-between ln-wrap" style={{ gap: 10 }}>
+          <span><b>{due} review{due === 1 ? '' : 's'} due.</b> Short questions that keep your skills fresh on your passport.</span>
+          <span className="ln-btn ln-btn-sm ln-btn-primary">Review now</span>
+        </Link>
+      )}
 
       <div className="ln-grid ln-g-hero">
         <section className="ln-card ln-card-dark" style={{ gap: 18, padding: 28 }}>

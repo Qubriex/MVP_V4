@@ -3,7 +3,8 @@ import { describe, it, expect } from 'vitest';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { checkWall, TEACHING, EMPLOYER } from './walls.js';
-import { closure } from './importGraph.js';
+import fs from 'fs';
+import { closure, parseImports } from './importGraph.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const BAD = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'fixtures/bad');
@@ -33,7 +34,14 @@ describe('employer/session wall', () => {
 
   it('actually walks the employer modules', () => {
     const { files } = closure(ROOT, EMPLOYER.entries(ROOT));
-    expect([...files.keys()]).toEqual(expect.arrayContaining(['api/routes/employer.js', 'api/middleware/employerAuth.js', 'api/middleware/auth.js']));
+    expect([...files.keys()]).toEqual(expect.arrayContaining(['api/routes/employer.js', 'api/routes/verify.js', 'api/middleware/employerAuth.js',
+      'api/middleware/auth.js', 'core/return/credentialEngine.js', 'core/qep/labelFn.js']));
+  });
+
+  it('self-test: a comment containing "/*" does not hide the imports after it', () => {
+    const src = fs.readFileSync(path.join(BAD, 'core/match/ranking.js'), 'utf8');
+    expect(parseImports(src).specs).toEqual(['../stores/learnerMemoryStore.js']);
+    expect(parseImports("// see core/match/*\nimport a from './a.js';\nconst s = '/* not a comment';\nimport b from './b.js';").specs).toEqual(['./a.js', './b.js']);
   });
 
   it('self-test: catches an employer route importing learner memory and naming a session table', () => {

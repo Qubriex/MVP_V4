@@ -6,6 +6,7 @@
 import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { legacyHandle as getDb } from '../../core/db/dal.js';
+import { aiRateLimitPosts } from '../middleware/rateLimit.js';
 import { authenticateToken, requireRole, requireActiveLearner } from '../middleware/auth.js';
 import * as market from '../../core/market/sampleMarket.js';
 import { getLearnerSkillState, classifySkill, scoreJob } from '../../core/market/skillGap.js';
@@ -15,6 +16,8 @@ const router = express.Router();
 router.use(authenticateToken);
 router.use(requireRole('learner'));
 router.use(requireActiveLearner);
+// AI-calling routes are POSTs; limited per learner and per institution (v4.3 §22).
+router.use(aiRateLimitPosts);
 
 const META = { sample: true, source: market.SOURCE_LABEL, updated_at: market.UPDATED_AT };
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];

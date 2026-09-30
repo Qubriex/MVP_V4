@@ -9,10 +9,21 @@ import { useUiLang, UI_LANGS, speechTag } from '../../context/UiLangContext';
 import api, { getOr } from '../../utils/api';
 import { useSpeechInput, useSpeechOutput } from '../../utils/voice';
 import { MOCK_PROFILE } from '../../utils/learnerMockData';
+import { useLowBandwidth } from '../../utils/lowBandwidth';
 
 const EDITABLE = ['email', 'phone', 'city', 'link_url', 'headline', 'about', 'target_roles', 'preferred_cities', 'available_from',
   'expected_salary', 'self_skills', 'experience', 'certifications', 'ui_language', 'voice_prefs', 'education', 'projects',
   'share_with_institution'];
+// Low-bandwidth mode (v4.3 §19) is a setting of this device, not the profile.
+function LowBandwidthToggle() {
+  const [on, set] = useLowBandwidth();
+  return (
+    <label className="ln-toggle-row">
+      <span>Low-bandwidth mode on this device<span className="ln-xs ln-muted" style={{ display: 'block' }}>Text first (no automatic speech), smaller voice uploads, the next lessons’ outlines saved for offline, time synced when you reconnect. Checks still need a connection.</span></span>
+      <input type="checkbox" checked={on} onChange={e => set(e.target.checked)} />
+    </label>
+  );
+}
 
 export function useProfileDraft() {
   const [profile, setProfile] = useState(null);
@@ -313,6 +324,7 @@ export function VoiceSection({ form }) {
         <label className="ln-toggle-row"><span>Start sessions in voice mode</span><input type="checkbox" checked={prefs.startInVoice !== false} onChange={e => setPref('startInVoice', e.target.checked)} /></label>
         <label className="ln-toggle-row"><span>Show English captions under {language === 'hindi' ? 'Hindi' : 'Telugu'} speech</span><input type="checkbox" checked={prefs.showEnglishCaptions !== false} onChange={e => setPref('showEnglishCaptions', e.target.checked)} /></label>
         <label className="ln-toggle-row"><span>Daily study reminder</span><input type="checkbox" checked={!!prefs.dailyReminder} onChange={e => setPref('dailyReminder', e.target.checked)} /></label>
+        <LowBandwidthToggle />
       </div>
     </Section>
   );

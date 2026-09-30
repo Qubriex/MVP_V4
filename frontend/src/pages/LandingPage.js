@@ -19,6 +19,8 @@ export default function LandingPage() {
       <NavBar
         right={
           <>
+            <button className="btn btn-ghost btn-sm" onClick={() => navigate('/verify')}>Verify a passport</button>
+            <button className="btn btn-ghost btn-sm" onClick={() => navigate('/employer/login')}>Employers</button>
             <button className="btn btn-ghost btn-sm" onClick={() => navigate('/login')}>Institution Login</button>
             <button className="btn btn-primary btn-sm" onClick={() => navigate('/learner-login')}>Learner Login</button>
           </>
@@ -56,6 +58,8 @@ export default function LandingPage() {
           <Reveal delay={480} className="row gap-4" style={{ justifyContent: 'center', flexWrap: 'wrap', marginBottom: 'var(--space-10)' }}>
             <button className="btn btn-primary" onClick={() => navigate('/login')}>Institution Login</button>
             <button className="btn btn-secondary" onClick={() => navigate('/learner-login')}>Learner Login</button>
+            <button className="btn btn-secondary" onClick={() => navigate('/employer/login')}>For employers</button>
+            <button className="btn btn-ghost" onClick={() => navigate('/verify')}>Verify a Capability Passport</button>
           </Reveal>
 
           <Reveal delay={560} className="row gap-3" style={{ justifyContent: 'center' }}>

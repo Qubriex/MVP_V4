@@ -89,7 +89,8 @@ function retrieveExampleResponses(nodeLabel, language, outcome, limit = 2) {
 }
 
 // ─── writeEvaluation() ─────────────────────────────────────────────────────────
-// Automatically builds the calibration corpus — every evaluation feeds back in.
+// Not called: v4.3 §7.3 forbids reusing raw model-scored answers as examples.
+// Kept until the gold set (faculty-labelled, consent level 6) replaces it.
 function writeEvaluation(nodeLabel, language, responseText, outcome, score, gapsIdentified = []) {
   const db = getDb();
   db.prepare(`

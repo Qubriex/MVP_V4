@@ -12,7 +12,7 @@
 //   params.flag('employerPortal')            → boolean (env FEATURE_EMPLOYER_PORTAL=1 overrides)
 import fs from 'fs';
 import path from 'path';
-import { PRIORS } from './priors.js';
+import { PRIORS, CALIBRATION_REGISTER } from './priors.js';
 
 let loaded = null;
 
@@ -84,5 +84,12 @@ export function report() {
   return out;
 }
 
-export const params = { get, stage, flag, load, report };
+/** Appendix A.1 register, with whether secure-config currently overrides each group. */
+export function calibrationRegister() {
+  const { overridden } = state();
+  const touches = (k) => [...overridden].some(o => o === k || o.startsWith(`${k}.`) || k.startsWith(`${o}.`));
+  return CALIBRATION_REGISTER.map(g => ({ ...g, overriddenBySecureConfig: g.keys.some(touches) }));
+}
+
+export const params = { get, stage, flag, load, report, calibrationRegister };
 export default params;
