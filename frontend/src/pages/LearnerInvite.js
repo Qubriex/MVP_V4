@@ -6,6 +6,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import PhoenixMark from '../components/PhoenixMark';
+import { errMsg } from '../utils/errors';
 
 export default function LearnerInvite() {
   const { token } = useParams();
@@ -18,7 +19,7 @@ export default function LearnerInvite() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    api.get(`/auth/learner/invite/${token}`).then(r => setInvite(r.data)).catch(e => setError(e.response?.data?.error || 'This invite link is invalid or has expired.'));
+    api.get(`/auth/learner/invite/${token}`).then(r => setInvite(r.data)).catch(e => setError(errMsg(e, 'This invite link is invalid or has expired.')));
   }, [token]);
 
   const accept = async (e) => {
@@ -30,7 +31,7 @@ export default function LearnerInvite() {
       const res = await api.post(`/auth/learner/invite/${token}/accept`, { pin });
       login(res.data.token, res.data.learner, 'learner');
       navigate('/learn/welcome');
-    } catch (err) { setError(err.response?.data?.error || 'Couldn’t set your PIN.'); }
+    } catch (err) { setError(errMsg(err, 'Couldn’t set your PIN.')); }
     setBusy(false);
   };
 

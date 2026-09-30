@@ -7,6 +7,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 import PhoenixMark from '../../components/PhoenixMark';
+import { errMsg } from '../../utils/errors';
 
 export function StaffAside() {
   return (
@@ -40,7 +41,7 @@ export default function StaffLogin() {
       login(res.data.token, { ...res.data.staff, institution_name: res.data.institution?.name }, 'institution');
       navigate(res.data.staff?.profile_completed ? '/institution/home' : '/institution/welcome');
     } catch (err) {
-      setError(err.response?.data?.error || 'Sign in failed.');
+      setError(errMsg(err, 'Sign in failed.'));
     }
     setLoading(false);
   };

@@ -3,5 +3,8 @@
 export function errMsg(e, fallback = 'Something went wrong. Please try again.') {
   const err = e?.response?.data?.error;
   if (!err) return e?.response ? fallback : 'Could not reach the server. Check your connection.';
-  return typeof err === 'string' ? err : err.message || fallback;
+  const text = typeof err === 'string' ? err : err.message || fallback;
+  // A deployment that is missing configuration names what to set.
+  const missing = e.response.data.missing_env;
+  return Array.isArray(missing) && missing.length ? `${text} Missing: ${missing.join(', ')}.` : text;
 }

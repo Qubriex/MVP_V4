@@ -11,6 +11,7 @@ import { useStaff } from '../../components/inst/InstitutionLayout';
 import CopyLink from '../../components/inst/CopyLink';
 import { AccessTag } from './Students';
 import { COHORT_STATUS } from './Cohorts';
+import { errMsg } from '../../utils/errors';
 
 const TABS = ['Overview', 'Students', 'Pathway', 'Mastery logs', 'Settings'];
 const date = (t) => (t ? new Date(t.replace(' ', 'T') + (/[Z+]/.test(t) ? '' : 'Z')).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—');
@@ -83,7 +84,7 @@ function Logs({ c, canProduce }) {
   useEffect(() => { load(); }, [load]);
   const produce = async (complete) => {
     if (complete && !window.confirm('Produce final logs and mark this cohort completed?')) return;
-    try { const r = await api.post(`/institution/engagements/${c.id}/produce-mastery-logs`, { complete }); setMsg(r.data.message); load(); } catch (e) { setMsg(e.response?.data?.error || 'Couldn’t produce logs.'); }
+    try { const r = await api.post(`/institution/engagements/${c.id}/produce-mastery-logs`, { complete }); setMsg(r.data.message); load(); } catch (e) { setMsg(errMsg(e, 'Couldn’t produce logs.')); }
   };
   const exportCsv = async () => {
     const r = await api.get(`/institution/engagements/${c.id}/mastery-logs.csv`, { responseType: 'blob' });
@@ -126,7 +127,7 @@ function Settings({ c, onChanged }) {
     try {
       await api.put(`/institution/engagements/${c.id}`, { title, status, professors: Object.entries(profs).map(([id, cohort_role]) => ({ id, cohort_role })) });
       setMsg('Saved.'); onChanged();
-    } catch (e) { setMsg(e.response?.data?.error || 'Couldn’t save.'); }
+    } catch (e) { setMsg(errMsg(e, 'Couldn’t save.')); }
   };
   return (
     <section className="ln-card" style={{ maxWidth: 760 }}>
@@ -164,7 +165,7 @@ export default function Cohort() {
 
   const rotate = async () => {
     if (!window.confirm('Create a new join code? The current one stops working for new sign-ins.')) return;
-    try { await api.post(`/institution/engagements/${id}/join-code`); load(); } catch (e) { setError(e.response?.data?.error || 'Couldn’t change the code.'); }
+    try { await api.post(`/institution/engagements/${id}/join-code`); load(); } catch (e) { setError(errMsg(e, 'Couldn’t change the code.')); }
   };
 
   if (error) return <div className="ln-error">{error}</div>;

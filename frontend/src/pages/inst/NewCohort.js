@@ -7,6 +7,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
+import { errMsg } from '../../utils/errors';
 
 const STEPS = ['Capability target', 'Confirm', 'Language', 'Build pathway', 'Cohort & professors'];
 
@@ -33,7 +34,7 @@ export default function NewCohort() {
     api.get('/institution/team').then(r => setTeam(r.data.filter(m => m.role === 'professor' && m.status !== 'disabled'))).catch(() => {});
   }, []);
 
-  const fail = (e, fallback) => setError(e.response?.data?.detail ? `${e.response.data.error}: ${e.response.data.detail}` : e.response?.data?.error || fallback);
+  const fail = (e, fallback) => setError(e.response?.data?.detail ? `${errMsg(e, fallback)}: ${e.response.data.detail}` : errMsg(e, fallback));
 
   const submitTarget = async (e) => {
     e.preventDefault(); setError(''); setBusy('extract');

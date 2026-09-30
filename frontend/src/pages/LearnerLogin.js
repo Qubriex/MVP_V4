@@ -9,6 +9,7 @@ import { useAuth } from '../context/AuthContext';
 import { useUiLang, UI_LANGS } from '../context/UiLangContext';
 import api from '../utils/api';
 import PhoenixMark from '../components/PhoenixMark';
+import { errMsg } from '../utils/errors';
 
 const COPY = {
   telugu: { title: 'లెర్నర్ సైన్ ఇన్', sub: 'మీ సంస్థ ఇచ్చిన వివరాలు వాడండి.', ref: 'లెర్నర్ రిఫరెన్స్ నంబర్', eng: 'జాయిన్ కోడ్', pin: '6 అంకెల PIN', keep: 'ఈ పరికరంలో సైన్ ఇన్‌లో ఉంచండి', go: 'సైన్ ఇన్', lang: 'ఇంటర్‌ఫేస్ భాష' },
@@ -61,7 +62,7 @@ export default function LearnerLogin() {
     if (!/^\d{6}$/.test(newPin)) return setError('Your PIN must be exactly 6 digits.');
     if (newPin !== newPin2) return setError('The two PINs don’t match.');
     setLoading(true);
-    try { await api.put('/learner/pin', { new_pin: newPin }); await enter(); } catch (err) { setError(err.response?.data?.error || 'Couldn’t change your PIN.'); }
+    try { await api.put('/learner/pin', { new_pin: newPin }); await enter(); } catch (err) { setError(errMsg(err, 'Couldn’t change your PIN.')); }
     setLoading(false);
   };
 
@@ -74,7 +75,7 @@ export default function LearnerLogin() {
       if (res.data.must_change_pin) { setMustChange(true); setLoading(false); return; }
       await enter();
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed. Check your learner reference, join code and PIN.');
+      setError(errMsg(err, 'Login failed. Check your learner reference, join code and PIN.'));
     }
     setLoading(false);
   };

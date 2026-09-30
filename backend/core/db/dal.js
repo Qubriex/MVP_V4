@@ -36,6 +36,9 @@ export function databaseUrl() {
 /** Opens the connection named by the environment (or the options). */
 export function connect({ url = databaseUrl(), file = process.env.DB_PATH || './data/pglite' } = {}) {
   if (conn) { const old = conn; conn = null; old.close().catch?.(() => {}); }
+  if (!url && process.env.NODE_ENV === 'production') {
+    throw new Error('DATABASE_URL is not set: production needs a PostgreSQL database (see docs/DEPLOY-VERCEL.md)');
+  }
   conn = url ? pgDriver.open(url) : pgliteDriver.open(file);
   return conn;
 }

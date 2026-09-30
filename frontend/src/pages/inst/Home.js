@@ -7,6 +7,7 @@ import { AlertTriangle, RotateCcw, KeyRound, Plus } from 'lucide-react';
 import api from '../../utils/api';
 import { Bar, SampleBadge } from '../../components/learn/ui';
 import { useStaff } from '../../components/inst/InstitutionLayout';
+import { errMsg } from '../../utils/errors';
 
 const ALERT_ICON = { never_signed_in: [AlertTriangle, 'ln-tag-warning'], stuck: [RotateCcw, 'ln-tag-accent'], pin_reset: [KeyRound, 'ln-tag-info'] };
 const COVERAGE = { covered: ['✓ In curriculum', 'ln-tag-success'], partly: ['◐ Partly covered', 'ln-tag-info'], missing: ['+ Not covered', 'ln-tag-accent'] };
@@ -20,7 +21,7 @@ export default function InstHome() {
   const { role } = useStaff();
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
-  useEffect(() => { api.get('/institution/overview').then(r => setData(r.data)).catch(e => setError(e.response?.data?.error || 'Couldn’t load your overview. Is the backend running?')); }, []);
+  useEffect(() => { api.get('/institution/overview').then(r => setData(r.data)).catch(e => setError(errMsg(e, 'Couldn’t load your overview. Is the backend running?'))); }, []);
 
   if (error) return <div className="ln-error">{error}</div>;
   if (!data) return <p className="ln-muted">Loading…</p>;

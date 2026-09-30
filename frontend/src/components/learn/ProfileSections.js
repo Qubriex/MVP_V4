@@ -10,6 +10,7 @@ import api, { getOr } from '../../utils/api';
 import { useSpeechInput, useSpeechOutput } from '../../utils/voice';
 import { MOCK_PROFILE } from '../../utils/learnerMockData';
 import { useLowBandwidth } from '../../utils/lowBandwidth';
+import { errMsg } from '../../utils/errors';
 
 const EDITABLE = ['email', 'phone', 'city', 'link_url', 'headline', 'about', 'target_roles', 'preferred_cities', 'available_from',
   'expected_salary', 'self_skills', 'experience', 'certifications', 'ui_language', 'voice_prefs', 'education', 'projects',
@@ -53,7 +54,7 @@ export function useProfileDraft() {
       setStatus('saved');
       return true;
     } catch (e) {
-      setStatus(e.response?.data?.error || 'Couldn’t save — check your connection and try again.');
+      setStatus(errMsg(e, 'Couldn’t save — check your connection and try again.'));
       return false;
     } finally {
       setSaving(false);

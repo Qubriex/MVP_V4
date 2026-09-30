@@ -9,6 +9,7 @@ import { Camera } from 'lucide-react';
 import api from '../../utils/api';
 import { ChipEditor } from '../learn/ProfileSections';
 import { Avatar } from './InstitutionLayout';
+import { errMsg } from '../../utils/errors';
 
 const EDITABLE = ['name', 'title', 'designation', 'department', 'employee_id', 'phone', 'qualification', 'years_teaching',
   'specialisations', 'teaching_languages', 'subjects', 'office_hours', 'target_roles', 'photo_data_url', 'notification_prefs'];
@@ -22,7 +23,7 @@ export function useStaffDraft() {
 
   useEffect(() => {
     api.get('/institution/me').then(r => { setSaved(r.data); setDraft(r.data); })
-      .catch(e => setStatus(e.response?.data?.error || 'Couldn’t load your profile.'));
+      .catch(e => setStatus(errMsg(e, 'Couldn’t load your profile.')));
   }, []);
   const set = useCallback((k, v) => { setDraft(d => ({ ...d, [k]: v })); setStatus(''); }, []);
   const dirty = !!(saved && draft && EDITABLE.some(k => JSON.stringify(saved[k]) !== JSON.stringify(draft[k])));
@@ -35,7 +36,7 @@ export function useStaffDraft() {
       setStatus('saved');
       return res.data;
     } catch (e) {
-      setStatus(e.response?.data?.error || 'Couldn’t save — check your connection.');
+      setStatus(errMsg(e, 'Couldn’t save — check your connection.'));
       return null;
     } finally {
       setSaving(false);

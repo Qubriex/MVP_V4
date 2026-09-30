@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import api from '../../utils/api';
 import { Avatar, ROLE_LABEL, useStaff } from '../../components/inst/InstitutionLayout';
 import CopyLink from '../../components/inst/CopyLink';
+import { errMsg } from '../../utils/errors';
 
 const STATUS = { active: ['Active', 'ln-tag-success'], invited: ['Invited', 'ln-tag-info'], expired: ['Expired', 'ln-tag-warning'], disabled: ['Disabled', 'ln-tag-neutral'] };
 
@@ -31,7 +32,7 @@ function EditModal({ member, cohorts, onClose, onSaved }) {
     try {
       const res = await api.put(`/institution/team/${member.id}`, { role, department, engagement_ids: ids, ...(status ? { status } : {}) });
       onSaved(res.data);
-    } catch (e) { setError(e.response?.data?.error || 'Couldn’t save.'); }
+    } catch (e) { setError(errMsg(e, 'Couldn’t save.')); }
   };
   return (
     <div className="in-modal-scrim" role="dialog" aria-modal="true" aria-labelledby="edit-title" onClick={onClose}>
@@ -70,7 +71,7 @@ export default function Team() {
   const [error, setError] = useState('');
   const [editing, setEditing] = useState(null);
 
-  const load = () => api.get('/institution/team').then(r => setTeam(r.data)).catch(e => setError(e.response?.data?.error || 'Couldn’t load the team.'));
+  const load = () => api.get('/institution/team').then(r => setTeam(r.data)).catch(e => setError(errMsg(e, 'Couldn’t load the team.')));
   useEffect(() => { load(); api.get('/institution/engagements').then(r => setCohorts(r.data)).catch(() => {}); }, []);
 
   const invite = async (e) => {
@@ -81,7 +82,7 @@ export default function Team() {
       setMessage(`Invite created for ${form.email}. Email delivery isn’t switched on yet — copy the link below and send it to them.`);
       setForm(f => ({ ...f, email: '', name: '' }));
       load();
-    } catch (err) { setError(err.response?.data?.error || 'Couldn’t send the invite.'); }
+    } catch (err) { setError(errMsg(err, 'Couldn’t send the invite.')); }
   };
   const resend = async (m) => {
     try {
@@ -89,7 +90,7 @@ export default function Team() {
       setLinks(l => ({ ...l, [m.id]: res.data.invite_url }));
       setMessage(res.data.message);
       load();
-    } catch (err) { setError(err.response?.data?.error || 'Couldn’t resend.'); }
+    } catch (err) { setError(errMsg(err, 'Couldn’t resend.')); }
   };
 
   return (

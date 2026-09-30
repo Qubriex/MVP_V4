@@ -9,6 +9,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { Plus, Trash2, Upload, Download } from 'lucide-react';
 import api from '../../utils/api';
 import AccessResults from '../../components/inst/AccessResults';
+import { errMsg } from '../../utils/errors';
 
 const TEMPLATE = 'name,learner_ref,email\nNikhil Gupta,CSE27-A-065,nikhil.g@student.edu.in\nImran Khan,CSE27-A-067,\n';
 const blankRow = () => ({ name: '', learner_ref: '', email: '' });
@@ -76,7 +77,7 @@ export default function AddStudents() {
   useEffect(() => {
     if (!cohortId || (!students.length && !existing.length)) { setPreview(null); return undefined; }
     const t = setTimeout(() => api.post('/institution/students/enrol/preview', { engagement_id: cohortId, delivery, students, existing_learner_ids: existing })
-      .then(r => setPreview(r.data)).catch(e => setError(e.response?.data?.error || 'Couldn’t check the rows.')), 350);
+      .then(r => setPreview(r.data)).catch(e => setError(errMsg(e, 'Couldn’t check the rows.'))), 350);
     return () => clearTimeout(t);
   }, [cohortId, delivery, students, existing]); // eslint-disable-line
 
@@ -100,7 +101,7 @@ export default function AddStudents() {
     try {
       const res = await api.post('/institution/students/enrol', { engagement_id: cohortId, delivery, students, existing_learner_ids: existing });
       setDone(res.data);
-    } catch (e) { setError(e.response?.data?.error || 'Couldn’t give access.'); }
+    } catch (e) { setError(errMsg(e, 'Couldn’t give access.')); }
     setBusy(false);
   };
   const reset = () => { setDone(null); setTyped([blankRow(), blankRow(), blankRow()]); setCsv(null); setPicked([]); setPreview(null); };

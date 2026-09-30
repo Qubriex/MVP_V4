@@ -7,6 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { Download } from 'lucide-react';
 import api from '../../utils/api';
 import { SampleBadge } from '../../components/learn/ui';
+import { errMsg } from '../../utils/errors';
 
 export default function Standing() {
   const [cohortId, setCohortId] = useState('');
@@ -24,7 +25,7 @@ export default function Standing() {
     if (cohortId) p.set('engagement_id', cohortId);
     api.get(`/institution/insights/standing?${p}`)
       .then(r => { setData(r.data); if (!cohortId && r.data.cohort) setCohortId(r.data.cohort.id); })
-      .catch(e => setError(e.response?.data?.error || 'Couldn’t load the comparison.'));
+      .catch(e => setError(errMsg(e, 'Couldn’t load the comparison.')));
   }, [cohortId, compare]); // eslint-disable-line
 
   const exportTop = () => {
