@@ -19,6 +19,7 @@ import { renewalTargets, renewalCooldown, completeRenewalIfDone } from '../../co
 import { verifySdJwt } from '../../core/qep/sdjwt.js';
 import * as statusList from '../../core/qep/statusList.js';
 import { ulid } from '../../core/db/ulid.js';
+import { learningCurve } from '../../core/readiness/learningCurve.js';
 
 const router = express.Router();
 router.use(authenticateToken, requireRole('learner'), requireActiveLearner);
@@ -68,6 +69,9 @@ router.post('/reviews/instances/:id/answer', async (req, res) => {
     res.status(err.status || 500).json({ error: err.status ? err.message : 'Could not save your answer. Try again.' });
   }
 });
+
+// Learning-curve signals (v4.3 §12.3): the learner's own view.
+router.get('/learning-curve', (req, res) => res.json(learningCurve(req.user.el_id)));
 
 // ─── Passport ────────────────────────────────────────────────────────────────
 function passportView(elId) {

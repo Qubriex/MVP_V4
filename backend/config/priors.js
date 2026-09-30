@@ -140,6 +140,7 @@ export const PRIORS = {
   },
   security: {
     passwordMinLength: 10, bcryptRounds: 10,
+    pinUnlockMinutes: 30,                        // learner PIN delayed unlock (§22, D-019)
     lockout: { maxFailures: 5, windowMinutes: 15 },
     session: { staffHours: 168, learnerHours: 168, employerHours: 24, adminHours: 24 },
     rateLimits: {

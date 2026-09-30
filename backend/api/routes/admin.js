@@ -147,4 +147,29 @@ router.post('/ontology-review/:id', (req, res) => {
   }
 });
 
+// ─── Employer KYB (v4.3 §14.1): manual approval after domain verification ─────
+router.get('/employers', (req, res) => {
+  const status = ['pending', 'verified', 'rejected', 'suspended'].includes(req.query.status) ? req.query.status : null;
+  const rows = dal.all(`SELECT e.*, (SELECT COUNT(*) FROM employer_users u WHERE u.employer_id = e.id) AS users,
+      (SELECT email FROM employer_users u WHERE u.employer_id = e.id AND u.role = 'owner' ORDER BY created_at LIMIT 1) AS owner_email
+    FROM employers e ${status ? 'WHERE e.kyb_status = ?' : ''} ORDER BY e.created_at DESC LIMIT 200`, ...(status ? [status] : []));
+  const counts = Object.fromEntries(dal.all('SELECT kyb_status, COUNT(*) n FROM employers GROUP BY kyb_status').map(r => [r.kyb_status, r.n]));
+  res.json({ employers: rows, counts });
+});
+
+router.post('/employers/:id/kyb', (req, res) => {
+  const e = dal.one('SELECT * FROM employers WHERE id = ?', req.params.id);
+  if (!e) return res.status(404).json({ error: 'Not found' });
+  const decision = req.body.decision;
+  const allowed = { pending: ['verified', 'rejected'], verified: ['suspended'], suspended: ['verified'], rejected: ['pending'] };
+  if (!(allowed[e.kyb_status] || []).includes(decision)) return res.status(400).json({ error: `Cannot move from ${e.kyb_status} to ${decision}.` });
+  if (decision === 'verified' && !e.domain_verified_at) return res.status(400).json({ error: 'The company domain email has not been verified yet.' });
+  dal.run('UPDATE employers SET kyb_status = ?, kyb_note = ?, kyb_decided_by = ?, kyb_decided_at = ?, updated_at = ? WHERE id = ?',
+    decision, req.body.note ? String(req.body.note).slice(0, 500) : null, req.user.id, dal.nowIso(), dal.nowIso(), e.id);
+  if (decision === 'suspended' || decision === 'rejected') {
+    dal.run(`UPDATE auth_sessions SET revoked_at = ? WHERE actor_type = 'employer' AND employer_id = ? AND revoked_at IS NULL`, dal.nowIso(), e.id);
+  }
+  res.json({ ok: true, kyb_status: decision });
+});
+
 export default router;

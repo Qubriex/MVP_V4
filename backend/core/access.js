@@ -16,6 +16,7 @@ import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 import { ulid } from './db/ulid.js';
+import params from '../config/params.js';
 
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no 0/O, 1/I
 const INVITE_DAYS = 7;
@@ -91,12 +92,21 @@ function createLearnerInvite(db, { learnerId, elId, staffId }) {
 //   invited         — invite sent, no PIN set yet
 //   never_signed_in — has a PIN (slip or set) but has not signed in
 //   active          — has signed in
+// A PIN lock lifts by itself after security.pinUnlockMinutes (delayed unlock,
+// v4.3 §22); staff can still reset the PIN at any time.
+function lockActive(lockedAt, now = Date.now()) {
+  if (!lockedAt) return false;
+  const s = String(lockedAt);
+  const t = Date.parse(s.includes('T') ? s : `${s.replace(' ', 'T')}Z`);
+  return !Number.isFinite(t) || now - t < params.get('security.pinUnlockMinutes') * 60000;
+}
+
 function accessState(row) {
   if (row.access_status === 'removed') return 'removed';
-  if (row.locked_at) return 'locked';
+  if (lockActive(row.locked_at)) return 'locked';
   if (!row.pin_hash) return 'invited';
   if (!row.last_login_at) return 'never_signed_in';
   return 'active';
 }
 
-export { MAX_PIN_ATTEMPTS, INVITE_DAYS, generateJoinCode, normaliseJoinCode, generatePin, hashPin, isValidPin, newToken, hashToken, inviteExpiry, logEvent, openResetRequest, resolvePinResetRequests, createLearnerInvite, accessState };
+export { MAX_PIN_ATTEMPTS, INVITE_DAYS, generateJoinCode, normaliseJoinCode, generatePin, hashPin, isValidPin, newToken, hashToken, inviteExpiry, logEvent, lockActive, openResetRequest, resolvePinResetRequests, createLearnerInvite, accessState };

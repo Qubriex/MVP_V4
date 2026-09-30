@@ -13,7 +13,7 @@ describe('migrations', () => {
 
   it('are recorded and idempotent', async () => {
     const ids = dal.all('SELECT id FROM schema_migrations ORDER BY id').map(r => r.id);
-    expect(ids).toEqual(['0001_baseline', '0002_foundation', '0003_employer_roles', '0004_capability_graph', '0005_evidence', '0006_retention', '0007_return']);
+    expect(ids).toEqual(['0001_baseline', '0002_foundation', '0003_employer_roles', '0004_capability_graph', '0005_evidence', '0006_retention', '0007_return', '0008_employer_kyb']);
     expect(await migrate()).toEqual([]);
   });
 
