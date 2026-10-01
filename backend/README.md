@@ -40,6 +40,7 @@ npm start                   # http://localhost:3001
 | `SIGNING_KEY_PEM`, `SIGNING_KEY_ID` | — | Production signing key (or secure-config/keys); `npm run secrets:generate` |
 | `SECURE_CONFIG_PARAMS_JSON` | — | secure-config `params.json` content, for hosts without the mounted directory |
 | `QBX_ALLOW_PRIORS`, `QBX_ECHO_EMAIL_CODES` | off | Staging only: run production on priors; show employer domain codes on screen |
+| `QBX_REQUIRE_SECRETS` | off | On Vercel, refuse to start without configured secrets instead of generating them into the database (D-030) |
 | `CRON_SECRET` | — | Authorises `/api/cron/outbox` (Vercel Cron) |
 | `JWT_SECRET` | — (required) | Signs session tokens |
 | `AI_ADAPTER` | `gemini` (`mock` in tests) | Model adapter behind `core/ai/gateway.js` |

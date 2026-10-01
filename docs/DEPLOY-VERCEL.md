@@ -5,103 +5,118 @@ One Vercel project serves the whole product:
 | Part | What runs | Where it lives |
 |---|---|---|
 | Website | The React app, built to static files | `frontend/` → `frontend/build` |
-| API | The Express backend as one Vercel Function | `api/index.js` → `backend/vercel/handler.js` |
-| Database | PostgreSQL (Neon, from the Vercel Marketplace) | `DATABASE_URL` |
-| Events | The outbox drains after each write request, plus a daily cron | `/api/cron/outbox` |
+| API (backend) | The Express backend as one Vercel Function | `api/index.js` → `backend/vercel/handler.js` |
+| Database | PostgreSQL (Neon, added from Vercel → Storage) | `DATABASE_URL`, set by Vercel |
 
 `vercel.json` at the repository root wires it together. It routes `/api/*` and
-`/.well-known/did.json` to the function and everything else to the React app.
-The build runs `backend/scripts/vercel-build.js`, which applies database
-migrations and then builds the frontend.
+`/.well-known/did.json` to the function, and everything else to the React app.
 
-## 1. Project settings
+## Quick start: no secrets to set
 
-In Vercel → your project (`mvp-v4`) → **Settings → Build and Deployment**:
+You only connect a database. The deployment generates everything else itself.
 
-- **Root Directory:** empty (the repository root, where `vercel.json` is).
-  If it is currently `frontend`, clear it.
-- **Framework Preset:** Other. `vercel.json` sets the install, build and
-  output commands, so leave those overrides off.
+### 1. Project settings (once)
+
+Vercel → **mvp-v4 → Settings → Build and Deployment**:
+- **Root Directory:** empty (the repository root).
+- **Framework Preset:** Other.
+- **Install/Build/Output overrides:** off (`vercel.json` sets them).
 - **Node.js Version:** 22.x.
 
-## 2. Database
+### 2. Connect a database (once, no copy-paste)
 
-Vercel → **Storage → Create Database → Neon (Postgres)**, then connect it to
-the project for Production and Preview. This adds `DATABASE_URL` (pooled) and
-`POSTGRES_URL` to the project's environment variables. The app uses
-`DATABASE_URL`, or `POSTGRES_URL` if the first is missing.
+Vercel → **mvp-v4 → Storage → Create Database → Neon (Postgres)**. Choose the
+free plan and a region close to your users (e.g. Washington, D.C. / iad1),
+then **Connect** it to the project for **Production** and **Preview**. Vercel
+adds the connection string itself; you never see or type it.
 
-Nothing else is needed: the first deploy creates all 70 tables, triggers and
-reference data (skills ontology, cultural examples). Later deploys apply only
-new migrations.
+### 3. Deploy the branch that has the backend
 
-## 3. Environment variables
+The backend lives on `claude/learner-side-updates-vthycg` until it is merged.
+- **To try it now:** in Vercel → Deployments, open the latest deployment of
+  that branch, then **⋯ → Redeploy**. It must be a build that started after
+  you connected the database.
+- **For the production domain:** merge the branch into `main` on GitHub.
+  Vercel deploys `main` to production automatically.
 
-Generate the secrets once, on your own machine:
+### 4. Check it
 
-```bash
-cd backend && npm install && npm run secrets:generate
+Open `https://<your-deployment>/api/health?deep=1`. You should see:
+
+```json
+"database": { "ok": true, "driver": "pg", "migrations": 3, … },
+"secrets": "database (JWT_SECRET, SUBJECT_SECRET, ITEM_SEED_SECRET, CRON_SECRET, signing key)",
+"params": "priors (QBX_ALLOW_PRIORS)"
 ```
 
-Then add these in Vercel → **Settings → Environment Variables**. Scope them to
-Production (and to Preview if you deploy previews), and mark every secret
-**Sensitive**:
+Then open the site and sign in. Deployments are behind Vercel Authentication,
+so you sign in to Vercel first. To make the site public, turn it off under
+Settings → Deployment Protection.
 
-| Variable | Value |
+What happens on the first request:
+- The function finds the database and creates all tables and reference data.
+- It generates its secrets and signing key once and keeps them in the
+  database's `system_secrets` table, so every instance uses the same ones.
+- Site URLs come from Vercel's own variables.
+- It runs on the default (prior) parameters, and shows employer
+  domain-verification codes on screen, because no email service is connected
+  yet.
+
+### Optional: the AI tutor
+
+Teaching sessions, check grading, captions and resume tailoring need a Google
+Gemini key. Without one, those screens say "The AI tutor is not set up on this
+deployment yet". Everything else (sign-in, cohorts, students, reviews, the
+passport, verification, employer and admin portals) works.
+
+To turn it on, go to Settings → Environment Variables → add `GEMINI_API_KEY`
+(from https://aistudio.google.com/app/apikey), marked Sensitive, then redeploy.
+
+### Optional: test accounts
+
+To click through with the test accounts in `docs/README.md`, seed the
+database once from your machine. Copy the connection string from Vercel →
+Storage → your database → `.env.local` tab.
+
+```bash
+cd backend && npm install
+DATABASE_URL='<connection string>' QBX_SEED_REMOTE=1 npm run seed:test
+```
+
+The passwords are public in this repository, so do this only on a test
+deployment.
+
+## Before a real launch
+
+The quick start keeps secrets in the database. Anyone who can read the
+database can then also read the signing key. Before real learners use the
+site:
+
+1. Run `cd backend && npm run secrets:generate`. Add every line it prints in
+   Settings → Environment Variables (Production, Sensitive), and keep a copy in
+   the private secure-config repository.
+2. Add `SECURE_CONFIG_PARAMS_JSON` (the contents of secure-config's
+   `params.json`).
+3. Add `QBX_REQUIRE_SECRETS=1`. The deployment then refuses to start if any
+   secret is missing, instead of generating its own.
+4. Connect a mail provider before turning off on-screen employer codes.
+
+Values in the environment always take precedence over the database. Change
+the signing key and `SUBJECT_SECRET` before issuing real passports: passports
+signed with the old key stay verifiable (old public keys remain published),
+but subject IDs change.
+
+## Troubleshooting
+
+| Symptom | Cause |
 |---|---|
-| `JWT_SECRET`, `SUBJECT_SECRET`, `ITEM_SEED_SECRET`, `CRON_SECRET` | From `secrets:generate` |
-| `SIGNING_KEY_ID`, `SIGNING_KEY_PEM` | From `secrets:generate`; paste the PEM line as printed, with its `\n` |
-| `GEMINI_API_KEY` | Your Google AI Studio key. Without it, teaching and grading answer 503 and the rest works |
-| `PUBLIC_URL`, `FRONTEND_URL` | The site's URL, e.g. `https://mvp-v4.vercel.app` |
-| `PUBLIC_HOST` | The same host without `https://`, e.g. `mvp-v4.vercel.app`. Passports are issued as `did:web:<host>`, so verifiers fetch the keys from this site |
-| `SECURE_CONFIG_PARAMS_JSON` | The contents of `params.json` from the private secure-config repository |
-| `QBX_ALLOW_PRIORS` | `1` **only** for a staging deployment without secure-config. It runs on the repository's prior defaults and says so in `/api/health?deep=1` |
-| `QBX_ECHO_EMAIL_CODES` | `1` **only** on staging. No mail provider is connected yet, so this shows the employer's domain code on screen |
-
-Keep a copy of every generated secret in the secure-config repository. They
-must never change:
-- `SIGNING_KEY_*` verifies every passport already issued.
-- `SUBJECT_SECRET` keeps credential subject IDs stable.
-- `JWT_SECRET` keeps people signed in.
-
-If one is missing, every API call answers 503 with `missing_env` naming it.
-
-## 4. Deploy
-
-Push to the connected branch, or run `vercel deploy --prod`. The build log
-should show `Migrations applied: 0001_schema, 0002_reference_data` on the first
-deploy (`Database schema is up to date.` afterwards), then
-`Compiled successfully.`
-
-## 5. Check the deployment
-
-1. `https://<your-site>/api/health?deep=1` should report `"status":"ok"`,
-   `"database":{"ok":true,"driver":"pg","migrations":2,…}`, the outbox counts,
-   where the parameters came from, and whether the Gemini key is set.
-2. `https://<your-site>/.well-known/did.json` and `/api/verify/jwks.json` should
-   list your `SIGNING_KEY_ID`.
-3. Open the site and sign in.
-
-### Test data on a staging database (optional)
-
-The test accounts in `docs/README.md` use public passwords. Seed them only into
-a staging or preview database, never a production one:
-
-```bash
-cd backend
-DATABASE_URL='<the staging database URL>' QBX_SEED_REMOTE=1 \
-SIGNING_KEY_ID='<same as Vercel>' SIGNING_KEY_PEM='<same as Vercel>' \
-npm run seed:test
-```
-
-With the same signing key, the seeded Mastery Log is signed exactly as a
-production one would be. The test learner's passport is issued by the deployed
-function on the next write request, for example any sign-in. Then open
-Capability Passport and check the Evidence ID at `/verify`.
+| Build log: `cd: backend: No such file or directory` | Root Directory is set to a subfolder (step 1) |
+| `/api/...` answers 503 with `missing_env` | No database connected (step 2), or `QBX_REQUIRE_SECRETS=1` with secrets missing |
+| `/api/health?deep=1` shows `"database":{"ok":false,…}` | The database is unreachable; check Storage → your database |
+| The site loads but every API call 404s | The deployment is from `main` before the backend was merged (step 3) |
 
 ## Local development
 
-Nothing changes for local work. Without `DATABASE_URL`, the backend runs
-PostgreSQL in-process (PGlite) with its data in `backend/data/pglite`, so no
-database server is needed. The tests do the same in memory. Point
-`DATABASE_URL` at any PostgreSQL to use a real server.
+Without `DATABASE_URL`, the backend runs PostgreSQL in-process (PGlite) with
+its data in `backend/data/pglite`, so no database server is needed. The tests
+do the same in memory.

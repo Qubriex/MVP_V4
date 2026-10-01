@@ -95,6 +95,10 @@ async function callWithRetry(r, req) {
   throw lastErr instanceof GatewayError ? lastErr : new GatewayError('upstream', 'The model call failed', lastErr);
 }
 
+/** True when a model call failed only because no model key is configured. */
+export const aiNotConfigured = (err) => /GEMINI_API_KEY is not set/.test(err?.cause?.message || err?.message || '');
+export const AI_NOT_CONFIGURED = 'The AI tutor is not set up on this deployment yet (GEMINI_API_KEY). Everything else works.';
+
 export async function generate(req) {
   if (!req?.task) throw new GatewayError('unknown_task', 'generate() needs a task');
   const r = route(req.task);

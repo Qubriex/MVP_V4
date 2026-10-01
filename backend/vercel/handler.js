@@ -3,14 +3,15 @@
 //     Route modules read parameters while they load, so a misconfigured
 //     deployment must be caught before they are imported; otherwise the
 //     function crashes with a bare 500 instead of saying what is missing.
-//   - Migrations run in the build (scripts/vercel-build.js), not per request;
-//     set QBX_MIGRATE_ON_START=1 to also run them on the first request.
+//   - vercel/autoConfig.js runs first: finds the database, applies migrations,
+//     and fills in any secret not set in the environment (D-030).
 //   - The outbox has no always-on worker here: after any request that can
 //     write, the response is sent first and the outbox is drained in the
 //     background with waitUntil(). The daily cron (/api/cron/outbox) is a
 //     backstop for anything a crashed instance left behind.
 import { waitUntil } from '@vercel/functions';
 import { signingKeyConfigured, SIGNING_ENV } from '../core/return/signing.js';
+import { autoConfigure } from './autoConfig.js';
 
 // What a production deployment cannot run without. Names only are reported,
 // never values. GEMINI_API_KEY is left out: without it AI features answer 503
@@ -31,6 +32,8 @@ let worker = null;
 let logger = console;
 
 async function init() {
+  const auto = await autoConfigure();
+  if (auto.generated.length) console.warn(`[qubirex] Using secrets kept in the database: ${auto.generated.join(', ')}. Set them in the environment for a real launch (docs/DEPLOY-VERCEL.md).`);
   if (process.env.NODE_ENV === 'production') {
     const missing = missingEnv();
     if (missing.length) throw Object.assign(new Error(`Missing environment variables: ${missing.join(', ')}`), { missing });
@@ -38,10 +41,6 @@ async function init() {
   const { default: params } = await import('../config/params.js');
   params.load();
   ({ logger } = await import('../core/logger.js'));
-  if (process.env.QBX_MIGRATE_ON_START === '1') {
-    const { migrate } = await import('../core/db/migrate.js');
-    await migrate();
-  }
   const { registerHandlers } = await import('../core/events/handlers.js');
   const { createWorker } = await import('../core/events/worker.js');
   const { createApp } = await import('../api/app.js');

@@ -254,3 +254,21 @@ Extends D-025. There is still no mail provider. On a staging deployment
 (`NODE_ENV=production`), `QBX_ECHO_EMAIL_CODES=1` shows the employer domain
 code on screen, so KYB can be verified end to end. It is off unless set, and
 is removed when a mail provider is connected.
+
+**D-030 — Zero-secret deployments: secrets kept in the database** · v4.3 §10, §22 · *approved 1 Oct 2026, for test deployments*
+The product owner asked to deploy the backend without managing secrets. On
+Vercel, before the app loads, `backend/vercel/autoConfig.js` does five things:
+- finds the database under any `*_DATABASE_URL` or `*_POSTGRES_URL` name;
+- applies migrations (advisory-locked);
+- takes the site URLs from Vercel's system variables;
+- generates JWT_SECRET, SUBJECT_SECRET, ITEM_SEED_SECRET, CRON_SECRET and the
+  RS256 signing key once, stored in `system_secrets` (append-only, read by no
+  route), so every instance shares them;
+- turns on the staging defaults (`QBX_ALLOW_PRIORS`, `QBX_ECHO_EMAIL_CODES`).
+
+The signing key is still created and loaded only by `core/return/signing.js`.
+This is an exception to "private halves never enter the database": whoever
+can read the database can read the key. Environment values always win.
+`QBX_REQUIRE_SECRETS=1` turns all of this off for a real launch.
+`/api/health?deep=1` reports where the secrets came from. Without
+GEMINI_API_KEY, AI routes answer 503 with a plain message rather than 500.
