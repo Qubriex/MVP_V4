@@ -35,7 +35,11 @@ async function init() {
   const auto = await autoConfigure();
   if (auto.generated.length) console.warn(`[qubirex] Using secrets kept in the database: ${auto.generated.join(', ')}. Set them in the environment for a real launch (docs/DEPLOY-VERCEL.md).`);
   if (process.env.NODE_ENV === 'production') {
-    const missing = missingEnv();
+    // Without a database nothing else can be provisioned, so that is the only
+    // thing to ask for; the secrets are generated once it exists (D-030).
+    const missing = !process.env.DATABASE_URL && process.env.QBX_REQUIRE_SECRETS !== '1'
+      ? ['a database — Vercel → Storage → connect a Neon Postgres database to this project, then redeploy']
+      : missingEnv();
     if (missing.length) throw Object.assign(new Error(`Missing environment variables: ${missing.join(', ')}`), { missing });
   }
   const { default: params } = await import('../config/params.js');
