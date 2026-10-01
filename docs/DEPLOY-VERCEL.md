@@ -74,17 +74,18 @@ To turn it on, go to Settings → Environment Variables → add `GEMINI_API_KEY`
 
 ### Optional: test accounts
 
-To click through with the test accounts in `docs/README.md`, seed the
-database once from your machine. Copy the connection string from Vercel →
-Storage → your database → `.env.local` tab.
+Add the environment variable `QBX_SEED_TEST_DATA` = `1` (Production and
+Preview), then redeploy. On its first start the deployment creates the test
+accounts from `docs/README.md` once.
+
+The passwords are public in this repository, so use this only on a test
+deployment, and remove the variable before real users arrive. Seeding from
+your own machine works too:
 
 ```bash
 cd backend && npm install
 DATABASE_URL='<connection string>' QBX_SEED_REMOTE=1 npm run seed:test
 ```
-
-The passwords are public in this repository, so do this only on a test
-deployment.
 
 ## Before a real launch
 
