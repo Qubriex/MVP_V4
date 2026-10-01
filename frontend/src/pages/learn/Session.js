@@ -33,6 +33,7 @@ import MermaidDiagram from '../../components/learn/MermaidDiagram';
 import { newTracker, recordPaste, provenanceFor } from '../../utils/provenance';
 import { enqueue, flush } from '../../utils/offlineQueue';
 import { useLowBandwidth, recorderOptions } from '../../utils/lowBandwidth';
+import { errMsg } from '../../utils/errors';
 
 const APPROACH_NAMES = { native_concept: 'Native concept', analogy: 'Analogy', worked_example: 'Worked example', decomposition: 'Building blocks', socratic: 'Socratic' };
 const LANG_LABEL = { telugu: 'తెలుగు', hindi: 'हिंदी' };
@@ -231,7 +232,7 @@ export default function Session() {
       setMessages(prev => [...prev, withId({ role: 'learner', content: res.data.transcript, type: 'response', input_mode: 'voice' })]);
       applyResponse(res.data);
     } catch (e) {
-      setError(e.response?.data?.error || 'Couldn’t hear that. Try again, or type your answer.');
+      setError(errMsg(e, 'Couldn’t hear that. Try again, or type your answer.'));
     }
     setTranscribing(false); setBusy(false);
   }, [sessionId, applyResponse, toCheckDraft]);

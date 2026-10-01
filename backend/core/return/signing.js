@@ -84,6 +84,31 @@ export async function signBytes(bytes) {
   return { kid, alg: 'RS256', signature: b64u(crypto.sign('RSA-SHA256', bytes, load().privateKey)) };
 }
 
+/**
+ * Deployments without a configured key (docs/decisions.md D-030): generate
+ * one RS256 key the first time, keep it in system_secrets, and load it into
+ * SIGNING_KEY_PEM / SIGNING_KEY_ID for this process. Every instance gets the
+ * same key; a configured key (environment or secure-config) always wins.
+ * @returns {Promise<'environment'|'secure-config'|'database'>}
+ */
+export async function ensureSigningKey() {
+  if (process.env.SIGNING_KEY_PEM && process.env.SIGNING_KEY_ID) return 'environment';
+  if (fs.existsSync(path.join(secureConfigDir(), 'keys', 'active'))) return 'secure-config';
+  let row = await dal.one("SELECT value FROM system_secrets WHERE name = 'signing_key'");
+  if (!row) {
+    const { privateKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
+    const kid = `qbx-${new Date().toISOString().slice(0, 10)}-${crypto.randomBytes(3).toString('hex')}`;
+    const value = JSON.stringify({ kid, pem: privateKey.export({ type: 'pkcs8', format: 'pem' }) });
+    await dal.run("INSERT INTO system_secrets (name, value, created_at) VALUES ('signing_key', ?, ?) ON CONFLICT (name) DO NOTHING", value, dal.nowIso());
+    row = await dal.one("SELECT value FROM system_secrets WHERE name = 'signing_key'");
+  }
+  const { kid, pem } = JSON.parse(row.value);
+  process.env.SIGNING_KEY_ID = kid;
+  process.env.SIGNING_KEY_PEM = pem;
+  cache = null;
+  return 'database';
+}
+
 /** The variables that carry the key, for configuration error messages. */
 export const SIGNING_ENV = 'SIGNING_KEY_PEM + SIGNING_KEY_ID';
 

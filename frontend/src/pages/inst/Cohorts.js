@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react';
 import api from '../../utils/api';
 import { Bar } from '../../components/learn/ui';
 import { useStaff } from '../../components/inst/InstitutionLayout';
+import { errMsg } from '../../utils/errors';
 
 export const COHORT_STATUS = { active: ['Active', 'ln-tag-success'], setup: ['Setting up', 'ln-tag-warning'], completed: ['Completed', 'ln-tag-neutral'], on_hold: ['On hold', 'ln-tag-warning'] };
 
@@ -12,7 +13,7 @@ export default function Cohorts() {
   const { role } = useStaff();
   const [rows, setRows] = useState(null);
   const [error, setError] = useState('');
-  useEffect(() => { api.get('/institution/engagements').then(r => setRows(r.data)).catch(e => setError(e.response?.data?.error || 'Couldn’t load cohorts.')); }, []);
+  useEffect(() => { api.get('/institution/engagements').then(r => setRows(r.data)).catch(e => setError(errMsg(e, 'Couldn’t load cohorts.'))); }, []);
 
   return (
     <>

@@ -9,6 +9,7 @@ import api from '../../utils/api';
 import { useStaff } from '../../components/inst/InstitutionLayout';
 import AccessResults from '../../components/inst/AccessResults';
 import LearningCurve from '../../components/learn/LearningCurve';
+import { errMsg } from '../../utils/errors';
 
 export const ACCESS = { active: 'Active', invited: 'Invited', never_signed_in: 'Never signed in', locked: 'Locked', removed: 'Removed' };
 const FILTERS = [['all', 'All'], ['active', 'Active'], ['invited', 'Invited'], ['never_signed_in', 'Never signed in'], ['locked', 'Locked'], ['removed', 'Removed'], ['reset_requested', 'PIN reset requested']];
@@ -77,7 +78,7 @@ export default function Students() {
     if (cohortId) p.set('engagement_id', cohortId);
     if (nodeId) p.set('node_id', nodeId);
     if (q.trim()) p.set('q', q.trim());
-    return api.get(`/institution/students?${p}`).then(r => setData(r.data)).catch(e => setError(e.response?.data?.error || 'Couldn’t load students.'));
+    return api.get(`/institution/students?${p}`).then(r => setData(r.data)).catch(e => setError(errMsg(e, 'Couldn’t load students.')));
   }, [status, cohortId, nodeId, q]);
 
   useEffect(() => { const t = setTimeout(load, 200); return () => clearTimeout(t); }, [load]);
@@ -94,7 +95,7 @@ export default function Students() {
       setSelected([]);
       await load();
       if (detail && ids.includes(detail.el_id)) openDetail(detail.el_id);
-    } catch (e) { setError(e.response?.data?.error || 'That didn’t work.'); }
+    } catch (e) { setError(errMsg(e, 'That didn’t work.')); }
   };
   const ask = (action, ids) => (['move', 'reset_pin', 'remove'].includes(action) ? setModal({ action, ids }) : run(action, ids));
 

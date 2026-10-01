@@ -7,6 +7,7 @@ import api from '../../utils/api';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Bar, initials } from '../../components/learn/ui';
+import { errMsg } from '../../utils/errors';
 import {
   useProfileDraft, Section, PersonalSection, EducationSection, ExperienceSection, ProjectsSection,
   SkillsSection, CertificationsSection, GoalsSection, VoiceSection
@@ -25,7 +26,7 @@ function ChangePin() {
   const save = async (e) => {
     e.preventDefault(); setMsg('');
     if (!/^\d{6}$/.test(pin)) { setMsg('Your PIN must be exactly 6 digits.'); return; }
-    try { await api.put('/learner/pin', { new_pin: pin }); setPin(''); setMsg('PIN changed. Use it next time you sign in.'); } catch (err) { setMsg(err.response?.data?.error || 'Couldn’t change your PIN.'); }
+    try { await api.put('/learner/pin', { new_pin: pin }); setPin(''); setMsg('PIN changed. Use it next time you sign in.'); } catch (err) { setMsg(errMsg(err, 'Couldn’t change your PIN.')); }
   };
   return (
     <form className="ln-row ln-wrap" style={{ gap: 10, alignItems: 'flex-end' }} onSubmit={save}>

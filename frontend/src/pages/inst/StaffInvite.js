@@ -6,6 +6,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 import { StaffAside } from './StaffLogin';
+import { errMsg } from '../../utils/errors';
 
 const ROLE = { admin: 'Admin', professor: 'Professor', viewer: 'Viewer' };
 
@@ -20,7 +21,7 @@ export default function StaffInvite() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    api.get(`/auth/staff/invite/${token}`).then(r => setInvite(r.data)).catch(e => setError(e.response?.data?.error || 'This invite link is invalid or has expired.'));
+    api.get(`/auth/staff/invite/${token}`).then(r => setInvite(r.data)).catch(e => setError(errMsg(e, 'This invite link is invalid or has expired.')));
   }, [token]);
 
   const accept = async (e) => {
@@ -34,7 +35,7 @@ export default function StaffInvite() {
       login(res.data.token, { ...res.data.staff, institution_name: res.data.institution?.name }, 'institution');
       navigate('/institution/welcome');
     } catch (err) {
-      setError(err.response?.data?.error || 'Couldn’t set up your account.');
+      setError(errMsg(err, 'Couldn’t set up your account.'));
     }
     setBusy(false);
   };

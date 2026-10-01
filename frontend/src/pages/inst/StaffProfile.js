@@ -6,6 +6,7 @@ import api from '../../utils/api';
 import { Section } from '../../components/learn/ProfileSections';
 import { useStaff, ROLE_LABEL } from '../../components/inst/InstitutionLayout';
 import { useStaffDraft, ProfileFields, TeachingFields, NotificationFields, StudentPreview } from '../../components/inst/StaffProfileForm';
+import { errMsg } from '../../utils/errors';
 
 function PasswordSection() {
   const [cur, setCur] = useState('');
@@ -14,7 +15,7 @@ function PasswordSection() {
   const change = async (e) => {
     e.preventDefault(); setMsg('');
     try { await api.put('/institution/me/password', { current_password: cur, new_password: next }); setMsg('Password changed.'); setCur(''); setNext(''); }
-    catch (err) { setMsg(err.response?.data?.error || 'Couldn’t change the password.'); }
+    catch (err) { setMsg(errMsg(err, 'Couldn’t change the password.')); }
   };
   return (
     <Section id="password" title="Password">

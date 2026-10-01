@@ -99,6 +99,7 @@ export function createApp({ drainOutbox = null } = {}) {
         body.database = { ok: false, driver: dal.driverKind(), error: err.message };
       }
       body.params = params.source();
+      body.secrets = process.env.QBX_SECRETS_SOURCE || 'environment';
       body.ai = { adapter: process.env.AI_ADAPTER || (process.env.NODE_ENV === 'test' ? 'mock' : 'gemini'), key_set: !!process.env.GEMINI_API_KEY };
     }
     res.status(body.status === 'ok' ? 200 : 503).json(body);

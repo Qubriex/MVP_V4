@@ -37,6 +37,7 @@ import { initDb, getDb } from '../db/init.js';
 import { close as closeDb } from '../core/db/dal.js';
 import { mapPathway } from '../core/graph/coverage.js';
 import { produceEngagementMasteryLogs } from '../core/masteryLog.js';
+import { ensureSigningKey } from '../core/return/signing.js';
 import { eachSeq } from '../core/util/seq.js';
 
 if (process.env.NODE_ENV === 'production') {
@@ -83,6 +84,9 @@ const PROGRAMME = [
 const CURRENT_NODE = 'DOM events';
 
 await initDb();
+// Against a deployed database, sign with the deployment's own key (D-030),
+// so the seeded Mastery Log verifies like any other.
+if (remoteUrl) await ensureSigningKey();
 const db = getDb();
 
 // The facts behind a mastered node: one completed session with `attempts`

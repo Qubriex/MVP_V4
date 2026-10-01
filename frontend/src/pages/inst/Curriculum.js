@@ -9,6 +9,7 @@ import { Download } from 'lucide-react';
 import api from '../../utils/api';
 import { SampleBadge } from '../../components/learn/ui';
 import { useStaff } from '../../components/inst/InstitutionLayout';
+import { errMsg } from '../../utils/errors';
 
 export const COVER = { covered: ['✓ ', 'ln-tag-success'], partly: ['◐ ', 'ln-tag-info'], missing: ['+ ', 'ln-tag-accent'] };
 
@@ -22,7 +23,7 @@ export default function Curriculum() {
   useEffect(() => {
     api.get(`/institution/insights/curriculum${cohortId ? `?engagement_id=${cohortId}` : ''}`)
       .then(r => { setData(r.data); if (!cohortId && r.data.cohort) setCohortId(r.data.cohort.id); })
-      .catch(e => setError(e.response?.data?.error || 'Couldn’t load curriculum insight.'));
+      .catch(e => setError(errMsg(e, 'Couldn’t load curriculum insight.')));
   }, [cohortId]); // eslint-disable-line
 
   const exportCsv = () => {
