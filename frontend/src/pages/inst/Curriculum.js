@@ -4,8 +4,8 @@
 // cohort is doing on it, what to do, and how many students asked for it.
 // JD shares are sample data; coverage and mastery are live.
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Download } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Download, Upload } from 'lucide-react';
 import api from '../../utils/api';
 import { SampleBadge } from '../../components/learn/ui';
 import { useStaff } from '../../components/inst/InstitutionLayout';
@@ -47,7 +47,10 @@ export default function Curriculum() {
           <h1 className="ln-title">Curriculum vs market</h1>
           <span className="ln-sub">How well what you teach matches what employers ask for in current job descriptions.</span>
         </div>
-        <div className="ln-row ln-wrap" style={{ gap: 10 }}><SampleBadge /><span className="ln-small ln-muted">JD figures: sample feed</span></div>
+        <div className="ln-row ln-wrap" style={{ gap: 10 }}>
+          <SampleBadge /><span className="ln-small ln-muted">JD figures: sample feed</span>
+          {role === 'admin' && <Link to="/institution/cohorts/new" className="ln-btn ln-btn-primary"><Upload size={16} aria-hidden="true" />Upload curriculum</Link>}
+        </div>
       </header>
 
       <div className="ln-filterbar">

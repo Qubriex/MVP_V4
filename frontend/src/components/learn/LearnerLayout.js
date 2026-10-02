@@ -92,7 +92,7 @@ export default function LearnerLayout() {
       </nav>
 
       <main className="ln-main" id="main">
-        <Outlet />
+        <div key={location.pathname} className="ln-page-fade"><Outlet /></div>
       </main>
     </div>
   );

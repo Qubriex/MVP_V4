@@ -338,3 +338,7 @@
   .ln-login-aside { width: auto; padding: 28px 16px; gap: 16px; }
   .ln-login-aside .ln-hide-phone { display: none; }
 }
+
+/* Page content fade inside a portal shell (the shell itself stays mounted). */
+.ln-page-fade { display: flex; flex-direction: column; gap: inherit; flex: 1; min-width: 0; animation: page-fade-in 240ms ease backwards; }
+@media (prefers-reduced-motion: reduce) { .ln-page-fade { animation: none; } }

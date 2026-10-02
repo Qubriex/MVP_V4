@@ -24,6 +24,8 @@ import AddStudents from './pages/inst/AddStudents';
 import Cohorts from './pages/inst/Cohorts';
 import NewCohort from './pages/inst/NewCohort';
 import Cohort from './pages/inst/Cohort';
+import CohortLive from './pages/inst/CohortLive';
+import EvidenceReport from './pages/inst/EvidenceReport';
 import Curriculum from './pages/inst/Curriculum';
 import Standing from './pages/inst/Standing';
 import FacultyReview from './pages/inst/Review';
@@ -129,6 +131,8 @@ export default function App() {
                       <Route path="cohorts" element={<Cohorts />} />
                       <Route path="cohorts/new" element={<NewCohort />} />
                       <Route path="cohorts/:id" element={<Cohort />} />
+                      <Route path="cohorts/:id/live" element={<CohortLive />} />
+                      <Route path="cohorts/:id/report" element={<EvidenceReport />} />
                       <Route path="curriculum" element={<Curriculum />} />
                       <Route path="benchmark" element={<Standing />} />
                       <Route path="review" element={<FacultyReview />} />

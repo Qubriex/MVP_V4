@@ -2,9 +2,12 @@
 // One place for student access: filter by cohort and access state, select
 // students, and resend invites, reset PINs, move them between cohorts or
 // remove access. Clicking a row opens its login details and access history.
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Plus, Search, KeyRound } from 'lucide-react';
+import { Plus, Search, KeyRound, Radio, Download, X } from 'lucide-react';
+import Crumbs from '../../components/inst/Crumbs';
+import DownloadDialog from '../../components/inst/DownloadDialog';
+import { peekCached } from '../../utils/cachedGet';
 import api from '../../utils/api';
 import { useStaff } from '../../components/inst/InstitutionLayout';
 import AccessResults from '../../components/inst/AccessResults';
@@ -61,8 +64,11 @@ export default function Students() {
   const status = params.get('status') || 'all';
   const cohortId = params.get('engagement_id') || '';
   const nodeId = params.get('node_id') || '';
+  const nodeLabel = params.get('node_label') || '';
   const [q, setQ] = useState('');
-  const [data, setData] = useState(null);
+  const [query, setQuery] = useState('');
+  const [all, setAll] = useState(null);
+  const [download, setDownload] = useState(null);
   const [cohorts, setCohorts] = useState([]);
   const [selected, setSelected] = useState([]);
   const [detail, setDetail] = useState(null);
@@ -73,15 +79,23 @@ export default function Students() {
 
   const setParam = (k, v) => { const p = new URLSearchParams(params); if (v) p.set(k, v); else p.delete(k); setParams(p, { replace: true }); };
 
+  // Every status is fetched once and the tabs filter in the browser, so
+  // switching All / Active / Invited… is instant. Search waits for a pause.
   const load = useCallback(() => {
-    const p = new URLSearchParams({ status });
+    const p = new URLSearchParams({ status: 'all' });
     if (cohortId) p.set('engagement_id', cohortId);
     if (nodeId) p.set('node_id', nodeId);
-    if (q.trim()) p.set('q', q.trim());
-    return api.get(`/institution/students?${p}`).then(r => setData(r.data)).catch(e => setError(errMsg(e, 'Couldn’t load students.')));
-  }, [status, cohortId, nodeId, q]);
+    if (query) p.set('q', query);
+    return api.get(`/institution/students?${p}`).then(r => setAll(r.data)).catch(e => setError(errMsg(e, 'Couldn’t load students.')));
+  }, [cohortId, nodeId, query]);
 
-  useEffect(() => { const t = setTimeout(load, 200); return () => clearTimeout(t); }, [load]);
+  useEffect(() => { const t = setTimeout(() => setQuery(q.trim()), 250); return () => clearTimeout(t); }, [q]);
+  useEffect(() => { load(); }, [load]);
+  const data = useMemo(() => {
+    if (!all) return null;
+    const rows = status === 'all' ? all.rows : status === 'reset_requested' ? all.rows.filter(r => r.reset_requested) : all.rows.filter(r => r.access === status);
+    return { counts: all.counts, rows };
+  }, [all, status]);
   useEffect(() => { api.get('/institution/engagements').then(r => setCohorts(r.data)).catch(() => {}); }, []);
   useEffect(() => { setSelected([]); }, [status, cohortId, nodeId]);
 
@@ -103,14 +117,28 @@ export default function Students() {
   const allOn = rows.length > 0 && rows.every(r => selected.includes(r.el_id));
   const toggle = (id) => setSelected(s => (s.includes(id) ? s.filter(x => x !== id) : [...s, id]));
 
+  const cohort = cohorts.find(c => c.id === cohortId);
+  const cohortDetail = cohortId ? peekCached(`/institution/engagements/${cohortId}`) : null;
+  const crumbs = cohortId ? [
+    { label: 'Cohorts', to: '/institution/cohorts' },
+    { label: cohort?.title || 'Cohort', to: `/institution/cohorts/${cohortId}?tab=${nodeId ? 'Overview' : 'Students'}` },
+    ...(nodeId ? [{ label: nodeLabel || 'One skill node' }] : []),
+    { label: 'Students & access' }
+  ] : null;
+
   return (
     <>
+      {crumbs && <Crumbs items={crumbs} />}
       <header className="ln-pagehead">
         <div className="ln-col" style={{ gap: 4 }}>
           <h1 className="ln-title">Students &amp; access</h1>
-          <span className="ln-sub">One place to add students, give them access to a cohort, reset PINs and remove access.</span>
+          <span className="ln-sub">{nodeId ? `Students who are on, or have worked on, “${nodeLabel || 'this node'}”.` : 'One place to add students, give them access to a cohort, reset PINs and remove access.'}</span>
         </div>
-        {canManage && <Link to={`/institution/students/add${cohortId ? `?cohort=${cohortId}` : ''}`} className="ln-btn ln-btn-primary"><Plus size={16} aria-hidden="true" />Add students</Link>}
+        <div className="ln-row ln-wrap" style={{ gap: 8 }}>
+          {cohortId && <Link to={`/institution/cohorts/${cohortId}/live`} className="ln-btn"><Radio size={16} aria-hidden="true" />Live</Link>}
+          {cohortId && cohort && <button type="button" className="ln-btn" onClick={() => setDownload(selected)}><Download size={16} aria-hidden="true" />Download data</button>}
+          {canManage && <Link to={`/institution/students/add${cohortId ? `?cohort=${cohortId}` : ''}`} className="ln-btn ln-btn-primary"><Plus size={16} aria-hidden="true" />Add students</Link>}
+        </div>
       </header>
 
       <div className="ln-filterbar">
@@ -118,7 +146,7 @@ export default function Students() {
           <select value={cohortId} onChange={e => setParam('engagement_id', e.target.value)}><option value="">All my cohorts</option>{cohorts.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}</select>
         </label>
         <label className="ln-search"><Search size={18} aria-hidden="true" /><input aria-label="Search students" placeholder="Name, ref or email" value={q} onChange={e => setQ(e.target.value)} /></label>
-        {nodeId && <button type="button" className="ln-btn ln-btn-sm" onClick={() => setParam('node_id', '')}>Showing students on one node ×</button>}
+        {nodeId && <button type="button" className="ln-btn ln-btn-sm" onClick={() => { const p = new URLSearchParams(params); p.delete('node_id'); p.delete('node_label'); setParams(p, { replace: true }); }}>Showing students on {nodeLabel ? `“${nodeLabel}”` : 'one node'} ×</button>}
       </div>
       <div className="ln-pilltabs" role="tablist" aria-label="Access status">
         {FILTERS.map(([id, label]) => (
@@ -181,7 +209,14 @@ export default function Students() {
         <aside aria-label="Student access detail" className="ln-card" style={{ gap: 16, position: 'sticky', top: 24 }}>
           {!detail ? <span className="ln-small ln-muted">Select a student to see their login details and access history.</span> : (
             <>
-              <div className="ln-col" style={{ gap: 2 }}><span style={{ fontSize: 18, fontWeight: 600 }}>{detail.name}</span><span className="ln-small ln-muted">{detail.learner_ref} · {detail.cohort_title}</span></div>
+              <div className="ln-between" style={{ alignItems: 'flex-start' }}>
+                <div className="ln-col" style={{ gap: 2 }}><span style={{ fontSize: 18, fontWeight: 600 }}>{detail.name}</span><span className="ln-small ln-muted">{detail.learner_ref} · {detail.cohort_title}</span></div>
+                <button type="button" className="ln-btn ln-btn-sm" onClick={() => setDetail(null)} aria-label="Close student details"><X size={14} aria-hidden="true" />Close</button>
+              </div>
+              <div className="ln-row ln-wrap" style={{ gap: 8 }}>
+                <Link className="ln-btn ln-btn-sm" to={`/institution/cohorts/${detail.engagement_id}?tab=Pathway&student=${detail.el_id}`}>Pathway</Link>
+                <button type="button" className="ln-btn ln-btn-sm" onClick={() => { const c = cohorts.find(x => x.id === detail.engagement_id); if (c) setDownload({ cohort: c, ids: [detail.el_id] }); }}><Download size={14} aria-hidden="true" />Download data</button>
+              </div>
               <div className="ln-tile" style={{ gap: 8, padding: 14 }}>
                 <span className="ln-kicker">Login details</span>
                 <div className="ln-between ln-small"><span className="ln-muted">Join code</span><b className="in-code">{detail.join_code}</b></div>
@@ -226,6 +261,13 @@ export default function Students() {
         </div>
       )}
 
+      {download && (() => {
+        const dCohort = Array.isArray(download) ? cohort : download.cohort;
+        const ids = Array.isArray(download) ? download : download.ids;
+        const roster = (Array.isArray(download) ? (all?.rows || []) : (all?.rows || []).filter(r => r.engagement_id === dCohort.id))
+          .filter(r => r.access !== 'removed' && r.engagement_id === dCohort.id);
+        return <DownloadDialog cohort={{ ...dCohort, join_code: dCohort.join_code || cohortDetail?.join_code || 'cohort' }} students={roster} initial={ids.filter(id => roster.some(r => r.el_id === id))} onClose={() => setDownload(null)} />;
+      })()}
       {modal && (
         <ActionModal action={modal.action} count={modal.ids.length}
           cohorts={cohorts.filter(c => !(modal.action === 'move' && modal.ids.length === 1 && detail && c.id === detail.engagement_id))}

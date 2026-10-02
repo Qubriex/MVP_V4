@@ -5,28 +5,25 @@
 // closest to job-ready — only those who opted in to share their record.
 import React, { useEffect, useState } from 'react';
 import { Download } from 'lucide-react';
-import api from '../../utils/api';
+import { useCachedGet } from '../../utils/cachedGet';
 import { SampleBadge } from '../../components/learn/ui';
 import { errMsg } from '../../utils/errors';
 
 export default function Standing() {
   const [cohortId, setCohortId] = useState('');
   const [compare, setCompare] = useState('regional');
-  const [data, setData] = useState(null);
-  const [error, setError] = useState('');
-  const [bench, setBench] = useState(null);
-  useEffect(() => {
-    if (!cohortId) return;
-    api.get(`/institution/insights/benchmarks?engagement_id=${cohortId}`).then(r => setBench(r.data)).catch(() => setBench(null));
-  }, [cohortId]);
-
-  useEffect(() => {
-    const p = new URLSearchParams({ compare });
-    if (cohortId) p.set('engagement_id', cohortId);
-    api.get(`/institution/insights/standing?${p}`)
-      .then(r => { setData(r.data); if (!cohortId && r.data.cohort) setCohortId(r.data.cohort.id); })
-      .catch(e => setError(errMsg(e, 'Couldn’t load the comparison.')));
-  }, [cohortId, compare]); // eslint-disable-line
+  // Cached per cohort and comparison: returning to this page, or switching
+  // back to a comparison already seen, shows at once and refreshes quietly.
+  const qs = new URLSearchParams({ compare });
+  if (cohortId) qs.set('engagement_id', cohortId);
+  const { data: fresh, error: loadError } = useCachedGet(`/institution/insights/standing?${qs}`);
+  const [shown, setShown] = useState(null);
+  useEffect(() => { if (fresh) setShown(fresh); }, [fresh]);
+  const data = fresh || shown; // keep the last result on screen while the next loads
+  // The first load picks the cohort on the server; it is shown without asking again.
+  const activeCohort = cohortId || data?.cohort?.id || '';
+  const error = loadError && !data ? errMsg(loadError, 'Couldn’t load the comparison.') : '';
+  const bench = useCachedGet(activeCohort ? `/institution/insights/benchmarks?engagement_id=${activeCohort}` : null).data || null;
 
   const exportTop = () => {
     const csv = ['name,learner_ref,best_role,match_pct', ...data.top.map(t => [t.name, t.learner_ref, t.role, t.match].join(','))].join('\n');
@@ -50,7 +47,7 @@ export default function Standing() {
 
       <div className="ln-filterbar">
         <label className="ln-selectwrap"><span>Cohort</span>
-          <select value={cohortId} onChange={e => { setCohortId(e.target.value); if (e.target.value === compare) setCompare('regional'); }}>{data.cohorts.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}</select></label>
+          <select value={activeCohort} onChange={e => { setCohortId(e.target.value); if (e.target.value === compare) setCompare('regional'); }}>{data.cohorts.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}</select></label>
         <span className="ln-small ln-muted">compared with</span>
         <div className="ln-pilltabs" role="tablist">
           {data.compare_options.map(o => <button key={o.id} type="button" role="tab" className="ln-pilltab" aria-selected={compare === o.id} onClick={() => setCompare(o.id)}>{o.label}{o.sample ? '' : ' (live)'}</button>)}

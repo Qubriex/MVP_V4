@@ -272,3 +272,34 @@ can read the database can read the key. Environment values always win.
 `QBX_REQUIRE_SECRETS=1` turns all of this off for a real launch.
 `/api/health?deep=1` reports where the secrets came from. Without
 GEMINI_API_KEY, AI routes answer 503 with a plain message rather than 500.
+
+**D-031 — Institution activity, exports and the evidence report** · v4.3 §7.8, §8.10, §16 · *2 Oct 2026*
+
+Institutions can see who is learning live, download activity, and print a
+per-student evidence report to answer a parent ("why wasn't my child
+placed?"). The rules:
+
+- **Structural facts only.** Live status, activity CSVs, skill progress and
+  the evidence report read session timestamps, active minutes and loop
+  counts, mastery dates and levels, reviews, practical/Day-One pass or fail,
+  and consents. They never read session text, doubts, or how answers were
+  marked (per-point scores, rubrics, fused scores).
+- **Every export is logged.** Each download and evidence report writes a
+  `data_exported` row to every included student's access history, with who
+  and when (`api/routes/institutionActivity.js`).
+- **Parent sharing needs consent.** The report shows, per student, whether it
+  may be shared with a parent: a minor needs a guardian consent on file; an
+  adult (or age unknown) needs the student's own level-2 consent.
+- **Live lights** (`core/institutionActivity.js` `LIVE`): green = activity in
+  the last 5 minutes; yellow = idle, or 1–2 loops on the current skill; red =
+  no activity for 3+ days, never started, or 3+ loops on the current skill.
+  Always shown with a text label.
+- **A student's pathway is their own.** A skill is 100% only when that student
+  mastered it, otherwise 0% (the current skill is marked "learning now"
+  without credit). The cohort aggregate is a separate, labelled view.
+- Days are counted in India time.
+
+Also fixed: since the async conversion, "Where we stand" treated every skill
+as verified (an un-awaited promise is truthy), and the emerging-topics check
+counted every step as taught. Both now await; a scan for async callbacks
+passed to `filter/some/every/find` finds none.

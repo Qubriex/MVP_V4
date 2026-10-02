@@ -1,10 +1,10 @@
 // src/pages/inst/Home.js — /institution/home
 // Replaces the old dashboard (whose "Manage Learners" opened Upload Target
 // and whose "View Mastery Logs" did nothing). Every card links somewhere real.
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AlertTriangle, RotateCcw, KeyRound, Plus } from 'lucide-react';
-import api from '../../utils/api';
+import { useCachedGet } from '../../utils/cachedGet';
 import { Bar, SampleBadge } from '../../components/learn/ui';
 import { useStaff } from '../../components/inst/InstitutionLayout';
 import { errMsg } from '../../utils/errors';
@@ -19,12 +19,14 @@ function greeting() {
 
 export default function InstHome() {
   const { role } = useStaff();
-  const [data, setData] = useState(null);
-  const [error, setError] = useState('');
-  useEffect(() => { api.get('/institution/overview').then(r => setData(r.data)).catch(e => setError(errMsg(e, 'Couldn’t load your overview. Is the backend running?'))); }, []);
+  // Cached: a revisit renders at once and refreshes quietly (no flicker).
+  const { data, error: loadError } = useCachedGet('/institution/overview');
+  const error = loadError && !data ? errMsg(loadError, 'Couldn’t load your overview. Is the backend running?') : '';
+  // The greeting is fixed when the page opens, so it never changes under the reader.
+  const [hello] = useState(greeting);
 
   if (error) return <div className="ln-error">{error}</div>;
-  if (!data) return <p className="ln-muted">Loading…</p>;
+  if (!data) return <p className="ln-muted" style={{ minHeight: '60vh' }}>Loading…</p>;
   const { me, kpis, cohorts, alerts, pulse, standing } = data;
   // "Dr. Rao" when there's a title, otherwise the first name.
   const parts = (me?.name || '').trim().split(/\s+/).filter(Boolean);
@@ -35,7 +37,7 @@ export default function InstHome() {
     <>
       <header className="ln-pagehead" style={{ alignItems: 'center' }}>
         <div className="ln-col" style={{ gap: 4 }}>
-          <h1 className="ln-title">{greeting()}{who ? `, ${who}` : ''}</h1>
+          <h1 className="ln-title">{hello}{who ? `, ${who}` : ''}</h1>
           <span className="ln-sub">{cohorts.length} cohort{cohorts.length === 1 ? '' : 's'} · {kpis.students} students{me?.department ? ` · ${me.department}` : ''}</span>
         </div>
         {canManage && (

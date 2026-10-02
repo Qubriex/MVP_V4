@@ -9,6 +9,7 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Home, LayoutGrid, Users, TrendingUp, BarChart3, ShieldCheck, UserRound, LogOut, Menu, X, ClipboardCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
+import { fetchCached } from '../../utils/cachedGet';
 import PhoenixMark from '../PhoenixMark';
 import ThemeToggle from '../ThemeToggle';
 import { initials } from '../learn/ui';
@@ -38,7 +39,14 @@ export default function InstitutionLayout() {
 
   const refresh = useCallback(() => api.get('/institution/me').then(r => setMe(r.data)).catch(() => setMe(m => m || { role: 'admin', name: 'Staff' })), []);
   useEffect(() => { refresh(); }, [refresh]);
-  useEffect(() => { api.get('/institution/overview').then(r => setAlerts(r.data.alerts?.length || 0)).catch(() => {}); }, [location.pathname]);
+  // Alerts badge: from the shared overview cache (the Home page reads the same
+  // data), refreshed every minute rather than on every navigation.
+  useEffect(() => {
+    const get = () => fetchCached('/institution/overview').then(d => setAlerts(d.alerts?.length || 0)).catch(() => {});
+    get();
+    const t = setInterval(() => { if (document.visibilityState === 'visible') get(); }, 60000);
+    return () => clearInterval(t);
+  }, []);
   useEffect(() => { setOpen(false); }, [location.pathname]);
 
   const role = me?.role || 'admin';
@@ -106,7 +114,7 @@ export default function InstitutionLayout() {
           </div>
         </nav>
 
-        <main className="ln-main" id="main"><Outlet /></main>
+        <main className="ln-main" id="main"><div key={location.pathname} className="ln-page-fade"><Outlet /></div></main>
       </div>
     </StaffContext.Provider>
   );
