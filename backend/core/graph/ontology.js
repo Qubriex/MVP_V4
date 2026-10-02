@@ -14,7 +14,25 @@ export async function listSkills() {
     FROM skills s ORDER BY s.domain, COALESCE(s.parent_skill_id, s.skill_id), s.parent_skill_id IS NOT NULL, s.name`);
 }
 
-export const children = async (id) => (await dal.all('SELECT skill_id FROM skills WHERE parent_skill_id = ?', id)).map(r => r.skill_id);
+// The skill tree is read on every coverage and match calculation, often
+// hundreds of times per page, so it is loaded once and kept for a short while
+// (and dropped when a skill is added or the database connection changes).
+let tree = null; // { conn, at, kids: Map(parent → [child]) }
+const TREE_TTL_MS = 60000;
+export const invalidateSkillTree = () => { tree = null; };
+async function skillTree() {
+  const conn = dal.db();
+  if (tree && tree.conn === conn && Date.now() - tree.at < TREE_TTL_MS) return tree.kids;
+  const kids = new Map();
+  (await dal.all('SELECT skill_id, parent_skill_id FROM skills WHERE parent_skill_id IS NOT NULL ORDER BY skill_id')).forEach(r => {
+    if (!kids.has(r.parent_skill_id)) kids.set(r.parent_skill_id, []);
+    kids.get(r.parent_skill_id).push(r.skill_id);
+  });
+  tree = { conn, at: Date.now(), kids };
+  return kids;
+}
+
+export const children = async (id) => [...((await skillTree()).get(id) || [])];
 
 export async function descendants(id) {
   const out = [];
@@ -47,6 +65,7 @@ export async function createSkill({ id, name, domain = 'general', parent = null,
   if (parent && !await getSkill(parent)) throw new Error(`Unknown parent ${parent}`);
   await dal.run(`INSERT INTO skills (skill_id, name, domain, description, typical_hours, parent_skill_id, version, created_at)
     VALUES (?, ?, ?, ?, ?, ?, 1, ?)`, skillId, name, domain, description, hours, parent, dal.nowIso());
+  invalidateSkillTree();
   await addAlias(name, skillId, 'name');
   return skillId;
 }

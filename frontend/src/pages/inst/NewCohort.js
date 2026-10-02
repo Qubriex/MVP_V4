@@ -6,8 +6,10 @@
 // Students are added afterwards from the cohort's join-code screen.
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Upload } from 'lucide-react';
 import api from '../../utils/api';
 import { errMsg } from '../../utils/errors';
+import Crumbs from '../../components/inst/Crumbs';
 
 const STEPS = ['Capability target', 'Confirm', 'Language', 'Build pathway', 'Cohort & professors'];
 
@@ -46,6 +48,22 @@ export default function NewCohort() {
     } catch (err) { fail(err, 'Extraction failed.'); }
     setBusy('');
   };
+  const [uploaded, setUploaded] = useState('');
+  const uploadFile = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setError(''); setUploaded(''); setBusy('upload');
+    try {
+      const form = new FormData();
+      form.append('file', file, file.name);
+      const r = await api.post('/institution/curriculum/upload', form, { timeout: 90000 });
+      setRaw(prev => (prev.trim() ? `${prev.trim()}\n\n${r.data.text}` : r.data.text));
+      if (!title.trim()) setTitle(file.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' '));
+      setUploaded(`Read “${file.name}”${r.data.truncated ? ' (long file: the first part was used)' : ''}. Check the text below, then extract.`);
+    } catch (err) { fail(err, 'Couldn’t read that file.'); }
+    setBusy('');
+  };
   const useExisting = (t) => {
     setCt({ ...t, existing: true });
     setCohortTitle(t.title);
@@ -76,7 +94,7 @@ export default function NewCohort() {
   const ex = ct?.extraction;
   return (
     <>
-      <Link to="/institution/cohorts" className="ln-link" style={{ alignSelf: 'flex-start' }}>← Cohorts</Link>
+      <Crumbs items={[{ label: 'Cohorts', to: '/institution/cohorts' }, { label: 'New cohort' }]} />
       <header className="ln-col" style={{ gap: 12 }}>
         <h1 className="ln-title">New cohort</h1>
         <ol className="in-steps" aria-label="Setup steps">
@@ -94,6 +112,17 @@ export default function NewCohort() {
           {mode === 'new' ? (
             <form className="ln-card" onSubmit={submitTarget}>
               <div className="ln-field"><label className="ln-label" htmlFor="ct-title">Programme title</label><input id="ct-title" className="ln-input" placeholder="e.g. Full-Stack Developer · CSE 2027 · Section A" value={title} onChange={e => setTitle(e.target.value)} required /></div>
+              <div className="ln-field">
+                <span className="ln-label">Upload the curriculum</span>
+                <div className="ln-row ln-wrap" style={{ gap: 10 }}>
+                  <label className="ln-btn" style={{ cursor: busy === 'upload' ? 'wait' : 'pointer' }}>
+                    <Upload size={16} aria-hidden="true" />{busy === 'upload' ? 'Reading the file…' : 'Choose a file'}
+                    <input type="file" accept=".pdf,.docx,.txt,.md,.csv" className="ln-sr" disabled={busy === 'upload'} onChange={uploadFile} />
+                  </label>
+                  <span className="ln-xs ln-muted">PDF, Word (.docx), text, Markdown or CSV, up to 4 MB. Its text appears below for you to check and edit.</span>
+                </div>
+                {uploaded && <span className="ln-small" role="status">{uploaded}</span>}
+              </div>
               <div className="ln-field"><label className="ln-label" htmlFor="ct-raw">Curriculum, JD, skills list or plain description — any format</label>
                 <textarea id="ct-raw" className="ln-textarea" rows={12} value={raw} onChange={e => setRaw(e.target.value)} required
                   placeholder={'We need our final-year students to build responsive web apps: HTML/CSS, JavaScript, React, REST APIs with Node.js and SQL. 16 weeks, 64 students.'} />

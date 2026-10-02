@@ -75,7 +75,9 @@ router.get('/students', async (req, res) => {
     let extra = '';
     const params = [];
     if (engagement_id) { extra += ' AND el.engagement_id = ?'; params.push(engagement_id); }
-    if (node_id) { extra += ' AND el.current_node_id = ?'; params.push(node_id); }
+    // Students on a node: those there now, or who have worked on it (the
+    // "See students" link from a cohort's hardest nodes).
+    if (node_id) { extra += ' AND (el.current_node_id = ? OR EXISTS (SELECT 1 FROM learning_sessions ls WHERE ls.engagement_learner_id = el.id AND ls.skill_node_id = ?))'; params.push(node_id, node_id); }
     const all = await loadRoster(db, req, extra, params);
     const needle = q.trim().toLowerCase();
     const searched = needle ? all.filter(r => r.name.toLowerCase().includes(needle) || r.learner_ref.toLowerCase().includes(needle) || (r.email || '').toLowerCase().includes(needle)) : all;

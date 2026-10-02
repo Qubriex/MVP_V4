@@ -25,7 +25,7 @@ const sha256 = (t) => crypto.createHash('sha256').update(String(t)).digest('hex'
 import { transcribeAudio } from '../../core/portfolio.js';
 import { isValidPin, hashPin, logEvent } from '../../core/access.js';
 import { eachSeq, mapSeq } from '../../core/util/seq.js';
-import { aiNotConfigured, AI_NOT_CONFIGURED } from '../../core/ai/gateway.js';
+import { aiNotConfigured, AI_NOT_CONFIGURED, synthesize } from '../../core/ai/gateway.js';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
@@ -637,6 +637,33 @@ router.post('/session/check', handleSessionMessage); // alias for backwards comp
 // message (input_mode 'voice'); the response adds `transcript`. Browsers with
 // on-device speech recognition skip this and post text to /session/message.
 // Speech out is synthesised in the browser from `message` — no audio is sent.
+// ─── Professor Qubirex's voice (docs/AI-VOICE-SPEC.md) ──────────────────────
+// POST /tts { text } → audio (MP3 or WAV) in Professor
+// Qubirex's one female voice, in the learner's language. 503 when no model key
+// is configured; 429 with Retry-After when every voice engine is out of quota
+// for the moment, so the page waits and asks again rather than switching voice.
+router.post('/tts', async (req, res) => {
+  const text = String(req.body?.text || '').trim();
+  if (!text) return res.status(400).json({ error: 'Nothing to say' });
+  if (text.length > 1500) return res.status(413).json({ error: 'Too long: send at most 1500 characters per request' });
+  try {
+    const out = await synthesize({ text, language: req.user.language || 'telugu', institutionId: req.user.institution_id || null });
+    res.set('Content-Type', out.mimeType);
+    res.set('Cache-Control', 'private, max-age=86400');
+    res.set('X-Voice-Engine', String(out.engine || ''));
+    res.send(out.audio);
+  } catch (err) {
+    if (aiNotConfigured(err)) return res.status(503).json({ error: AI_NOT_CONFIGURED });
+    const cause = err.cause || err;
+    req.log?.warn('tts.failed', { status: cause.status, error: cause.message });
+    if (cause.status === 429) {
+      res.set('Retry-After', String(Math.min(cause.retryAfter || 20, 120)));
+      return res.status(429).json({ error: 'The voice is busy for a moment.', retry_after: Math.min(cause.retryAfter || 20, 120) });
+    }
+    res.status(502).json({ error: 'The voice is unavailable right now.' });
+  }
+});
+
 router.post('/session/voice', upload.single('audio'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'audio file required (multipart field "audio")' });
   let transcript;

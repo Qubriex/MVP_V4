@@ -8,6 +8,7 @@
 // everything read-only. Cohort ("engagement") routes always check the cohort
 // belongs to the caller's institution AND is in their scope.
 import express from 'express';
+import { activitySummary } from '../../core/institutionActivity.js';
 import { v4 as uuidv4 } from 'uuid';
 import { legacyHandle as getDb } from '../../core/db/dal.js';
 import { authenticateToken, requireRole } from '../middleware/auth.js';
@@ -286,17 +287,23 @@ router.get('/engagements/:id', async (req, res) => {
     `).all(e.id)).map(({ pin_hash, ...l }) => ({ ...l, access: accessState({ ...l, pin_hash }) }));
     const current = learners.filter(l => l.access !== 'removed');
 
-    const clusters = await mapSeq(await db.prepare('SELECT id, cluster_label, sequence_order FROM skill_clusters WHERE capability_target_id = ? ORDER BY sequence_order').all(e.capability_target_id), async c => {
-        const nodes = await db.prepare(`
-          SELECT sn.id, sn.node_label, sn.estimated_minutes,
-            (SELECT COUNT(*) FROM node_mastery nm JOIN engagement_learners el ON el.id = nm.engagement_learner_id
-              WHERE nm.skill_node_id = sn.id AND el.engagement_id = ? AND nm.advanced_at IS NOT NULL) as mastered_by
-          FROM skill_nodes sn WHERE sn.cluster_id = ? ORDER BY sn.sequence_order
-        `).all(e.id, c.id);
-        return { id: c.id, label: c.cluster_label, nodes, students_here: current.filter(l => l.current_cluster_id === c.id && l.overall_status !== 'completed').length };
-      });
-    const finishedCluster = (await filterSeq(current, async l => await someSeq(clusters, async c => c.nodes.length && await everySeq(c.nodes, async n =>
-      await db.prepare('SELECT 1 FROM node_mastery WHERE engagement_learner_id = ? AND skill_node_id = ? AND advanced_at IS NOT NULL').get(l.el_id, n.id))))).length;
+    const allNodes = await db.prepare(`
+      SELECT sn.id, sn.node_label, sn.estimated_minutes, sn.cluster_id,
+        (SELECT COUNT(*) FROM node_mastery nm JOIN engagement_learners el ON el.id = nm.engagement_learner_id
+          WHERE nm.skill_node_id = sn.id AND el.engagement_id = ? AND nm.advanced_at IS NOT NULL AND COALESCE(el.access_status, 'active') != 'removed') as mastered_by
+      FROM skill_nodes sn JOIN skill_clusters sc ON sc.id = sn.cluster_id WHERE sc.capability_target_id = ? ORDER BY sn.sequence_order
+    `).all(e.id, e.capability_target_id);
+    const clusters = (await db.prepare('SELECT id, cluster_label, sequence_order FROM skill_clusters WHERE capability_target_id = ? ORDER BY sequence_order').all(e.capability_target_id))
+      .map(c => ({
+        id: c.id, label: c.cluster_label,
+        nodes: allNodes.filter(n => n.cluster_id === c.id).map(({ cluster_id, ...n }) => ({ ...n, mastered_pct: current.length ? Math.round((n.mastered_by / current.length) * 100) : 0 })),
+        students_here: current.filter(l => l.current_cluster_id === c.id && l.overall_status !== 'completed').length
+      }));
+    // One query for every mastered (student, node) pair, then count in memory.
+    const masteredPairs = new Set((await db.prepare(`SELECT nm.engagement_learner_id AS el_id, nm.skill_node_id AS node_id FROM node_mastery nm
+      JOIN engagement_learners el ON el.id = nm.engagement_learner_id WHERE el.engagement_id = ? AND nm.advanced_at IS NOT NULL`).all(e.id))
+      .map(r => `${r.el_id}|${r.node_id}`));
+    const finishedCluster = current.filter(l => clusters.some(c => c.nodes.length && c.nodes.every(n => masteredPairs.has(`${l.el_id}|${n.id}`)))).length;
 
     const hardest = (await db.prepare(`
       SELECT sn.id as node_id, sn.node_label, AVG(ls.loop_count) as avg_loops,
@@ -429,11 +436,14 @@ router.get('/engagements/:id/mastery-logs.csv', async (req, res) => {
   const e = await findScopedEngagement(db, req, req.params.id);
   if (!e) { db.close(); return res.status(404).json({ error: 'Not found' }); }
   const logs = await logSummaries(db, e.id);
+  // When each student started (first session) and last left (last activity).
+  const times = new Map((await activitySummary(db, e.id, { from: '2000-01-01', to: '2999-12-31' })).map(r => [r.learner_ref, r]));
   db.close();
   const esc = (v) => (v == null ? '' : /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : String(v));
-  const lines = [['learner_reference', 'learner_name', 'cluster', 'skill_node', 'mastery_attainment', 'time_to_mastery_minutes', 'attempt_count', 'confidence_indicator', 'advanced', 'produced_at'].join(',')];
+  const lines = [['learner_reference', 'learner_name', 'started_at', 'exit_at', 'cluster', 'skill_node', 'mastery_attainment', 'time_to_mastery_minutes', 'attempt_count', 'confidence_indicator', 'advanced', 'produced_at'].join(',')];
   logs.forEach(l => (l.log_data.clusters || []).forEach(c => (c.nodes || []).forEach(n => lines.push([
-    l.learner_ref, l.learner_name, c.cluster, n.skill_node, n.mastery_attainment, n.time_to_mastery_minutes, n.attempt_count, n.confidence_indicator, n.advanced ? 'yes' : 'no', l.produced_at
+    l.learner_ref, l.learner_name, times.get(l.learner_ref)?.started_at, times.get(l.learner_ref)?.last_active_at,
+    c.cluster, n.skill_node, n.mastery_attainment, n.time_to_mastery_minutes, n.attempt_count, n.confidence_indicator, n.advanced ? 'yes' : 'no', l.produced_at
   ].map(esc).join(',')))));
   res.set('Content-Type', 'text/csv; charset=utf-8');
   res.set('Content-Disposition', `attachment; filename="mastery-logs-${e.join_code || e.id}.csv"`);

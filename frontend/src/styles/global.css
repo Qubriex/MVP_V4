@@ -371,7 +371,7 @@ h4, .h4 {
   flex: 1;
   display: flex;
   flex-direction: column;
-  animation: page-fade-in 320ms ease both;
+  animation: page-fade-in 320ms ease backwards; /* no transform left behind: it would trap position:fixed dialogs */
 }
 
 /* ---- Motion & accessibility ------------------------------------------------------------- */

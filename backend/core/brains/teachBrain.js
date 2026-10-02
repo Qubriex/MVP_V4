@@ -4,6 +4,7 @@
 // history (MEM), and node specifications (CURR). Never invents cultural
 // examples when retrieval returns results.
 import { callAI, safeParseJSON } from '../instructionEngine.js';
+import { personaBlock, spokenStyleBlock, CAPTION_RULES } from './persona.js';
 
 // ─── LANGUAGE_CONTEXTS ─────────────────────────────────────────────────────────
 const LANGUAGE_CONTEXTS = {
@@ -90,12 +91,18 @@ async function runDiagnosis({ nodeLabel, clusterLabel, language, learnerContext 
 
   const system = `You are Professor Qubirex, teaching the skill node "${nodeLabel}" (part of cluster "${clusterLabel}") in ${ctx.lang_name}. ${ctx.script_note}. Cultural frame: ${ctx.region}.
 
-Ask a warm, conversational question in ${ctx.lang_name} about what the learner already knows about this topic. Limit to 1-2 sentences plus one question.${struggleHint}
+${personaBlock(ctx)}
+
+Greet the learner briefly and ask one warm, conversational question in ${ctx.lang_name} about what they already know about this topic. Limit to 1-2 short sentences plus one question.${struggleHint}
+
+${spokenStyleBlock(ctx, { maxWords: 45 })}
+
+${CAPTION_RULES}
 
 Respond ONLY with JSON:
 {
   "message": "your ${ctx.lang_name} diagnostic question",
-  "captionEn": "one plain-English line saying the same thing — shown as a caption under the ${ctx.lang_name} speech",
+  "captionEn": "the English translation of the message",
   "decision": "DIAGNOSE",
   "behaviourSignal": "engaged"
 }`;
@@ -117,6 +124,8 @@ async function generateInstruction({
 
   const system = `You are Professor Qubirex, teaching "${nodeLabel}" (cluster: "${clusterLabel}") in ${ctx.lang_name}. ${ctx.script_note}. Cultural frame: ${ctx.region}.
 
+${personaBlock(ctx)}
+
 EXPLANATION APPROACH THIS TURN: ${approach}
 ${approachGuide}
 
@@ -137,9 +146,13 @@ SYSTEM PROMPT RULES:
 - When you have explained sufficiently, set decision to CHECK and tell the learner, in one short line, that a check is next.
 - You never write the check question: the assessment system writes it separately, from the node spec. Do not include a question to be graded.
 - Approaches already used at this node (never repeat): ${approachesAlreadyUsed.join(', ') || 'none'}
-- "captionEn" is a caption, not the lesson: 1–2 plain-English sentences glossing what you just said. Compose "message" natively in ${ctx.lang_name} first; never translate the lesson from English.
-- The message will usually be spoken aloud by a text-to-speech voice: keep sentences short, and put code and diagrams ONLY in "code"/"mermaid", never inside "message".${learnerRequestedCheck ? `
-- THE LEARNER HAS SAID THEY ARE READY FOR THE MASTERY CHECK. Set decision to CHECK this turn and give a short encouraging line (no question).` : ''}
+- Compose "message" natively in ${ctx.lang_name} first; never translate the lesson from English.
+- Teach before checking: explain the idea with the cultural example, connect it to the English term, and give one concrete use. Move to CHECK only once you have taught the core idea in this conversation.
+
+${spokenStyleBlock(ctx)}
+
+${CAPTION_RULES}${learnerRequestedCheck ? `
+- THE LEARNER HAS SAID THEY ARE READY FOR THE MASTERY CHECK. Set decision to CHECK this turn. If you have not yet taught the core idea in this conversation, first give a compact explanation of it (within the word limit); then say in one short encouraging line that the check is next (no question).` : ''}
 
 CONVERSATION HISTORY (last 6 turns):
 ${formatHistory(conversationHistory) || '(session start)'}
@@ -147,7 +160,7 @@ ${formatHistory(conversationHistory) || '(session start)'}
 Respond ONLY with JSON:
 {
   "message": "native-language instruction text",
-  "captionEn": "1-2 sentence plain-English caption of the message",
+  "captionEn": "the English translation of the message",
   "decision": "CONTINUE | CHECK",
   "mermaid": "mermaid diagram string — optional, for logic flow, else null",
   "code": "code snippet in English — optional, else null",
@@ -180,7 +193,11 @@ async function answerDoubt({ questionText, nodeLabel, clusterLabel, language, le
 
 ${formatCulturalContext(culturalExamples)}
 
+${personaBlock(ctx)}
+
 Reference the current node. Try a different angle than previous explanations. End with: "${ctx.still_confused}"
+
+${spokenStyleBlock(ctx, { maxWords: 110 }).replace(/"message"/g, '"answer"')}
 
 Respond ONLY with JSON:
 {

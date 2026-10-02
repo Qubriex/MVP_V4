@@ -84,13 +84,15 @@ export default function LearnerLayout() {
 
         <div className="ln-sidebar-foot">
           <NavLink to="/learn/profile#preferences" className="ln-navlink ln-indic"><Settings size={18} strokeWidth={1.8} aria-hidden="true" /><span>{t('nav.settings')}</span></NavLink>
-          <button type="button" className="ln-navlink ln-indic" onClick={doLogout}><LogOut size={18} strokeWidth={1.8} aria-hidden="true" /><span>{t('nav.logout')}</span></button>
-          <div style={{ padding: '8px 12px 0' }}><ThemeToggle /></div>
+          <div className="ln-row" style={{ gap: 8, alignItems: 'center' }}>
+            <button type="button" className="ln-navlink ln-indic" style={{ flex: 1 }} onClick={doLogout}><LogOut size={18} strokeWidth={1.8} aria-hidden="true" /><span>{t('nav.logout')}</span></button>
+            <ThemeToggle />
+          </div>
         </div>
       </nav>
 
       <main className="ln-main" id="main">
-        <Outlet />
+        <div key={location.pathname} className="ln-page-fade"><Outlet /></div>
       </main>
     </div>
   );

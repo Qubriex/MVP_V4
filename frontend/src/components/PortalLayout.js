@@ -50,7 +50,7 @@ export default function PortalLayout({ kicker, org, account, items, loginPath, c
         </div>
       </nav>
 
-      <main className="ln-main" id="main"><Outlet context={context} /></main>
+      <main className="ln-main" id="main"><div key={location.pathname} className="ln-page-fade"><Outlet context={context} /></div></main>
     </div>
   );
 }

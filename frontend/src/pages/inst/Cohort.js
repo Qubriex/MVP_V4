@@ -4,8 +4,12 @@
 // students, the pathway, mastery logs (produce, view, export) and settings.
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { Plus, Download, RefreshCw } from 'lucide-react';
+import { Plus, Download, RefreshCw, Radio } from 'lucide-react';
 import api from '../../utils/api';
+import { useCachedGet, dropCached } from '../../utils/cachedGet';
+import Crumbs from '../../components/inst/Crumbs';
+import ActivityYear from '../../components/inst/ActivityYear';
+import DownloadDialog from '../../components/inst/DownloadDialog';
 import { Bar } from '../../components/learn/ui';
 import { useStaff } from '../../components/inst/InstitutionLayout';
 import CopyLink from '../../components/inst/CopyLink';
@@ -44,12 +48,13 @@ function Overview({ c, requests }) {
             <table className="ln-table"><thead><tr><th>Node</th><th>Avg loops</th><th>Stuck now</th><th /></tr></thead>
               <tbody>{c.hardest.map(h => (
                 <tr key={h.node_id}><td style={{ fontWeight: 600 }}>{h.node_label}</td><td>{h.avg_loops}</td><td>{h.stuck}</td>
-                  <td><Link className="ln-btn ln-btn-sm" to={`/institution/students?engagement_id=${c.id}&node_id=${h.node_id}`}>See students</Link></td></tr>
+                  <td><Link className="ln-btn ln-btn-sm" to={`/institution/students?engagement_id=${c.id}&node_id=${h.node_id}&node_label=${encodeURIComponent(h.node_label)}`}>See students</Link></td></tr>
               ))}</tbody></table>
           )}
           <span className="ln-xs ln-muted">Only counts and loops are shown. Session conversations stay private to each student.</span>
         </section>
       </div>
+      <ActivityYear cohortId={c.id} />
       {requests.length > 0 && (
         <section className="ln-card">
           <h2 className="ln-h2">Skills students asked you to add</h2>
@@ -61,18 +66,65 @@ function Overview({ c, requests }) {
   );
 }
 
-function Pathway({ c }) {
+// Pathway: each student's own progress (default) or the cohort overview.
+// A student's skill is 100% only when they mastered it, otherwise 0% — their
+// current skill is marked "learning now" without credit.
+function Pathway({ c, studentId, setStudentId }) {
+  const [view, setView] = useState('student');
+  const students = c.learners.filter(l => l.access !== 'removed');
+  const sel = studentId || students[0]?.el_id || '';
+  const { data: p, error } = useCachedGet(view === 'student' && sel ? `/institution/engagements/${c.id}/students/${sel}/pathway` : null);
   return (
     <div className="ln-col" style={{ gap: 14 }}>
-      {c.clusters.map((cl, i) => (
-        <section key={cl.id} className="ln-card" style={{ gap: 10 }}>
-          <div className="ln-between"><h2 className="ln-h2">{i + 1}. {cl.label}</h2><span className="ln-small ln-muted">{cl.nodes.length} nodes · {Math.round(cl.nodes.reduce((a, n) => a + (n.estimated_minutes || 20), 0) / 6) / 10} h</span></div>
-          <div className="ln-row ln-wrap" style={{ gap: 8 }}>
-            {cl.nodes.map(n => <span key={n.id} className="ln-chip" title={`${n.mastered_by} of ${c.kpis.students} mastered`}>{n.node_label}<span className="ln-xs ln-muted">· {n.mastered_by}/{c.kpis.students}</span></span>)}
-          </div>
-        </section>
-      ))}
-      <span className="ln-xs ln-muted">The numbers after each node are students who have mastered it. The pathway is built in {c.language === 'hindi' ? 'Hindi' : 'Telugu'}.</span>
+      <div className="ln-row ln-wrap" style={{ gap: 12 }}>
+        <div className="ln-pilltabs" role="tablist" aria-label="Pathway view">
+          <button type="button" role="tab" className="ln-pilltab" aria-selected={view === 'student'} onClick={() => setView('student')}>Each student</button>
+          <button type="button" role="tab" className="ln-pilltab" aria-selected={view === 'cohort'} onClick={() => setView('cohort')}>Cohort overview</button>
+        </div>
+        {view === 'student' && students.length > 0 && (
+          <label className="ln-selectwrap"><span>Student</span>
+            <select value={sel} onChange={e => setStudentId(e.target.value)}>{students.map(l => <option key={l.el_id} value={l.el_id}>{l.name} · {l.learner_ref}</option>)}</select>
+          </label>
+        )}
+      </div>
+      {view === 'student' ? (
+        students.length === 0 ? <div className="ln-card ln-muted">No students in this cohort yet.</div>
+          : error ? <div className="ln-error">Couldn’t load this student’s pathway.</div>
+            : !p ? <p className="ln-muted">Loading…</p> : (
+              <>
+                <div className="ln-card ln-card-sm" style={{ gap: 6 }}>
+                  <div className="ln-between ln-wrap"><b>{p.student.name}</b><span className="ln-small">{p.mastered} of {p.total} skills mastered · <b>{p.pct}%</b></span></div>
+                  <Bar pct={p.pct} label={`${p.pct}% of the pathway mastered`} />
+                </div>
+                {p.clusters.map((cl, i) => (
+                  <section key={cl.id} className="ln-card" style={{ gap: 10 }}>
+                    <div className="ln-between"><h2 className="ln-h2">{i + 1}. {cl.label}</h2><span className="ln-small"><b>{cl.pct}%</b> <span className="ln-muted">mastered</span></span></div>
+                    <div className="ln-row ln-wrap" style={{ gap: 8 }}>
+                      {cl.nodes.map(n => (
+                        <span key={n.id} className={`in-node is-${n.status}`} title={n.mastered_at ? `Mastered ${date(n.mastered_at)}` : n.status === 'learning' ? 'Learning now' : 'Not started'}>
+                          {n.status === 'mastered' ? '✓' : n.status === 'learning' ? '◐' : '○'} {n.label}
+                          <span className="ln-xs ln-muted">· {n.status === 'mastered' ? `100% · ${date(n.mastered_at)}` : n.status === 'learning' ? `0% · learning now${n.loops ? ` · ${n.loops} loops` : ''}` : '0%'}</span>
+                        </span>
+                      ))}
+                    </div>
+                  </section>
+                ))}
+                <span className="ln-xs ln-muted">Only skills this student has mastered count. Everything else shows 0% until they master it — no projected or cohort figures.</span>
+              </>
+            )
+      ) : (
+        <>
+          {c.clusters.map((cl, i) => (
+            <section key={cl.id} className="ln-card" style={{ gap: 10 }}>
+              <div className="ln-between"><h2 className="ln-h2">{i + 1}. {cl.label}</h2><span className="ln-small ln-muted">{cl.nodes.length} nodes · {Math.round(cl.nodes.reduce((a, n) => a + (n.estimated_minutes || 20), 0) / 6) / 10} h</span></div>
+              <div className="ln-row ln-wrap" style={{ gap: 8 }}>
+                {cl.nodes.map(n => <span key={n.id} className="ln-chip" title={`${n.mastered_by} of ${c.kpis.students} mastered`}>{n.node_label}<span className="ln-xs ln-muted">· {n.mastered_by}/{c.kpis.students} · {n.mastered_pct ?? 0}%</span></span>)}
+              </div>
+            </section>
+          ))}
+          <span className="ln-xs ln-muted">Cohort overview: after each skill, how many current students have mastered it, and the share of the cohort. For one student’s progress, use “Each student”.</span>
+        </>
+      )}
     </div>
   );
 }
@@ -153,15 +205,21 @@ function Settings({ c, onChanged }) {
 
 export default function Cohort() {
   const { id } = useParams();
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const { role } = useStaff();
-  const [c, setC] = useState(null);
-  const [tab, setTab] = useState('Overview');
+  const { data: c, error: loadError, reload } = useCachedGet(`/institution/engagements/${id}`);
+  const tab = TABS.includes(params.get('tab')) ? params.get('tab') : 'Overview';
+  const setTab = (t) => { const p = new URLSearchParams(params); p.set('tab', t); setParams(p, { replace: true }); };
+  const studentId = params.get('student') || '';
+  const setStudentId = (s) => { const p = new URLSearchParams(params); p.set('student', s); setParams(p, { replace: true }); };
   const [requests, setRequests] = useState([]);
   const [error, setError] = useState('');
-
-  const load = useCallback(() => api.get(`/institution/engagements/${id}`).then(r => setC(r.data)).catch(e => setError(e.response?.status === 404 ? 'This cohort doesn’t exist or isn’t assigned to you.' : 'Couldn’t load the cohort.')), [id]);
-  useEffect(() => { load(); api.get(`/institution/engagements/${id}/skill-requests`).then(r => setRequests(r.data)).catch(() => {}); }, [id, load]);
+  const [download, setDownload] = useState(null);
+  const load = useCallback(() => { dropCached(`/institution/engagements/${id}`); return reload(); }, [id, reload]);
+  useEffect(() => { api.get(`/institution/engagements/${id}/skill-requests`).then(r => setRequests(r.data)).catch(() => {}); }, [id]);
+  useEffect(() => {
+    if (loadError) setError(loadError.response?.status === 404 ? 'This cohort doesn’t exist or isn’t assigned to you.' : 'Couldn’t load the cohort.');
+  }, [loadError]);
 
   const rotate = async () => {
     if (!window.confirm('Create a new join code? The current one stops working for new sign-ins.')) return;
@@ -175,12 +233,12 @@ export default function Cohort() {
 
   return (
     <>
+      <Crumbs items={[{ label: 'Cohorts', to: '/institution/cohorts' }, { label: c.title }]} />
       <header className="ln-pagehead" style={{ alignItems: 'flex-start' }}>
         <div className="ln-col" style={{ gap: 6, minWidth: 0 }}>
-          <Link to="/institution/cohorts" className="ln-link" style={{ fontSize: 13 }}>← Cohorts</Link>
           <div className="ln-row ln-wrap" style={{ gap: 12 }}><h1 className="ln-title" style={{ fontSize: 34 }}>{c.title}</h1><span className={`ln-tag ln-tag-lg ${st[1]}`}>{st[0]}</span></div>
           <span className="ln-small ln-muted">
-            Target: {c.ct_title} v{c.ct_version} · {c.language === 'hindi' ? 'Hindi' : 'Telugu'} · {c.total_nodes} skill nodes · Started {date(c.started_at)}
+            Target: {c.ct_title} v{c.ct_version} · {c.total_nodes} skill nodes · Started {date(c.started_at)}
             {c.professors.length > 0 && ` · Professors: ${c.professors.map(p => [p.title, p.name].filter(Boolean).join(' ') + (p.cohort_role === 'lead' ? ' (lead)' : '')).join(', ')}`}
           </span>
         </div>
@@ -211,24 +269,32 @@ export default function Cohort() {
         <section className="ln-card" style={{ padding: 0, overflow: 'hidden' }}>
           <div className="ln-between ln-wrap" style={{ padding: '16px 18px 0' }}>
             <h2 className="ln-h2">{c.learners.length} students</h2>
-            <div className="ln-row" style={{ gap: 8 }}>
+            <div className="ln-row ln-wrap" style={{ gap: 8 }}>
+              <Link to={`/institution/cohorts/${c.id}/live`} className="ln-btn ln-btn-sm"><Radio size={14} aria-hidden="true" />Live</Link>
+              <button type="button" className="ln-btn ln-btn-sm" onClick={() => setDownload([])}><Download size={14} aria-hidden="true" />Download data</button>
               <Link to={`/institution/students?engagement_id=${c.id}`} className="ln-btn ln-btn-sm">Manage access</Link>
               {role !== 'viewer' && <Link to={`/institution/students/add?cohort=${c.id}`} className="ln-btn ln-btn-sm ln-btn-primary"><Plus size={14} aria-hidden="true" />Add students</Link>}
             </div>
           </div>
           <div className="ln-tablewrap"><table className="ln-table" style={{ margin: '0 18px', width: 'calc(100% - 36px)' }}>
-            <thead><tr><th>Student</th><th>Current node</th><th>Mastered</th><th>Access</th></tr></thead>
+            <thead><tr><th>Student</th><th>Language</th><th>Current node</th><th>Mastered</th><th>Access</th><th /></tr></thead>
             <tbody>{c.learners.map(l => (
               <tr key={l.el_id}><td><b style={{ fontWeight: 600 }}>{l.name}</b> <span className="ln-xs ln-muted">{l.learner_ref}</span></td>
+                <td className="ln-small ln-indic">{l.language === 'hindi' ? 'हिंदी' : 'తెలుగు'}</td>
                 <td className="ln-small">{l.overall_status === 'completed' ? 'Completed' : l.current_node_label || '—'}</td>
-                <td>{l.nodes_mastered} / {c.total_nodes}</td><td><AccessTag state={l.access} /></td></tr>
+                <td>{l.nodes_mastered} / {c.total_nodes}</td><td><AccessTag state={l.access} /></td>
+                <td><div className="ln-row" style={{ gap: 6 }}>
+                  <button type="button" className="ln-btn ln-btn-sm" onClick={() => { const p = new URLSearchParams(params); p.set('tab', 'Pathway'); p.set('student', l.el_id); setParams(p); }}>Pathway</button>
+                  <button type="button" className="ln-btn ln-btn-sm" onClick={() => setDownload([l.el_id])} aria-label={`Download data for ${l.name}`}><Download size={14} aria-hidden="true" /></button>
+                </div></td></tr>
             ))}</tbody></table></div>
           <CopyLinkHint code={c.join_code} url={loginUrl} />
         </section>
       )}
-      {tab === 'Pathway' && <Pathway c={c} />}
+      {tab === 'Pathway' && <Pathway c={c} studentId={studentId} setStudentId={setStudentId} />}
       {tab === 'Mastery logs' && <Logs c={c} canProduce={role !== 'viewer'} />}
       {tab === 'Settings' && role === 'admin' && <Settings c={c} onChanged={load} />}
+      {download && <DownloadDialog cohort={c} students={c.learners.filter(l => l.access !== 'removed')} initial={download} onClose={() => setDownload(null)} />}
     </>
   );
 }

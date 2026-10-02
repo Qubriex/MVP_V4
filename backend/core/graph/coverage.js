@@ -96,7 +96,7 @@ export function coverageStatus(c) {
 /** Node ids in the pathway that teach a skill or any of its descendants. */
 export async function nodesForSkill(skillId, map) {
   const ids = new Set();
-  const walk = async (s) => { (map.bySkill.get(s) || []).forEach(r => ids.add(r.node_id)); (await children(s)).forEach(walk); };
+  const walk = async (s) => { (map.bySkill.get(s) || []).forEach(r => ids.add(r.node_id)); await eachSeq(await children(s), walk); };
   await walk(skillId);
   return ids;
 }
