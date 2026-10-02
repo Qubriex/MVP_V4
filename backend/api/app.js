@@ -7,6 +7,7 @@ import cors from 'cors';
 import crypto from 'crypto';
 import { logger } from '../core/logger.js';
 import * as dal from '../core/db/dal.js';
+import { generate } from '../core/ai/gateway.js';
 import params from '../config/params.js';
 import authRoutes from './routes/auth.js';
 import institutionRoutes from './routes/institution.js';
@@ -101,6 +102,16 @@ export function createApp({ drainOutbox = null } = {}) {
       body.params = params.source();
       body.secrets = process.env.QBX_SECRETS_SOURCE || 'environment';
       body.ai = { adapter: process.env.AI_ADAPTER || (process.env.NODE_ENV === 'test' ? 'mock' : 'gemini'), key_set: !!process.env.GEMINI_API_KEY };
+      // &ai=1 makes one tiny live model call, so a deployment can confirm its key and model.
+      if (req.query.ai === '1') {
+        const started = Date.now();
+        try {
+          const r = await generate({ task: 'HEALTH.ping', input: 'Reply with the single word OK.', maxTokens: 64 });
+          body.ai.live = { ok: true, model: r.modelId, ms: Date.now() - started, reply: String(r.text || '').slice(0, 20) };
+        } catch (err) {
+          body.ai.live = { ok: false, model: process.env.GEMINI_MODEL || null, error: String(err.cause?.message || err.message).slice(0, 300) };
+        }
+      }
     }
     res.status(body.status === 'ok' ? 200 : 503).json(body);
   });
