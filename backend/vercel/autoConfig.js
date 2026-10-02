@@ -11,8 +11,9 @@
 //      the signing key are generated once and kept in system_secrets.
 //   5. Staging defaults: prior parameters and on-screen employer codes, unless
 //      SECURE_CONFIG_PARAMS_JSON / QBX_ECHO_EMAIL_CODES say otherwise.
-// Anything set in the environment wins. QBX_REQUIRE_SECRETS=1 turns steps 4
-// and 5 off, so a real launch fails loudly instead of generating its own.
+//   6. QBX_SEED_TEST_DATA=1: the test accounts from docs/README.md, once.
+// Anything set in the environment wins. QBX_REQUIRE_SECRETS=1 turns steps 4-6
+// off, so a real launch fails loudly instead of generating its own.
 import crypto from 'crypto';
 import * as dal from '../core/db/dal.js';
 import { migrate } from '../core/db/migrate.js';
@@ -56,5 +57,19 @@ export async function autoConfigure(env = process.env) {
   if (!env.SECURE_CONFIG_PARAMS_JSON && env.QBX_ALLOW_PRIORS === undefined) env.QBX_ALLOW_PRIORS = '1';
   if (env.QBX_ECHO_EMAIL_CODES === undefined) env.QBX_ECHO_EMAIL_CODES = '1';
   env.QBX_SECRETS_SOURCE = generated.length ? `database (${generated.join(', ')})` : 'environment';
+
+  // QBX_SEED_TEST_DATA=1 (test deployments only): create the public test
+  // accounts once. The marker row and the seed share one transaction, so a
+  // second instance starting at the same time waits, then skips.
+  if (env.QBX_SEED_TEST_DATA === '1') {
+    await dal.tx(async () => {
+      const first = await dal.run("INSERT INTO system_secrets (name, value, created_at) VALUES ('test_data_seeded', ?, ?) ON CONFLICT (name) DO NOTHING",
+        dal.nowIso(), dal.nowIso());
+      if (!first.changes) return;
+      const { seedTestData } = await import('../scripts/testData.js');
+      await seedTestData({ log: () => {} });
+      console.warn('[qubirex] QBX_SEED_TEST_DATA=1: test accounts created (public credentials — test deployments only).');
+    });
+  }
   return { secrets: env.QBX_SECRETS_SOURCE, generated };
 }

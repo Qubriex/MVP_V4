@@ -13,7 +13,20 @@ const getClient = () => {
 export const name = 'gemini';
 
 /** @param {{model: string, system?: string, input: string, audio?: {base64: string, mimeType: string}, temperature?: number, maxTokens?: number, json?: boolean}} req */
-export async function generate({ model, system, input, audio, temperature = 0.7, maxTokens = 1024, json = false }) {
+// Google's rolling alias, used once if the configured model name is unknown to
+// this key (404), so a renamed or retired model does not take the tutor down.
+const FALLBACK_MODEL = 'gemini-flash-latest';
+
+export async function generate(req) {
+  try {
+    return await call(req);
+  } catch (err) {
+    if (err?.status === 404 && req.model !== FALLBACK_MODEL) return call({ ...req, model: FALLBACK_MODEL });
+    throw err;
+  }
+}
+
+async function call({ model, system, input, audio, temperature = 0.7, maxTokens = 1024, json = false }) {
   const m = getClient().getGenerativeModel({
     model,
     systemInstruction: system,
