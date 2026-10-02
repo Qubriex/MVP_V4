@@ -27,7 +27,7 @@ import { ArrowLeft, Clock, Mic, Keyboard, RotateCcw, Pause, Play, Volume2, Award
 import { useAuth } from '../../context/AuthContext';
 import { useUiLang, speechTag } from '../../context/UiLangContext';
 import api, { getOr } from '../../utils/api';
-import { useSpeechInput, useSpeechOutput, hasVoiceFor } from '../../utils/voice';
+import { useSpeechInput, useSpeechOutput, hasVoiceFor, usingServerVoice } from '../../utils/voice';
 import { MOCK_SESSION_START, MOCK_PROFILE, MOCK_LEARNER_DASHBOARD } from '../../utils/learnerMockData';
 import MermaidDiagram from '../../components/learn/MermaidDiagram';
 import { newTracker, recordPaste, provenanceFor } from '../../utils/provenance';
@@ -277,7 +277,7 @@ export default function Session() {
 
   const orb = mic.listening ? 'listening' : busy ? 'thinking' : speech.speakingId ? 'speaking' : mode === 'typing' ? 'typing' : phase === 'mastery_check' ? 'yourTurn' : 'idle';
   const orbLabel = { listening: t('session.listening'), thinking: transcribing ? 'Transcribing…' : t('session.thinking'), speaking: t('session.speaking'), typing: t('session.typing'), yourTurn: t('session.yourTurn'), idle: t('session.idle') }[orb];
-  const noVoice = speech.supported && !hasVoiceFor(bcp47);
+  const noVoice = speech.supported && !usingServerVoice() && !hasVoiceFor(bcp47);
   const clock = `${Math.floor(elapsed / 60)}:${String(elapsed % 60).padStart(2, '0')}`;
   const langName = LANG_LABEL[language] || language;
   const liveCaption = mic.listening && mic.interim ? mic.interim : lastAi?.content;

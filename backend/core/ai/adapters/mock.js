@@ -27,3 +27,14 @@ export async function generate(req) {
   const text = typeof out === 'string' ? out : JSON.stringify(out);
   return { text, modelVersion: 'mock-1', tokensIn: Math.ceil(String(req.input).length / 4), tokensOut: Math.ceil(text.length / 4) };
 }
+
+/** Deterministic silent WAV (a few ms per character), so tests never need audio. */
+export async function speak({ text }) {
+  const samples = Math.min(24000, 40 * String(text).length);
+  const pcm = Buffer.alloc(samples * 2);
+  const h = Buffer.alloc(44);
+  h.write('RIFF', 0); h.writeUInt32LE(36 + pcm.length, 4); h.write('WAVE', 8); h.write('fmt ', 12);
+  h.writeUInt32LE(16, 16); h.writeUInt16LE(1, 20); h.writeUInt16LE(1, 22); h.writeUInt32LE(24000, 24);
+  h.writeUInt32LE(48000, 28); h.writeUInt16LE(2, 32); h.writeUInt16LE(16, 34); h.write('data', 36); h.writeUInt32LE(pcm.length, 40);
+  return { audio: Buffer.concat([h, pcm]), mimeType: 'audio/wav', modelVersion: 'mock-tts-1' };
+}

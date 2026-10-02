@@ -301,7 +301,7 @@ export function VoiceSection({ form }) {
   const language = user?.language || draft.language || 'telugu';
   const speech = useSpeechOutput({ lang: speechTag(language), rate: prefs.rate || 1 });
   const sample = language === 'hindi' ? 'नमस्ते! मैं प्रोफ़ेसर क्यूबिरेक्स हूँ।' : 'నమస్కారం! నేను ప్రొఫెసర్ క్యూబిరెక్స్.';
-  const preview = (variant) => { setPref('voice', variant); speech.speak(sample, variant); };
+  const preview = (variant) => { setPref('voice', variant); speech.speak(sample, `preview-${variant}`, { variant }); };
 
   return (
     <Section id="preferences" title="Learning and voice preferences">

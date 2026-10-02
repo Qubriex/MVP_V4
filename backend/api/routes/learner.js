@@ -25,7 +25,7 @@ const sha256 = (t) => crypto.createHash('sha256').update(String(t)).digest('hex'
 import { transcribeAudio } from '../../core/portfolio.js';
 import { isValidPin, hashPin, logEvent } from '../../core/access.js';
 import { eachSeq, mapSeq } from '../../core/util/seq.js';
-import { aiNotConfigured, AI_NOT_CONFIGURED } from '../../core/ai/gateway.js';
+import { aiNotConfigured, AI_NOT_CONFIGURED, synthesize } from '../../core/ai/gateway.js';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
@@ -637,6 +637,26 @@ router.post('/session/check', handleSessionMessage); // alias for backwards comp
 // message (input_mode 'voice'); the response adds `transcript`. Browsers with
 // on-device speech recognition skip this and post text to /session/message.
 // Speech out is synthesised in the browser from `message` — no audio is sent.
+// ─── Professor Qubirex's voice (docs/AI-VOICE-SPEC.md) ──────────────────────
+// POST /tts { text, variant?: 'A'|'B' } → audio/wav. The page speaks a lesson
+// in sentence groups, so each request stays short. 503 when no model key is
+// configured: the page then falls back to the browser's own voice.
+router.post('/tts', async (req, res) => {
+  const text = String(req.body?.text || '').trim();
+  if (!text) return res.status(400).json({ error: 'Nothing to say' });
+  if (text.length > 1200) return res.status(413).json({ error: 'Too long: send at most 1200 characters per request' });
+  try {
+    const out = await synthesize({ text, variant: req.body?.variant === 'B' ? 'B' : 'A', institutionId: req.user.institution_id || null });
+    res.set('Content-Type', out.mimeType);
+    res.set('Cache-Control', 'private, max-age=86400');
+    res.send(out.audio);
+  } catch (err) {
+    if (aiNotConfigured(err)) return res.status(503).json({ error: AI_NOT_CONFIGURED });
+    req.log?.warn('tts.failed', { error: err.cause?.message || err.message });
+    res.status(502).json({ error: 'The voice is unavailable right now.' });
+  }
+});
+
 router.post('/session/voice', upload.single('audio'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'audio file required (multipart field "audio")' });
   let transcript;

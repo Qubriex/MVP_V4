@@ -7,7 +7,7 @@ import cors from 'cors';
 import crypto from 'crypto';
 import { logger } from '../core/logger.js';
 import * as dal from '../core/db/dal.js';
-import { generate } from '../core/ai/gateway.js';
+import { generate, synthesize } from '../core/ai/gateway.js';
 import params from '../config/params.js';
 import authRoutes from './routes/auth.js';
 import institutionRoutes from './routes/institution.js';
@@ -110,6 +110,13 @@ export function createApp({ drainOutbox = null } = {}) {
           body.ai.live = { ok: true, model: r.modelId, ms: Date.now() - started, reply: String(r.text || '').slice(0, 20) };
         } catch (err) {
           body.ai.live = { ok: false, model: process.env.GEMINI_MODEL || null, error: String(err.cause?.message || err.message).slice(0, 300) };
+        }
+        try {
+          const t0 = Date.now();
+          const v = await synthesize({ text: 'నమస్కారం' });
+          body.ai.voice = { ok: true, bytes: v.audio.length, ms: Date.now() - t0 };
+        } catch (err) {
+          body.ai.voice = { ok: false, error: String(err.cause?.message || err.message).slice(0, 300) };
         }
       }
     }

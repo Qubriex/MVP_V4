@@ -3498,6 +3498,36 @@
         ]
       }
     },
+    "/api/learner/tts": {
+      "post": {
+        "tags": [
+          "learner"
+        ],
+        "operationId": "post_learner_tts",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CsrfToken"
+          }
+        ]
+      }
+    },
     "/api/market/jobs": {
       "get": {
         "tags": [
