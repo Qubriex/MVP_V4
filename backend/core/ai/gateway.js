@@ -133,31 +133,32 @@ export async function generate(req) {
 
 // ─── Speech ───────────────────────────────────────────────────────────────────
 // Professor Qubirex's voice (docs/AI-VOICE-SPEC.md): one female prebuilt
-// voice per variant, the same on every device. GEMINI_TTS_MODEL and
+// voice, Kore, for every learner, page and reply. GEMINI_TTS_MODEL and
 // GEMINI_TTS_VOICE override the defaults.
-export const TTS_VOICES = { A: 'Kore', B: 'Aoede' };
+export const TTS_VOICE = 'Kore';
 const TTS_MODEL = () => process.env.GEMINI_TTS_MODEL || 'gemini-2.5-flash-preview-tts';
 const ttsCache = new Map(); // per instance; replays and repeated lines cost nothing
 const TTS_CACHE_MAX = 64;
 
 /**
- * @param {{ text: string, variant?: 'A'|'B', institutionId?: string|null }} req
- * @returns {Promise<{ audio: Buffer, mimeType: string, cached: boolean }>}
+ * @param {{ text: string, language?: string, institutionId?: string|null }} req
+ * @returns {Promise<{ audio: Buffer, mimeType: string, engine: string, cached: boolean }>}
  */
-export async function synthesize({ text, variant = 'A', institutionId = null }) {
+export async function synthesize({ text, language = 'telugu', institutionId = null }) {
   const r = route('TEACH.speak');
-  const voice = process.env.GEMINI_TTS_VOICE || TTS_VOICES[variant] || TTS_VOICES.A;
-  const key = `${r.adapter}|${voice}|${text}`;
+  const voice = process.env.GEMINI_TTS_VOICE || TTS_VOICE;
+  const key = `${r.adapter}|${voice}|${language}|${text}`;
   const hit = ttsCache.get(key);
   if (hit) return { ...hit, cached: true };
   const started = Date.now();
   const model = r.adapter === 'mock' ? 'mock' : TTS_MODEL();
   try {
-    const out = await withTimeout(ADAPTERS[r.adapter].speak({ model, text, voice }), Math.max(params.get('ai.timeoutMs'), 30000));
+    const out = await withTimeout(ADAPTERS[r.adapter].speak({ model, text, voice, language }), Math.max(params.get('ai.timeoutMs'), 50000));
     await logCall({ task: 'TEACH.speak', adapter: r.adapter, model, modelVersion: out.modelVersion, ms: Date.now() - started, status: 'ok', institutionId, tokensIn: text.length });
-    ttsCache.set(key, { audio: out.audio, mimeType: out.mimeType });
+    const entry = { audio: out.audio, mimeType: out.mimeType, engine: out.modelVersion };
+    ttsCache.set(key, entry);
     if (ttsCache.size > TTS_CACHE_MAX) ttsCache.delete(ttsCache.keys().next().value);
-    return { audio: out.audio, mimeType: out.mimeType, cached: false };
+    return { ...entry, cached: false };
   } catch (err) {
     await logCall({ task: 'TEACH.speak', adapter: r.adapter, model, ms: Date.now() - started, status: 'error', institutionId, error: String(err.message).slice(0, 300) });
     throw err instanceof GatewayError ? err : new GatewayError('upstream', 'Speech synthesis failed', err);

@@ -301,7 +301,7 @@ export function VoiceSection({ form }) {
   const language = user?.language || draft.language || 'telugu';
   const speech = useSpeechOutput({ lang: speechTag(language), rate: prefs.rate || 1 });
   const sample = language === 'hindi' ? 'नमस्ते! मैं प्रोफ़ेसर क्यूबिरेक्स हूँ।' : 'నమస్కారం! నేను ప్రొఫెసర్ క్యూబిరెక్స్.';
-  const preview = (variant) => { setPref('voice', variant); speech.speak(sample, `preview-${variant}`, { variant }); };
+  const preview = () => speech.speak(sample, 'preview');
 
   return (
     <Section id="preferences" title="Learning and voice preferences">
@@ -312,10 +312,10 @@ export function VoiceSection({ form }) {
           <div className="ln-seg ln-indic" role="group" aria-labelledby="ui-lang">
             {UI_LANGS.map(l => <button key={l.id} type="button" aria-pressed={draft.ui_language === l.id} onClick={() => { set('ui_language', l.id); setLang(l.id); }}>{l.label}</button>)}
           </div></div>
-        <div className="ln-field"><span className="ln-label" id="voice-pick">Professor’s voice</span>
-          <div className="ln-seg" role="group" aria-labelledby="voice-pick">
-            {['A', 'B'].map(v => <button key={v} type="button" aria-pressed={(prefs.voice || 'A') === v} onClick={() => preview(v)}>Voice {v} <Play size={12} aria-hidden="true" style={{ display: 'inline' }} /></button>)}
-          </div></div>
+        <div className="ln-field"><span className="ln-label">Professor’s voice</span>
+          <button type="button" className="ln-btn ln-btn-sm" style={{ alignSelf: 'flex-start' }} onClick={preview}>
+            <Play size={12} aria-hidden="true" />Hear Professor Qubirex
+          </button></div>
         <div className="ln-field"><span className="ln-label" id="rate-pick">Speaking speed</span>
           <div className="ln-seg" role="group" aria-labelledby="rate-pick">
             {[0.8, 1, 1.2].map(r => <button key={r} type="button" aria-pressed={(prefs.rate || 1) === r} onClick={() => setPref('rate', r)}>{r.toFixed(1)}×</button>)}

@@ -71,7 +71,7 @@ async function ttsOnce(model, { text, voice, style }) {
   });
   if (!res.ok) {
     const body = await res.text().catch(() => '');
-    throw Object.assign(new Error(`TTS ${res.status}: ${body.slice(0, 200)}`), { status: res.status });
+    throw Object.assign(new Error(`TTS ${res.status}: ${body.slice(0, 200)}`), { status: res.status, retryAfter: retryAfter(res, body) });
   }
   const json = await res.json();
   const part = json.candidates?.[0]?.content?.parts?.find(p => p.inlineData?.data);
@@ -80,15 +80,83 @@ async function ttsOnce(model, { text, voice, style }) {
   return { audio: wav(Buffer.from(part.inlineData.data, 'base64'), rate), mimeType: 'audio/wav', modelVersion: model };
 }
 
-/** @param {{model: string, text: string, voice: string, style?: string}} req */
+// Google Cloud Text-to-Speech with the same key: Chirp 3 HD has the same
+// prebuilt voices as Gemini (Kore, Aoede), so she sounds the same, returns
+// small MP3s, and has its own, much larger quota. Standard-A is the female
+// Standard voice for each locale, used only if the HD voice is not offered.
+const CLOUD_TTS = 'https://texttospeech.googleapis.com/v1/text:synthesize';
+const LOCALES = { telugu: 'te-IN', hindi: 'hi-IN', english: 'en-IN' };
+
+async function cloudOnce(name, languageCode, text) {
+  const res = await fetch(CLOUD_TTS, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-goog-api-key': process.env.GEMINI_API_KEY },
+    body: JSON.stringify({ input: { text }, voice: { languageCode, name }, audioConfig: { audioEncoding: 'MP3' } })
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => '');
+    throw Object.assign(new Error(`Cloud TTS ${res.status}: ${body.slice(0, 200)}`), { status: res.status, retryAfter: retryAfter(res, body) });
+  }
+  const json = await res.json();
+  if (!json.audioContent) throw Object.assign(new Error('Cloud TTS returned no audio'), { status: 502 });
+  return { audio: Buffer.from(json.audioContent, 'base64'), mimeType: 'audio/mpeg', modelVersion: `cloud-tts:${name}` };
+}
+
+async function cloudSpeak({ text, voice, language }) {
+  if (!process.env.GEMINI_API_KEY) throw Object.assign(new Error('GEMINI_API_KEY is not set'), { status: 503 });
+  const lc = LOCALES[language] || LOCALES.telugu;
+  try { return await cloudOnce(`${lc}-Chirp3-HD-${voice}`, lc, text); } catch (err) {
+    if (err.status !== 400 && err.status !== 404) throw err;
+    return cloudOnce(`${lc}-Standard-A`, lc, text);
+  }
+}
+
+// Seconds Google asks us to wait, from the Retry-After header or the
+// RetryInfo detail ("retryDelay": "37s") in the error body.
+function retryAfter(res, body) {
+  const h = Number(res.headers?.get?.('retry-after'));
+  if (h > 0) return h;
+  const m = /"retryDelay":\s*"(\d+)/.exec(body || '');
+  return m ? Number(m[1]) : null;
+}
+
+// An engine that is out of quota, switched off for this key, or unknown is
+// skipped for a while instead of being asked again on every sentence.
+const resting = new Map(); // engine → time it may be tried again
+const restFor = (err) => {
+  if (err.status === 429) return (err.retryAfter || 60) * 1000;
+  if (err.status === 401 || err.status === 403) return 10 * 60 * 1000;
+  if (err.status === 400 || err.status === 404) return 60 * 60 * 1000;
+  return 0;
+};
+export const _resetTtsEngines = () => resting.clear();
+
+/**
+ * Speech in Professor Qubirex's one voice. Tries Cloud TTS (Chirp 3 HD),
+ * then the Gemini TTS models, all with the same female voice; it never
+ * changes to another voice to get past a failure.
+ * @param {{model: string, text: string, voice: string, language?: string, style?: string}} req
+ */
 export async function speak(req) {
-  const models = [req.model, ...TTS_FALLBACK_MODELS.filter(m => m !== req.model)];
-  let last;
-  for (const model of models) {
-    try { return await ttsOnce(model, req); } catch (err) {
+  if (!process.env.GEMINI_API_KEY) throw Object.assign(new Error('GEMINI_API_KEY is not set'), { status: 503 });
+  const engines = [
+    ['cloud-tts', () => cloudSpeak(req)],
+    ...[req.model, ...TTS_FALLBACK_MODELS.filter(m => m !== req.model)].map(m => [m, () => ttsOnce(m, req)])
+  ];
+  const now = Date.now();
+  let last = null;
+  for (const [name, run] of engines) {
+    if ((resting.get(name) || 0) > now) continue;
+    try { return await run(); } catch (err) {
       last = err;
-      if (err.status !== 404 && err.status !== 400) throw err; // only an unknown model moves on
+      const ms = restFor(err);
+      if (ms) resting.set(name, Date.now() + ms);
     }
+  }
+  if (!last) {
+    // Every engine is resting: report a rate limit so the page waits and retries.
+    const soonest = Math.min(...engines.map(([n]) => resting.get(n) || now));
+    throw Object.assign(new Error('All voice engines are resting'), { status: 429, retryAfter: Math.max(1, Math.ceil((soonest - now) / 1000)) });
   }
   throw last;
 }

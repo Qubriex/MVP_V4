@@ -17,11 +17,14 @@ style, captions and check questions. It extends v4.3 §5 (BUILD) and §19
 
 | Rule | Where |
 |---|---|
-| One consistent female voice on every device: Gemini text-to-speech, prebuilt voice **Kore** (variant A, default) or **Aoede** (variant B, set in the learner's profile). | `core/ai/gateway.js` `TTS_VOICES`, `synthesize()` |
-| Model `gemini-2.5-flash-preview-tts`; if Google retires the name, the adapter tries the alternatives. `GEMINI_TTS_MODEL` and `GEMINI_TTS_VOICE` override both. | `core/ai/adapters/gemini.js` `speak()` |
-| No stutter: speech starts with a short first part (≈220 characters, so it begins quickly), then larger parts (≈480). The next part downloads while the current one plays. The speed setting applies throughout. | `frontend/src/utils/voice.js` `parts()`, `speak()` |
+| **One voice, female, for every learner, page and reply**: prebuilt voice **Kore**. Lessons, answers to spoken questions, answers to typed questions, check questions, replays and the profile preview all use it. There is no second voice to choose. | `core/ai/gateway.js` `TTS_VOICE`, `synthesize()` |
+| Engines, all with the same voice: Google Cloud Text-to-Speech **Chirp 3 HD** (`te-IN-Chirp3-HD-Kore`, `hi-IN-Chirp3-HD-Kore`; small MP3s, large quota), then the Gemini TTS models. An engine that is out of quota (429), switched off for the key (403) or unknown (400/404) rests for a while and the next one is used. `GEMINI_TTS_MODEL` and `GEMINI_TTS_VOICE` override the defaults. | `core/ai/adapters/gemini.js` `speak()` |
+| When every engine is busy, `/learner/tts` answers 429 with `Retry-After`; the page waits and asks again. Only "not configured" (503) turns the server voice off for the visit, so a busy moment never changes the voice for the rest of the lesson. | `api/routes/learner.js`, `frontend/src/utils/voice.js` `fetchAudio()` |
+| Replies are spoken in voice mode **and** typing mode (low-bandwidth mode excepted). | `Session.js` |
+| No stutter: speech starts with a short first part (≈260 characters, so it begins quickly), then large parts (≈1,200), so a reply is two or three requests. The next part downloads while the current one plays. The speed setting applies throughout. | `frontend/src/utils/voice.js` `parts()`, `speak()` |
 | Before speaking, remove anything that makes a voice stumble: markdown, code fences, brackets, arrows, and English glosses in brackets inside Telugu/Hindi text. | `voice.js` `speakable()` |
-| If the server voice is unavailable (no key, outage, autoplay blocked), the browser voice takes over, preferring female voices, in fewer and larger parts. | `voice.js` `pickVoice()`, `speakBrowser()` |
+| Never a male voice: if the server voice cannot be reached, the browser speaks only with a voice known to be female (e.g. Microsoft Shruti, Swara, Kalpana). A device without one shows the reply as text, with a note, and the next reply tries her voice again. | `voice.js` `pickVoice()`, `speakBrowser()` |
+| If the browser blocks audio until a tap, the page asks for a tap on Replay rather than switching voice. | `voice.js` `speak()` |
 | Low-bandwidth mode never downloads audio; replies show as captions. | `Session.js` |
 | Replays come from a cache: in the browser per page, and on the server per instance. | `voice.js` `audioCache`, `gateway.js` `ttsCache` |
 
@@ -67,4 +70,9 @@ Enforced in `core/evidence/checkWriter.js`.
 
 `/api/health?deep=1&ai=1` makes one tiny text call and one tiny voice call. It reports:
 - `ai.live`: whether the key and model work;
-- `ai.voice`: whether speech works.
+- `ai.voice`: whether speech works, and `engine`: which one answered
+  (`cloud-tts:te-IN-Chirp3-HD-Kore` is the best case).
+
+For the Cloud Text-to-Speech engine, turn on the **Cloud Text-to-Speech API**
+in the Google Cloud project that owns the key (APIs & Services → Library).
+Without it the Gemini TTS models are used, whose free quota is small.

@@ -114,7 +114,7 @@ export function createApp({ drainOutbox = null } = {}) {
         try {
           const t0 = Date.now();
           const v = await synthesize({ text: 'నమస్కారం' });
-          body.ai.voice = { ok: true, bytes: v.audio.length, ms: Date.now() - t0 };
+          body.ai.voice = { ok: true, engine: v.engine, bytes: v.audio.length, ms: Date.now() - t0 };
         } catch (err) {
           body.ai.voice = { ok: false, error: String(err.cause?.message || err.message).slice(0, 300) };
         }
