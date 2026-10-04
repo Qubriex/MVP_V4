@@ -90,6 +90,9 @@ export default function Reviews() {
         <>
           <section className="ln-col" style={{ gap: 12 }}>
             <h2 className="ln-h2">Due now {due.length > 0 && <span className="ln-tag ln-tag-accent">{due.length}</span>}</h2>
+            {!data && !error && [0, 1, 2].map(i => (
+              <div key={i} className="ln-card ln-skeleton" aria-hidden="true" style={{ height: 76 }} />
+            ))}
             {data && due.length === 0 && <div className="ln-card ln-muted">Nothing due. {done > 0 ? 'Nice work today.' : 'Reviews appear here 3 days after you master a node, then at growing intervals.'}</div>}
             {due.map(item => (
               <div key={`${item.kind}-${item.node_id}`} className="ln-card ln-between ln-wrap" style={{ gap: 12 }}>

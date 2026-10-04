@@ -44,7 +44,7 @@ The backend lives on `claude/learner-side-updates-vthycg` until it is merged.
 Open `https://<your-deployment>/api/health?deep=1`. You should see:
 
 ```json
-"database": { "ok": true, "driver": "pg", "migrations": 3, … },
+"database": { "ok": true, "driver": "pg", "migrations": 4, … },
 "secrets": "database (JWT_SECRET, SUBJECT_SECRET, ITEM_SEED_SECRET, CRON_SECRET, signing key)",
 "params": "priors (QBX_ALLOW_PRIORS)"
 ```
@@ -106,6 +106,28 @@ Values in the environment always take precedence over the database. Change
 the signing key and `SUBJECT_SECRET` before issuing real passports: passports
 signed with the old key stay verifiable (old public keys remain published),
 but subject IDs change.
+
+## Speed: run it in Mumbai (do both steps together)
+
+Today the functions run in Washington, D.C. (`iad1`) and the Neon database is
+in AWS US East (`us-east-1`). They are next to each other, so database
+queries are fast, but every click from India crosses to the US and back
+(about a quarter of a second per round trip, before any work). Moving only the functions to Mumbai
+would be **slower**: each page makes several database queries, and every one
+would then cross the ocean. Move both:
+
+1. **Database.** Vercel → mvp-v4 → Storage → Create Database → Neon, region
+   **Asia Pacific (Mumbai) aws-ap-south-1**, and connect it to the project
+   (Production and Preview). Disconnect the US one. The new database starts
+   empty: the deployment creates the tables, its secrets and (with
+   `QBX_SEED_TEST_DATA=1`) the test accounts on first start. Test progress in
+   the old database is not copied; sign-ins and passports issued there stop
+   working, because the new database has new secrets.
+2. **Functions.** Add `"regions": ["bom1"]` to `vercel.json` (or Settings →
+   Functions → Function Region → Mumbai, bom1), then redeploy.
+
+Check: `/api/health?deep=1` shows `"database": {"ok": true …}` and answers
+in well under a second from India.
 
 ## Troubleshooting
 

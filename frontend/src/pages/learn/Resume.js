@@ -9,6 +9,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { Download, ChevronUp, ChevronDown, History } from 'lucide-react';
 import api, { getOr } from '../../utils/api';
 import { MOCK_RESUME } from '../../utils/learnerMockData';
+import { useAuth } from '../../context/AuthContext';
 
 const TEMPLATES = [
   { id: 'classic', name: 'Classic', thumb: { borderTop: '6px solid var(--accent-800)' } },
@@ -27,6 +28,7 @@ function orderBy(list, order) {
 }
 
 export default function Resume() {
+  const { user } = useAuth();
   const [params] = useSearchParams();
   const [data, setData] = useState(null);
   const [template, setTemplate] = useState('classic');
@@ -39,6 +41,9 @@ export default function Resume() {
   const [busy, setBusy] = useState('');
   const [message, setMessage] = useState('');
   const [showVersions, setShowVersions] = useState(false);
+  const [step, setStep] = useState(0);
+  const [saved, setSaved] = useState(null); // what was last saved, to know about unsaved changes
+  const draftKey = `qbx_resume_draft_${user?.id || user?.learner_ref || 'me'}`;
 
   const apply = (r, profile) => {
     setTemplate(r.template || 'classic');
@@ -46,12 +51,41 @@ export default function Resume() {
     setSummary(r.summary ?? profile.about ?? '');
     setSkillOrder(r.skill_order || null);
     setTailoredFor(r.tailored_job_id || null);
+    setSaved({ template: r.template || 'classic', sections: r.sections, summary: r.summary ?? profile.about ?? '', skillOrder: r.skill_order || null, tailoredFor: r.tailored_job_id || null });
   };
+  const current = { template, sections, summary, skillOrder, tailoredFor };
+  const dirty = !!saved && JSON.stringify(current) !== JSON.stringify(saved);
+
+  // Unsaved work is kept on this device as a draft, and leaving the page
+  // with unsaved changes asks first.
+  useEffect(() => {
+    if (!saved) return;
+    try { if (dirty) localStorage.setItem(draftKey, JSON.stringify({ ...current, at: Date.now() })); else localStorage.removeItem(draftKey); } catch { /* storage blocked */ }
+  }, [template, sections, summary, skillOrder, tailoredFor, saved]); // eslint-disable-line
+  useEffect(() => {
+    if (!dirty) return undefined;
+    const warn = (e) => { e.preventDefault(); e.returnValue = ''; };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [dirty]);
+  useEffect(() => {
+    if (busy !== 'tailor') { setStep(0); return undefined; }
+    const t = setInterval(() => setStep(n => Math.min(n + 1, 2)), 2500);
+    return () => clearInterval(t);
+  }, [busy]);
 
   useEffect(() => {
     getOr('/learner/resume', MOCK_RESUME, d => d && d.profile && d.resume).then(d => {
       setData(d);
       apply(d.resume, d.profile);
+      try {
+        const draft = JSON.parse(localStorage.getItem(draftKey) || 'null');
+        if (draft) {
+          setTemplate(draft.template); setSections(draft.sections); setSummary(draft.summary);
+          setSkillOrder(draft.skillOrder); setTailoredFor(draft.tailoredFor);
+          setMessage('Restored your unsaved changes from this device. Save a version to keep them.');
+        }
+      } catch { /* no draft */ }
       const list = [...d.saved_jobs];
       const wanted = params.get('job');
       if (wanted && !list.some(j => j.id === wanted)) {
@@ -90,6 +124,8 @@ export default function Resume() {
     try {
       const res = await api.post('/learner/resume', { template, sections, summary, skill_order: skillOrder, tailored_job_id: tailoredFor });
       setData(d => ({ ...d, resume: res.data, versions: [{ version: res.data.version, template: res.data.template, tailored_job_id: res.data.tailored_job_id, created_at: res.data.created_at }, ...d.versions] }));
+      setSaved({ ...current });
+      try { localStorage.removeItem(draftKey); } catch { /* ignore */ }
       setMessage(`Saved as version ${res.data.version}.`);
     } catch (e) {
       setMessage('Couldn’t save — check your connection.');
@@ -192,7 +228,7 @@ export default function Resume() {
                   {jobs.map(j => <option key={j.id} value={j.id}>{j.title} · {j.company_type}</option>)}
                 </select>
                 <span className="ln-small" style={{ lineHeight: 1.5 }}>Reorders skills to match the JD and rewrites the summary. Only claims skills you have mastered or declared.</span>
-                <button type="button" className="ln-btn ln-btn-ink" onClick={tailor} disabled={busy === 'tailor'}>{busy === 'tailor' ? 'Tailoring…' : 'Tailor resume'}</button>
+                <button type="button" className="ln-btn ln-btn-ink" onClick={tailor} disabled={busy === 'tailor'}>{busy === 'tailor' ? ['Reading the job description…', 'Matching your skills…', 'Writing your summary…'][step] : 'Tailor resume'}</button>
                 {tailoredJob && <span className="ln-xs ln-muted">Currently tailored to: {tailoredJob.title}</span>}
               </>
             )}
@@ -212,7 +248,11 @@ export default function Resume() {
           <section className="ln-card" style={{ padding: 20, borderRadius: 'var(--radius-lg)', gap: 8 }}>
             <label htmlFor="rsum" className="ln-h2" style={{ fontSize: 15 }}>Summary on this resume</label>
             <textarea id="rsum" className="ln-textarea" rows={5} value={summary} onChange={e => setSummary(e.target.value)} />
-            <button type="button" className="ln-link" style={{ alignSelf: 'flex-start', fontSize: 13 }} onClick={() => setSummary(p.about || '')}>Reset to “About you” from profile</button>
+            <div className="ln-row ln-wrap" style={{ gap: 10, alignItems: 'center' }}>
+              <button type="button" className="ln-btn ln-btn-primary ln-btn-sm" onClick={saveVersion} disabled={busy === 'save' || !dirty}>{busy === 'save' ? 'Saving…' : dirty ? 'Save' : '✓ Saved'}</button>
+              {dirty && <span className="ln-xs ln-muted">Unsaved changes · kept on this device until you save</span>}
+              <button type="button" className="ln-link" style={{ fontSize: 13, marginLeft: 'auto' }} onClick={() => setSummary(p.about || '')}>Reset to “About you” from profile</button>
+            </div>
           </section>
         </aside>
 

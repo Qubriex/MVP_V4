@@ -2,12 +2,13 @@
 // One featured topic (new roles + what to learn, in order) and a grid of
 // topics filtered by sector. Skills outside the programme are requested from
 // the institution, never added directly.
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Volume2, Square } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { speechTag } from '../../context/UiLangContext';
-import api, { getOr } from '../../utils/api';
+import api from '../../utils/api';
+import { useCachedGet } from '../../utils/cachedGet';
 import { useSpeechOutput } from '../../utils/voice';
 import { MOCK_TOPICS } from '../../utils/learnerMockData';
 import VoiceStatus from '../../components/learn/VoiceStatus';
@@ -18,7 +19,9 @@ export default function Topics() {
   const { user } = useAuth();
   const [params, setParams] = useSearchParams();
   const [sector, setSector] = useState('');
-  const [data, setData] = useState(null);
+  // Cached: returning to Topics or switching back to a sector shows at once.
+  const { data: live, error: topicsError } = useCachedGet(`/market/topics${sector ? `?sector=${encodeURIComponent(sector)}` : ''}`);
+  const data = live && Array.isArray(live.topics) ? live : topicsError ? MOCK_TOPICS : null;
   const [featuredId, setFeaturedId] = useState(params.get('topic'));
   const [introBusy, setIntroBusy] = useState(false);
   const [introError, setIntroError] = useState('');
@@ -26,9 +29,6 @@ export default function Topics() {
   const speech = useSpeechOutput({ lang: speechTag(user?.language || 'telugu') });
   const requests = useSkillRequests();
 
-  useEffect(() => {
-    getOr(`/market/topics${sector ? `?sector=${encodeURIComponent(sector)}` : ''}`, MOCK_TOPICS, d => d && Array.isArray(d.topics)).then(setData);
-  }, [sector]);
 
   const all = data ? [data.featured, ...data.topics].filter(Boolean) : [];
   const featured = all.find(tp => tp.id === featuredId) || data?.featured || null;
