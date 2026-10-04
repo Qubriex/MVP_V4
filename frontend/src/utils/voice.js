@@ -70,6 +70,8 @@ export function speakable(text) {
 // Sentences grouped into parts of about 400 characters (a short first part
 // so speech starts quickly). Each part is one voice request; the next part
 // downloads while the current one plays. Smaller parts come back faster.
+/** The parts a reply is spoken in (for highlighting the part being spoken). */
+export const speechParts = (text) => parts(speakable(text));
 function parts(text, firstMax = 180, max = 400) {
   const sentences = text.match(/[^.!?।\n]+[.!?।]*\s*/g)?.map(x => x.trim()).filter(Boolean) || [];
   const out = [];

@@ -109,7 +109,7 @@ function Security({ settings, reload }) {
         <span className="ln-label">Signed-in devices</span>
         <span className="ln-xs ln-muted">Your account works on one device at a time. Signing in on a new device signs out the old one.</span>
         {settings.devices.map(d => (
-          <div key={d.id} className="ln-tile ln-row" style={{ padding: '10px 12px', gap: 10 }}>
+          <div key={d.id} className="ln-tile" style={{ padding: '10px 12px', gap: 10, flexDirection: 'row', alignItems: 'center', textAlign: 'left' }}>
             <Smartphone size={16} aria-hidden="true" />
             <span className="ln-col" style={{ flex: 1, gap: 2 }}><b style={{ fontSize: 14 }}>{d.device}{d.current ? ' · this device' : ''}</b><span className="ln-xs ln-muted">{[d.city, `signed in ${when(d.signed_in_at)}`].filter(Boolean).join(' · ')}</span></span>
             {!d.current && <button type="button" className="ln-btn ln-btn-sm" onClick={() => signOut(d.id)}>Sign out</button>}
