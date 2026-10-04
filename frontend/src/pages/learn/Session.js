@@ -27,7 +27,8 @@ import { ArrowLeft, Clock, Mic, Keyboard, RotateCcw, Pause, Play, Volume2, Award
 import { useAuth } from '../../context/AuthContext';
 import { useUiLang, speechTag } from '../../context/UiLangContext';
 import api, { getOr } from '../../utils/api';
-import { useSpeechInput, useSpeechOutput, hasVoiceFor, usingServerVoice } from '../../utils/voice';
+import { useSpeechInput, useSpeechOutput } from '../../utils/voice';
+import VoiceStatus from '../../components/learn/VoiceStatus';
 import { MOCK_SESSION_START, MOCK_PROFILE, MOCK_LEARNER_DASHBOARD } from '../../utils/learnerMockData';
 import MermaidDiagram from '../../components/learn/MermaidDiagram';
 import { newTracker, recordPaste, provenanceFor } from '../../utils/provenance';
@@ -276,7 +277,6 @@ export default function Session() {
 
   const orb = mic.listening ? 'listening' : busy ? 'thinking' : speech.speakingId ? 'speaking' : mode === 'typing' ? 'typing' : phase === 'mastery_check' ? 'yourTurn' : 'idle';
   const orbLabel = { listening: t('session.listening'), thinking: transcribing ? 'Transcribing…' : t('session.thinking'), speaking: t('session.speaking'), typing: t('session.typing'), yourTurn: t('session.yourTurn'), idle: t('session.idle') }[orb];
-  const noVoice = speech.supported && !usingServerVoice() && !hasVoiceFor(bcp47);
   const clock = `${Math.floor(elapsed / 60)}:${String(elapsed % 60).padStart(2, '0')}`;
   const langName = LANG_LABEL[language] || language;
   const liveCaption = mic.listening && mic.interim ? mic.interim : lastAi?.content;
@@ -349,8 +349,7 @@ export default function Session() {
               <div className="ln-col" style={{ gap: 10, alignItems: 'center', width: '100%' }}>
                 <p lang={bcp47} className="ln-caption-te" aria-live="polite">{liveCaption || (busy ? '' : '…')}</p>
                 {showEnglish && !mic.listening && lastAi?.caption_en && <p className="ln-caption-en">{lastAi.caption_en}</p>}
-                {noVoice && orb !== 'listening' && <p className="ln-caption-en" style={{ fontSize: 12 }}>Professor Qubirex's voice is not available on this deployment, so replies show as captions.</p>}
-                {!noVoice && speech.voiceIssue && orb !== 'listening' && <p className="ln-caption-en" style={{ fontSize: 12 }}>{speech.voiceIssue}</p>}
+                {orb !== 'listening' && <VoiceStatus speech={speech} dark />}
               </div>
             )}
           </div>

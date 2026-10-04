@@ -8,7 +8,19 @@
 // has mastered (verified by a Qubirex check) or declared themselves, and keep
 // the two apart. Never invent employers, projects, grades or numbers.
 // ─────────────────────────────────────────────────────────────────────────────
-import { callAI, callAIWithAudio, safeParseJSON } from './instructionEngine.js';
+import { callAIWithAudio, safeParseJSON } from './instructionEngine.js';
+import { generate } from './ai/gateway.js';
+
+// Spoken Telugu/Hindi needs 3–5× the tokens of the same English, so spoken
+// helpers get room for it, ask for JSON through the gateway (checked, repaired
+// once) and skip the model's hidden "thinking", which would use up the budget.
+// A reply that is cut off or not valid JSON throws instead of being returned.
+async function spokenJson({ task, system, input, maxTokens, temperature, required = ['text'] }) {
+  const r = await generate({ task, system, input, maxTokens, temperature, thinking: false, schema: { required } });
+  const text = String(r.json.text || '').trim();
+  if (required.includes('text') && !text) throw Object.assign(new Error('The model returned no text'), { status: 502 });
+  return r.json;
+}
 
 const LANG_NAMES = { telugu: 'Telugu', hindi: 'Hindi', english: 'English' };
 
@@ -31,8 +43,8 @@ Write 2–3 sentences of plain, confident English in the first person implied (n
 Use ONLY facts the learner said, plus these verified skills if relevant: ${verifiedSkills.join(', ') || 'none'}. Target roles: ${targetRoles.join(', ') || 'not given'}.
 Never invent employers, grades, numbers or projects.
 Respond ONLY with JSON: {"summary": "..."}`;
-  const text = await callAI({ system, userMessage: `Learner (${name || 'learner'}) said:\n${transcript}`, maxTokens: 400, temperature: 0.4 });
-  return (safeParseJSON(text, { summary: text }).summary || '').trim();
+  const r = await generate({ task: 'RESUME.summary_from_speech', system, input: `Learner (${name || 'learner'}) said:\n${transcript}`, maxTokens: 1024, temperature: 0.4, thinking: false, schema: { required: ['summary'] } });
+  return String(r.json.summary || '').trim();
 }
 
 // ─── tailorResume() — reorder skills and rewrite the summary for one JD ──────
@@ -48,8 +60,7 @@ Honesty rules:
 - Never invent experience, employers, numbers or projects.
 Respond ONLY with JSON: {"summary": "...", "skill_order": ["..."]}`;
   const jd = `${job.title} (${job.company_type}, ${job.city})\n${job.about}\nResponsibilities: ${job.responsibilities.join('; ')}\nSkills: ${job.skills.map(s => s.name + (s.required ? '' : ' (nice to have)')).join(', ')}`;
-  const text = await callAI({ system, userMessage: `Current summary:\n${about || '(none)'}\n\nJob description:\n${jd}`, maxTokens: 600, temperature: 0.4 });
-  const parsed = safeParseJSON(text, { summary: about || '', skill_order: allowed });
+  const parsed = (await generate({ task: 'RESUME.tailor', system, input: `Current summary:\n${about || '(none)'}\n\nJob description:\n${jd}`, maxTokens: 2048, temperature: 0.4, thinking: false, schema: { required: ['summary'] } })).json;
   // Enforce the allow-list server-side too — the prompt is not a guarantee.
   const order = (parsed.skill_order || []).filter(x => allowed.includes(x));
   allowed.forEach(x => { if (!order.includes(x)) order.push(x); });
@@ -65,9 +76,8 @@ async function explainJobAloud({ job, language = 'telugu' }) {
 Cover: the role and company type, what they will do day to day, the skills asked for (say which are "nice to have"), location, work mode and salary. 6–9 short sentences, suitable for text-to-speech. No lists, no markdown.
 Respond ONLY with JSON: {"text": "...", "captionEn": "one-sentence English summary"}`;
   const jd = `${job.title} — ${job.company_type}, ${job.city} (${job.mode}), ₹${job.salary_min}–${job.salary_max} LPA, ${job.experience}\n${job.about}\nResponsibilities: ${job.responsibilities.join('; ')}\nSkills: ${job.skills.map(x => x.name + (x.required ? '' : ' (nice to have)')).join(', ')}`;
-  const text = await callAI({ system, userMessage: jd, maxTokens: 900, temperature: 0.5 });
-  const parsed = safeParseJSON(text, { text, captionEn: null });
-  return { text: (parsed.text || '').trim(), caption_en: parsed.captionEn || null };
+  const parsed = await spokenJson({ task: 'MARKET.read_jd', system, input: jd, maxTokens: 4096, temperature: 0.5 });
+  return { text: parsed.text.trim(), caption_en: parsed.captionEn || null };
 }
 
 // ─── explainTopicAloud() — "Listen to a 2-min intro" on an emerging topic ────
@@ -77,9 +87,8 @@ async function explainTopicAloud({ topic, language = 'telugu' }) {
 Explain what the field is with one everyday example from India, what the new roles do, and what to learn first, in order. About 12–16 short sentences for text-to-speech. No lists, no markdown, no invented statistics.
 Respond ONLY with JSON: {"text": "...", "captionEn": "one-sentence English summary"}`;
   const brief = `${topic.name} (${topic.sector}, ${topic.growth})\n${topic.desc}\nNew roles: ${topic.roles.join(', ')}\nLearning order: ${topic.steps.map(x => x.name).join(' → ')}`;
-  const text = await callAI({ system, userMessage: brief, maxTokens: 1400, temperature: 0.6 });
-  const parsed = safeParseJSON(text, { text, captionEn: null });
-  return { text: (parsed.text || '').trim(), caption_en: parsed.captionEn || null };
+  const parsed = await spokenJson({ task: 'MARKET.topic_intro', system, input: brief, maxTokens: 6144, temperature: 0.6 });
+  return { text: parsed.text.trim(), caption_en: parsed.captionEn || null };
 }
 
 // ─── interviewTurn() — voice interview practice for one JD ─────────────────────
@@ -98,9 +107,8 @@ ${asked === 0 ? 'Greet the candidate in one line and ask the first question.' : 
 Mix question types: one about themselves, technical questions on the JD skills, one scenario, one about a project. Never mark answers right/wrong in a harsh way.
 Respond ONLY with JSON: {"text": "what you say, ${lang}", "captionEn": "one-line English gloss", "done": ${done}}`;
   const history = turns.slice(-10).map(x => `${x.role === 'interviewer' ? 'Interviewer' : 'Candidate'}: ${x.text}`).join('\n') || '(start)';
-  const text = await callAI({ system, userMessage: history, maxTokens: 600, temperature: 0.6 });
-  const parsed = safeParseJSON(text, { text, captionEn: null, done });
-  return { text: (parsed.text || '').trim(), caption_en: parsed.captionEn || null, done, question_number: done ? null : asked + 1, total: INTERVIEW_QUESTIONS };
+  const parsed = await spokenJson({ task: 'MARKET.interview', system, input: history, maxTokens: 3072, temperature: 0.6 });
+  return { text: parsed.text.trim(), caption_en: parsed.captionEn || null, done, question_number: done ? null : asked + 1, total: INTERVIEW_QUESTIONS };
 }
 
 export { transcribeAudio, summaryFromSpeech, tailorResume, explainJobAloud, explainTopicAloud, interviewTurn };

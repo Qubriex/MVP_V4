@@ -4,8 +4,11 @@
 // core/ai/adapters/*.
 //
 //   generate({ task, system, input, schema?, audio?, temperature?, maxTokens?,
-//              promptId?, promptVersion?, institutionId? })
-//     → { text, json?, modelId, modelVersion, adapter }
+//              thinking?, promptId?, promptVersion?, institutionId? })
+//     → { text, json?, modelId, modelVersion, adapter, truncated }
+//   thinking: false → no hidden reasoning before the answer (faster; the whole
+//   token budget goes to the reply). A reply cut off at maxTokens is logged as
+//   'truncated' and, with a schema, counts as a schema failure.
 //
 // - timeout (ai.timeoutMs, 20 s) or a 5xx → one retry, then the route's fallback
 // - schema ({ required: [...] }) → parse + check, one repair retry, then a
@@ -116,13 +119,13 @@ export async function generate(req) {
         }));
         json = parseJson(result.text);
       }
-      if (!satisfies(json, req.schema)) {
+      if (!satisfies(json, req.schema) || result.truncated) {
         await logCall({ ...base, ms: Date.now() - started, status: 'schema_failed', modelVersion: result.modelVersion, tokensIn: result.tokensIn, tokensOut: result.tokensOut });
         throw new GatewayError('schema_failed', `Model output for ${req.task} did not match its schema`);
       }
     }
-    await logCall({ ...base, adapter: used.adapter, model: used.model, ms: Date.now() - started, status: fellBack ? 'fallback' : 'ok', modelVersion: result.modelVersion, tokensIn: result.tokensIn, tokensOut: result.tokensOut });
-    return { text: result.text, json, modelId: used.model, modelVersion: result.modelVersion, adapter: used.adapter };
+    await logCall({ ...base, adapter: used.adapter, model: used.model, ms: Date.now() - started, status: result.truncated ? 'truncated' : fellBack ? 'fallback' : 'ok', modelVersion: result.modelVersion, tokensIn: result.tokensIn, tokensOut: result.tokensOut });
+    return { text: result.text, json, modelId: used.model, modelVersion: result.modelVersion, adapter: used.adapter, truncated: !!result.truncated };
   } catch (err) {
     if (!(err instanceof GatewayError && err.code === 'schema_failed')) {
       await logCall({ ...base, ms: Date.now() - started, status: 'error', error: String(err.message).slice(0, 300) });
@@ -163,4 +166,13 @@ export async function synthesize({ text, language = 'telugu', institutionId = nu
     await logCall({ task: 'TEACH.speak', adapter: r.adapter, model, ms: Date.now() - started, status: 'error', institutionId, error: String(err.message).slice(0, 300) });
     throw err instanceof GatewayError ? err : new GatewayError('upstream', 'Speech synthesis failed', err);
   }
+}
+
+// ─── Voice speed telemetry ─────────────────────────────────────────────────────
+// Reported by the learner's page: how long until her voice started, and the
+// whole turn (learner finished → voice started). Kept in model_calls so the
+// admin Quality page reads speed next to the AI calls.
+export async function recordVoiceMetric({ firstMs, turnMs = null, chars = null, institutionId = null }) {
+  await logCall({ task: 'CLIENT.voice_first_audio', adapter: 'client', model: 'browser', ms: firstMs, status: 'ok', institutionId, tokensIn: chars });
+  if (turnMs != null) await logCall({ task: 'CLIENT.voice_turn', adapter: 'client', model: 'browser', ms: turnMs, status: 'ok', institutionId });
 }

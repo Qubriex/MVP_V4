@@ -342,3 +342,7 @@
 /* Page content fade inside a portal shell (the shell itself stays mounted). */
 .ln-page-fade { display: flex; flex-direction: column; gap: inherit; flex: 1; min-width: 0; animation: page-fade-in 240ms ease backwards; }
 @media (prefers-reduced-motion: reduce) { .ln-page-fade { animation: none; } }
+
+/* Voice status: why she is silent, with Replay */
+.ln-voice-status { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border-radius: var(--radius-md); background: var(--status-warning-bg, #FBF1DE); color: var(--color-text); font-size: 14px; }
+.ln-voice-status.is-dark { background: rgba(255, 255, 255, 0.06); color: var(--stage-text, #F4EFE6); border: 1px solid rgba(255, 255, 255, 0.12); }

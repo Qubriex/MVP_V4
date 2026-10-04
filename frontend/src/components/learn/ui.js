@@ -1,7 +1,7 @@
 // src/components/learn/ui.js
 // Small shared pieces for the learner pages: status tags, match ring,
 // progress bar, sample-data badge, formatters and the skill-request hook.
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Check, Plus } from 'lucide-react';
 import api from '../../utils/api';
 
@@ -73,28 +73,39 @@ export const initials = (name = '') => name.split(/\s+/).filter(Boolean).slice(0
 // ─── Request a skill from the institution ──────────────────────────────────────
 // Returns request(name, source) and a Set of names already requested this
 // session, so buttons can flip to "Requested" straight away.
+// Skill requests the learner sent to their institution, with each one's
+// status (pending / added / declined), and a short confirmation after sending.
+export const REQUEST_STATUS = { pending: 'Requested · waiting for your institution', added: 'Added to your programme', declined: 'Your institution declined this one' };
 export function useSkillRequests() {
-  const [requested, setRequested] = useState(() => new Set());
+  const [statuses, setStatuses] = useState(() => new Map());
   const [error, setError] = useState('');
-  const request = useCallback(async (skillName, source) => {
-    setError('');
-    try {
-      await api.post('/learner/skill-requests', { skill_name: skillName, source });
-      setRequested(prev => new Set(prev).add(skillName));
-    } catch (e) {
-      setError('Could not send the request. Check your connection and try again.');
-    }
+  const [sent, setSent] = useState('');
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    api.get('/learner/skill-requests').then(r => setStatuses(new Map((r.data || []).map(x => [x.skill_name, x.status || 'pending'])))).catch(() => {});
   }, []);
-  return { request, requested, error };
+  const requestMany = useCallback(async (names, source) => {
+    setError(''); setSent(''); setBusy(true);
+    const results = await Promise.allSettled(names.map(n => api.post('/learner/skill-requests', { skill_name: n, source })));
+    const ok = names.filter((n, i) => results[i].status === 'fulfilled');
+    setStatuses(prev => { const m = new Map(prev); ok.forEach(n => { if (!m.has(n)) m.set(n, 'pending'); }); return m; });
+    if (ok.length) setSent(`✓ ${ok.length} skill${ok.length === 1 ? '' : 's'} sent to your institution`);
+    if (ok.length < names.length) setError('Some requests could not be sent. Check your connection and try again.');
+    setBusy(false);
+    return ok.length;
+  }, []);
+  const request = useCallback((skillName, source) => requestMany([skillName], source), [requestMany]);
+  const requested = { has: (n) => statuses.has(n) };
+  return { request, requestMany, requested, statusOf: (n) => statuses.get(n) || null, error, sent, busy };
 }
 
 export function RequestButton({ name, source, requests, small = true }) {
-  const done = requests.requested.has(name);
+  const status = requests.statusOf(name);
   return (
-    <button type="button" className={`ln-btn ln-btn-outline-accent ${small ? 'ln-btn-sm' : ''}`} disabled={done}
+    <button type="button" className={`ln-btn ln-btn-outline-accent ${small ? 'ln-btn-sm' : ''}`} disabled={!!status || requests.busy}
       onClick={() => requests.request(name, source)}
-      title="Your institution owns your programme. This asks them to add the skill.">
-      {done ? 'Requested' : 'Request'}
+      title={status ? REQUEST_STATUS[status] : 'Your institution owns your programme. This asks them to add the skill.'}>
+      {status === 'added' ? '✓ Added' : status === 'declined' ? 'Declined' : status ? '✓ Requested' : 'Request'}
     </button>
   );
 }

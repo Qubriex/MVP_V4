@@ -14,6 +14,34 @@ export default function AdminQuality() {
     <>
       <header className="ln-pagehead"><div className="ln-col" style={{ gap: 4 }}><h1 className="ln-title">Evaluator quality</h1><span className="ln-sub">{q?.note || 'Loading…'}</span></div></header>
       {error && <div className="ln-error" role="alert">{error}</div>}
+      <h2 className="ln-h2" style={{ fontSize: 18 }}>Speed and failures, last 7 days</h2>
+      <span className="ln-small ln-muted">Targets: her voice starts within 2 s, and a whole voice turn takes under 4 s. “Cut off” means the reply hit its length limit.</span>
+      <div className="ln-tablewrap" style={{ marginBottom: 12 }}>
+        <table className="ln-table">
+          <thead><tr><th>Task</th><th>Calls</th><th>Median</th><th>90th percentile</th><th>Target</th><th>Failed</th><th>Cut off</th><th>Max tokens out</th></tr></thead>
+          <tbody>
+            {q && q.speed.length === 0 && <tr><td colSpan={8} className="ln-muted">No calls in the last 7 days.</td></tr>}
+            {(q?.speed || []).map(t => {
+              const slow = t.target_ms && t.p50_ms > t.target_ms;
+              return (
+                <tr key={t.task}><td style={{ fontWeight: 600 }}>{t.task}</td><td>{t.calls}</td><td>{(t.p50_ms / 1000).toFixed(1)} s</td><td>{(t.p90_ms / 1000).toFixed(1)} s</td>
+                  <td>{t.target_ms ? <span className={`ln-tag ${slow ? 'ln-tag-warning' : 'ln-tag-success'}`}>{slow ? '⚠ ' : '✓ '}{t.target_ms / 1000} s</span> : '—'}</td>
+                  <td>{t.failed || 0}</td><td>{t.truncated || 0}</td><td>{t.max_tokens_out ?? '—'}</td></tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <h2 className="ln-h2" style={{ fontSize: 18 }}>Which voice engine answered</h2>
+      <div className="ln-tablewrap" style={{ marginBottom: 24 }}>
+        <table className="ln-table">
+          <thead><tr><th>Engine</th><th>Status</th><th>Calls</th><th>Average</th></tr></thead>
+          <tbody>
+            {q && q.voice_engines.length === 0 && <tr><td colSpan={4} className="ln-muted">No voice calls in the last 7 days.</td></tr>}
+            {(q?.voice_engines || []).map((e, i) => <tr key={i}><td style={{ fontWeight: 600 }}>{e.engine}</td><td>{e.status}</td><td>{e.calls}</td><td>{(e.avg_ms / 1000).toFixed(1)} s</td></tr>)}
+          </tbody>
+        </table>
+      </div>
       <h2 className="ln-h2" style={{ fontSize: 18 }}>Hardest nodes</h2>
       <div className="ln-tablewrap" style={{ marginBottom: 24 }}>
         <table className="ln-table">

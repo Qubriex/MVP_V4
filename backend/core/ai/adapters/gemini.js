@@ -12,7 +12,7 @@ const getClient = () => {
 
 export const name = 'gemini';
 
-/** @param {{model: string, system?: string, input: string, audio?: {base64: string, mimeType: string}, temperature?: number, maxTokens?: number, json?: boolean}} req */
+/** @param {{model: string, system?: string, input: string, audio?: {base64: string, mimeType: string}, temperature?: number, maxTokens?: number, json?: boolean, thinking?: boolean}} req */
 // Google's rolling alias, used once if the configured model name is unknown to
 // this key (404), so a renamed or retired model does not take the tutor down.
 const FALLBACK_MODEL = 'gemini-flash-latest';
@@ -26,20 +26,37 @@ export async function generate(req) {
   }
 }
 
-async function call({ model, system, input, audio, temperature = 0.7, maxTokens = 1024, json = false }) {
+// thinking: false asks the model not to spend output tokens "thinking" first
+// (spoken replies, JSON helpers). Models that cannot turn thinking off answer
+// 400; the call is then repeated without the setting.
+async function call(req) {
+  try {
+    return await callOnce(req, req.thinking === false);
+  } catch (err) {
+    if (req.thinking === false && err?.status === 400 && /thinking/i.test(String(err.message))) return callOnce(req, false);
+    throw err;
+  }
+}
+
+async function callOnce({ model, system, input, audio, temperature = 0.7, maxTokens = 1024, json = false }, noThinking) {
   const m = getClient().getGenerativeModel({
     model,
     systemInstruction: system,
-    generationConfig: { temperature, maxOutputTokens: maxTokens, responseMimeType: json ? 'application/json' : 'text/plain' }
+    generationConfig: {
+      temperature, maxOutputTokens: maxTokens, responseMimeType: json ? 'application/json' : 'text/plain',
+      ...(noThinking ? { thinkingConfig: { thinkingBudget: 0 } } : {})
+    }
   });
   const parts = audio ? [{ inlineData: { mimeType: audio.mimeType, data: audio.base64 } }, { text: input }] : input;
   const result = await m.generateContent(parts);
   const usage = result.response.usageMetadata || {};
+  const finish = result.response.candidates?.[0]?.finishReason || null;
   return {
     text: result.response.text(),
     modelVersion: result.response.modelVersion || model,
     tokensIn: usage.promptTokenCount ?? null,
-    tokensOut: usage.candidatesTokenCount ?? null
+    tokensOut: usage.candidatesTokenCount ?? null,
+    truncated: finish === 'MAX_TOKENS'
   };
 }
 

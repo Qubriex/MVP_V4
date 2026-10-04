@@ -9,6 +9,8 @@ import { useAuth } from '../../context/AuthContext';
 import { useUiLang, speechTag } from '../../context/UiLangContext';
 import api, { getOr } from '../../utils/api';
 import { useSpeechInput, useSpeechOutput } from '../../utils/voice';
+import VoiceStatus from '../../components/learn/VoiceStatus';
+import { errMsg } from '../../utils/errors';
 import { MOCK_JOB_DETAIL } from '../../utils/learnerMockData';
 
 export default function Interview() {
@@ -36,7 +38,7 @@ export default function Interview() {
       setMeta(res.data);
       speech.speak(res.data.text, 'q');
     } catch (e) {
-      setError('The practice interviewer is unavailable right now. Try again in a moment.');
+      setError(errMsg(e, 'The practice interviewer is unavailable right now. Try again in a moment.'));
     }
     setBusy(false);
   }, [jobId, speech]);
@@ -85,7 +87,13 @@ export default function Interview() {
         </div>
         <p lang={bcp47} className="ln-caption-te" aria-live="polite">{mic.listening && mic.interim ? mic.interim : busy ? '…' : last?.text}</p>
         {!mic.listening && meta.caption_en && <p className="ln-caption-en">{meta.caption_en}</p>}
-        {(error || mic.error) && <div className="ln-banner-check" role="alert" style={{ borderColor: 'var(--status-danger)', color: '#F5C8BD' }}>{error || mic.error}</div>}
+        <VoiceStatus speech={speech} dark />
+        {(error || mic.error) && (
+          <div className="ln-banner-check" role="alert" style={{ borderColor: 'var(--status-danger)', color: '#F5C8BD', gap: 10, flexWrap: 'wrap' }}>
+            <span>{error || mic.error}</span>
+            {error && !busy && <button type="button" className="ln-btn ln-btn-sm ln-btn-ghost-dark" onClick={() => ask(turnsRef.current)}>Try again</button>}
+          </div>
+        )}
 
         {meta.done ? (
           <button type="button" className="ln-btn ln-btn-amber" onClick={() => { setTurns([]); ask([]); }}><RotateCcw size={18} aria-hidden="true" />Practise again</button>

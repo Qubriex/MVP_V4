@@ -25,7 +25,7 @@ const sha256 = (t) => crypto.createHash('sha256').update(String(t)).digest('hex'
 import { transcribeAudio } from '../../core/portfolio.js';
 import { isValidPin, hashPin, logEvent } from '../../core/access.js';
 import { eachSeq, mapSeq } from '../../core/util/seq.js';
-import { aiNotConfigured, AI_NOT_CONFIGURED, synthesize } from '../../core/ai/gateway.js';
+import { aiNotConfigured, AI_NOT_CONFIGURED, synthesize, recordVoiceMetric } from '../../core/ai/gateway.js';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
@@ -647,7 +647,9 @@ router.post('/tts', async (req, res) => {
   if (!text) return res.status(400).json({ error: 'Nothing to say' });
   if (text.length > 1500) return res.status(413).json({ error: 'Too long: send at most 1500 characters per request' });
   try {
-    const out = await synthesize({ text, language: req.user.language || 'telugu', institutionId: req.user.institution_id || null });
+    // lang: 'english' speaks the English caption in the same voice ("say it in English").
+    const language = req.body?.lang === 'english' ? 'english' : (req.user.language || 'telugu');
+    const out = await synthesize({ text, language, institutionId: req.user.institution_id || null });
     res.set('Content-Type', out.mimeType);
     res.set('Cache-Control', 'private, max-age=86400');
     res.set('X-Voice-Engine', String(out.engine || ''));
@@ -662,6 +664,17 @@ router.post('/tts', async (req, res) => {
     }
     res.status(502).json({ error: 'The voice is unavailable right now.' });
   }
+});
+
+// POST /voice-metrics { first_audio_ms, turn_ms?, chars? } — how long the
+// learner waited for her voice (admin → Quality shows it against the targets:
+// first audio within 2 s, a whole turn within 4 s). Stored with the AI call log.
+router.post('/voice-metrics', async (req, res) => {
+  const n = (v) => (Number.isFinite(Number(v)) && Number(v) >= 0 && Number(v) < 600000 ? Math.round(Number(v)) : null);
+  const first = n(req.body?.first_audio_ms); const turn = n(req.body?.turn_ms);
+  if (first == null) return res.status(400).json({ error: 'first_audio_ms required' });
+  await recordVoiceMetric({ firstMs: first, turnMs: turn, chars: n(req.body?.chars), institutionId: req.user.institution_id || null });
+  res.status(204).end();
 });
 
 router.post('/session/voice', upload.single('audio'), async (req, res) => {

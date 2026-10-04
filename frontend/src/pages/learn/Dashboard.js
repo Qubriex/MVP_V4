@@ -167,6 +167,7 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
+          {requests.sent && <div className="ln-note" role="status">{requests.sent}.</div>}
           {requests.error && <div className="ln-error">{requests.error}</div>}
         </section>
 

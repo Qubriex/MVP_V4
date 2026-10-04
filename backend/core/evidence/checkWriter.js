@@ -19,13 +19,45 @@ import { logger } from '../logger.js';
 
 export const PROMPT_VERSION = 'EVIDENCE.conceptItem.v1';
 
-// Native context pool (§7.2): kirana store, cricket scorecard, railway
-// reservation, ration shop, bus depot.
-const CONTEXT_POOL = {
-  telugu: ['కిరాణా దుకాణం', 'క్రికెట్ స్కోర్‌కార్డ్', 'రైల్వే రిజర్వేషన్', 'రేషన్ షాప్', 'బస్ డిపో'],
-  hindi: ['किराना दुकान', 'क्रिकेट स्कोरकार्ड', 'रेलवे आरक्षण', 'राशन दुकान', 'बस डिपो'],
-  english: ['kirana store', 'cricket scorecard', 'railway reservation', 'ration shop', 'bus depot']
+// Native context pool (§7.2): everyday Indian settings, chosen to fit the
+// topic. A web page topic gets web settings (a college fest site, a shop's
+// order page), data topics get records (a library, train bookings), general
+// programming gets calculations (a scorecard, a bill). A setting that does
+// not fit ("in a kirana store, use HTML semantics…") is worse than none.
+const CONTEXTS = {
+  web: {
+    telugu: ['కాలేజీ ఫెస్ట్ వెబ్‌సైట్', 'ఒక హోటల్ ఆన్‌లైన్ ఆర్డర్ పేజీ', 'ఒక చిన్న దుకాణం ఉత్పత్తుల పేజీ', 'బస్ టికెట్ బుకింగ్ పేజీ'],
+    hindi: ['कॉलेज फेस्ट की वेबसाइट', 'एक होटल का ऑनलाइन ऑर्डर पेज', 'एक छोटी दुकान का प्रोडक्ट पेज', 'बस टिकट बुकिंग पेज'],
+    english: ['college fest website', 'restaurant online-order page', 'small shop’s product page', 'bus ticket booking page']
+  },
+  data: {
+    telugu: ['కాలేజీ విద్యార్థుల రికార్డులు', 'రైల్వే రిజర్వేషన్ వ్యవస్థ', 'లైబ్రరీ పుస్తకాల రికార్డులు', 'రేషన్ షాప్ రిజిస్టర్'],
+    hindi: ['कॉलेज के छात्रों के रिकॉर्ड', 'रेलवे आरक्षण प्रणाली', 'लाइब्रेरी की किताबों के रिकॉर्ड', 'राशन दुकान का रजिस्टर'],
+    english: ['college student records', 'railway reservation system', 'library book records', 'ration shop register']
+  },
+  code: {
+    telugu: ['క్రికెట్ స్కోర్‌కార్డ్ ప్రోగ్రామ్', 'కిరాణా దుకాణం బిల్లు లెక్క', 'క్లాస్ మార్కుల లెక్క', 'బస్ డిపో టైమ్‌టేబుల్'],
+    hindi: ['क्रिकेट स्कोरकार्ड प्रोग्राम', 'किराना दुकान का बिल', 'कक्षा के अंकों का हिसाब', 'बस डिपो की समय-सारणी'],
+    english: ['cricket scorecard program', 'kirana store bill calculator', 'class marks calculator', 'bus depot timetable']
+  },
+  team: {
+    telugu: ['ముగ్గురు స్నేహితులు కలిసి చేసే కాలేజీ ప్రాజెక్ట్', 'హ్యాకథాన్ టీమ్ ప్రాజెక్ట్'],
+    hindi: ['तीन दोस्तों का कॉलेज प्रोजेक्ट', 'हैकाथॉन टीम प्रोजेक्ट'],
+    english: ['college project shared by three friends', 'hackathon team project']
+  }
 };
+const DOMAIN_RULES = [
+  ['team', /\b(git|github|version control|branch|merge|deploy|ci\/cd|docker)\b/i],
+  ['web', /\b(html|css|dom|react|component|props|hooks?|forms?|responsive|flexbox|box model|frontend|front-end|ui|page|browser|semantic)/i],
+  ['data', /\b(sql|database|joins?|quer(y|ies)|tables?|records?|rest|api|apis|express|node|backend|back-end|server|fetch|json)\b/i]
+];
+/** The setting family that fits a node: web, data, team, or general code. */
+export function domainOf(node) {
+  const text = `${node?.node_label || ''} ${node?.cluster_label || ''}`;
+  return (DOMAIN_RULES.find(([, re]) => re.test(text)) || ['code'])[0];
+}
+// Kept for callers that only know the language.
+const CONTEXT_POOL = CONTEXTS.code;
 
 function seedSecret() {
   const s = process.env.ITEM_SEED_SECRET;
@@ -38,8 +70,9 @@ export const deriveSeed = (learnerId, familyId, attemptNo) =>
   crypto.createHmac('sha256', seedSecret()).update(`${learnerId}|${familyId}|${attemptNo}`).digest('hex');
 
 /** Scenario parameters drawn from the seed: a context and a few small numbers the question can use. */
-export function paramsFromSeed(seed, language) {
-  const pool = CONTEXT_POOL[language] || CONTEXT_POOL.english;
+export function paramsFromSeed(seed, language, node = null) {
+  const family = node ? CONTEXTS[domainOf(node)] : CONTEXT_POOL;
+  const pool = family[language] || family.english;
   const n = (i) => parseInt(seed.slice(i * 4, i * 4 + 4), 16);
   return {
     context: pool[n(0) % pool.length],
@@ -95,7 +128,7 @@ export async function issueInstance({ elId, learnerId, nodeId, language, purpose
   const familyId = `gen:${nodeId}`;
   const attemptNo = (await dal.one('SELECT COUNT(*) n FROM family_instances WHERE el_id = ? AND family_id = ?', elId, familyId)).n + 1;
   const seed = deriveSeed(learnerId, familyId, attemptNo);
-  const params = paramsFromSeed(seed, language);
+  const params = paramsFromSeed(seed, language, node);
   const previous = (await dal.all('SELECT question_text FROM family_instances WHERE el_id = ? AND family_id = ? ORDER BY attempt_no DESC LIMIT 5', elId, familyId))
     .map(r => r.question_text);
 

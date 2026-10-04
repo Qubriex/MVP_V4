@@ -11,6 +11,7 @@ import { authenticateToken, requireRole, requireActiveLearner } from '../middlew
 import * as market from '../../core/market/sampleMarket.js';
 import { getLearnerSkillState, classifySkill, scoreJob } from '../../core/market/skillGap.js';
 import { explainJobAloud, explainTopicAloud, interviewTurn } from '../../core/portfolio.js';
+import { aiNotConfigured, AI_NOT_CONFIGURED } from '../../core/ai/gateway.js';
 import { mapSeq } from '../../core/util/seq.js';
 
 const router = express.Router();
@@ -162,16 +163,26 @@ router.get('/jobs/:id/gap', async (req, res) => {
 
 // ─── Read the JD aloud in the learner's language ─────────────────────────────
 // Cached per job + language: the JD does not change and this is read often.
+// Only complete readings are kept; a failure is never cached, so the next
+// tap asks again.
 const readAloudCache = new Map();
+const aiFailure = (res, err, what) => {
+  if (aiNotConfigured(err)) return res.status(503).json({ error: AI_NOT_CONFIGURED });
+  return res.status(502).json({ error: `${what} Please try again.` });
+};
 router.post('/jobs/:id/read-aloud', async (req, res) => {
   const job = findJob(req, res);
   if (!job) return;
   const key = `${job.id}:${req.user.language}`;
   try {
-    if (!readAloudCache.has(key)) readAloudCache.set(key, await explainJobAloud({ job, language: req.user.language }));
+    if (!readAloudCache.has(key)) {
+      const out = await explainJobAloud({ job, language: req.user.language });
+      if (out.text) readAloudCache.set(key, out);
+      return res.json({ job_id: job.id, language: req.user.language, ...out });
+    }
     res.json({ job_id: job.id, language: req.user.language, ...readAloudCache.get(key) });
   } catch (err) {
-    res.status(502).json({ error: 'Could not prepare the reading', detail: err.message });
+    aiFailure(res, err, 'Could not prepare the reading.');
   }
 });
 
@@ -193,7 +204,7 @@ router.post('/jobs/:id/interview', async (req, res) => {
   try {
     res.json(await interviewTurn({ job, language: req.user.language, turns, verifiedSkills: verified }));
   } catch (err) {
-    res.status(502).json({ error: 'The interviewer is unavailable right now', detail: err.message });
+    aiFailure(res, err, 'The interviewer is unavailable right now.');
   }
 });
 
@@ -253,10 +264,14 @@ router.post('/topics/:id/intro', async (req, res) => {
   if (!topic) return res.status(404).json({ error: 'Topic not found' });
   const key = `topic:${topic.id}:${req.user.language}`;
   try {
-    if (!readAloudCache.has(key)) readAloudCache.set(key, await explainTopicAloud({ topic, language: req.user.language }));
+    if (!readAloudCache.has(key)) {
+      const out = await explainTopicAloud({ topic, language: req.user.language });
+      if (out.text) readAloudCache.set(key, out);
+      return res.json({ topic_id: topic.id, language: req.user.language, ...out });
+    }
     res.json({ topic_id: topic.id, language: req.user.language, ...readAloudCache.get(key) });
   } catch (err) {
-    res.status(502).json({ error: 'Could not prepare the intro', detail: err.message });
+    aiFailure(res, err, 'Could not prepare the intro.');
   }
 });
 
