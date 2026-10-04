@@ -17,6 +17,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import { useCallback, useEffect, useRef, useState } from 'react';
 import api from './api';
+import { pronounce } from './pronounce';
 
 const synth = typeof window !== 'undefined' ? window.speechSynthesis : null;
 const Recognition = typeof window !== 'undefined' ? (window.SpeechRecognition || window.webkitSpeechRecognition) : null;
@@ -66,9 +67,12 @@ export function speakable(text) {
     .trim();
 }
 
-// Sentences grouped into parts: a short first part so speech starts quickly,
-// then large parts, so a whole reply is two or three requests at most.
-function parts(text, firstMax = 260, max = 1200) {
+// Sentences grouped into parts of about 400 characters (a short first part
+// so speech starts quickly). Each part is one voice request; the next part
+// downloads while the current one plays. Smaller parts come back faster.
+/** The parts a reply is spoken in (for highlighting the part being spoken). */
+export const speechParts = (text) => parts(speakable(text));
+function parts(text, firstMax = 180, max = 400) {
   const sentences = text.match(/[^.!?।\n]+[.!?।]*\s*/g)?.map(x => x.trim()).filter(Boolean) || [];
   const out = [];
   let cur = '';
@@ -77,48 +81,88 @@ function parts(text, firstMax = 260, max = 1200) {
     if (cur && (cur.length + s.length + 1) > limit) { out.push(cur); cur = s; } else cur = cur ? `${cur} ${s}` : s;
   }
   if (cur) out.push(cur);
-  return out.flatMap(p => (p.length > 1400 ? p.match(/[\s\S]{1,1400}(\s|$)/g).map(x => x.trim()) : [p]));
+  return out.flatMap(p => (p.length > 600 ? p.match(/[\s\S]{1,500}(\s|$)/g).map(x => x.trim()) : [p]));
 }
 
-// Server voice (/learner/tts). Only "not configured" (503) turns it off for
-// the page visit; a busy voice (429) or a network error is retried, so one
-// bad moment never changes the voice for the rest of the lesson.
+// ─── One audio element for the whole visit ─────────────────────────────────
+// iPhone Safari blocks audio that starts long after a tap (a reply that takes
+// 10–20 s). Playing a silent clip on the same element during a tap unlocks
+// it, so later replies on that element are allowed to play.
+const SILENCE = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+let player = null;
+let unlocked = false;
+function getPlayer() {
+  if (!player && typeof Audio !== 'undefined') { player = new Audio(); player.preload = 'auto'; }
+  return player;
+}
+function unlockAudio() {
+  const p = getPlayer();
+  if (!p || unlocked || !p.paused) return;
+  p.src = SILENCE;
+  p.play().then(() => { unlocked = true; }).catch(() => {});
+}
+if (typeof document !== 'undefined') {
+  ['pointerdown', 'keydown', 'touchend'].forEach(ev => document.addEventListener(ev, unlockAudio, { capture: true, passive: true }));
+}
+
+// ─── Server voice (/learner/tts) ───────────────────────────────────────────
+// Only "not configured" (503) turns it off for the page visit. A busy voice
+// (429) or a network error is retried once after a short wait; a long wait
+// is not worth it mid-lesson, so the reply is shown as text instead.
 let serverVoice = true;
 export const usingServerVoice = () => serverVoice;
-const audioCache = new Map(); // text → object URL
+const audioCache = new Map(); // lang|text → object URL
 const wait = (ms) => new Promise(r => setTimeout(r, ms));
-async function fetchAudio(text, isCurrent) {
-  const key = text;
+async function fetchAudio(text, lang, isCurrent) {
+  const key = `${lang || ''}|${text}`;
   if (audioCache.has(key)) return audioCache.get(key);
   let lastErr;
-  for (let attempt = 0; attempt < 3; attempt += 1) {
+  for (let attempt = 0; attempt < 2; attempt += 1) {
     try {
-      const res = await api.post('/learner/tts', { text }, { responseType: 'blob', timeout: 60000 });
+      const res = await api.post('/learner/tts', { text, ...(lang ? { lang } : {}) }, { responseType: 'blob', timeout: 30000 });
       const url = URL.createObjectURL(res.data);
       audioCache.set(key, url);
-      if (audioCache.size > 40) { const [k, u] = audioCache.entries().next().value; URL.revokeObjectURL(u); audioCache.delete(k); }
+      if (audioCache.size > 60) { const [k, u] = audioCache.entries().next().value; URL.revokeObjectURL(u); audioCache.delete(k); }
       return url;
     } catch (err) {
       lastErr = err;
       const status = err.response?.status;
       if (status === 503) { serverVoice = false; break; }
-      if (status === 400 || status === 401 || status === 413) break;
-      if (!isCurrent()) break;
+      if ([400, 401, 413].includes(status) || !isCurrent()) break;
       const after = Number(err.response?.headers?.['retry-after']) || 0;
-      if (status === 429 && after > 20) break; // too long to wait mid-lesson
-      await wait(status === 429 ? Math.max(after, 2) * 1000 : 1500);
+      if (status === 429 && after > 6) break;
+      await wait(status === 429 ? Math.min(Math.max(after, 1), 3) * 1000 : 800);
       if (!isCurrent()) break;
     }
   }
   throw lastErr;
 }
 
+// Speed telemetry (admin → Quality): time to first audio and, when the page
+// passes when the learner finished their turn, the whole turn.
+function reportVoiceMetric(body) {
+  api.post('/learner/voice-metrics', body).catch(() => {});
+}
+
+export const VOICE_ISSUE = {
+  busy: 'Professor Qubirex’s voice is busy right now, so this one is shown as text. The next reply will be spoken again.',
+  tap: 'Your browser paused the voice. Tap Replay to hear it.',
+  none: 'Professor Qubirex’s voice is not available on this deployment, so replies show as text.'
+};
+
+/**
+ * @param {{ lang?: string, rate?: number, server?: boolean }} opts
+ * speak(text, id, { lang, rate, onEnd, turnStartedAt, quiet }) — lang 'en-IN'
+ * speaks English (captions) in the same voice; quiet skips metrics/notices.
+ */
 export function useSpeechOutput({ lang = 'te-IN', rate = 1, server = true } = {}) {
   const [speakingId, setSpeakingId] = useState(null);
   const [paused, setPaused] = useState(false);
-  const [voiceIssue, setVoiceIssue] = useState('');
+  const [issue, setIssue] = useState(serverVoice ? '' : 'none');
+  const [part, setPart] = useState(null); // { id, index, text } — the part being spoken
   const runRef = useRef(0);
-  const audioRef = useRef(null);
+  const lastRef = useRef(null);
+  const usingPlayer = useRef(false);
 
   // Voices load asynchronously on some browsers; re-render once they arrive.
   const [, setVoicesReady] = useState(0);
@@ -128,33 +172,36 @@ export function useSpeechOutput({ lang = 'te-IN', rate = 1, server = true } = {}
     synth.addEventListener?.('voiceschanged', onVoices);
     return () => { synth.removeEventListener?.('voiceschanged', onVoices); synth.cancel(); };
   }, []);
-  useEffect(() => () => { runRef.current += 1; audioRef.current?.pause(); }, []);
+  useEffect(() => () => { runRef.current += 1; if (usingPlayer.current) player?.pause(); }, []);
 
   const stop = useCallback(() => {
     runRef.current += 1;
-    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+    if (usingPlayer.current && player) { player.pause(); usingPlayer.current = false; }
     if (synth) synth.cancel();
     setSpeakingId(null);
     setPaused(false);
+    setPart(null);
   }, []);
 
-  // Browser fallback: female voice only, otherwise captions only.
+  // Browser fallback: a female voice only, otherwise the reply stays as text.
   const speakBrowser = useCallback((text, run, opts) => {
-    const voice = synth ? pickVoice(opts.lang || lang) : null;
+    const l = opts.lang || lang;
+    const voice = synth ? pickVoice(l) : null;
     if (!voice) {
-      if (runRef.current === run) { setSpeakingId(null); setVoiceIssue('The voice is busy right now, so this reply is shown as text. The next reply will be spoken again.'); }
+      if (runRef.current === run) { setSpeakingId(null); setPart(null); if (!opts.quiet) setIssue(serverVoice ? 'busy' : 'none'); }
       return;
     }
-    const chunks = parts(text, 200, 240);
-    chunks.forEach((part, i) => {
-      const u = new SpeechSynthesisUtterance(part);
-      u.lang = opts.lang || lang;
+    const chunks = parts(pronounce(text, l), 200, 240);
+    chunks.forEach((p, i) => {
+      const u = new SpeechSynthesisUtterance(p);
+      u.lang = l;
       u.rate = opts.rate || rate;
       u.voice = voice;
+      u.onstart = () => { if (runRef.current === run) setPart({ id: opts.id, index: i, text: p }); };
       if (i === chunks.length - 1) {
-        u.onend = () => { if (runRef.current === run) { setSpeakingId(null); setPaused(false); opts.onEnd?.(); } };
+        u.onend = () => { if (runRef.current === run) { setSpeakingId(null); setPaused(false); setPart(null); opts.onEnd?.(); } };
       }
-      u.onerror = () => { if (runRef.current === run && i === chunks.length - 1) setSpeakingId(null); };
+      u.onerror = () => { if (runRef.current === run && i === chunks.length - 1) { setSpeakingId(null); setPart(null); } };
       synth.speak(u);
     });
   }, [lang, rate]);
@@ -165,56 +212,78 @@ export function useSpeechOutput({ lang = 'te-IN', rate = 1, server = true } = {}
     stop();
     const run = runRef.current;
     const isCurrent = () => runRef.current === run;
+    const l = opts.lang || lang;
+    const o = { ...opts, id, lang: l };
+    if (!opts.quiet) { lastRef.current = { text, id, opts }; setIssue(''); }
     setSpeakingId(id);
-    setVoiceIssue('');
-    if (!(server && serverVoice)) { speakBrowser(clean, run, opts); return; }
-    const chunks = parts(clean);
-    // Play part i while part i+1 downloads.
-    let next = fetchAudio(chunks[0], isCurrent);
+    if (!(server && serverVoice)) { speakBrowser(clean, run, o); return; }
+    const spoken = pronounce(clean, l);
+    const chunks = parts(spoken);
+    const shown = parts(clean); // same sentence boundaries, without spelling changes
+    const ttsLang = l.startsWith('en') ? 'english' : null; // otherwise the learner's own language
+    const t0 = Date.now();
+    let next = fetchAudio(chunks[0], ttsLang, isCurrent);
+    const p = getPlayer();
     for (let i = 0; i < chunks.length; i += 1) {
       let url;
       try { url = await next; } catch {
         if (!isCurrent()) return;
-        speakBrowser(chunks.slice(i).join(' '), run, opts);
+        speakBrowser(shown.slice(i).join(' '), run, o);
         return;
       }
       if (!isCurrent()) return;
-      if (i + 1 < chunks.length) { next = fetchAudio(chunks[i + 1], isCurrent); next.catch(() => {}); }
-      const audio = new Audio(url);
-      audio.playbackRate = opts.rate || rate;
-      audioRef.current = audio;
+      if (i + 1 < chunks.length) { next = fetchAudio(chunks[i + 1], ttsLang, isCurrent); next.catch(() => {}); }
+      usingPlayer.current = true;
+      p.src = url;
+      p.playbackRate = opts.rate || rate;
+      setPart({ id, index: i, text: shown[i] || chunks[i] });
       try {
         await new Promise((resolve, reject) => {
-          audio.onended = resolve;
-          audio.onerror = reject;
-          audio.play().catch(reject);
+          p.onended = resolve;
+          p.onerror = reject;
+          p.play().then(() => {
+            if (i === 0 && !opts.quiet) {
+              const firstMs = Date.now() - t0;
+              reportVoiceMetric({ first_audio_ms: firstMs, ...(opts.turnStartedAt ? { turn_ms: Date.now() - opts.turnStartedAt } : {}), chars: clean.length });
+            }
+          }).catch(reject);
         });
       } catch (err) {
         if (!isCurrent()) return;
         if (err?.name === 'NotAllowedError') {
-          // Autoplay blocked until the learner taps: keep her voice, ask for a tap.
-          setSpeakingId(null);
-          setVoiceIssue('Tap Replay to hear the reply.');
+          // Blocked until the learner taps: keep her voice and offer Replay.
+          setSpeakingId(null); setPart(null);
+          if (!opts.quiet) setIssue('tap');
           return;
         }
-        speakBrowser(chunks.slice(i).join(' '), run, opts);
+        speakBrowser(shown.slice(i).join(' '), run, o);
         return;
       }
       if (!isCurrent()) return;
     }
-    if (isCurrent()) { audioRef.current = null; setSpeakingId(null); setPaused(false); opts.onEnd?.(); }
-  }, [rate, server, stop, speakBrowser]);
+    if (isCurrent()) { usingPlayer.current = false; setSpeakingId(null); setPaused(false); setPart(null); opts.onEnd?.(); }
+  }, [lang, rate, server, stop, speakBrowser]);
+
+  const replay = useCallback(() => {
+    const last = lastRef.current;
+    if (last) speak(last.text, last.id, last.opts);
+  }, [speak]);
 
   const pause = useCallback(() => {
-    if (audioRef.current && !audioRef.current.paused) { audioRef.current.pause(); setPaused(true); return; }
+    if (usingPlayer.current && player && !player.paused) { player.pause(); setPaused(true); return; }
     if (synth && synth.speaking) { synth.pause(); setPaused(true); }
   }, []);
   const resume = useCallback(() => {
-    if (audioRef.current && audioRef.current.paused) { audioRef.current.play().catch(() => {}); setPaused(false); return; }
+    if (usingPlayer.current && player && player.paused) { player.play().catch(() => {}); setPaused(false); return; }
     if (synth) { synth.resume(); setPaused(false); }
   }, []);
+  const setRate = useCallback((r) => { if (usingPlayer.current && player) player.playbackRate = r; }, []);
 
-  return { speak, stop, pause, resume, speakingId, paused, voiceIssue, supported: canSpeak || typeof Audio !== 'undefined' };
+  return {
+    speak, stop, pause, resume, replay, setRate, speakingId, paused, part,
+    issue, voiceIssue: issue ? VOICE_ISSUE[issue] : '', hasLast: () => !!lastRef.current,
+    supported: canSpeak || typeof Audio !== 'undefined'
+  };
 }
 
 export function useSpeechInput({ lang = 'te-IN', onFinal, onAudio, recorder = undefined } = {}) {

@@ -6,7 +6,8 @@
 //   - vercel/autoConfig.js runs first: finds the database, applies migrations,
 //     and fills in any secret not set in the environment (D-030).
 //   - The outbox has no always-on worker here: after any request that can
-//     write, the response is sent first and the outbox is drained in the
+//     write (and after any request when it was last drained over a minute
+//     ago), the response is sent first and the outbox is drained in the
 //     background with waitUntil(). The daily cron (/api/cron/outbox) is a
 //     backstop for anything a crashed instance left behind.
 import { waitUntil } from '@vercel/functions';
@@ -29,6 +30,7 @@ export function missingEnv(env = process.env) {
 let ready = null;
 let app = null;
 let worker = null;
+let lastDrain = 0;
 let logger = console;
 
 async function init() {
@@ -65,7 +67,13 @@ export default async function handler(req, res) {
     res.end(JSON.stringify({ error: 'Service is misconfigured. Check the deployment logs.', ...(err.missing ? { missing_env: err.missing } : {}) }));
     return;
   }
-  if (req.method !== 'GET' && req.method !== 'HEAD') {
+  // Drain the outbox after any request that can write, and after any other
+  // request when it has not been drained for a minute — so background work
+  // (review questions, notifications) runs within minutes, not at the daily
+  // cron (Vercel Hobby allows one cron run a day).
+  const writes = req.method !== 'GET' && req.method !== 'HEAD';
+  if (writes || Date.now() - lastDrain > 60000) {
+    lastDrain = Date.now();
     res.on('finish', () => waitUntil(worker.tick().catch(err => logger.error('outbox.drain_failed', { error: err.message }))));
   }
   app(req, res);

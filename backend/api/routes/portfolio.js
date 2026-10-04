@@ -56,7 +56,7 @@ async function loadProfile(db, user) {
     has_profile: !!p.learner_id,   // false until the first save — drives the first-run /learn/welcome flow
     phone: p.phone || '', city: p.city || '', link_url: p.link_url || '', headline: p.headline || '', about: p.about || '',
     target_roles: parseJSON(p.target_roles, []), preferred_cities: parseJSON(p.preferred_cities, []),
-    available_from: p.available_from || '', expected_salary: p.expected_salary || '',
+    available_from: p.available_from || '', graduation_year: p.graduation_year ?? null, expected_salary: p.expected_salary || '',
     self_skills: parseJSON(p.self_skills, []), experience: parseJSON(p.experience, []), certifications: parseJSON(p.certifications, []),
     ui_language: p.ui_language || learner.language,
     voice_prefs: { ...DEFAULT_VOICE_PREFS, ...parseJSON(p.voice_prefs, {}) },
@@ -107,18 +107,20 @@ router.put('/profile', async (req, res) => {
   const current = await loadProfile(db, req.user);
   if (!current) { db.close(); return res.status(404).json({ error: 'Not found' }); }
   const pick = (key, fn, fallback) => (key in b ? fn(b[key]) : fallback);
+  const gradYear = pick('graduation_year', v => { const y = Number(v); return Number.isInteger(y) && y >= 1990 && y <= 2100 ? y : null; }, current.graduation_year ?? null);
 
   const write = db.transaction(async () => {
     if ('email' in b) await db.prepare('UPDATE learners SET email = ? WHERE id = ?').run(clean(b.email, 200) || null, req.user.id);
+    if (gradYear) await db.prepare('UPDATE learners SET availability = ? WHERE id = ?').run(`${gradYear}-06`, req.user.id);
     await db.prepare(`
       INSERT INTO learner_profiles (learner_id, phone, city, link_url, headline, about, target_roles, preferred_cities,
-        available_from, expected_salary, self_skills, experience, certifications, ui_language, voice_prefs, share_with_institution, updated_at)
+        available_from, graduation_year, expected_salary, self_skills, experience, certifications, ui_language, voice_prefs, share_with_institution, updated_at)
       VALUES (@learner_id, @phone, @city, @link_url, @headline, @about, @target_roles, @preferred_cities,
-        @available_from, @expected_salary, @self_skills, @experience, @certifications, @ui_language, @voice_prefs, @share_with_institution, datetime('now'))
+        @available_from, @graduation_year, @expected_salary, @self_skills, @experience, @certifications, @ui_language, @voice_prefs, @share_with_institution, datetime('now'))
       ON CONFLICT(learner_id) DO UPDATE SET
         phone = excluded.phone, city = excluded.city, link_url = excluded.link_url, headline = excluded.headline,
         about = excluded.about, target_roles = excluded.target_roles, preferred_cities = excluded.preferred_cities,
-        available_from = excluded.available_from, expected_salary = excluded.expected_salary,
+        available_from = excluded.available_from, graduation_year = excluded.graduation_year, expected_salary = excluded.expected_salary,
         self_skills = excluded.self_skills, experience = excluded.experience, certifications = excluded.certifications,
         ui_language = excluded.ui_language, voice_prefs = excluded.voice_prefs,
         share_with_institution = excluded.share_with_institution, updated_at = datetime('now')
@@ -131,7 +133,10 @@ router.put('/profile', async (req, res) => {
       about: pick('about', v => clean(v, 1500), current.about),
       target_roles: JSON.stringify(pick('target_roles', cleanList, current.target_roles)),
       preferred_cities: JSON.stringify(pick('preferred_cities', cleanList, current.preferred_cities)),
-      available_from: pick('available_from', v => clean(v, 40), current.available_from),
+      // Graduation year replaces "Available from": availability is set from it
+      // (June of that year), which employers' candidate cards read.
+      graduation_year: gradYear,
+      available_from: gradYear ? `June ${gradYear}` : pick('available_from', v => clean(v, 40), current.available_from),
       expected_salary: pick('expected_salary', v => clean(v, 40), current.expected_salary),
       self_skills: JSON.stringify(pick('self_skills', cleanList, current.self_skills)),
       experience: JSON.stringify(pick('experience', v => (Array.isArray(v) ? v.slice(0, 20) : []), current.experience)),

@@ -21,6 +21,7 @@ import portfolioRoutes from './routes/portfolio.js';
 import marketRoutes from './routes/market.js';
 import employerRoutes from './routes/employer.js';
 import learnerEvidenceRoutes from './routes/learnerEvidence.js';
+import learnerSettingsRoutes from './routes/learnerSettings.js';
 import verifyRoutes from './routes/verify.js';
 import { didDocument } from '../core/return/keyRegistry.js';
 import { issuerHost } from '../core/return/credentialEngine.js';
@@ -38,6 +39,7 @@ export const MOUNTS = [
   ['/api/learner', learnerRoutes],
   ['/api/learner', portfolioRoutes],                // profile, resume, skill requests, transcribe
   ['/api/learner', learnerEvidenceRoutes],          // reviews, rechecks, passport, renewal
+  ['/api/learner', learnerSettingsRoutes],          // settings: devices, consent, my data
   ['/api/market', marketRoutes],                    // job market, JD gap, emerging topics
   ['/api/employer', employerRoutes],
   ['/api/verify', verifyRoutes],                    // public verifier (v4.3 §10)

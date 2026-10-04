@@ -4,8 +4,8 @@
 // mastered node — the same fields the institution sees in the Mastery Log.
 // Until now only the institution could see this.
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Check, Copy } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Check, Copy, Lock, Play } from 'lucide-react';
 import api, { getOr } from '../../utils/api';
 import { MOCK_PATH } from '../../utils/learnerMockData';
 import { minutes } from '../../components/learn/ui';
@@ -21,7 +21,18 @@ function NodePill({ n }) {
 }
 
 export default function Record() {
+  const navigate = useNavigate();
   const [data, setData] = useState(null);
+  const [switching, setSwitching] = useState('');
+  const [switchError, setSwitchError] = useState('');
+  // Start another section: its first skill not yet mastered becomes current.
+  const startSection = async (c) => {
+    setSwitching(c.id); setSwitchError('');
+    try { await api.post('/learner/path/start', { cluster_id: c.id }); navigate('/learn/session'); } catch (e) {
+      setSwitchError(e.response?.data?.error || 'Couldn’t switch sections. Try again.');
+    }
+    setSwitching('');
+  };
   const [copied, setCopied] = useState(false);
   const [curve, setCurve] = useState(null);
 
@@ -83,8 +94,16 @@ export default function Record() {
               <span className="ln-small ln-muted">{c.mastered} of {c.total}</span>
             </div>
             <div className="ln-row ln-wrap" style={{ gap: 8 }}>{c.nodes.map(n => <NodePill key={n.id} n={n} />)}</div>
+            {c.status !== 'done' && (
+              <div className="ln-row ln-wrap" style={{ gap: 10 }}>
+                {c.current ? <Link to="/learn/session" className="ln-btn ln-btn-sm ln-btn-primary"><Play size={14} aria-hidden="true" />Continue this section</Link>
+                  : c.can_start ? <button type="button" className="ln-btn ln-btn-sm" disabled={switching === c.id} onClick={() => startSection(c)}><Play size={14} aria-hidden="true" />{switching === c.id ? 'Switching…' : c.mastered ? 'Continue this section' : 'Start this section'}</button>
+                    : c.locked_by?.length ? <span className="ln-small ln-muted ln-row" style={{ gap: 6 }}><Lock size={14} aria-hidden="true" />Locked: finish {c.locked_by.map(x => x.label).join(' and ')} first</span> : null}
+              </div>
+            )}
           </div>
         ))}
+        {switchError && <div className="ln-error" role="alert">{switchError}</div>}
       </section>
 
       <section className="ln-card" style={{ gap: 10 }}>

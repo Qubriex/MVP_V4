@@ -10,33 +10,16 @@ import { Bar, initials } from '../../components/learn/ui';
 import { errMsg } from '../../utils/errors';
 import {
   useProfileDraft, Section, PersonalSection, EducationSection, ExperienceSection, ProjectsSection,
-  SkillsSection, CertificationsSection, GoalsSection, VoiceSection
+  SkillsSection, CertificationsSection, GoalsSection
 } from '../../components/learn/ProfileSections';
 
 const NAV = [
   ['personal', 'Personal info', 'personal'], ['education', 'Education', 'education'], ['experience', 'Experience', null],
   ['projects', 'Projects', 'projects'], ['skills', 'Skills', 'skills'], ['certifications', 'Certifications', null],
-  ['goals', 'Career goals', 'goals'], ['preferences', 'Learning & voice', 'preferences'], ['account', 'Account & PIN', undefined]
+  ['goals', 'Career goals', 'goals'], ['account', 'Account & sharing', undefined]
 ];
 const MISSING_LABEL = { personal: 'your details', education: 'education', projects: 'projects', skills: 'skills', goals: 'goals' };
 
-function ChangePin() {
-  const [pin, setPin] = useState('');
-  const [msg, setMsg] = useState('');
-  const save = async (e) => {
-    e.preventDefault(); setMsg('');
-    if (!/^\d{6}$/.test(pin)) { setMsg('Your PIN must be exactly 6 digits.'); return; }
-    try { await api.put('/learner/pin', { new_pin: pin }); setPin(''); setMsg('PIN changed. Use it next time you sign in.'); } catch (err) { setMsg(errMsg(err, 'Couldn’t change your PIN.')); }
-  };
-  return (
-    <form className="ln-row ln-wrap" style={{ gap: 10, alignItems: 'flex-end' }} onSubmit={save}>
-      <div className="ln-field" style={{ width: 200 }}><label className="ln-label" htmlFor="chpin">New PIN</label>
-        <input id="chpin" className="ln-input" type="password" inputMode="numeric" maxLength={6} autoComplete="new-password" value={pin} onChange={e => setPin(e.target.value.replace(/\D/g, ''))} /></div>
-      <button type="submit" className="ln-btn" disabled={pin.length !== 6}>Change PIN</button>
-      {msg && <span className="ln-small" role="status">{msg}</span>}
-    </form>
-  );
-}
 
 export default function Profile() {
   const form = useProfileDraft();
@@ -94,10 +77,8 @@ export default function Profile() {
           <SkillsSection form={form} />
           <CertificationsSection form={form} />
           <GoalsSection form={form} />
-          <VoiceSection form={form} />
           <Section id="account" title="Account, PIN and sharing">
-            <span className="ln-small">You sign in with your learner reference, your cohort’s join code and your 6-digit PIN. Forgot it? Use “Forgot PIN?” on the sign-in page and your professor will reset it.</span>
-            <ChangePin />
+            <span className="ln-small">You sign in with your learner reference, your cohort’s join code and your 6-digit PIN. Voice, language, your PIN, signed-in devices and your data are in <Link to="/learn/settings" className="ln-link">Settings</Link>.</span>
             <label className="ln-toggle-row" style={{ alignItems: 'flex-start' }}>
               <span className="ln-col" style={{ gap: 2 }}><span>Share my capability record with my institution’s placement cell</span>
                 <span className="ln-xs ln-muted">Lets your professors list you among students closest to job-ready, with your verified skills and job match. Off by default; you can turn it off any time.</span></span>

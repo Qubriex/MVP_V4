@@ -1,5 +1,6 @@
 // api/routes/auth.js
 import express from 'express';
+import { afterLearnerSignIn } from '../../core/devices.js';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 import { legacyHandle as getDb } from '../../core/db/dal.js';
@@ -157,11 +158,15 @@ async function findEnrolment(db, learnerRef, cohort) {
   `).get(String(learnerRef || '').trim(), engagement.id);
 }
 
+// One device at a time: a new sign-in ends the learner's other sessions
+// (core/devices.js).
 async function learnerSession(req, res, data) {
-  return await issueSession(res, {
+  const session = await issueSession(res, {
     actorType: 'learner', actorId: data.id, institutionId: data.eng_institution_id, req,
     claims: { id: data.id, el_id: data.el_id, engagement_id: data.engagement_id, language: data.language }
   });
+  await afterLearnerSignIn({ sessionId: session.sessionId, learnerId: data.id, elId: data.el_id, institutionId: data.eng_institution_id, req });
+  return session;
 }
 
 // PINs are locked per enrolment after MAX_PIN_ATTEMPTS; this per-IP limit

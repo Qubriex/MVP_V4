@@ -19,14 +19,23 @@ style, captions and check questions. It extends v4.3 §5 (BUILD) and §19
 |---|---|
 | **One voice, female, for every learner, page and reply**: prebuilt voice **Kore**. Lessons, answers to spoken questions, answers to typed questions, check questions, replays and the profile preview all use it. There is no second voice to choose. | `core/ai/gateway.js` `TTS_VOICE`, `synthesize()` |
 | Engines, all with the same voice: Google Cloud Text-to-Speech **Chirp 3 HD** (`te-IN-Chirp3-HD-Kore`, `hi-IN-Chirp3-HD-Kore`; small MP3s, large quota), then the Gemini TTS models. An engine that is out of quota (429), switched off for the key (403) or unknown (400/404) rests for a while and the next one is used. `GEMINI_TTS_MODEL` and `GEMINI_TTS_VOICE` override the defaults. | `core/ai/adapters/gemini.js` `speak()` |
-| When every engine is busy, `/learner/tts` answers 429 with `Retry-After`; the page waits and asks again. Only "not configured" (503) turns the server voice off for the visit, so a busy moment never changes the voice for the rest of the lesson. | `api/routes/learner.js`, `frontend/src/utils/voice.js` `fetchAudio()` |
+| When every engine is busy, `/learner/tts` answers 429 with `Retry-After`; the page waits up to 3 s and asks once more, then shows that reply as text. Only "not configured" (503) turns the server voice off for the visit, so a busy moment never changes the voice for the rest of the lesson. | `api/routes/learner.js`, `frontend/src/utils/voice.js` `fetchAudio()` |
 | Replies are spoken in voice mode **and** typing mode (low-bandwidth mode excepted). | `Session.js` |
-| No stutter: speech starts with a short first part (≈260 characters, so it begins quickly), then large parts (≈1,200), so a reply is two or three requests. The next part downloads while the current one plays. The speed setting applies throughout. | `frontend/src/utils/voice.js` `parts()`, `speak()` |
+| No stutter, fast start: a short first part (≈180 characters), then parts of ≈400. Each part is one voice request; the next downloads while the current one plays. The speed setting applies throughout. | `frontend/src/utils/voice.js` `parts()`, `speak()` |
+| Names she would say wrongly in English letters are respelt before speaking: Qubirex → క్యూబిరెక్స్ / क्यूबिरेक्स, and a few terms (JSON, SQL, GitHub). The caption is unchanged. The three candidate spellings can be compared in Settings. | `frontend/src/utils/pronounce.js` |
+| iPhone: one audio element, unlocked on the learner's first tap, plays every reply, so a reply that arrives 10–20 s after the tap is not blocked. If a browser still blocks it, the page says "Tap Replay". | `voice.js` `unlockAudio()` |
 | Before speaking, remove anything that makes a voice stumble: markdown, code fences, brackets, arrows, and English glosses in brackets inside Telugu/Hindi text. | `voice.js` `speakable()` |
 | Never a male voice: if the server voice cannot be reached, the browser speaks only with a voice known to be female (e.g. Microsoft Shruti, Swara, Kalpana). A device without one shows the reply as text, with a note, and the next reply tries her voice again. | `voice.js` `pickVoice()`, `speakBrowser()` |
 | If the browser blocks audio until a tap, the page asks for a tap on Replay rather than switching voice. | `voice.js` `speak()` |
 | Low-bandwidth mode never downloads audio; replies show as captions. | `Session.js` |
 | Replays come from a cache: in the browser per page, and on the server per instance. | `voice.js` `audioCache`, `gateway.js` `ttsCache` |
+
+### Voice status on every page that speaks
+
+The lesson, JD reading, topic intro and interview practice all show the same
+message when she is silent — voice busy (with the text), audio blocked
+("Tap Replay"), or no voice on this deployment — with a Replay button.
+`frontend/src/components/learn/VoiceStatus.js`.
 
 ## 3. Spoken style (what the model writes)
 
@@ -66,7 +75,23 @@ message…". Enforced by `CAPTION_RULES` in `core/brains/persona.js`.
 
 Enforced in `core/evidence/checkWriter.js`.
 
-## 7. Checking a deployment
+## 7. Voice mode in the lesson
+
+| Feature | How | Where |
+|---|---|---|
+| Hands-free (Settings) | When she finishes, a short two-note sound plays and the microphone opens. | `Session.js` `say()`, `voiceMode.js` `playCue()` |
+| Interrupt by speaking | In hands-free mode, starting to talk while she speaks stops her and opens the microphone. The mic uses echo cancellation, learns the room's noise for half a second and needs a clear voice for about a third of a second. | `voiceMode.js` `useBargeIn()` |
+| Voice commands | Short utterances (≤ 6 words) in English, Telugu or Hindi: "repeat", "slower", "say it in English" (her voice speaks the English caption), "I'm ready for the test". "Give an example" goes to her as a request. | `voiceMode.js` `parseVoiceCommand()` |
+| Highlight while speaking | The part she is saying is highlighted in the caption; parts already said are dimmed. | `voice.js` `part`, `speechParts()` |
+| Filler while waiting | If a reply takes over 1.2 s, she says "ఒక్క క్షణం…" / "एक पल…" once, so silence never feels broken. | `Session.js` `startWaiting()` |
+| Speed targets | The page reports time to first audio and the whole turn (learner finished → voice starts); admin → Quality shows the median and 90th percentile against the targets: first audio ≤ 2 s, turn ≤ 4 s. | `/learner/voice-metrics`, `admin.js` quality report |
+
+Teaching replies are written with the model's hidden thinking turned off and
+room for Telugu (3–5× English tokens), so they come back faster and are not
+cut off. Replies are not streamed yet: speech starts once the whole reply is
+written.
+
+## 8. Checking a deployment
 
 `/api/health?deep=1&ai=1` makes one tiny text call and one tiny voice call. It reports:
 - `ai.live`: whether the key and model work;

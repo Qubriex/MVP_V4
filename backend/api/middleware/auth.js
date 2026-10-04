@@ -19,6 +19,7 @@
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import 'dotenv/config';
+import { OTHER_DEVICE, OTHER_DEVICE_MESSAGE } from '../../core/devices.js';
 import * as dal from '../../core/db/dal.js';
 import { ulid } from '../../core/db/ulid.js';
 import params from '../../config/params.js';
@@ -121,6 +122,7 @@ export function authenticate({ errors = 'legacy' } = {}) {
     }
     if (!payload.sid) return fail(res, 401, 'invalid_session', 'Your session has ended. Please sign in again.');
     const session = await dal.one('SELECT * FROM auth_sessions WHERE id = ?', payload.sid);
+    if (session?.revoked_reason === OTHER_DEVICE) return fail(res, 401, 'signed_in_elsewhere', OTHER_DEVICE_MESSAGE);
     if (!session || session.revoked_at || session.expires_at <= dal.nowIso() || ROLE_OF[session.actor_type] !== payload.role) {
       return fail(res, 401, 'invalid_session', 'Your session has ended. Please sign in again.');
     }

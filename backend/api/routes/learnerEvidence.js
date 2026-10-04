@@ -20,7 +20,8 @@ import { verifySdJwt } from '../../core/qep/sdjwt.js';
 import * as statusList from '../../core/qep/statusList.js';
 import { ulid } from '../../core/db/ulid.js';
 import { learningCurve } from '../../core/readiness/learningCurve.js';
-import { mapSeq } from '../../core/util/seq.js';
+import { eachSeq, mapSeq } from '../../core/util/seq.js';
+import { waitUntil } from '@vercel/functions';
 import { aiNotConfigured, AI_NOT_CONFIGURED } from '../../core/ai/gateway.js';
 
 const router = express.Router();
@@ -29,13 +30,54 @@ router.use(authenticateToken, requireRole('learner'), requireActiveLearner);
 const openInstance = async (elId, nodeId, purpose) => await dal.one(`SELECT fi.* FROM family_instances fi WHERE fi.el_id = ? AND fi.node_id = ? AND fi.purpose = ?
   AND NOT EXISTS (SELECT 1 FROM evidence_records e WHERE e.instance_id = fi.id AND e.assurance != 'A0') ORDER BY fi.created_at DESC LIMIT 1`, elId, nodeId, purpose);
 
+// Open (unanswered) instances for one student, all nodes at once: one query
+// instead of two per review.
+async function openInstances(elId) {
+  const rows = await dal.all(`SELECT DISTINCT ON (fi.node_id, fi.purpose) fi.id, fi.node_id, fi.purpose FROM family_instances fi
+    WHERE fi.el_id = ? AND fi.purpose IN ('review', 'check')
+      AND NOT EXISTS (SELECT 1 FROM evidence_records e WHERE e.instance_id = fi.id AND e.assurance != 'A0')
+    ORDER BY fi.node_id, fi.purpose, fi.created_at DESC`, elId);
+  return new Map(rows.map(r => [`${r.node_id}|${r.purpose}`, r.id]));
+}
+
+// Review questions are written ahead, in the background, when the list shows
+// a review as due without one — so Start does not wait for the model.
+const preparing = new Set();
+function prepareAhead(req, items) {
+  const todo = items.filter(r => !r.open_instance && !preparing.has(`${req.user.el_id}|${r.node_id}`)).slice(0, 3);
+  if (!todo.length) return;
+  const job = (async () => {
+    await eachSeq(todo, async (r) => {
+      const key = `${req.user.el_id}|${r.node_id}`;
+      preparing.add(key);
+      try {
+        const node = await dal.one('SELECT ct.institution_id FROM skill_nodes sn JOIN skill_clusters sc ON sc.id = sn.cluster_id JOIN capability_targets ct ON ct.id = sc.capability_target_id WHERE sn.id = ?', r.node_id);
+        await issueInstance({ elId: req.user.el_id, learnerId: req.user.id, nodeId: r.node_id, language: req.user.language, purpose: r.kind === 'recheck' ? 'check' : 'review', institutionId: node?.institution_id });
+      } catch (err) {
+        req.log?.warn?.('review.prepare_failed', { error: err.message });
+      } finally {
+        preparing.delete(key);
+      }
+    });
+  })();
+  try { waitUntil(job); } catch { /* not on Vercel: the promise just runs */ }
+}
+
 router.get('/reviews/due', async (req, res) => {
-  const reviews = await mapSeq(await dueReviews(req.user.el_id), async r => ({ ...r, kind: 'review', open_instance: (await openInstance(req.user.el_id, r.node_id, 'review'))?.id || null }));
-  const rechecks = await mapSeq(await dal.all(`SELECT nm.skill_node_id AS node_id, sn.node_label, sc.cluster_label FROM node_mastery nm JOIN skill_nodes sn ON sn.id = nm.skill_node_id
-    JOIN skill_clusters sc ON sc.id = sn.cluster_id WHERE nm.engagement_learner_id = ? AND nm.recheck_required = 1`, req.user.el_id), async r => ({ ...r, kind: 'recheck', open_instance: (await openInstance(req.user.el_id, r.node_id, 'check'))?.id || null }));
-  const upcoming = await dal.all(`SELECT r.node_id, r.due_at, sn.node_label FROM node_retention r JOIN skill_nodes sn ON sn.id = r.node_id
-    WHERE r.el_id = ? AND r.due_at > ? ORDER BY r.due_at LIMIT 5`, req.user.el_id, dal.nowIso());
-  res.json({ due: [...rechecks, ...reviews], upcoming, warmups: reviews.slice(0, 2).map(r => r.node_id) });
+  const elId = req.user.el_id;
+  const [due, rechecksRaw, upcoming, open] = await Promise.all([
+    dueReviews(elId),
+    dal.all(`SELECT nm.skill_node_id AS node_id, sn.node_label, sc.cluster_label FROM node_mastery nm JOIN skill_nodes sn ON sn.id = nm.skill_node_id
+      JOIN skill_clusters sc ON sc.id = sn.cluster_id WHERE nm.engagement_learner_id = ? AND nm.recheck_required = 1`, elId),
+    dal.all(`SELECT r.node_id, r.due_at, sn.node_label FROM node_retention r JOIN skill_nodes sn ON sn.id = r.node_id
+      WHERE r.el_id = ? AND r.due_at > ? ORDER BY r.due_at LIMIT 5`, elId, dal.nowIso()),
+    openInstances(elId)
+  ]);
+  const reviews = due.map(r => ({ ...r, kind: 'review', open_instance: open.get(`${r.node_id}|review`) || null }));
+  const rechecks = rechecksRaw.map(r => ({ ...r, kind: 'recheck', open_instance: open.get(`${r.node_id}|check`) || null }));
+  const list = [...rechecks, ...reviews];
+  res.json({ due: list, upcoming, warmups: reviews.slice(0, 2).map(r => r.node_id) });
+  prepareAhead(req, list);
 });
 
 router.post('/reviews/:nodeId/start', async (req, res) => {

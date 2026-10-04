@@ -23,6 +23,8 @@ export default function LearnerLogin() {
   const [pin, setPin] = useState('');
   const [keep, setKeep] = useState(true);
   const [error, setError] = useState('');
+  // Shown once after the account was used on another device (one device at a time).
+  const [signedOutReason] = useState(() => { try { const r = sessionStorage.getItem('qubirex_signout_reason'); sessionStorage.removeItem('qubirex_signout_reason'); return r || ''; } catch { return ''; } });
   const [showPinHelp, setShowPinHelp] = useState(false);
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
@@ -128,6 +130,7 @@ export default function LearnerLogin() {
             </div>
           </fieldset>
 
+          {signedOutReason && !error && <div className="ln-note" role="status">{signedOutReason} If that wasn’t you, sign in and change your PIN in Settings.</div>}
           {error && <div className="ln-error" role="alert">{error}</div>}
 
           <div className="ln-field">

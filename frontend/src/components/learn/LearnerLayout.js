@@ -83,7 +83,7 @@ export default function LearnerLayout() {
         </div>
 
         <div className="ln-sidebar-foot">
-          <NavLink to="/learn/profile#preferences" className="ln-navlink ln-indic"><Settings size={18} strokeWidth={1.8} aria-hidden="true" /><span>{t('nav.settings')}</span></NavLink>
+          <NavLink to="/learn/settings" className={({ isActive }) => `ln-navlink ln-indic ${isActive ? 'is-active' : ''}`}><Settings size={18} strokeWidth={1.8} aria-hidden="true" /><span>{t('nav.settings')}</span></NavLink>
           <div className="ln-row" style={{ gap: 8, alignItems: 'center' }}>
             <button type="button" className="ln-navlink ln-indic" style={{ flex: 1 }} onClick={doLogout}><LogOut size={18} strokeWidth={1.8} aria-hidden="true" /><span>{t('nav.logout')}</span></button>
             <ThemeToggle />

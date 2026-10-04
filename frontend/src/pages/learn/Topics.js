@@ -2,30 +2,33 @@
 // One featured topic (new roles + what to learn, in order) and a grid of
 // topics filtered by sector. Skills outside the programme are requested from
 // the institution, never added directly.
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Volume2, Square } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { speechTag } from '../../context/UiLangContext';
-import api, { getOr } from '../../utils/api';
+import api from '../../utils/api';
+import { useCachedGet } from '../../utils/cachedGet';
 import { useSpeechOutput } from '../../utils/voice';
 import { MOCK_TOPICS } from '../../utils/learnerMockData';
-import { Bar, SampleBadge, useSkillRequests } from '../../components/learn/ui';
+import VoiceStatus from '../../components/learn/VoiceStatus';
+import { errMsg } from '../../utils/errors';
+import { Bar, SampleBadge, useSkillRequests, REQUEST_STATUS } from '../../components/learn/ui';
 
 export default function Topics() {
   const { user } = useAuth();
   const [params, setParams] = useSearchParams();
   const [sector, setSector] = useState('');
-  const [data, setData] = useState(null);
+  // Cached: returning to Topics or switching back to a sector shows at once.
+  const { data: live, error: topicsError } = useCachedGet(`/market/topics${sector ? `?sector=${encodeURIComponent(sector)}` : ''}`);
+  const data = live && Array.isArray(live.topics) ? live : topicsError ? MOCK_TOPICS : null;
   const [featuredId, setFeaturedId] = useState(params.get('topic'));
   const [introBusy, setIntroBusy] = useState(false);
   const [introError, setIntroError] = useState('');
+  const [introText, setIntroText] = useState('');
   const speech = useSpeechOutput({ lang: speechTag(user?.language || 'telugu') });
   const requests = useSkillRequests();
 
-  useEffect(() => {
-    getOr(`/market/topics${sector ? `?sector=${encodeURIComponent(sector)}` : ''}`, MOCK_TOPICS, d => d && Array.isArray(d.topics)).then(setData);
-  }, [sector]);
 
   const all = data ? [data.featured, ...data.topics].filter(Boolean) : [];
   const featured = all.find(tp => tp.id === featuredId) || data?.featured || null;
@@ -34,6 +37,7 @@ export default function Topics() {
 
   const feature = (id) => {
     speech.stop();
+    setIntroText('');
     setFeaturedId(id);
     setParams({ topic: id }, { replace: true });
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -45,9 +49,10 @@ export default function Topics() {
     try {
       const res = await api.post(`/market/topics/${featured.id}/intro`);
       if (!res.data?.text) throw new Error('empty');
+      setIntroText(res.data.text);
       speech.speak(res.data.text, featured.id);
     } catch (e) {
-      setIntroError('Couldn’t prepare the intro right now.');
+      setIntroError(errMsg(e, 'Couldn’t prepare the intro right now. Please try again.'));
     }
     setIntroBusy(false);
   };
@@ -82,16 +87,25 @@ export default function Topics() {
               <div className="ln-row ln-wrap" style={{ gap: 8 }}>{featured.roles.map(r => <Link key={r} to={`/learn/market?q=${encodeURIComponent(r.split(' ')[0])}`} className="ln-darkpill">{r}</Link>)}</div>
             </div>
             <div className="ln-row ln-wrap" style={{ gap: 10, paddingTop: 6 }}>
-              <button type="button" className="ln-btn ln-btn-amber" disabled={toRequest.length === 0}
-                onClick={() => toRequest.forEach(st => requests.request(st.name, `topic:${featured.id}`))}>
-                {toRequest.length ? `Request ${toRequest.length} skill${toRequest.length > 1 ? 's' : ''} from your institution` : 'Nothing to request'}
-              </button>
+              {toRequest.length > 0 ? (
+                <button type="button" className="ln-btn ln-btn-amber" disabled={requests.busy}
+                  onClick={() => requests.requestMany(toRequest.map(st => st.name), `topic:${featured.id}`)}>
+                  {requests.busy ? 'Sending…' : `Request ${toRequest.length} skill${toRequest.length > 1 ? 's' : ''} from your institution`}
+                </button>
+              ) : (
+                <span className="ln-tag ln-tag-lg" style={{ background: '#263329', color: '#7FBE7C' }}>
+                  {featured.steps.some(st => st.status === 'not_in_path' || requests.requested.has(st.name)) ? '✓ Requested from your institution' : '✓ Every skill is already in your programme'}
+                </span>
+              )}
               <button type="button" className="ln-btn ln-btn-ghost-dark" onClick={playIntro} disabled={introBusy || !speech.supported}>
                 {speech.speakingId ? <Square size={16} aria-hidden="true" /> : <Volume2 size={18} aria-hidden="true" />}
                 {introBusy ? 'Preparing…' : speech.speakingId ? 'Stop' : 'Listen to a 2-min intro'}
               </button>
             </div>
-            {(introError || requests.error) && <div className="ln-error">{introError || requests.error}</div>}
+            <VoiceStatus speech={speech} text={introText} dark lang={speechTag(user?.language || 'telugu')} />
+            {introError && <div className="ln-error">{introError}</div>}
+            {requests.sent && <div className="ln-note" role="status" style={{ background: '#263329', color: '#CFE8CD' }}>{requests.sent}. You’ll see each one’s status below.</div>}
+            {requests.error && <div className="ln-error">{requests.error}</div>}
           </div>
           <div>
             <span className="ln-kicker" style={{ color: 'var(--stage-muted)' }}>What to learn, in order</span>
@@ -99,7 +113,8 @@ export default function Topics() {
               const done = st.status === 'mastered' || st.status === 'declared';
               const note = done ? 'Already mastered'
                 : st.status === 'in_path' || st.status === 'in_progress' ? `In your path · about ${st.hours} h`
-                : requests.requested.has(st.name) || st.status === 'requested' ? `Requested · about ${st.hours} h`
+                : requests.requested.has(st.name) ? `${REQUEST_STATUS[requests.statusOf(st.name)]} · about ${st.hours} h`
+                : st.status === 'requested' ? `${REQUEST_STATUS.pending} · about ${st.hours} h`
                 : `About ${st.hours} h · not in your programme`;
               return (
                 <div key={st.name} className="ln-step">

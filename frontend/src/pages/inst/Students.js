@@ -18,7 +18,7 @@ export const ACCESS = { active: 'Active', invited: 'Invited', never_signed_in: '
 const FILTERS = [['all', 'All'], ['active', 'Active'], ['invited', 'Invited'], ['never_signed_in', 'Never signed in'], ['locked', 'Locked'], ['removed', 'Removed'], ['reset_requested', 'PIN reset requested']];
 const EVENT = {
   invited: 'Invited', invite_resent: 'Invite resent', pin_set: 'PIN set', pin_reset: 'PIN reset', slip_issued: 'Printed slip issued',
-  signed_in: 'Signed in', locked: 'Locked after wrong PINs', removed: 'Access removed', restored: 'Access restored', moved: 'Moved', pin_reset_requested: 'Asked for a PIN reset'
+  signed_in: 'Signed in', locked: 'Locked after wrong PINs', shared_account_suspected: 'Signed in from two cities on one day', data_exported: 'Data downloaded', removed: 'Access removed', restored: 'Access restored', moved: 'Moved', pin_reset_requested: 'Asked for a PIN reset'
 };
 const when = (t) => (t ? new Date(t.replace(' ', 'T') + (t.includes('Z') || t.includes('+') ? '' : 'Z')).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) : '—');
 

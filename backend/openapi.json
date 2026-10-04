@@ -2747,6 +2747,36 @@
         }
       }
     },
+    "/api/learner/consents/parent-share": {
+      "put": {
+        "tags": [
+          "learner"
+        ],
+        "operationId": "put_learner_consents_parent_share",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CsrfToken"
+          }
+        ]
+      }
+    },
     "/api/learner/dashboard": {
       "get": {
         "tags": [
@@ -2770,6 +2800,104 @@
             "$ref": "#/components/responses/Error"
           }
         }
+      }
+    },
+    "/api/learner/delete-request": {
+      "post": {
+        "tags": [
+          "learner"
+        ],
+        "operationId": "post_learner_delete_request",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CsrfToken"
+          }
+        ]
+      }
+    },
+    "/api/learner/devices/sign-out-others": {
+      "post": {
+        "tags": [
+          "learner"
+        ],
+        "operationId": "post_learner_devices_sign_out_others",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CsrfToken"
+          }
+        ]
+      }
+    },
+    "/api/learner/devices/{id}": {
+      "delete": {
+        "tags": [
+          "learner"
+        ],
+        "operationId": "delete_learner_devices_id",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CsrfToken"
+          }
+        ]
       }
     },
     "/api/learner/doubts": {
@@ -2894,6 +3022,31 @@
           "learner"
         ],
         "operationId": "get_learner_mastery_record",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/api/learner/my-data": {
+      "get": {
+        "tags": [
+          "learner"
+        ],
+        "operationId": "get_learner_my_data",
         "responses": {
           "200": {
             "description": "OK"
@@ -3051,6 +3204,36 @@
             "$ref": "#/components/responses/Error"
           }
         }
+      }
+    },
+    "/api/learner/path/start": {
+      "post": {
+        "tags": [
+          "learner"
+        ],
+        "operationId": "post_learner_path_start",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CsrfToken"
+          }
+        ]
       }
     },
     "/api/learner/pin": {
@@ -3620,6 +3803,31 @@
         ]
       }
     },
+    "/api/learner/settings": {
+      "get": {
+        "tags": [
+          "learner"
+        ],
+        "operationId": "get_learner_settings",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
     "/api/learner/skill-requests": {
       "get": {
         "tags": [
@@ -3787,6 +3995,36 @@
           "learner"
         ],
         "operationId": "post_learner_tts",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CsrfToken"
+          }
+        ]
+      }
+    },
+    "/api/learner/voice-metrics": {
+      "post": {
+        "tags": [
+          "learner"
+        ],
+        "operationId": "post_learner_voice_metrics",
         "responses": {
           "200": {
             "description": "OK"

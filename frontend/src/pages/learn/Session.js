@@ -27,7 +27,9 @@ import { ArrowLeft, Clock, Mic, Keyboard, RotateCcw, Pause, Play, Volume2, Award
 import { useAuth } from '../../context/AuthContext';
 import { useUiLang, speechTag } from '../../context/UiLangContext';
 import api, { getOr } from '../../utils/api';
-import { useSpeechInput, useSpeechOutput, hasVoiceFor, usingServerVoice } from '../../utils/voice';
+import { useSpeechInput, useSpeechOutput, speechParts } from '../../utils/voice';
+import VoiceStatus from '../../components/learn/VoiceStatus';
+import { playCue, useBargeIn, parseVoiceCommand, FILLER } from '../../utils/voiceMode';
 import { MOCK_SESSION_START, MOCK_PROFILE, MOCK_LEARNER_DASHBOARD } from '../../utils/learnerMockData';
 import MermaidDiagram from '../../components/learn/MermaidDiagram';
 import { newTracker, recordPaste, provenanceFor } from '../../utils/provenance';
@@ -86,6 +88,30 @@ export default function Session() {
   lowBwRef.current = lowBw;
 
   const speech = useSpeechOutput({ lang: bcp47, rate });
+  const [handsFree, setHandsFree] = useState(false);
+  const micRef = useRef(null);
+  const busyRef = useRef(false);
+  const turnRef = useRef(null);       // when the learner finished their turn (speed metric)
+  const spokenRef = useRef(null);     // { id, text } of what she is saying, for highlighting
+  const lastAiRef = useRef(null);
+  const handsFreeRef = useRef(false);
+  handsFreeRef.current = handsFree;
+
+  // Everything she says goes through here: remembered for highlighting, and in
+  // hands-free mode the microphone opens (with a cue) when she finishes.
+  const say = useCallback((text, id, opts = {}) => {
+    spokenRef.current = { id, text };
+    speech.speak(text, id, {
+      ...opts,
+      onEnd: () => {
+        opts.onEnd?.();
+        if (handsFreeRef.current && modeRef.current === 'voice' && phaseRef.current !== 'result' && !lowBwRef.current && micRef.current && !micRef.current.listening) {
+          playCue();
+          setTimeout(() => micRef.current?.start(), 280);
+        }
+      }
+    });
+  }, [speech]);
 
   // ── Load session, voice preferences and node position ──────────────────────
   const startSession = useCallback(async () => {
@@ -108,8 +134,8 @@ export default function Session() {
     const last = [...history].reverse().find(m => m.role === 'ai');
     if (last?.type === 'mastery_check') setPhase('mastery_check');
     setBusy(false);
-    if (last && !lowBwRef.current) speech.speak(last.content, last.id);
-  }, [speech]);
+    if (last && !lowBwRef.current) say(last.content, last.id);
+  }, [say]);
 
   useEffect(() => {
     startSession();
@@ -117,6 +143,7 @@ export default function Session() {
       const v = p.voice_prefs || {};
       setShowEnglish(v.showEnglishCaptions !== false);
       if (RATES.includes(v.rate)) setRate(v.rate);
+      setHandsFree(!!v.handsFree);
       if (v.startInVoice === false && !params.get('mode')) setMode('typing');
     });
     // Warm-ups (v4.3 §8): up to 2 due reviews come before new material.
@@ -190,8 +217,17 @@ export default function Session() {
     setMessages(prev => [...prev, ai, ...extra]);
     const speakNow = extra.length ? extra[extra.length - 1] : ai;
     // Spoken in both modes, so a typed question gets the same voice (AI-VOICE-SPEC §2).
-    if (!lowBwRef.current) speech.speak(extra.length ? `${ai.content} ${speakNow.content}` : ai.content, speakNow.id);
-  }, [speech]);
+    if (!lowBwRef.current) say(extra.length ? `${ai.content} ${speakNow.content}` : ai.content, speakNow.id, { turnStartedAt: turnRef.current });
+  }, [say]);
+
+  // While a reply is being written, a short "one moment" after a little
+  // silence, so the wait never feels like a broken connection.
+  const startWaiting = useCallback(() => {
+    turnRef.current = Date.now();
+    busyRef.current = true;
+    if (modeRef.current !== 'voice' || lowBwRef.current) return;
+    setTimeout(() => { if (busyRef.current) speech.speak(FILLER[bcp47] || FILLER['en-IN'], '__filler', { quiet: true }); }, 1200);
+  }, [speech, bcp47]);
 
   const send = useCallback(async (content, inputMode, { requestCheck = false, provenance = null } = {}) => {
     const text = (content || '').trim();
@@ -200,15 +236,18 @@ export default function Session() {
     setError('');
     setMessages(prev => [...prev, withId({ role: 'learner', content: text || t('session.ready'), type: 'response', input_mode: inputMode })]);
     setBusy(true);
+    startWaiting();
     try {
       const res = await api.post('/learner/session/message', { content: text, session_id: sessionId, input_mode: inputMode, request_check: requestCheck, ...(provenance ? { provenance } : {}) });
       if (!res.data || !res.data.message) throw new Error('unexpected response shape');
       applyResponse(res.data);
     } catch (e) {
+      if (speech.speakingId === '__filler') speech.stop();
       setError(navigator.onLine ? 'Couldn’t reach Professor Qubirex. Try again.' : 'You are offline. Lessons and checks need a connection — your active time is saved and will sync.');
     }
+    busyRef.current = false;
     setBusy(false);
-  }, [busy, sessionId, speech, applyResponse, t]);
+  }, [busy, sessionId, speech, applyResponse, t, startWaiting]);
 
   // A spoken check answer goes into the editable transcript, never straight in.
   const toCheckDraft = useCallback((text) => {
@@ -221,6 +260,7 @@ export default function Session() {
 
   const sendAudio = useCallback(async (blob) => {
     setTranscribing(true); setBusy(true); setError('');
+    startWaiting();
     try {
       const form = new FormData();
       form.append('audio', blob, 'answer.webm');
@@ -231,16 +271,52 @@ export default function Session() {
       setMessages(prev => [...prev, withId({ role: 'learner', content: res.data.transcript, type: 'response', input_mode: 'voice' })]);
       applyResponse(res.data);
     } catch (e) {
+      if (speech.speakingId === '__filler') speech.stop();
       setError(errMsg(e, 'Couldn’t hear that. Try again, or type your answer.'));
     }
+    busyRef.current = false;
     setTranscribing(false); setBusy(false);
-  }, [sessionId, applyResponse, toCheckDraft]);
+  }, [sessionId, applyResponse, toCheckDraft, startWaiting, speech]);
+
+  // Spoken commands: repeat, slower, say it in English, I'm ready for the test.
+  // ("Give an example" goes to her as a normal request.)
+  const runCommand = useCallback((cmd) => {
+    const last = lastAiRef.current;
+    if (cmd === 'repeat') { speech.replay(); return true; }
+    if (cmd === 'slower') {
+      const slower = RATES[Math.max(0, RATES.indexOf(rate) - 1)];
+      setRate(slower); speech.setRate(slower);
+      setNotice(`Speaking slower (${slower.toFixed(1)}×).`);
+      if (!speech.speakingId) speech.replay();
+      return true;
+    }
+    if (cmd === 'english') {
+      if (last?.caption_en) say(last.caption_en, last.id, { lang: 'en-IN' });
+      else setNotice('There is no English version of that one.');
+      return true;
+    }
+    if (cmd === 'ready' && phaseRef.current === 'instruction') { send('', 'voice', { requestCheck: true }); return true; }
+    return false;
+  }, [speech, rate, say, send]);
 
   const mic = useSpeechInput({
     lang: bcp47,
-    onFinal: (text) => { lastInputRef.current = Date.now(); if (phaseRef.current === 'mastery_check') toCheckDraft(text); else send(text, 'voice'); },
+    onFinal: (text) => {
+      lastInputRef.current = Date.now();
+      if (phaseRef.current === 'mastery_check') { toCheckDraft(text); return; }
+      const cmd = parseVoiceCommand(text);
+      if (cmd && runCommand(cmd)) return;
+      send(text, 'voice');
+    },
     onAudio: sendAudio,
     recorder: recorderOptions(lowBw)
+  });
+
+  micRef.current = mic;
+  // Interrupt by speaking: in hands-free mode, starting to talk stops her and opens the mic.
+  useBargeIn({
+    active: handsFree && mode === 'voice' && !!speech.speakingId && speech.speakingId !== '__filler' && !mic.listening && !lowBw,
+    onVoice: () => { speech.stop(); mic.start(); }
   });
 
   const toggleMic = () => {
@@ -276,10 +352,13 @@ export default function Session() {
 
   const orb = mic.listening ? 'listening' : busy ? 'thinking' : speech.speakingId ? 'speaking' : mode === 'typing' ? 'typing' : phase === 'mastery_check' ? 'yourTurn' : 'idle';
   const orbLabel = { listening: t('session.listening'), thinking: transcribing ? 'Transcribing…' : t('session.thinking'), speaking: t('session.speaking'), typing: t('session.typing'), yourTurn: t('session.yourTurn'), idle: t('session.idle') }[orb];
-  const noVoice = speech.supported && !usingServerVoice() && !hasVoiceFor(bcp47);
   const clock = `${Math.floor(elapsed / 60)}:${String(elapsed % 60).padStart(2, '0')}`;
   const langName = LANG_LABEL[language] || language;
+  lastAiRef.current = lastAi;
   const liveCaption = mic.listening && mic.interim ? mic.interim : lastAi?.content;
+  // The part she is saying right now is highlighted in the caption.
+  const spoken = spokenRef.current;
+  const speakingParts = !mic.listening && speech.part && spoken && speech.part.id === spoken.id ? speechParts(spoken.text) : null;
 
   const endSession = () => { speech.stop(); if (mic.listening) mic.stop(); navigate('/learn/dashboard'); };
 
@@ -347,10 +426,18 @@ export default function Session() {
               </div>
             ) : (
               <div className="ln-col" style={{ gap: 10, alignItems: 'center', width: '100%' }}>
-                <p lang={bcp47} className="ln-caption-te" aria-live="polite">{liveCaption || (busy ? '' : '…')}</p>
+                {speakingParts ? (
+                  <p lang={spoken?.text === lastAi?.caption_en ? 'en' : bcp47} className="ln-caption-te">
+                    {speakingParts.map((p, i) => <span key={i} className={i === speech.part.index ? 'ln-speaking-now' : i < speech.part.index ? 'ln-spoken' : ''}>{p} </span>)}
+                  </p>
+                ) : (
+                  <p lang={bcp47} className="ln-caption-te" aria-live="polite">{liveCaption || (busy ? '' : '…')}</p>
+                )}
+                {mode === 'voice' && !busy && !mic.listening && phase === 'instruction' && (
+                  <p className="ln-xs" style={{ color: 'var(--stage-muted)', margin: 0 }}>Say “repeat”, “slower”, “in English”, “give an example” or “I’m ready for the test”.{handsFree ? ' Hands-free is on: just start talking.' : ''}</p>
+                )}
                 {showEnglish && !mic.listening && lastAi?.caption_en && <p className="ln-caption-en">{lastAi.caption_en}</p>}
-                {noVoice && orb !== 'listening' && <p className="ln-caption-en" style={{ fontSize: 12 }}>Professor Qubirex's voice is not available on this deployment, so replies show as captions.</p>}
-                {!noVoice && speech.voiceIssue && orb !== 'listening' && <p className="ln-caption-en" style={{ fontSize: 12 }}>{speech.voiceIssue}</p>}
+                {orb !== 'listening' && <VoiceStatus speech={speech} dark />}
               </div>
             )}
           </div>
@@ -372,7 +459,7 @@ export default function Session() {
 
           {phase !== 'result' && (
             <div className="ln-row ln-stage-controls" style={{ gap: 18, justifyContent: 'center' }}>
-              <button type="button" className="ln-roundbtn" aria-label="Replay last answer" disabled={!lastAi || !speech.supported} onClick={() => lastAi && speech.speak(lastAi.content, lastAi.id)}><RotateCcw size={20} aria-hidden="true" /></button>
+              <button type="button" className="ln-roundbtn" aria-label="Replay last answer" disabled={!lastAi || !speech.supported} onClick={() => lastAi && say(lastAi.content, lastAi.id)}><RotateCcw size={20} aria-hidden="true" /></button>
               <button type="button" className="ln-roundbtn ln-hide-stage-phone" aria-label={`Playback speed ${rate}×, change`} onClick={() => setRate(r => RATES[(RATES.indexOf(r) + 1) % RATES.length])}>{rate.toFixed(1)}×</button>
               <div className="ln-col" style={{ alignItems: 'center', gap: 8 }}>
                 <button type="button" className={`ln-mic ${mic.listening ? 'is-listening' : ''}`} onClick={toggleMic} disabled={(busy && !mic.listening) || !mic.supported}
@@ -415,7 +502,7 @@ export default function Session() {
                         {!you && showEnglish && m.caption_en && <span className="ln-bubble-en" lang="en">{m.caption_en}</span>}
                       </div>
                       {speech.supported && (
-                        <button type="button" className="ln-play" onClick={() => (now ? speech.stop() : speech.speak(m.content, m.id))}>
+                        <button type="button" className="ln-play" onClick={() => (now ? speech.stop() : say(m.content, m.id))}>
                           <Volume2 size={14} aria-hidden="true" />{now ? 'Stop' : 'Play'}
                         </button>
                       )}

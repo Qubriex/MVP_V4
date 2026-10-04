@@ -7,6 +7,8 @@ import { Link, useParams } from 'react-router-dom';
 import { Check, FileText, Mic, Volume2, Square, Bookmark, BookmarkCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { speechTag } from '../../context/UiLangContext';
+import VoiceStatus from '../../components/learn/VoiceStatus';
+import { errMsg } from '../../utils/errors';
 import api, { getOr } from '../../utils/api';
 import { useSpeechOutput } from '../../utils/voice';
 import { MOCK_JOB_DETAIL } from '../../utils/learnerMockData';
@@ -22,6 +24,7 @@ export default function JobDetail() {
   const [savedStatus, setSavedStatus] = useState(null);
   const [reading, setReading] = useState(false);
   const [readError, setReadError] = useState('');
+  const [readText, setReadText] = useState('');
   const requests = useSkillRequests();
   const speech = useSpeechOutput({ lang: speechTag(language) });
 
@@ -43,9 +46,10 @@ export default function JobDetail() {
     try {
       const res = await api.post(`/market/jobs/${jobId}/read-aloud`);
       if (!res.data?.text) throw new Error('empty');
+      setReadText(res.data.text);
       speech.speak(res.data.text, 'jd');
     } catch (e) {
-      setReadError('Couldn’t prepare the reading right now. Try again in a moment.');
+      setReadError(errMsg(e, 'Couldn’t prepare the reading right now. Try again in a moment.'));
     }
     setReading(false);
   };
@@ -93,6 +97,7 @@ export default function JobDetail() {
             </button>
           </div>
           {readError && <div className="ln-error">{readError}</div>}
+          <VoiceStatus speech={speech} text={readText} lang={speechTag(language)} />
         </article>
 
         <aside className="ln-col" style={{ gap: 16 }}>
@@ -127,7 +132,8 @@ export default function JobDetail() {
                 </div>
               ))}
               <span className="ln-xs ln-muted">Your institution sets your programme, so new skills are requested rather than added.</span>
-              {requests.error && <div className="ln-error">{requests.error}</div>}
+              {requests.sent && <div className="ln-note" role="status">{requests.sent}.</div>}
+          {requests.error && <div className="ln-error">{requests.error}</div>}
             </section>
           )}
 

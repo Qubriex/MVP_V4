@@ -87,8 +87,26 @@ router.get('/quality-report', async (req, res) => {
     FROM learning_sessions GROUP BY current_approach
   `).all();
 
+  // Speed and failures of every AI task and of her voice, last 7 days
+  // (v4.3 speed targets: first audio within 2 s, a whole voice turn within 4 s).
+  const since = new Date(Date.now() - 7 * 86400000).toISOString();
+  const speed = (await db.prepare(`
+    SELECT task, COUNT(*) AS calls,
+      ROUND(percentile_cont(0.5) WITHIN GROUP (ORDER BY ms)) AS p50_ms,
+      ROUND(percentile_cont(0.9) WITHIN GROUP (ORDER BY ms)) AS p90_ms,
+      SUM(CASE WHEN status NOT IN ('ok', 'fallback') THEN 1 ELSE 0 END) AS failed,
+      SUM(CASE WHEN status = 'truncated' THEN 1 ELSE 0 END) AS truncated,
+      MAX(tokens_out) AS max_tokens_out
+    FROM model_calls WHERE created_at >= ? GROUP BY task ORDER BY p50_ms DESC
+  `).all(since)).map(r => ({ ...r, target_ms: { 'CLIENT.voice_first_audio': 2000, 'CLIENT.voice_turn': 4000 }[r.task] || null }));
+  const voiceEngines = await db.prepare(`
+    SELECT COALESCE(model_version, '—') AS engine, status, COUNT(*) AS calls, ROUND(AVG(ms)) AS avg_ms
+    FROM model_calls WHERE task = 'TEACH.speak' AND created_at >= ? GROUP BY model_version, status ORDER BY calls DESC
+  `).all(since);
+
   db.close();
   res.json({
+    speed, voice_engines: voiceEngines,
     node_difficulty_ranking: nodeStats,
     approach_effectiveness: loopStats,
     calibration_register: calibrationRegister(),   // v4.3 Appendix A.1
