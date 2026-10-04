@@ -2,9 +2,11 @@
 // All routes require JWT authentication. Learner payload: id (learner_id),
 // el_id (engagement_learner_id), engagement_id, language.
 import express from 'express';
+import bcrypt from 'bcryptjs';
 import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import { legacyHandle as getDb } from '../../core/db/dal.js';
+import * as dal from '../../core/db/dal.js';
 import { aiRateLimitPosts } from '../middleware/rateLimit.js';
 import { authenticateToken, requireRole, requireActiveLearner } from '../middleware/auth.js';
 import * as orchestrator from '../../core/orchestrator.js';
@@ -176,6 +178,53 @@ router.get('/mastery-record', async (req, res) => {
 // The learner-facing view of what the institution sees in the Mastery Log:
 // every cluster and node with its status, plus evidence for mastered nodes.
 // Session content, check questions and evaluations stay proprietary.
+// ─── Sections: any section can be opened; one can be started when the
+// sections it builds on are done. Section B builds on section A when a skill
+// taught in B has a prerequisite skill taught in A (Capability Graph). With
+// no graph data for a pathway, every section is open.
+async function sectionLocks(engagementId, clusters) {
+  const edges = await dal.all(`
+    SELECT DISTINCT nb.cluster_id AS needs, na.cluster_id AS on_cluster
+    FROM node_skill_map mb JOIN skill_nodes nb ON nb.id = mb.node_id
+    JOIN skill_prereqs p ON p.skill_id = mb.skill_id
+    JOIN node_skill_map ma ON ma.skill_id = p.prereq_skill_id JOIN skill_nodes na ON na.id = ma.node_id
+    JOIN skill_clusters cb ON cb.id = nb.cluster_id JOIN skill_clusters ca ON ca.id = na.cluster_id
+    WHERE cb.capability_target_id = (SELECT capability_target_id FROM engagements WHERE id = ?)
+      AND ca.capability_target_id = cb.capability_target_id AND nb.cluster_id != na.cluster_id`, engagementId);
+  const done = new Set(clusters.filter(c => c.status === 'done').map(c => c.id));
+  const label = new Map(clusters.map(c => [c.id, c.label]));
+  const out = new Map();
+  edges.forEach(e => {
+    if (done.has(e.on_cluster) || !label.has(e.on_cluster)) return;
+    if (!out.has(e.needs)) out.set(e.needs, []);
+    if (!out.get(e.needs).some(x => x.id === e.on_cluster)) out.get(e.needs).push({ id: e.on_cluster, label: label.get(e.on_cluster) });
+  });
+  return out;
+}
+
+// POST /path/start { cluster_id } — switch to another section: its first
+// skill not yet mastered becomes the current one. Progress elsewhere is kept.
+router.post('/path/start', async (req, res) => {
+  const clusterId = String(req.body?.cluster_id || '');
+  const rows = await dal.all(`SELECT sc.id, sc.cluster_label, sc.sequence_order, sn.id AS node_id, sn.sequence_order AS node_order,
+      EXISTS (SELECT 1 FROM node_mastery nm WHERE nm.engagement_learner_id = ? AND nm.skill_node_id = sn.id AND nm.advanced_at IS NOT NULL) AS mastered
+    FROM skill_clusters sc JOIN skill_nodes sn ON sn.cluster_id = sc.id
+    WHERE sc.capability_target_id = (SELECT capability_target_id FROM engagements WHERE id = ?)
+    ORDER BY sc.sequence_order, sn.sequence_order`, req.user.el_id, req.user.engagement_id);
+  const mine = rows.filter(r => r.id === clusterId);
+  if (!mine.length) return res.status(404).json({ error: 'Section not found' });
+  const clusters = [...new Map(rows.map(r => [r.id, { id: r.id, label: r.cluster_label }])).values()].map(c => {
+    const nodes = rows.filter(r => r.id === c.id);
+    return { ...c, status: nodes.every(n => n.mastered) ? 'done' : 'next' };
+  });
+  const lockedBy = (await sectionLocks(req.user.engagement_id, clusters)).get(clusterId) || [];
+  if (lockedBy.length) return res.status(409).json({ error: `Locked: finish ${lockedBy.map(x => x.label).join(' and ')} first.`, locked_by: lockedBy });
+  const next = mine.find(r => !r.mastered);
+  if (!next) return res.status(409).json({ error: 'You have already mastered every skill in this section.' });
+  await dal.run(`UPDATE engagement_learners SET current_node_id = ?, current_cluster_id = ?, overall_status = 'in_progress' WHERE id = ?`, next.node_id, clusterId, req.user.el_id);
+  res.json({ current_node_id: next.node_id, cluster_id: clusterId });
+});
+
 router.get('/path', async (req, res) => {
   const db = getDb();
   const el = await db.prepare(`
@@ -216,6 +265,9 @@ router.get('/path', async (req, res) => {
     c.total = c.nodes.length;
     c.status = done === c.total ? 'done' : c.nodes.some(n => n.status !== 'upcoming') ? 'now' : 'next';
   });
+  // Which sections can be started now (their prerequisite sections are done).
+  const locks = await sectionLocks(req.user.engagement_id, clusters);
+  clusters.forEach(c => { c.locked_by = locks.get(c.id) || []; c.current = c.nodes.some(n => n.status === 'current'); c.can_start = c.status !== 'done' && !c.current && !c.locked_by.length; });
 
   const masteredNodes = clusters.flatMap(c => c.nodes.filter(n => n.status === 'mastered').map(n => ({ ...n, cluster: c.label })));
   res.json({
@@ -505,22 +557,24 @@ async function handleCheckResult({ req, res, session, node, result, learnerRespo
   let confidenceIndicator = null;
   let review = null;
 
+  // Next skill after a mastered one: the next unmastered skill in the same
+  // section, otherwise the earliest unmastered skill in the programme (the
+  // learner may have started sections out of order). None left: complete.
   const nextNodeAfter = async () => {
-    const nextNode = await db.prepare(`
+    const unmastered = `NOT EXISTS (SELECT 1 FROM node_mastery nm WHERE nm.engagement_learner_id = ? AND nm.skill_node_id = sn.id AND nm.advanced_at IS NOT NULL) AND sn.id != ?`;
+    const sameCluster = await db.prepare(`
       SELECT sn.* FROM skill_nodes sn
       WHERE sn.cluster_id = (SELECT cluster_id FROM skill_nodes WHERE id = ?)
-      AND sn.sequence_order > (SELECT sequence_order FROM skill_nodes WHERE id = ?)
+        AND sn.sequence_order > (SELECT sequence_order FROM skill_nodes WHERE id = ?) AND ${unmastered}
       ORDER BY sn.sequence_order LIMIT 1
-    `).get(session.skill_node_id, session.skill_node_id);
-    if (nextNode) return nextNode;
-    const currentCluster = await db.prepare('SELECT cluster_id FROM skill_nodes WHERE id = ?').get(session.skill_node_id);
-    const nextCluster = await db.prepare(`
-      SELECT sc.id FROM skill_clusters sc
-      WHERE sc.capability_target_id = (SELECT capability_target_id FROM skill_clusters WHERE id = ?)
-      AND sc.sequence_order > (SELECT sequence_order FROM skill_clusters WHERE id = ?)
-      ORDER BY sc.sequence_order LIMIT 1
-    `).get(currentCluster.cluster_id, currentCluster.cluster_id);
-    return nextCluster ? await db.prepare('SELECT * FROM skill_nodes WHERE cluster_id = ? ORDER BY sequence_order LIMIT 1').get(nextCluster.id) : null;
+    `).get(session.skill_node_id, session.skill_node_id, elId, session.skill_node_id);
+    if (sameCluster) return sameCluster;
+    return await db.prepare(`
+      SELECT sn.* FROM skill_nodes sn JOIN skill_clusters sc ON sc.id = sn.cluster_id
+      WHERE sc.capability_target_id = (SELECT sc2.capability_target_id FROM skill_nodes n2 JOIN skill_clusters sc2 ON sc2.id = n2.cluster_id WHERE n2.id = ?)
+        AND ${unmastered}
+      ORDER BY sc.sequence_order, sn.sequence_order LIMIT 1
+    `).get(session.skill_node_id, elId, session.skill_node_id) || null;
   };
 
   await db.transaction(async () => {
@@ -844,12 +898,21 @@ router.get('/certificates', async (req, res) => {
 // GET/PUT /profile, resume and skill requests live in portfolio.js.
 // ─── Change PIN (required after a printed slip or a reset) ─────────────────────
 router.put('/pin', async (req, res) => {
-  const { new_pin } = req.body;
+  const { new_pin, current_pin } = req.body;
   if (!isValidPin(new_pin)) return res.status(400).json({ error: 'Your PIN must be exactly 6 digits.' });
   const db = getDb();
+  // From Settings (no one-time PIN to replace) the current PIN is required,
+  // and other devices are signed out afterwards.
+  const me = await db.prepare('SELECT pin_hash, pin_must_change FROM learners WHERE id = ?').get(req.user.id);
+  const fromSettings = me?.pin_hash && !me.pin_must_change;
+  if (fromSettings && !(current_pin && await bcrypt.compare(String(current_pin), me.pin_hash))) {
+    db.close();
+    return res.status(403).json({ error: 'Your current PIN is not right.' });
+  }
+  if (fromSettings) await db.prepare("UPDATE auth_sessions SET revoked_at = ?, revoked_reason = 'pin_changed' WHERE actor_type = 'learner' AND actor_id = ? AND id != ? AND revoked_at IS NULL").run(new Date().toISOString(), req.user.id, req.session.id);
   await db.prepare("UPDATE learners SET pin_hash = ?, pin_must_change = 0, pin_set_at = datetime('now') WHERE id = ?").run(hashPin(new_pin), req.user.id);
   const e = await db.prepare('SELECT institution_id FROM engagements WHERE id = ?').get(req.user.engagement_id);
-  if (e) await logEvent(db, { institutionId: e.institution_id, learnerId: req.user.id, elId: req.user.el_id, event: 'pin_set', detail: 'Chose a new PIN after a one-time PIN' });
+  if (e) await logEvent(db, { institutionId: e.institution_id, learnerId: req.user.id, elId: req.user.el_id, event: 'pin_set', detail: fromSettings ? 'Changed their PIN in Settings' : 'Chose a new PIN after a one-time PIN' });
   db.close();
   res.json({ message: 'PIN updated' });
 });

@@ -14,6 +14,10 @@ api.interceptors.response.use(
   err => {
     if (err.response?.status === 401) {
       const role = localStorage.getItem('qubirex_role');
+      // Signed out because the account was used on another device: say so on the sign-in page.
+      const e = err.response?.data?.error;
+      const msg = typeof e === 'string' ? e : e?.message;
+      if (/another device/i.test(msg || '')) { try { sessionStorage.setItem('qubirex_signout_reason', msg); } catch { /* ignore */ } }
       localStorage.removeItem('qubirex_token');
       localStorage.removeItem('qubirex_user');
       localStorage.removeItem('qubirex_role');

@@ -12,11 +12,11 @@ import { MOCK_PROFILE } from '../../utils/learnerMockData';
 import { useLowBandwidth } from '../../utils/lowBandwidth';
 import { errMsg } from '../../utils/errors';
 
-const EDITABLE = ['email', 'phone', 'city', 'link_url', 'headline', 'about', 'target_roles', 'preferred_cities', 'available_from',
+const EDITABLE = ['email', 'phone', 'city', 'link_url', 'headline', 'about', 'target_roles', 'preferred_cities', 'graduation_year',
   'expected_salary', 'self_skills', 'experience', 'certifications', 'ui_language', 'voice_prefs', 'education', 'projects',
   'share_with_institution'];
 // Low-bandwidth mode (v4.3 §19) is a setting of this device, not the profile.
-function LowBandwidthToggle() {
+export function LowBandwidthToggle() {
   const [on, set] = useLowBandwidth();
   return (
     <label className="ln-toggle-row">
@@ -285,7 +285,14 @@ export function GoalsSection({ form }) {
       <div className="ln-grid ln-g-2" style={{ gap: 16 }}>
         <ChipEditor label="Target roles" values={draft.target_roles} onChange={v => set('target_roles', v)} placeholder="Add role" tone="accent" />
         <ChipEditor label="Preferred cities" values={draft.preferred_cities} onChange={v => set('preferred_cities', v)} placeholder="Add city" />
-        <Field id="avail" label="Available from" placeholder="e.g. June 2027" value={draft.available_from || ''} onChange={e => set('available_from', e.target.value)} />
+        <div className="ln-field">
+          <label className="ln-label" htmlFor="gradyear">Graduation year</label>
+          <select id="gradyear" className="ln-select" value={draft.graduation_year || ''} onChange={e => set('graduation_year', e.target.value ? Number(e.target.value) : null)}>
+            <option value="">Choose a year</option>
+            {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - 3 + i).map(y => <option key={y} value={y}>{y}</option>)}
+          </select>
+          <span className="ln-xs ln-muted">Employers see you as available from June of this year.</span>
+        </div>
         <Field id="sal" label="Expected salary" hint="private, used for job filters" placeholder="e.g. ₹4 LPA" value={draft.expected_salary || ''} onChange={e => set('expected_salary', e.target.value)} />
       </div>
     </Section>

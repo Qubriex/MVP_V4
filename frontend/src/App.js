@@ -41,6 +41,7 @@ import LearnerProfile from './pages/learn/Profile';
 import ResumeBuilder from './pages/learn/Resume';
 import Welcome from './pages/learn/Welcome';
 import Reviews from './pages/learn/Reviews';
+import LearnerSettings from './pages/learn/Settings';
 import Passport from './pages/learn/Passport';
 import Verify from './pages/Verify';
 import EmployerLogin from './pages/employer/Login';
@@ -163,6 +164,7 @@ export default function App() {
                       <Route path="market/:jobId/interview" element={<InterviewPractice />} />
                       <Route path="topics" element={<EmergingTopics />} />
                       <Route path="profile" element={<LearnerProfile />} />
+                      <Route path="settings" element={<LearnerSettings />} />
                       <Route path="resume" element={<ResumeBuilder />} />
                       <Route path="reviews" element={<Reviews />} />
                       <Route path="passport" element={<Passport />} />
