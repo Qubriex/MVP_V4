@@ -291,4 +291,12 @@ async function readinessTimeline(db, engagement, elIds, dates) {
   return out;
 }
 
-export { curriculumCoverage, cohortStanding, pathwayNodes, readinessTimeline };
+/** Which of `keys` (market skill keys) the mastered nodes verify, on a pathway. */
+async function verifiedKeys(capabilityTargetId, masteredIds, keys) {
+  if (!masteredIds.size) return new Set();
+  const map = await pathwayMap(capabilityTargetId);
+  const memo = new Map();
+  return new Set(await filterSeq(keys, k => verifiedSkill(k, map, masteredIds, memo)));
+}
+
+export { curriculumCoverage, cohortStanding, pathwayNodes, readinessTimeline, jobMatch, verifiedKeys };

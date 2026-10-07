@@ -4,13 +4,63 @@
 // nudge to finish the profile.
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mic, Keyboard, Check, Search } from 'lucide-react';
+import { Mic, Keyboard, Check, Search, CheckCircle2, Circle, Route as RouteIcon, Building2, RotateCcw } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useUiLang } from '../../context/UiLangContext';
 import api, { getOr } from '../../utils/api';
 import { MOCK_LEARNER_DASHBOARD, MOCK_MARKET_SNAPSHOT, MOCK_PROFILE_BASICS } from '../../utils/learnerMockData';
 import { Bar, SampleBadge, StatusTag, salary, minutes, RequestButton, useSkillRequests } from '../../components/learn/ui';
 import { useLowBandwidth, slowConnection, cacheOutlines, cachedOutlines } from '../../utils/lowBandwidth';
+import CommandBox from '../../components/shared/CommandBox';
+
+// "Start here" for a new student, and "Today": practice from the college,
+// employer requests and reviews due, each one tap away (v4.3 canvas L1).
+function StartHere({ s }) {
+  const steps = [
+    ['Tell us about yourself', s.profile, '/learn/welcome'],
+    ['Do your first lesson — speak or type', s.first_lesson, '/learn/session?mode=voice'],
+    ['Let employers find you by your verified skills', s.discoverable, '/learn/settings#privacy']
+  ];
+  if (steps.every(x => x[1])) return null;
+  return (
+    <section className="ln-card ln-card-warm" style={{ gap: 10 }} aria-label="Start here">
+      <div className="ln-between"><h2 className="ln-h2">Start here</h2><span className="ln-small ln-muted">{steps.filter(x => x[1]).length} of 3 done</span></div>
+      {steps.map(([label, done, href]) => (
+        <div key={label} className="ln-row" style={{ gap: 10 }}>
+          {done ? <CheckCircle2 size={18} style={{ color: 'var(--status-success)' }} aria-label="Done" /> : <Circle size={18} aria-label="Not done" />}
+          {done ? <span className="ln-small ln-muted" style={{ textDecoration: 'line-through' }}>{label}</span> : <Link to={href} className="ln-link ln-small">{label} →</Link>}
+        </div>
+      ))}
+    </section>
+  );
+}
+
+function Today({ today }) {
+  const navigate = useNavigate();
+  const start = async (nodeId) => { try { await api.post('/learner/path/node', { node_id: nodeId }); } catch { /* the session opens on the current node */ } navigate('/learn/session?mode=voice'); };
+  const items = [];
+  today.bridges.forEach(b => {
+    const next = b.skills.find(x => !x.mastered);
+    items.push({ key: b.id, icon: RouteIcon, title: `Practice from your college: ${b.skills.filter(x => !x.mastered).map(x => x.label).join(', ')}`, body: `${b.note ? `${b.note} · ` : ''}re-test by ${new Date(b.retest_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}`, action: <button type="button" className="ln-btn ln-btn-sm ln-btn-primary" onClick={() => start(next.id)}>Start</button> });
+  });
+  if (today.requests_waiting) items.push({ key: 'req', icon: Building2, title: `${today.requests_waiting} employer${today.requests_waiting === 1 ? '' : 's'} asked to see your Passport`, body: 'You decide what to share.', action: <Link to="/learn/jobs" className="ln-btn ln-btn-sm ln-btn-primary">Answer</Link> });
+  if (today.reviews_due) items.push({ key: 'rev', icon: RotateCcw, title: `${today.reviews_due} review${today.reviews_due === 1 ? '' : 's'} due`, body: 'Short questions that keep your skills fresh on your Passport.', action: <Link to="/learn/reviews" className="ln-btn ln-btn-sm ln-btn-primary">Review now</Link> });
+  if (!items.length) return null;
+  return (
+    <section className="ln-card" style={{ gap: 4 }} aria-label="Today">
+      <h2 className="ln-h2">Today</h2>
+      <div className="ln-divided ln-col">
+        {items.map(({ key, icon: Icon, title, body, action }) => (
+          <div key={key} className="ln-row ln-wrap" style={{ gap: 12, padding: '10px 0' }}>
+            <Icon size={18} aria-hidden="true" />
+            <span className="ln-col" style={{ flex: 1, gap: 2, minWidth: 200 }}><b style={{ fontSize: 15 }}>{title}</b><span className="ln-xs ln-muted">{body}</span></span>
+            {action}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
 
 const APPROACH_NAMES = { native_concept: 'Native concept', analogy: 'Analogy', worked_example: 'Worked example', decomposition: 'Building blocks', socratic: 'Socratic' };
 const SECTION_NAMES = { personal: 'your details', education: 'education', projects: 'your projects', skills: 'skills', goals: 'career goals' };
@@ -25,7 +75,7 @@ export default function Dashboard() {
   const [query, setQuery] = useState('');
   const [professors, setProfessors] = useState([]);
   const requests = useSkillRequests();
-  const [due, setDue] = useState(0);
+  const [today, setToday] = useState(null);
   const [lowBw, setLowBw] = useLowBandwidth();
   const suggestLowBw = !lowBw && slowConnection();
 
@@ -34,7 +84,7 @@ export default function Dashboard() {
     getOr('/market/snapshot', MOCK_MARKET_SNAPSHOT, d => d && Array.isArray(d.jobs)).then(setMarket);
     getOr('/learner/profile', MOCK_PROFILE_BASICS, d => d && d.completeness).then(setProfile);
     getOr('/learner/professors', [], Array.isArray).then(setProfessors);
-    api.get('/learner/reviews/due').then(r => setDue(r.data.due?.length || 0)).catch(() => {});
+    api.get('/learner/today').then(r => setToday(r.data)).catch(() => {});
     // Low-bandwidth mode (v4.3 §19): keep the next two lessons' outlines on the device.
     api.get('/learner/path').then(r => {
       const nodes = (r.data.clusters || []).flatMap(c => c.nodes.map(n => ({ ...n, cluster: c.label })));
@@ -74,12 +124,9 @@ export default function Dashboard() {
           <span className="ln-xs ln-muted">Lessons and checks need a connection. Your active time syncs when you are back online.</span>
         </section>
       )}
-      {due > 0 && (
-        <Link to="/learn/reviews" className="ln-card ln-card-link ln-between ln-wrap" style={{ gap: 10 }}>
-          <span><b>{due} review{due === 1 ? '' : 's'} due.</b> Short questions that keep your skills fresh on your passport.</span>
-          <span className="ln-btn ln-btn-sm ln-btn-primary">Review now</span>
-        </Link>
-      )}
+      <CommandBox side="learner" placeholder="Ask anything — for example, what should I learn next?" />
+      {today && <StartHere s={today.start_here} />}
+      {today && <Today today={today} />}
 
       <div className="ln-grid ln-g-hero">
         <section className="ln-card ln-card-dark" style={{ gap: 18, padding: 28 }}>

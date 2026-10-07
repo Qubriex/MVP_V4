@@ -34,7 +34,7 @@ export const TEACHING = {
 export const EMPLOYER = {
   name: 'employer/session wall',
   entries: (root) => [
-    'api/routes/employer.js', 'api/routes/verify.js', 'api/middleware/employerAuth.js',
+    'api/routes/employer.js', 'api/routes/employerHiring.js', 'api/routes/verify.js', 'api/middleware/employerAuth.js',
     ...globDir(root, 'core/match')
   ].filter(e => exists(root, e)),
   required: ['api/routes/employer.js', 'api/middleware/employerAuth.js'],

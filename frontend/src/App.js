@@ -46,6 +46,7 @@ import Welcome from './pages/learn/Welcome';
 import Reviews from './pages/learn/Reviews';
 import LearnerSettings from './pages/learn/Settings';
 import Passport from './pages/learn/Passport';
+import LearnerJobs from './pages/learn/Jobs';
 import Verify from './pages/Verify';
 import EmployerLogin from './pages/employer/Login';
 import EmployerInvite from './pages/employer/Invite';
@@ -166,6 +167,7 @@ export default function App() {
                       <Route path="dashboard" element={<LearnerHome />} />
                       <Route path="welcome" element={<Welcome />} />
                       <Route path="record" element={<SkillRecord />} />
+                      <Route path="jobs" element={<LearnerJobs />} />
                       <Route path="market" element={<JobMarket />} />
                       <Route path="market/:jobId" element={<JobDetail />} />
                       <Route path="market/:jobId/interview" element={<InterviewPractice />} />

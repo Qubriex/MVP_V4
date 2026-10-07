@@ -21,6 +21,8 @@ import learnerRoutes from './routes/learner.js';
 import portfolioRoutes from './routes/portfolio.js';
 import marketRoutes from './routes/market.js';
 import employerRoutes from './routes/employer.js';
+import employerHiringRoutes from './routes/employerHiring.js';
+import learnerJobsRoutes from './routes/learnerJobs.js';
 import learnerEvidenceRoutes from './routes/learnerEvidence.js';
 import learnerSettingsRoutes from './routes/learnerSettings.js';
 import sharedRoutes from './routes/shared.js';
@@ -44,8 +46,10 @@ export const MOUNTS = [
   ['/api/learner', portfolioRoutes],                // profile, resume, skill requests, transcribe
   ['/api/learner', learnerEvidenceRoutes],          // reviews, rechecks, passport, renewal
   ['/api/learner', learnerSettingsRoutes],          // settings: devices, consent, my data
+  ['/api/learner', learnerJobsRoutes],              // jobs & applications, employer requests
   ['/api/market', marketRoutes],                    // job market, JD gap, emerging topics
   ['/api/employer', employerRoutes],
+  ['/api/employer', employerHiringRoutes],           // roles, candidates, pipeline, sponsor, colleges, bulk verify
   ['/api/verify', verifyRoutes],                    // public verifier (v4.3 §10)
   ['/api/admin', adminRoutes]
 ];

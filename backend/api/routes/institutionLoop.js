@@ -185,4 +185,19 @@ router.delete('/placements/:id', requireStaffRole('admin'), async (req, res) => 
   res.json({ ok: true });
 });
 
+// ─── Sponsorships from employers (E7 → I9) ─────────────────────────────────────
+router.get('/sponsorships', async (req, res) => {
+  res.json(await dal.all(`SELECT s.id, s.seats, s.interview_promise, s.message, s.status, s.created_at, s.decided_at, s.engagement_id, em.name AS employer, r.title AS role_title
+    FROM sponsorships s JOIN employers em ON em.id = s.employer_id LEFT JOIN employer_roles r ON r.id = s.role_id WHERE s.institution_id = ? ORDER BY s.created_at DESC`, req.user.id));
+});
+router.post('/sponsorships/:id/decide', requireStaffRole('admin'), async (req, res) => {
+  const s = await dal.one("SELECT * FROM sponsorships WHERE id = ? AND institution_id = ? AND status = 'proposed'", req.params.id, req.user.id);
+  if (!s) return res.status(404).json({ error: 'Not found or already decided.' });
+  const accept = !!req.body?.accept;
+  const cohort = accept && req.body?.engagement_id ? await findScopedEngagement(dal.legacyHandle(), req, req.body.engagement_id) : null;
+  await dal.run('UPDATE sponsorships SET status = ?, engagement_id = ?, decided_at = ? WHERE id = ?', accept ? 'accepted' : 'declined', cohort?.id || null, dal.nowIso(), s.id);
+  await notify({ to: { type: 'employer', id: s.employer_id }, kind: accept ? 'sponsorship_accepted' : 'sponsorship_declined', title: accept ? 'Your sponsorship was accepted' : 'Your sponsorship was declined', href: '/employer/sponsor' });
+  res.json({ ok: true });
+});
+
 export default router;
