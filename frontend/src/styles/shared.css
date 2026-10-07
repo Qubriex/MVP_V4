@@ -53,3 +53,7 @@
 .sk-empty svg { color: var(--accent-600); }
 @media (max-width: 900px) { .sk-topactions { margin-top: 0; } .sk-askbtn { flex: 1; justify-content: center; } }
 @media print { .sk-topactions { display: none !important; } }
+.sk-command { display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px 16px; border-radius: var(--radius-full); border: 1.5px solid var(--color-border-strong, var(--color-border)); background: var(--color-surface); }
+.sk-command > svg { color: var(--accent-600); flex-shrink: 0; }
+.sk-command input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--color-text); font-size: 15px; outline: none; min-height: 38px; }
+.sk-command:focus-within { border-color: var(--accent-600); }

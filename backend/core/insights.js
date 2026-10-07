@@ -282,8 +282,11 @@ async function readinessTimeline(db, engagement, elIds, dates) {
     });
     const { best, have } = await matchAt(new Set(rows.map(r => r.skill_node_id)));
     const role = best ? best.job.role : null;
-    const below = best ? [...new Set(jobs.filter(j => j.role === role).flatMap(j => j.skills.filter(sk => sk.required && !have.has(sk.key)).map(sk => market.SKILLS[sk.key]?.name || sk.key)))] : [];
-    out.set(elId, { timeline, role, match: best ? Math.round(best.m * 100) : 0, below_requirements: below, sample_jds: true });
+    const belowKeys = best ? [...new Set(jobs.filter(j => j.role === role).flatMap(j => j.skills.filter(sk => sk.required && !have.has(sk.key)).map(sk => sk.key)))] : [];
+    const below = belowKeys.map(k => market.SKILLS[k]?.name || k);
+    // Pathway nodes that teach each missing skill (what a bridge programme assigns).
+    const bridgeNodes = [...new Set((await mapSeq(belowKeys, async k => [...await nodesForSkill(k, map)])).flat())].filter(n => !rows.some(r => r.skill_node_id === n));
+    out.set(elId, { timeline, role, match: best ? Math.round(best.m * 100) : 0, below_requirements: below, below_keys: belowKeys, bridge_nodes: bridgeNodes, sample_jds: true });
   });
   return out;
 }

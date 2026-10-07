@@ -7,6 +7,7 @@ import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import { legacyHandle as getDb } from '../../core/db/dal.js';
 import * as dal from '../../core/db/dal.js';
+import { learnerBridges } from '../../core/collegeLoop.js';
 import { aiRateLimitPosts } from '../middleware/rateLimit.js';
 import { authenticateToken, requireRole, requireActiveLearner } from '../middleware/auth.js';
 import * as orchestrator from '../../core/orchestrator.js';
@@ -223,6 +224,32 @@ router.post('/path/start', async (req, res) => {
   if (!next) return res.status(409).json({ error: 'You have already mastered every skill in this section.' });
   await dal.run(`UPDATE engagement_learners SET current_node_id = ?, current_cluster_id = ?, overall_status = 'in_progress' WHERE id = ?`, next.node_id, clusterId, req.user.el_id);
   res.json({ current_node_id: next.node_id, cluster_id: clusterId });
+});
+
+// GET /bridges — practice the college assigned (bridge programmes), for "Today".
+router.get('/bridges', async (req, res) => {
+  res.json(await learnerBridges(req.user.el_id));
+});
+
+// POST /path/node { node_id } — start one skill (from a bridge task or the
+// path): it becomes the current skill unless mastered or its section is locked.
+router.post('/path/node', async (req, res) => {
+  const node = await dal.one(`SELECT sn.id, sn.cluster_id FROM skill_nodes sn JOIN skill_clusters sc ON sc.id = sn.cluster_id
+    WHERE sn.id = ? AND sc.capability_target_id = (SELECT capability_target_id FROM engagements WHERE id = ?)`, String(req.body?.node_id || ''), req.user.engagement_id);
+  if (!node) return res.status(404).json({ error: 'Skill not found' });
+  if (await dal.one('SELECT 1 FROM node_mastery WHERE engagement_learner_id = ? AND skill_node_id = ? AND advanced_at IS NOT NULL', req.user.el_id, node.id)) {
+    return res.status(409).json({ error: 'You have already mastered this skill.' });
+  }
+  const assigned = await dal.one(`SELECT 1 FROM bridge_assignments ba JOIN bridge_programmes bp ON bp.id = ba.bridge_id
+    WHERE ba.el_id = ? AND bp.status = 'open' AND bp.node_ids_json LIKE ?`, req.user.el_id, `%"${node.id}"%`);
+  if (!assigned) {
+    const clusters = (await dal.all('SELECT id, cluster_label AS label FROM skill_clusters WHERE capability_target_id = (SELECT capability_target_id FROM engagements WHERE id = ?)', req.user.engagement_id))
+      .map(c => ({ ...c, status: 'next' }));
+    const lockedBy = (await sectionLocks(req.user.engagement_id, clusters)).get(node.cluster_id) || [];
+    if (lockedBy.length) return res.status(409).json({ error: `Locked: finish ${lockedBy.map(x => x.label).join(' and ')} first.` });
+  }
+  await dal.run(`UPDATE engagement_learners SET current_node_id = ?, current_cluster_id = ?, overall_status = 'in_progress' WHERE id = ?`, node.id, node.cluster_id, req.user.el_id);
+  res.json({ current_node_id: node.id });
 });
 
 router.get('/path', async (req, res) => {

@@ -29,7 +29,7 @@ const SUGGEST = {
 };
 const LANGS = [['en', 'EN', 'en-IN'], ['te', 'తెలుగు', 'te-IN'], ['hi', 'हिंदी', 'hi-IN']];
 
-export default function AskQubirex({ side = 'learner', onClose, initialLang = 'en' }) {
+export default function AskQubirex({ side = 'learner', onClose, initialLang = 'en', initialQuestion = '' }) {
   const [lang, setLang] = useState(initialLang);
   const [q, setQ] = useState('');
   const [thread, setThread] = useState([]);
@@ -49,6 +49,9 @@ export default function AskQubirex({ side = 'learner', onClose, initialLang = 'e
     setBusy(false);
   };
   const mic = useSpeechInput({ lang: bcp47, onFinal: (text) => askIt(text) });
+  // Opened from a page's command box with a question already typed.
+  const asked = React.useRef(false);
+  React.useEffect(() => { if (initialQuestion && !asked.current) { asked.current = true; askIt(initialQuestion); } }, []); // eslint-disable-line
 
   return (
     <Drawer title="Ask Qubirex" onClose={onClose}>

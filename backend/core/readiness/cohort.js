@@ -34,8 +34,8 @@ export async function cohortReadiness(engagement) {
   const today = new Date(Date.now() + 5.5 * 3600000).toISOString().slice(0, 10);
   const r = await readinessTimeline(db, engagement, students.map(s => s.el_id), [today]);
   const rows = students.map(s => {
-    const x = r.get(s.el_id) || { match: 0, role: null, below_requirements: [] };
-    return { ...s, nodes_mastered: Number(s.nodes_mastered) || 0, readiness: x.match, band: bandOf(x.match), role: x.role, below_requirements: x.below_requirements };
+    const x = r.get(s.el_id) || { match: 0, role: null, below_requirements: [], bridge_nodes: [] };
+    return { ...s, nodes_mastered: Number(s.nodes_mastered) || 0, readiness: x.match, band: bandOf(x.match), role: x.role, below_requirements: x.below_requirements, bridge_nodes: x.bridge_nodes || [] };
   });
   cache.set(engagement.id, { at: Date.now(), rows });
   return rows;
