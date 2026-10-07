@@ -2,7 +2,7 @@
 // the signed-in user once (GET /employer/me) and shares them with the pages.
 import React, { useCallback, useEffect, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { Home, Building2, Users, KeyRound, BadgeCheck } from 'lucide-react';
+import { Home, Building2, Users, KeyRound, BadgeCheck, Briefcase, ListChecks, School, Handshake, FileCheck2, ClipboardList, Receipt } from 'lucide-react';
 import api from '../../utils/api';
 import PortalLayout from '../../components/PortalLayout';
 
@@ -17,9 +17,16 @@ export default function EmployerLayout() {
   const todo = steps ? [steps.details, steps.domain_verified, steps.approved].filter(x => !x).length : 0;
   const items = [
     { to: '/employer/home', label: 'Home', icon: Home, badge: todo || null },
+    { to: '/employer/roles', label: 'Roles & candidates', icon: Briefcase },
+    { to: '/employer/pipeline', label: 'Pipeline', icon: ListChecks },
+    { to: '/employer/colleges', label: 'Colleges & insights', icon: School },
+    { to: '/employer/sponsor', label: 'Sponsor a cohort', icon: Handshake },
+    { to: '/employer/templates', label: 'Day-One templates', icon: ClipboardList },
+    { to: '/employer/verify-bulk', label: 'Verify in bulk', icon: FileCheck2 },
     { to: '/employer/company', label: 'Company', icon: Building2 },
     { to: '/employer/team', label: 'Team', icon: Users },
     { to: '/employer/api-keys', label: 'API & integrations', icon: KeyRound },
+    { to: '/employer/billing', label: 'Plan & billing', icon: Receipt },
     { to: '/verify', label: 'Verify a credential', icon: BadgeCheck }
   ];
   return (

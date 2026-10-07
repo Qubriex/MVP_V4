@@ -51,7 +51,7 @@ async function learnerFacts(req) {
     links: [
       { label: 'Continue learning', href: '/learn/session' }, { label: 'Skill path', href: '/learn/record' },
       { label: 'Reviews', href: '/learn/reviews' }, { label: 'My Passport', href: '/learn/passport' },
-      { label: 'Jobs', href: '/learn/market' }, { label: 'Settings', href: '/learn/settings' }
+      { label: 'Jobs & applications', href: '/learn/jobs' }, { label: 'Job market', href: '/learn/market' }, { label: 'Settings', href: '/learn/settings' }
     ]
   };
 }
@@ -95,10 +95,10 @@ async function employerFacts(req) {
   const company = await dal.one('SELECT name, kyb_status, city FROM employers WHERE id = ?', employerId);
   const hasRoles = await dal.tableExists('employer_roles');
   const roles = hasRoles ? await dal.all("SELECT id, title FROM employer_roles WHERE employer_id = ? AND status != 'closed' ORDER BY created_at DESC LIMIT 6", employerId) : [];
-  const waiting = hasRoles ? Number((await dal.one("SELECT COUNT(*) AS n FROM employer_pipeline WHERE employer_id = ? AND stage IN ('access_granted','interview_done','dayone_done')", employerId))?.n || 0) : 0;
+  const waiting = hasRoles ? Number((await dal.one("SELECT COUNT(*) AS n FROM employer_pipeline WHERE employer_id = ? AND stage IN ('access_granted','applied')", employerId))?.n || 0) : 0;
   return {
     facts: { company: company?.name, verification: company?.kyb_status, open_roles: roles.map(r => r.title), waiting_for_your_decision: waiting },
-    links: [{ label: 'Roles', href: '/employer/roles' }, { label: 'Find candidates', href: '/employer/find' }, { label: 'Pipeline', href: '/employer/pipeline' }, { label: 'Verify', href: '/employer/verify' }]
+    links: [{ label: 'Roles', href: '/employer/roles' }, { label: 'Colleges & insights', href: '/employer/colleges' }, { label: 'Pipeline', href: '/employer/pipeline' }, { label: 'Verify in bulk', href: '/employer/verify-bulk' }]
   };
 }
 

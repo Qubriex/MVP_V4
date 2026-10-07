@@ -61,6 +61,34 @@ function Rate({ p, onDone }) {
   );
 }
 
+function Sponsorships({ isAdmin }) {
+  const { data, reload } = useCachedGet('/institution/sponsorships');
+  const { data: cohorts } = useCachedGet('/institution/engagements');
+  const [pick, setPick] = useState({});
+  if (!data?.length) return null;
+  const decide = async (id, accept) => { await api.post(`/institution/sponsorships/${id}/decide`, { accept, engagement_id: pick[id] || undefined }).catch(() => {}); dropCached('/institution/sponsorships'); reload(); };
+  return (
+    <section className="ln-card" style={{ gap: 10 }}>
+      <h2 className="ln-h2">Sponsorship offers from employers</h2>
+      {data.map(s => (
+        <div key={s.id} className="ln-tile" style={{ padding: 14, gap: 6, textAlign: 'left', alignItems: 'stretch' }}>
+          <div className="ln-between ln-wrap" style={{ gap: 8 }}><b>{s.employer} · {s.seats} seat{s.seats === 1 ? '' : 's'}{s.role_title ? ` for ${s.role_title}` : ''}</b>
+            <span className={`ln-tag ${s.status === 'proposed' ? 'ln-tag-warning' : s.status === 'accepted' ? 'ln-tag-success' : 'ln-tag-neutral'}`}>{s.status === 'proposed' ? 'Waiting for you' : s.status}</span></div>
+          {s.interview_promise ? <span className="ln-xs">Interview promised to each student who reaches their bar.</span> : null}
+          {s.message && <span className="ln-small">“{s.message}”</span>}
+          {s.status === 'proposed' && isAdmin && (
+            <div className="ln-row ln-wrap" style={{ gap: 8 }}>
+              <select className="ln-select" style={{ minHeight: 34, width: 240 }} aria-label="Cohort to sponsor" value={pick[s.id] || ''} onChange={e => setPick(p => ({ ...p, [s.id]: e.target.value }))}><option value="">Choose a cohort…</option>{(cohorts || []).map(c => <option key={c.id} value={c.id}>{c.title}</option>)}</select>
+              <button type="button" className="ln-btn ln-btn-sm ln-btn-primary" disabled={!pick[s.id]} onClick={() => decide(s.id, true)}>Accept</button>
+              <button type="button" className="ln-btn ln-btn-sm" onClick={() => decide(s.id, false)}>Decline</button>
+            </div>
+          )}
+        </div>
+      ))}
+    </section>
+  );
+}
+
 export default function Placements() {
   const { role } = useStaff();
   const { data, error, reload } = useCachedGet('/institution/placements');
@@ -79,6 +107,7 @@ export default function Placements() {
         <div className="ln-col" style={{ gap: 4 }}><h1 className="ln-title">Placements</h1><span className="ln-sub">Offers, joinings and how students are doing 90 days in.</span></div>
         {canEdit && !adding && <button type="button" className="ln-btn ln-btn-primary" onClick={() => setAdding(true)}><Plus size={16} aria-hidden="true" />Record an offer</button>}
       </header>
+      <Sponsorships isAdmin={role === 'admin'} />
       {adding && <AddPlacement onDone={(ok = true) => { setAdding(false); if (ok) refresh(); }} />}
       <div className="ln-grid ln-g-4" style={{ gap: 16 }}>
         <div className="ln-card ln-card-sm"><span className="ln-small ln-muted">Placed</span><span className="ln-stat">{s.placed}</span><span className="ln-xs ln-muted">students who joined</span></div>

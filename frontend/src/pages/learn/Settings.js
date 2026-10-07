@@ -4,6 +4,7 @@
 // and downloading or deleting my data. Voice and language preferences save
 // with "Save changes"; everything else acts at once.
 import React, { useEffect, useState } from 'react';
+import { CONTACT } from '../../config/contact';
 import { useNavigate } from 'react-router-dom';
 import { Play, Download, Trash2, Smartphone } from 'lucide-react';
 import api from '../../utils/api';
@@ -109,7 +110,7 @@ function Alerts() {
 function Grievance() {
   return (
     <Section id="grievance" title="Questions or complaints about your data">
-      <span className="ln-small">Grievance officer: <b>[Name]</b> · <a className="ln-link" href="mailto:grievance@qubirex.in">grievance@qubirex.in</a></span>
+      <span className="ln-small">Grievance officer: <b>{CONTACT.grievanceOfficer}</b> · <a className="ln-link" href={`mailto:${CONTACT.grievance}`}>{CONTACT.grievance}</a></span>
       <span className="ln-xs ln-muted">We reply within 7 days and resolve within 30 days, as the Digital Personal Data Protection Act requires. You can also use Help → Contact and choose “Complaint”.</span>
     </Section>
   );
