@@ -29,6 +29,9 @@ import EvidenceReport from './pages/inst/EvidenceReport';
 import Curriculum from './pages/inst/Curriculum';
 import Standing from './pages/inst/Standing';
 import FacultyReview from './pages/inst/Review';
+import { BridgeList, BridgeDetail } from './pages/inst/Bridges';
+import Placements from './pages/inst/Placements';
+import BoardReport from './pages/inst/BoardReport';
 import LearnerLayout from './components/learn/LearnerLayout';
 import LearnerHome from './pages/learn/Dashboard';
 import VoiceSession from './pages/learn/Session';
@@ -137,6 +140,10 @@ export default function App() {
                       <Route path="curriculum" element={<Curriculum />} />
                       <Route path="benchmark" element={<Standing />} />
                       <Route path="review" element={<FacultyReview />} />
+                      <Route path="bridges" element={<BridgeList />} />
+                      <Route path="bridges/:id" element={<BridgeDetail />} />
+                      <Route path="placements" element={<Placements />} />
+                      <Route path="board-report" element={<BoardReport />} />
                       <Route path="profile" element={<StaffProfile />} />
                       <Route path="mastery-log/:logId" element={<MasteryLogView />} />
                       <Route path="dashboard" element={<Navigate to="/institution/home" replace />} />

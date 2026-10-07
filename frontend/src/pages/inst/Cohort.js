@@ -16,8 +16,9 @@ import CopyLink from '../../components/inst/CopyLink';
 import { AccessTag } from './Students';
 import { COHORT_STATUS } from './Cohorts';
 import { errMsg } from '../../utils/errors';
+import CohortGrid from '../../components/inst/CohortGrid';
 
-const TABS = ['Overview', 'Students', 'Pathway', 'Mastery logs', 'Settings'];
+const TABS = ['Overview', 'Readiness', 'Students', 'Pathway', 'Mastery logs', 'Settings'];
 const date = (t) => (t ? new Date(t.replace(' ', 'T') + (/[Z+]/.test(t) ? '' : 'Z')).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—');
 
 function Overview({ c, requests }) {
@@ -138,6 +139,9 @@ function Logs({ c, canProduce }) {
     if (complete && !window.confirm('Produce final logs and mark this cohort completed?')) return;
     try { const r = await api.post(`/institution/engagements/${c.id}/produce-mastery-logs`, { complete }); setMsg(r.data.message); load(); } catch (e) { setMsg(errMsg(e, 'Couldn’t produce logs.')); }
   };
+  const sendAll = async () => {
+    try { const r = await api.post(`/institution/engagements/${c.id}/mastery-logs/send`); setMsg(`Sent to ${r.data.sent} student${r.data.sent === 1 ? '' : 's'}. They see it in their notifications.`); } catch (e) { setMsg(errMsg(e, 'Couldn’t send.')); }
+  };
   const exportCsv = async () => {
     const r = await api.get(`/institution/engagements/${c.id}/mastery-logs.csv`, { responseType: 'blob' });
     const a = document.createElement('a');
@@ -150,6 +154,7 @@ function Logs({ c, canProduce }) {
           <span className="ln-small ln-muted" style={{ maxWidth: 560 }}>Produce them whenever you need a current record (producing again replaces each student’s log), or as final logs at the end. Readiness classification and external scores stay yours to fill in.</span></div>
         <div className="ln-row ln-wrap" style={{ gap: 8 }}>
           <button type="button" className="ln-btn" onClick={exportCsv} disabled={!logs?.length}><Download size={16} aria-hidden="true" />Export all (CSV)</button>
+          {canProduce && logs?.length > 0 && <button type="button" className="ln-btn" onClick={sendAll}>Send to students</button>}
           {canProduce && <button type="button" className="ln-btn" onClick={() => produce(false)}>Produce current logs</button>}
           {canProduce && c.status !== 'completed' && <button type="button" className="ln-btn ln-btn-primary" onClick={() => produce(true)}>Produce final logs</button>}
         </div>
@@ -265,6 +270,7 @@ export default function Cohort() {
       </div>
 
       {tab === 'Overview' && <Overview c={c} requests={requests} />}
+      {tab === 'Readiness' && <CohortGrid c={c} canBridge={role !== 'viewer'} />}
       {tab === 'Students' && (
         <section className="ln-card" style={{ padding: 0, overflow: 'hidden' }}>
           <div className="ln-between ln-wrap" style={{ padding: '16px 18px 0' }}>

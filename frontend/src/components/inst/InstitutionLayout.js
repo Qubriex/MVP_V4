@@ -6,7 +6,7 @@
 // and shared through useStaff(), so pages know the caller's role.
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Home, LayoutGrid, Users, TrendingUp, BarChart3, ShieldCheck, UserRound, LogOut, Menu, X, ClipboardCheck } from 'lucide-react';
+import { Home, LayoutGrid, Users, TrendingUp, BarChart3, ShieldCheck, UserRound, LogOut, Menu, X, ClipboardCheck, Route as RouteIcon, Briefcase } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 import { fetchCached } from '../../utils/cachedGet';
@@ -56,11 +56,13 @@ export default function InstitutionLayout() {
     { label: 'Teaching', items: [
       { to: '/institution/cohorts', label: 'Cohorts', icon: LayoutGrid },
       { to: '/institution/students', label: 'Students & access', icon: Users },
-      { to: '/institution/review', label: 'Faculty review', icon: ClipboardCheck }
+      { to: '/institution/review', label: 'Faculty review', icon: ClipboardCheck },
+      { to: '/institution/bridges', label: 'Bridge programmes', icon: RouteIcon }
     ] },
     { label: 'Insights', items: [
       { to: '/institution/curriculum', label: 'Curriculum vs market', icon: TrendingUp },
-      { to: '/institution/benchmark', label: 'Where we stand', icon: BarChart3 }
+      { to: '/institution/benchmark', label: 'Where we stand', icon: BarChart3 },
+      { to: '/institution/placements', label: 'Placements', icon: Briefcase }
     ] },
     { label: 'Institution', items: [
       ...(role === 'admin' ? [{ to: '/institution/team', label: 'Team & roles', icon: ShieldCheck }] : []),

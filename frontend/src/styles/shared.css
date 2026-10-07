@@ -57,3 +57,11 @@
 .sk-command > svg { color: var(--accent-600); flex-shrink: 0; }
 .sk-command input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--color-text); font-size: 15px; outline: none; min-height: 38px; }
 .sk-command:focus-within { border-color: var(--accent-600); }
+
+/* Board report: printable, one page. */
+.sk-report { display: flex; flex-direction: column; gap: 18px; max-width: 980px; }
+@media print {
+  .sk-noprint, .sk-topactions, .ln-sidebar, .in-sidebar, nav, aside { display: none !important; }
+  .sk-report { max-width: none; }
+  body { background: #fff !important; }
+}

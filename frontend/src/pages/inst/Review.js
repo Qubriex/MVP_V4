@@ -104,6 +104,7 @@ export default function Review() {
 
       {tab === 'queue' && (
         <section className="ln-col" style={{ gap: 14 }}>
+          <div className="ln-note" role="note"><b>Integrity flags are a reason to talk, not a verdict.</b> A flag means an answer looked unusual (very fast, pasted, or unlike the student’s other work). Ask the student about it before deciding anything.</div>
           {queue?.cap_reached && <div className="ln-note">This week’s contracted review time is used up. Only priority items (persistence, authenticity, weak viva, borderline) are shown; the random sample waits.</div>}
           {done.map(d => (
             <div key={d.item.id} className="ln-card ln-card-sm" role="status" style={{ gap: 4 }}>

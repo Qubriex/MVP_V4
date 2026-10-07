@@ -215,7 +215,7 @@ async function cohortStanding(db, engagement, { roles = null, compare = 'regiona
   const roleNames = [...new Set(now.jobs.map(j => j.role))];
   const roleFit = roleNames.map(role => {
     const roleJobs = now.jobs.filter(j => j.role === role);
-    const ready = now.students.filter(st => st.perJob.some(x => x.job.role === role && x.m >= 0.7)).length;
+    const ready = now.students.filter(st => st.perJob.some(x => x.job.role === role && x.m >= 0.8)).length;
     const req = [...new Set(roleJobs.flatMap(j => j.skills.filter(sk => sk.required).map(sk => sk.key)))];
     const gapKey = req.sort((a, b) => (ours[a] ?? 0) - (ours[b] ?? 0))[0];
     return { role, ready, open: market.ROLE_OPENINGS[role] || null, gap: gapKey ? market.SKILLS[gapKey].name : null };

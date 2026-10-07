@@ -8,6 +8,7 @@ import { useCachedGet } from '../../utils/cachedGet';
 import { Bar, SampleBadge } from '../../components/learn/ui';
 import { useStaff } from '../../components/inst/InstitutionLayout';
 import { errMsg } from '../../utils/errors';
+import CommandCentre from '../../components/inst/CommandCentre';
 
 const ALERT_ICON = { never_signed_in: [AlertTriangle, 'ln-tag-warning'], stuck: [RotateCcw, 'ln-tag-accent'], pin_reset: [KeyRound, 'ln-tag-info'] };
 const COVERAGE = { covered: ['✓ In curriculum', 'ln-tag-success'], partly: ['◐ Partly covered', 'ln-tag-info'], missing: ['+ Not covered', 'ln-tag-accent'] };
@@ -27,7 +28,7 @@ export default function InstHome() {
 
   if (error) return <div className="ln-error">{error}</div>;
   if (!data) return <p className="ln-muted" style={{ minHeight: '60vh' }}>Loading…</p>;
-  const { me, kpis, cohorts, alerts, pulse, standing } = data;
+  const { me, kpis, cohorts, alerts, pulse } = data;
   // "Dr. Rao" when there's a title, otherwise the first name.
   const parts = (me?.name || '').trim().split(/\s+/).filter(Boolean);
   const who = me?.title && parts.length ? `${me.title} ${parts[parts.length - 1]}` : parts[0];
@@ -48,9 +49,11 @@ export default function InstHome() {
         )}
       </header>
 
+      <CommandCentre role={role} />
+
       {alerts.length > 0 && (
         <section className="ln-col" style={{ gap: 12 }}>
-          <h2 className="ln-h2">Needs your attention</h2>
+          <h2 className="ln-h2">Access and sign-in</h2>
           <div className="ln-grid ln-g-3" style={{ gap: 14 }}>
             {alerts.map(a => {
               const [Icon, cls] = ALERT_ICON[a.kind] || [AlertTriangle, 'ln-tag-warning'];
@@ -98,7 +101,7 @@ export default function InstHome() {
       </section>
 
       {pulse.length > 0 && (
-        <div className="ln-grid ln-g-2">
+        <div className="ln-grid">
           <section className="ln-card" style={{ gap: 12 }}>
             <div className="ln-between ln-wrap"><div className="ln-row"><h2 className="ln-h2">Market pulse for your targets</h2><SampleBadge /></div><Link to="/institution/curriculum" className="ln-link">Compare curriculum →</Link></div>
             <div className="ln-divided ln-col">
@@ -111,20 +114,6 @@ export default function InstHome() {
               ))}
             </div>
           </section>
-          {standing && (
-            <section className="ln-card" style={{ gap: 12 }}>
-              <div className="ln-between"><h2 className="ln-h2">Where we stand</h2><Link to="/institution/benchmark" className="ln-link">Open →</Link></div>
-              <span className="ln-stat">{standing.ready} of {standing.total}</span>
-              <span className="ln-small">students already match 70%+ of the skills in current JDs for their target roles (verified skills only).</span>
-              {[['70%+ match', standing.ready, 'ln-bar-good'], ['50–69%', standing.mid, ''], ['Under 50%', standing.low, '']].map(([label, n, v]) => (
-                <div key={label} className="ln-row" style={{ gap: 10 }}>
-                  <span className="ln-small" style={{ width: 90 }}>{label}</span>
-                  <div style={{ flex: 1 }}><Bar pct={standing.total ? (n / standing.total) * 100 : 0} variant={v} label={`${label}: ${n}`} /></div>
-                  <b style={{ width: 28, textAlign: 'right' }}>{n}</b>
-                </div>
-              ))}
-            </section>
-          )}
         </div>
       )}
     </>
