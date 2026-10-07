@@ -29,7 +29,7 @@ router.get('/settings', async (req, res) => {
   const [devices, consent, learner] = await Promise.all([
     activeDevices(req.user.id, req.session?.id),
     dal.one('SELECT id, granted_at FROM consents WHERE learner_id = ? AND level = ? AND withdrawn_at IS NULL ORDER BY granted_at DESC LIMIT 1', req.user.id, LEVELS.INSTITUTION_SHARE),
-    dal.one('SELECT notification_prefs, pin_set_at, age_status FROM learners WHERE id = ?', req.user.id)
+    dal.one('SELECT notification_prefs, pin_set_at, age_status, is_discoverable, city FROM learners WHERE id = ?', req.user.id)
   ]);
   let notifications = {};
   try { notifications = JSON.parse(learner?.notification_prefs || '{}'); } catch { notifications = {}; }
@@ -37,6 +37,7 @@ router.get('/settings', async (req, res) => {
   res.json({
     devices, notifications, pin_set_at: learner?.pin_set_at || null, age_status: learner?.age_status || 'unknown',
     parent_share: { on: !!consent, since: consent?.granted_at || null },
+    discoverable: !!learner?.is_discoverable, city: learner?.city || null,
     deletion_requested_at: pending?.created_at || null
   });
 });

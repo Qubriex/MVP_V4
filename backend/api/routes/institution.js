@@ -8,6 +8,7 @@
 // everything read-only. Cohort ("engagement") routes always check the cohort
 // belongs to the caller's institution AND is in their scope.
 import express from 'express';
+import { notify } from '../../core/notify.js';
 import { activitySummary } from '../../core/institutionActivity.js';
 import { v4 as uuidv4 } from 'uuid';
 import { legacyHandle as getDb } from '../../core/db/dal.js';
@@ -404,6 +405,7 @@ router.post('/engagements/:id/produce-mastery-logs', requireStaffRole('admin', '
       complete: req.body.complete === true,
       learnerIds: Array.isArray(req.body.learner_ids) ? req.body.learner_ids : null
     });
+    await notify({ to: { type: 'institution', id: e.institution_id }, kind: 'mastery_logs', title: `Mastery Logs for ${e.title} are ready`, body: `${logs.length} produced by ${req.staff?.name || 'staff'}.`, href: `/institution/cohorts/${e.id}?tab=Mastery%20logs` });
     res.json({ message: `${logs.length} Mastery Logs produced`, log_ids: logs.map(l => l.log_id) });
   } catch (err) {
     res.status(500).json({ error: err.message });

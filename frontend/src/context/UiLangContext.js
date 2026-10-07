@@ -26,6 +26,7 @@ const STRINGS = {
   'nav.reviews':    { telugu: 'రివ్యూలు', hindi: 'रिव्यू', english: 'Reviews' },
   'nav.passport':   { telugu: 'కేపబిలిటీ పాస్‌పోర్ట్', hindi: 'कैपेबिलिटी पासपोर्ट', english: 'Capability Passport' },
   'nav.career':     { telugu: 'కెరీర్', hindi: 'करियर', english: 'Career' },
+  'nav.jobs':       { telugu: 'ఉద్యోగాలు & దరఖాస్తులు', hindi: 'नौकरियाँ और आवेदन', english: 'Jobs & applications' },
   'nav.market':     { telugu: 'ఉద్యోగ మార్కెట్', hindi: 'जॉब मार्केट', english: 'Job market' },
   'nav.topics':     { telugu: 'కొత్త అంశాలు', hindi: 'उभरते विषय', english: 'Emerging topics' },
   'nav.me':         { telugu: 'నేను', hindi: 'मैं', english: 'Me' },

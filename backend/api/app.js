@@ -16,12 +16,16 @@ import institutionStudentsRoutes from './routes/institutionStudents.js';
 import institutionInsightsRoutes from './routes/institutionInsights.js';
 import institutionReviewRoutes from './routes/institutionReview.js';
 import institutionActivityRoutes from './routes/institutionActivity.js';
+import institutionLoopRoutes from './routes/institutionLoop.js';
 import learnerRoutes from './routes/learner.js';
 import portfolioRoutes from './routes/portfolio.js';
 import marketRoutes from './routes/market.js';
 import employerRoutes from './routes/employer.js';
+import employerHiringRoutes from './routes/employerHiring.js';
+import learnerJobsRoutes from './routes/learnerJobs.js';
 import learnerEvidenceRoutes from './routes/learnerEvidence.js';
 import learnerSettingsRoutes from './routes/learnerSettings.js';
+import sharedRoutes from './routes/shared.js';
 import verifyRoutes from './routes/verify.js';
 import { didDocument } from '../core/return/keyRegistry.js';
 import { issuerHost } from '../core/return/credentialEngine.js';
@@ -36,12 +40,16 @@ export const MOUNTS = [
   ['/api/institution', institutionInsightsRoutes],  // curriculum vs market, where we stand
   ['/api/institution', institutionReviewRoutes],    // faculty review queue, κ, review load
   ['/api/institution', institutionActivityRoutes],  // live status, activity, exports, evidence report
+  ['/api/institution', institutionLoopRoutes],      // command centre, grid, bridges, placements
+  ['/api', sharedRoutes],                           // notifications, Ask Qubirex, help, glossary
   ['/api/learner', learnerRoutes],
   ['/api/learner', portfolioRoutes],                // profile, resume, skill requests, transcribe
   ['/api/learner', learnerEvidenceRoutes],          // reviews, rechecks, passport, renewal
   ['/api/learner', learnerSettingsRoutes],          // settings: devices, consent, my data
+  ['/api/learner', learnerJobsRoutes],              // jobs & applications, employer requests
   ['/api/market', marketRoutes],                    // job market, JD gap, emerging topics
   ['/api/employer', employerRoutes],
+  ['/api/employer', employerHiringRoutes],           // roles, candidates, pipeline, sponsor, colleges, bulk verify
   ['/api/verify', verifyRoutes],                    // public verifier (v4.3 §10)
   ['/api/admin', adminRoutes]
 ];

@@ -2,6 +2,8 @@
 //   GET /jwks.json            public keys, including retired keys
 //   GET /status/:listId       bitstring status list (cacheable 24 h)
 //   GET /:evidenceId          malformed | not_found | revoked | expired | signature_invalid | valid
+//   POST /:evidenceId/name-check  { name } → { match } — is this the person in front of you?
+//                             The stored name is never returned; 10 checks/h per IP.
 // Rate limits: 100 requests/h per IP; after 20 not_found in an hour, 429 for that IP.
 // The holder's name and contact are never returned. Errors use {error: {code, message}}.
 //
@@ -10,7 +12,9 @@
 import express from 'express';
 import params from '../../config/params.js';
 import { hit, peek, clientIp } from '../middleware/rateLimit.js';
-import { verify } from '../../core/return/credentialEngine.js';
+import { verify, activeCredential } from '../../core/return/credentialEngine.js';
+import { normaliseEvidenceId } from '../../core/qep/evidenceId.js';
+import * as dal from '../../core/db/dal.js';
 import { jwks } from '../../core/return/keyRegistry.js';
 import { encodedList } from '../../core/qep/statusList.js';
 
@@ -47,6 +51,32 @@ router.get('/:evidenceId', async (req, res) => {
   }
   res.set('Cache-Control', 'no-store');
   return res.json(result);
+});
+
+// Names match when every typed word is the holder's word or its initial,
+// in any order, and every holder word is accounted for ("K. Ravi Kumar" =
+// "Ravi Kumar K", "R Kumar K" = "Kumar Ravi K.").
+const words = (s) => String(s || '').toLowerCase().normalize('NFKC').replace(/[^\p{L}\p{M}\p{N}\s]/gu, ' ').split(/\s+/).filter(Boolean);
+export function namesMatch(typed, stored) {
+  const a = words(typed); const b = words(stored);
+  if (!a.length || !b.length || a.length !== b.length) return false;
+  const left = [...b];
+  const take = (pred) => { const i = left.findIndex(pred); if (i < 0) return false; left.splice(i, 1); return true; };
+  // Full words first, then initials, so an initial never steals a full word.
+  const full = a.filter(w => w.length > 1); const initials = a.filter(w => w.length === 1);
+  return full.every(w => take(x => x === w)) && initials.every(w => take(x => x[0] === w));
+}
+
+router.post('/:evidenceId/name-check', express.json(), async (req, res) => {
+  const ip = clientIp(req);
+  if (!hit('verify:name', ip, 10, HOUR).allowed) return res.status(429).json({ error: { code: 'rate_limited', message: 'Too many name checks. Try again in an hour.' } });
+  const name = String(req.body?.name || '').slice(0, 120);
+  if (words(name).length < 2) return res.status(400).json({ error: { code: 'invalid', message: 'Type the full name, at least two words.' } });
+  const c = await activeCredential('evidence_id = ?', normaliseEvidenceId(req.params.evidenceId));
+  if (!c) return res.status(404).json({ status: 'not_found' });
+  const holder = await dal.one('SELECT l.name FROM engagement_learners el JOIN learners l ON l.id = el.learner_id WHERE el.id = ?', c.el_id);
+  res.set('Cache-Control', 'no-store');
+  res.json({ match: namesMatch(name, holder?.name) });
 });
 
 export default router;

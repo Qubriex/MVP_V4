@@ -8,7 +8,11 @@ import DevNav from './components/DevNav';
 import PageTransition from './components/PageTransition';
 
 // Pages
-import LandingPage from './pages/LandingPage';
+import PublicHome from './pages/public/Home';
+import Pricing from './pages/public/Pricing';
+import Demo from './pages/public/Demo';
+import SignIn from './pages/public/SignIn';
+import Legal from './pages/public/Legal';
 import LearnerLogin from './pages/LearnerLogin';
 import MasteryLogView from './pages/MasteryLogView';
 import LearnerInvite from './pages/LearnerInvite';
@@ -29,6 +33,9 @@ import EvidenceReport from './pages/inst/EvidenceReport';
 import Curriculum from './pages/inst/Curriculum';
 import Standing from './pages/inst/Standing';
 import FacultyReview from './pages/inst/Review';
+import { BridgeList, BridgeDetail } from './pages/inst/Bridges';
+import Placements from './pages/inst/Placements';
+import BoardReport from './pages/inst/BoardReport';
 import LearnerLayout from './components/learn/LearnerLayout';
 import LearnerHome from './pages/learn/Dashboard';
 import VoiceSession from './pages/learn/Session';
@@ -43,6 +50,7 @@ import Welcome from './pages/learn/Welcome';
 import Reviews from './pages/learn/Reviews';
 import LearnerSettings from './pages/learn/Settings';
 import Passport from './pages/learn/Passport';
+import LearnerJobs from './pages/learn/Jobs';
 import Verify from './pages/Verify';
 import EmployerLogin from './pages/employer/Login';
 import EmployerInvite from './pages/employer/Invite';
@@ -51,6 +59,10 @@ import EmployerHome from './pages/employer/Home';
 import EmployerCompany from './pages/employer/Company';
 import EmployerTeam from './pages/employer/Team';
 import EmployerApiKeys from './pages/employer/ApiKeys';
+import { RoleList, RoleSearch } from './pages/employer/Roles';
+import { PipelinePage, CandidatePage } from './pages/employer/Pipeline';
+import { SponsorPage, CollegesPage } from './pages/employer/Insights';
+import { BulkVerify, Templates, Billing } from './pages/employer/Tools';
 import AdminLogin from './pages/admin/Login';
 import AdminLayout from './pages/admin/Layout';
 import AdminOverview from './pages/admin/Overview';
@@ -80,7 +92,11 @@ export default function App() {
         <BrowserRouter>
           <PageTransition>
             <Routes>
-              <Route path="/" element={<LandingPage />} />
+              <Route path="/" element={<PublicHome />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/demo" element={<Demo />} />
+              <Route path="/signin" element={<SignIn />} />
+              <Route path="/legal/:page" element={<Legal />} />
               <Route path="/login" element={<StaffLogin />} />
               <Route path="/institution/invite/:token" element={<StaffInvite />} />
               <Route path="/learner-login" element={<LearnerLogin />} />
@@ -99,6 +115,15 @@ export default function App() {
                       <Route path="company" element={<EmployerCompany />} />
                       <Route path="team" element={<EmployerTeam />} />
                       <Route path="api-keys" element={<EmployerApiKeys />} />
+                      <Route path="roles" element={<RoleList />} />
+                      <Route path="roles/:id" element={<RoleSearch />} />
+                      <Route path="pipeline" element={<PipelinePage />} />
+                      <Route path="candidates/:id" element={<CandidatePage />} />
+                      <Route path="sponsor" element={<SponsorPage />} />
+                      <Route path="colleges" element={<CollegesPage />} />
+                      <Route path="verify-bulk" element={<BulkVerify />} />
+                      <Route path="templates" element={<Templates />} />
+                      <Route path="billing" element={<Billing />} />
                       <Route path="*" element={<Navigate to="/employer/home" replace />} />
                     </Route>
                   </Routes>
@@ -137,6 +162,10 @@ export default function App() {
                       <Route path="curriculum" element={<Curriculum />} />
                       <Route path="benchmark" element={<Standing />} />
                       <Route path="review" element={<FacultyReview />} />
+                      <Route path="bridges" element={<BridgeList />} />
+                      <Route path="bridges/:id" element={<BridgeDetail />} />
+                      <Route path="placements" element={<Placements />} />
+                      <Route path="board-report" element={<BoardReport />} />
                       <Route path="profile" element={<StaffProfile />} />
                       <Route path="mastery-log/:logId" element={<MasteryLogView />} />
                       <Route path="dashboard" element={<Navigate to="/institution/home" replace />} />
@@ -159,6 +188,7 @@ export default function App() {
                       <Route path="dashboard" element={<LearnerHome />} />
                       <Route path="welcome" element={<Welcome />} />
                       <Route path="record" element={<SkillRecord />} />
+                      <Route path="jobs" element={<LearnerJobs />} />
                       <Route path="market" element={<JobMarket />} />
                       <Route path="market/:jobId" element={<JobDetail />} />
                       <Route path="market/:jobId/interview" element={<InterviewPractice />} />

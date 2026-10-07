@@ -2,6 +2,7 @@
 // Mounted at /api/learner alongside learner.js. All learner-private except
 // skill_requests, which the institution reads to decide on its pathway.
 import express from 'express';
+import { notify } from '../../core/notify.js';
 import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import { legacyHandle as getDb } from '../../core/db/dal.js';
@@ -287,12 +288,16 @@ router.post('/skill-requests', async (req, res) => {
   const skillName = clean(req.body && req.body.skill_name, 120);
   if (!skillName) return res.status(400).json({ error: 'skill_name required' });
   const db = getDb();
-  await db.prepare(`
+  const inserted = await db.prepare(`
     INSERT OR IGNORE INTO skill_requests (id, engagement_learner_id, engagement_id, skill_name, source)
     VALUES (?, ?, ?, ?, ?)
   `).run(uuidv4(), req.user.el_id, req.user.engagement_id, skillName, clean(req.body.source, 80) || null);
   const row = await db.prepare('SELECT id, skill_name, source, status, created_at FROM skill_requests WHERE engagement_learner_id = ? AND skill_name = ?').get(req.user.el_id, skillName);
+  const e = await db.prepare('SELECT institution_id, title FROM engagements WHERE id = ?').get(req.user.engagement_id);
   db.close();
+  if (e && inserted.changes) {
+    await notify({ to: { type: 'institution', id: e.institution_id }, kind: 'skill_request', title: `A student in ${e.title} asked to add ${skillName}`, href: `/institution/cohorts/${req.user.engagement_id}` });
+  }
   res.status(201).json(row);
 });
 

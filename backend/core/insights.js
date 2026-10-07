@@ -215,7 +215,7 @@ async function cohortStanding(db, engagement, { roles = null, compare = 'regiona
   const roleNames = [...new Set(now.jobs.map(j => j.role))];
   const roleFit = roleNames.map(role => {
     const roleJobs = now.jobs.filter(j => j.role === role);
-    const ready = now.students.filter(st => st.perJob.some(x => x.job.role === role && x.m >= 0.7)).length;
+    const ready = now.students.filter(st => st.perJob.some(x => x.job.role === role && x.m >= 0.8)).length;
     const req = [...new Set(roleJobs.flatMap(j => j.skills.filter(sk => sk.required).map(sk => sk.key)))];
     const gapKey = req.sort((a, b) => (ours[a] ?? 0) - (ours[b] ?? 0))[0];
     return { role, ready, open: market.ROLE_OPENINGS[role] || null, gap: gapKey ? market.SKILLS[gapKey].name : null };
@@ -282,10 +282,21 @@ async function readinessTimeline(db, engagement, elIds, dates) {
     });
     const { best, have } = await matchAt(new Set(rows.map(r => r.skill_node_id)));
     const role = best ? best.job.role : null;
-    const below = best ? [...new Set(jobs.filter(j => j.role === role).flatMap(j => j.skills.filter(sk => sk.required && !have.has(sk.key)).map(sk => market.SKILLS[sk.key]?.name || sk.key)))] : [];
-    out.set(elId, { timeline, role, match: best ? Math.round(best.m * 100) : 0, below_requirements: below, sample_jds: true });
+    const belowKeys = best ? [...new Set(jobs.filter(j => j.role === role).flatMap(j => j.skills.filter(sk => sk.required && !have.has(sk.key)).map(sk => sk.key)))] : [];
+    const below = belowKeys.map(k => market.SKILLS[k]?.name || k);
+    // Pathway nodes that teach each missing skill (what a bridge programme assigns).
+    const bridgeNodes = [...new Set((await mapSeq(belowKeys, async k => [...await nodesForSkill(k, map)])).flat())].filter(n => !rows.some(r => r.skill_node_id === n));
+    out.set(elId, { timeline, role, match: best ? Math.round(best.m * 100) : 0, below_requirements: below, below_keys: belowKeys, bridge_nodes: bridgeNodes, sample_jds: true });
   });
   return out;
 }
 
-export { curriculumCoverage, cohortStanding, pathwayNodes, readinessTimeline };
+/** Which of `keys` (market skill keys) the mastered nodes verify, on a pathway. */
+async function verifiedKeys(capabilityTargetId, masteredIds, keys) {
+  if (!masteredIds.size) return new Set();
+  const map = await pathwayMap(capabilityTargetId);
+  const memo = new Map();
+  return new Set(await filterSeq(keys, k => verifiedSkill(k, map, masteredIds, memo)));
+}
+
+export { curriculumCoverage, cohortStanding, pathwayNodes, readinessTimeline, jobMatch, verifiedKeys };

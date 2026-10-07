@@ -6,7 +6,8 @@
 // time, attempts) are never part of it.
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Copy, Printer, ShieldCheck, RefreshCw, ExternalLink } from 'lucide-react';
+import { Copy, Printer, ShieldCheck, RefreshCw, ExternalLink, Share2 } from 'lucide-react';
+import QrCode from '../../components/shared/QrCode';
 import api from '../../utils/api';
 import { errMsg } from '../../utils/errors';
 import { Bar } from '../../components/learn/ui';
@@ -71,6 +72,12 @@ export default function Passport() {
     setBusy(false);
   };
   const copy = () => { navigator.clipboard?.writeText(p.evidence_id).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); }); };
+  const link = p?.evidence_id ? `${window.location.origin}/verify/${p.evidence_id}` : '';
+  const shareLink = async () => {
+    const text = `My Capability Passport — check it here: ${link}`;
+    if (navigator.share) { try { await navigator.share({ title: 'Capability Passport', text, url: link }); return; } catch { /* closed */ } }
+    navigator.clipboard?.writeText(link).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); });
+  };
 
   if (!p) return <>{error ? <div className="ln-error">{error}</div> : <div className="ln-card ln-muted">Loading…</div>}</>;
 
@@ -81,7 +88,10 @@ export default function Passport() {
           <h1 className="ln-title">Capability Passport</h1>
           <span className="ln-sub">Signed facts about what you have shown. Labels are worked out today from those facts.</span>
         </div>
-        {p.issued && <button type="button" className="ln-btn" onClick={() => window.print()}><Printer size={16} aria-hidden="true" />Print</button>}
+        {p.issued && <div className="ln-row ln-wrap" style={{ gap: 8 }}>
+          <button type="button" className="ln-btn" onClick={shareLink}><Share2 size={16} aria-hidden="true" />Share link</button>
+          <button type="button" className="ln-btn" onClick={() => window.print()} title="Prints one page with your skills and QR code — save it as PDF"><Printer size={16} aria-hidden="true" />One-page PDF</button>
+        </div>}
       </header>
       {error && <div className="ln-error" role="alert">{error}</div>}
 
@@ -98,7 +108,10 @@ export default function Passport() {
               <span className="ln-row" style={{ gap: 10 }}><b style={{ fontSize: 22, letterSpacing: '0.04em', fontFamily: 'var(--font-mono, monospace)' }}>{p.evidence_id}</b>
                 <button type="button" className="ln-btn ln-btn-sm ln-btn-ghost-dark in-no-print" onClick={copy}><Copy size={14} aria-hidden="true" />{copied ? 'Copied' : 'Copy'}</button></span>
             </div>
-            <span className={`ln-tag ln-tag-lg ${p.status === 'valid' ? 'ln-tag-success' : 'ln-tag-warning'}`}><ShieldCheck size={14} aria-hidden="true" />{p.status === 'valid' ? 'Valid' : p.status}</span>
+            <div className="ln-row" style={{ gap: 12, alignItems: 'flex-start' }}>
+              <span className={`ln-tag ln-tag-lg ${p.status === 'valid' ? 'ln-tag-success' : 'ln-tag-warning'}`}><ShieldCheck size={14} aria-hidden="true" />{p.status === 'valid' ? 'Valid' : p.status}</span>
+              <QrCode value={link} size={96} label="QR code: scan to check this Passport" />
+            </div>
           </div>
           <span className="ln-small" style={{ color: 'var(--stage-muted)' }}>Version {p.version} · valid {fmtDate(p.valid_from)} – {fmtDate(p.valid_until)}</span>
           <label className="ln-toggle-row in-no-print" style={{ gap: 10, justifyContent: 'flex-start' }}>

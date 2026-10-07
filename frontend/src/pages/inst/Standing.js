@@ -116,7 +116,7 @@ export default function Standing() {
             <div key={r.role} className="ln-card" style={{ gap: 10, padding: 20 }}>
               <span style={{ fontSize: 16, fontWeight: 600 }}>{r.role}</span>
               <div className="ln-row" style={{ gap: 20 }}>
-                <div className="ln-col"><b style={{ fontSize: 24 }}>{r.ready}</b><span className="ln-xs ln-muted">students 70%+ match</span></div>
+                <div className="ln-col"><b style={{ fontSize: 24 }}>{r.ready}</b><span className="ln-xs ln-muted">students Ready (80+)</span></div>
                 <div className="ln-col"><b style={{ fontSize: 24 }}>{r.open ? r.open.toLocaleString('en-IN') : '—'}</b><span className="ln-xs ln-muted">open roles in region (sample)</span></div>
               </div>
               {r.gap && <span className="ln-small">Biggest gap: <b>{r.gap}</b></span>}

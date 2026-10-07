@@ -8,8 +8,9 @@ import { LogOut, Menu, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import PhoenixMark from './PhoenixMark';
 import ThemeToggle from './ThemeToggle';
+import TopActions from './shared/TopActions';
 
-export default function PortalLayout({ kicker, org, account, items, loginPath, context }) {
+export default function PortalLayout({ kicker, org, account, items, loginPath, context, side = null }) {
   const { logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -50,7 +51,7 @@ export default function PortalLayout({ kicker, org, account, items, loginPath, c
         </div>
       </nav>
 
-      <main className="ln-main" id="main"><div key={location.pathname} className="ln-page-fade"><Outlet context={context} /></div></main>
+      <main className="ln-main" id="main">{side && <TopActions side={side} />}<div key={location.pathname} className="ln-page-fade"><Outlet context={context} /></div></main>
     </div>
   );
 }

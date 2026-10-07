@@ -4,6 +4,7 @@
 // and downloading or deleting my data. Voice and language preferences save
 // with "Save changes"; everything else acts at once.
 import React, { useEffect, useState } from 'react';
+import { CONTACT } from '../../config/contact';
 import { useNavigate } from 'react-router-dom';
 import { Play, Download, Trash2, Smartphone } from 'lucide-react';
 import api from '../../utils/api';
@@ -70,6 +71,7 @@ function VoiceAndLanguage({ form, language }) {
 function Privacy({ settings, reload }) {
   const [busy, setBusy] = useState(false);
   const toggle = async (on) => { setBusy(true); try { await api.put('/learner/consents/parent-share', { on }); await reload(); } catch { /* shown by reload */ } setBusy(false); };
+  const findable = async (on) => { setBusy(true); try { await api.put('/learner/discoverable', { on }); await reload(); } catch { /* shown by reload */ } setBusy(false); };
   return (
     <Section id="privacy" title="Sharing and consent">
       <label className="ln-toggle-row" style={{ alignItems: 'flex-start' }}>
@@ -77,7 +79,39 @@ function Privacy({ settings, reload }) {
           <span className="ln-xs ln-muted">The report shows attendance, skills passed or stuck and readiness. It never includes what you said in sessions or how your answers were marked.{settings.parent_share.on && settings.parent_share.since ? ` On since ${when(settings.parent_share.since)}.` : ''}</span></span>
         <input type="checkbox" disabled={busy} checked={settings.parent_share.on} onChange={e => toggle(e.target.checked)} />
       </label>
-      {settings.age_status === 'minor' && <span className="ln-xs ln-muted">You are registered as under 18, so your parent or guardian’s consent also applies.</span>}
+      <label className="ln-toggle-row" style={{ alignItems: 'flex-start' }}>
+        <span className="ln-col" style={{ gap: 2 }}><span>Let verified employers find me</span>
+          <span className="ln-xs ln-muted">They see your verified skills, college and city — not your name. They must ask, and you say yes or no to each thing they want to see. Manage requests in Jobs &amp; applications.</span></span>
+        <input type="checkbox" disabled={busy} checked={settings.discoverable} onChange={e => findable(e.target.checked)} />
+      </label>
+      <div className="ln-note" role="note">
+        <b>Under 18?</b> A parent or guardian must agree before employers can see anything about you. {settings.age_status === 'minor' ? 'You are registered as under 18, so your college collects their consent.' : 'Tell your college if you are under 18.'}
+      </div>
+    </Section>
+  );
+}
+
+const CHANNELS = [['in_app', 'In the app', true], ['email', 'Email'], ['whatsapp', 'WhatsApp'], ['sms', 'SMS']];
+function Alerts() {
+  const [ch, setCh] = useState(null);
+  useEffect(() => { api.get('/notifications').then(r => setCh(r.data.channels || {})).catch(() => setCh({})); }, []);
+  const set = async (k, on) => { const next = { ...ch, [k]: on }; setCh(next); try { await api.put('/notifications/channels', next); } catch { /* kept locally */ } };
+  return (
+    <Section id="alerts" title="Alerts">
+      <span className="ln-xs ln-muted">Where we tell you about reviews due, new practice from your college and employer requests.</span>
+      {ch && CHANNELS.map(([k, label, fixed]) => (
+        <label key={k} className="ln-toggle-row"><span>{label}{(k === 'whatsapp' || k === 'sms') && <span className="ln-xs ln-muted"> · starts when your college turns it on</span>}</span>
+          <input type="checkbox" checked={fixed ? true : !!ch[k]} disabled={fixed} onChange={e => set(k, e.target.checked)} /></label>
+      ))}
+    </Section>
+  );
+}
+
+function Grievance() {
+  return (
+    <Section id="grievance" title="Questions or complaints about your data">
+      <span className="ln-small">Grievance officer: <b>{CONTACT.grievanceOfficer}</b> · <a className="ln-link" href={`mailto:${CONTACT.grievance}`}>{CONTACT.grievance}</a></span>
+      <span className="ln-xs ln-muted">We reply within 7 days and resolve within 30 days, as the Digital Personal Data Protection Act requires. You can also use Help → Contact and choose “Complaint”.</span>
     </Section>
   );
 }
@@ -157,7 +191,7 @@ export default function Settings() {
 
   return (
     <>
-      <header className="ln-pagehead"><div className="ln-col" style={{ gap: 4 }}><h1 className="ln-title">Settings</h1><span className="ln-sub">Voice, language, sharing, PIN, devices and your data.</span></div></header>
+      <header className="ln-pagehead"><div className="ln-col" style={{ gap: 4 }}><h1 className="ln-title">Settings</h1><span className="ln-sub">Account &amp; privacy: voice, language, sharing, alerts, PIN, devices and your data.</span></div></header>
       {error && <div className="ln-error" role="alert">{error}</div>}
       <div className="ln-col" style={{ gap: 20, maxWidth: 860 }}>
         {form.draft ? <VoiceAndLanguage form={form} language={language} /> : <div className="ln-card ln-skeleton" style={{ height: 220 }} aria-hidden="true" />}
@@ -173,7 +207,9 @@ export default function Settings() {
           <>
             <Privacy settings={settings} reload={reload} />
             <Security settings={settings} reload={reload} />
+            <Alerts />
             <MyData settings={settings} reload={reload} />
+            <Grievance />
           </>
         ) : !error && <div className="ln-card ln-skeleton" style={{ height: 320 }} aria-hidden="true" />}
         <button type="button" className="ln-btn" style={{ alignSelf: 'flex-start' }} onClick={() => { logout(); navigate('/learner-login'); }}>Sign out of this device</button>

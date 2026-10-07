@@ -4,12 +4,13 @@
 // 960px the sidebar becomes a drawer opened from a slim top bar.
 import React, { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Mic, Route as RouteIcon, Briefcase, TrendingUp, User, FileText, Settings, LogOut, Menu, X, RotateCcw, BadgeCheck } from 'lucide-react';
+import { Home, Mic, Route as RouteIcon, Briefcase, TrendingUp, User, FileText, Settings, LogOut, Menu, X, RotateCcw, BadgeCheck, Handshake } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useUiLang, UI_LANGS } from '../../context/UiLangContext';
 import PhoenixMark from '../PhoenixMark';
 import ThemeToggle from '../ThemeToggle';
 import { initials } from './ui';
+import TopActions from '../shared/TopActions';
 
 const GROUPS = [
   { label: 'nav.learn', items: [
@@ -20,6 +21,7 @@ const GROUPS = [
     { to: '/learn/passport', label: 'nav.passport', icon: BadgeCheck }
   ] },
   { label: 'nav.career', items: [
+    { to: '/learn/jobs', label: 'nav.jobs', icon: Handshake },
     { to: '/learn/market', label: 'nav.market', icon: Briefcase },
     { to: '/learn/topics', label: 'nav.topics', icon: TrendingUp }
   ] },
@@ -92,6 +94,7 @@ export default function LearnerLayout() {
       </nav>
 
       <main className="ln-main" id="main">
+        <TopActions side="learner" settingsHref="/learn/settings" />
         <div key={location.pathname} className="ln-page-fade"><Outlet /></div>
       </main>
     </div>
