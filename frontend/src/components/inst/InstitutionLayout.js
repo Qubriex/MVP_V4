@@ -13,6 +13,7 @@ import { fetchCached } from '../../utils/cachedGet';
 import PhoenixMark from '../PhoenixMark';
 import ThemeToggle from '../ThemeToggle';
 import { initials } from '../learn/ui';
+import TopActions from '../shared/TopActions';
 
 const StaffContext = createContext(null);
 export const useStaff = () => useContext(StaffContext);
@@ -114,7 +115,7 @@ export default function InstitutionLayout() {
           </div>
         </nav>
 
-        <main className="ln-main" id="main"><div key={location.pathname} className="ln-page-fade"><Outlet /></div></main>
+        <main className="ln-main" id="main"><TopActions side="staff" /><div key={location.pathname} className="ln-page-fade"><Outlet /></div></main>
       </div>
     </StaffContext.Provider>
   );

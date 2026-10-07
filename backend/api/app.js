@@ -22,6 +22,7 @@ import marketRoutes from './routes/market.js';
 import employerRoutes from './routes/employer.js';
 import learnerEvidenceRoutes from './routes/learnerEvidence.js';
 import learnerSettingsRoutes from './routes/learnerSettings.js';
+import sharedRoutes from './routes/shared.js';
 import verifyRoutes from './routes/verify.js';
 import { didDocument } from '../core/return/keyRegistry.js';
 import { issuerHost } from '../core/return/credentialEngine.js';
@@ -36,6 +37,7 @@ export const MOUNTS = [
   ['/api/institution', institutionInsightsRoutes],  // curriculum vs market, where we stand
   ['/api/institution', institutionReviewRoutes],    // faculty review queue, κ, review load
   ['/api/institution', institutionActivityRoutes],  // live status, activity, exports, evidence report
+  ['/api', sharedRoutes],                           // notifications, Ask Qubirex, help, glossary
   ['/api/learner', learnerRoutes],
   ['/api/learner', portfolioRoutes],                // profile, resume, skill requests, transcribe
   ['/api/learner', learnerEvidenceRoutes],          // reviews, rechecks, passport, renewal

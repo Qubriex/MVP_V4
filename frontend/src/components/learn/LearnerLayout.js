@@ -10,6 +10,7 @@ import { useUiLang, UI_LANGS } from '../../context/UiLangContext';
 import PhoenixMark from '../PhoenixMark';
 import ThemeToggle from '../ThemeToggle';
 import { initials } from './ui';
+import TopActions from '../shared/TopActions';
 
 const GROUPS = [
   { label: 'nav.learn', items: [
@@ -92,6 +93,7 @@ export default function LearnerLayout() {
       </nav>
 
       <main className="ln-main" id="main">
+        <TopActions side="learner" settingsHref="/learn/settings" />
         <div key={location.pathname} className="ln-page-fade"><Outlet /></div>
       </main>
     </div>

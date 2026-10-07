@@ -23,7 +23,7 @@ export default function EmployerLayout() {
     { to: '/verify', label: 'Verify a credential', icon: BadgeCheck }
   ];
   return (
-    <PortalLayout kicker="FOR EMPLOYERS" loginPath="/employer/login" items={items}
+    <PortalLayout kicker="FOR EMPLOYERS" loginPath="/employer/login" items={items} side="employer"
       org={<><b style={{ fontWeight: 600 }}>{me?.employer?.name || 'Your company'}</b>{me?.employer?.domain && <span>@{me.employer.domain}</span>}</>}
       account={{ primary: me?.user?.name || me?.user?.email, secondary: me?.user?.role }}
       context={{ me, refresh, isOwner: me?.user?.role === 'owner' }} />
