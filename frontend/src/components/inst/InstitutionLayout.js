@@ -4,13 +4,14 @@
 // signed-in staff member, Logout, and nav grouped Overview · Teaching ·
 // Insights · Institution. The signed-in staff profile is loaded once here
 // and shared through useStaff(), so pages know the caller's role.
+import { useUiLang } from '../../context/UiLangContext';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Home, LayoutGrid, Users, TrendingUp, BarChart3, ShieldCheck, UserRound, LogOut, Menu, X, ClipboardCheck, Route as RouteIcon, Briefcase } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 import { fetchCached } from '../../utils/cachedGet';
-import PhoenixMark from '../PhoenixMark';
+import BrandLogo from '../BrandLogo';
 import ThemeToggle from '../ThemeToggle';
 import { initials } from '../learn/ui';
 import TopActions from '../shared/TopActions';
@@ -31,6 +32,7 @@ export function Avatar({ person, size = 36, className = '' }) {
 }
 
 export default function InstitutionLayout() {
+  const { t } = useUiLang();
   const { logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -52,21 +54,21 @@ export default function InstitutionLayout() {
 
   const role = me?.role || 'admin';
   const groups = [
-    { label: 'Overview', items: [{ to: '/institution/home', label: 'Home', icon: Home, badge: alerts || null }] },
-    { label: 'Teaching', items: [
-      { to: '/institution/cohorts', label: 'Cohorts', icon: LayoutGrid },
-      { to: '/institution/students', label: 'Students & access', icon: Users },
-      { to: '/institution/review', label: 'Faculty review', icon: ClipboardCheck },
-      { to: '/institution/bridges', label: 'Bridge programmes', icon: RouteIcon }
+    { label: t('inst.nav.overview'), items: [{ to: '/institution/home', label: t('nav.homeShort'), icon: Home, badge: alerts || null }] },
+    { label: t('inst.nav.teaching'), items: [
+      { to: '/institution/cohorts', label: t('inst.nav.cohorts'), icon: LayoutGrid },
+      { to: '/institution/students', label: t('inst.nav.students'), icon: Users },
+      { to: '/institution/review', label: t('inst.nav.review'), icon: ClipboardCheck },
+      { to: '/institution/bridges', label: t('inst.nav.bridges'), icon: RouteIcon }
     ] },
-    { label: 'Insights', items: [
-      { to: '/institution/curriculum', label: 'Curriculum vs market', icon: TrendingUp },
-      { to: '/institution/benchmark', label: 'Where we stand', icon: BarChart3 },
-      { to: '/institution/placements', label: 'Placements', icon: Briefcase }
+    { label: t('inst.nav.insights'), items: [
+      { to: '/institution/curriculum', label: t('inst.nav.curriculum'), icon: TrendingUp },
+      { to: '/institution/benchmark', label: t('inst.nav.standing'), icon: BarChart3 },
+      { to: '/institution/placements', label: t('inst.nav.placements'), icon: Briefcase }
     ] },
-    { label: 'Institution', items: [
-      ...(role === 'admin' ? [{ to: '/institution/team', label: 'Team & roles', icon: ShieldCheck }] : []),
-      { to: '/institution/profile', label: 'My profile', icon: UserRound }
+    { label: t('inst.nav.institution'), items: [
+      ...(role === 'admin' ? [{ to: '/institution/team', label: t('inst.nav.team'), icon: ShieldCheck }] : []),
+      { to: '/institution/profile', label: t('inst.nav.profile'), icon: UserRound }
     ] }
   ];
 
@@ -76,16 +78,16 @@ export default function InstitutionLayout() {
     <StaffContext.Provider value={{ me, role, refresh, setMe }}>
       <div className="ln-shell">
         <div className="ln-topbar in-topbar">
-          <button type="button" className="in-iconbtn" onClick={() => setOpen(true)} aria-label="Menu" aria-expanded={open}><Menu size={20} aria-hidden="true" /></button>
-          <span className="ln-brand" style={{ fontSize: 18 }}><PhoenixMark size={24} />Qubirex</span>
+          <button type="button" className="in-iconbtn" onClick={() => setOpen(true)} aria-label={t('nav.menu')} aria-expanded={open}><Menu size={20} aria-hidden="true" /></button>
+          <a href="/" className="brand-home" aria-label={t('nav.logoHome')}><BrandLogo height={28} tone="onDark" /></a>
           <ThemeToggle />
         </div>
         {open && <div className="ln-scrim" onClick={() => setOpen(false)} aria-hidden="true" />}
 
-        <nav className={`ln-sidebar in-sidebar ${open ? 'is-open' : ''}`} aria-label="Institution navigation">
+        <nav className={`ln-sidebar in-sidebar ${open ? 'is-open' : ''}`} aria-label={t('nav.main')}>
           <div className="ln-between">
-            <span className="ln-brand"><PhoenixMark size={30} /><span>Qubirex<small>FOR INSTITUTIONS</small></span></span>
-            {open && <button type="button" className="in-iconbtn" onClick={() => setOpen(false)} aria-label="Close menu"><X size={18} aria-hidden="true" /></button>}
+            <span className="ln-col" style={{ gap: 4 }}><a href="/" className="brand-home" aria-label={t('nav.logoHome')}><BrandLogo height={38} tone="onDark" /></a><small className="ln-xs" style={{ color: 'var(--ink-muted)', letterSpacing: '0.08em', paddingLeft: 4 }}>{t('inst.kicker')}</small></span>
+            {open && <button type="button" className="in-iconbtn" onClick={() => setOpen(false)} aria-label={t('nav.closeMenu')}><X size={18} aria-hidden="true" /></button>}
           </div>
           <div className="in-org">
             <b style={{ fontWeight: 600 }}>{me?.institution_name || 'Your institution'}</b>
@@ -113,7 +115,7 @@ export default function InstitutionLayout() {
               <span style={{ fontSize: 11, color: 'var(--stage-muted)' }}>{[me?.designation, ROLE_LABEL[role]].filter(Boolean).join(' · ')}</span>
             </div>
             <ThemeToggle />
-            <button type="button" className="in-iconbtn" onClick={doLogout} aria-label="Log out" title="Log out"><LogOut size={18} aria-hidden="true" /></button>
+            <button type="button" className="in-iconbtn" onClick={doLogout} aria-label={t('nav.logout')} title={t('nav.logout')}><LogOut size={18} aria-hidden="true" /></button>
           </div>
         </nav>
 
