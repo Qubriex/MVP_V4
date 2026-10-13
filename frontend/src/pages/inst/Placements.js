@@ -53,7 +53,7 @@ function Rate({ p, onDone }) {
   return (
     <span className="ln-row" style={{ gap: 2 }} role="radiogroup" aria-label={`90-day rating for ${p.name}`}>
       {[1, 2, 3, 4, 5].map(v => (
-        <button key={v} type="button" role="radio" aria-checked={n === v} aria-label={`${v} of 5`} onClick={() => save(v)} style={{ background: 'none', border: 0, padding: 2, cursor: 'pointer', color: v <= n ? 'var(--accent-500, #f4a93a)' : 'var(--color-text-muted)' }}>
+        <button key={v} type="button" role="radio" aria-checked={n === v} aria-label={`${v} of 5`} onClick={() => save(v)} style={{ background: 'none', border: 0, padding: 2, cursor: 'pointer', color: v <= n ? 'var(--accent-400)' : 'var(--color-text-muted)' }}>
           <Star size={15} fill={v <= n ? 'currentColor' : 'none'} aria-hidden="true" />
         </button>
       ))}

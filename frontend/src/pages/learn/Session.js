@@ -443,7 +443,7 @@ export default function Session() {
           </div>
 
           {notice && !error && <div className="ln-banner-check" role="status">{notice}</div>}
-          {(error || mic.error) && <div className="ln-banner-check" role="alert" style={{ borderColor: 'var(--status-danger)', color: '#F5C8BD' }}>{error || mic.error}</div>}
+          {(error || mic.error) && <div className="ln-banner-check" role="alert" style={{ borderColor: 'var(--status-danger)', color: '#FFB4A6' }}>{error || mic.error}</div>}
 
           {mode === 'typing' && phase !== 'result' && (
             <div className="ln-typebar">

@@ -8,7 +8,7 @@ import { ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useUiLang, UI_LANGS } from '../context/UiLangContext';
 import api from '../utils/api';
-import PhoenixMark from '../components/PhoenixMark';
+import BrandLogo from '../components/BrandLogo';
 import { errMsg } from '../utils/errors';
 
 const COPY = {
@@ -85,7 +85,7 @@ export default function LearnerLogin() {
   return (
     <div className="ln-login">
       <aside className="ln-login-aside">
-        <span className="ln-brand" style={{ fontSize: 24, padding: 0 }}><PhoenixMark size={36} />Qubirex</span>
+        <a href="/" className="brand-home" aria-label="Qubirex home"><BrandLogo height={48} tone="onDark" /></a>
         <div className="ln-col ln-hide-phone" style={{ gap: 24 }}>
           <h1 style={{ fontSize: 'clamp(34px, 3vw + 12px, 52px)' }}>Learn in your language.<br />Speak, listen, build.</h1>
           <p style={{ fontSize: 17, lineHeight: 1.65, color: 'var(--stage-muted)', maxWidth: 460 }}>

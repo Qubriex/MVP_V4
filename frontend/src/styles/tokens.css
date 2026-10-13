@@ -9,9 +9,9 @@
    - Base surfaces (--color-bg / --color-surface / --color-border / --color-text)
      control the warm paper/charcoal theme. Light values live on `:root`,
      dark overrides live under `[data-theme="dark"]`.
-   - Brand accent (--accent-*) is sampled from the phoenix mark's gradient —
-     amber wingtips through burnt orange into deep maroon at the base. It is
-     identical in light and dark mode and is reserved for emphasis elements
+   - Brand (--brand-*, --accent-*) comes from the Qubirex logo: the flame
+     and X gradient (orange #F89833 → red #E73B2B → crimson #BC1F3D) and the
+     wordmark ink #17222B. The accent scale is identical in light and dark mode and is reserved for emphasis elements
      (buttons, links, focus rings, active nav state, progress, small gradient
      washes) — never a full-page or full-section background.
    - Semantic status colors (--status-*) are for engagement/mastery states
@@ -25,72 +25,88 @@
    ========================================================================== */
 
 :root {
-  /* ---- Brand accent — sampled from the phoenix mark gradient ---- */
-  --accent-50:  #FDF3E7;
-  --accent-100: #FBE4C6;
-  --accent-200: #F7CE97;
-  --accent-300: #F7C170;
-  --accent-400: #F4A93A;  /* amber — wingtip highlight */
-  --accent-500: #EE9433;
-  --accent-600: #E8823C;  /* burnt orange — primary brand accent */
-  --accent-700: #C9642F;  /* hover / pressed shade */
-  --accent-800: #9B3A2A;  /* deep rust — transitional tone */
-  --accent-900: #7A2E24;  /* deep maroon — logo base tone */
+  /* ---- Brand — taken from the Qubirex logo (public/brand/) ----
+     Logo gradient stops (SVG): #F89833 orange · #F1592D orange-red ·
+     #E73B2B red · #C31F44 / #BC1F3D crimson. Wordmark ink: #17222B.
+     Contrast (WCAG, against white): primary #E73B2B is 4.15:1 — below
+     4.5:1, so text and filled buttons use --brand-primary-strong (5.52:1). */
+  --brand-primary: #E73B2B;         /* logo red — decorative, large shapes */
+  --brand-primary-strong: #C4302A;  /* buttons and text on light: 5.52:1 on white */
+  --brand-primary-hover: #A8203C;   /* hover / pressed: 7.15:1 on white */
+  --brand-accent: #F89833;          /* logo orange highlight — never text on light */
+  --brand-accent-strong: #F1592D;   /* logo orange-red — gradients, progress */
+  --brand-crimson: #BC1F3D;         /* logo crimson — gradient end */
+  --brand-ink: #17222B;             /* wordmark ink — text, dark surfaces */
+  --brand-surface: #FAF8F6;         /* page background */
+  --brand-muted: #5B6670;           /* secondary text: 5.54:1 on surface */
+  /* Ink scale for surfaces that are dark in both themes (sidebar, lesson stage) */
+  --ink-900: #121A21; --ink-850: #16212A; --ink-800: #17222B; --ink-750: #1B252E;
+  --ink-700: #22303B; --ink-650: #2A3743; --ink-600: #2C3843; --ink-500: #3A4753;
+  --ink-text: #F5F1EC;   /* 15.6:1 on --ink-900 */
+  --ink-muted: #A9B4BD;  /* 8.3:1 on --ink-900 */
+  --ink-faint: #8A96A0;  /* 5.6:1 on --ink-900 */
+  --brand-gradient: linear-gradient(135deg, #F89833 0%, #F1592D 40%, #E73B2B 70%, #BC1F3D 100%);
 
-  /* Two gradients, deliberately different ranges — see the WCAG note below.
-     --gradient-accent (800→900) is dark enough that white text stays AA
-     throughout; use it wherever text or an icon sits directly on the fill
-     (buttons, the learner's chat bubbles). --gradient-accent-vivid is the
-     full amber→maroon sweep sampled from the logo; use it only where
-     nothing needs to read against it (progress/mastery bars, the hero
-     wash, the logo mark) — amber is simply too light for reliable overlaid
-     text at any weight. */
-  --gradient-accent: linear-gradient(135deg, var(--accent-800) 0%, var(--accent-900) 100%);
-  --gradient-accent-hover: linear-gradient(135deg, var(--accent-900) 0%, #5C231B 100%);
-  --gradient-accent-vivid: linear-gradient(135deg, var(--accent-400) 0%, var(--accent-600) 45%, var(--accent-800) 80%, var(--accent-900) 100%);
-  --gradient-accent-wash: linear-gradient(135deg, rgba(244,169,58,0.16) 0%, rgba(232,130,60,0.10) 45%, rgba(122,46,36,0.08) 100%);
-  --shadow-accent-glow: 0 8px 24px -8px rgba(232, 130, 60, 0.5);
-  --shadow-accent-glow-lg: 0 16px 40px -12px rgba(232, 130, 60, 0.55);
+  /* Status — each 4.5:1 or better on white and on its own background */
+  --ok: #2E7D4F;      --ok-bg: #E6F3EB;
+  --warn: #9A5B00;    --warn-bg: #FBF0DD;
+  --danger: #B42318;  --danger-bg: #FCE8E6;
+  --info: #2F5F8A;    --info-bg: #E6EEF6;
 
-  /* Accent color for TEXT, icons, links, and indicators read directly
-     against the page background (never a solid fill with overlaid text —
-     see --gradient-accent above for that case). accent-600/#E8823C — the
-     literal "burnt orange" the palette is named for — only reaches 2.6:1
-     against the cream background, well under the 4.5:1 AA floor for normal
-     text, so it's reserved for large/decorative use (borders, glows,
-     progress fills) and never for text. --accent-ink swaps per theme
-     (verified via WCAG's relative-luminance formula, both ≥6.5:1): dark
-     rust on light mode, lit amber on dark mode — the same warm hue family
-     tuned to stay legible on both grounds. */
+  /* ---- Accent scale (used across the app) mapped onto the brand ---- */
+  --accent-50:  #FEF3EA;
+  --accent-100: #FDE3CF;
+  --accent-200: #FBC9A3;
+  --accent-300: #FAAE73;
+  --accent-400: #F89833;  /* logo orange */
+  --accent-500: #F1592D;  /* logo orange-red */
+  --accent-600: #E73B2B;  /* logo red — primary */
+  --accent-700: #C4302A;  /* strong — text and fills */
+  --accent-800: #A8203C;  /* hover / crimson ink */
+  --accent-900: #7D1A2E;  /* deepest crimson */
+
+  /* --gradient-accent carries white text (buttons, chat bubbles): its
+     lightest point #C4302A is 5.52:1 with white. --gradient-accent-vivid is
+     the full logo sweep, only where nothing reads on top of it. */
+  --gradient-accent: linear-gradient(135deg, var(--accent-700) 0%, var(--accent-800) 100%);
+  --gradient-accent-hover: linear-gradient(135deg, var(--accent-800) 0%, var(--accent-900) 100%);
+  --gradient-accent-vivid: var(--brand-gradient);
+  --gradient-accent-wash: linear-gradient(135deg, rgba(248,152,51,0.14) 0%, rgba(241,89,45,0.08) 50%, rgba(188,31,61,0.06) 100%);
+  --shadow-accent-glow: 0 8px 24px -8px rgba(231, 59, 43, 0.40);
+  --shadow-accent-glow-lg: 0 16px 40px -12px rgba(231, 59, 43, 0.45);
+
+  /* Accent for text, icons and links on the page background: 6.75:1 light, 7.97:1 dark. */
   --accent-ink: var(--accent-800);
 
   /* ---- Base surfaces — light mode (default) ---- */
-  --color-bg: #FAF9F5;
-  --color-bg-alt: #F3F0E7;
-  --color-surface: #FFFFFE;
-  --color-surface-2: #EFEADD;
-  --color-border: #E4DECE;
-  --color-border-strong: #D6CDB6;
-  --color-text: #1F1E1C;
-  --color-text-muted: #6B6659;
-  --color-text-faint: #928C7B;
-  --color-overlay: rgba(31, 30, 28, 0.45);
+  --color-bg: var(--brand-surface);
+  --color-bg-alt: #F3EFEA;
+  --color-surface: #FFFFFF;
+  --color-surface-2: #F0EBE5;
+  --color-border: #E6E0D9;
+  --color-border-strong: #D3CBC2;
+  --color-text: var(--brand-ink);
+  --color-text-muted: var(--brand-muted);
+  --color-text-faint: #7A848D;      /* hints only: 3.9:1, never body text */
+  --color-overlay: rgba(23, 34, 43, 0.45);
 
-  /* ---- Semantic status colors (warm-tuned, distinct from brand accent) ---- */
-  --status-success: #3F7D53;
-  --status-success-bg: #E7F1E7;
-  --status-info: #4C6E8C;
-  --status-info-bg: #E7EEF3;
-  --status-warning: #B8842E;
-  --status-warning-bg: #F6EBD8;
-  --status-neutral: #746F63;
-  --status-neutral-bg: #ECE8DC;
-  --status-danger: #B14B3A;
-  --status-danger-bg: #F5E5DF;
+  /* ---- Semantic status colors (older names, kept for existing screens) ---- */
+  --status-success: var(--ok);
+  --status-success-bg: var(--ok-bg);
+  --status-info: var(--info);
+  --status-info-bg: var(--info-bg);
+  --status-warning: var(--warn);
+  --status-warning-bg: var(--warn-bg);
+  --status-neutral: #5B6670;
+  --status-neutral-bg: #ECE8E3;
+  --status-danger: var(--danger);
+  --status-danger-bg: var(--danger-bg);
 
   /* ---- Typography ---- */
-  --font-display: 'Fraunces', 'Iowan Old Style', Georgia, serif;
-  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* One display face (geometric, close to the logo's wordmark) and one body
+     face; Telugu and Devanagari fall through to Noto Sans in both. */
+  --font-display: 'Outfit', 'Noto Sans Telugu', 'Noto Sans Devanagari', -apple-system, 'Segoe UI', sans-serif;
+  --font-body: 'Inter', 'Noto Sans Telugu', 'Noto Sans Devanagari', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
   --text-display: clamp(2.75rem, 1.5rem + 4.5vw, 4.75rem);
   --text-h1: clamp(2.125rem, 1.6rem + 2vw, 3rem);
@@ -137,9 +153,9 @@
   --radius-full: 999px;
 
   /* ---- Shadows (warm-tinted, never pure black) ---- */
-  --shadow-sm: 0 1px 2px rgba(31, 30, 28, 0.06);
-  --shadow-md: 0 6px 16px -4px rgba(31, 30, 28, 0.10);
-  --shadow-lg: 0 16px 36px -10px rgba(31, 30, 28, 0.14);
+  --shadow-sm: 0 1px 2px rgba(23, 34, 43, 0.06);
+  --shadow-md: 0 6px 16px -4px rgba(23, 34, 43, 0.10);
+  --shadow-lg: 0 16px 36px -10px rgba(23, 34, 43, 0.14);
 
   /* ---- Motion ---- */
   --transition-fast: 150ms ease;
@@ -160,34 +176,44 @@
 }
 
 [data-theme='dark'] {
-  --color-bg: #1A1915;
-  --color-bg-alt: #201F1A;
-  --color-surface: #232221;
-  --color-surface-2: #2B2925;
-  --color-border: #3A3733;
-  --color-border-strong: #4A463F;
-  --color-text: #EDEAE2;
-  --color-text-muted: #ABA595;
-  --color-text-faint: #7D786A;
+  /* Dark set built on the logo ink. Text 15.6:1, muted 8.3:1, accent ink 8.0:1 on --color-bg. */
+  --brand-surface: #121A21;
+  --brand-muted: #A9B4BD;
+  --brand-primary-strong: #FF7A5C;  /* links and outlines on dark: 7.3:1 */
+  --brand-primary-hover: #FF9A80;
+  --ok: #7CC99A;      --ok-bg: #1C2E25;
+  --warn: #E8B05A;    --warn-bg: #33291A;
+  --danger: #FF8A7A;  --danger-bg: #3A201D;
+  --info: #8FBBE0;    --info-bg: #1C2A37;
+
+  --color-bg: #121A21;
+  --color-bg-alt: #16212A;
+  --color-surface: #1B252E;
+  --color-surface-2: #22303B;
+  --color-border: #2C3843;
+  --color-border-strong: #3A4753;
+  --color-text: #F5F1EC;
+  --color-text-muted: #A9B4BD;
+  --color-text-faint: #7D8994;
   --color-overlay: rgba(0, 0, 0, 0.6);
 
-  --status-success: #7FBE7C;
-  --status-success-bg: #263329;
-  --status-info: #8FB6D6;
-  --status-info-bg: #232D35;
-  --status-warning: #E0AC5C;
-  --status-warning-bg: #362C1E;
-  --status-neutral: #A6A092;
-  --status-neutral-bg: #2A2823;
-  --status-danger: #E08872;
-  --status-danger-bg: #362320;
+  --status-success: var(--ok);
+  --status-success-bg: var(--ok-bg);
+  --status-info: var(--info);
+  --status-info-bg: var(--info-bg);
+  --status-warning: var(--warn);
+  --status-warning-bg: var(--warn-bg);
+  --status-neutral: #A9B4BD;
+  --status-neutral-bg: #22303B;
+  --status-danger: var(--danger);
+  --status-danger-bg: var(--danger-bg);
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
   --shadow-md: 0 8px 20px -6px rgba(0, 0, 0, 0.45);
   --shadow-lg: 0 20px 44px -12px rgba(0, 0, 0, 0.55);
 
-  --shadow-accent-glow: 0 8px 26px -6px rgba(244, 169, 58, 0.35);
-  --shadow-accent-glow-lg: 0 18px 44px -10px rgba(244, 169, 58, 0.4);
+  --shadow-accent-glow: 0 8px 26px -6px rgba(248, 152, 51, 0.30);
+  --shadow-accent-glow-lg: 0 18px 44px -10px rgba(248, 152, 51, 0.35);
 
   --accent-ink: var(--accent-400);
 

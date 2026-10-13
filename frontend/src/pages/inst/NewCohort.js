@@ -149,7 +149,7 @@ export default function NewCohort() {
           <div className="ln-between ln-wrap"><h2 className="ln-h2">Check what Professor Qubirex understood</h2>
             {ex?.extraction_confidence != null && <span className="ln-tag ln-tag-lg ln-tag-success">Confidence {Math.round(ex.extraction_confidence * 100)}%</span>}</div>
           {ex?.confirmation_summary && <p className="ln-tile" style={{ padding: 16, fontSize: 14, lineHeight: 1.65 }}>{ex.confirmation_summary}</p>}
-          {ex?.ambiguities?.length > 0 && <div className="ln-note" style={{ background: 'var(--status-warning-bg)', color: '#7A5418' }}><b>Needs clarification:</b><ul style={{ listStyle: 'disc', paddingLeft: 20, marginTop: 6 }}>{ex.ambiguities.map(a => <li key={a}>{a}</li>)}</ul></div>}
+          {ex?.ambiguities?.length > 0 && <div className="ln-note" style={{ background: 'var(--status-warning-bg)', color: 'var(--warn)' }}><b>Needs clarification:</b><ul style={{ listStyle: 'disc', paddingLeft: 20, marginTop: 6 }}>{ex.ambiguities.map(a => <li key={a}>{a}</li>)}</ul></div>}
           <div className="ln-col" style={{ gap: 8 }}>
             {(ex?.clusters || []).map(c => (
               <div key={c.label} className="ln-tile" style={{ padding: '12px 14px' }}>

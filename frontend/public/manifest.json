@@ -1,0 +1,13 @@
+{
+  "short_name": "Qubirex",
+  "name": "Qubirex — Your Language. Your Skills. Your Future",
+  "icons": [
+    { "src": "/favicon.ico", "sizes": "16x16 32x32 48x48 64x64", "type": "image/x-icon" },
+    { "src": "/brand/qubirex-mark-192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "/brand/qubirex-mark.png", "type": "image/png", "sizes": "512x512" }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#E73B2B",
+  "background_color": "#FAF8F6"
+}

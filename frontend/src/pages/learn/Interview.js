@@ -89,7 +89,7 @@ export default function Interview() {
         {!mic.listening && meta.caption_en && <p className="ln-caption-en">{meta.caption_en}</p>}
         <VoiceStatus speech={speech} dark />
         {(error || mic.error) && (
-          <div className="ln-banner-check" role="alert" style={{ borderColor: 'var(--status-danger)', color: '#F5C8BD', gap: 10, flexWrap: 'wrap' }}>
+          <div className="ln-banner-check" role="alert" style={{ borderColor: 'var(--status-danger)', color: '#FFB4A6', gap: 10, flexWrap: 'wrap' }}>
             <span>{error || mic.error}</span>
             {error && !busy && <button type="button" className="ln-btn ln-btn-sm ln-btn-ghost-dark" onClick={() => ask(turnsRef.current)}>Try again</button>}
           </div>

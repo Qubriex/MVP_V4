@@ -28,7 +28,7 @@ body {
 
 #root { min-height: 100vh; display: flex; flex-direction: column; }
 
-::selection { background: var(--accent-300); color: #2A1608; }
+::selection { background: var(--accent-300); color: var(--brand-ink); }
 
 :focus-visible {
   outline: 2px solid var(--accent-ink);
@@ -136,7 +136,7 @@ h4, .h4 {
 
 .btn-primary {
   background: var(--gradient-accent);
-  color: #FFF8EE;
+  color: var(--accent-50);
   box-shadow: var(--shadow-accent-glow);
 }
 .btn-primary:hover:not(:disabled) {
@@ -154,7 +154,7 @@ h4, .h4 {
   background: var(--accent-50);
   border-color: var(--accent-800);
 }
-[data-theme='dark'] .btn-secondary:hover:not(:disabled) { background: rgba(244, 169, 58, 0.1); border-color: var(--accent-400); }
+[data-theme='dark'] .btn-secondary:hover:not(:disabled) { background: rgba(248, 152, 51, 0.1); border-color: var(--accent-400); }
 
 .btn-ghost {
   background: transparent;
@@ -205,7 +205,7 @@ h4, .h4 {
 .input:focus, .textarea:focus {
   outline: none;
   border-color: var(--accent-ink);
-  box-shadow: 0 0 0 3px rgba(232, 130, 60, 0.18);
+  box-shadow: 0 0 0 3px rgba(231, 59, 43, 0.18);
 }
 
 /* ---- Badges / tags -------------------------------------------------------------- */
@@ -226,7 +226,7 @@ h4, .h4 {
 .badge-neutral { background: var(--status-neutral-bg); color: var(--status-neutral); }
 .badge-danger { background: var(--status-danger-bg); color: var(--status-danger); }
 .badge-accent { background: var(--accent-50); color: var(--accent-800); }
-[data-theme='dark'] .badge-accent { background: rgba(244, 169, 58, 0.14); color: var(--accent-400); }
+[data-theme='dark'] .badge-accent { background: rgba(248, 152, 51, 0.14); color: var(--accent-400); }
 
 /* ---- Nav ------------------------------------------------------------------------ */
 .nav {

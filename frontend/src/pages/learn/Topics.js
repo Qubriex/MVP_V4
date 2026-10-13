@@ -77,8 +77,8 @@ export default function Topics() {
         <section className="ln-feature" aria-labelledby="featured-topic">
           <div>
             <div className="ln-row ln-wrap" style={{ gap: 8 }}>
-              <span className="ln-tag ln-tag-lg" style={{ background: '#263329', color: '#7FBE7C' }}>{featured.growth}</span>
-              {featured.have_pct >= 20 && <span className="ln-tag ln-tag-lg" style={{ background: 'var(--stage-surface)', color: '#F7CE97' }}>Close to your path</span>}
+              <span className="ln-tag ln-tag-lg" style={{ background: 'var(--ok-bg)', color: 'var(--ok)' }}>{featured.growth}</span>
+              {featured.have_pct >= 20 && <span className="ln-tag ln-tag-lg" style={{ background: 'var(--stage-surface)', color: 'var(--accent-200)' }}>Close to your path</span>}
             </div>
             <h2 id="featured-topic" style={{ fontSize: 34 }}>{featured.name}</h2>
             <p style={{ fontSize: 15, lineHeight: 1.65, color: 'var(--stage-muted)', maxWidth: 520 }}>{featured.desc}</p>
@@ -93,7 +93,7 @@ export default function Topics() {
                   {requests.busy ? 'Sending…' : `Request ${toRequest.length} skill${toRequest.length > 1 ? 's' : ''} from your institution`}
                 </button>
               ) : (
-                <span className="ln-tag ln-tag-lg" style={{ background: '#263329', color: '#7FBE7C' }}>
+                <span className="ln-tag ln-tag-lg" style={{ background: 'var(--ok-bg)', color: 'var(--ok)' }}>
                   {featured.steps.some(st => st.status === 'not_in_path' || requests.requested.has(st.name)) ? '✓ Requested from your institution' : '✓ Every skill is already in your programme'}
                 </span>
               )}
@@ -104,7 +104,7 @@ export default function Topics() {
             </div>
             <VoiceStatus speech={speech} text={introText} dark lang={speechTag(user?.language || 'telugu')} />
             {introError && <div className="ln-error">{introError}</div>}
-            {requests.sent && <div className="ln-note" role="status" style={{ background: '#263329', color: '#CFE8CD' }}>{requests.sent}. You’ll see each one’s status below.</div>}
+            {requests.sent && <div className="ln-note" role="status" style={{ background: 'var(--ok-bg)', color: 'var(--ok)' }}>{requests.sent}. You’ll see each one’s status below.</div>}
             {requests.error && <div className="ln-error">{requests.error}</div>}
           </div>
           <div>

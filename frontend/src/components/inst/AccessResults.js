@@ -56,7 +56,7 @@ export default function AccessResults({ invites = [], slips = [], kept = [], ski
         </div>
       )}
       {kept.length > 0 && <div className="ln-note">{kept.length} existing student{kept.length > 1 ? 's' : ''} keep their current PIN and can sign in with this cohort’s join code: {kept.map(k => k.name).join(', ')}.</div>}
-      {skipped.length > 0 && <div className="ln-note" style={{ background: 'var(--status-warning-bg)', color: '#7A5418' }}>Skipped: {skipped.map(s => `${s.name || `row ${s.row}`} (${s.check || s.reason})`).join('; ')}</div>}
+      {skipped.length > 0 && <div className="ln-note" style={{ background: 'var(--status-warning-bg)', color: 'var(--warn)' }}>Skipped: {skipped.map(s => `${s.name || `row ${s.row}`} (${s.check || s.reason})`).join('; ')}</div>}
     </div>
   );
 }
