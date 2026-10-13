@@ -6,13 +6,13 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
-import PhoenixMark from '../../components/PhoenixMark';
+import BrandLogo from '../../components/BrandLogo';
 import { errMsg } from '../../utils/errors';
 
 export function StaffAside() {
   return (
     <aside className="ln-login-aside">
-      <span className="ln-brand" style={{ fontSize: 24, padding: 0 }}><PhoenixMark size={36} />Qubirex<span className="ln-xs" style={{ color: 'var(--stage-muted)', letterSpacing: '0.08em', fontFamily: 'var(--font-body)' }}>FOR INSTITUTIONS</span></span>
+      <span className="ln-col" style={{ gap: 6 }}><a href="/" className="brand-home" aria-label="Qubirex home"><BrandLogo height={48} tone="onDark" /></a><span className="ln-xs" style={{ color: 'var(--stage-muted)', letterSpacing: '0.08em', fontFamily: 'var(--font-body)' }}>FOR INSTITUTIONS</span></span>
       <div className="ln-col ln-hide-phone" style={{ gap: 22 }}>
         <h1 style={{ fontSize: 'clamp(32px, 3vw + 10px, 50px)' }}>See how your students are building, and what the market wants next.</h1>
         <p style={{ fontSize: 17, lineHeight: 1.65, color: 'var(--stage-muted)', maxWidth: 470 }}>Faculty accounts are created by your institution admin. You’ll get an email with a link to set your password and profile.</p>

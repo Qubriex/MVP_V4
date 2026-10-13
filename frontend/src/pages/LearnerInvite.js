@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
-import PhoenixMark from '../components/PhoenixMark';
+import BrandLogo from '../components/BrandLogo';
 import { errMsg } from '../utils/errors';
 
 export default function LearnerInvite() {
@@ -38,7 +38,7 @@ export default function LearnerInvite() {
   return (
     <div className="ln-login">
       <aside className="ln-login-aside">
-        <span className="ln-brand" style={{ fontSize: 24, padding: 0 }}><PhoenixMark size={36} />Qubirex</span>
+        <a href="/" className="brand-home" aria-label="Qubirex home"><BrandLogo height={48} tone="onDark" /></a>
         <div className="ln-col ln-hide-phone" style={{ gap: 20 }}>
           <h1 style={{ fontSize: 'clamp(32px, 3vw + 10px, 48px)' }}>Welcome. Let’s set up your sign-in.</h1>
           <p style={{ fontSize: 17, lineHeight: 1.65, color: 'var(--stage-muted)', maxWidth: 460 }}>Choose a PIN only you know. You’ll use it with your learner reference and your cohort’s join code.</p>

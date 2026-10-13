@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 import { errMsg } from '../../utils/errors';
-import PhoenixMark from '../../components/PhoenixMark';
+import BrandLogo from '../../components/BrandLogo';
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
@@ -26,7 +26,7 @@ export default function AdminLogin() {
   return (
     <div className="ln-login">
       <aside className="ln-login-aside">
-        <span className="ln-brand" style={{ fontSize: 24, padding: 0 }}><PhoenixMark size={36} />Qubirex<span className="ln-xs" style={{ color: 'var(--stage-muted)', letterSpacing: '0.08em' }}>PLATFORM ADMIN</span></span>
+        <span className="ln-col" style={{ gap: 6 }}><a href="/" className="brand-home" aria-label="Qubirex home"><BrandLogo height={48} tone="onDark" /></a><span className="ln-xs" style={{ color: 'var(--stage-muted)', letterSpacing: '0.08em' }}>PLATFORM ADMIN</span></span>
         <p className="ln-hide-phone" style={{ fontSize: 17, lineHeight: 1.65, color: 'var(--stage-muted)', maxWidth: 470 }}>Employer verification, the skills ontology and evaluator quality.</p>
         <span />
       </aside>

@@ -91,7 +91,7 @@ export default function Standing() {
             <span style={{ color: 'var(--stage-muted)' }}>vs <b style={{ color: 'var(--stage-text)' }}>{data.comparison.score}</b> {cmpLabel.toLowerCase()}</span>
           </div>
           <span className="ln-small" style={{ color: 'var(--stage-muted)', lineHeight: 1.6 }}>Average share of target-role JD skills your students have verified through mastery checks. Self-declared skills don’t count.</span>
-          <span className="ln-small" style={{ color: data.change_30d >= 0 ? 'var(--stage-listen)' : '#F5C8BD' }}>{data.change_30d >= 0 ? '▲' : '▼'} {Math.abs(data.change_30d)} points since last month</span>
+          <span className="ln-small" style={{ color: data.change_30d >= 0 ? 'var(--stage-listen)' : '#FFB4A6' }}>{data.change_30d >= 0 ? '▲' : '▼'} {Math.abs(data.change_30d)} points since last month</span>
           <span className="ln-xs" style={{ color: 'var(--stage-muted)' }}>{data.students} students · target roles: {data.target_roles.join(', ') || '—'}</span>
         </section>
         <section className="ln-card">

@@ -14,8 +14,8 @@ import { SmallSample } from '../shared/SampleSize';
 import { LoadingRows } from '../shared/EmptyState';
 
 const BAND_TAG = { ready: 'ln-tag-success', nearly: 'ln-tag-info', building: 'ln-tag-warning' };
-const LIGHT = { green: ['#16a34a', 'Learning well'], yellow: ['#d97706', 'Needs a nudge'], red: ['#dc2626', 'Needs help'] };
-const shade = (pct) => (pct >= 100 ? 'var(--status-success-bg)' : pct > 0 ? 'var(--status-info-bg, #e0f2fe)' : 'transparent');
+const LIGHT = { green: ['var(--ok)', 'Learning well'], yellow: ['var(--warn)', 'Needs a nudge'], red: ['var(--danger)', 'Needs help'] };
+const shade = (pct) => (pct >= 100 ? 'var(--status-success-bg)' : pct > 0 ? 'var(--status-info-bg)' : 'transparent');
 
 function WhyDrawer({ cohortId, student, canBridge, onClose }) {
   const { data: w, error } = useCachedGet(`/institution/engagements/${cohortId}/students/${student.el_id}/why`);

@@ -99,7 +99,7 @@ function unlockAudio() {
   const p = getPlayer();
   if (!p || unlocked || !p.paused) return;
   p.src = SILENCE;
-  p.play().then(() => { unlocked = true; }).catch(() => {});
+  try { Promise.resolve(p.play()).then(() => { unlocked = true; }).catch(() => {}); } catch { /* play() unsupported */ }
 }
 if (typeof document !== 'undefined') {
   ['pointerdown', 'keydown', 'touchend'].forEach(ev => document.addEventListener(ev, unlockAudio, { capture: true, passive: true }));

@@ -7,7 +7,7 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Home, Mic, Route as RouteIcon, Briefcase, TrendingUp, User, FileText, Settings, LogOut, Menu, X, RotateCcw, BadgeCheck, Handshake } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useUiLang, UI_LANGS } from '../../context/UiLangContext';
-import PhoenixMark from '../PhoenixMark';
+import BrandLogo from '../BrandLogo';
 import ThemeToggle from '../ThemeToggle';
 import { initials } from './ui';
 import TopActions from '../shared/TopActions';
@@ -49,14 +49,14 @@ export default function LearnerLayout() {
         <button type="button" className="ln-btn ln-btn-sm" onClick={() => setOpen(true)} aria-label={t('nav.menu')} aria-expanded={open}>
           <Menu size={18} aria-hidden="true" />
         </button>
-        <span className="ln-brand" style={{ fontSize: 18 }}><PhoenixMark size={24} />Qubirex</span>
+        <a href="/" className="brand-home" aria-label="Qubirex home"><BrandLogo height={28} /></a>
         <ThemeToggle />
       </div>
       {open && <div className="ln-scrim" onClick={() => setOpen(false)} aria-hidden="true" />}
 
       <nav className={`ln-sidebar ${open ? 'is-open' : ''}`} aria-label="Learner navigation">
         <div className="ln-between">
-          <span className="ln-brand"><PhoenixMark size={30} />Qubirex</span>
+          <a href="/" className="brand-home" aria-label="Qubirex home"><BrandLogo height={38} /></a>
           {open && (
             <button type="button" className="ln-btn ln-btn-sm" onClick={() => setOpen(false)} aria-label="Close menu"><X size={16} aria-hidden="true" /></button>
           )}

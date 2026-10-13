@@ -3,7 +3,7 @@
 // Teaching → Notifications, with a live preview of what students see.
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import PhoenixMark from '../../components/PhoenixMark';
+import BrandLogo from '../../components/BrandLogo';
 import { useStaffDraft, ProfileFields, TeachingFields, NotificationFields, StudentPreview } from '../../components/inst/StaffProfileForm';
 
 const STEPS = ['Account', 'Profile', 'Teaching', 'Notifications'];
@@ -28,7 +28,7 @@ export default function StaffWelcome() {
   return (
     <div className="ln-col" style={{ minHeight: '100vh', background: 'var(--color-bg)' }}>
       <header className="ln-between ln-wrap" style={{ padding: '14px 40px', borderBottom: '1px solid var(--color-border)', background: 'var(--color-surface)', gap: 16 }}>
-        <span className="ln-brand" style={{ padding: 0 }}><PhoenixMark size={26} />Qubirex</span>
+        <a href="/" className="brand-home" aria-label="Qubirex home"><BrandLogo height={34} /></a>
         <ol className="in-steps" aria-label="Setup steps">
           {STEPS.map((label, i) => (
             <li key={label} className={i < step ? 'is-done' : i === step ? 'is-now' : ''} aria-current={i === step ? 'step' : undefined}>
