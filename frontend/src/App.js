@@ -10,7 +10,8 @@ import PageTransition from './components/PageTransition';
 // Pages
 import PublicHome from './pages/public/Home';
 import Pricing from './pages/public/Pricing';
-import Demo from './pages/public/Demo';
+import Demo, { DemoSide } from './pages/public/Demo';
+import Audience from './pages/public/Audience';
 import SignIn from './pages/public/SignIn';
 import Legal from './pages/public/Legal';
 import LearnerLogin from './pages/LearnerLogin';
@@ -94,7 +95,11 @@ export default function App() {
             <Routes>
               <Route path="/" element={<PublicHome />} />
               <Route path="/pricing" element={<Pricing />} />
+              <Route path="/learners" element={<Audience side="learners" />} />
+              <Route path="/colleges" element={<Audience side="colleges" />} />
+              <Route path="/employers" element={<Audience side="employers" />} />
               <Route path="/demo" element={<Demo />} />
+              <Route path="/demo/:side" element={<DemoSide />} />
               <Route path="/signin" element={<SignIn />} />
               <Route path="/legal/:page" element={<Legal />} />
               <Route path="/login" element={<StaffLogin />} />
