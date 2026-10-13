@@ -91,6 +91,7 @@ const PLANS = [
   ['Enterprise', 'For large hiring programmes', ['Unlimited roles', 'API for your ATS', 'Sponsored cohorts', 'Named support']]
 ];
 export function Billing() {
+  const [asked, setAsked] = useState(null);
   return (
     <>
       <header className="ln-pagehead"><div className="ln-col" style={{ gap: 4 }}><h1 className="ln-title">Plan &amp; billing</h1><span className="ln-sub">Prices are shown before GST. Invoices carry your GSTIN when you have added it.</span></div></header>
@@ -100,7 +101,8 @@ export function Billing() {
             <b style={{ fontSize: 18 }}>{name}</b><span className="ln-small ln-muted">{sub}</span>
             <span className="ln-stat" style={{ fontSize: 26 }}>[PRICE]<span className="ln-small ln-muted"> / month + GST</span></span>
             <ul className="ln-small" style={{ margin: 0, paddingLeft: 18, display: 'grid', gap: 4 }}>{feats.map(f => <li key={f}>{f}</li>)}</ul>
-            <button type="button" className="ln-btn ln-btn-sm" disabled title="Pricing is being finalised">Choose {name}</button>
+            <button type="button" className="ln-btn ln-btn-sm" aria-expanded={asked === name} onClick={() => setAsked(name)}>Choose {name}</button>
+            {asked === name && <span className="ln-xs" role="status">Coming soon: pricing is being finalised. Use Help → Contact and we will set up {name} for you.</span>}
           </article>
         ))}
       </div>
