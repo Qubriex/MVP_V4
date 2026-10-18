@@ -20,7 +20,7 @@ const TEMPLATES = [
   { id: 'compact', name: 'Compact', thumb: { background: 'repeating-linear-gradient(var(--color-bg-alt) 0 6px, var(--color-border) 6px 8px)' } }
 ];
 const SECTION_NAMES = { summary: 'Summary', skills: 'Skills', projects: 'Projects', education: 'Education', experience: 'Experience', certifications: 'Certifications', capability_record: 'Capability record' };
-const ACCENT = { classic: '#9B3A2A', modern: '#201F1A', compact: '#3B5A75' };
+const ACCENT = { classic: '#C4302A', modern: '#201F1A', compact: '#3B5A75' };
 
 function orderBy(list, order) {
   if (!order) return list;
