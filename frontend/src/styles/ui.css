@@ -148,3 +148,8 @@ button.ui-stat { text-align: left; cursor: pointer; font: inherit; color: inheri
 /* Evidence / authorship tag: plain words; the code is in the popover. */
 .sk-codetag { cursor: help; border-style: dashed; font: inherit; font-size: var(--fs-caption); }
 .sk-codetag:focus-visible { outline: 3px solid var(--accent-400); outline-offset: 2px; }
+
+/* Ask Qubirex box: Search jobs folds to an icon on phones. */
+@media (max-width: 639px) {
+  .sk-command-search span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}

@@ -279,7 +279,9 @@ router.post('/topics/:id/intro', async (req, res) => {
 router.get('/snapshot', async (req, res) => {
   await withState(req, async ({ state, saved }) => {
     const jobs = (await mapSeq(market.JOBS, async j => await jobCard(j, state, saved))).sort((a, b) => b.match - a.match).slice(0, 3)
-      .map(j => ({ ...j, missing: j.skills.filter(s => s.required && (s.status === 'not_in_path' || s.status === 'requested')).map(s => s.name) }));
+      .map(j => ({ ...j, missing: j.skills.filter(s => s.required && (s.status === 'not_in_path' || s.status === 'requested')).map(s => s.name),
+        // Every skill not yet mastered, required first: a card under 100% always names what is left.
+        to_learn: j.skills.filter(s => s.status !== 'mastered').sort((a, b) => b.required - a.required).slice(0, 3).map(s => s.name) }));
     const skills = (await mapSeq(market.SKILL_SHARE, async ([key, pct]) => ({ key, name: market.SKILLS[key].name, pct, status: (await classifySkill({ key, ...market.SKILLS[key] }, state)).status })))
       .sort((a, b) => (a.status === 'mastered') - (b.status === 'mastered') || b.pct - a.pct)
       .slice(0, 5);

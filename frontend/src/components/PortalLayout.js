@@ -36,10 +36,10 @@ export default function PortalLayout({ kicker, org, account, items, loginPath, c
         </div>
         {org && <div className="in-org">{org}</div>}
         <div className="ln-navgroup">
-          {items.map(({ to, label, icon: Icon, badge }) => (
+          {items.map(({ to, label, icon: Icon, badge, badgeLabel }) => (
             <NavLink key={to} to={to} className={({ isActive }) => `ln-navlink ${isActive ? 'is-active' : ''}`}>
               <Icon size={18} strokeWidth={1.8} aria-hidden="true" /><span>{label}</span>
-              {badge ? <span className="in-badge">{badge}</span> : null}
+              {badge ? <span className="in-badge" title={badgeLabel || undefined}><span aria-hidden="true">{badge}</span>{badgeLabel && <span className="ln-sr">{badgeLabel}</span>}</span> : null}
             </NavLink>
           ))}
         </div>

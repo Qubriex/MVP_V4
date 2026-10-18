@@ -4,7 +4,7 @@
 // nudge to finish the profile.
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mic, Keyboard, Check, Search, CheckCircle2, Circle, Route as RouteIcon, Building2, RotateCcw } from 'lucide-react';
+import { Mic, Keyboard, Check, CheckCircle2, Circle, Route as RouteIcon, Building2, RotateCcw } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useUiLang } from '../../context/UiLangContext';
 import api, { getOr } from '../../utils/api';
@@ -71,11 +71,9 @@ const SECTION_NAMES = { personal: 'learn.dashboard.sectionNames.yourDetails', ed
 export default function Dashboard() {
   const { user } = useAuth();
   const { t } = useUiLang();
-  const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [market, setMarket] = useState(null);
   const [profile, setProfile] = useState(null);
-  const [query, setQuery] = useState('');
   const [professors, setProfessors] = useState([]);
   const requests = useSkillRequests();
   const [today, setToday] = useState(null);
@@ -97,7 +95,6 @@ export default function Dashboard() {
   }, []);
 
   const firstName = (user?.name || '').split(' ')[0];
-  const search = (e) => { e.preventDefault(); if (query.trim()) navigate(`/learn/market?q=${encodeURIComponent(query.trim())}`); };
   const done = data?.overall_status === 'completed';
   const missing = (profile?.completeness?.missing || []).filter(k => SECTION_NAMES[k]);
 
@@ -108,10 +105,6 @@ export default function Dashboard() {
           <h1 className="ln-title ln-indic">{t('greet')}, {firstName}</h1>
           <span className="ln-sub">{data?.engagement_title}{profile?.institution_name ? ` · ${profile.institution_name}` : ''}</span>
         </div>
-        <form role="search" onSubmit={search} className="ln-search" style={{ flex: '0 1 320px' }}>
-          <Search size={18} aria-hidden="true" />
-          <input aria-label={t('learn.dashboard.searchJobsSkills')} placeholder={t('learn.dashboard.searchJobsSkills')} value={query} onChange={e => setQuery(e.target.value)} />
-        </form>
       </header>
 
       {suggestLowBw && (
@@ -127,7 +120,7 @@ export default function Dashboard() {
           <span className="ln-xs ln-muted">{t('learn.dashboard.lessonsChecksNeedConnection')}</span>
         </section>
       )}
-      <CommandBox side="learner" placeholder={t('learn.dashboard.askAnythingExampleWhat')} />
+      <CommandBox side="learner" placeholder={t('learn.dashboard.askOrSearch')} searchHref="/learn/market" />
       {today && <StartHere s={today.start_here} />}
       {today && <Today today={today} />}
 
@@ -195,7 +188,7 @@ export default function Dashboard() {
                 <div className="ln-between ln-small"><span className="ln-muted">{t('learn.dashboard.skillMatch')}</span><b>{job.match}%</b></div>
                 <Bar pct={job.match} variant={job.match >= 70 ? 'ln-bar-good' : ''} label={t('learn.dashboard.matchSkillMatch', { match: job.match })} />
               </div>
-              <span className="ln-small">{job.missing?.length ? <>{t('learn.dashboard.missing')}{' '} <b>{job.missing.join(', ')}</b></> : t('learn.dashboard.noRequiredSkillsMissing')}</span>
+              <span className="ln-small">{job.match < 100 && (job.to_learn || job.missing || []).length ? <>{t('learn.dashboard.stillToLearn')}{' '} <b>{(job.to_learn || job.missing).join(', ')}</b></> : t('learn.dashboard.haveEverySkill')}</span>
             </Link>
           ))}
         </div>

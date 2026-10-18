@@ -114,9 +114,9 @@ export default function Jobs() {
                       {r.interview_promise && <span className="ln-tag ln-tag-success"><Handshake size={13} aria-hidden="true" />{t('learn.jobs.interviewPromised')}</span>}
                     </div>
                     <span className="ln-small">{r.points_short === 0 ? <><CheckCircle2 size={14} aria-hidden="true" style={{ color: 'var(--status-success)', verticalAlign: -2 }} /> {' '}{t('learn.jobs.meetTheirBarBar', { bar: r.bar })}</> : <><b>{t('learn.jobs.pointsShortPointsShort', { points_short: r.points_short })}</b> {' '}{t('learn.jobs.theirBarReadinessBar', { readiness: r.readiness, bar: r.bar })}</>}</span>
-                    {r.missing.length > 0 && <span className="ln-xs ln-muted">{t('learn.jobs.stillVerifyJoin', { join: r.missing.join(', ') })}</span>}
+                    {r.points_short > 0 && (r.to_verify || r.missing).length > 0 && <span className="ln-xs ln-muted">{t('learn.jobs.stillVerifyJoin', { join: (r.to_verify || r.missing).join(', ') })}</span>}
                     {r.stage ? <span className={`ln-tag ${STAGE_TAG[r.stage] || 'ln-tag-neutral'}`} style={{ alignSelf: 'flex-start' }}>{r.stage === 'requested' ? t('learn.jobs.theyAskedAbout') : r.stage === 'applied' ? t('learn.jobs.applied') : r.stage}</span>
-                      : <button type="button" className="ln-btn ln-btn-sm ln-btn-primary" style={{ alignSelf: 'flex-start' }} onClick={() => { if (window.confirm('Apply to {title} at {employer}? They will see your name, verified skills, résumé and contact details.')) act(() => api.post(`/learner/roles/${r.id}/apply`), t('learn.jobs.appliedYouCanWithdraw')); }}>{t('learn.jobs.apply')}</button>}
+                      : <button type="button" className="ln-btn ln-btn-sm ln-btn-primary" style={{ alignSelf: 'flex-start' }} onClick={() => { if (window.confirm(t('learn.jobs.confirmApply', { title: r.title, employer: r.employer }))) act(() => api.post(`/learner/roles/${r.id}/apply`), t('learn.jobs.appliedYouCanWithdraw')); }}>{t('learn.jobs.apply')}</button>}
                   </div>
                 ))}
               </div>
