@@ -11,6 +11,7 @@ import api from '../../utils/api';
 import AccessResults from '../../components/inst/AccessResults';
 import { errMsg } from '../../utils/errors';
 
+import { useUiLang } from '../../context/UiLangContext';
 const TEMPLATE = 'name,learner_ref,email\nNikhil Gupta,CSE27-A-065,nikhil.g@student.edu.in\nImran Khan,CSE27-A-067,\n';
 const blankRow = () => ({ name: '', learner_ref: '', email: '' });
 
@@ -39,6 +40,7 @@ function parseCsv(text) {
 }
 
 export default function AddStudents() {
+  const { t: tx } = useUiLang();
   const [params] = useSearchParams();
   const [tab, setTab] = useState('type');
   const [typed, setTyped] = useState([blankRow(), blankRow(), blankRow()]);
@@ -59,7 +61,7 @@ export default function AddStudents() {
     api.get('/institution/engagements').then(r => {
       setCohorts(r.data);
       if (!cohortId && r.data[0]) setCohortId(r.data[0].id);
-    }).catch(() => setError('Couldn’t load your cohorts.'));
+    }).catch(() => setError(tx('inst.addStudents.couldnTLoadCohorts')));
   }, []); // eslint-disable-line
 
   useEffect(() => {
@@ -77,7 +79,7 @@ export default function AddStudents() {
   useEffect(() => {
     if (!cohortId || (!students.length && !existing.length)) { setPreview(null); return undefined; }
     const t = setTimeout(() => api.post('/institution/students/enrol/preview', { engagement_id: cohortId, delivery, students, existing_learner_ids: existing })
-      .then(r => setPreview(r.data)).catch(e => setError(errMsg(e, 'Couldn’t check the rows.'))), 350);
+      .then(r => setPreview(r.data)).catch(e => setError(errMsg(e, tx('inst.addStudents.couldnTCheckRows')))), 350);
     return () => clearTimeout(t);
   }, [cohortId, delivery, students, existing]); // eslint-disable-line
 
@@ -85,7 +87,7 @@ export default function AddStudents() {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
-    if (!/\.(csv|txt)$/i.test(file.name)) { setError('Upload a .csv file. In Excel, use File → Save As → CSV.'); return; }
+    if (!/\.(csv|txt)$/i.test(file.name)) { setError(tx('inst.addStudents.uploadCsvFileExcel')); return; }
     const reader = new FileReader();
     reader.onload = () => { setError(''); setCsv({ name: file.name, rows: parseCsv(String(reader.result)) }); };
     reader.readAsText(file);
@@ -101,7 +103,7 @@ export default function AddStudents() {
     try {
       const res = await api.post('/institution/students/enrol', { engagement_id: cohortId, delivery, students, existing_learner_ids: existing });
       setDone(res.data);
-    } catch (e) { setError(errMsg(e, 'Couldn’t give access.')); }
+    } catch (e) { setError(errMsg(e, tx('inst.addStudents.couldnTGiveAccess'))); }
     setBusy(false);
   };
   const reset = () => { setDone(null); setTyped([blankRow(), blankRow(), blankRow()]); setCsv(null); setPicked([]); setPreview(null); };
@@ -113,14 +115,14 @@ export default function AddStudents() {
   if (done) {
     return (
       <>
-        <Link to="/institution/students" className="ln-link" style={{ alignSelf: 'flex-start' }}>← Students &amp; access</Link>
+        <Link to="/institution/students" className="ln-link" style={{ alignSelf: 'flex-start' }}>{tx('inst.addStudents.studentsAccess')}</Link>
         <section className="ln-card" style={{ gap: 18 }}>
-          <h1 className="ln-title" style={{ fontSize: 30 }}>{done.added} student{done.added === 1 ? '' : 's'} now {done.added === 1 ? 'has' : 'have'} access</h1>
-          <span className="ln-sub">Cohort: <b>{done.cohort.title}</b> · Join code <b className="in-code">{done.cohort.join_code}</b></span>
+          <h1 className="ln-title" style={{ fontSize: 'var(--fs-h1)' }}>{tx('inst.addStudents.doneTitle', { n: done.added })}</h1>
+          <span className="ln-sub">{tx('inst.addStudents.cohort')}{' '} <b>{done.cohort.title}</b> {' '}{tx('inst.addStudents.joinCode')}{' '} <b className="in-code">{done.cohort.join_code}</b></span>
           <AccessResults invites={done.invites} slips={done.slips} kept={done.kept} skipped={done.skipped} />
           <div className="ln-row in-no-print" style={{ gap: 10 }}>
-            <Link to={`/institution/students?engagement_id=${done.cohort.id}`} className="ln-btn">Back to students</Link>
-            <button type="button" className="ln-btn ln-btn-primary" onClick={reset}>Add more</button>
+            <Link to={`/institution/students?engagement_id=${done.cohort.id}`} className="ln-btn">{tx('inst.addStudents.backStudents')}</Link>
+            <button type="button" className="ln-btn ln-btn-primary" onClick={reset}>{tx('inst.addStudents.addMore')}</button>
           </div>
         </section>
       </>
@@ -129,15 +131,15 @@ export default function AddStudents() {
 
   return (
     <>
-      <Link to="/institution/students" className="ln-link" style={{ alignSelf: 'flex-start' }}>← Students &amp; access</Link>
-      <h1 className="ln-title">Add students and give access</h1>
+      <Link to="/institution/students" className="ln-link" style={{ alignSelf: 'flex-start' }}>{tx('inst.addStudents.studentsAccess')}</Link>
+      <h1 className="ln-title">{tx('inst.addStudents.addStudentsGiveAccess')}</h1>
 
       <div className="ln-grid ln-g-detail" style={{ gridTemplateColumns: 'minmax(0, 1fr) 340px' }}>
         <div className="ln-col" style={{ gap: 20, minWidth: 0 }}>
           <section className="ln-card">
-            <div className="ln-between ln-wrap"><h2 className="ln-h2">1 · Who</h2>
+            <div className="ln-between ln-wrap"><h2 className="ln-h2">{tx('inst.addStudents.1Who')}</h2>
               <div className="ln-tabs" role="tablist">
-                {[['type', 'Type in'], ['csv', 'Upload CSV'], ['pick', 'Pick existing students']].map(([id, label]) => (
+                {[['type', tx('inst.addStudents.typeIn')], ['csv', tx('inst.addStudents.uploadCsv')], ['pick', tx('inst.addStudents.pickExistingStudents')]].map(([id, label]) => (
                   <button key={id} type="button" role="tab" className="ln-tab" aria-selected={tab === id} onClick={() => setTab(id)}>{label}</button>
                 ))}
               </div>
@@ -147,34 +149,34 @@ export default function AddStudents() {
               <div className="ln-col" style={{ gap: 8 }}>
                 {typed.map((r, i) => (
                   <div key={i} className="in-rowedit">
-                    <input className="ln-input" aria-label={`Row ${i + 1} name`} placeholder="Full name" value={r.name} onChange={e => setTyped(t => t.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))} />
-                    <input className="ln-input" aria-label={`Row ${i + 1} roll or ref number`} placeholder="Roll / ref no." value={r.learner_ref} onChange={e => setTyped(t => t.map((x, j) => (j === i ? { ...x, learner_ref: e.target.value } : x)))} />
-                    <input className="ln-input" type="email" aria-label={`Row ${i + 1} email`} placeholder="Email (optional)" value={r.email} onChange={e => setTyped(t => t.map((x, j) => (j === i ? { ...x, email: e.target.value } : x)))} />
-                    <button type="button" className="ln-btn ln-btn-sm" aria-label={`Remove row ${i + 1}`} onClick={() => setTyped(t => (t.length > 1 ? t.filter((_, j) => j !== i) : [blankRow()]))}><Trash2 size={14} aria-hidden="true" /></button>
+                    <input className="ln-input" aria-label={tx('inst.addStudents.rowValueName', { value: i + 1 })} placeholder={tx('inst.addStudents.fullName')} value={r.name} onChange={e => setTyped(t => t.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))} />
+                    <input className="ln-input" aria-label={tx('inst.addStudents.rowValueRollRef', { value: i + 1 })} placeholder={tx('inst.addStudents.rollRefNo')} value={r.learner_ref} onChange={e => setTyped(t => t.map((x, j) => (j === i ? { ...x, learner_ref: e.target.value } : x)))} />
+                    <input className="ln-input" type="email" aria-label={tx('inst.addStudents.rowValueEmail', { value: i + 1 })} placeholder={tx('inst.addStudents.emailOptional')} value={r.email} onChange={e => setTyped(t => t.map((x, j) => (j === i ? { ...x, email: e.target.value } : x)))} />
+                    <button type="button" className="ln-btn ln-btn-sm" aria-label={tx('inst.addStudents.removeRowValue', { value: i + 1 })} onClick={() => setTyped(t => (t.length > 1 ? t.filter((_, j) => j !== i) : [blankRow()]))}><Trash2 size={14} aria-hidden="true" /></button>
                   </div>
                 ))}
-                <button type="button" className="ln-btn ln-btn-sm" style={{ alignSelf: 'flex-start' }} onClick={() => setTyped(t => [...t, blankRow()])}><Plus size={14} aria-hidden="true" />Add row</button>
+                <button type="button" className="ln-btn ln-btn-sm" style={{ alignSelf: 'flex-start' }} onClick={() => setTyped(t => [...t, blankRow()])}><Plus size={14} aria-hidden="true" />{tx('inst.addStudents.addRow')}</button>
               </div>
             )}
 
             {tab === 'csv' && (
               <div className="ln-col" style={{ gap: 12 }}>
                 <div className="ln-tile ln-between ln-wrap" style={{ padding: 14, flexDirection: 'row' }}>
-                  <div className="ln-col"><b>{csv ? csv.name : 'No file yet'}</b>
-                    <span className="ln-small ln-muted">{csv ? `${csv.rows.length} rows read` : 'Columns: name, learner_ref (roll no.), email. From Excel, save as CSV.'}{' · '}
-                      <button type="button" className="ln-link" style={{ fontSize: 13 }} onClick={downloadTemplate}><Download size={12} aria-hidden="true" style={{ display: 'inline' }} /> Download template</button></span></div>
+                  <div className="ln-col"><b>{csv ? csv.name : tx('inst.addStudents.noFileYet')}</b>
+                    <span className="ln-small ln-muted">{csv ? tx('inst.addStudents.rowsRead', { n: csv.rows.length }) : tx('inst.addStudents.columnsNameLearnerRef')}{' · '}
+                      <button type="button" className="ln-link" style={{ fontSize: 'var(--fs-small)' }} onClick={downloadTemplate}><Download size={12} aria-hidden="true" style={{ display: 'inline' }} /> {' '}{tx('inst.addStudents.downloadTemplate')}</button></span></div>
                   <input ref={fileRef} type="file" accept=".csv,text/csv" className="ln-sr" onChange={readFile} id="csvfile" />
-                  <button type="button" className="ln-btn" onClick={() => fileRef.current?.click()}><Upload size={16} aria-hidden="true" />{csv ? 'Replace file' : 'Choose file'}</button>
+                  <button type="button" className="ln-btn" onClick={() => fileRef.current?.click()}><Upload size={16} aria-hidden="true" />{csv ? tx('inst.addStudents.replaceFile') : tx('inst.addStudents.chooseFile')}</button>
                 </div>
                 {csv && (
                   <div className="ln-tablewrap">
-                    <table className="ln-table"><thead><tr><th>Name</th><th>Roll / ref no.</th><th>Email</th><th>Check</th></tr></thead>
+                    <table className="ln-table"><thead><tr><th>{tx('inst.addStudents.name')}</th><th>{tx('inst.addStudents.rollRefNo')}</th><th>{tx('inst.addStudents.email')}</th><th>{tx('inst.addStudents.check')}</th></tr></thead>
                       <tbody>{csv.rows.slice(0, 50).map((r, i) => {
                         const c = checkFor(i);
                         return <tr key={i}><td>{r.name}</td><td>{r.learner_ref}</td><td>{r.email || '—'}</td>
                           <td>{c && <span className={`ln-tag ${c.ok ? (c.check.includes('slip') ? 'ln-tag-info' : 'ln-tag-success') : 'in-state-locked'}`}>{c.ok ? '✓' : '!'} {c.check}</span>}</td></tr>;
                       })}</tbody></table>
-                    {csv.rows.length > 50 && <span className="ln-small ln-muted">+ {csv.rows.length - 50} more rows</span>}
+                    {csv.rows.length > 50 && <span className="ln-small ln-muted">{tx('inst.addStudents.valueMoreRows', { value: csv.rows.length - 50 })}</span>}
                   </div>
                 )}
               </div>
@@ -182,13 +184,13 @@ export default function AddStudents() {
 
             {tab === 'pick' && (
               <div className="ln-col" style={{ gap: 10 }}>
-                <input className="ln-input" aria-label="Search students" placeholder="Search by name or ref" value={poolQ} onChange={e => setPoolQ(e.target.value)} />
+                <input className="ln-input" aria-label={tx('inst.addStudents.searchStudents')} placeholder={tx('inst.addStudents.searchByNameRef')} value={poolQ} onChange={e => setPoolQ(e.target.value)} />
                 <div className="ln-col ln-divided" style={{ maxHeight: 360, overflowY: 'auto' }}>
-                  {pool.length === 0 && <span className="ln-small ln-muted" style={{ padding: 8 }}>No other students found outside this cohort.</span>}
+                  {pool.length === 0 && <span className="ln-small ln-muted" style={{ padding: 8 }}>{tx('inst.addStudents.noOtherStudentsFound')}</span>}
                   {pool.map(p => (
                     <label key={p.id} className="ln-check" style={{ padding: '8px 4px' }}>
                       <input type="checkbox" checked={picked.includes(p.id)} onChange={() => setPicked(x => (x.includes(p.id) ? x.filter(y => y !== p.id) : [...x, p.id]))} />
-                      <span className="ln-col"><b style={{ fontWeight: 600 }}>{p.name}</b><span className="ln-xs ln-muted">{p.learner_ref} · in {p.cohorts}</span></span>
+                      <span className="ln-col"><b style={{ fontWeight: 600 }}>{p.name}</b><span className="ln-xs ln-muted">{tx('inst.addStudents.learnerRefCohorts', { learner_ref: p.learner_ref, cohorts: p.cohorts })}</span></span>
                     </label>
                   ))}
                 </div>
@@ -197,46 +199,46 @@ export default function AddStudents() {
 
             {tab === 'type' && preview && (
               <div className="ln-row ln-wrap" style={{ gap: 6 }}>
-                {preview.rows.map(r => <span key={r.row} className={`ln-tag ${r.ok ? 'ln-tag-success' : 'in-state-locked'}`}>{r.name || `Row ${r.row}`}: {r.check}</span>)}
+                {preview.rows.map(r => <span key={r.row} className={`ln-tag ${r.ok ? 'ln-tag-success' : 'in-state-locked'}`}>{r.name || tx('inst.addStudents.rowN', { n: r.row })}: {r.check}</span>)}
               </div>
             )}
           </section>
 
           <section className="ln-card">
-            <h2 className="ln-h2">2 · Which cohort</h2>
-            {cohorts.length === 0 && <span className="ln-small ln-muted">No cohorts in your scope yet.</span>}
+            <h2 className="ln-h2">{tx('inst.addStudents.2WhichCohort')}</h2>
+            {cohorts.length === 0 && <span className="ln-small ln-muted">{tx('inst.addStudents.noCohortsScopeYet')}</span>}
             <div className="ln-grid ln-g-2" style={{ gap: 10 }}>
               {cohorts.map(c => (
                 <button key={c.id} type="button" className="in-choice" aria-pressed={c.id === cohortId} onClick={() => setCohortId(c.id)}>
                   <b>{c.title}</b>
-                  <span className="ln-small ln-muted">{c.learner_count} students · {c.language === 'hindi' ? 'Hindi' : 'Telugu'} · Join code <b className="in-code">{c.join_code}</b></span>
+                  <span className="ln-small ln-muted">{tx('inst.addStudents.learnerCountStudents', { learner_count: c.learner_count })}{' '} {c.language === 'hindi' ? tx('inst.addStudents.hindi') : tx('inst.addStudents.telugu')} {' '}{tx('inst.addStudents.joinCode')}{' '} <b className="in-code">{c.join_code}</b></span>
                 </button>
               ))}
             </div>
-            <span className="ln-xs ln-muted">Students start at the first skill node. Language comes from the cohort.</span>
+            <span className="ln-xs ln-muted">{tx('inst.addStudents.studentsStartAtFirst')}</span>
           </section>
 
           <section className="ln-card">
-            <h2 className="ln-h2">3 · How they get access</h2>
+            <h2 className="ln-h2">{tx('inst.addStudents.3HowTheyGet')}</h2>
             <label className="in-radio"><input type="radio" name="delivery" checked={delivery === 'email'} onChange={() => setDelivery('email')} />
-              <div className="ln-col"><b>Email invite link <span className="ln-tag ln-tag-success" style={{ marginLeft: 6 }}>Recommended</span></b>
-                <span className="ln-small ln-muted">Each student opens the link and sets their own PIN. You never see or share PINs. Students without an email get a printed slip instead.</span></div></label>
+              <div className="ln-col"><b>{tx('inst.addStudents.emailInviteLink')}{' '} <span className="ln-tag ln-tag-success" style={{ marginLeft: 6 }}>{tx('inst.addStudents.recommended')}</span></b>
+                <span className="ln-small ln-muted">{tx('inst.addStudents.eachStudentOpensLink')}</span></div></label>
             <label className="in-radio"><input type="radio" name="delivery" checked={delivery === 'slips'} onChange={() => setDelivery('slips')} />
-              <div className="ln-col"><b>Printed login slips</b>
-                <span className="ln-small ln-muted">A one-time PIN per student on cut-out slips. The student must change the PIN at first sign-in.</span></div></label>
+              <div className="ln-col"><b>{tx('inst.addStudents.printedLoginSlips')}</b>
+                <span className="ln-small ln-muted">{tx('inst.addStudents.oneTimePinPer')}</span></div></label>
           </section>
         </div>
 
         <aside className="ln-card ln-card-dark" style={{ gap: 12, position: 'sticky', top: 24, alignSelf: 'start' }}>
-          <span className="ln-kicker" style={{ color: 'var(--stage-muted)' }}>Summary</span>
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: 34, fontWeight: 600 }}>{s ? s.adding : 0} student{s?.adding === 1 ? '' : 's'}</span>
-          <span style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--stage-muted)' }}>
-            {cohort ? <>join <b style={{ color: 'var(--stage-text)' }}>{cohort.title}</b>.</> : 'Pick a cohort.'}
-            {s && <> {s.invites ? `${s.invites} get an email invite. ` : ''}{s.slips ? `${s.slips} get printed slips. ` : ''}{s.keep_pin ? `${s.keep_pin} keep their existing PIN. ` : ''}{s.skipped ? `${s.skipped} row${s.skipped > 1 ? 's' : ''} skipped until fixed.` : ''}</>}
+          <span className="ln-kicker" style={{ color: 'var(--stage-muted)' }}>{tx('inst.addStudents.summary')}</span>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-h1)', fontWeight: 600 }}>{s?.adding === 1 ? tx('inst.addStudents.oneStudent') : tx('inst.addStudents.nStudents', { n: s ? s.adding : 0 })}</span>
+          <span style={{ fontSize: 'var(--fs-body)', lineHeight: 1.6, color: 'var(--stage-muted)' }}>
+            {cohort ? <>{tx('inst.addStudents.cohort')}{' '} <b style={{ color: 'var(--stage-text)' }}>{cohort.title}</b></> : tx('inst.addStudents.pickCohort')}
+            {s && <> {[s.invites && tx('inst.addStudents.sumInvites', { n: s.invites }), s.slips && tx('inst.addStudents.sumSlips', { n: s.slips }), s.keep_pin && tx('inst.addStudents.sumKeep', { n: s.keep_pin }), s.skipped && tx('inst.addStudents.sumSkipped', { n: s.skipped })].filter(Boolean).join(' ')}</>}
           </span>
           {error && <div className="ln-error" role="alert">{error}</div>}
-          <button type="button" className="ln-btn ln-btn-amber" style={{ borderRadius: 'var(--radius-md)' }} disabled={busy || !s || !s.adding} onClick={submit}>{busy ? 'Giving access…' : 'Give access'}</button>
-          <span className="ln-xs" style={{ color: 'var(--stage-muted)', lineHeight: 1.5 }}>This is one step on the server: students, enrolment and invites are created together, so nothing is left half-done if you close the page.</span>
+          <button type="button" className="ln-btn ln-btn-primary ln-btn-lg" style={{ borderRadius: 'var(--radius-md)' }} disabled={busy || !s || !s.adding} onClick={submit}>{busy ? tx('inst.addStudents.givingAccess') : tx('inst.addStudents.giveAccess')}</button>
+          <span className="ln-xs" style={{ color: 'var(--stage-muted)', lineHeight: 1.5 }}>{tx('inst.addStudents.oneStepServerStudents')}</span>
         </aside>
       </div>
     </>

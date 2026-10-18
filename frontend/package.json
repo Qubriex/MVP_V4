@@ -16,7 +16,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test"
+    "test": "react-scripts test",
+    "i18n:check": "node scripts/i18n-check.js"
   },
   "proxy": "http://localhost:3001",
   "browserslist": {

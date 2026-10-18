@@ -3,7 +3,9 @@
 import React, { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 
+import { useUiLang } from '../../context/UiLangContext';
 export default function Drawer({ title, onClose, children, width = 420, labelledBy }) {
+  const { t } = useUiLang();
   const ref = useRef(null);
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') onClose(); };
@@ -17,7 +19,7 @@ export default function Drawer({ title, onClose, children, width = 420, labelled
       <aside className="sk-drawer" role="dialog" aria-modal="true" aria-labelledby={id} style={{ width }} onClick={e => e.stopPropagation()} tabIndex={-1} ref={ref}>
         <div className="sk-drawer-head">
           <h2 id={id} className="sk-drawer-title">{title}</h2>
-          <button type="button" className="in-iconbtn sk-close" onClick={onClose} aria-label="Close"><X size={18} aria-hidden="true" /></button>
+          <button type="button" className="in-iconbtn sk-close" onClick={onClose} aria-label={t('shared.drawer.close')}><X size={18} aria-hidden="true" /></button>
         </div>
         <div className="sk-drawer-body">{children}</div>
       </aside>

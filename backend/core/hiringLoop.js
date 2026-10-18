@@ -328,7 +328,8 @@ export async function matchedRoles(user, { city = '' } = {}) {
     const have = await verifiedKeys(e.capability_target_id, mastered, skills.map(s => s.key));
     const readiness = Math.round(jobMatch({ skills }, k => have.has(k)) * 100);
     return { id: r.id, title: r.title, employer: r.employer, city: r.city, bar: r.bar, readiness, points_short: Math.max(0, r.bar - readiness), interview_promise: !!r.interview_promise,
-      missing: skills.filter(s => s.required && !have.has(s.key)).map(s => s.name), stage: mine.get(r.id) || null };
+      missing: skills.filter(s => s.required && !have.has(s.key)).map(s => s.name),
+      to_verify: skills.filter(s => !have.has(s.key)).sort((a, b) => b.required - a.required).slice(0, 3).map(s => s.name), stage: mine.get(r.id) || null };
   })).sort((a, b) => a.points_short - b.points_short || b.readiness - a.readiness);
 }
 

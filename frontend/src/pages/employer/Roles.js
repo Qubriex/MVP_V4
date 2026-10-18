@@ -14,10 +14,13 @@ import Crumbs from '../../components/inst/Crumbs';
 import EmptyState, { LoadingRows } from '../../components/shared/EmptyState';
 import { WhyThis, HowCounted } from '../../components/shared/Popover';
 import { useEmployer } from './Layout';
+import { BandPill } from '../../components/shared/ui';
+import { Select } from '../../components/shared/ui';
 
-const BAND_TAG = { ready: 'ln-tag-success', nearly: 'ln-tag-info', building: 'ln-tag-warning' };
 
+import { useUiLang } from '../../context/UiLangContext';
 function NewRole({ onDone }) {
+  const { t } = useUiLang();
   const navigate = useNavigate();
   const [f, setF] = useState({ title: '', city: '', jd_text: '', bar: 80, published: true, interview_promise: false });
   const [skills, setSkills] = useState(null);
@@ -26,70 +29,71 @@ function NewRole({ onDone }) {
   const set = (k) => (e) => setF(x => ({ ...x, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));
   const parse = async () => {
     setMsg('');
-    try { const r = await api.post('/employer/roles/parse', { jd_text: f.jd_text }); setSkills(r.data.skills); setAll(r.data.all_skills); if (!r.data.skills.length) setMsg('No skills found in that text. Add them below.'); } catch (e) { setMsg(errMsg(e)); }
+    try { const r = await api.post('/employer/roles/parse', { jd_text: f.jd_text }); setSkills(r.data.skills); setAll(r.data.all_skills); if (!r.data.skills.length) setMsg(t('emp.roles.noSkillsFoundText')); } catch (e) { setMsg(errMsg(e)); }
   };
   const save = async (e) => {
     e.preventDefault();
-    try { const r = await api.post('/employer/roles', { ...f, skills }); dropCached('/employer/'); navigate(`/employer/roles/${r.data.id}`); } catch (err) { setMsg(errMsg(err, 'Couldn’t save the role.')); }
+    try { const r = await api.post('/employer/roles', { ...f, skills }); dropCached('/employer/'); navigate(`/employer/roles/${r.data.id}`); } catch (err) { setMsg(errMsg(err, t('emp.roles.couldnTSaveRole'))); }
   };
   const add = (key) => { const s = all.find(x => x.key === key); if (s && !skills.some(x => x.key === key)) setSkills([...skills, { ...s, required: true, market_share: null }]); };
   return (
-    <form className="ln-card" style={{ gap: 14, maxWidth: 900 }} onSubmit={save}>
-      <h2 className="ln-h2">New role</h2>
+    <form className="ui-narrow ln-card" style={{ gap: 14 }} onSubmit={save}>
+      <h2 className="ln-h2">{t('emp.roles.newRole')}</h2>
       <div className="ln-grid ln-g-2" style={{ gap: 12 }}>
-        <div className="ln-field"><label className="ln-label" htmlFor="r-title">Role title</label><input id="r-title" className="ln-input" value={f.title} onChange={set('title')} required placeholder="Data analyst (fresher)" /></div>
-        <div className="ln-field"><label className="ln-label" htmlFor="r-city">City</label><input id="r-city" className="ln-input" value={f.city} onChange={set('city')} placeholder="Hyderabad" /></div>
+        <div className="ln-field"><label className="ln-label" htmlFor="r-title">{t('emp.roles.roleTitle')}</label><input id="r-title" className="ln-input" value={f.title} onChange={set('title')} required placeholder={t('emp.roles.dataAnalystFresher')} /></div>
+        <div className="ln-field"><label className="ln-label" htmlFor="r-city">{t('emp.roles.city')}</label><input id="r-city" className="ln-input" value={f.city} onChange={set('city')} placeholder={t('emp.roles.hyderabad')} /></div>
       </div>
-      <div className="ln-field"><label className="ln-label" htmlFor="r-jd">Job description</label>
-        <textarea id="r-jd" className="ln-input" rows={7} value={f.jd_text} onChange={set('jd_text')} placeholder={'Paste the job description. Lines with “nice to have” mark skills as optional.'} /></div>
-      <button type="button" className="ln-btn" style={{ alignSelf: 'flex-start' }} onClick={parse} disabled={f.jd_text.trim().length < 20}>Pick out the skills</button>
+      <div className="ln-field"><label className="ln-label" htmlFor="r-jd">{t('emp.roles.jobDescription')}</label>
+        <textarea id="r-jd" className="ln-input" rows={7} value={f.jd_text} onChange={set('jd_text')} placeholder={t('emp.roles.pasteJobDescriptionLines')} /></div>
+      <button type="button" className="ln-btn" style={{ alignSelf: 'flex-start' }} onClick={parse} disabled={f.jd_text.trim().length < 20}>{t('emp.roles.pickOutSkills')}</button>
       {skills && (
         <section className="ln-col" style={{ gap: 8 }}>
-          <div className="ln-row" style={{ gap: 8 }}><span className="ln-label">Skills · your bar vs the market</span>
-            <WhyThis title="Market share">How many current fresher job posts ask for this skill. A skill few posts ask for may shrink your pool of candidates.</WhyThis></div>
+          <div className="ln-row" style={{ gap: 8 }}><span className="ln-label">{t('emp.roles.skillsBarVsMarket')}</span>
+            <WhyThis title={t('emp.roles.marketShare')}>{t('emp.roles.howManyCurrentFresher')}</WhyThis></div>
           {skills.map((s, i) => (
             <div key={s.key} className="ln-row ln-wrap" style={{ gap: 10 }}>
               <span style={{ width: 180, fontWeight: 600 }}>{s.name}</span>
-              <div style={{ flex: 1, minWidth: 120 }}>{s.market_share != null ? <Bar pct={s.market_share} label={`${s.market_share}% of posts`} /> : <span className="ln-xs ln-muted">Market share not known</span>}</div>
-              <span className="ln-xs ln-muted" style={{ width: 70 }}>{s.market_share != null ? `${s.market_share}% of posts` : ''}</span>
-              <label className="ln-check ln-small"><input type="checkbox" checked={s.required} onChange={e => setSkills(skills.map((x, j) => (j === i ? { ...x, required: e.target.checked } : x)))} />Required</label>
-              <button type="button" className="in-iconbtn" aria-label={`Remove ${s.name}`} onClick={() => setSkills(skills.filter((_, j) => j !== i))}><X size={14} aria-hidden="true" /></button>
+              <div style={{ flex: 1, minWidth: 120 }}>{s.market_share != null ? <Bar pct={s.market_share} label={t('emp.roles.marketSharePosts', { market_share: s.market_share })} /> : <span className="ln-xs ln-muted">{t('emp.roles.marketShareNotKnown')}</span>}</div>
+              <span className="ln-xs ln-muted" style={{ width: 70 }}>{s.market_share != null ? t('emp.roles.pctOfPosts', { pct: s.market_share }) : ''}</span>
+              <label className="ln-check ln-small"><input type="checkbox" checked={s.required} onChange={e => setSkills(skills.map((x, j) => (j === i ? { ...x, required: e.target.checked } : x)))} />{t('emp.roles.required')}</label>
+              <button type="button" className="in-iconbtn" aria-label={t('emp.roles.removeName', { name: s.name })} onClick={() => setSkills(skills.filter((_, j) => j !== i))}><X size={14} aria-hidden="true" /></button>
             </div>
           ))}
-          <select className="ln-select" style={{ maxWidth: 260 }} aria-label="Add a skill" value="" onChange={e => add(e.target.value)}>
-            <option value="">+ Add a skill</option>{all.filter(a => !skills.some(s => s.key === a.key)).map(a => <option key={a.key} value={a.key}>{a.name}</option>)}
-          </select>
+          <Select style={{ maxWidth: 260 }} aria-label={t('emp.roles.addSkill')} value="" onChange={e => add(e.target.value)}>
+            <option value="">{t('emp.roles.addSkill2')}</option>{all.filter(a => !skills.some(s => s.key === a.key)).map(a => <option key={a.key} value={a.key}>{a.name}</option>)}
+          </Select>
           <div className="ln-grid ln-g-3" style={{ gap: 12, alignItems: 'end' }}>
-            <div className="ln-field"><label className="ln-label" htmlFor="r-bar">Your bar: {f.bar}</label><input id="r-bar" type="range" min="50" max="100" step="5" value={f.bar} onChange={set('bar')} /></div>
-            <label className="ln-check"><input type="checkbox" checked={f.published} onChange={set('published')} />Publish as a target for colleges</label>
-            <label className="ln-check"><input type="checkbox" checked={f.interview_promise} onChange={set('interview_promise')} />Promise an interview to anyone at the bar</label>
+            <div className="ln-field"><label className="ln-label" htmlFor="r-bar">{t('emp.roles.barBar', { bar: f.bar })}</label><input id="r-bar" type="range" min="50" max="100" step="5" value={f.bar} onChange={set('bar')} /></div>
+            <label className="ln-check"><input type="checkbox" checked={f.published} onChange={set('published')} />{t('emp.roles.publishAsTargetColleges')}</label>
+            <label className="ln-check"><input type="checkbox" checked={f.interview_promise} onChange={set('interview_promise')} />{t('emp.roles.promiseInterviewAnyoneAt')}</label>
           </div>
         </section>
       )}
       {msg && <div className="ln-note" role="status">{msg}</div>}
-      <div className="ln-row" style={{ gap: 8 }}><button type="submit" className="ln-btn ln-btn-primary" disabled={!skills?.length || !f.title}>Save role</button><button type="button" className="ln-btn" onClick={onDone}>Cancel</button></div>
+      <div className="ln-row" style={{ gap: 8 }}><button type="submit" className="ln-btn ln-btn-primary" disabled={!skills?.length || !f.title}>{t('emp.roles.saveRole')}</button><button type="button" className="ln-btn" onClick={onDone}>{t('emp.roles.cancel')}</button></div>
     </form>
   );
 }
 
 export function RoleList() {
+  const { t } = useUiLang();
   const [params, setParams] = useSearchParams();
   const { data } = useCachedGet('/employer/roles');
   const creating = params.get('new') === '1';
   return (
     <>
       <header className="ln-pagehead">
-        <div className="ln-col" style={{ gap: 4 }}><h1 className="ln-title">Roles</h1><span className="ln-sub">What you hire for, the bar you set, and how it compares with the market.</span></div>
-        {!creating && <button type="button" className="ln-btn ln-btn-primary" onClick={() => setParams({ new: '1' })}><Plus size={16} aria-hidden="true" />New role</button>}
+        <div className="ln-col" style={{ gap: 4 }}><h1 className="ln-title">{t('emp.roles.roles')}</h1><span className="ln-sub">{t('emp.roles.whatHireBarSet')}</span></div>
+        {!creating && <button type="button" className="ln-btn ln-btn-primary" onClick={() => setParams({ new: '1' })}><Plus size={16} aria-hidden="true" />{t('emp.roles.newRole')}</button>}
       </header>
       {creating && <NewRole onDone={() => setParams({})} />}
-      {!data ? <LoadingRows /> : data.length === 0 && !creating ? <EmptyState title="No roles yet" text="Paste a job description to create one." /> : (
+      {!data ? <LoadingRows /> : data.length === 0 && !creating ? <EmptyState title={t('emp.roles.noRolesYet')} text={t('emp.roles.pasteJobDescriptionCreate')} /> : (
         <div className="ln-tablewrap"><table className="ln-table">
-          <thead><tr><th>Role</th><th>City</th><th>Bar</th><th>Skills</th><th>In pipeline</th><th /></tr></thead>
+          <thead><tr><th>{t('emp.roles.role')}</th><th>{t('emp.roles.city')}</th><th>{t('emp.roles.bar')}</th><th>{t('emp.roles.skills')}</th><th>{t('emp.roles.inPipeline')}</th><th /></tr></thead>
           <tbody>{data.map(r => (
-            <tr key={r.id}><td><Link to={`/employer/roles/${r.id}`} className="ln-link">{r.title}</Link>{r.interview_promise && <span className="ln-tag ln-tag-success" style={{ marginLeft: 6 }}>Interview promise</span>}</td>
-              <td className="ln-small">{r.city || 'Any'}</td><td>{r.bar}</td><td className="ln-small">{r.skills.map(s => s.name).join(', ')}</td><td>{r.in_pipeline}</td>
-              <td><span className={`ln-tag ${r.status === 'open' ? 'ln-tag-info' : 'ln-tag-neutral'}`}>{r.status === 'open' ? (r.published ? 'Open · published' : 'Open') : 'Closed'}</span></td></tr>
+            <tr key={r.id}><td><Link to={`/employer/roles/${r.id}`} className="ln-link">{r.title}</Link>{r.interview_promise && <span className="ln-tag ln-tag-success" style={{ marginLeft: 6 }}>{t('emp.roles.interviewPromise')}</span>}</td>
+              <td className="ln-small">{r.city || t('emp.roles.any')}</td><td>{r.bar}</td><td className="ln-small">{r.skills.map(s => s.name).join(', ')}</td><td>{r.in_pipeline}</td>
+              <td><span className={`ln-tag ${r.status === 'open' ? 'ln-tag-info' : 'ln-tag-neutral'}`}>{r.status === 'open' ? (r.published ? t('emp.roles.openPublished') : t('emp.roles.open')) : t('emp.roles.closed')}</span></td></tr>
           ))}</tbody></table></div>
       )}
     </>
@@ -97,6 +101,7 @@ export function RoleList() {
 }
 
 export function RoleSearch() {
+  const { t } = useUiLang();
   const { id } = useParams();
   const { me } = useEmployer();
   const [city, setCity] = useState('');
@@ -107,9 +112,9 @@ export function RoleSearch() {
   const verified = me?.employer?.kyb_status === 'verified';
   const act = async (ref, kind) => {
     setMsg('');
-    try { await api.post(`/employer/roles/${id}/candidates/${ref}/${kind}`, {}); setMsg(kind === 'request' ? 'Request sent. The student decides what to share; you will be notified.' : 'Added to your watch list. The student is not told.'); dropCached(`/employer/roles/${id}`); reload(); } catch (e) { setMsg(errMsg(e)); }
+    try { await api.post(`/employer/roles/${id}/candidates/${ref}/${kind}`, {}); setMsg(kind === 'request' ? 'Request sent. The student decides what to share; you will be notified.' : t('emp.roles.addedToYourWatch')); dropCached(`/employer/roles/${id}`); reload(); } catch (e) { setMsg(errMsg(e)); }
   };
-  if (error && !data) return <div className="ln-error">{errMsg(error, 'Couldn’t load candidates.')}</div>;
+  if (error && !data) return <div className="ln-error">{errMsg(error, t('emp.roles.couldnTLoadCandidates'))}</div>;
   if (!data) return <LoadingRows rows={5} />;
   const { role } = data;
   const near = data.candidates.filter(c => !c.meets_bar && c.points_short <= 20);
@@ -117,54 +122,54 @@ export function RoleSearch() {
     <>
       <Crumbs items={[{ label: 'Roles', to: '/employer/roles' }, { label: role.title }]} />
       <header className="ln-pagehead">
-        <div className="ln-col" style={{ gap: 4 }}><h1 className="ln-title" style={{ fontSize: 30 }}>{role.title}</h1>
-          <span className="ln-sub">{role.city || 'Any city'} · bar {role.bar} · {role.skills.map(s => `${s.name}${s.required ? '' : ' (optional)'}`).join(', ')}</span></div>
+        <div className="ln-col" style={{ gap: 4 }}><h1 className="ln-title" style={{ fontSize: 'var(--fs-h1)' }}>{role.title}</h1>
+          <span className="ln-sub">{role.city || t('emp.roles.anyCity')} {' '}{t('emp.roles.barBar2', { bar: role.bar })}{' '} {role.skills.map(s => `${s.name}${s.required ? '' : ' ' + t('emp.roles.optional')}`).join(', ')}</span></div>
       </header>
-      {!verified && <div className="ln-note">You can watch candidates now. Requests open once your company is verified.</div>}
+      {!verified && <div className="ln-note">{t('emp.roles.canWatchCandidatesNow')}</div>}
       {msg && <div className="ln-note" role="status">{msg}</div>}
       <div className="ln-filterbar">
-        <label className="ln-selectwrap"><span>City</span><select value={city} onChange={e => setCity(e.target.value)}><option value="">Any</option>{['Hyderabad', 'Bengaluru', 'Visakhapatnam', 'Vijayawada', 'Remote'].map(c => <option key={c}>{c}</option>)}</select></label>
-        <label className="ln-selectwrap"><span>Readiness</span><select value={band} onChange={e => setBand(e.target.value)}><option value="">All</option><option value="ready">Ready</option><option value="nearly">Nearly ready</option><option value="building">Building</option></select></label>
-        <span className="ln-small ln-muted">{data.total} student{data.total === 1 ? '' : 's'} open to employers</span>
+        <label className="ln-selectwrap"><span>{t('emp.roles.city')}</span><Select value={city} onChange={e => setCity(e.target.value)}><option value="">{t('emp.roles.any')}</option>{['Hyderabad', 'Bengaluru', 'Visakhapatnam', 'Vijayawada', 'Remote'].map(c => <option key={c}>{c}</option>)}</Select></label>
+        <label className="ln-selectwrap"><span>{t('emp.roles.readiness')}</span><Select value={band} onChange={e => setBand(e.target.value)}><option value="">{t('emp.roles.all')}</option><option value="ready">{t('emp.roles.ready')}</option><option value="nearly">{t('emp.roles.nearlyReady')}</option><option value="building">{t('emp.roles.building')}</option></Select></label>
+        <span className="ln-small ln-muted">{t('emp.roles.studentsOpen', { n: data.total })}</span>
       </div>
       <div className="ln-grid" style={{ gridTemplateColumns: 'minmax(0, 2.2fr) minmax(260px, 1fr)', gap: 16 }}>
         <section className="ln-col" style={{ gap: 10, minWidth: 0 }}>
-          {data.candidates.length === 0 ? <EmptyState title="No candidates match yet" text="Only students who turned on “Let employers find me” appear. Try another city, or publish the role so colleges can prepare students for it." /> : (
+          {data.candidates.length === 0 ? <EmptyState title={t('emp.roles.noCandidatesMatchYet')} text={t('emp.roles.onlyStudentsWhoTurned')} /> : (
             <div className="ln-tablewrap"><table className="ln-table">
-              <thead><tr><th>Candidate</th><th>Readiness</th><th>Verified</th><th>Still missing</th><th /></tr></thead>
+              <thead><tr><th>{t('emp.roles.candidate')}</th><th>{t('emp.roles.readiness')}</th><th>{t('emp.roles.verified')}</th><th>{t('emp.roles.stillMissing')}</th><th /></tr></thead>
               <tbody>{data.candidates.map(c => (
                 <tr key={c.ref}>
                   <td><b className="in-code">{c.code}</b><span className="ln-xs ln-muted" style={{ display: 'block' }}>{c.college} · {c.city || '—'}</span></td>
-                  <td><span className={`ln-tag ${BAND_TAG[c.band]}`}>{c.readiness} · {c.band_label}</span>{!c.meets_bar && <span className="ln-xs ln-muted" style={{ display: 'block' }}>{c.points_short} short of your bar</span>}</td>
+                  <td><BandPill band={c.band} score={c.readiness} />{!c.meets_bar && <span className="ln-xs ln-muted" style={{ display: 'block' }}>{t('emp.roles.pointsShortShortBar', { points_short: c.points_short })}</span>}</td>
                   <td className="ln-small">{c.verified.join(', ') || '—'}</td>
                   <td className="ln-small">{c.missing.join(', ') || '—'}</td>
-                  <td>{c.stage ? <span className="ln-tag ln-tag-neutral">{c.stage === 'watching' ? 'Watching' : c.stage === 'requested' ? 'Asked' : 'In pipeline'}</span> : (
+                  <td>{c.stage ? <span className="ln-tag ln-tag-neutral">{c.stage === 'watching' ? t('emp.roles.watching') : c.stage === 'requested' ? t('emp.roles.asked') : t('emp.roles.inPipeline')}</span> : (
                     <div className="ln-row" style={{ gap: 6 }}>
-                      <button type="button" className="ln-btn ln-btn-sm" onClick={() => act(c.ref, 'watch')}><Eye size={13} aria-hidden="true" />Watch</button>
-                      <button type="button" className="ln-btn ln-btn-sm ln-btn-primary" disabled={!verified} onClick={() => act(c.ref, 'request')}><Send size={13} aria-hidden="true" />Request</button>
+                      <button type="button" className="ln-btn ln-btn-sm" onClick={() => act(c.ref, 'watch')}><Eye size={13} aria-hidden="true" />{t('emp.roles.watch')}</button>
+                      <button type="button" className="ln-btn ln-btn-sm ln-btn-primary" disabled={!verified} onClick={() => act(c.ref, 'request')}><Send size={13} aria-hidden="true" />{t('emp.roles.request')}</button>
                     </div>
-                  )}{c.stage === 'watching' && <button type="button" className="ln-btn ln-btn-sm ln-btn-primary" style={{ marginLeft: 6 }} disabled={!verified} onClick={() => act(c.ref, 'request')}>Request</button>}</td>
+                  )}{c.stage === 'watching' && <button type="button" className="ln-btn ln-btn-sm ln-btn-primary" style={{ marginLeft: 6 }} disabled={!verified} onClick={() => act(c.ref, 'request')}>{t('emp.roles.request')}</button>}</td>
                 </tr>
               ))}</tbody></table></div>
           )}
-          <HowCounted>Readiness = how much of this role’s skills the student has verified in checks (not self-declared), weighted so required skills count double. Names stay hidden until the student says yes.</HowCounted>
+          <HowCounted>{t('emp.roles.readinessHowMuchRole')}</HowCounted>
         </section>
         <aside className="ln-col" style={{ gap: 12 }}>
           <section className="ln-card" style={{ gap: 8 }}>
-            <h2 className="ln-h2" style={{ fontSize: 17 }}>Best colleges for this role</h2>
-            {data.colleges.length === 0 && <span className="ln-small ln-muted">None yet.</span>}
+            <h2 className="ln-h2" style={{ fontSize: 'var(--fs-h3)' }}>{t('emp.roles.bestCollegesRole')}</h2>
+            {data.colleges.length === 0 && <span className="ln-small ln-muted">{t('emp.roles.noneYet')}</span>}
             {data.colleges.map(g => (
               <div key={g.institution_id} className="ln-between ln-small" style={{ gap: 8 }}>
                 <span>{g.college}<span className="ln-xs ln-muted"> · {g.city || ''}</span></span>
-                {g.too_few ? <span className="sk-toofew-inline">Too few to show</span> : <span>{g.at_bar} at bar · {g.near} near</span>}
+                {g.too_few ? <span className="sk-toofew-inline">{t('emp.roles.tooFewShow')}</span> : <span>{t('emp.roles.atBarAtBar', { at_bar: g.at_bar, near: g.near })}</span>}
               </div>
             ))}
           </section>
           {near.length > 0 && (
             <section className="ln-card ln-card-warm" style={{ gap: 8 }}>
-              <b>{near.length} near-miss{near.length === 1 ? '' : 'es'}</b>
-              <span className="ln-small">Within 20 points of your bar. Sponsoring a cohort at their college pays for focused practice, with your interview promise.</span>
-              <Link to={`/employer/sponsor?role=${role.id}`} className="ln-btn ln-btn-sm ln-btn-primary" style={{ alignSelf: 'flex-start' }}><Handshake size={14} aria-hidden="true" />Sponsor a cohort</Link>
+              <b>{t('emp.roles.nearMisses', { n: near.length })}</b>
+              <span className="ln-small">{t('emp.roles.within20PointsBar')}</span>
+              <Link to={`/employer/sponsor?role=${role.id}`} className="ln-btn ln-btn-sm ln-btn-primary" style={{ alignSelf: 'flex-start' }}><Handshake size={14} aria-hidden="true" />{t('emp.roles.sponsorCohort')}</Link>
             </section>
           )}
         </aside>

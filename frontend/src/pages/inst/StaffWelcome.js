@@ -6,14 +6,16 @@ import { Link, useNavigate } from 'react-router-dom';
 import BrandLogo from '../../components/BrandLogo';
 import { useStaffDraft, ProfileFields, TeachingFields, NotificationFields, StudentPreview } from '../../components/inst/StaffProfileForm';
 
-const STEPS = ['Account', 'Profile', 'Teaching', 'Notifications'];
+import { useUiLang } from '../../context/UiLangContext';
+const STEPS = ['inst.staffWelcome.steps.account', 'inst.staffWelcome.steps.profile', 'inst.staffWelcome.steps.teaching', 'inst.staffWelcome.steps.notifications'];
 const INTRO = {
-  1: ['Your profile', 'Students see your name, photo and designation in their cohort. The rest stays inside your institution.'],
-  2: ['What you teach', 'We use this to show you the market data and cohorts that matter to you.'],
-  3: ['Notifications', 'Choose what Qubirex tells you about.']
+  1: ['inst.staffWelcome.intro.yourProfile', 'inst.staffWelcome.intro.studentsSeeYourName'],
+  2: ['inst.staffWelcome.intro.whatYouTeach', 'inst.staffWelcome.intro.weUseThisTo'],
+  3: ['inst.staffWelcome.intro.notifications', 'inst.staffWelcome.intro.chooseWhatQubirexTells']
 };
 
 export default function StaffWelcome() {
+  const { t } = useUiLang();
   const form = useStaffDraft();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
@@ -28,28 +30,28 @@ export default function StaffWelcome() {
   return (
     <div className="ln-col" style={{ minHeight: '100vh', background: 'var(--color-bg)' }}>
       <header className="ln-between ln-wrap" style={{ padding: '14px 40px', borderBottom: '1px solid var(--color-border)', background: 'var(--color-surface)', gap: 16 }}>
-        <a href="/" className="brand-home" aria-label="Qubirex home"><BrandLogo height={34} /></a>
-        <ol className="in-steps" aria-label="Setup steps">
+        <a href="/" className="brand-home" aria-label={t('inst.staffWelcome.qubirexHome')}><BrandLogo height={34} /></a>
+        <ol className="in-steps" aria-label={t('inst.staffWelcome.setupSteps')}>
           {STEPS.map((label, i) => (
             <li key={label} className={i < step ? 'is-done' : i === step ? 'is-now' : ''} aria-current={i === step ? 'step' : undefined}>
-              <span className="in-dot">{i < step ? '✓' : i + 1}</span>{label}
+              <span className="in-dot">{i < step ? '✓' : i + 1}</span>{t(label)}
             </li>
           ))}
         </ol>
-        <Link to="/institution/home" className="ln-link">Skip for now</Link>
+        <Link to="/institution/home" className="ln-link">{t('inst.staffWelcome.skipNow')}</Link>
       </header>
 
-      {!form.draft ? <p className="ln-muted" style={{ padding: 40 }}>{form.status || 'Loading…'}</p> : (
+      {!form.draft ? <p className="ln-muted" style={{ padding: 40 }}>{form.status || t('inst.staffWelcome.loading')}</p> : (
         <div className="ln-grid ln-g-detail" style={{ padding: 'clamp(20px, 4vw, 40px) clamp(16px, 6vw, 80px)', gridTemplateColumns: 'minmax(0, 1fr) 340px', gap: 40 }}>
           <div className="ln-col" style={{ gap: 22, minWidth: 0 }}>
-            <div className="ln-col" style={{ gap: 6 }}><h1 className="ln-title" style={{ fontSize: 34 }}>{INTRO[step][0]}</h1><p className="ln-sub">{INTRO[step][1]}</p></div>
+            <div className="ln-col" style={{ gap: 6 }}><h1 className="ln-title" style={{ fontSize: 'var(--fs-h1)' }}>{t(INTRO[step][0])}</h1><p className="ln-sub">{t(INTRO[step][1])}</p></div>
             {step === 1 && <ProfileFields form={form} />}
             {step === 2 && <TeachingFields form={form} />}
             {step === 3 && <NotificationFields form={form} />}
             {form.status && form.status !== 'saved' && <div className="ln-error" role="alert">{form.status}</div>}
             <div className="ln-between" style={{ paddingTop: 8 }}>
-              <button type="button" className="ln-btn" style={{ minHeight: 48 }} onClick={() => setStep(Math.max(1, step - 1))} disabled={step === 1}>Back</button>
-              <button type="button" className="ln-btn ln-btn-primary" style={{ minHeight: 48 }} onClick={next} disabled={form.saving}>{form.saving ? 'Saving…' : step === STEPS.length - 1 ? 'Finish' : 'Save and continue →'}</button>
+              <button type="button" className="ln-btn" style={{ minHeight: 48 }} onClick={() => setStep(Math.max(1, step - 1))} disabled={step === 1}>{t('inst.staffWelcome.back')}</button>
+              <button type="button" className="ln-btn ln-btn-primary" style={{ minHeight: 48 }} onClick={next} disabled={form.saving}>{form.saving ? t('inst.staffWelcome.saving') : step === STEPS.length - 1 ? t('inst.staffWelcome.finish') : t('inst.staffWelcome.saveAndContinue')}</button>
             </div>
           </div>
           <aside><StudentPreview person={form.draft} /></aside>

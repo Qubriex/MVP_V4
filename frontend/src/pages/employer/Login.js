@@ -8,20 +8,24 @@ import api from '../../utils/api';
 import { errMsg } from '../../utils/errors';
 import BrandLogo from '../../components/BrandLogo';
 
+import { useUiLang } from '../../context/UiLangContext';
+import SignInBar from '../../components/shared/SignInBar';
 export function EmployerAside() {
+  const { t } = useUiLang();
   return (
     <aside className="ln-login-aside">
-      <span className="ln-col" style={{ gap: 6 }}><a href="/" className="brand-home" aria-label="Qubirex home"><BrandLogo height={48} tone="onDark" /></a><span className="ln-xs" style={{ color: 'var(--stage-muted)', letterSpacing: '0.08em', fontFamily: 'var(--font-body)' }}>FOR EMPLOYERS</span></span>
+      <span className="ln-col" style={{ gap: 6 }}><a href="/" className="brand-home" aria-label={t('emp.login.qubirexHome')}><BrandLogo height={48} tone="onDark" /></a><span className="ln-xs" style={{ color: 'var(--stage-muted)', letterSpacing: '0.08em', fontFamily: 'var(--font-body)' }}>{t('signin.forEmployers')}</span></span>
       <div className="ln-col ln-hide-phone" style={{ gap: 22 }}>
-        <h1 style={{ fontSize: 'clamp(32px, 3vw + 10px, 50px)' }}>Hire on evidence, not claims.</h1>
-        <p style={{ fontSize: 17, lineHeight: 1.65, color: 'var(--stage-muted)', maxWidth: 470 }}>Every Qubirex skill is backed by signed evidence you can check yourself. Verify your company domain to get started.</p>
+        <h1 style={{ fontSize: 'var(--fs-display)' }}>{t('emp.login.hireEvidenceNotClaims')}</h1>
+        <p style={{ fontSize: 'var(--fs-h3)', lineHeight: 1.65, color: 'var(--stage-muted)', maxWidth: 470 }}>{t('emp.login.everyQubirexSkillBacked')}</p>
       </div>
-      <span className="ln-small ln-hide-phone" style={{ color: 'var(--stage-muted)' }}>Receive. Build. Return.</span>
+      <span className="ln-small ln-hide-phone" style={{ color: 'var(--stage-muted)' }}>{t('brand.tagline')}</span>
     </aside>
   );
 }
 
 export default function EmployerLogin() {
+  const { t } = useUiLang();
   const location = useLocation();
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -42,7 +46,7 @@ export default function EmployerLogin() {
     try {
       if (tab === 'register') await api.post('/auth/employer/register', f);
       await signIn(f.email, f.password);
-    } catch (err) { setError(errMsg(err, 'Sign in failed.')); }
+    } catch (err) { setError(errMsg(err, t('emp.login.signFailed'))); }
     setLoading(false);
   };
 
@@ -50,27 +54,28 @@ export default function EmployerLogin() {
     <div className="ln-login">
       <EmployerAside />
       <div className="ln-login-main">
+        <SignInBar />
         <div className="ln-login-form">
           <div className="ln-seg" role="tablist" style={{ padding: 4, background: 'var(--color-surface-2)', borderRadius: 12 }}>
-            <button type="button" role="tab" aria-selected={tab === 'signin'} aria-pressed={tab === 'signin'} onClick={() => navigate('/employer/login')}>Sign in</button>
-            <button type="button" role="tab" aria-selected={tab === 'register'} aria-pressed={tab === 'register'} onClick={() => navigate('/employer/register')}>Create account</button>
+            <button type="button" role="tab" aria-selected={tab === 'signin'} aria-pressed={tab === 'signin'} onClick={() => navigate('/employer/login')}>{t('emp.login.signIn')}</button>
+            <button type="button" role="tab" aria-selected={tab === 'register'} aria-pressed={tab === 'register'} onClick={() => navigate('/employer/register')}>{t('emp.login.createAccount')}</button>
           </div>
           <form className="ln-col" style={{ gap: 16 }} onSubmit={submit}>
             <div className="ln-col" style={{ gap: 6 }}>
-              <h2 style={{ fontSize: 32 }}>{tab === 'register' ? 'Create an employer account' : 'Employer sign in'}</h2>
-              <p className="ln-muted">{tab === 'register' ? 'Use your work email — its domain becomes your company domain.' : 'For recruiters and hiring teams.'}</p>
+              <h2 style={{ fontSize: 'var(--fs-h1)' }}>{tab === 'register' ? t('emp.login.createEmployerAccount') : t('emp.login.employerSign')}</h2>
+              <p className="ln-muted">{tab === 'register' ? t('emp.login.useWorkEmailIts') : t('emp.login.recruitersHiringTeams')}</p>
             </div>
             {error && <div className="ln-error" role="alert">{error}</div>}
             {tab === 'register' && <>
-              <div className="ln-field"><label className="ln-label" htmlFor="co">Company name</label><input id="co" className="ln-input" value={f.company_name} onChange={set('company_name')} required /></div>
-              <div className="ln-field"><label className="ln-label" htmlFor="nm">Your name</label><input id="nm" className="ln-input" autoComplete="name" value={f.name} onChange={set('name')} required /></div>
-              <div className="ln-field"><label className="ln-label" htmlFor="ws">Website (optional)</label><input id="ws" className="ln-input" placeholder="https://" value={f.website} onChange={set('website')} /></div>
+              <div className="ln-field"><label className="ln-label" htmlFor="co">{t('emp.login.companyName')}</label><input id="co" className="ln-input" value={f.company_name} onChange={set('company_name')} required /></div>
+              <div className="ln-field"><label className="ln-label" htmlFor="nm">{t('emp.login.yourName')}</label><input id="nm" className="ln-input" autoComplete="name" value={f.name} onChange={set('name')} required /></div>
+              <div className="ln-field"><label className="ln-label" htmlFor="ws">{t('emp.login.websiteOptional')}</label><input id="ws" className="ln-input" placeholder={t('emp.login.https')} value={f.website} onChange={set('website')} /></div>
             </>}
-            <div className="ln-field"><label className="ln-label" htmlFor="em">Work email</label><input id="em" className="ln-input" type="email" autoComplete="username" placeholder="you@company.com" value={f.email} onChange={set('email')} required /></div>
-            <div className="ln-field"><label className="ln-label" htmlFor="pw">Password</label><input id="pw" className="ln-input" type="password" autoComplete={tab === 'register' ? 'new-password' : 'current-password'} minLength={tab === 'register' ? 10 : undefined} value={f.password} onChange={set('password')} required />
-              {tab === 'register' && <span className="ln-xs ln-muted">At least 10 characters.</span>}</div>
-            <button type="submit" className="ln-btn ln-btn-primary ln-btn-block" style={{ minHeight: 52, fontSize: 16 }} disabled={loading}>{loading ? 'Please wait…' : tab === 'register' ? 'Create account' : 'Sign in'}</button>
-            <p className="ln-small ln-muted" style={{ textAlign: 'center' }}>Only checking one credential? <Link to="/verify" className="ln-link" style={{ fontSize: 13 }}>Verify an Evidence ID</Link> — no account needed.</p>
+            <div className="ln-field"><label className="ln-label" htmlFor="em">{t('emp.login.workEmail')}</label><input id="em" className="ln-input" type="email" autoComplete="username" placeholder="you@company.com" value={f.email} onChange={set('email')} required /></div>
+            <div className="ln-field"><label className="ln-label" htmlFor="pw">{t('emp.login.password')}</label><input id="pw" className="ln-input" type="password" autoComplete={tab === 'register' ? 'new-password' : 'current-password'} minLength={tab === 'register' ? 10 : undefined} value={f.password} onChange={set('password')} required />
+              {tab === 'register' && <span className="ln-xs ln-muted">{t('emp.login.atLeast10Characters')}</span>}</div>
+            <button type="submit" className="ln-btn ln-btn-primary ln-btn-block" style={{ minHeight: 52, fontSize: 'var(--fs-h3)' }} disabled={loading}>{loading ? t('emp.login.pleaseWait') : tab === 'register' ? t('emp.login.createAccount') : t('emp.login.signIn')}</button>
+            <p className="ln-small ln-muted" style={{ textAlign: 'center' }}>{t('emp.login.onlyCheckingOneCredential')}{' '} <Link to="/verify" className="ln-link" style={{ fontSize: 'var(--fs-small)' }}>{t('emp.login.verifyEvidenceId')}</Link> {' '}{t('emp.login.noAccountNeeded')}</p>
           </form>
         </div>
       </div>

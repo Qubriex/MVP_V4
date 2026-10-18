@@ -98,7 +98,7 @@ export function createApp({ drainOutbox = null } = {}) {
       status: 'ok',
       service: 'Qubirex',
       company: 'Inferexaa Private Limited',
-      tagline: 'Receive. Build. Return.',
+      tagline: 'Your Language. Your Skills. Your Future.',
       timestamp: new Date().toISOString()
     };
     if (req.query.deep === '1') {

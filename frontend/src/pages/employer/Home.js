@@ -12,43 +12,45 @@ import CommandBox from '../../components/shared/CommandBox';
 import { HowCounted } from '../../components/shared/Popover';
 import { Bar } from '../../components/learn/ui';
 
+import { useUiLang, uiLocale } from '../../context/UiLangContext';
 // The hiring side of Home (v4.3 canvas E1): who is waiting for a decision,
 // open roles and the funnel. Verification steps follow until approved.
 function Hiring() {
+  const { t } = useUiLang();
   const { data } = useCachedGet('/employer/home');
-  if (!data) return <CommandBox side="employer" placeholder="Ask about your hiring — for example, who is waiting for me?" />;
+  if (!data) return <CommandBox side="employer" placeholder={t('emp.home.askAboutHiringExample')} />;
   const top = Math.max(1, ...data.funnel.map(f => f.n));
   return (
     <>
-      <CommandBox side="employer" placeholder="Ask about your hiring — for example, who is waiting for me?" />
+      <CommandBox side="employer" placeholder={t('emp.home.askAboutHiringExample')} />
       <div className="ln-grid ln-g-2" style={{ gap: 16 }}>
         <section className="ln-card" style={{ gap: 10 }}>
-          <div className="ln-between"><h2 className="ln-h2">{data.waiting} waiting for your decision</h2><Link to="/employer/pipeline" className="ln-link">Pipeline →</Link></div>
-          {data.waiting_rows.length === 0 ? <span className="ln-small ln-muted">Nobody is waiting. Candidates who say yes or apply appear here.</span>
+          <div className="ln-between"><h2 className="ln-h2">{t('emp.home.waitingWaitingDecision', { waiting: data.waiting })}</h2><Link to="/employer/pipeline" className="ln-link">{t('emp.home.pipeline')}</Link></div>
+          {data.waiting_rows.length === 0 ? <span className="ln-small ln-muted">{t('emp.home.nobodyWaitingCandidatesWho')}</span>
             : data.waiting_rows.map(r => (
               <Link key={r.id} to={`/employer/candidates/${r.id}`} className="ln-tile ln-card-link ln-between" style={{ flexDirection: 'row', padding: '10px 12px', alignItems: 'center' }}>
-                <span className="ln-col" style={{ gap: 2 }}><b style={{ fontSize: 14 }}>{r.name || r.code}</b><span className="ln-xs ln-muted">{r.role_title} · {r.college} · {r.stage_label}{r.waiting_days ? ` · ${r.waiting_days} day${r.waiting_days === 1 ? '' : 's'}` : ''}</span></span>
+                <span className="ln-col" style={{ gap: 2 }}><b style={{ fontSize: 'var(--fs-body)' }}>{r.name || r.code}</b><span className="ln-xs ln-muted">{r.role_title} · {r.college} · {r.stage_label}{r.waiting_days ? ` · ${r.waiting_days === 1 ? t('emp.common.oneDay') : t('emp.common.nDays', { n: r.waiting_days })}` : ''}</span></span>
                 <span className="ln-tag ln-tag-info">{r.readiness}</span>
               </Link>
             ))}
-          {data.unanswered > 0 && <span className="ln-xs ln-muted">{data.unanswered} request{data.unanswered === 1 ? '' : 's'} not answered by students yet.</span>}
+          {data.unanswered > 0 && <span className="ln-xs ln-muted">{t('emp.home.unansweredRequests', { n: data.unanswered })}</span>}
         </section>
         <section className="ln-card" style={{ gap: 10 }}>
-          <div className="ln-between"><h2 className="ln-h2">Funnel</h2>{data.weeks_to_decide != null && <span className="ln-small ln-muted">{data.weeks_to_decide} weeks to decide</span>}</div>
+          <div className="ln-between"><h2 className="ln-h2">{t('emp.home.funnel')}</h2>{data.weeks_to_decide != null && <span className="ln-small ln-muted">{t('emp.home.weeksDecideWeeksDecide', { weeks_to_decide: data.weeks_to_decide })}</span>}</div>
           {data.funnel.map(f => (
             <div key={f.label} className="ln-row" style={{ gap: 10 }}><span className="ln-small" style={{ width: 140 }}>{f.label}</span><div style={{ flex: 1 }}><Bar pct={(f.n / top) * 100} label={`${f.label}: ${f.n}`} /></div><b style={{ width: 28, textAlign: 'right' }}>{f.n}</b></div>
           ))}
-          <HowCounted>Asked = candidates you requested or who applied. Weeks to decide = average time from asking to interview, offer or “not now”.</HowCounted>
+          <HowCounted>{t('emp.home.askedCandidatesRequestedWho')}</HowCounted>
         </section>
       </div>
       <section className="ln-col" style={{ gap: 12 }}>
-        <div className="ln-between"><h2 className="ln-h2">Open roles</h2><Link to="/employer/roles?new=1" className="ln-btn ln-btn-sm ln-btn-primary"><Plus size={14} aria-hidden="true" />New role</Link></div>
-        {data.roles.length === 0 ? <div className="ln-card ln-small ln-muted">Paste a job description to create your first role. We pick out the skills and show how you compare with the market.</div> : (
+        <div className="ln-between"><h2 className="ln-h2">{t('emp.home.openRoles')}</h2><Link to="/employer/roles?new=1" className="ln-btn ln-btn-sm ln-btn-primary"><Plus size={14} aria-hidden="true" />{t('emp.home.newRole')}</Link></div>
+        {data.roles.length === 0 ? <div className="ln-card ln-small ln-muted">{t('emp.home.pasteJobDescriptionCreate')}</div> : (
           <div className="ln-grid ln-g-3" style={{ gap: 12 }}>
             {data.roles.map(r => (
               <Link key={r.id} to={`/employer/roles/${r.id}`} className="ln-card ln-card-link" style={{ gap: 6 }}>
-                <b>{r.title}</b><span className="ln-xs ln-muted">{r.city || 'Any city'} · bar {r.bar} · {r.skills.length} skills{r.published ? ' · shared with colleges' : ''}</span>
-                <span className="ln-link ln-small"><Users size={13} aria-hidden="true" /> Find candidates →</span>
+                <b>{r.title}</b><span className="ln-xs ln-muted">{r.city || t('emp.home.anyCity')} {' '}{t('emp.home.barBarLengthSkills', { bar: r.bar, length: r.skills.length })}{r.published ? t('emp.home.sharedColleges') : ''}</span>
+                <span className="ln-link ln-small"><Users size={13} aria-hidden="true" /> {' '}{t('emp.home.findCandidates')}</span>
               </Link>
             ))}
           </div>
@@ -59,12 +61,13 @@ function Hiring() {
 }
 
 function Step({ n, done, title, children }) {
+  const { t } = useUiLang();
   return (
     <article className="ln-card" style={{ gap: 10 }}>
       <div className="ln-row" style={{ gap: 10, alignItems: 'center' }}>
         {done ? <CheckCircle2 size={22} color="var(--status-success)" aria-hidden="true" /> : <Circle size={22} aria-hidden="true" />}
-        <h2 className="ln-h2" style={{ margin: 0, fontSize: 18 }}>{n}. {title}</h2>
-        {done && <span className="ln-tag ln-tag-success">Done</span>}
+        <h2 className="ln-h2" style={{ margin: 0, fontSize: 'var(--fs-h3)' }}>{n}. {title}</h2>
+        {done && <span className="ln-tag ln-tag-success">{t('emp.home.done')}</span>}
       </div>
       {children}
     </article>
@@ -72,12 +75,13 @@ function Step({ n, done, title, children }) {
 }
 
 export default function EmployerHome() {
+  const { t } = useUiLang();
   const { me, refresh, isOwner } = useEmployer();
   const [otp, setOtp] = useState(null);
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  if (!me) return <p className="ln-muted">Loading…</p>;
+  if (!me) return <p className="ln-muted">{t('emp.home.loading')}</p>;
   const e = me.employer;
   const s = e.kyb_steps;
   const [kybLabel, kybClass] = KYB_TEXT[e.kyb_status] || KYB_TEXT.pending;
@@ -101,40 +105,40 @@ export default function EmployerHome() {
       <header className="ln-pagehead">
         <div className="ln-col" style={{ gap: 4 }}>
           <h1 className="ln-title">{e.name}</h1>
-          <span className="ln-sub">@{e.domain} · <span className={`ln-tag ${kybClass}`}>{kybLabel}</span></span>
+          <span className="ln-sub">@{e.domain} · <span className={`ln-tag ${kybClass}`}>{t(kybLabel)}</span></span>
         </div>
       </header>
       <Hiring />
       {e.kyb_status === 'verified' ? null : (
-        <div className="ln-note" role="status">Until your company is verified you can check Evidence IDs and prepare your account, but you cannot request access to a learner’s evidence.</div>
+        <div className="ln-note" role="status">{t('emp.home.untilCompanyVerifiedCan')}</div>
       )}
       {error && <div className="ln-error" role="alert">{error}</div>}
       {e.kyb_status !== 'verified' && <div className="ln-col" style={{ gap: 14, marginTop: 16 }}>
-        <Step n={1} done={s.details} title="Company details">
-          <p className="ln-small ln-muted" style={{ margin: 0 }}>Contact person and phone, city and — if you have one — your GSTIN.</p>
-          <Link to="/employer/company" className="ln-btn ln-btn-sm" style={{ alignSelf: 'flex-start' }}>{s.details ? 'Edit details' : 'Add details'}</Link>
+        <Step n={1} done={s.details} title={t('emp.home.companyDetails')}>
+          <p className="ln-small ln-muted" style={{ margin: 0 }}>{t('emp.home.contactPersonPhoneCity')}</p>
+          <Link to="/employer/company" className="ln-btn ln-btn-sm" style={{ alignSelf: 'flex-start' }}>{s.details ? t('emp.home.editDetails') : t('emp.home.addDetails')}</Link>
         </Step>
-        <Step n={2} done={s.domain_verified} title={`Verify your @${e.domain} email`}>
-          {s.domain_verified ? <p className="ln-small ln-muted" style={{ margin: 0 }}>Verified on {new Date(e.domain_verified_at).toLocaleDateString()}.</p>
-            : !isOwner ? <p className="ln-small ln-muted" style={{ margin: 0 }}>An owner of this account needs to do this step.</p>
+        <Step n={2} done={s.domain_verified} title={t('emp.home.verifyDomainEmail', { domain: e.domain })}>
+          {s.domain_verified ? <p className="ln-small ln-muted" style={{ margin: 0 }}>{t('emp.home.verifiedTolocaledatestring', { toLocaleDateString: new Date(e.domain_verified_at).toLocaleDateString(uiLocale()) })}</p>
+            : !isOwner ? <p className="ln-small ln-muted" style={{ margin: 0 }}>{t('emp.home.ownerAccountNeedsDo')}</p>
             : otp && !otp.already_verified ? (
               <form className="ln-col" style={{ gap: 10 }} onSubmit={confirm}>
-                <p className="ln-small" style={{ margin: 0 }}>We sent a 6-digit code to <b>{otp.sent_to}</b>. It expires in {otp.expires_minutes} minutes.</p>
-                {otp.dev_code && <div className="ln-note ln-xs">No email is sent on this test deployment. Your code is <b>{otp.dev_code}</b>.</div>}
+                <p className="ln-small" style={{ margin: 0 }}>{t('emp.home.weSent6Digit')}{' '} <b>{otp.sent_to}</b>{t('emp.home.expiresExpiresMinutesMinutes', { expires_minutes: otp.expires_minutes })}</p>
+                {otp.dev_code && <div className="ln-note ln-xs">{t('emp.home.noEmailSentTest')}{' '} <b>{otp.dev_code}</b>.</div>}
                 <div className="ln-row ln-wrap" style={{ gap: 8 }}>
-                  <input className="ln-input" style={{ maxWidth: 160, letterSpacing: '0.2em' }} inputMode="numeric" pattern="[0-9]{6}" maxLength={6} aria-label="Verification code" value={code} onChange={ev => setCode(ev.target.value.replace(/\D/g, ''))} required />
-                  <button type="submit" className="ln-btn ln-btn-primary" disabled={busy || code.length !== 6}>Verify</button>
-                  <button type="button" className="ln-btn" onClick={request} disabled={busy}>Send a new code</button>
+                  <input className="ln-input" style={{ maxWidth: 160, letterSpacing: '0.2em' }} inputMode="numeric" pattern="[0-9]{6}" maxLength={6} aria-label={t('emp.home.verificationCode')} value={code} onChange={ev => setCode(ev.target.value.replace(/\D/g, ''))} required />
+                  <button type="submit" className="ln-btn ln-btn-primary" disabled={busy || code.length !== 6}>{t('emp.home.verify')}</button>
+                  <button type="button" className="ln-btn" onClick={request} disabled={busy}>{t('emp.home.sendNewCode')}</button>
                 </div>
               </form>
             ) : (
-              <><p className="ln-small ln-muted" style={{ margin: 0 }}>We email a one-time code to {me.user?.email} to prove the company controls this domain.</p>
-                <button type="button" className="ln-btn ln-btn-primary ln-btn-sm" style={{ alignSelf: 'flex-start' }} onClick={request} disabled={busy}>{busy ? 'Sending…' : 'Email me a code'}</button></>
+              <><p className="ln-small ln-muted" style={{ margin: 0 }}>{t('emp.home.weEmailOneTime', { email: me.user?.email })}</p>
+                <button type="button" className="ln-btn ln-btn-primary ln-btn-sm" style={{ alignSelf: 'flex-start' }} onClick={request} disabled={busy}>{busy ? t('emp.home.sending') : t('emp.home.emailMeCode')}</button></>
             )}
         </Step>
-        <Step n={3} done={s.approved} title="Qubirex approval">
+        <Step n={3} done={s.approved} title={t('emp.home.qubirexApproval')}>
           <p className="ln-small ln-muted" style={{ margin: 0 }}>
-            {s.approved ? 'Approved.' : e.kyb_status === 'rejected' ? `Not approved${e.kyb_note ? `: ${e.kyb_note}` : '.'}` : s.domain_verified ? 'We review new companies within one working day.' : 'Starts once your domain is verified.'}
+            {s.approved ? t('emp.home.approved') : e.kyb_status === 'rejected' ? (e.kyb_note ? t('emp.home.notApprovedNote', { note: e.kyb_note }) : t('emp.home.notApproved')) : s.domain_verified ? t('emp.home.weReviewNewCompanies') : t('emp.home.startsOnceYourDomain')}
           </p>
         </Step>
       </div>}

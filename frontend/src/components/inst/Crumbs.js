@@ -7,8 +7,10 @@ import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 
+import { useUiLang } from '../../context/UiLangContext';
 /** @param {{ items: {label: string, to?: string}[] }} props  last item is the current page */
 export default function Crumbs({ items }) {
+  const { t } = useUiLang();
   const navigate = useNavigate();
   const location = useLocation();
   const parent = [...items].reverse().find((c, i) => i > 0 && c.to) || items.find(c => c.to);
@@ -17,8 +19,8 @@ export default function Crumbs({ items }) {
     else if (parent) navigate(parent.to);
   };
   return (
-    <nav className="in-crumbs" aria-label="Breadcrumb">
-      <button type="button" className="ln-btn ln-btn-sm" onClick={back}><ArrowLeft size={15} aria-hidden="true" />Back</button>
+    <nav className="in-crumbs" aria-label={t('inst.crumbs.breadcrumb')}>
+      <button type="button" className="ln-btn ln-btn-sm" onClick={back}><ArrowLeft size={15} aria-hidden="true" />{t('inst.crumbs.back')}</button>
       <ol>
         {items.map((c, i) => (
           <li key={`${c.label}-${i}`}>

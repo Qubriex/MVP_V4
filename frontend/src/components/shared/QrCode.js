@@ -2,8 +2,10 @@
 // links, the public verifier). Drawn on the device; nothing is sent anywhere.
 import React, { useEffect, useState } from 'react';
 import QR from 'qrcode';
+import { useUiLang } from '../../context/UiLangContext';
 
 export default function QrCode({ value, size = 160, label }) {
+  const { t } = useUiLang();
   const [src, setSrc] = useState('');
   useEffect(() => {
     let live = true;
@@ -11,5 +13,5 @@ export default function QrCode({ value, size = 160, label }) {
     return () => { live = false; };
   }, [value, size]);
   if (!src) return <div style={{ width: size, height: size }} className="ln-skeleton" aria-hidden="true" />;
-  return <img src={src} width={size} height={size} alt={label || `QR code for ${value}`} style={{ borderRadius: 8, background: '#fff' }} />;
+  return <img src={src} width={size} height={size} alt={label || t('shared.qrCode.alt', { value })} style={{ borderRadius: 8, background: '#FFFFFF' /* QR codes need a white quiet zone in both themes */ }} />;
 }

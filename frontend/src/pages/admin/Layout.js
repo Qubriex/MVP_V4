@@ -19,5 +19,5 @@ export default function AdminLayout() {
     { to: '/admin/ontology', label: t('adm.nav.ontology'), icon: Network, badge: counts.onto || null },
     { to: '/admin/quality', label: t('adm.nav.quality'), icon: Gauge }
   ];
-  return <PortalLayout kicker="PLATFORM ADMIN" loginPath="/admin/login" items={items} account={{ primary: email, secondary: 'Admin' }} />;
+  return <PortalLayout kicker={t('signin.platformAdmin')} loginPath="/admin/login" items={items} account={{ primary: email, secondary: 'Admin' }} />;
 }

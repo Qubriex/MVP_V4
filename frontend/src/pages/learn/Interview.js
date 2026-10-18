@@ -38,7 +38,7 @@ export default function Interview() {
       setMeta(res.data);
       speech.speak(res.data.text, 'q');
     } catch (e) {
-      setError(errMsg(e, 'The practice interviewer is unavailable right now. Try again in a moment.'));
+      setError(errMsg(e, t('learn.interview.practiceInterviewerUnavailableRight')));
     }
     setBusy(false);
   }, [jobId, speech]);
@@ -64,7 +64,7 @@ export default function Interview() {
       answer(res.data.transcript);
     } catch (e) {
       setBusy(false);
-      setError('Couldn’t hear that. Try again, or type your answer.');
+      setError(t('learn.interview.couldnTHearTry'));
     }
   };
   const mic = useSpeechInput({ lang: bcp47, onFinal: answer, onAudio: transcribe });
@@ -72,13 +72,13 @@ export default function Interview() {
 
   return (
     <>
-      <Link to={`/learn/market/${jobId}`} className="ln-link" style={{ alignSelf: 'flex-start' }}>← Back to the JD</Link>
+      <Link to={`/learn/market/${jobId}`} className="ln-link" style={{ alignSelf: 'flex-start' }}>{t('learn.interview.backJd')}</Link>
       <header className="ln-pagehead">
         <div className="ln-col" style={{ gap: 6 }}>
-          <h1 className="ln-title">Interview practice</h1>
-          <span className="ln-sub">{job ? `${job.title} · ${job.company_type}` : '…'} · Practice only — answers are not saved.</span>
+          <h1 className="ln-title">{t('learn.interview.interviewPractice')}</h1>
+          <span className="ln-sub">{job ? `${job.title} · ${job.company_type}` : '…'} {' '}{t('learn.interview.practiceOnlyAnswersNot')}</span>
         </div>
-        {meta.question_number && <span className="ln-tag ln-tag-lg ln-tag-accent">Question {meta.question_number} of {meta.total}</span>}
+        {meta.question_number && <span className="ln-tag ln-tag-lg ln-tag-accent">{t('learn.interview.questionQuestionNumberTotal', { question_number: meta.question_number, total: meta.total })}</span>}
       </header>
 
       <section className="ln-card ln-card-dark" style={{ alignItems: 'center', gap: 20, padding: '36px 24px' }}>
@@ -89,30 +89,30 @@ export default function Interview() {
         {!mic.listening && meta.caption_en && <p className="ln-caption-en">{meta.caption_en}</p>}
         <VoiceStatus speech={speech} dark />
         {(error || mic.error) && (
-          <div className="ln-banner-check" role="alert" style={{ borderColor: 'var(--status-danger)', color: '#FFB4A6', gap: 10, flexWrap: 'wrap' }}>
+          <div className="ln-banner-check" role="alert" style={{ borderColor: 'var(--status-danger)', color: 'var(--danger-on-ink)', gap: 10, flexWrap: 'wrap' }}>
             <span>{error || mic.error}</span>
-            {error && !busy && <button type="button" className="ln-btn ln-btn-sm ln-btn-ghost-dark" onClick={() => ask(turnsRef.current)}>Try again</button>}
+            {error && !busy && <button type="button" className="ln-btn ln-btn-sm ln-btn-ghost-dark" onClick={() => ask(turnsRef.current)}>{t('learn.interview.tryAgain')}</button>}
           </div>
         )}
 
         {meta.done ? (
-          <button type="button" className="ln-btn ln-btn-amber" onClick={() => { setTurns([]); ask([]); }}><RotateCcw size={18} aria-hidden="true" />Practise again</button>
+          <button type="button" className="ln-btn ln-btn-primary ln-btn-lg" onClick={() => { setTurns([]); ask([]); }}><RotateCcw size={18} aria-hidden="true" />{t('learn.interview.practiseAgain')}</button>
         ) : (
           <>
             {typing && (
               <div className="ln-typebar" style={{ maxWidth: 760 }}>
-                <label htmlFor="ans" className="ln-sr">Type your answer</label>
+                <label htmlFor="ans" className="ln-sr">{t('learn.interview.typeAnswer')}</label>
                 <textarea id="ans" rows={2} value={draft} disabled={busy} placeholder={t('session.typeHere')} onChange={e => setDraft(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); answer(draft); setDraft(''); } }} />
-                <button type="button" className="ln-btn ln-btn-amber ln-indic" onClick={() => { answer(draft); setDraft(''); }} disabled={busy || !draft.trim()}>{t('session.send')}</button>
+                <button type="button" className="ln-btn ln-btn-primary ln-btn-lg ln-indic" onClick={() => { answer(draft); setDraft(''); }} disabled={busy || !draft.trim()}>{t('session.send')}</button>
               </div>
             )}
             <div className="ln-row" style={{ gap: 18 }}>
-              <button type="button" className="ln-roundbtn" aria-label="Replay question" disabled={!last} onClick={() => last && speech.speak(last.text, 'q')}><RotateCcw size={20} aria-hidden="true" /></button>
+              <button type="button" className="ln-roundbtn" aria-label={t('learn.interview.replayQuestion')} disabled={!last} onClick={() => last && speech.speak(last.text, 'q')}><RotateCcw size={20} aria-hidden="true" /></button>
               <button type="button" className={`ln-mic ${mic.listening ? 'is-listening' : ''}`} disabled={(busy && !mic.listening) || !mic.supported}
                 aria-label={mic.listening ? t('session.tapStop') : t('session.tapSpeak')} aria-pressed={mic.listening}
                 onClick={() => (mic.listening ? mic.stop() : (speech.stop(), mic.start()))}><Mic size={30} aria-hidden="true" /></button>
-              <button type="button" className="ln-roundbtn" aria-label="Switch to typing" aria-pressed={typing} onClick={() => setTyping(v => !v)}><Keyboard size={20} aria-hidden="true" /></button>
+              <button type="button" className="ln-roundbtn" aria-label={t('learn.interview.switchTyping')} aria-pressed={typing} onClick={() => setTyping(v => !v)}><Keyboard size={20} aria-hidden="true" /></button>
             </div>
           </>
         )}
@@ -120,10 +120,10 @@ export default function Interview() {
 
       {turns.length > 0 && (
         <section className="ln-card">
-          <h2 className="ln-h2">Transcript</h2>
+          <h2 className="ln-h2">{t('learn.interview.transcript')}</h2>
           {turns.map((x, i) => (
             <div key={i} className={`ln-msg ${x.role === 'candidate' ? 'is-you' : ''}`}>
-              <span className="ln-msg-who">{x.role === 'candidate' ? 'You' : 'Interviewer'}</span>
+              <span className="ln-msg-who">{x.role === 'candidate' ? t('learn.interview.you') : t('learn.interview.interviewer')}</span>
               <div className="ln-bubble" lang={bcp47} style={{ maxWidth: 640 }}>{x.text}</div>
             </div>
           ))}

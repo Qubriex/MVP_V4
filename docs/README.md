@@ -1,6 +1,6 @@
 # QUBIREX — MVP Codebase
 
-**Inferexaa Private Limited · Receive. Build. Return.**
+**Inferexaa Private Limited · Your Language. Your Skills. Your Future.**
 
 The only platform that teaches technical skills in Telugu, and proves they were
 learned — with a Mastery Log, not a certificate. Qubirex constructs
@@ -10,7 +10,10 @@ per learner to the commissioning institution.
 
 ---
 
-## THE THREE-VERB MODEL
+## THE THREE-VERB MODEL (internal)
+
+The product's internal operating model. It is no longer the public tagline —
+user-facing text uses "Your Language. Your Skills. Your Future."
 
 | Verb | What It Means |
 |---|---|
@@ -136,31 +139,76 @@ docs/
 
 ## DESIGN SYSTEM
 
-The frontend runs on a warm, Claude-inspired design system — a paper/charcoal
-base palette with an accent gradient sampled from the phoenix mark (amber →
-burnt orange → deep maroon), a Fraunces/Inter type pairing, a 4px spacing
-scale, and restrained scroll/hover motion. It replaced an earlier dark
-blue-gray UI; no routes, copy, or backend behavior changed as part of that
-redesign.
+**Fonts** (self-hosted in `frontend/public/fonts/`, OFL; `font-display: swap`,
+the two Latin faces preloaded, the Telugu or Devanagari face preloaded for the
+saved language): **Outfit** for headings, **Anek** (Latin, Telugu,
+Devanagari; Hind as fallback) for body text, **JetBrains Mono** for code.
+Numbers in stats and tables use tabular figures. IBRAND stays for the logo and
+marketing material only — *the brand book needs an update: web fonts = Outfit
++ Anek.*
 
-**Where things live:**
+**Tokens** (`src/styles/tokens.css`):
 
-| File | Purpose |
+| Group | Tokens |
 |---|---|
-| `src/styles/tokens.css` | Every color, spacing, type, radius, shadow and motion value as CSS custom properties. Full header comment there explains how to retune the palette — start here before editing any component's styling. |
-| `src/styles/global.css` | Reset + shared classes built on those tokens: `.btn`/`.btn-primary`/`.btn-secondary`/`.btn-ghost`, `.card`, `.input`/`.textarea`, `.badge-*`, `.nav`, `.footer`, `.table`, `.reveal`, `.hero-wash`, `.page-fade`. Compose these in new components instead of hardcoding hex/px values. |
-| `src/context/ThemeContext.js` | Light/dark toggle. Defaults to light, persists to `localStorage` (`qubirex_theme`), sets `data-theme` on `<html>` — that attribute is what `tokens.css`'s dark overrides key off. |
-| `src/components/NavBar.js`, `Footer.js` | Shared chrome. Pages pass page-specific content (login buttons, user menu, logout) via the `right` prop so behavior stays page-owned. |
-| `src/components/Reveal.js`, `src/hooks/useReveal.js` | Fade-up-on-scroll wrapper, staggered via a `delay` (ms) prop. No-ops to fully visible under `prefers-reduced-motion`. |
-| `src/components/PageTransition.js` | Wraps the router so navigating between pages fades instead of cutting. |
-| `src/components/PhoenixMark.js` | **Placeholder** brand mark built from the accent gradient — the real logo file was shared in chat, not as a repo asset. Drop it in as `public/phoenix-logo.png` (or similar) and swap the `<svg>` in this file for an `<img>`; `NavBar`/`Footer` don't need any other changes. |
+| Type scale (six sizes) | `--fs-display`, `--fs-h1`, `--fs-h2`, `--fs-h3`, `--fs-body`, `--fs-small`, `--fs-caption` with matching `--lh-*` / `--fw-*` |
+| Primary | `--brand-primary-strong` (#C4302A, 5.5:1 on white) for every primary button and link; orange (`--brand-accent`) is decoration only |
+| Readiness bands | Ready = `--ok` green · Nearly ready = `--warn` amber · Building = `--info` blue · none = grey. Red (`--danger`) only for errors, locked, revoked or overdue |
+| Widths | one content width, plus `ui-narrow` (`--content-narrow`, 860 px) for forms |
 
-**Retuning the palette:** every accent color lives in the `--accent-*` scale
-at the top of `tokens.css`, with the gradient itself in `--gradient-accent`.
-Base surface colors are `--color-bg` / `--color-surface` / `--color-border` /
-`--color-text` (light values on `:root`, dark overrides under
-`[data-theme='dark']`). Change values there once — every component picks it
-up automatically since nothing hardcodes a hex value.
+**Component kit** — `src/components/shared/ui/` (import from
+`components/shared/ui`): `Button`, `IconButton`, `Select` (accessible
+listbox), `Input`, `Textarea`, `Field`, `Card`, `StatTile`, `Table` (cards
+below 640 px; `TableLabels` does this for every `.ln-table`), `Tabs`, `Pill`,
+`BandPill`, `BandBar`, `EmptyState` (with a primary action), `Skeleton`,
+`Toast` (`useToast`), `Tooltip`, `Modal`/`Drawer`, `PageHeader`. Styles live
+in `src/styles/ui.css`. Every portal sidebar uses the same dark-ink style.
+
+**Accessibility rules:** real buttons, links and labels; `aria-label` on icon
+buttons; visible focus rings; 44 px touch targets on touch screens; 4.5:1
+text contrast; never colour alone (band pills carry the word). Layouts work
+from 360 px to 1440 px without sideways scroll, and respect
+`prefers-reduced-motion`.
+
+---
+
+## LANGUAGES (interface)
+
+- Every screen — public, learner, college, employer, admin — reads from
+  `frontend/src/i18n/{en,te,hi}.json` with namespaced keys (`learn.*`,
+  `inst.*`, `emp.*`, `adm.*`, `page.*`, `shared.*`, `title.*`). In Telugu or
+  Hindi mode the only English left is product names (Qubirex, Capability
+  Passport, Evidence ID…), skill names, code and data.
+- One language switch everywhere (`components/shared/LangSwitch.js`):
+  "EN · తెలుగు · हिंदी" on desktop, a globe button on phones. The choice is
+  kept in `localStorage` (`qubirex_ui_lang`), sets `<html lang>`, and drives
+  dates and numbers through `Intl` (`uiLocale()`, `fmtDate`, `fmtNum`).
+- `document.title` is set per route in the selected language
+  (`hooks/usePageTitle.js`: "Page — Qubirex").
+- **Check before you push:** `cd frontend && npm run i18n:check` fails when a
+  key is missing in te or hi, a translation drops a `{placeholder}`, a
+  `t('key')` is unknown, or English JSX text is shown without `t()`. Mark a
+  line that intentionally shows code or data with `/* i18n-ignore */`.
+- Adding text: put the English in `en.json`, the Telugu and Hindi in
+  `te.json` / `hi.json` under the same key, and call `t('ns.key', { vars })`.
+  Write counts as "Reviews due: {n}" rather than plural endings.
+
+## WORDS WE USE
+
+| Say | Not |
+|---|---|
+| College | Institution (except in legal text) |
+| Cohort | Engagement |
+| Skill group | Cluster |
+| Lesson ("Lesson 9 of 20") / skill ("8 of 20 skills done") | Node |
+| Target (an employer's readiness target) | Bar |
+| Confirmed · Partial · Not yet | "Partial mastery", "Not yet mastered" |
+| Fresh · Ageing · Needs refresh (the % only in the Passport tooltip) | Freshness 73% |
+| Plain evidence words ("Checked by running the work"); the L/A code is in the glossary popover | "L2 · Execution-verified" |
+| Mastery Log · Capability Passport · Evidence ID · bridge programme · readiness band · authorship · Day-One Simulation · Sponsor a cohort | other spellings |
+
+No visible placeholders: prices read "Talk to us for pricing"; demo data uses
+sample names tagged "Sample".
 
 ---
 

@@ -29,24 +29,24 @@ export default function PortalLayout({ kicker, org, account, items, loginPath, c
       </div>
       {open && <div className="ln-scrim" onClick={() => setOpen(false)} aria-hidden="true" />}
 
-      <nav className={`ln-sidebar in-sidebar ${open ? 'is-open' : ''}`} aria-label={`${kicker} navigation`}>
+      <nav className={`ln-sidebar in-sidebar ${open ? 'is-open' : ''}`} aria-label={t('ui.portalLayout.kickerNavigation', { kicker })}>
         <div className="ln-between">
           <span className="ln-col" style={{ gap: 4 }}><a href="/" className="brand-home" aria-label={t('nav.logoHome')}><BrandLogo height={38} tone="onDark" /></a><small className="ln-xs" style={{ color: 'var(--ink-muted)', letterSpacing: '0.08em', paddingLeft: 4 }}>{kicker}</small></span>
           {open && <button type="button" className="in-iconbtn" onClick={() => setOpen(false)} aria-label={t('nav.closeMenu')}><X size={18} aria-hidden="true" /></button>}
         </div>
         {org && <div className="in-org">{org}</div>}
         <div className="ln-navgroup">
-          {items.map(({ to, label, icon: Icon, badge }) => (
+          {items.map(({ to, label, icon: Icon, badge, badgeLabel }) => (
             <NavLink key={to} to={to} className={({ isActive }) => `ln-navlink ${isActive ? 'is-active' : ''}`}>
               <Icon size={18} strokeWidth={1.8} aria-hidden="true" /><span>{label}</span>
-              {badge ? <span className="in-badge">{badge}</span> : null}
+              {badge ? <span className="in-badge" title={badgeLabel || undefined}><span aria-hidden="true">{badge}</span>{badgeLabel && <span className="ln-sr">{badgeLabel}</span>}</span> : null}
             </NavLink>
           ))}
         </div>
         <div className="in-me">
           <div className="ln-col" style={{ flex: 1, minWidth: 0 }}>
-            <span style={{ fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{account?.primary || '…'}</span>
-            {account?.secondary && <span style={{ fontSize: 11, color: 'var(--stage-muted)' }}>{account.secondary}</span>}
+            <span style={{ fontSize: 'var(--fs-small)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{account?.primary || '…'}</span>
+            {account?.secondary && <span style={{ fontSize: 'var(--fs-caption)', color: 'var(--stage-muted)' }}>{account.secondary}</span>}
           </div>
           <ThemeToggle />
           <button type="button" className="in-iconbtn" onClick={doLogout} aria-label={t('nav.logout')} title={t('nav.logout')}><LogOut size={18} aria-hidden="true" /></button>

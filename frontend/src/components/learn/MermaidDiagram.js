@@ -6,6 +6,7 @@
 // If rendering fails, the source is shown as text instead.
 import React, { useEffect, useRef, useState } from 'react';
 
+import { useUiLang } from '../../context/UiLangContext';
 let mermaidPromise = null;
 let counter = 0;
 
@@ -21,6 +22,7 @@ function loadMermaid() {
 }
 
 export default function MermaidDiagram({ source }) {
+  const { t } = useUiLang();
   const ref = useRef(null);
   const [failed, setFailed] = useState(false);
 
@@ -35,5 +37,5 @@ export default function MermaidDiagram({ source }) {
   }, [source]);
 
   if (failed) return <pre className="ln-board-code">{source}</pre>;
-  return <div className="ln-board-diagram" ref={ref} role="img" aria-label="Diagram from Professor Qubirex" />;
+  return <div className="ln-board-diagram" ref={ref} role="img" aria-label={t('learn.mermaidDiagram.diagramFromProfessorQubirex')} />;
 }

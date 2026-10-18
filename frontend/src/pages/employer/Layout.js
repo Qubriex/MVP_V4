@@ -6,9 +6,10 @@ import { useOutletContext } from 'react-router-dom';
 import { Home, Building2, Users, KeyRound, BadgeCheck, Briefcase, ListChecks, School, Handshake, FileCheck2, ClipboardList, Receipt } from 'lucide-react';
 import api from '../../utils/api';
 import PortalLayout from '../../components/PortalLayout';
+import { useCachedGet } from '../../utils/cachedGet';
 
 export const useEmployer = () => useOutletContext();
-export const KYB_TEXT = { pending: ['Verification pending', 'ln-tag-warning'], verified: ['Verified company', 'ln-tag-success'], rejected: ['Rejected', 'ln-tag-neutral'], suspended: ['Suspended', 'ln-tag-neutral'] };
+export const KYB_TEXT = { pending: ['emp.layout.kybText.verificationPending', 'ln-tag-warning'], verified: ['emp.layout.kybText.verifiedCompany', 'ln-tag-success'], rejected: ['emp.layout.kybText.rejected', 'ln-tag-neutral'], suspended: ['emp.layout.kybText.suspended', 'ln-tag-neutral'] };
 
 export default function EmployerLayout() {
   const { t } = useUiLang();
@@ -17,23 +18,26 @@ export default function EmployerLayout() {
   useEffect(() => { refresh(); }, [refresh]);
   const steps = me?.employer?.kyb_steps;
   const todo = steps ? [steps.details, steps.domain_verified, steps.approved].filter(x => !x).length : 0;
+  // Each badge counts what its page leads with: Home — candidates waiting for
+  // your decision; Company — setup steps still open. Same cached request as Home.
+  const { data: home } = useCachedGet('/employer/home');
   const items = [
-    { to: '/employer/home', label: t('nav.homeShort'), icon: Home, badge: todo || null },
+    { to: '/employer/home', label: t('nav.homeShort'), icon: Home, badge: home?.waiting || null, badgeLabel: home?.waiting ? t('emp.layout.badgeWaiting', { n: home.waiting }) : null },
     { to: '/employer/roles', label: t('emp.nav.roles'), icon: Briefcase },
     { to: '/employer/pipeline', label: t('emp.nav.pipeline'), icon: ListChecks },
     { to: '/employer/colleges', label: t('emp.nav.colleges'), icon: School },
     { to: '/employer/sponsor', label: t('emp.nav.sponsor'), icon: Handshake },
     { to: '/employer/templates', label: t('emp.nav.templates'), icon: ClipboardList },
     { to: '/employer/verify-bulk', label: t('emp.nav.bulk'), icon: FileCheck2 },
-    { to: '/employer/company', label: t('emp.nav.company'), icon: Building2 },
+    { to: '/employer/company', label: t('emp.nav.company'), icon: Building2, badge: todo || null, badgeLabel: todo ? t('emp.layout.badgeSetup', { n: todo }) : null },
     { to: '/employer/team', label: t('emp.nav.team'), icon: Users },
     { to: '/employer/api-keys', label: t('emp.nav.api'), icon: KeyRound },
     { to: '/employer/billing', label: t('emp.nav.billing'), icon: Receipt },
     { to: '/verify', label: t('emp.nav.verify'), icon: BadgeCheck }
   ];
   return (
-    <PortalLayout kicker={t('emp.kicker')} loginPath="/employer/login" items={items} side="employer"
-      org={<><b style={{ fontWeight: 600 }}>{me?.employer?.name || 'Your company'}</b>{me?.employer?.domain && <span>@{me.employer.domain}</span>}</>}
+    <PortalLayout kicker={t('signin.forEmployers')} loginPath="/employer/login" items={items} side="employer"
+      org={<><b style={{ fontWeight: 600 }}>{me?.employer?.name || t('emp.layout.yourCompany')}</b>{me?.employer?.domain && <span>@{me.employer.domain}</span>}</>}
       account={{ primary: me?.user?.name || me?.user?.email, secondary: me?.user?.role }}
       context={{ me, refresh, isOwner: me?.user?.role === 'owner' }} />
   );

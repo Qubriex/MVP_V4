@@ -10,10 +10,13 @@ import { Upload } from 'lucide-react';
 import api from '../../utils/api';
 import { errMsg } from '../../utils/errors';
 import Crumbs from '../../components/inst/Crumbs';
+import { Select } from '../../components/shared/ui';
 
-const STEPS = ['Capability target', 'Confirm', 'Language', 'Build pathway', 'Cohort & professors'];
+import { useUiLang } from '../../context/UiLangContext';
+const STEPS = ['inst.newCohort.steps.capabilityTarget', 'inst.newCohort.steps.confirm', 'inst.newCohort.steps.language', 'inst.newCohort.steps.buildPathway', 'inst.newCohort.steps.cohortProfessors'];
 
 export default function NewCohort() {
+  const { t } = useUiLang();
   const navigate = useNavigate();
   const location = useLocation();
   const [step, setStep] = useState(0);
@@ -45,7 +48,7 @@ export default function NewCohort() {
       setCt({ id: res.data.id, title: title || res.data.extraction?.title, extraction: res.data.extraction, node_count: 0, confirmed: false });
       setCohortTitle(title);
       setStep(1);
-    } catch (err) { fail(err, 'Extraction failed.'); }
+    } catch (err) { fail(err, t('inst.newCohort.extractionFailed')); }
     setBusy('');
   };
   const [uploaded, setUploaded] = useState('');
@@ -60,8 +63,8 @@ export default function NewCohort() {
       const r = await api.post('/institution/curriculum/upload', form, { timeout: 90000 });
       setRaw(prev => (prev.trim() ? `${prev.trim()}\n\n${r.data.text}` : r.data.text));
       if (!title.trim()) setTitle(file.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' '));
-      setUploaded(`Read “${file.name}”${r.data.truncated ? ' (long file: the first part was used)' : ''}. Check the text below, then extract.`);
-    } catch (err) { fail(err, 'Couldn’t read that file.'); }
+      setUploaded(`Read “${file.name}”${r.data.truncated ? ' ' + t('inst.newCohort.longFileTheFirst') : ''}. Check the text below, then extract.`);
+    } catch (err) { fail(err, t('inst.newCohort.couldnTReadThat')); }
     setBusy('');
   };
   const useExisting = (t) => {
@@ -71,12 +74,12 @@ export default function NewCohort() {
   };
   const confirm = async () => {
     setError(''); setBusy('confirm');
-    try { await api.post(`/institution/capability-targets/${ct.id}/confirm`); setCt({ ...ct, confirmed: true }); setStep(2); } catch (err) { fail(err, 'Confirmation failed.'); }
+    try { await api.post(`/institution/capability-targets/${ct.id}/confirm`); setCt({ ...ct, confirmed: true }); setStep(2); } catch (err) { fail(err, t('inst.newCohort.confirmationFailed')); }
     setBusy('');
   };
   const build = async () => {
     setError(''); setBusy('build');
-    try { const res = await api.post(`/institution/capability-targets/${ct.id}/build-pathway`, { language }); setBuildResult(res.data); setStep(4); } catch (err) { fail(err, 'Pathway build failed.'); }
+    try { const res = await api.post(`/institution/capability-targets/${ct.id}/build-pathway`, { language }); setBuildResult(res.data); setStep(4); } catch (err) { fail(err, t('inst.newCohort.pathwayBuildFailed')); }
     setBusy('');
   };
   const create = async () => {
@@ -87,7 +90,7 @@ export default function NewCohort() {
         professors: Object.entries(profs).map(([id, cohort_role]) => ({ id, cohort_role }))
       });
       navigate(`/institution/cohorts/${res.data.engagement_id}?created=1`);
-    } catch (err) { fail(err, 'Couldn’t create the cohort.'); }
+    } catch (err) { fail(err, t('inst.newCohort.couldnTCreateThe')); }
     setBusy('');
   };
 
@@ -96,47 +99,47 @@ export default function NewCohort() {
     <>
       <Crumbs items={[{ label: 'Cohorts', to: '/institution/cohorts' }, { label: 'New cohort' }]} />
       <header className="ln-col" style={{ gap: 12 }}>
-        <h1 className="ln-title">New cohort</h1>
-        <ol className="in-steps" aria-label="Setup steps">
-          {STEPS.map((label, i) => <li key={label} className={i < step ? 'is-done' : i === step ? 'is-now' : ''} aria-current={i === step ? 'step' : undefined}><span className="in-dot">{i < step ? '✓' : i + 1}</span>{label}</li>)}
+        <h1 className="ln-title">{t('inst.newCohort.newCohort')}</h1>
+        <ol className="in-steps" aria-label={t('inst.newCohort.setupSteps')}>
+          {STEPS.map((label, i) => <li key={label} className={i < step ? 'is-done' : i === step ? 'is-now' : ''} aria-current={i === step ? 'step' : undefined}><span className="in-dot">{i < step ? '✓' : i + 1}</span>{t(label)}</li>)}
         </ol>
       </header>
       {error && <div className="ln-error" role="alert">{error}</div>}
 
       {step === 0 && (
-        <div className="ln-col" style={{ gap: 16, maxWidth: 860 }}>
+        <div className="ui-narrow ln-col" style={{ gap: 16 }}>
           <div className="ln-tabs" role="tablist">
-            <button type="button" role="tab" className="ln-tab" aria-selected={mode === 'new'} onClick={() => setMode('new')}>Paste a new brief</button>
-            <button type="button" role="tab" className="ln-tab" aria-selected={mode === 'existing'} onClick={() => setMode('existing')}>Use an existing target · {targets.length}</button>
+            <button type="button" role="tab" className="ln-tab" aria-selected={mode === 'new'} onClick={() => setMode('new')}>{t('inst.newCohort.pasteNewBrief')}</button>
+            <button type="button" role="tab" className="ln-tab" aria-selected={mode === 'existing'} onClick={() => setMode('existing')}>{t('inst.newCohort.useExistingTargetLength', { length: targets.length })}</button>
           </div>
           {mode === 'new' ? (
             <form className="ln-card" onSubmit={submitTarget}>
-              <div className="ln-field"><label className="ln-label" htmlFor="ct-title">Programme title</label><input id="ct-title" className="ln-input" placeholder="e.g. Full-Stack Developer · CSE 2027 · Section A" value={title} onChange={e => setTitle(e.target.value)} required /></div>
+              <div className="ln-field"><label className="ln-label" htmlFor="ct-title">{t('inst.newCohort.programmeTitle')}</label><input id="ct-title" className="ln-input" placeholder={t('inst.newCohort.eGFullStack')} value={title} onChange={e => setTitle(e.target.value)} required /></div>
               <div className="ln-field">
-                <span className="ln-label">Upload the curriculum</span>
+                <span className="ln-label">{t('inst.newCohort.uploadCurriculum')}</span>
                 <div className="ln-row ln-wrap" style={{ gap: 10 }}>
                   <label className="ln-btn" style={{ cursor: busy === 'upload' ? 'wait' : 'pointer' }}>
-                    <Upload size={16} aria-hidden="true" />{busy === 'upload' ? 'Reading the file…' : 'Choose a file'}
+                    <Upload size={16} aria-hidden="true" />{busy === 'upload' ? t('inst.newCohort.readingFile') : t('inst.newCohort.chooseFile')}
                     <input type="file" accept=".pdf,.docx,.txt,.md,.csv" className="ln-sr" disabled={busy === 'upload'} onChange={uploadFile} />
                   </label>
-                  <span className="ln-xs ln-muted">PDF, Word (.docx), text, Markdown or CSV, up to 4 MB. Its text appears below for you to check and edit.</span>
+                  <span className="ln-xs ln-muted">{t('inst.newCohort.pdfWordDocxText')}</span>
                 </div>
                 {uploaded && <span className="ln-small" role="status">{uploaded}</span>}
               </div>
-              <div className="ln-field"><label className="ln-label" htmlFor="ct-raw">Curriculum, JD, skills list or plain description — any format</label>
+              <div className="ln-field"><label className="ln-label" htmlFor="ct-raw">{t('inst.newCohort.curriculumJdSkillsList')}</label>
                 <textarea id="ct-raw" className="ln-textarea" rows={12} value={raw} onChange={e => setRaw(e.target.value)} required
-                  placeholder={'We need our final-year students to build responsive web apps: HTML/CSS, JavaScript, React, REST APIs with Node.js and SQL. 16 weeks, 64 students.'} />
-                <span className="ln-xs ln-muted">Professor Qubirex extracts skill clusters and shows them to you to confirm before anything is built. The teaching language is chosen next.</span></div>
-              <div className="ln-field" style={{ maxWidth: 200 }}><label className="ln-label" htmlFor="ct-weeks">Time window (weeks) · optional</label><input id="ct-weeks" className="ln-input" type="number" min="1" max="104" value={weeks} onChange={e => setWeeks(e.target.value)} /></div>
-              <button type="submit" className="ln-btn ln-btn-primary" style={{ alignSelf: 'flex-start' }} disabled={busy === 'extract'}>{busy === 'extract' ? 'Extracting…' : 'Extract capability targets →'}</button>
+                  placeholder={t('inst.newCohort.weNeedOurFinal')} />
+                <span className="ln-xs ln-muted">{t('inst.newCohort.professorQubirexExtractsSkill')}</span></div>
+              <div className="ln-field" style={{ maxWidth: 200 }}><label className="ln-label" htmlFor="ct-weeks">{t('inst.newCohort.timeWindowWeeksOptional')}</label><input id="ct-weeks" className="ln-input" type="number" min="1" max="104" value={weeks} onChange={e => setWeeks(e.target.value)} /></div>
+              <button type="submit" className="ln-btn ln-btn-primary" style={{ alignSelf: 'flex-start' }} disabled={busy === 'extract'}>{busy === 'extract' ? t('inst.newCohort.extracting') : t('inst.newCohort.extractCapabilityTargets')}</button>
             </form>
           ) : (
             <div className="ln-col" style={{ gap: 10 }}>
-              {targets.length === 0 && <div className="ln-card ln-muted">No capability targets yet.</div>}
-              {targets.map(t => (
-                <button key={t.id} type="button" className="in-choice" onClick={() => useExisting(t)}>
-                  <b>{t.title} <span className="ln-muted" style={{ fontWeight: 400 }}>v{t.version}</span></b>
-                  <span className="ln-small ln-muted">{t.node_count ? `Pathway built · ${t.cluster_count} clusters · ${t.node_count} skill nodes` : t.confirmed ? 'Confirmed · pathway not built yet' : 'Not confirmed yet'}</span>
+              {targets.length === 0 && <div className="ln-card ln-muted">{t('inst.newCohort.noCapabilityTargetsYet')}</div>}
+              {targets.map(tg => (
+                <button key={tg.id} type="button" className="in-choice" onClick={() => useExisting(tg)}>
+                  <b>{tg.title} <span className="ln-muted" style={{ fontWeight: 400 }}>v{tg.version}</span></b>
+                  <span className="ln-small ln-muted">{tg.node_count ? t('inst.newCohort.pathwayBuilt', { groups: tg.cluster_count, lessons: tg.node_count }) : tg.confirmed ? t('inst.newCohort.confirmedNotBuilt') : t('inst.newCohort.notConfirmedYet')}</span>
                 </button>
               ))}
             </div>
@@ -145,78 +148,78 @@ export default function NewCohort() {
       )}
 
       {step === 1 && ct && (
-        <section className="ln-card" style={{ maxWidth: 860 }}>
-          <div className="ln-between ln-wrap"><h2 className="ln-h2">Check what Professor Qubirex understood</h2>
-            {ex?.extraction_confidence != null && <span className="ln-tag ln-tag-lg ln-tag-success">Confidence {Math.round(ex.extraction_confidence * 100)}%</span>}</div>
-          {ex?.confirmation_summary && <p className="ln-tile" style={{ padding: 16, fontSize: 14, lineHeight: 1.65 }}>{ex.confirmation_summary}</p>}
-          {ex?.ambiguities?.length > 0 && <div className="ln-note" style={{ background: 'var(--status-warning-bg)', color: 'var(--warn)' }}><b>Needs clarification:</b><ul style={{ listStyle: 'disc', paddingLeft: 20, marginTop: 6 }}>{ex.ambiguities.map(a => <li key={a}>{a}</li>)}</ul></div>}
+        <section className="ui-narrow ln-card">
+          <div className="ln-between ln-wrap"><h2 className="ln-h2">{t('inst.newCohort.checkWhatProfessorQubirex')}</h2>
+            {ex?.extraction_confidence != null && <span className="ln-tag ln-tag-lg ln-tag-success">{t('inst.newCohort.confidenceRound', { round: Math.round(ex.extraction_confidence * 100) })}</span>}</div>
+          {ex?.confirmation_summary && <p className="ln-tile" style={{ padding: 16, fontSize: 'var(--fs-body)', lineHeight: 1.65 }}>{ex.confirmation_summary}</p>}
+          {ex?.ambiguities?.length > 0 && <div className="ln-note" style={{ background: 'var(--status-warning-bg)', color: 'var(--warn)' }}><b>{t('inst.newCohort.needsClarification')}</b><ul style={{ listStyle: 'disc', paddingLeft: 20, marginTop: 6 }}>{ex.ambiguities.map(a => <li key={a}>{a}</li>)}</ul></div>}
           <div className="ln-col" style={{ gap: 8 }}>
             {(ex?.clusters || []).map(c => (
               <div key={c.label} className="ln-tile" style={{ padding: '12px 14px' }}>
-                <b style={{ fontSize: 14 }}>{c.label}</b>
+                <b style={{ fontSize: 'var(--fs-body)' }}>{c.label}</b>
                 <span className="ln-xs ln-muted" style={{ textTransform: 'capitalize' }}>{[c.required_proficiency, c.priority && `${c.priority} priority`].filter(Boolean).join(' · ')}</span>
                 {c.description && <span className="ln-small">{c.description}</span>}
               </div>
             ))}
-            {!ex && <span className="ln-small ln-muted">This target was saved earlier. Confirm it to continue.</span>}
+            {!ex && <span className="ln-small ln-muted">{t('inst.newCohort.targetWasSavedEarlier')}</span>}
           </div>
           <div className="ln-row" style={{ gap: 10 }}>
-            <button type="button" className="ln-btn" onClick={() => setStep(0)}>Back — edit the brief</button>
-            <button type="button" className="ln-btn ln-btn-primary" onClick={confirm} disabled={busy === 'confirm'}>These targets are right — confirm</button>
+            <button type="button" className="ln-btn" onClick={() => setStep(0)}>{t('inst.newCohort.backEditBrief')}</button>
+            <button type="button" className="ln-btn ln-btn-primary" onClick={confirm} disabled={busy === 'confirm'}>{t('inst.newCohort.theseTargetsRightConfirm')}</button>
           </div>
         </section>
       )}
 
       {step === 2 && (
-        <section className="ln-card" style={{ maxWidth: 860 }}>
-          <h2 className="ln-h2">Which language will this cohort learn in?</h2>
-          <span className="ln-small ln-muted">Skill nodes and Professor Qubirex’s explanations are built natively in this language. It can’t be changed once the pathway is built.</span>
+        <section className="ui-narrow ln-card">
+          <h2 className="ln-h2">{t('inst.newCohort.whichLanguageWillCohort')}</h2>
+          <span className="ln-small ln-muted">{t('inst.newCohort.skillNodesProfessorQubirex')}</span>
           <div className="ln-grid ln-g-2 ln-indic" style={{ gap: 10 }}>
-            {[['telugu', 'తెలుగు', 'Telugu'], ['hindi', 'हिंदी', 'Hindi']].map(([id, native, en]) => (
-              <button key={id} type="button" className="in-choice" aria-pressed={language === id} onClick={() => setLanguage(id)}><b style={{ fontSize: 20 }}>{native}</b><span className="ln-small ln-muted">{en}</span></button>
+            {[['telugu', 'తెలుగు', t('inst.newCohort.telugu')], ['hindi', 'हिंदी', t('inst.newCohort.hindi')]].map(([id, native, en]) => (
+              <button key={id} type="button" className="in-choice" aria-pressed={language === id} onClick={() => setLanguage(id)}><b style={{ fontSize: 'var(--fs-h2)' }}>{native}</b><span className="ln-small ln-muted">{en}</span></button>
             ))}
           </div>
-          <button type="button" className="ln-btn ln-btn-primary" style={{ alignSelf: 'flex-start' }} disabled={!language} onClick={() => setStep(3)}>Continue →</button>
+          <button type="button" className="ln-btn ln-btn-primary" style={{ alignSelf: 'flex-start' }} disabled={!language} onClick={() => setStep(3)}>{t('inst.newCohort.continue')}</button>
         </section>
       )}
 
       {step === 3 && (
-        <section className="ln-card" style={{ maxWidth: 860 }}>
-          <h2 className="ln-h2">Build the pathway in {language === 'hindi' ? 'Hindi' : 'Telugu'}</h2>
-          <span className="ln-small ln-muted">Each cluster is broken into short skill nodes, easiest first, with prerequisites respected. This takes a minute or two.</span>
+        <section className="ui-narrow ln-card">
+          <h2 className="ln-h2">{t('inst.newCohort.buildPathway')}{' '} {language === 'hindi' ? t('inst.newCohort.hindi') : t('inst.newCohort.telugu')}</h2>
+          <span className="ln-small ln-muted">{t('inst.newCohort.eachClusterBrokenInto')}</span>
           <div className="ln-row" style={{ gap: 10 }}>
-            <button type="button" className="ln-btn" onClick={() => setStep(2)} disabled={busy === 'build'}>Back</button>
-            <button type="button" className="ln-btn ln-btn-primary" onClick={build} disabled={busy === 'build'}>{busy === 'build' ? 'Building the pathway…' : 'Build pathway'}</button>
+            <button type="button" className="ln-btn" onClick={() => setStep(2)} disabled={busy === 'build'}>{t('inst.newCohort.back')}</button>
+            <button type="button" className="ln-btn ln-btn-primary" onClick={build} disabled={busy === 'build'}>{busy === 'build' ? t('inst.newCohort.buildingPathway') : t('inst.newCohort.buildPathway2')}</button>
           </div>
         </section>
       )}
 
       {step === 4 && ct && (
-        <section className="ln-card" style={{ maxWidth: 860 }}>
-          <h2 className="ln-h2">Name the cohort and assign professors</h2>
-          {buildResult && <div className="ln-note">Pathway built: {buildResult.results.map(r => (r.error ? `${r.cluster} — failed (${r.error})` : `${r.cluster} (${r.nodes_created} nodes)`)).join(' · ')}</div>}
+        <section className="ui-narrow ln-card">
+          <h2 className="ln-h2">{t('inst.newCohort.nameCohortAssignProfessors')}</h2>
+          {buildResult && <div className="ln-note">{t('inst.newCohort.pathwayBuilt')}{' '} {buildResult.results.map(r => (r.error ? `${r.cluster} — failed (${r.error})` : `${r.cluster} (${r.nodes_created} nodes)`)).join(' · ')}</div>}
           {ct.existing && ct.node_count > 0 && !language && (
-            <div className="ln-field"><span className="ln-label">Teaching language</span>
+            <div className="ln-field"><span className="ln-label">{t('inst.newCohort.teachingLanguage')}</span>
               <div className="ln-seg ln-indic">{[['telugu', 'తెలుగు'], ['hindi', 'हिंदी']].map(([id, l]) => <button key={id} type="button" aria-pressed={language === id} onClick={() => setLanguage(id)}>{l}</button>)}</div>
-              <span className="ln-xs ln-muted">This target’s pathway is already built; pick the language it was built for.</span></div>
+              <span className="ln-xs ln-muted">{t('inst.newCohort.targetSPathwayAlready')}</span></div>
           )}
-          {ct.existing && ct.node_count > 0 && language && <span className="ln-small">Language: <b>{language === 'hindi' ? 'Hindi' : 'Telugu'}</b> · <button type="button" className="ln-link" style={{ fontSize: 13 }} onClick={() => setLanguage('')}>change</button></span>}
-          <div className="ln-field"><label className="ln-label" htmlFor="co-title">Cohort name</label><input id="co-title" className="ln-input" placeholder="e.g. Full-Stack Developer · CSE 2027 · Section A" value={cohortTitle} onChange={e => setCohortTitle(e.target.value)} /></div>
+          {ct.existing && ct.node_count > 0 && language && <span className="ln-small">{t('inst.newCohort.language')}{' '} <b>{language === 'hindi' ? t('inst.newCohort.hindi') : t('inst.newCohort.telugu')}</b> · <button type="button" className="ln-link" style={{ fontSize: 'var(--fs-small)' }} onClick={() => setLanguage('')}>{t('inst.newCohort.change')}</button></span>}
+          <div className="ln-field"><label className="ln-label" htmlFor="co-title">{t('inst.newCohort.cohortName')}</label><input id="co-title" className="ln-input" placeholder={t('inst.newCohort.eGFullStack')} value={cohortTitle} onChange={e => setCohortTitle(e.target.value)} /></div>
           <div className="ln-col" style={{ gap: 8 }}>
-            <span className="ln-label">Professors</span>
-            {team.length === 0 && <span className="ln-small ln-muted">No professors yet. <Link to="/institution/team" className="ln-link" style={{ fontSize: 13 }}>Invite one from Team &amp; roles</Link> — you can assign them later.</span>}
+            <span className="ln-label">{t('inst.newCohort.professors')}</span>
+            {team.length === 0 && <span className="ln-small ln-muted">{t('inst.newCohort.noProfessorsYet')}{' '} <Link to="/institution/team" className="ln-link" style={{ fontSize: 'var(--fs-small)' }}>{t('inst.newCohort.inviteOneFromTeam')}</Link> {' '}{t('inst.newCohort.canAssignThemLater')}</span>}
             {team.map(m => (
               <div key={m.id} className="ln-row ln-wrap" style={{ gap: 12 }}>
                 <label className="ln-check" style={{ flex: 1 }}><input type="checkbox" checked={!!profs[m.id]} onChange={e => setProfs(p => { const n = { ...p }; if (e.target.checked) n[m.id] = Object.values(p).includes('lead') ? 'co' : 'lead'; else delete n[m.id]; return n; })} />{[m.title, m.name].filter(Boolean).join(' ') || m.email}{m.status !== 'active' && <span className="ln-tag ln-tag-info">{m.status}</span>}</label>
                 {profs[m.id] && (
-                  <select className="ln-select" style={{ width: 170, minHeight: 36 }} aria-label={`Role of ${m.name || m.email} in this cohort`} value={profs[m.id]} onChange={e => setProfs(p => ({ ...p, [m.id]: e.target.value }))}>
-                    <option value="lead">Lead professor</option><option value="co">Co-professor</option>
-                  </select>
+                  <Select style={{ width: 170, minHeight: 36 }} aria-label={t('inst.newCohort.roleOf', { name: m.name || m.email })} value={profs[m.id]} onChange={e => setProfs(p => ({ ...p, [m.id]: e.target.value }))}>
+                    <option value="lead">{t('inst.newCohort.leadProfessor')}</option><option value="co">{t('inst.newCohort.coProfessor')}</option>
+                  </Select>
                 )}
               </div>
             ))}
           </div>
-          <button type="button" className="ln-btn ln-btn-primary" style={{ alignSelf: 'flex-start' }} onClick={create} disabled={busy === 'create' || !language || !cohortTitle.trim()}>{busy === 'create' ? 'Creating…' : 'Create cohort'}</button>
+          <button type="button" className="ln-btn ln-btn-primary" style={{ alignSelf: 'flex-start' }} onClick={create} disabled={busy === 'create' || !language || !cohortTitle.trim()}>{busy === 'create' ? t('inst.newCohort.creating') : t('inst.newCohort.createCohort')}</button>
         </section>
       )}
     </>

@@ -15,7 +15,9 @@ import VoiceStatus from '../../components/learn/VoiceStatus';
 import { errMsg } from '../../utils/errors';
 import { Bar, SampleBadge, useSkillRequests, REQUEST_STATUS } from '../../components/learn/ui';
 
+import { useUiLang } from '../../context/UiLangContext';
 export default function Topics() {
+  const { t } = useUiLang();
   const { user } = useAuth();
   const [params, setParams] = useSearchParams();
   const [sector, setSector] = useState('');
@@ -52,7 +54,7 @@ export default function Topics() {
       setIntroText(res.data.text);
       speech.speak(res.data.text, featured.id);
     } catch (e) {
-      setIntroError(errMsg(e, 'Couldn’t prepare the intro right now. Please try again.'));
+      setIntroError(errMsg(e, t('learn.topics.couldnTPrepareIntro')));
     }
     setIntroBusy(false);
   };
@@ -61,15 +63,15 @@ export default function Topics() {
     <>
       <header className="ln-pagehead">
         <div className="ln-col" style={{ gap: 6 }}>
-          <h1 className="ln-title">Topics creating new jobs</h1>
-          <span className="ln-sub">Where new roles are appearing, what they need, and how close you already are.</span>
+          <h1 className="ln-title">{t('learn.topics.topicsCreatingNewJobs')}</h1>
+          <span className="ln-sub">{t('learn.topics.whereNewRolesAppearing')}</span>
         </div>
         <SampleBadge />
       </header>
 
-      <div className="ln-pilltabs" role="tablist" aria-label="Sector">
+      <div className="ln-pilltabs" role="tablist" aria-label={t('learn.topics.sector')}>
         {['', ...(data?.sectors || MOCK_TOPICS.sectors)].map(s => (
-          <button key={s || 'all'} type="button" role="tab" className="ln-pilltab" aria-selected={sector === s} onClick={() => { setSector(s); setFeaturedId(null); }}>{s || 'All'}</button>
+          <button key={s || 'all'} type="button" role="tab" className="ln-pilltab" aria-selected={sector === s} onClick={() => { setSector(s); setFeaturedId(null); }}>{s || t('learn.topics.all2')}</button>
         ))}
       </div>
 
@@ -78,48 +80,48 @@ export default function Topics() {
           <div>
             <div className="ln-row ln-wrap" style={{ gap: 8 }}>
               <span className="ln-tag ln-tag-lg" style={{ background: 'var(--ok-bg)', color: 'var(--ok)' }}>{featured.growth}</span>
-              {featured.have_pct >= 20 && <span className="ln-tag ln-tag-lg" style={{ background: 'var(--stage-surface)', color: 'var(--accent-200)' }}>Close to your path</span>}
+              {featured.have_pct >= 20 && <span className="ln-tag ln-tag-lg" style={{ background: 'var(--stage-surface)', color: 'var(--accent-200)' }}>{t('learn.topics.closePath')}</span>}
             </div>
-            <h2 id="featured-topic" style={{ fontSize: 34 }}>{featured.name}</h2>
-            <p style={{ fontSize: 15, lineHeight: 1.65, color: 'var(--stage-muted)', maxWidth: 520 }}>{featured.desc}</p>
+            <h2 id="featured-topic" style={{ fontSize: 'var(--fs-h1)' }}>{featured.name}</h2>
+            <p style={{ fontSize: 'var(--fs-body)', lineHeight: 1.65, color: 'var(--stage-muted)', maxWidth: 520 }}>{featured.desc}</p>
             <div className="ln-col" style={{ gap: 8 }}>
-              <span className="ln-kicker" style={{ color: 'var(--stage-muted)' }}>New roles</span>
+              <span className="ln-kicker" style={{ color: 'var(--stage-muted)' }}>{t('learn.topics.newRoles')}</span>
               <div className="ln-row ln-wrap" style={{ gap: 8 }}>{featured.roles.map(r => <Link key={r} to={`/learn/market?q=${encodeURIComponent(r.split(' ')[0])}`} className="ln-darkpill">{r}</Link>)}</div>
             </div>
             <div className="ln-row ln-wrap" style={{ gap: 10, paddingTop: 6 }}>
               {toRequest.length > 0 ? (
-                <button type="button" className="ln-btn ln-btn-amber" disabled={requests.busy}
+                <button type="button" className="ln-btn ln-btn-primary ln-btn-lg" disabled={requests.busy}
                   onClick={() => requests.requestMany(toRequest.map(st => st.name), `topic:${featured.id}`)}>
-                  {requests.busy ? 'Sending…' : `Request ${toRequest.length} skill${toRequest.length > 1 ? 's' : ''} from your institution`}
+                  {requests.busy ? t('learn.topics.sending') : t('learn.topics.requestN', { n: toRequest.length })}
                 </button>
               ) : (
                 <span className="ln-tag ln-tag-lg" style={{ background: 'var(--ok-bg)', color: 'var(--ok)' }}>
-                  {featured.steps.some(st => st.status === 'not_in_path' || requests.requested.has(st.name)) ? '✓ Requested from your institution' : '✓ Every skill is already in your programme'}
+                  {featured.steps.some(st => st.status === 'not_in_path' || requests.requested.has(st.name)) ? t('learn.topics.requestedFromInstitution') : t('learn.topics.everySkillAlreadyProgramme')}
                 </span>
               )}
               <button type="button" className="ln-btn ln-btn-ghost-dark" onClick={playIntro} disabled={introBusy || !speech.supported}>
                 {speech.speakingId ? <Square size={16} aria-hidden="true" /> : <Volume2 size={18} aria-hidden="true" />}
-                {introBusy ? 'Preparing…' : speech.speakingId ? 'Stop' : 'Listen to a 2-min intro'}
+                {introBusy ? t('learn.topics.preparing') : speech.speakingId ? t('learn.topics.stop') : t('learn.topics.listenToA2')}
               </button>
             </div>
             <VoiceStatus speech={speech} text={introText} dark lang={speechTag(user?.language || 'telugu')} />
             {introError && <div className="ln-error">{introError}</div>}
-            {requests.sent && <div className="ln-note" role="status" style={{ background: 'var(--ok-bg)', color: 'var(--ok)' }}>{requests.sent}. You’ll see each one’s status below.</div>}
+            {requests.sent && <div className="ln-note" role="status" style={{ background: 'var(--ok-bg)', color: 'var(--ok)' }}>{t('learn.topics.sentLlSeeEach', { sent: requests.sent })}</div>}
             {requests.error && <div className="ln-error">{requests.error}</div>}
           </div>
           <div>
-            <span className="ln-kicker" style={{ color: 'var(--stage-muted)' }}>What to learn, in order</span>
+            <span className="ln-kicker" style={{ color: 'var(--stage-muted)' }}>{t('learn.topics.whatLearnOrder')}</span>
             {featured.steps.map(st => {
               const done = st.status === 'mastered' || st.status === 'declared';
-              const note = done ? 'Already mastered'
+              const note = done ? t('learn.topics.alreadyMastered')
                 : st.status === 'in_path' || st.status === 'in_progress' ? `In your path · about ${st.hours} h`
-                : requests.requested.has(st.name) ? `${REQUEST_STATUS[requests.statusOf(st.name)]} · about ${st.hours} h`
-                : st.status === 'requested' ? `${REQUEST_STATUS.pending} · about ${st.hours} h`
+                : requests.requested.has(st.name) ? `${t(REQUEST_STATUS[requests.statusOf(st.name)])} · about ${st.hours} h`
+                : st.status === 'requested' ? `${t(REQUEST_STATUS.pending)} · about ${st.hours} h`
                 : `About ${st.hours} h · not in your programme`;
               return (
                 <div key={st.name} className="ln-step">
                   <span className={`ln-stepdot ${done ? 'is-done' : ''}`}>{done ? '✓' : st.n}</span>
-                  <div className="ln-col" style={{ flex: 1 }}><span style={{ fontSize: 14, fontWeight: 600 }}>{st.name}</span><span className="ln-xs" style={{ color: 'var(--stage-muted)' }}>{note}</span></div>
+                  <div className="ln-col" style={{ flex: 1 }}><span style={{ fontSize: 'var(--fs-body)', fontWeight: 600 }}>{st.name}</span><span className="ln-xs" style={{ color: 'var(--stage-muted)' }}>{note}</span></div>
                 </div>
               );
             })}
@@ -131,14 +133,14 @@ export default function Topics() {
         {rest.map(tp => (
           <article key={tp.id} className="ln-card" style={{ gap: 12, padding: 22, borderRadius: 'var(--radius-lg)' }}>
             <div className="ln-between"><span className="ln-xs ln-muted">{tp.sector}</span><span className={`ln-tag ln-tag-lg ${tp.growth === 'Steady' ? 'ln-tag-neutral' : 'ln-tag-success'}`}>{tp.growth}</span></div>
-            <h3 style={{ fontSize: 18 }}>{tp.name}</h3>
-            <span style={{ fontSize: 14, lineHeight: 1.55 }}>{tp.desc}</span>
-            <span className="ln-small ln-muted"><b style={{ color: 'var(--color-text)' }}>New roles:</b> {tp.roles.join(', ')}</span>
+            <h3 style={{ fontSize: 'var(--fs-h3)' }}>{tp.name}</h3>
+            <span style={{ fontSize: 'var(--fs-body)', lineHeight: 1.55 }}>{tp.desc}</span>
+            <span className="ln-small ln-muted"><b style={{ color: 'var(--color-text)' }}>{t('learn.topics.newRoles2')}</b> {tp.roles.join(', ')}</span>
             <div className="ln-col" style={{ gap: 6, paddingTop: 4, marginTop: 'auto' }}>
-              <div className="ln-between ln-xs"><span className="ln-muted">You already have</span><b>{tp.have_pct}%</b></div>
-              <Bar pct={tp.have_pct} label={`You already have ${tp.have_pct}% of the skills`} />
+              <div className="ln-between ln-xs"><span className="ln-muted">{t('learn.topics.alreadyHave')}</span><b>{tp.have_pct}%</b></div>
+              <Bar pct={tp.have_pct} label={t('learn.topics.alreadyHaveHavePct', { have_pct: tp.have_pct })} />
             </div>
-            <button type="button" className="ln-btn" style={{ fontWeight: 600 }} onClick={() => feature(tp.id)}>See roles and skills</button>
+            <button type="button" className="ln-btn" style={{ fontWeight: 600 }} onClick={() => feature(tp.id)}>{t('learn.topics.seeRolesSkills')}</button>
           </article>
         ))}
       </div>

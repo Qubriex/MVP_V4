@@ -90,7 +90,7 @@ export default function QrScanner({ onCode }) {
       ) : (
         <button type="button" className="ln-btn ln-btn-primary" style={{ alignSelf: 'flex-start' }} onClick={() => stop()}><VideoOff size={16} aria-hidden="true" />{t('verify.stopCamera')}</button>
       )}
-      <video ref={video} playsInline muted aria-label={t('verify.cameraView')} style={{ display: live ? 'block' : 'none', width: '100%', borderRadius: 12, background: '#000' }} />
+      <video ref={video} playsInline muted aria-label={t('verify.cameraView')} style={{ display: live ? 'block' : 'none', width: '100%', borderRadius: 12, background: 'var(--ink-900)' }} />
       <canvas ref={canvas} hidden />
       {state === 'scanning' && <span className="ln-xs ln-muted" aria-live="polite">{t('verify.pointCamera')}</span>}
       {state === 'denied' && <span className="ln-small" role="alert">{t('verify.cameraDenied')}</span>}
