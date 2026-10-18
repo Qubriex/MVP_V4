@@ -10,6 +10,7 @@ import { Download, ChevronUp, ChevronDown, History } from 'lucide-react';
 import api, { getOr } from '../../utils/api';
 import { MOCK_RESUME } from '../../utils/learnerMockData';
 import { useAuth } from '../../context/AuthContext';
+import { Select } from '../../components/shared/ui';
 
 const TEMPLATES = [
   { id: 'classic', name: 'Classic', thumb: { borderTop: '6px solid var(--accent-800)' } },
@@ -224,9 +225,9 @@ export default function Resume() {
             ) : (
               <>
                 <label className="ln-sr" htmlFor="tailor-job">Job to tailor to</label>
-                <select id="tailor-job" className="ln-select" value={jobId} onChange={e => setJobId(e.target.value)}>
+                <Select id="tailor-job" value={jobId} onChange={e => setJobId(e.target.value)}>
                   {jobs.map(j => <option key={j.id} value={j.id}>{j.title} · {j.company_type}</option>)}
-                </select>
+                </Select>
                 <span className="ln-small" style={{ lineHeight: 1.5 }}>Reorders skills to match the JD and rewrites the summary. Only claims skills you have mastered or declared.</span>
                 <button type="button" className="ln-btn ln-btn-ink" onClick={tailor} disabled={busy === 'tailor'}>{busy === 'tailor' ? ['Reading the job description…', 'Matching your skills…', 'Writing your summary…'][step] : 'Tailor resume'}</button>
                 {tailoredJob && <span className="ln-xs ln-muted">Currently tailored to: {tailoredJob.title}</span>}

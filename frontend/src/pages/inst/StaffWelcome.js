@@ -42,7 +42,7 @@ export default function StaffWelcome() {
       {!form.draft ? <p className="ln-muted" style={{ padding: 40 }}>{form.status || 'Loading…'}</p> : (
         <div className="ln-grid ln-g-detail" style={{ padding: 'clamp(20px, 4vw, 40px) clamp(16px, 6vw, 80px)', gridTemplateColumns: 'minmax(0, 1fr) 340px', gap: 40 }}>
           <div className="ln-col" style={{ gap: 22, minWidth: 0 }}>
-            <div className="ln-col" style={{ gap: 6 }}><h1 className="ln-title" style={{ fontSize: 34 }}>{INTRO[step][0]}</h1><p className="ln-sub">{INTRO[step][1]}</p></div>
+            <div className="ln-col" style={{ gap: 6 }}><h1 className="ln-title" style={{ fontSize: 'var(--fs-h1)' }}>{INTRO[step][0]}</h1><p className="ln-sub">{INTRO[step][1]}</p></div>
             {step === 1 && <ProfileFields form={form} />}
             {step === 2 && <TeachingFields form={form} />}
             {step === 3 && <NotificationFields form={form} />}

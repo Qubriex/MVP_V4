@@ -20,7 +20,7 @@ export default function Pricing() {
         {PLANS.map(([side, price, href, cta]) => (
           <article key={side} className="ln-card" style={{ gap: 10 }}>
             <span className="pb-kicker">{t(`nav.${side}`)}</span>
-            <span className="ln-stat" style={{ fontSize: 30 }}>{price.startsWith('[') ? price : t(price)}</span><span className="ln-small ln-muted">{t(`price.${side}Unit`)}</span>
+            <span className="ln-stat" style={{ fontSize: 'var(--fs-h1)' }}>{price.startsWith('[') ? price : t(price)}</span><span className="ln-small ln-muted">{t(`price.${side}Unit`)}</span>
             <ul className="ln-small" style={{ margin: 0, paddingLeft: 18, display: 'grid', gap: 6 }}>{[1, 2, 3].map(i => <li key={i}>{t(`price.${side}${i}`)}</li>)}</ul>
             <Link to={href} className="ln-btn ln-btn-secondary ln-btn-sm" style={{ alignSelf: 'flex-start', marginTop: 'auto' }}>{t(cta)}</Link>
           </article>
@@ -28,13 +28,13 @@ export default function Pricing() {
       </section>
       <div className="ln-grid ln-g-2" style={{ gap: 16 }}>
         <section className="ln-card ln-card-warm" style={{ gap: 8 }}>
-          <span className="pb-kicker">{t('price.sponsorKicker')}</span><b style={{ fontSize: 20 }}>{t('price.sponsorTitle')}</b>
+          <span className="pb-kicker">{t('price.sponsorKicker')}</span><b style={{ fontSize: 'var(--fs-h2)' }}>{t('price.sponsorTitle')}</b>
           <span className="ln-small">{t('price.sponsorText')}</span>
           <Link to="/employers" className="ln-link">{t('home.learnMore')} →</Link>
         </section>
         <section className="ln-card" style={{ gap: 10 }}>
           <span className="pb-kicker">{t('price.faq')}</span>
-          {[1, 2, 3, 4].map(i => <div key={i} className="ln-col" style={{ gap: 2 }}><b style={{ fontSize: 15 }}>{t(`price.q${i}`)}</b><span className="ln-small ln-muted">{t(`price.a${i}`)}</span></div>)}
+          {[1, 2, 3, 4].map(i => <div key={i} className="ln-col" style={{ gap: 2 }}><b style={{ fontSize: 'var(--fs-body)' }}>{t(`price.q${i}`)}</b><span className="ln-small ln-muted">{t(`price.a${i}`)}</span></div>)}
         </section>
       </div>
       <p className="ln-xs ln-muted">{t('price.gst')}</p>

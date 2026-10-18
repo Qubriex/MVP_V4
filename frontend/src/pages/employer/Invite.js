@@ -39,13 +39,13 @@ export default function EmployerInvite() {
         <div className="ln-login-form">
           {!inv ? (
             <div className="ln-col" style={{ gap: 12 }}>
-              <h2 style={{ fontSize: 28 }}>Join your team</h2>
+              <h2 style={{ fontSize: 'var(--fs-h1)' }}>Join your team</h2>
               {error ? <div className="ln-error" role="alert">{error}</div> : <p className="ln-muted">Checking your invite…</p>}
               <Link to="/employer/login" className="ln-link">Go to sign in</Link>
             </div>
           ) : (
             <form className="ln-col" style={{ gap: 16 }} onSubmit={accept}>
-              <div className="ln-col" style={{ gap: 6 }}><h2 style={{ fontSize: 30 }}>Join {inv.employer_name}</h2>
+              <div className="ln-col" style={{ gap: 6 }}><h2 style={{ fontSize: 'var(--fs-h1)' }}>Join {inv.employer_name}</h2>
                 <p className="ln-muted">You were invited as a <b>{inv.role}</b> ({inv.email}).</p></div>
               {error && <div className="ln-error" role="alert">{error}</div>}
               <div className="ln-field"><label className="ln-label" htmlFor="nm">Your name</label><input id="nm" className="ln-input" value={name} onChange={e => setName(e.target.value)} required /></div>

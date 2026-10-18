@@ -12,7 +12,9 @@ import { Bar } from '../../components/learn/ui';
 import Crumbs from '../../components/inst/Crumbs';
 import EmptyState, { LoadingRows } from '../../components/shared/EmptyState';
 import { HowCounted, Term } from '../../components/shared/Popover';
+import { BandPill } from '../../components/shared/ui';
 
+const BAND_OF = { Ready: 'ready', 'Nearly ready': 'nearly', Building: 'building' };
 const STAGE_TAG = { watching: 'ln-tag-neutral', requested: 'ln-tag-warning', access_granted: 'ln-tag-success', applied: 'ln-tag-success', interview: 'ln-tag-info', dayone: 'ln-tag-info', offer: 'ln-tag-success', hired: 'ln-tag-success', hold: 'ln-tag-neutral', not_now: 'ln-tag-neutral', declined: 'ln-tag-neutral', withdrawn: 'ln-tag-neutral' };
 const FILTERS = [['', 'Everyone'], ['decide', 'Waiting for you'], ['requested', 'Asked'], ['interview', 'Interview'], ['offer', 'Offer'], ['hold', 'On hold']];
 const day = (s) => (s ? new Date(s).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—');
@@ -54,7 +56,7 @@ export function PipelinePage() {
             <tr key={r.id}>
               <td>{r.name ? <Link to={`/employer/candidates/${r.id}`} className="ln-link">{r.name}</Link> : <Link to={`/employer/candidates/${r.id}`} className="ln-link in-code">{r.code}</Link>}<span className="ln-xs ln-muted" style={{ display: 'block' }}>{r.college}</span></td>
               <td className="ln-small">{r.role_title}{r.interview_promised && <span className="ln-xs ln-muted" style={{ display: 'block' }}>Interview promised</span>}</td>
-              <td>{r.readiness} <span className="ln-xs ln-muted">{r.band_label}</span></td>
+              <td><BandPill band={BAND_OF[r.band_label] || 'none'} score={r.readiness} /></td>
               <td><span className={`ln-tag ${STAGE_TAG[r.stage]}`}>{r.stage_label}</span></td>
               <td className="ln-small">{r.waiting_days ? `${r.waiting_days} day${r.waiting_days === 1 ? '' : 's'}` : 'Today'}</td>
               <td><div className="ln-row" style={{ gap: 6 }}>
@@ -80,7 +82,7 @@ export function CandidatePage() {
       <Crumbs items={[{ label: 'Pipeline', to: '/employer/pipeline' }, { label: c.name || c.code }]} />
       <header className="ln-pagehead">
         <div className="ln-col" style={{ gap: 4 }}>
-          <h1 className="ln-title" style={{ fontSize: 30 }}>{c.name || <span className="in-code">{c.code}</span>}</h1>
+          <h1 className="ln-title" style={{ fontSize: 'var(--fs-h1)' }}>{c.name || <span className="in-code">{c.code}</span>}</h1>
           <span className="ln-sub">{c.role.title} · {c.college} · {c.city || '—'} · <span className="ln-tag ln-tag-info">{c.stage_label}</span></span>
         </div>
         {c.open && (
@@ -93,8 +95,8 @@ export function CandidatePage() {
       </header>
       {msg && <div className="ln-note" role="status">{msg}</div>}
       <div className="ln-grid ln-g-3" style={{ gap: 16 }}>
-        <div className="ln-card ln-card-sm"><span className="ln-small ln-muted">Readiness for this role</span><span className="ln-stat">{c.readiness}</span><span className="ln-xs ln-muted">{c.band_label} · your bar {c.role.bar}</span></div>
-        <div className="ln-card ln-card-sm"><span className="ln-small ln-muted">Day-One practice run</span><span className="ln-stat" style={{ fontSize: 20 }}>{c.dayone?.status === 'invited' ? 'Invited' : 'Not scheduled'}</span>
+        <div className="ln-card ln-card-sm"><span className="ln-small ln-muted">Readiness for this role</span><span className="ln-stat">{c.readiness}</span><span className="ln-row ln-wrap" style={{ gap: 6 }}><BandPill band={BAND_OF[c.band_label] || 'none'} /><span className="ln-xs ln-muted">your bar {c.role.bar}</span></span></div>
+        <div className="ln-card ln-card-sm"><span className="ln-small ln-muted">Day-One practice run</span><span className="ln-stat" style={{ fontSize: 'var(--fs-h2)' }}>{c.dayone?.status === 'invited' ? 'Invited' : 'Not scheduled'}</span>
           {c.open && c.dayone?.status !== 'invited' && <button type="button" className="ln-btn ln-btn-sm" style={{ alignSelf: 'flex-start' }} onClick={() => stage('dayone', 'Day-One practice run invitation sent.')}>Invite to Day-One</button>}</div>
         <div className="ln-card ln-card-sm"><span className="ln-small ln-muted">Evidence ID</span>
           {c.evidence_id ? <Link to={`/verify/${c.evidence_id}`} className="ln-link in-code" target="_blank" rel="noopener">{c.evidence_id} <ExternalLink size={12} aria-hidden="true" /></Link> : <span className="ln-small ln-muted">{c.open ? 'Not shared' : 'Shown after a yes'}</span>}
@@ -121,9 +123,9 @@ export function CandidatePage() {
             )}
           </section>
           <div className="ln-grid ln-g-2" style={{ gap: 16 }}>
-            <section className="ln-card" style={{ gap: 6 }}><h2 className="ln-h2" style={{ fontSize: 17 }}>Résumé</h2>
+            <section className="ln-card" style={{ gap: 6 }}><h2 className="ln-h2" style={{ fontSize: 'var(--fs-h3)' }}>Résumé</h2>
               {c.resume ? <><b>{c.resume.headline}</b><span className="ln-small">{c.resume.summary}</span></> : <span className="ln-small ln-muted">{c.shared.includes('resume') ? 'Not filled in yet.' : 'Not shared.'}</span>}</section>
-            <section className="ln-card" style={{ gap: 6 }}><h2 className="ln-h2" style={{ fontSize: 17 }}>Contact</h2>
+            <section className="ln-card" style={{ gap: 6 }}><h2 className="ln-h2" style={{ fontSize: 'var(--fs-h3)' }}>Contact</h2>
               {c.contact ? <span className="ln-small">{[c.contact.email, c.contact.phone].filter(Boolean).join(' · ') || 'No contact details on file.'}</span> : <span className="ln-small ln-muted">Not shared. Use Interview to invite them through Qubirex.</span>}</section>
           </div>
           {['interview', 'dayone'].includes(c.stage) && (

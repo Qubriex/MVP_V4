@@ -19,9 +19,9 @@ export default function AdminOverview() {
       {error && <div className="ln-error" role="alert">{error}</div>}
       <div className="ln-grid ln-g-4" style={{ gap: 12, marginBottom: 20 }}>
         {STATS.map(([k, label]) => (
-          <div key={k} className="ln-card ln-card-sm"><span className="ln-xs ln-muted">{label}</span><b style={{ fontSize: 26 }}>{stats ? stats[k] ?? 0 : '…'}</b></div>
+          <div key={k} className="ln-card ln-card-sm"><span className="ln-xs ln-muted">{label}</span><b style={{ fontSize: 'var(--fs-h1)' }}>{stats ? stats[k] ?? 0 : '…'}</b></div>
         ))}
-        <div className="ln-card ln-card-sm"><span className="ln-xs ln-muted">Average mastery</span><b style={{ fontSize: 26 }}>{stats?.avg_mastery != null ? `${Math.round(stats.avg_mastery * 100)}%` : '—'}</b></div>
+        <div className="ln-card ln-card-sm"><span className="ln-xs ln-muted">Average mastery</span><b style={{ fontSize: 'var(--fs-h1)' }}>{stats?.avg_mastery != null ? `${Math.round(stats.avg_mastery * 100)}%` : '—'}</b></div>
       </div>
       <div className="ln-tablewrap">
         <table className="ln-table">

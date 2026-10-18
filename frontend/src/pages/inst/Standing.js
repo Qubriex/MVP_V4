@@ -8,6 +8,7 @@ import { Download } from 'lucide-react';
 import { useCachedGet } from '../../utils/cachedGet';
 import { SampleBadge } from '../../components/learn/ui';
 import { errMsg } from '../../utils/errors';
+import { Select } from '../../components/shared/ui';
 
 export default function Standing() {
   const [cohortId, setCohortId] = useState('');
@@ -47,7 +48,7 @@ export default function Standing() {
 
       <div className="ln-filterbar">
         <label className="ln-selectwrap"><span>Cohort</span>
-          <select value={activeCohort} onChange={e => { setCohortId(e.target.value); if (e.target.value === compare) setCompare('regional'); }}>{data.cohorts.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}</select></label>
+          <Select value={activeCohort} onChange={e => { setCohortId(e.target.value); if (e.target.value === compare) setCompare('regional'); }}>{data.cohorts.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}</Select></label>
         <span className="ln-small ln-muted">compared with</span>
         <div className="ln-pilltabs" role="tablist">
           {data.compare_options.map(o => <button key={o.id} type="button" role="tab" className="ln-pilltab" aria-selected={compare === o.id} onClick={() => setCompare(o.id)}>{o.label}{o.sample ? '' : ' (live)'}</button>)}
@@ -87,11 +88,11 @@ export default function Standing() {
         <section className="ln-card ln-card-dark" style={{ gap: 12 }}>
           <span className="ln-kicker" style={{ color: 'var(--accent-400)' }}>Job-match index</span>
           <div className="ln-row" style={{ alignItems: 'baseline', gap: 14 }}>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: 72, fontWeight: 600, lineHeight: 1 }}>{data.index}</span>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-display)', fontWeight: 600, lineHeight: 1 }}>{data.index}</span>
             <span style={{ color: 'var(--stage-muted)' }}>vs <b style={{ color: 'var(--stage-text)' }}>{data.comparison.score}</b> {cmpLabel.toLowerCase()}</span>
           </div>
           <span className="ln-small" style={{ color: 'var(--stage-muted)', lineHeight: 1.6 }}>Average share of target-role JD skills your students have verified through mastery checks. Self-declared skills don’t count.</span>
-          <span className="ln-small" style={{ color: data.change_30d >= 0 ? 'var(--stage-listen)' : '#FFB4A6' }}>{data.change_30d >= 0 ? '▲' : '▼'} {Math.abs(data.change_30d)} points since last month</span>
+          <span className="ln-small" style={{ color: data.change_30d >= 0 ? 'var(--stage-listen)' : 'var(--danger-on-ink)' }}>{data.change_30d >= 0 ? '▲' : '▼'} {Math.abs(data.change_30d)} points since last month</span>
           <span className="ln-xs" style={{ color: 'var(--stage-muted)' }}>{data.students} students · target roles: {data.target_roles.join(', ') || '—'}</span>
         </section>
         <section className="ln-card">
@@ -114,10 +115,10 @@ export default function Standing() {
         <div className="ln-grid ln-g-3" style={{ gap: 14 }}>
           {data.roles.map(r => (
             <div key={r.role} className="ln-card" style={{ gap: 10, padding: 20 }}>
-              <span style={{ fontSize: 16, fontWeight: 600 }}>{r.role}</span>
+              <span style={{ fontSize: 'var(--fs-h3)', fontWeight: 600 }}>{r.role}</span>
               <div className="ln-row" style={{ gap: 20 }}>
-                <div className="ln-col"><b style={{ fontSize: 24 }}>{r.ready}</b><span className="ln-xs ln-muted">students Ready (80+)</span></div>
-                <div className="ln-col"><b style={{ fontSize: 24 }}>{r.open ? r.open.toLocaleString('en-IN') : '—'}</b><span className="ln-xs ln-muted">open roles in region (sample)</span></div>
+                <div className="ln-col"><b style={{ fontSize: 'var(--fs-h2)' }}>{r.ready}</b><span className="ln-xs ln-muted">students Ready (80+)</span></div>
+                <div className="ln-col"><b style={{ fontSize: 'var(--fs-h2)' }}>{r.open ? r.open.toLocaleString('en-IN') : '—'}</b><span className="ln-xs ln-muted">open roles in region (sample)</span></div>
               </div>
               {r.gap && <span className="ln-small">Biggest gap: <b>{r.gap}</b></span>}
             </div>

@@ -30,7 +30,7 @@ export default function AdminEmployers() {
         {data && data.employers.length === 0 && <p className="ln-muted">Nothing here.</p>}
         {(data?.employers || []).map(e => (
           <article key={e.id} className="ln-card" style={{ gap: 8 }}>
-            <div className="ln-between ln-wrap"><b style={{ fontSize: 17 }}>{e.name}</b><span className="ln-tag ln-tag-neutral">{e.kyb_status}</span></div>
+            <div className="ln-between ln-wrap"><b style={{ fontSize: 'var(--fs-h3)' }}>{e.name}</b><span className="ln-tag ln-tag-neutral">{e.kyb_status}</span></div>
             <div className="ln-small ln-muted">@{e.domain} · owner {e.owner_email || '—'} · {e.users} user{e.users === 1 ? '' : 's'}{e.city ? ` · ${e.city}` : ''}</div>
             <div className="ln-row ln-wrap" style={{ gap: 6 }}>
               <span className={`ln-tag ${e.domain_verified_at ? 'ln-tag-success' : 'ln-tag-warning'}`}>{e.domain_verified_at ? 'Domain verified' : 'Domain not verified'}</span>

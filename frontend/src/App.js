@@ -6,6 +6,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import { UiLangProvider } from './context/UiLangContext';
 import DevNav from './components/DevNav';
 import PageTransition from './components/PageTransition';
+import { ToastProvider, TableLabels } from './components/shared/ui';
 
 // Pages
 import PublicHome from './pages/public/Home';
@@ -90,6 +91,8 @@ export default function App() {
     <ThemeProvider>
       <UiLangProvider>
       <AuthProvider>
+        <ToastProvider>
+        <TableLabels />
         <BrowserRouter>
           <PageTransition>
             <Routes>
@@ -214,6 +217,7 @@ export default function App() {
           </PageTransition>
           <DevNav />
         </BrowserRouter>
+        </ToastProvider>
       </AuthProvider>
       </UiLangProvider>
     </ThemeProvider>

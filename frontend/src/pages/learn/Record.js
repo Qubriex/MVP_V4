@@ -80,7 +80,7 @@ export default function Record() {
 
       <section className="ln-col" style={{ gap: 14 }}>
         <div className="ln-between ln-wrap">
-          <h2 className="ln-h2" style={{ fontSize: 20 }}>Path</h2>
+          <h2 className="ln-h2" style={{ fontSize: 'var(--fs-h2)' }}>Path</h2>
           <div className="ln-row ln-wrap ln-xs" style={{ gap: 16 }}>
             <span className="ln-row" style={{ gap: 6 }}><span style={{ width: 12, height: 12, borderRadius: 99, background: 'var(--status-success)' }} />Mastered</span>
             <span className="ln-row" style={{ gap: 6 }}><span style={{ width: 12, height: 12, borderRadius: 99, background: 'var(--accent-400)', border: '2px solid var(--accent-800)', boxSizing: 'border-box' }} />Current</span>
@@ -90,7 +90,7 @@ export default function Record() {
         {data.clusters.map(c => (
           <div key={c.id} className="ln-card" style={{ padding: 20, borderRadius: 'var(--radius-lg)', gap: 12 }}>
             <div className="ln-between ln-wrap">
-              <div className="ln-row" style={{ gap: 10 }}><span style={{ fontSize: 16, fontWeight: 600 }}>{c.label}</span><span className={`ln-tag ${CLUSTER_TAG[c.status][1]}`}>{CLUSTER_TAG[c.status][0]}</span></div>
+              <div className="ln-row" style={{ gap: 10 }}><span style={{ fontSize: 'var(--fs-h3)', fontWeight: 600 }}>{c.label}</span><span className={`ln-tag ${CLUSTER_TAG[c.status][1]}`}>{CLUSTER_TAG[c.status][0]}</span></div>
               <span className="ln-small ln-muted">{c.mastered} of {c.total}</span>
             </div>
             <div className="ln-row ln-wrap" style={{ gap: 8 }}>{c.nodes.map(n => <NodePill key={n.id} n={n} />)}</div>

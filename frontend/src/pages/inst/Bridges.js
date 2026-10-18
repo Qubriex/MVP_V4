@@ -13,6 +13,7 @@ import Crumbs from '../../components/inst/Crumbs';
 import EmptyState from '../../components/shared/EmptyState';
 import { HowCounted } from '../../components/shared/Popover';
 import { SmallSample } from '../../components/shared/SampleSize';
+import { Select } from '../../components/shared/ui';
 
 const day = (s) => (s ? new Date(s).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—');
 const inDays = (n) => new Date(Date.now() + n * 86400000).toISOString().slice(0, 10);
@@ -47,14 +48,14 @@ function NewBridge({ onCreated, onCancel }) {
   };
   const learners = (c?.learners || []).filter(l => l.access !== 'removed');
   return (
-    <form className="ln-card" style={{ gap: 16, maxWidth: 860 }} onSubmit={submit}>
+    <form className="ui-narrow ln-card" style={{ gap: 16 }} onSubmit={submit}>
       <h2 className="ln-h2">Start a bridge programme</h2>
       <span className="ln-small ln-muted">Pick the skills to strengthen and who should practise them. Students see it on their Home under “Today”, and you check on the re-test date whether it worked.</span>
       <div className="ln-grid ln-g-2" style={{ gap: 12 }}>
         <div className="ln-field"><label className="ln-label" htmlFor="br-cohort">Cohort</label>
-          <select id="br-cohort" className="ln-select" value={cohortId} onChange={e => { setCohortId(e.target.value); setNodes(new Set()); setStudents(new Set()); }}>
+          <Select id="br-cohort" value={cohortId} onChange={e => { setCohortId(e.target.value); setNodes(new Set()); setStudents(new Set()); }}>
             {(cohorts || []).map(x => <option key={x.id} value={x.id}>{x.title}</option>)}
-          </select></div>
+          </Select></div>
         <div className="ln-field"><label className="ln-label" htmlFor="br-retest">Re-test on</label><input id="br-retest" type="date" className="ln-input" value={retest} min={inDays(1)} onChange={e => setRetest(e.target.value)} required /></div>
       </div>
       <fieldset className="ln-col" style={{ gap: 8, border: 0, padding: 0 }}>
@@ -152,19 +153,19 @@ export function BridgeDetail() {
     <>
       <Crumbs items={[{ label: 'Bridge programmes', to: '/institution/bridges' }, { label: b.title }]} />
       <header className="ln-pagehead">
-        <div className="ln-col" style={{ gap: 4 }}><h1 className="ln-title" style={{ fontSize: 30 }}>{b.title}</h1>
+        <div className="ln-col" style={{ gap: 4 }}><h1 className="ln-title" style={{ fontSize: 'var(--fs-h1)' }}>{b.title}</h1>
           <span className="ln-sub">{b.cohort.title} · {b.skills.map(s => s.label).join(', ')} · started {day(b.created_at)} · re-test {day(b.retest_at)}</span></div>
         {role !== 'viewer' && b.status === 'open' && <button type="button" className="ln-btn" onClick={close}>Close programme</button>}
       </header>
       {msg && <div className="ln-error">{msg}</div>}
       <section className={`ln-card ${r.retest_due ? '' : 'ln-card-warm'}`} style={{ gap: 10 }}>
         <div className="ln-between"><h2 className="ln-h2">Did it work?</h2><SmallSample n={r.assigned} /></div>
-        <b style={{ fontSize: 18 }}>{r.verdict}</b>
+        <b style={{ fontSize: 'var(--fs-h3)' }}>{r.verdict}</b>
         <div className="ln-grid ln-g-4" style={{ gap: 12 }}>
-          <div className="ln-tile"><b style={{ fontSize: 20 }}>{r.assigned}</b><span className="ln-xs ln-muted">students</span></div>
-          <div className="ln-tile"><b style={{ fontSize: 20 }}>{r.improved}</b><span className="ln-xs ln-muted">improved</span></div>
-          <div className="ln-tile"><b style={{ fontSize: 20 }}>{r.completed}</b><span className="ln-xs ln-muted">hold every bridge skill</span></div>
-          <div className="ln-tile"><b style={{ fontSize: 20 }}>{r.readiness_before ?? '—'} → {r.readiness_now ?? '—'}</b><span className="ln-xs ln-muted">average readiness{avgUp ? ` (${avgUp > 0 ? '+' : ''}${avgUp})` : ''}</span></div>
+          <div className="ln-tile"><b style={{ fontSize: 'var(--fs-h2)' }}>{r.assigned}</b><span className="ln-xs ln-muted">students</span></div>
+          <div className="ln-tile"><b style={{ fontSize: 'var(--fs-h2)' }}>{r.improved}</b><span className="ln-xs ln-muted">improved</span></div>
+          <div className="ln-tile"><b style={{ fontSize: 'var(--fs-h2)' }}>{r.completed}</b><span className="ln-xs ln-muted">hold every bridge skill</span></div>
+          <div className="ln-tile"><b style={{ fontSize: 'var(--fs-h2)' }}>{r.readiness_before ?? '—'} → {r.readiness_now ?? '—'}</b><span className="ln-xs ln-muted">average readiness{avgUp ? ` (${avgUp > 0 ? '+' : ''}${avgUp})` : ''}</span></div>
         </div>
         <HowCounted>For each student we saved which bridge skills they held and their readiness on the day the programme started. “Now” is their verified skills today. Improved = more bridge skills, or higher readiness.</HowCounted>
       </section>

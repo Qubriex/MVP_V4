@@ -111,8 +111,8 @@ export default function InstitutionLayout() {
           <div className="in-me">
             <Avatar person={me} />
             <div className="ln-col" style={{ flex: 1, minWidth: 0 }}>
-              <span style={{ fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{[me?.title, me?.name].filter(Boolean).join(' ') || me?.email || '…'}</span>
-              <span style={{ fontSize: 11, color: 'var(--stage-muted)' }}>{[me?.designation, ROLE_LABEL[role]].filter(Boolean).join(' · ')}</span>
+              <span style={{ fontSize: 'var(--fs-small)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{[me?.title, me?.name].filter(Boolean).join(' ') || me?.email || '…'}</span>
+              <span style={{ fontSize: 'var(--fs-caption)', color: 'var(--stage-muted)' }}>{[me?.designation, ROLE_LABEL[role]].filter(Boolean).join(' · ')}</span>
             </div>
             <ThemeToggle />
             <button type="button" className="in-iconbtn" onClick={doLogout} aria-label={t('nav.logout')} title={t('nav.logout')}><LogOut size={18} aria-hidden="true" /></button>

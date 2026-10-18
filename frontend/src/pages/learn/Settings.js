@@ -38,7 +38,7 @@ function VoiceAndLanguage({ form, language }) {
             {[0.8, 1, 1.2].map(r => <button key={r} type="button" aria-pressed={(prefs.rate || 1) === r} onClick={() => setPref('rate', r)}>{r.toFixed(1)}×</button>)}
           </div></div>
         <div className="ln-field"><span className="ln-label">Teaching language</span>
-          <span className="ln-tile ln-indic" style={{ fontSize: 14, padding: '12px 14px' }}>{language === 'hindi' ? 'हिंदी' : 'తెలుగు'} <span className="ln-muted">· set by your institution</span></span></div>
+          <span className="ln-tile ln-indic" style={{ fontSize: 'var(--fs-body)', padding: '12px 14px' }}>{language === 'hindi' ? 'हिंदी' : 'తెలుగు'} <span className="ln-muted">· set by your institution</span></span></div>
         <div className="ln-field"><span className="ln-label" id="ui-lang">Interface language</span>
           <div className="ln-seg ln-indic" role="group" aria-labelledby="ui-lang">
             {UI_LANGS.map(l => <button key={l.id} type="button" aria-pressed={draft.ui_language === l.id} onClick={() => { set('ui_language', l.id); setLang(l.id); }}>{l.label}</button>)}
@@ -145,7 +145,7 @@ function Security({ settings, reload }) {
         {settings.devices.map(d => (
           <div key={d.id} className="ln-tile" style={{ padding: '10px 12px', gap: 10, flexDirection: 'row', alignItems: 'center', textAlign: 'left' }}>
             <Smartphone size={16} aria-hidden="true" />
-            <span className="ln-col" style={{ flex: 1, gap: 2 }}><b style={{ fontSize: 14 }}>{d.device}{d.current ? ' · this device' : ''}</b><span className="ln-xs ln-muted">{[d.city, `signed in ${when(d.signed_in_at)}`].filter(Boolean).join(' · ')}</span></span>
+            <span className="ln-col" style={{ flex: 1, gap: 2 }}><b style={{ fontSize: 'var(--fs-body)' }}>{d.device}{d.current ? ' · this device' : ''}</b><span className="ln-xs ln-muted">{[d.city, `signed in ${when(d.signed_in_at)}`].filter(Boolean).join(' · ')}</span></span>
             {!d.current && <button type="button" className="ln-btn ln-btn-sm" onClick={() => signOut(d.id)}>Sign out</button>}
           </div>
         ))}
@@ -193,7 +193,7 @@ export default function Settings() {
     <>
       <header className="ln-pagehead"><div className="ln-col" style={{ gap: 4 }}><h1 className="ln-title">Settings</h1><span className="ln-sub">Account &amp; privacy: voice, language, sharing, alerts, PIN, devices and your data.</span></div></header>
       {error && <div className="ln-error" role="alert">{error}</div>}
-      <div className="ln-col" style={{ gap: 20, maxWidth: 860 }}>
+      <div className="ui-narrow ln-col" style={{ gap: 20 }}>
         {form.draft ? <VoiceAndLanguage form={form} language={language} /> : <div className="ln-card ln-skeleton" style={{ height: 220 }} aria-hidden="true" />}
         {form.dirty && (
           <div className="ln-row ln-wrap" style={{ justifyContent: 'flex-end', gap: 10, position: 'sticky', bottom: 0, padding: '12px 0', background: 'var(--color-bg)', zIndex: 2 }}>

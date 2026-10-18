@@ -19,10 +19,10 @@ export default function Audience({ side }) {
   const Icon = s.icon;
   return (
     <PublicShell>
-      <section className="ln-col" style={{ gap: 14, maxWidth: 820 }}>
+      <section className="ui-narrow ln-col" style={{ gap: 14 }}>
         <span className="pb-kicker"><Icon size={14} aria-hidden="true" />{t(`nav.${side}`)}</span>
-        <h1 className="ln-title" style={{ fontSize: 'clamp(30px, 4.5vw, 46px)' }}>{t(`${side}.hero`)}</h1>
-        <p className="ln-sub" style={{ margin: 0, fontSize: 17 }}>{t(`${side}.heroSub`)}</p>
+        <h1 className="ln-title" style={{ fontSize: 'var(--fs-display)' }}>{t(`${side}.hero`)}</h1>
+        <p className="ln-sub" style={{ margin: 0, fontSize: 'var(--fs-h3)' }}>{t(`${side}.heroSub`)}</p>
         <div className="pb-gradient-rule" aria-hidden="true" />
         <div className="ln-row ln-wrap" style={{ gap: 10 }}>
           <Link to={s.demo} className="ln-btn ln-btn-primary">{t(`${side}.demoCta`)}</Link>
@@ -38,7 +38,7 @@ export default function Audience({ side }) {
         ))}
       </section>
       <section className="ln-col" style={{ gap: 12 }}>
-        <h2 className="ln-h2" style={{ fontSize: 22 }}>{t('aud.how')}</h2>
+        <h2 className="ln-h2" style={{ fontSize: 'var(--fs-h2)' }}>{t('aud.how')}</h2>
         <ol className="pb-steps pb-steps-3" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
           {[1, 2, 3].map(i => <li key={i} className="ln-card" style={{ gap: 6 }}><span className="pb-num">{i}</span><span className="ln-small">{t(`${side}.how${i}`)}</span></li>)}
         </ol>

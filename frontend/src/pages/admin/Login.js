@@ -27,12 +27,12 @@ export default function AdminLogin() {
     <div className="ln-login">
       <aside className="ln-login-aside">
         <span className="ln-col" style={{ gap: 6 }}><a href="/" className="brand-home" aria-label="Qubirex home"><BrandLogo height={48} tone="onDark" /></a><span className="ln-xs" style={{ color: 'var(--stage-muted)', letterSpacing: '0.08em' }}>PLATFORM ADMIN</span></span>
-        <p className="ln-hide-phone" style={{ fontSize: 17, lineHeight: 1.65, color: 'var(--stage-muted)', maxWidth: 470 }}>Employer verification, the skills ontology and evaluator quality.</p>
+        <p className="ln-hide-phone" style={{ fontSize: 'var(--fs-h3)', lineHeight: 1.65, color: 'var(--stage-muted)', maxWidth: 470 }}>Employer verification, the skills ontology and evaluator quality.</p>
         <span />
       </aside>
       <div className="ln-login-main">
         <form className="ln-login-form ln-col" style={{ gap: 16 }} onSubmit={submit}>
-          <h2 style={{ fontSize: 30 }}>Admin sign in</h2>
+          <h2 style={{ fontSize: 'var(--fs-h1)' }}>Admin sign in</h2>
           {error && <div className="ln-error" role="alert">{error}</div>}
           <div className="ln-field"><label className="ln-label" htmlFor="em">Email</label><input id="em" className="ln-input" type="email" autoComplete="username" value={email} onChange={e => setEmail(e.target.value)} required /></div>
           <div className="ln-field"><label className="ln-label" htmlFor="pw">Password</label><input id="pw" className="ln-input" type="password" autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} required /></div>

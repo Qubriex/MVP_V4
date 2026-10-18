@@ -30,7 +30,7 @@ export default function Cohorts() {
         {(rows || []).map(c => (
           <Link key={c.id} to={`/institution/cohorts/${c.id}`} className="ln-card ln-card-link" style={{ gap: 12 }}>
             <div className="ln-between" style={{ alignItems: 'flex-start' }}>
-              <div className="ln-col" style={{ gap: 2 }}><span style={{ fontSize: 17, fontWeight: 600 }}>{c.title}</span>
+              <div className="ln-col" style={{ gap: 2 }}><span style={{ fontSize: 'var(--fs-h3)', fontWeight: 600 }}>{c.title}</span>
                 <span className="ln-small ln-muted">{c.ct_title} v{c.ct_version} · {c.language === 'hindi' ? 'Hindi' : 'Telugu'} · {c.total_nodes} skill nodes</span></div>
               <span className={`ln-tag ln-tag-lg ${(COHORT_STATUS[c.status] || COHORT_STATUS.setup)[1]}`}>{(COHORT_STATUS[c.status] || COHORT_STATUS.setup)[0]}</span>
             </div>

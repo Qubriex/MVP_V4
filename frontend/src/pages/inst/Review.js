@@ -9,6 +9,7 @@ import { CheckCircle2, XCircle } from 'lucide-react';
 import api from '../../utils/api';
 import { errMsg } from '../../utils/errors';
 import { useStaff } from '../../components/inst/InstitutionLayout';
+import { Select } from '../../components/shared/ui';
 
 const BAND_TEXT = { '0.0-0.49': 'Weak (0–0.49)', '0.5-0.69': 'Partial (0.5–0.69)', '0.7-0.89': 'Good (0.7–0.89)', '0.9-1.0': 'Excellent (0.9–1.0)' };
 const CAL = { calibrated: ['Calibrated', 'ln-tag-success'], rubric_under_review: ['Rubric under review', 'ln-tag-warning'], sampling: ['Sampling', 'ln-tag-neutral'] };
@@ -94,7 +95,7 @@ export default function Review() {
       {error && <div className="ln-error" role="alert">{error}</div>}
       <div className="ln-filterbar">
         <label className="ln-selectwrap"><span>Cohort</span>
-          <select value={cohortId} onChange={e => setCohortId(e.target.value)}>{cohorts.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}</select></label>
+          <Select value={cohortId} onChange={e => setCohortId(e.target.value)}>{cohorts.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}</Select></label>
         <div className="ln-pilltabs" role="tablist">
           {[['queue', `Queue${queue ? ` · ${queue.items.length}` : ''}`], ['calibration', 'Calibration'], ['load', 'Review load']].map(([id, label]) => (
             <button key={id} type="button" role="tab" className="ln-pilltab" aria-selected={tab === id} onClick={() => setTab(id)}>{label}</button>

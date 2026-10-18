@@ -28,7 +28,7 @@ export default function SignIn() {
           </article>
         ))}
       </section>
-      <section className="ln-card" style={{ gap: 8, maxWidth: 560 }}>
+      <section className="ln-card" style={{ gap: 8 }}>
         <span className="pb-kicker"><ShieldCheck size={14} aria-hidden="true" />{t('door.anyone')}</span>
         <form className="ln-row" style={{ gap: 8 }} onSubmit={e => { e.preventDefault(); if (eid.trim()) navigate(`/verify/${eid.trim().toUpperCase()}`); }}>
           <label htmlFor="door-eid" className="ln-sr">{t('verify.idLabel')}</label>

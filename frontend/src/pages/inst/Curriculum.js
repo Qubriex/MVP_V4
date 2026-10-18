@@ -10,6 +10,7 @@ import api from '../../utils/api';
 import { SampleBadge } from '../../components/learn/ui';
 import { useStaff } from '../../components/inst/InstitutionLayout';
 import { errMsg } from '../../utils/errors';
+import { Select } from '../../components/shared/ui';
 
 export const COVER = { covered: ['✓ ', 'ln-tag-success'], partly: ['◐ ', 'ln-tag-info'], missing: ['+ ', 'ln-tag-accent'] };
 
@@ -55,7 +56,7 @@ export default function Curriculum() {
 
       <div className="ln-filterbar">
         <label className="ln-selectwrap"><span>Cohort</span>
-          <select value={cohortId} onChange={e => setCohortId(e.target.value)}>{data.cohorts.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}</select></label>
+          <Select value={cohortId} onChange={e => setCohortId(e.target.value)}>{data.cohorts.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}</Select></label>
         <span className="ln-small ln-muted">Curriculum: <b style={{ color: 'var(--color-text)' }}>{data.cohort.ct_title} v{data.cohort.ct_version}</b> · {data.pathway_nodes} skill nodes · JDs: fresher and 0–2 yr roles, last 90 days</span>
       </div>
 
@@ -72,7 +73,7 @@ export default function Curriculum() {
         return (
           <section className="ln-card ln-card-warm" style={{ gap: 8 }} aria-label="Biggest gap">
             <span className="ln-kicker">Biggest gap</span>
-            <b style={{ fontSize: 18 }}>{gap.name}: asked for in {gap.share}% of job posts, {gap.coverage === 'partly' ? 'only partly taught' : 'not taught yet'}.</b>
+            <b style={{ fontSize: 'var(--fs-h3)' }}>{gap.name}: asked for in {gap.share}% of job posts, {gap.coverage === 'partly' ? 'only partly taught' : 'not taught yet'}.</b>
             <div className="ln-row ln-wrap" style={{ gap: 8 }}>
               {role !== 'viewer' && gap.coverage === 'partly' && <Link to={`/institution/bridges?new=1&cohort=${data.cohort.id}`} className="ln-btn ln-btn-primary ln-btn-sm">Create bridge programme</Link>}
               {role === 'admin' && <button type="button" className="ln-btn ln-btn-sm" onClick={() => navigate('/institution/cohorts/new', { state: { draft: `Module: ${gap.name}.\nEmployers ask for it in ${gap.share}% of current job posts.` } })}>Draft a module</button>}

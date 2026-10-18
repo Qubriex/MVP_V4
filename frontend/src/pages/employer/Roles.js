@@ -14,8 +14,9 @@ import Crumbs from '../../components/inst/Crumbs';
 import EmptyState, { LoadingRows } from '../../components/shared/EmptyState';
 import { WhyThis, HowCounted } from '../../components/shared/Popover';
 import { useEmployer } from './Layout';
+import { BandPill } from '../../components/shared/ui';
+import { Select } from '../../components/shared/ui';
 
-const BAND_TAG = { ready: 'ln-tag-success', nearly: 'ln-tag-info', building: 'ln-tag-warning' };
 
 function NewRole({ onDone }) {
   const navigate = useNavigate();
@@ -34,7 +35,7 @@ function NewRole({ onDone }) {
   };
   const add = (key) => { const s = all.find(x => x.key === key); if (s && !skills.some(x => x.key === key)) setSkills([...skills, { ...s, required: true, market_share: null }]); };
   return (
-    <form className="ln-card" style={{ gap: 14, maxWidth: 900 }} onSubmit={save}>
+    <form className="ui-narrow ln-card" style={{ gap: 14 }} onSubmit={save}>
       <h2 className="ln-h2">New role</h2>
       <div className="ln-grid ln-g-2" style={{ gap: 12 }}>
         <div className="ln-field"><label className="ln-label" htmlFor="r-title">Role title</label><input id="r-title" className="ln-input" value={f.title} onChange={set('title')} required placeholder="Data analyst (fresher)" /></div>
@@ -56,9 +57,9 @@ function NewRole({ onDone }) {
               <button type="button" className="in-iconbtn" aria-label={`Remove ${s.name}`} onClick={() => setSkills(skills.filter((_, j) => j !== i))}><X size={14} aria-hidden="true" /></button>
             </div>
           ))}
-          <select className="ln-select" style={{ maxWidth: 260 }} aria-label="Add a skill" value="" onChange={e => add(e.target.value)}>
+          <Select style={{ maxWidth: 260 }} aria-label="Add a skill" value="" onChange={e => add(e.target.value)}>
             <option value="">+ Add a skill</option>{all.filter(a => !skills.some(s => s.key === a.key)).map(a => <option key={a.key} value={a.key}>{a.name}</option>)}
-          </select>
+          </Select>
           <div className="ln-grid ln-g-3" style={{ gap: 12, alignItems: 'end' }}>
             <div className="ln-field"><label className="ln-label" htmlFor="r-bar">Your bar: {f.bar}</label><input id="r-bar" type="range" min="50" max="100" step="5" value={f.bar} onChange={set('bar')} /></div>
             <label className="ln-check"><input type="checkbox" checked={f.published} onChange={set('published')} />Publish as a target for colleges</label>
@@ -117,14 +118,14 @@ export function RoleSearch() {
     <>
       <Crumbs items={[{ label: 'Roles', to: '/employer/roles' }, { label: role.title }]} />
       <header className="ln-pagehead">
-        <div className="ln-col" style={{ gap: 4 }}><h1 className="ln-title" style={{ fontSize: 30 }}>{role.title}</h1>
+        <div className="ln-col" style={{ gap: 4 }}><h1 className="ln-title" style={{ fontSize: 'var(--fs-h1)' }}>{role.title}</h1>
           <span className="ln-sub">{role.city || 'Any city'} · bar {role.bar} · {role.skills.map(s => `${s.name}${s.required ? '' : ' (optional)'}`).join(', ')}</span></div>
       </header>
       {!verified && <div className="ln-note">You can watch candidates now. Requests open once your company is verified.</div>}
       {msg && <div className="ln-note" role="status">{msg}</div>}
       <div className="ln-filterbar">
-        <label className="ln-selectwrap"><span>City</span><select value={city} onChange={e => setCity(e.target.value)}><option value="">Any</option>{['Hyderabad', 'Bengaluru', 'Visakhapatnam', 'Vijayawada', 'Remote'].map(c => <option key={c}>{c}</option>)}</select></label>
-        <label className="ln-selectwrap"><span>Readiness</span><select value={band} onChange={e => setBand(e.target.value)}><option value="">All</option><option value="ready">Ready</option><option value="nearly">Nearly ready</option><option value="building">Building</option></select></label>
+        <label className="ln-selectwrap"><span>City</span><Select value={city} onChange={e => setCity(e.target.value)}><option value="">Any</option>{['Hyderabad', 'Bengaluru', 'Visakhapatnam', 'Vijayawada', 'Remote'].map(c => <option key={c}>{c}</option>)}</Select></label>
+        <label className="ln-selectwrap"><span>Readiness</span><Select value={band} onChange={e => setBand(e.target.value)}><option value="">All</option><option value="ready">Ready</option><option value="nearly">Nearly ready</option><option value="building">Building</option></Select></label>
         <span className="ln-small ln-muted">{data.total} student{data.total === 1 ? '' : 's'} open to employers</span>
       </div>
       <div className="ln-grid" style={{ gridTemplateColumns: 'minmax(0, 2.2fr) minmax(260px, 1fr)', gap: 16 }}>
@@ -135,7 +136,7 @@ export function RoleSearch() {
               <tbody>{data.candidates.map(c => (
                 <tr key={c.ref}>
                   <td><b className="in-code">{c.code}</b><span className="ln-xs ln-muted" style={{ display: 'block' }}>{c.college} · {c.city || '—'}</span></td>
-                  <td><span className={`ln-tag ${BAND_TAG[c.band]}`}>{c.readiness} · {c.band_label}</span>{!c.meets_bar && <span className="ln-xs ln-muted" style={{ display: 'block' }}>{c.points_short} short of your bar</span>}</td>
+                  <td><BandPill band={c.band} score={c.readiness} />{!c.meets_bar && <span className="ln-xs ln-muted" style={{ display: 'block' }}>{c.points_short} short of your bar</span>}</td>
                   <td className="ln-small">{c.verified.join(', ') || '—'}</td>
                   <td className="ln-small">{c.missing.join(', ') || '—'}</td>
                   <td>{c.stage ? <span className="ln-tag ln-tag-neutral">{c.stage === 'watching' ? 'Watching' : c.stage === 'requested' ? 'Asked' : 'In pipeline'}</span> : (
@@ -151,7 +152,7 @@ export function RoleSearch() {
         </section>
         <aside className="ln-col" style={{ gap: 12 }}>
           <section className="ln-card" style={{ gap: 8 }}>
-            <h2 className="ln-h2" style={{ fontSize: 17 }}>Best colleges for this role</h2>
+            <h2 className="ln-h2" style={{ fontSize: 'var(--fs-h3)' }}>Best colleges for this role</h2>
             {data.colleges.length === 0 && <span className="ln-small ln-muted">None yet.</span>}
             {data.colleges.map(g => (
               <div key={g.institution_id} className="ln-between ln-small" style={{ gap: 8 }}>

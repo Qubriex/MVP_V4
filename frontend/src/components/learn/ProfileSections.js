@@ -11,6 +11,7 @@ import { useSpeechInput, useSpeechOutput } from '../../utils/voice';
 import { MOCK_PROFILE } from '../../utils/learnerMockData';
 import { useLowBandwidth } from '../../utils/lowBandwidth';
 import { errMsg } from '../../utils/errors';
+import { Select } from '../shared/ui';
 
 const EDITABLE = ['email', 'phone', 'city', 'link_url', 'headline', 'about', 'target_roles', 'preferred_cities', 'graduation_year',
   'expected_salary', 'self_skills', 'experience', 'certifications', 'ui_language', 'voice_prefs', 'education', 'projects',
@@ -115,7 +116,7 @@ function RecordList({ items = [], onChange, fields, empty, addLabel, render }) {
     <div className="ln-col" style={{ gap: 10 }}>
       {items.length === 0 && editing === null && (
         <div className="ln-col" style={{ alignItems: 'center', gap: 8, padding: 26, border: '1.5px dashed var(--color-border-strong)', borderRadius: 'var(--radius-lg)', textAlign: 'center' }}>
-          <span style={{ fontSize: 15, fontWeight: 600 }}>{empty.title}</span>
+          <span style={{ fontSize: 'var(--fs-body)', fontWeight: 600 }}>{empty.title}</span>
           <span className="ln-small ln-muted" style={{ maxWidth: 440 }}>{empty.text}</span>
         </div>
       )}
@@ -217,7 +218,7 @@ export function EducationSection({ form }) {
         empty={{ title: 'No education added', text: 'Add your degree or diploma, where you studied and when.' }}
         fields={[{ key: 'degree', label: 'Degree', placeholder: 'B.Tech, Computer Science' }, { key: 'institution_name', label: 'College or school' },
           { key: 'city', label: 'City' }, { key: 'grade', label: 'CGPA or %' }, { key: 'start_year', label: 'Start year' }, { key: 'end_year', label: 'End year' }]}
-        render={e => <><span style={{ fontSize: 15, fontWeight: 600 }}>{e.degree || 'Untitled'}</span><span className="ln-small">{[e.institution_name, e.city].filter(Boolean).join(', ')}{e.start_year || e.end_year ? ` · ${e.start_year || ''}–${e.end_year || ''}` : ''}</span>{e.grade && <span className="ln-small ln-muted">{e.grade}</span>}</>} />
+        render={e => <><span style={{ fontSize: 'var(--fs-body)', fontWeight: 600 }}>{e.degree || 'Untitled'}</span><span className="ln-small">{[e.institution_name, e.city].filter(Boolean).join(', ')}{e.start_year || e.end_year ? ` · ${e.start_year || ''}–${e.end_year || ''}` : ''}</span>{e.grade && <span className="ln-small ln-muted">{e.grade}</span>}</>} />
     </Section>
   );
 }
@@ -228,7 +229,7 @@ export function ExperienceSection({ form }) {
       <RecordList items={form.draft.experience} onChange={v => form.set('experience', v)} addLabel="Add experience"
         empty={{ title: 'No experience added', text: 'Freshers often skip this. Internships and volunteering count.' }}
         fields={[{ key: 'role', label: 'Role' }, { key: 'org', label: 'Organisation' }, { key: 'period', label: 'When', placeholder: 'May–Jul 2026' }, { key: 'notes', label: 'What you did', multiline: true }]}
-        render={x => <><span style={{ fontSize: 15, fontWeight: 600 }}>{x.role || 'Untitled'}</span><span className="ln-small">{[x.org, x.period].filter(Boolean).join(' · ')}</span></>} />
+        render={x => <><span style={{ fontSize: 'var(--fs-body)', fontWeight: 600 }}>{x.role || 'Untitled'}</span><span className="ln-small">{[x.org, x.period].filter(Boolean).join(' · ')}</span></>} />
     </Section>
   );
 }
@@ -239,7 +240,7 @@ export function ProjectsSection({ form }) {
       <RecordList items={form.draft.projects} onChange={v => form.set('projects', v)} addLabel="Add project"
         empty={{ title: 'No projects yet', text: 'Add a title, what you built, the tools you used and a GitHub or demo link. Projects are what recruiters read first on a fresher resume.' }}
         fields={[{ key: 'title', label: 'Title' }, { key: 'link_url', label: 'GitHub or demo link', placeholder: 'https://' }, { key: 'tools', label: 'Tools (comma separated)', list: true }, { key: 'description', label: 'What you built', multiline: true }]}
-        render={p => <><span style={{ fontSize: 15, fontWeight: 600 }}>{p.title || 'Untitled'}</span>{p.description && <span className="ln-small">{p.description}</span>}{(p.tools || []).length > 0 && <span className="ln-xs ln-muted">{p.tools.join(' · ')}</span>}</>} />
+        render={p => <><span style={{ fontSize: 'var(--fs-body)', fontWeight: 600 }}>{p.title || 'Untitled'}</span>{p.description && <span className="ln-small">{p.description}</span>}{(p.tools || []).length > 0 && <span className="ln-xs ln-muted">{p.tools.join(' · ')}</span>}</>} />
     </Section>
   );
 }
@@ -273,7 +274,7 @@ export function CertificationsSection({ form }) {
       <RecordList items={form.draft.certifications} onChange={v => form.set('certifications', v)} addLabel="Add certification"
         empty={{ title: 'No other certifications', text: 'Add certificates from courses or exams you have passed elsewhere.' }}
         fields={[{ key: 'name', label: 'Name' }, { key: 'issuer', label: 'Issued by' }, { key: 'year', label: 'Year' }]}
-        render={c => <><span style={{ fontSize: 15, fontWeight: 600 }}>{c.name || 'Untitled'}</span><span className="ln-small">{[c.issuer, c.year].filter(Boolean).join(' · ')}</span></>} />
+        render={c => <><span style={{ fontSize: 'var(--fs-body)', fontWeight: 600 }}>{c.name || 'Untitled'}</span><span className="ln-small">{[c.issuer, c.year].filter(Boolean).join(' · ')}</span></>} />
     </Section>
   );
 }
@@ -287,10 +288,10 @@ export function GoalsSection({ form }) {
         <ChipEditor label="Preferred cities" values={draft.preferred_cities} onChange={v => set('preferred_cities', v)} placeholder="Add city" />
         <div className="ln-field">
           <label className="ln-label" htmlFor="gradyear">Graduation year</label>
-          <select id="gradyear" className="ln-select" value={draft.graduation_year || ''} onChange={e => set('graduation_year', e.target.value ? Number(e.target.value) : null)}>
+          <Select id="gradyear" value={draft.graduation_year || ''} onChange={e => set('graduation_year', e.target.value ? Number(e.target.value) : null)}>
             <option value="">Choose a year</option>
             {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - 3 + i).map(y => <option key={y} value={y}>{y}</option>)}
-          </select>
+          </Select>
           <span className="ln-xs ln-muted">Employers see you as available from June of this year.</span>
         </div>
         <Field id="sal" label="Expected salary" hint="private, used for job filters" placeholder="e.g. ₹4 LPA" value={draft.expected_salary || ''} onChange={e => set('expected_salary', e.target.value)} />
@@ -314,7 +315,7 @@ export function VoiceSection({ form }) {
     <Section id="preferences" title="Learning and voice preferences">
       <div className="ln-grid ln-g-2" style={{ gap: 16 }}>
         <div className="ln-field"><span className="ln-label">Teaching language</span>
-          <span className="ln-tile ln-indic" style={{ fontSize: 14, padding: '12px 14px' }}>{language === 'hindi' ? 'हिंदी' : 'తెలుగు'} <span className="ln-muted">· set by your institution</span></span></div>
+          <span className="ln-tile ln-indic" style={{ fontSize: 'var(--fs-body)', padding: '12px 14px' }}>{language === 'hindi' ? 'हिंदी' : 'తెలుగు'} <span className="ln-muted">· set by your institution</span></span></div>
         <div className="ln-field"><span className="ln-label" id="ui-lang">Interface language</span>
           <div className="ln-seg ln-indic" role="group" aria-labelledby="ui-lang">
             {UI_LANGS.map(l => <button key={l.id} type="button" aria-pressed={draft.ui_language === l.id} onClick={() => { set('ui_language', l.id); setLang(l.id); }}>{l.label}</button>)}

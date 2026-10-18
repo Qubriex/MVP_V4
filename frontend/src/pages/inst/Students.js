@@ -13,6 +13,7 @@ import { useStaff } from '../../components/inst/InstitutionLayout';
 import AccessResults from '../../components/inst/AccessResults';
 import LearningCurve from '../../components/learn/LearningCurve';
 import { errMsg } from '../../utils/errors';
+import { Select } from '../../components/shared/ui';
 
 export const ACCESS = { active: 'Active', invited: 'Invited', never_signed_in: 'Never signed in', locked: 'Locked', removed: 'Removed' };
 const FILTERS = [['all', 'All'], ['active', 'Active'], ['invited', 'Invited'], ['never_signed_in', 'Never signed in'], ['locked', 'Locked'], ['removed', 'Removed'], ['reset_requested', 'PIN reset requested']];
@@ -37,7 +38,7 @@ function ActionModal({ action, count, cohorts, onCancel, onConfirm }) {
         <h2 id="am-title" className="ln-h2">{title}</h2>
         {action === 'move' && (
           <div className="ln-field"><label className="ln-label" htmlFor="mv">Move to</label>
-            <select id="mv" className="ln-select" value={target} onChange={e => setTarget(e.target.value)}>{cohorts.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}</select>
+            <Select id="mv" value={target} onChange={e => setTarget(e.target.value)}>{cohorts.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}</Select>
             <span className="ln-xs ln-muted">Same programme: progress is kept. Different programme: the student starts its pathway; their earlier mastery record is kept.</span></div>
         )}
         {action === 'reset_pin' && (
@@ -143,7 +144,7 @@ export default function Students() {
 
       <div className="ln-filterbar">
         <label className="ln-selectwrap"><span>Cohort</span>
-          <select value={cohortId} onChange={e => setParam('engagement_id', e.target.value)}><option value="">All my cohorts</option>{cohorts.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}</select>
+          <Select value={cohortId} onChange={e => setParam('engagement_id', e.target.value)}><option value="">All my cohorts</option>{cohorts.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}</Select>
         </label>
         <label className="ln-search"><Search size={18} aria-hidden="true" /><input aria-label="Search students" placeholder="Name, ref or email" value={q} onChange={e => setQ(e.target.value)} /></label>
         {nodeId && <button type="button" className="ln-btn ln-btn-sm" onClick={() => { const p = new URLSearchParams(params); p.delete('node_id'); p.delete('node_label'); setParams(p, { replace: true }); }}>Showing students on {nodeLabel ? `“${nodeLabel}”` : 'one node'} ×</button>}
@@ -210,7 +211,7 @@ export default function Students() {
           {!detail ? <span className="ln-small ln-muted">Select a student to see their login details and access history.</span> : (
             <>
               <div className="ln-between" style={{ alignItems: 'flex-start' }}>
-                <div className="ln-col" style={{ gap: 2 }}><span style={{ fontSize: 18, fontWeight: 600 }}>{detail.name}</span><span className="ln-small ln-muted">{detail.learner_ref} · {detail.cohort_title}</span></div>
+                <div className="ln-col" style={{ gap: 2 }}><span style={{ fontSize: 'var(--fs-h3)', fontWeight: 600 }}>{detail.name}</span><span className="ln-small ln-muted">{detail.learner_ref} · {detail.cohort_title}</span></div>
                 <button type="button" className="ln-btn ln-btn-sm" onClick={() => setDetail(null)} aria-label="Close student details"><X size={14} aria-hidden="true" />Close</button>
               </div>
               <div className="ln-row ln-wrap" style={{ gap: 8 }}>

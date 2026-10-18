@@ -14,7 +14,7 @@ export default function AdminQuality() {
     <>
       <header className="ln-pagehead"><div className="ln-col" style={{ gap: 4 }}><h1 className="ln-title">Evaluator quality</h1><span className="ln-sub">{q?.note || 'Loading…'}</span></div></header>
       {error && <div className="ln-error" role="alert">{error}</div>}
-      <h2 className="ln-h2" style={{ fontSize: 18 }}>Speed and failures, last 7 days</h2>
+      <h2 className="ln-h2" style={{ fontSize: 'var(--fs-h3)' }}>Speed and failures, last 7 days</h2>
       <span className="ln-small ln-muted">Targets: her voice starts within 2 s, and a whole voice turn takes under 4 s. “Cut off” means the reply hit its length limit.</span>
       <div className="ln-tablewrap" style={{ marginBottom: 12 }}>
         <table className="ln-table">
@@ -32,7 +32,7 @@ export default function AdminQuality() {
           </tbody>
         </table>
       </div>
-      <h2 className="ln-h2" style={{ fontSize: 18 }}>Which voice engine answered</h2>
+      <h2 className="ln-h2" style={{ fontSize: 'var(--fs-h3)' }}>Which voice engine answered</h2>
       <div className="ln-tablewrap" style={{ marginBottom: 24 }}>
         <table className="ln-table">
           <thead><tr><th>Engine</th><th>Status</th><th>Calls</th><th>Average</th></tr></thead>
@@ -42,7 +42,7 @@ export default function AdminQuality() {
           </tbody>
         </table>
       </div>
-      <h2 className="ln-h2" style={{ fontSize: 18 }}>Hardest nodes</h2>
+      <h2 className="ln-h2" style={{ fontSize: 'var(--fs-h3)' }}>Hardest nodes</h2>
       <div className="ln-tablewrap" style={{ marginBottom: 24 }}>
         <table className="ln-table">
           <thead><tr><th>Node</th><th>Cluster</th><th>Learners</th><th>Avg attempts</th><th>Avg mastery</th><th>Confidence</th></tr></thead>
@@ -55,7 +55,7 @@ export default function AdminQuality() {
           </tbody>
         </table>
       </div>
-      <h2 className="ln-h2" style={{ fontSize: 18 }}>Calibration register</h2>
+      <h2 className="ln-h2" style={{ fontSize: 'var(--fs-h3)' }}>Calibration register</h2>
       <div className="ln-tablewrap">
         <table className="ln-table">
           <thead><tr><th>Parameters</th><th>Stage</th><th>Fitting method</th><th>Fit when</th><th>Source</th></tr></thead>

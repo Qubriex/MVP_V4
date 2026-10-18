@@ -28,7 +28,7 @@ export default function EmployerCompany() {
     <>
       <header className="ln-pagehead"><div className="ln-col" style={{ gap: 4 }}><h1 className="ln-title">Company</h1>
         <span className="ln-sub">Domain: @{me.employer.domain}{me.employer.gst_state_code ? ` · GST state ${me.employer.gst_state_code}` : ''}</span></div></header>
-      <form className="ln-card" style={{ gap: 14, maxWidth: 620 }} onSubmit={save}>
+      <form className="ui-narrow ln-card" style={{ gap: 14 }} onSubmit={save}>
         {error && <div className="ln-error" role="alert">{error}</div>}
         {saved && <div className="ln-note" role="status">Saved.</div>}
         {FIELDS.map(([k, label]) => (

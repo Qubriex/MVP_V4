@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 import api from '../../utils/api';
 import { errMsg } from '../../utils/errors';
 import Drawer from './Drawer';
+import { Select } from './ui';
 
 const DOCS = {
   learner: [
@@ -58,10 +59,10 @@ export default function HelpPanel({ side = 'learner', onClose }) {
       {tab === 'contact' && (
         <form className="ln-col" style={{ gap: 10 }} onSubmit={send}>
           <label className="ln-field"><span className="ln-label">Type</span>
-            <select className="ln-select" value={type} onChange={e => setType(e.target.value)}>
+            <Select value={type} onChange={e => setType(e.target.value)}>
               <option value="question">Question</option><option value="problem">Something is not working</option>
               <option value="data_request">My data</option><option value="grievance">Complaint (grievance officer)</option>
-            </select></label>
+            </Select></label>
           <label className="ln-field"><span className="ln-label">Message</span>
             <textarea className="ln-textarea" rows={5} value={message} onChange={e => setMessage(e.target.value)} required minLength={5} /></label>
           <button type="submit" className="ln-btn ln-btn-primary" style={{ alignSelf: 'flex-start' }}>Send</button>

@@ -13,8 +13,8 @@ export function EmployerAside() {
     <aside className="ln-login-aside">
       <span className="ln-col" style={{ gap: 6 }}><a href="/" className="brand-home" aria-label="Qubirex home"><BrandLogo height={48} tone="onDark" /></a><span className="ln-xs" style={{ color: 'var(--stage-muted)', letterSpacing: '0.08em', fontFamily: 'var(--font-body)' }}>FOR EMPLOYERS</span></span>
       <div className="ln-col ln-hide-phone" style={{ gap: 22 }}>
-        <h1 style={{ fontSize: 'clamp(32px, 3vw + 10px, 50px)' }}>Hire on evidence, not claims.</h1>
-        <p style={{ fontSize: 17, lineHeight: 1.65, color: 'var(--stage-muted)', maxWidth: 470 }}>Every Qubirex skill is backed by signed evidence you can check yourself. Verify your company domain to get started.</p>
+        <h1 style={{ fontSize: 'var(--fs-display)' }}>Hire on evidence, not claims.</h1>
+        <p style={{ fontSize: 'var(--fs-h3)', lineHeight: 1.65, color: 'var(--stage-muted)', maxWidth: 470 }}>Every Qubirex skill is backed by signed evidence you can check yourself. Verify your company domain to get started.</p>
       </div>
       <span className="ln-small ln-hide-phone" style={{ color: 'var(--stage-muted)' }}>Receive. Build. Return.</span>
     </aside>
@@ -57,7 +57,7 @@ export default function EmployerLogin() {
           </div>
           <form className="ln-col" style={{ gap: 16 }} onSubmit={submit}>
             <div className="ln-col" style={{ gap: 6 }}>
-              <h2 style={{ fontSize: 32 }}>{tab === 'register' ? 'Create an employer account' : 'Employer sign in'}</h2>
+              <h2 style={{ fontSize: 'var(--fs-h1)' }}>{tab === 'register' ? 'Create an employer account' : 'Employer sign in'}</h2>
               <p className="ln-muted">{tab === 'register' ? 'Use your work email — its domain becomes your company domain.' : 'For recruiters and hiring teams.'}</p>
             </div>
             {error && <div className="ln-error" role="alert">{error}</div>}
@@ -69,8 +69,8 @@ export default function EmployerLogin() {
             <div className="ln-field"><label className="ln-label" htmlFor="em">Work email</label><input id="em" className="ln-input" type="email" autoComplete="username" placeholder="you@company.com" value={f.email} onChange={set('email')} required /></div>
             <div className="ln-field"><label className="ln-label" htmlFor="pw">Password</label><input id="pw" className="ln-input" type="password" autoComplete={tab === 'register' ? 'new-password' : 'current-password'} minLength={tab === 'register' ? 10 : undefined} value={f.password} onChange={set('password')} required />
               {tab === 'register' && <span className="ln-xs ln-muted">At least 10 characters.</span>}</div>
-            <button type="submit" className="ln-btn ln-btn-primary ln-btn-block" style={{ minHeight: 52, fontSize: 16 }} disabled={loading}>{loading ? 'Please wait…' : tab === 'register' ? 'Create account' : 'Sign in'}</button>
-            <p className="ln-small ln-muted" style={{ textAlign: 'center' }}>Only checking one credential? <Link to="/verify" className="ln-link" style={{ fontSize: 13 }}>Verify an Evidence ID</Link> — no account needed.</p>
+            <button type="submit" className="ln-btn ln-btn-primary ln-btn-block" style={{ minHeight: 52, fontSize: 'var(--fs-h3)' }} disabled={loading}>{loading ? 'Please wait…' : tab === 'register' ? 'Create account' : 'Sign in'}</button>
+            <p className="ln-small ln-muted" style={{ textAlign: 'center' }}>Only checking one credential? <Link to="/verify" className="ln-link" style={{ fontSize: 'var(--fs-small)' }}>Verify an Evidence ID</Link> — no account needed.</p>
           </form>
         </div>
       </div>

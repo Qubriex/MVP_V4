@@ -54,7 +54,7 @@ export default function MasteryLogView() {
               </div>
             </div>
             <div className="card" style={{ textAlign: 'center', padding: 'var(--space-4) var(--space-6)', boxShadow: 'none' }}>
-              <div style={{ color: 'var(--status-success)', fontSize: '2.25rem', fontWeight: 800, lineHeight: 1, fontFamily: 'var(--font-display)' }}>{overallCompletion}%</div>
+              <div style={{ color: 'var(--status-success)', fontSize: 'var(--fs-h1)', fontWeight: 800, lineHeight: 1, fontFamily: 'var(--font-display)' }}>{overallCompletion}%</div>
               <div className="small text-faint" style={{ marginTop: 'var(--space-1)' }}>Programme Complete</div>
             </div>
           </Reveal>
@@ -137,7 +137,7 @@ function MetaItem({ label, val, color }) {
   return (
     <div style={{ textAlign: 'right' }}>
       <div className="caption" style={{ marginBottom: 2 }}>{label}</div>
-      <div style={{ fontSize: 'var(--text-h4)', fontWeight: 700, color: color || 'var(--color-text)' }}>{val}</div>
+      <div style={{ fontSize: 'var(--fs-h3)', fontWeight: 700, color: color || 'var(--color-text)' }}>{val}</div>
     </div>
   );
 }

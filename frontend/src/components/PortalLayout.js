@@ -45,8 +45,8 @@ export default function PortalLayout({ kicker, org, account, items, loginPath, c
         </div>
         <div className="in-me">
           <div className="ln-col" style={{ flex: 1, minWidth: 0 }}>
-            <span style={{ fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{account?.primary || '…'}</span>
-            {account?.secondary && <span style={{ fontSize: 11, color: 'var(--stage-muted)' }}>{account.secondary}</span>}
+            <span style={{ fontSize: 'var(--fs-small)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{account?.primary || '…'}</span>
+            {account?.secondary && <span style={{ fontSize: 'var(--fs-caption)', color: 'var(--stage-muted)' }}>{account.secondary}</span>}
           </div>
           <ThemeToggle />
           <button type="button" className="in-iconbtn" onClick={doLogout} aria-label={t('nav.logout')} title={t('nav.logout')}><LogOut size={18} aria-hidden="true" /></button>

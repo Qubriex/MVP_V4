@@ -8,6 +8,7 @@ import { Search, Bookmark, BookmarkCheck } from 'lucide-react';
 import api, { getOr } from '../../utils/api';
 import { MOCK_JOBS, MOCK_TRENDS } from '../../utils/learnerMockData';
 import { MatchRing, SampleBadge, SkillChip, StatusTag, salary, posted } from '../../components/learn/ui';
+import { Select } from '../../components/shared/ui';
 
 const SALARY_STEPS = [0, 3, 4, 5, 6];
 
@@ -73,13 +74,13 @@ export default function JobMarket() {
           <input aria-label="Role or skill" placeholder="Role or skill, e.g. React developer" value={q} onChange={e => setQ(e.target.value)} />
         </label>
         <label className="ln-selectwrap"><span>City</span>
-          <select value={city} onChange={e => setCity(e.target.value)}><option value="">Any</option>{cities.map(c => <option key={c}>{c}</option>)}</select>
+          <Select value={city} onChange={e => setCity(e.target.value)}><option value="">Any</option>{cities.map(c => <option key={c}>{c}</option>)}</Select>
         </label>
         <label className="ln-selectwrap"><span>Mode</span>
-          <select value={mode} onChange={e => setMode(e.target.value)}><option value="">Any</option>{['On-site', 'Hybrid', 'Remote'].map(m => <option key={m}>{m}</option>)}</select>
+          <Select value={mode} onChange={e => setMode(e.target.value)}><option value="">Any</option>{['On-site', 'Hybrid', 'Remote'].map(m => <option key={m}>{m}</option>)}</Select>
         </label>
         <label className="ln-selectwrap"><span>Salary</span>
-          <select value={minSalary} onChange={e => setMinSalary(Number(e.target.value))}>{SALARY_STEPS.map(v => <option key={v} value={v}>{v ? `₹${v} LPA+` : 'Any'}</option>)}</select>
+          <Select value={minSalary} onChange={e => setMinSalary(Number(e.target.value))}>{SALARY_STEPS.map(v => <option key={v} value={v}>{v ? `₹${v} LPA+` : 'Any'}</option>)}</Select>
         </label>
         <label className="ln-check" style={{ minHeight: 44, padding: '0 8px' }}><input type="checkbox" checked={onlyGood} onChange={e => setOnlyGood(e.target.checked)} />Only 60%+ match</label>
       </div>
@@ -87,14 +88,14 @@ export default function JobMarket() {
       <div className="ln-grid ln-g-4" style={{ gap: 16 }}>
         <div className="ln-card ln-card-sm"><span className="ln-small ln-muted">Open fresher roles{city ? ` · ${city}` : ''}</span><span className="ln-stat">{k ? k.open_roles.toLocaleString('en-IN') : '—'}</span><span className="ln-xs ln-muted">{k && k.open_roles_change >= 0 ? `Up ${k.open_roles_change.toLocaleString('en-IN')} on last month` : 'Down on last month'}</span></div>
         <div className="ln-card ln-card-sm"><span className="ln-small ln-muted">Median fresher salary</span><span className="ln-stat">{k ? `₹${k.median_salary_lpa} LPA` : '—'}</span><span className="ln-xs ln-muted">Across listed ranges</span></div>
-        <div className="ln-card ln-card-sm"><span className="ln-small ln-muted">Fastest-growing role</span><span className="ln-stat" style={{ fontSize: 24 }}>{k?.fastest_growing_role || '—'}</span><Link to="/learn/topics" className="ln-xs ln-link" style={{ fontSize: 12 }}>See emerging topics</Link></div>
+        <div className="ln-card ln-card-sm"><span className="ln-small ln-muted">Fastest-growing role</span><span className="ln-stat" style={{ fontSize: 'var(--fs-h2)' }}>{k?.fastest_growing_role || '—'}</span><Link to="/learn/topics" className="ln-xs ln-link" style={{ fontSize: 'var(--fs-caption)' }}>See emerging topics</Link></div>
         <div className="ln-card ln-card-sm"><span className="ln-small ln-muted">Your best match</span><span className="ln-stat">{k?.best_match ? `${k.best_match.match}%` : '—'}</span><span className="ln-xs ln-muted">{k?.best_match?.title}</span></div>
       </div>
 
       <div className="ln-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 420px), 1fr))' }}>
         <section className="ln-card">
           <div className="ln-between" style={{ alignItems: 'baseline' }}>
-            <h2 className="ln-h2" style={{ fontSize: 17 }}>Open fresher roles{city ? ` in ${city}` : ''}, by month</h2>
+            <h2 className="ln-h2" style={{ fontSize: 'var(--fs-h3)' }}>Open fresher roles{city ? ` in ${city}` : ''}, by month</h2>
             <button type="button" className="ln-btn ln-btn-sm" aria-pressed={tableView} onClick={() => setTableView(v => !v)}>{tableView ? 'Chart view' : 'Table view'}</button>
           </div>
           {tableView ? (
@@ -107,7 +108,7 @@ export default function JobMarket() {
                 <div className="ln-chart-bars">
                   {(trends?.months || []).map(m => (
                     <div key={m.label} className="ln-chart-col">
-                      <span className="ln-xs" style={{ fontWeight: 600, fontSize: 11 }}>{m.count.toLocaleString('en-IN')}</span>
+                      <span className="ln-xs" style={{ fontWeight: 600, fontSize: 'var(--fs-caption)' }}>{m.count.toLocaleString('en-IN')}</span>
                       <i style={{ height: `${(m.count / axisTop) * 88}%` }} />
                     </div>
                   ))}
@@ -119,7 +120,7 @@ export default function JobMarket() {
         </section>
 
         <section className="ln-card" style={{ gap: 12 }}>
-          <h2 className="ln-h2" style={{ fontSize: 17 }}>Skills JDs ask for most</h2>
+          <h2 className="ln-h2" style={{ fontSize: 'var(--fs-h3)' }}>Skills JDs ask for most</h2>
           {(trends?.skills || []).map(a => (
             <div key={a.name} className="ln-askrow">
               <span style={{ fontWeight: 500 }}>{a.name}</span>
@@ -140,7 +141,7 @@ export default function JobMarket() {
             ))}
           </div>
           <label className="ln-selectwrap"><span>Sort</span>
-            <select value={sort} onChange={e => setSort(e.target.value)}><option value="match">Best match</option><option value="recent">Most recent</option><option value="salary">Highest salary</option></select>
+            <Select value={sort} onChange={e => setSort(e.target.value)}><option value="match">Best match</option><option value="recent">Most recent</option><option value="salary">Highest salary</option></Select>
           </label>
         </div>
 
@@ -150,7 +151,7 @@ export default function JobMarket() {
             <MatchRing pct={j.match} />
             <div className="ln-col" style={{ gap: 8, minWidth: 0 }}>
               <div className="ln-row ln-wrap" style={{ gap: 10, alignItems: 'baseline' }}>
-                <Link to={`/learn/market/${j.id}`} style={{ fontSize: 17, fontWeight: 600 }}>{j.title}</Link>
+                <Link to={`/learn/market/${j.id}`} style={{ fontSize: 'var(--fs-h3)', fontWeight: 600 }}>{j.title}</Link>
                 <span className="ln-small ln-muted">{j.company || j.company_type}</span>
               </div>
               <span className="ln-small">{[j.city, j.mode, salary(j.salary_min, j.salary_max), posted(j.posted_days_ago)].filter(Boolean).join(' · ')}</span>

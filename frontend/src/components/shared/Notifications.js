@@ -46,7 +46,7 @@ export function NotificationsPanel({ data, onClose, settingsHref }) {
       </div>
       <div className="sk-channels">
         <span className="ln-xs">We also send these by email{channels.whatsapp ? ' and WhatsApp' : ''}.</span>
-        <button type="button" className="ln-link" style={{ fontSize: 12 }} onClick={() => setEditing(e => !e)}>Change channels</button>
+        <button type="button" className="ln-link" style={{ fontSize: 'var(--fs-caption)' }} onClick={() => setEditing(e => !e)}>Change channels</button>
         {editing && (
           <div className="ln-col" style={{ gap: 4, width: '100%' }}>
             <label className="ln-toggle-row"><span>Email</span><input type="checkbox" checked={!!channels.email} onChange={e => save({ ...channels, email: e.target.checked })} /></label>

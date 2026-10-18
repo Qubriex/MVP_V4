@@ -7,6 +7,7 @@ import { Copy } from 'lucide-react';
 import api from '../../utils/api';
 import { errMsg } from '../../utils/errors';
 import { useEmployer } from './Layout';
+import { Select } from '../../components/shared/ui';
 
 const SCOPE_TEXT = { search: 'Search candidates', verify: 'Verify Evidence IDs', 'passport.read': 'Read shared passports', webhooks: 'Receive webhooks' };
 
@@ -59,7 +60,7 @@ export default function EmployerApiKeys() {
       )}
       {isOwner && (
         <form className="ln-card" style={{ gap: 12, marginBottom: 16 }} onSubmit={create}>
-          <h2 className="ln-h2" style={{ margin: 0, fontSize: 18 }}>New API key</h2>
+          <h2 className="ln-h2" style={{ margin: 0, fontSize: 'var(--fs-h3)' }}>New API key</h2>
           <input className="ln-input" aria-label="Key name" placeholder="e.g. Greenhouse integration" value={name} onChange={e => setName(e.target.value)} required />
           <div className="ln-row ln-wrap" style={{ gap: 8 }} role="group" aria-label="Scopes">
             {scopes.map(s => (
@@ -86,12 +87,12 @@ export default function EmployerApiKeys() {
           </tbody>
         </table>
       </div>
-      <form className="ln-card" style={{ gap: 12, maxWidth: 620 }} onSubmit={saveIdent}>
-        <h2 className="ln-h2" style={{ margin: 0, fontSize: 18 }}>Signing identity (optional)</h2>
+      <form className="ui-narrow ln-card" style={{ gap: 12 }} onSubmit={saveIdent}>
+        <h2 className="ln-h2" style={{ margin: 0, fontSize: 'var(--fs-h3)' }}>Signing identity (optional)</h2>
         <p className="ln-small ln-muted" style={{ margin: 0 }}>Register a did:web identifier or an https JWKS URL on @{me?.employer?.domain}. Endorsements stay signed by Qubirex until employer-held keys are switched on.</p>
         {identNote && <div className="ln-note ln-small">{identNote}</div>}
         <div className="ln-row ln-wrap" style={{ gap: 8 }}>
-          <select className="ln-select" aria-label="Identity type" value={ident.kind} onChange={e => setIdent(v => ({ ...v, kind: e.target.value }))} disabled={!isOwner}><option value="did_web">did:web</option><option value="jwks_url">JWKS URL</option></select>
+          <Select aria-label="Identity type" value={ident.kind} onChange={e => setIdent(v => ({ ...v, kind: e.target.value }))} disabled={!isOwner}><option value="did_web">did:web</option><option value="jwks_url">JWKS URL</option></Select>
           <input className="ln-input" style={{ flex: 1, minWidth: 220 }} aria-label="Identifier" placeholder={ident.kind === 'did_web' ? `did:web:${me?.employer?.domain || 'company.com'}` : `https://${me?.employer?.domain || 'company.com'}/.well-known/jwks.json`} value={ident.value} onChange={e => setIdent(v => ({ ...v, value: e.target.value }))} disabled={!isOwner} required />
           {isOwner && <button type="submit" className="ln-btn">Save</button>}
         </div>

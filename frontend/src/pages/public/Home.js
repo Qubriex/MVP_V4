@@ -36,7 +36,7 @@ export default function Home() {
           <span className="pb-kicker">{t('home.kicker')}</span>
           <h1>{t('home.title')}</h1>
           {/* Brand line: the one place all three languages appear together. */}
-          <p className="ln-indic ln-muted" style={{ margin: 0, fontSize: 15, lineHeight: 1.7 }} aria-label={t('home.tagline')}>
+          <p className="ln-indic ln-muted" style={{ margin: 0, fontSize: 'var(--fs-body)', lineHeight: 1.7 }} aria-label={t('home.tagline')}>
             <span lang="en">Your Language. Your Skills. Your Future</span><br />
             <span lang="te">మీ భాష. మీ నైపుణ్యాలు. మీ భవిష్యత్తు</span><br />
             <span lang="hi">आपकी भाषा। आपके कौशल। आपका भविष्य</span>
@@ -48,7 +48,7 @@ export default function Home() {
         </div>
         <article className="ln-card" style={{ gap: 10 }} aria-label={t('home.sampleLabel')}>
           <div className="ln-between"><span className="ln-kicker">{t('home.sampleLabel')}</span><span className="ln-tag ln-tag-neutral">{t('common.demoData')}</span></div>
-          <b style={{ fontSize: 18 }}>{t('home.sampleProgramme')}</b>
+          <b style={{ fontSize: 'var(--fs-h3)' }}>{t('home.sampleProgramme')}</b>
           {[['home.s1', 'Confirmed · L2 · A3', true], ['home.s2', 'Confirmed · L2 · A2', true], ['home.s3', 'Partial · L2 · A2', false]].map(([k, l, ok]) => (
             <div key={k} className="ln-between ln-small"><span>{t(k)}</span><span className={`ln-tag ${ok ? 'ln-tag-success' : 'ln-tag-info'}`}>{ok ? t('label.confirmed') : t('label.partial')} · {l.split(' · ').slice(1).join(' · ')}</span></div>
           ))}
@@ -64,7 +64,7 @@ export default function Home() {
         {SIDES.map(([id, Icon]) => (
           <article key={id} className="ln-card" style={{ gap: 10 }}>
             <span className="pb-kicker"><Icon size={14} aria-hidden="true" />{t(`nav.${id}`)}</span>
-            <b style={{ fontSize: 19 }}>{t(`${id}.title`)}</b>
+            <b style={{ fontSize: 'var(--fs-h2)' }}>{t(`${id}.title`)}</b>
             <ul className="ln-small" style={{ margin: 0, paddingLeft: 18, display: 'grid', gap: 6 }}>{[1, 2, 3].map(i => <li key={i}>{t(`${id}.b${i}`)}</li>)}</ul>
             <Link to={`/${id}`} className="ln-link" style={{ marginTop: 'auto' }}>{t('home.learnMore')} →</Link>
           </article>
@@ -75,14 +75,14 @@ export default function Home() {
 
       <section className="ln-card" style={{ gap: 12 }}>
         <span className="pb-kicker">{t('home.honestKicker')}</span>
-        <h2 className="ln-h2" style={{ fontSize: 24 }}>{t('home.honestTitle')}</h2>
+        <h2 className="ln-h2" style={{ fontSize: 'var(--fs-h2)' }}>{t('home.honestTitle')}</h2>
         <div className="ln-grid ln-g-2" style={{ gap: 8 }}>
           {proves.map(([yes, k]) => <span key={k} className="ln-small"><span className={yes ? 'pb-yes' : 'pb-no'}>{yes ? t('common.yes') : t('common.no')}</span>{t(k)}</span>)}
         </div>
       </section>
 
       <section className="ln-grid ln-g-4" style={{ gap: 12 }} aria-label={t('home.whyTitle')}>
-        {[1, 2, 3, 4].map(i => <div key={i} className="ln-tile" style={{ padding: 16 }}><b style={{ fontSize: 14 }}>{t(`home.why${i}`)}</b></div>)}
+        {[1, 2, 3, 4].map(i => <div key={i} className="ln-tile" style={{ padding: 16 }}><b style={{ fontSize: 'var(--fs-body)' }}>{t(`home.why${i}`)}</b></div>)}
       </section>
     </PublicShell>
   );

@@ -17,6 +17,7 @@ import { AccessTag } from './Students';
 import { COHORT_STATUS } from './Cohorts';
 import { errMsg } from '../../utils/errors';
 import CohortGrid from '../../components/inst/CohortGrid';
+import { Select } from '../../components/shared/ui';
 
 const TABS = ['Overview', 'Readiness', 'Students', 'Pathway', 'Mastery logs', 'Settings'];
 const date = (t) => (t ? new Date(t.replace(' ', 'T') + (/[Z+]/.test(t) ? '' : 'Z')).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—');
@@ -84,7 +85,7 @@ function Pathway({ c, studentId, setStudentId }) {
         </div>
         {view === 'student' && students.length > 0 && (
           <label className="ln-selectwrap"><span>Student</span>
-            <select value={sel} onChange={e => setStudentId(e.target.value)}>{students.map(l => <option key={l.el_id} value={l.el_id}>{l.name} · {l.learner_ref}</option>)}</select>
+            <Select value={sel} onChange={e => setStudentId(e.target.value)}>{students.map(l => <option key={l.el_id} value={l.el_id}>{l.name} · {l.learner_ref}</option>)}</Select>
           </label>
         )}
       </div>
@@ -165,7 +166,7 @@ function Logs({ c, canProduce }) {
         {(logs || []).map(l => (
           <Link key={l.id} to={`/institution/mastery-log/${l.id}`} className="ln-tile ln-card-link" style={{ padding: 14 }}>
             <b>{l.learner_name}</b><span className="ln-xs ln-muted">{l.clusters_complete.length ? l.clusters_complete.join(', ') : 'No cluster complete yet'} · {date(l.produced_at)}</span>
-            <span className="ln-link" style={{ fontSize: 13 }}>View →</span>
+            <span className="ln-link" style={{ fontSize: 'var(--fs-small)' }}>View →</span>
           </Link>
         ))}
       </div>
@@ -187,17 +188,17 @@ function Settings({ c, onChanged }) {
     } catch (e) { setMsg(errMsg(e, 'Couldn’t save.')); }
   };
   return (
-    <section className="ln-card" style={{ maxWidth: 760 }}>
+    <section className="ui-narrow ln-card">
       <div className="ln-grid ln-g-2" style={{ gap: 12 }}>
         <div className="ln-field"><label className="ln-label" htmlFor="st-title">Cohort name</label><input id="st-title" className="ln-input" value={title} onChange={e => setTitle(e.target.value)} /></div>
         <div className="ln-field"><label className="ln-label" htmlFor="st-status">Status</label>
-          <select id="st-status" className="ln-select" value={status} onChange={e => setStatus(e.target.value)}>{Object.entries(COHORT_STATUS).map(([k, v]) => <option key={k} value={k}>{v[0]}</option>)}</select></div>
+          <Select id="st-status" value={status} onChange={e => setStatus(e.target.value)}>{Object.entries(COHORT_STATUS).map(([k, v]) => <option key={k} value={k}>{v[0]}</option>)}</Select></div>
       </div>
       <div className="ln-col" style={{ gap: 8 }}><span className="ln-label">Professors</span>
         {team.map(m => (
           <div key={m.id} className="ln-row ln-wrap" style={{ gap: 12 }}>
             <label className="ln-check" style={{ flex: 1 }}><input type="checkbox" checked={!!profs[m.id]} onChange={e => setProfs(p => { const n = { ...p }; if (e.target.checked) n[m.id] = 'co'; else delete n[m.id]; return n; })} />{[m.title, m.name].filter(Boolean).join(' ') || m.email}</label>
-            {profs[m.id] && <select className="ln-select" style={{ width: 170, minHeight: 36 }} aria-label="Role in this cohort" value={profs[m.id]} onChange={e => setProfs(p => ({ ...p, [m.id]: e.target.value }))}><option value="lead">Lead professor</option><option value="co">Co-professor</option></select>}
+            {profs[m.id] && <Select style={{ width: 170, minHeight: 36 }} aria-label="Role in this cohort" value={profs[m.id]} onChange={e => setProfs(p => ({ ...p, [m.id]: e.target.value }))}><option value="lead">Lead professor</option><option value="co">Co-professor</option></Select>}
           </div>
         ))}
         {team.length === 0 && <span className="ln-small ln-muted">No professors yet — invite them from Team &amp; roles.</span>}
@@ -241,7 +242,7 @@ export default function Cohort() {
       <Crumbs items={[{ label: 'Cohorts', to: '/institution/cohorts' }, { label: c.title }]} />
       <header className="ln-pagehead" style={{ alignItems: 'flex-start' }}>
         <div className="ln-col" style={{ gap: 6, minWidth: 0 }}>
-          <div className="ln-row ln-wrap" style={{ gap: 12 }}><h1 className="ln-title" style={{ fontSize: 34 }}>{c.title}</h1><span className={`ln-tag ln-tag-lg ${st[1]}`}>{st[0]}</span></div>
+          <div className="ln-row ln-wrap" style={{ gap: 12 }}><h1 className="ln-title" style={{ fontSize: 'var(--fs-h1)' }}>{c.title}</h1><span className={`ln-tag ln-tag-lg ${st[1]}`}>{st[0]}</span></div>
           <span className="ln-small ln-muted">
             Target: {c.ct_title} v{c.ct_version} · {c.total_nodes} skill nodes · Started {date(c.started_at)}
             {c.professors.length > 0 && ` · Professors: ${c.professors.map(p => [p.title, p.name].filter(Boolean).join(' ') + (p.cohort_role === 'lead' ? ' (lead)' : '')).join(', ')}`}
@@ -250,7 +251,7 @@ export default function Cohort() {
         <div className="ln-card" style={{ padding: '14px 16px', gap: 6, borderRadius: 'var(--radius-lg)', minWidth: 260 }}>
           <span className="ln-kicker">Student join code</span>
           <div className="ln-row" style={{ gap: 10 }}>
-            <b className="in-code" style={{ fontSize: 22 }}>{c.join_code}</b>
+            <b className="in-code" style={{ fontSize: 'var(--fs-h2)' }}>{c.join_code}</b>
             {role !== 'viewer' && <button type="button" className="ln-btn ln-btn-sm" onClick={rotate} title="New join code"><RefreshCw size={14} aria-hidden="true" />New code</button>}
           </div>
           <span className="ln-xs ln-muted">Students sign in at {loginUrl} with their ref, this code and their PIN.</span>

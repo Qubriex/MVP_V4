@@ -45,27 +45,27 @@ export default function LearnerLayout() {
 
   return (
     <div className="ln-shell">
-      <div className="ln-topbar">
-        <button type="button" className="ln-btn ln-btn-sm" onClick={() => setOpen(true)} aria-label={t('nav.menu')} aria-expanded={open}>
-          <Menu size={18} aria-hidden="true" />
+      <div className="ln-topbar in-topbar">
+        <button type="button" className="in-iconbtn" onClick={() => setOpen(true)} aria-label={t('nav.menu')} aria-expanded={open}>
+          <Menu size={20} aria-hidden="true" />
         </button>
-        <a href="/" className="brand-home" aria-label="Qubirex home"><BrandLogo height={28} /></a>
+        <a href="/" className="brand-home" aria-label={t('nav.logoHome')}><BrandLogo height={28} tone="onDark" /></a>
         <ThemeToggle />
       </div>
       {open && <div className="ln-scrim" onClick={() => setOpen(false)} aria-hidden="true" />}
 
-      <nav className={`ln-sidebar ${open ? 'is-open' : ''}`} aria-label="Learner navigation">
+      <nav className={`ln-sidebar in-sidebar ${open ? 'is-open' : ''}`} aria-label={t('nav.main')}>
         <div className="ln-between">
-          <a href="/" className="brand-home" aria-label="Qubirex home"><BrandLogo height={38} /></a>
+          <a href="/" className="brand-home" aria-label={t('nav.logoHome')}><BrandLogo height={38} tone="onDark" /></a>
           {open && (
-            <button type="button" className="ln-btn ln-btn-sm" onClick={() => setOpen(false)} aria-label="Close menu"><X size={16} aria-hidden="true" /></button>
+            <button type="button" className="in-iconbtn" onClick={() => setOpen(false)} aria-label={t('nav.closeMenu')}><X size={18} aria-hidden="true" /></button>
           )}
         </div>
 
         <div className="ln-usercard">
           <div className="ln-avatar">{initials(user?.name)}</div>
           <div className="ln-col" style={{ minWidth: 0 }}>
-            <span style={{ fontSize: 14, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.name || 'Learner'}</span>
+            <span style={{ fontSize: 'var(--fs-body)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.name || 'Learner'}</span>
             <span className="ln-xs ln-muted ln-indic">{[user?.learner_ref, langLabel].filter(Boolean).join(' · ')}</span>
           </div>
         </div>

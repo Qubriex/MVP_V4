@@ -12,8 +12,9 @@ import Drawer from '../shared/Drawer';
 import { HowCounted } from '../shared/Popover';
 import { SmallSample } from '../shared/SampleSize';
 import { LoadingRows } from '../shared/EmptyState';
+import { BandPill, BandBar } from '../shared/ui';
+import { Select } from '../shared/ui';
 
-const BAND_TAG = { ready: 'ln-tag-success', nearly: 'ln-tag-info', building: 'ln-tag-warning' };
 const LIGHT = { green: ['var(--ok)', 'Learning well'], yellow: ['var(--warn)', 'Needs a nudge'], red: ['var(--danger)', 'Needs help'] };
 const shade = (pct) => (pct >= 100 ? 'var(--status-success-bg)' : pct > 0 ? 'var(--status-info-bg)' : 'transparent');
 
@@ -26,7 +27,7 @@ function WhyDrawer({ cohortId, student, canBridge, onClose }) {
       {!w && !error && <LoadingRows />}
       {w && (
         <div className="ln-col" style={{ gap: 14 }}>
-          <div className="ln-row" style={{ gap: 10 }}><span className={`ln-tag ln-tag-lg ${BAND_TAG[w.band]}`}>{w.band_label}</span><b style={{ fontSize: 22 }}>{w.readiness}</b><span className="ln-small ln-muted">{w.role ? `for ${w.role}` : ''}</span></div>
+          <div className="ln-row" style={{ gap: 10 }}><BandPill band={w.band} /><b style={{ fontSize: 'var(--fs-h2)' }}>{w.readiness}</b><span className="ln-small ln-muted">{w.role ? `for ${w.role}` : ''}</span></div>
           <section className="ln-col" style={{ gap: 6 }}>
             <h3 className="ln-label">{w.band === 'ready' ? 'Why ready' : 'Why not ready yet'}</h3>
             <ul className="ln-small" style={{ margin: 0, paddingLeft: 18, display: 'grid', gap: 6 }}>{w.reasons.map(r => <li key={r}>{r}</li>)}</ul>
@@ -69,7 +70,7 @@ export default function CohortGrid({ c, canBridge }) {
       <div className="ln-col" style={{ gap: 10, padding: '16px 18px 0' }}>
         <div className="ln-between ln-wrap" style={{ gap: 10 }}>
           <div className="ln-row ln-wrap" style={{ gap: 8 }}>
-            <span className="ln-tag ln-tag-success">Ready {counts.ready}</span><span className="ln-tag ln-tag-info">Nearly ready {counts.nearly}</span><span className="ln-tag ln-tag-warning">Building {counts.building}</span>
+            <div style={{ minWidth: 260, flex: 1 }}><BandBar counts={counts} onSelect={(b) => setBand(band === b ? 'all' : b)} /></div>
             <SmallSample n={total} />
           </div>
           <button type="button" className="ln-btn ln-btn-sm" onClick={csv}><Download size={14} aria-hidden="true" />CSV</button>
@@ -83,10 +84,10 @@ export default function CohortGrid({ c, canBridge }) {
         <div className="ln-row ln-wrap" style={{ gap: 8 }}>
           <label className="ln-row sk-search" style={{ gap: 6 }}><Search size={14} aria-hidden="true" /><span className="ln-sr">Search students</span>
             <input className="ln-input" style={{ minHeight: 34, width: 200 }} value={q} onChange={e => setQ(e.target.value)} placeholder="Search name or ref" /></label>
-          <select className="ln-select" style={{ minHeight: 34, width: 160 }} aria-label="Readiness" value={band} onChange={e => setBand(e.target.value)}>
-            <option value="all">All readiness</option><option value="ready">Ready</option><option value="nearly">Nearly ready</option><option value="building">Building</option></select>
-          <select className="ln-select" style={{ minHeight: 34, width: 160 }} aria-label="Status light" value={light} onChange={e => setLight(e.target.value)}>
-            <option value="all">Any status</option><option value="green">Learning well</option><option value="yellow">Needs a nudge</option><option value="red">Needs help</option></select>
+          <Select style={{ minHeight: 34, width: 160 }} aria-label="Readiness" value={band} onChange={e => setBand(e.target.value)}>
+            <option value="all">All readiness</option><option value="ready">Ready</option><option value="nearly">Nearly ready</option><option value="building">Building</option></Select>
+          <Select style={{ minHeight: 34, width: 160 }} aria-label="Status light" value={light} onChange={e => setLight(e.target.value)}>
+            <option value="all">Any status</option><option value="green">Learning well</option><option value="yellow">Needs a nudge</option><option value="red">Needs help</option></Select>
           <span className="ln-xs ln-muted">{rows.length} of {data.students.length}</span>
         </div>
       </div>
@@ -95,7 +96,7 @@ export default function CohortGrid({ c, canBridge }) {
         <tbody>{rows.map(s => (
           <tr key={s.el_id}>
             <td><b style={{ fontWeight: 600 }}>{s.name}</b> <span className="ln-xs ln-muted">{s.learner_ref}</span></td>
-            <td><span className={`ln-tag ${BAND_TAG[s.band]}`}>{s.readiness} · {s.band_label}</span></td>
+            <td><BandPill band={s.band} score={s.readiness} /></td>
             {s.cells.map((pct, i) => <td key={data.clusters[i].id} style={{ background: shade(pct), textAlign: 'center' }} className="ln-small">{pct}%</td>)}
             <td>{s.light ? <span className="ln-row" style={{ gap: 6 }}><span aria-hidden="true" style={{ width: 9, height: 9, borderRadius: 9, background: LIGHT[s.light][0] }} /><span className="ln-xs">{LIGHT[s.light][1]}</span></span> : '—'}</td>
             <td><button type="button" className="ln-btn ln-btn-sm" onClick={() => setOpen(s)}>{s.band === 'ready' ? 'Why ready' : 'Why not ready?'}</button></td>

@@ -41,12 +41,12 @@ export default function Profile() {
       <section className="ln-card" style={{ flexDirection: 'row', alignItems: 'center', gap: 24, flexWrap: 'wrap', padding: '24px 28px' }}>
         <div className="ln-avatar ln-avatar-lg" aria-hidden="true">{initials(draft.name)}</div>
         <div className="ln-col" style={{ gap: 4, flex: '1 1 260px' }}>
-          <h1 className="ln-title" style={{ fontSize: 30 }}>{draft.name}</h1>
-          {draft.headline && <span style={{ fontSize: 15 }}>{draft.headline}</span>}
+          <h1 className="ln-title" style={{ fontSize: 'var(--fs-h1)' }}>{draft.name}</h1>
+          {draft.headline && <span style={{ fontSize: 'var(--fs-body)' }}>{draft.headline}</span>}
           <span className="ln-small ln-muted">{[draft.learner_ref, draft.engagement_title, draft.city].filter(Boolean).join(' · ')}</span>
         </div>
         <div className="ln-col" style={{ width: 260, gap: 8 }}>
-          <div className="ln-between" style={{ fontSize: 14 }}><span style={{ fontWeight: 600 }}>Profile strength</span><b>{c.pct}%</b></div>
+          <div className="ln-between" style={{ fontSize: 'var(--fs-body)' }}><span style={{ fontWeight: 600 }}>Profile strength</span><b>{c.pct}%</b></div>
           <Bar pct={c.pct} label="Profile strength" />
           <span className="ln-xs ln-muted">{missing.length ? `Add ${missing.map(k => MISSING_LABEL[k]).join(' and ')} to reach 100%` : 'Complete — nice work.'}</span>
         </div>
@@ -90,8 +90,8 @@ export default function Profile() {
           <div className="ln-row ln-wrap" style={{ justifyContent: 'flex-end', gap: 10, position: 'sticky', bottom: 0, padding: '12px 0', background: 'var(--color-bg)' }}>
             {form.status === 'saved' && <span className="ln-small" style={{ color: 'var(--status-success)' }} role="status">Saved</span>}
             {form.status && form.status !== 'saved' && <span className="ln-small" style={{ color: 'var(--status-danger)' }} role="alert">{form.status}</span>}
-            <button type="button" className="ln-btn" style={{ minHeight: 48, fontSize: 15 }} onClick={form.discard} disabled={!form.dirty || form.saving}>Discard</button>
-            <button type="button" className="ln-btn ln-btn-primary" style={{ minHeight: 48, fontSize: 15 }} onClick={form.save} disabled={!form.dirty || form.saving}>{form.saving ? 'Saving…' : 'Save changes'}</button>
+            <button type="button" className="ln-btn" style={{ minHeight: 48, fontSize: 'var(--fs-body)' }} onClick={form.discard} disabled={!form.dirty || form.saving}>Discard</button>
+            <button type="button" className="ln-btn ln-btn-primary" style={{ minHeight: 48, fontSize: 'var(--fs-body)' }} onClick={form.save} disabled={!form.dirty || form.saving}>{form.saving ? 'Saving…' : 'Save changes'}</button>
           </div>
         </div>
       </div>

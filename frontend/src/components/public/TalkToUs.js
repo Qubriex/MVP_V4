@@ -6,6 +6,7 @@ import api from '../../utils/api';
 import Drawer from '../shared/Drawer';
 import { useUiLang } from '../../context/UiLangContext';
 import { CONTACT } from '../../config/contact';
+import { Select } from '../shared/ui';
 
 const ROLES = ['talk.roleLearner', 'talk.roleCollege', 'talk.roleEmployer', 'talk.roleOther'];
 
@@ -32,7 +33,7 @@ export default function TalkToUs({ onClose }) {
           <div className="ln-field"><label className="ln-label" htmlFor="tk-name">{t('talk.name')}</label><input id="tk-name" className="ln-input" value={f.name} onChange={set('name')} required autoComplete="name" /></div>
           <div className="ln-field"><label className="ln-label" htmlFor="tk-reply">{t('talk.replyTo')}</label><input id="tk-reply" className="ln-input" value={f.reply_to} onChange={set('reply_to')} required autoComplete="email" placeholder={t('talk.replyToHint')} /></div>
           <div className="ln-field"><label className="ln-label" htmlFor="tk-role">{t('talk.iam')}</label>
-            <select id="tk-role" className="ln-select" value={f.role} onChange={set('role')}>{ROLES.map(r => <option key={r} value={r}>{t(r)}</option>)}</select></div>
+            <Select id="tk-role" value={f.role} onChange={set('role')}>{ROLES.map(r => <option key={r} value={r}>{t(r)}</option>)}</Select></div>
           <div className="ln-field"><label className="ln-label" htmlFor="tk-msg">{t('talk.message')}</label><textarea id="tk-msg" className="ln-input" rows={5} value={f.message} onChange={set('message')} required minLength={5} /></div>
           {err && <span className="ln-small" style={{ color: 'var(--danger)' }} role="alert">{err}</span>}
           <button type="submit" className="ln-btn ln-btn-primary" disabled={state === 'sending'}>{state === 'sending' ? t('talk.sending') : t('talk.send')}</button>

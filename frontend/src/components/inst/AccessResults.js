@@ -18,11 +18,11 @@ export function LoginSlips({ slips }) {
         {slips.map(s => (
           <div key={s.learner_ref} className="in-slip">
             <b>{s.name}</b>
-            <span style={{ color: '#6B6659' }}>{s.cohort}</span>
+            <span style={{ color: 'var(--color-text-muted)' }}>{s.cohort}</span>
             <span>Learner reference: <span className="in-code">{s.learner_ref}</span></span>
             <span>Join code: <span className="in-code">{s.join_code}</span></span>
             <span>One-time PIN: <span className="in-code">{s.pin}</span></span>
-            <span style={{ fontSize: 11, color: '#6B6659' }}>Sign in at {loginUrl()} — you’ll choose your own PIN the first time.</span>
+            <span style={{ fontSize: 'var(--fs-caption)', color: 'var(--color-text-muted)' }}>Sign in at {loginUrl()} — you’ll choose your own PIN the first time.</span>
           </div>
         ))}
       </div>

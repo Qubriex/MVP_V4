@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { Download, FileText } from 'lucide-react';
 import api from '../../utils/api';
 import { errMsg } from '../../utils/errors';
+import { Select } from '../shared/ui';
 
 const istToday = () => new Date(Date.now() + 5.5 * 3600000).toISOString().slice(0, 10);
 const minus = (d, days) => new Date(Date.parse(`${d}T00:00:00Z`) - days * 86400000).toISOString().slice(0, 10);
@@ -55,7 +56,7 @@ export default function DownloadDialog({ cohort, students, initial = [], onClose
 
   return (
     <div className="in-modal-scrim" role="dialog" aria-modal="true" aria-labelledby="dl-title" onClick={onClose}>
-      <div className="ln-card in-modal" style={{ maxWidth: 620, gap: 16 }} onClick={e => e.stopPropagation()}>
+      <div className="ln-card in-modal" style={{ maxWidth: 620, width: "100%", gap: 16 }} onClick={e => e.stopPropagation()}>
         <h2 id="dl-title" className="ln-h2">Download data · {cohort.title}</h2>
 
         <fieldset className="ln-col" style={{ gap: 8, border: 0, padding: 0, margin: 0 }}>
@@ -66,9 +67,9 @@ export default function DownloadDialog({ cohort, students, initial = [], onClose
             ))}
           </div>
           {scope === 'one' && (
-            <select className="ln-select" aria-label="Student" value={one} onChange={e => setOne(e.target.value)}>
+            <Select aria-label="Student" value={one} onChange={e => setOne(e.target.value)}>
               {students.map(s => <option key={s.el_id} value={s.el_id}>{s.name} · {s.learner_ref}</option>)}
-            </select>
+            </Select>
           )}
           {scope === 'selected' && (
             <div className="ln-tile" style={{ maxHeight: 180, overflowY: 'auto', padding: 10, gap: 4 }}>

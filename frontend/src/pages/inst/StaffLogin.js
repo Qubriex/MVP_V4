@@ -14,8 +14,8 @@ export function StaffAside() {
     <aside className="ln-login-aside">
       <span className="ln-col" style={{ gap: 6 }}><a href="/" className="brand-home" aria-label="Qubirex home"><BrandLogo height={48} tone="onDark" /></a><span className="ln-xs" style={{ color: 'var(--stage-muted)', letterSpacing: '0.08em', fontFamily: 'var(--font-body)' }}>FOR INSTITUTIONS</span></span>
       <div className="ln-col ln-hide-phone" style={{ gap: 22 }}>
-        <h1 style={{ fontSize: 'clamp(32px, 3vw + 10px, 50px)' }}>See how your students are building, and what the market wants next.</h1>
-        <p style={{ fontSize: 17, lineHeight: 1.65, color: 'var(--stage-muted)', maxWidth: 470 }}>Faculty accounts are created by your institution admin. You’ll get an email with a link to set your password and profile.</p>
+        <h1 style={{ fontSize: 'var(--fs-display)' }}>See how your students are building, and what the market wants next.</h1>
+        <p style={{ fontSize: 'var(--fs-h3)', lineHeight: 1.65, color: 'var(--stage-muted)', maxWidth: 470 }}>Faculty accounts are created by your institution admin. You’ll get an email with a link to set your password and profile.</p>
       </div>
       <span className="ln-small ln-hide-phone" style={{ color: 'var(--stage-muted)' }}>Receive. Build. Return.</span>
     </aside>
@@ -64,25 +64,25 @@ export default function StaffLogin() {
 
           {tab === 'signin' ? (
             <form className="ln-col" style={{ gap: 18 }} onSubmit={signIn}>
-              <div className="ln-col" style={{ gap: 6 }}><h2 style={{ fontSize: 32 }}>Staff sign in</h2><p className="ln-muted">For professors and institution admins.</p></div>
+              <div className="ln-col" style={{ gap: 6 }}><h2 style={{ fontSize: 'var(--fs-h1)' }}>Staff sign in</h2><p className="ln-muted">For professors and institution admins.</p></div>
               {error && <div className="ln-error" role="alert">{error}</div>}
               <div className="ln-field"><label className="ln-label" htmlFor="em">Work email</label>
                 <input id="em" className="ln-input" style={{ minHeight: 48 }} type="email" autoComplete="username" placeholder="you@college.edu.in" value={email} onChange={e => setEmail(e.target.value)} required /></div>
               <div className="ln-field">
                 <div className="ln-between"><label className="ln-label" htmlFor="pw">Password</label>
-                  <button type="button" className="ln-link" style={{ fontSize: 13 }} onClick={() => setForgot(v => !v)} aria-expanded={forgot}>Forgot password?</button></div>
+                  <button type="button" className="ln-link" style={{ fontSize: 'var(--fs-small)' }} onClick={() => setForgot(v => !v)} aria-expanded={forgot}>Forgot password?</button></div>
                 <input id="pw" className="ln-input" style={{ minHeight: 48 }} type="password" autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} required />
                 {forgot && <div className="ln-note">Ask your institution admin to send you a new link from Team &amp; roles. It lets you set a new password.</div>}
               </div>
-              <button type="submit" className="ln-btn ln-btn-primary ln-btn-block" style={{ minHeight: 52, fontSize: 16 }} disabled={loading}>{loading ? 'Signing in…' : 'Sign in'}</button>
-              <p className="ln-small ln-muted" style={{ textAlign: 'center' }}>Student? <Link to="/learner-login" className="ln-link" style={{ fontSize: 13 }}>Learner login</Link></p>
+              <button type="submit" className="ln-btn ln-btn-primary ln-btn-block" style={{ minHeight: 52, fontSize: 'var(--fs-h3)' }} disabled={loading}>{loading ? 'Signing in…' : 'Sign in'}</button>
+              <p className="ln-small ln-muted" style={{ textAlign: 'center' }}>Student? <Link to="/learner-login" className="ln-link" style={{ fontSize: 'var(--fs-small)' }}>Learner login</Link></p>
             </form>
           ) : (
             <form className="ln-col" style={{ gap: 18 }} onSubmit={openInvite}>
-              <div className="ln-col" style={{ gap: 6 }}><h2 style={{ fontSize: 32 }}>Set up your account</h2><p className="ln-muted">Open the link in your invite email, or paste it here.</p></div>
+              <div className="ln-col" style={{ gap: 6 }}><h2 style={{ fontSize: 'var(--fs-h1)' }}>Set up your account</h2><p className="ln-muted">Open the link in your invite email, or paste it here.</p></div>
               <div className="ln-field"><label className="ln-label" htmlFor="inv">Invite link</label>
                 <input id="inv" className="ln-input" style={{ minHeight: 48 }} placeholder="https://…/institution/invite/…" value={invite} onChange={e => setInvite(e.target.value)} required /></div>
-              <button type="submit" className="ln-btn ln-btn-primary ln-btn-block" style={{ minHeight: 52, fontSize: 16 }}>Continue →</button>
+              <button type="submit" className="ln-btn ln-btn-primary ln-btn-block" style={{ minHeight: 52, fontSize: 'var(--fs-h3)' }}>Continue →</button>
             </form>
           )}
         </div>

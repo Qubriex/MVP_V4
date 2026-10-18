@@ -368,7 +368,7 @@ export default function Session() {
         <Link to="/learn/dashboard" className="ln-btn ln-btn-sm ln-hide-phone" onClick={() => speech.stop()}><ArrowLeft size={16} aria-hidden="true" />{t('nav.home')}</Link>
         <Link to="/learn/dashboard" className="ln-roundbtn ln-show-phone" aria-label="Back to home" onClick={() => speech.stop()}><ArrowLeft size={18} aria-hidden="true" /></Link>
         <div className="ln-col" style={{ flex: 1, minWidth: 0 }}>
-          <span className="ln-session-title" style={{ fontSize: 17, fontWeight: 600 }}>{nodeLabel || '…'}</span>
+          <span className="ln-session-title" style={{ fontSize: 'var(--fs-h3)', fontWeight: 600 }}>{nodeLabel || '…'}</span>
           <span className="ln-small ln-session-sub-desk" style={{ opacity: 0.75 }}>
             {clusterLabel}{nodePos ? ` · Node ${nodePos.i} of ${nodePos.n}` : ''}
           </span>
@@ -392,7 +392,7 @@ export default function Session() {
             <div className="ln-banner-check" role="status" style={{ flexWrap: 'wrap', gap: 10 }}>
               <span>Warm-up first: {warmups} short review{warmups === 1 ? '' : 's'} of earlier skills (about 2 minutes).</span>
               <span className="ln-row" style={{ gap: 8 }}>
-                <button type="button" className="ln-btn ln-btn-sm ln-btn-amber" onClick={() => navigate('/learn/reviews?warmup=1')}>Start warm-up</button>
+                <button type="button" className="ln-btn ln-btn-sm ln-btn-primary" onClick={() => navigate('/learn/reviews?warmup=1')}>Start warm-up</button>
                 <button type="button" className="ln-btn ln-btn-sm ln-btn-ghost-dark" onClick={() => { setWarmups(0); try { sessionStorage.setItem('qubirex_warmup_later', '1'); } catch { /* ignore */ } }}>Later</button>
               </span>
             </div>
@@ -402,7 +402,7 @@ export default function Session() {
             <div className={`ln-orb-ring is-${orb}`}><div><div className="ln-orb" /></div></div>
             <div className="ln-col" style={{ alignItems: 'center', gap: 4 }}>
               <span className="ln-kicker" style={{ color: 'var(--accent-400)' }}>Professor Qubirex</span>
-              <span className="ln-indic" style={{ fontSize: 15, color: 'var(--stage-muted)' }} aria-live="polite">{orbLabel}</span>
+              <span className="ln-indic" style={{ fontSize: 'var(--fs-body)', color: 'var(--stage-muted)' }} aria-live="polite">{orbLabel}</span>
             </div>
             <div className={`ln-wave ${orb === 'speaking' || orb === 'listening' ? 'is-on' : ''} ${orb === 'listening' ? 'is-listening' : ''}`} aria-hidden="true">
               {WAVE.map((h, i) => <span key={i} style={{ '--h': `${h}px`, animationDelay: `${(i % 7) * 0.09}s` }} />)}
@@ -413,14 +413,14 @@ export default function Session() {
                 <p className="ln-caption-te">{lastAi?.content}</p>
                 {result?.programme_complete ? (
                   <>
-                    <strong style={{ fontSize: 22, color: 'var(--stage-listen)' }}>{t('session.complete')}</strong>
-                    <Link to="/learn/record" className="ln-btn ln-btn-amber">See your capability record</Link>
+                    <strong style={{ fontSize: 'var(--fs-h2)', color: 'var(--stage-listen)' }}>{t('session.complete')}</strong>
+                    <Link to="/learn/record" className="ln-btn ln-btn-primary ln-btn-lg">See your capability record</Link>
                   </>
                 ) : (
                   <>
-                    <strong style={{ fontSize: 20, color: 'var(--stage-listen)' }}>✓ {t('session.advance')}</strong>
+                    <strong style={{ fontSize: 'var(--fs-h2)', color: 'var(--stage-listen)' }}>✓ {t('session.advance')}</strong>
                     <span style={{ color: 'var(--stage-muted)' }}>{t('session.nextSkill')}: <b style={{ color: 'var(--stage-text)' }}>{result?.next_node?.label}</b></span>
-                    <button type="button" className="ln-btn ln-btn-amber" onClick={() => startSession()}>{t('session.next')} →</button>
+                    <button type="button" className="ln-btn ln-btn-primary ln-btn-lg" onClick={() => startSession()}>{t('session.next')} →</button>
                   </>
                 )}
               </div>
@@ -443,7 +443,7 @@ export default function Session() {
           </div>
 
           {notice && !error && <div className="ln-banner-check" role="status">{notice}</div>}
-          {(error || mic.error) && <div className="ln-banner-check" role="alert" style={{ borderColor: 'var(--status-danger)', color: '#FFB4A6' }}>{error || mic.error}</div>}
+          {(error || mic.error) && <div className="ln-banner-check" role="alert" style={{ borderColor: 'var(--status-danger)', color: 'var(--danger-on-ink)' }}>{error || mic.error}</div>}
 
           {mode === 'typing' && phase !== 'result' && (
             <div className="ln-typebar">
@@ -453,7 +453,7 @@ export default function Session() {
                 onChange={e => setDraft(e.target.value)}
                 onPaste={e => { if (phase === 'mastery_check') trackerRef.current = recordPaste(trackerRef.current, e.clipboardData.getData('text')); }}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitDraft(); } }} />
-              <button type="button" className="ln-btn ln-btn-amber ln-indic" style={{ borderRadius: 'var(--radius-lg)' }} onClick={submitDraft} disabled={busy || !draft.trim()}>{t('session.send')}</button>
+              <button type="button" className="ln-btn ln-btn-primary ln-btn-lg ln-indic" style={{ borderRadius: 'var(--radius-lg)' }} onClick={submitDraft} disabled={busy || !draft.trim()}>{t('session.send')}</button>
             </div>
           )}
 
@@ -528,7 +528,7 @@ export default function Session() {
 
           {phase !== 'result' && (
             <div style={{ boxSizing: 'border-box', padding: '16px 20px 20px', borderTop: '1px solid var(--color-border)' }} className="ln-col ln-panel-foot">
-              <button type="button" className="ln-btn ln-btn-primary ln-btn-block ln-indic" style={{ minHeight: 48, fontSize: 15, marginBottom: 10 }}
+              <button type="button" className="ln-btn ln-btn-primary ln-btn-block ln-indic" style={{ minHeight: 48, fontSize: 'var(--fs-body)', marginBottom: 10 }}
                 disabled={busy || phase === 'mastery_check'} onClick={() => send('', mode === 'voice' ? 'voice' : 'text', { requestCheck: true })}>
                 {t('session.ready')}
               </button>

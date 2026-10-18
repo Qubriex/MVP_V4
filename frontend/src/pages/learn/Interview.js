@@ -89,14 +89,14 @@ export default function Interview() {
         {!mic.listening && meta.caption_en && <p className="ln-caption-en">{meta.caption_en}</p>}
         <VoiceStatus speech={speech} dark />
         {(error || mic.error) && (
-          <div className="ln-banner-check" role="alert" style={{ borderColor: 'var(--status-danger)', color: '#FFB4A6', gap: 10, flexWrap: 'wrap' }}>
+          <div className="ln-banner-check" role="alert" style={{ borderColor: 'var(--status-danger)', color: 'var(--danger-on-ink)', gap: 10, flexWrap: 'wrap' }}>
             <span>{error || mic.error}</span>
             {error && !busy && <button type="button" className="ln-btn ln-btn-sm ln-btn-ghost-dark" onClick={() => ask(turnsRef.current)}>Try again</button>}
           </div>
         )}
 
         {meta.done ? (
-          <button type="button" className="ln-btn ln-btn-amber" onClick={() => { setTurns([]); ask([]); }}><RotateCcw size={18} aria-hidden="true" />Practise again</button>
+          <button type="button" className="ln-btn ln-btn-primary ln-btn-lg" onClick={() => { setTurns([]); ask([]); }}><RotateCcw size={18} aria-hidden="true" />Practise again</button>
         ) : (
           <>
             {typing && (
@@ -104,7 +104,7 @@ export default function Interview() {
                 <label htmlFor="ans" className="ln-sr">Type your answer</label>
                 <textarea id="ans" rows={2} value={draft} disabled={busy} placeholder={t('session.typeHere')} onChange={e => setDraft(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); answer(draft); setDraft(''); } }} />
-                <button type="button" className="ln-btn ln-btn-amber ln-indic" onClick={() => { answer(draft); setDraft(''); }} disabled={busy || !draft.trim()}>{t('session.send')}</button>
+                <button type="button" className="ln-btn ln-btn-primary ln-btn-lg ln-indic" onClick={() => { answer(draft); setDraft(''); }} disabled={busy || !draft.trim()}>{t('session.send')}</button>
               </div>
             )}
             <div className="ln-row" style={{ gap: 18 }}>

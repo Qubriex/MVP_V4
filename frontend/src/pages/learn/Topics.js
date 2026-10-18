@@ -80,15 +80,15 @@ export default function Topics() {
               <span className="ln-tag ln-tag-lg" style={{ background: 'var(--ok-bg)', color: 'var(--ok)' }}>{featured.growth}</span>
               {featured.have_pct >= 20 && <span className="ln-tag ln-tag-lg" style={{ background: 'var(--stage-surface)', color: 'var(--accent-200)' }}>Close to your path</span>}
             </div>
-            <h2 id="featured-topic" style={{ fontSize: 34 }}>{featured.name}</h2>
-            <p style={{ fontSize: 15, lineHeight: 1.65, color: 'var(--stage-muted)', maxWidth: 520 }}>{featured.desc}</p>
+            <h2 id="featured-topic" style={{ fontSize: 'var(--fs-h1)' }}>{featured.name}</h2>
+            <p style={{ fontSize: 'var(--fs-body)', lineHeight: 1.65, color: 'var(--stage-muted)', maxWidth: 520 }}>{featured.desc}</p>
             <div className="ln-col" style={{ gap: 8 }}>
               <span className="ln-kicker" style={{ color: 'var(--stage-muted)' }}>New roles</span>
               <div className="ln-row ln-wrap" style={{ gap: 8 }}>{featured.roles.map(r => <Link key={r} to={`/learn/market?q=${encodeURIComponent(r.split(' ')[0])}`} className="ln-darkpill">{r}</Link>)}</div>
             </div>
             <div className="ln-row ln-wrap" style={{ gap: 10, paddingTop: 6 }}>
               {toRequest.length > 0 ? (
-                <button type="button" className="ln-btn ln-btn-amber" disabled={requests.busy}
+                <button type="button" className="ln-btn ln-btn-primary ln-btn-lg" disabled={requests.busy}
                   onClick={() => requests.requestMany(toRequest.map(st => st.name), `topic:${featured.id}`)}>
                   {requests.busy ? 'Sending…' : `Request ${toRequest.length} skill${toRequest.length > 1 ? 's' : ''} from your institution`}
                 </button>
@@ -119,7 +119,7 @@ export default function Topics() {
               return (
                 <div key={st.name} className="ln-step">
                   <span className={`ln-stepdot ${done ? 'is-done' : ''}`}>{done ? '✓' : st.n}</span>
-                  <div className="ln-col" style={{ flex: 1 }}><span style={{ fontSize: 14, fontWeight: 600 }}>{st.name}</span><span className="ln-xs" style={{ color: 'var(--stage-muted)' }}>{note}</span></div>
+                  <div className="ln-col" style={{ flex: 1 }}><span style={{ fontSize: 'var(--fs-body)', fontWeight: 600 }}>{st.name}</span><span className="ln-xs" style={{ color: 'var(--stage-muted)' }}>{note}</span></div>
                 </div>
               );
             })}
@@ -131,8 +131,8 @@ export default function Topics() {
         {rest.map(tp => (
           <article key={tp.id} className="ln-card" style={{ gap: 12, padding: 22, borderRadius: 'var(--radius-lg)' }}>
             <div className="ln-between"><span className="ln-xs ln-muted">{tp.sector}</span><span className={`ln-tag ln-tag-lg ${tp.growth === 'Steady' ? 'ln-tag-neutral' : 'ln-tag-success'}`}>{tp.growth}</span></div>
-            <h3 style={{ fontSize: 18 }}>{tp.name}</h3>
-            <span style={{ fontSize: 14, lineHeight: 1.55 }}>{tp.desc}</span>
+            <h3 style={{ fontSize: 'var(--fs-h3)' }}>{tp.name}</h3>
+            <span style={{ fontSize: 'var(--fs-body)', lineHeight: 1.55 }}>{tp.desc}</span>
             <span className="ln-small ln-muted"><b style={{ color: 'var(--color-text)' }}>New roles:</b> {tp.roles.join(', ')}</span>
             <div className="ln-col" style={{ gap: 6, paddingTop: 4, marginTop: 'auto' }}>
               <div className="ln-between ln-xs"><span className="ln-muted">You already have</span><b>{tp.have_pct}%</b></div>

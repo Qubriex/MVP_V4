@@ -83,7 +83,7 @@ export default function Reviews() {
         <section className="ln-card" style={{ gap: 14 }} aria-label="Review question">
           <div className="ln-between ln-wrap"><span className="ln-kicker">{active.kind === 'recheck' ? 'Recheck' : 'Review'} · {active.node_label}</span>
             <button type="button" className="ln-link" onClick={() => setActive(null)}>Back to list</button></div>
-          <p className="ln-indic" style={{ fontSize: 18, lineHeight: 1.6 }}>{active.question}</p>
+          <p className="ln-indic" style={{ fontSize: 'var(--fs-h3)', lineHeight: 1.6 }}>{active.question}</p>
           <AnswerBox onSubmit={answer} busy={busy} />
         </section>
       ) : (

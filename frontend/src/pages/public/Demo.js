@@ -12,6 +12,8 @@ import { Bar } from '../../components/learn/ui';
 import { useUiLang, UI_LANGS, LANG_CODE } from '../../context/UiLangContext';
 import { useSpeechInput } from '../../utils/voice';
 import { demoSpeak, demoStop } from '../../utils/demoVoice';
+import { BandPill, BandBar } from '../../components/shared/ui';
+import { Select } from '../../components/shared/ui';
 
 const COHORT = { ready: 9, nearly: 14, building: 21 };
 const CANDIDATES = [[1, 86, 'ready'], [2, 82, 'ready'], [3, 74, 'nearly'], [4, 66, 'nearly']];
@@ -57,9 +59,9 @@ function LearnerDemo() {
   return (
     <div className="ln-grid ln-g-2" style={{ gap: 20, alignItems: 'start' }}>
       <section className="pb-phone ln-col" style={{ gap: 10 }} aria-label={t('demo.learnerTitle')}>
-        <b style={{ fontSize: 18 }}>{t('demo.l.hello')}</b>
+        <b style={{ fontSize: 'var(--fs-h3)' }}>{t('demo.l.hello')}</b>
         <span className="ln-small">{t('demo.l.today')}</span>
-        {step === 'start' && <button type="button" className="ln-btn ln-btn-amber" onClick={start}><Volume2 size={18} aria-hidden="true" />{t('demo.l.start')}</button>}
+        {step === 'start' && <button type="button" className="ln-btn ln-btn-primary ln-btn-lg" onClick={start}><Volume2 size={18} aria-hidden="true" />{t('demo.l.start')}</button>}
         {chat.map((m, i) => (
           <div key={i} className={`demo-msg ${m.who === 'you' ? 'is-you' : ''}`}>{m.text}</div>
         ))}
@@ -100,7 +102,6 @@ function CollegeDemo() {
   const [list, setList] = useState([]);
   const [msg, setMsg] = useState('');
   const [f, setF] = useState({ skill: 'demo.c.skill1', cohort: 'CSE 2026', due: inDays(14), retest: true });
-  const firstField = useRef(null);
   const submit = (e) => {
     e.preventDefault();
     setList(l => [...l, { ...f, id: Date.now() }]);
@@ -112,9 +113,7 @@ function CollegeDemo() {
       <div className="ln-grid ln-g-2" style={{ gap: 20, alignItems: 'start' }}>
         <section className="ln-card" style={{ gap: 10 }}>
           <span className="ln-kicker">{t('demo.c.cohort')}</span>
-          {[['band.ready', COHORT.ready, 'ln-bar-good'], ['band.nearly', COHORT.nearly, ''], ['band.building', COHORT.building, '']].map(([k, n, v]) => (
-            <div key={k} className="ln-row" style={{ gap: 10 }}><span className="ln-small" style={{ width: 110 }}>{t(k)}</span><div style={{ flex: 1 }}><Bar pct={(n / total) * 100} variant={v} label={`${t(k)}: ${n}`} /></div><b>{n}</b></div>
-          ))}
+          <BandBar counts={COHORT} />
         </section>
         <section className="ln-card ln-card-warm" style={{ gap: 8 }}>
           <b>{t('demo.c.nearly', { n: COHORT.nearly })}</b>
@@ -136,11 +135,11 @@ function CollegeDemo() {
         <Drawer title={t('demo.c.start')} onClose={() => setOpen(false)}>
           <form className="ln-col" style={{ gap: 12 }} onSubmit={submit}>
             <div className="ln-field"><label className="ln-label" htmlFor="db-skill">{t('demo.c.skill')}</label>
-              <select id="db-skill" ref={firstField} className="ln-select" value={f.skill} onChange={e => setF(x => ({ ...x, skill: e.target.value }))}>
+              <Select id="db-skill" value={f.skill} onChange={e => setF(x => ({ ...x, skill: e.target.value }))}>
                 {['demo.c.skill1', 'demo.c.skill2', 'demo.c.skill3'].map(k => <option key={k} value={k}>{t(k)}</option>)}
-              </select></div>
+              </Select></div>
             <div className="ln-field"><label className="ln-label" htmlFor="db-cohort">{t('demo.c.cohortLabel')}</label>
-              <select id="db-cohort" className="ln-select" value={f.cohort} onChange={e => setF(x => ({ ...x, cohort: e.target.value }))}>{['CSE 2026', 'ECE 2026'].map(c => <option key={c}>{c}</option>)}</select></div>
+              <Select id="db-cohort" value={f.cohort} onChange={e => setF(x => ({ ...x, cohort: e.target.value }))}>{['CSE 2026', 'ECE 2026'].map(c => <option key={c}>{c}</option>)}</Select></div>
             <div className="ln-field"><label className="ln-label" htmlFor="db-due">{t('demo.c.dueLabel')}</label>
               <input id="db-due" type="date" className="ln-input" value={f.due} min={inDays(1)} onChange={e => setF(x => ({ ...x, due: e.target.value }))} required /></div>
             <label className="ln-check"><input type="checkbox" checked={f.retest} onChange={e => setF(x => ({ ...x, retest: e.target.checked }))} />{t('demo.c.retest')}</label>
@@ -162,7 +161,7 @@ function EmployerDemo() {
       <div className="ln-tablewrap"><table className="ln-table"><thead><tr><th>{t('demo.e.candidate')}</th><th>{t('demo.e.readiness')}</th><th><span className="ln-sr">{t('demo.e.action')}</span></th></tr></thead>
         <tbody>{CANDIDATES.map(([n, r, band]) => (
           <tr key={n}><td>{t('demo.e.cand', { n })}<span className="ln-xs ln-muted" style={{ display: 'block' }}>{t('demo.e.college')}</span></td>
-            <td><span className={`ln-tag ${band === 'ready' ? 'ln-tag-success' : 'ln-tag-info'}`}>{r} · {t(`band.${band}`)}</span></td>
+            <td><BandPill band={band} score={r} /></td>
             <td>{asked[n] ? <span className="ln-small ln-muted" role="status">{t('demo.e.asked')}</span> : <button type="button" className="ln-btn ln-btn-sm" onClick={() => setAsked(a => ({ ...a, [n]: true }))}>{t('demo.e.request')}</button>}</td></tr>
         ))}</tbody></table></div>
       <span className="ln-xs ln-muted">{t('demo.e.note')}</span>
@@ -204,7 +203,7 @@ export default function Demo() {
       <section className="ln-grid ln-g-3" style={{ gap: 16 }}>
         {Object.entries(SIDES).map(([id, [kicker, title, text]]) => (
           <article key={id} className="ln-card" style={{ gap: 8 }}>
-            <span className="pb-kicker">{t(kicker)}</span><b style={{ fontSize: 18 }}>{t(title)}</b><span className="ln-small ln-muted">{t(text)}</span>
+            <span className="pb-kicker">{t(kicker)}</span><b style={{ fontSize: 'var(--fs-h3)' }}>{t(title)}</b><span className="ln-small ln-muted">{t(text)}</span>
             <Link to={`/demo/${id}`} className="ln-btn ln-btn-primary ln-btn-sm" style={{ alignSelf: 'flex-start', marginTop: 'auto' }}>{t(`demo.open.${id}`)}</Link>
           </article>
         ))}

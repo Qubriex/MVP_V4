@@ -27,7 +27,7 @@ function Hiring() {
           {data.waiting_rows.length === 0 ? <span className="ln-small ln-muted">Nobody is waiting. Candidates who say yes or apply appear here.</span>
             : data.waiting_rows.map(r => (
               <Link key={r.id} to={`/employer/candidates/${r.id}`} className="ln-tile ln-card-link ln-between" style={{ flexDirection: 'row', padding: '10px 12px', alignItems: 'center' }}>
-                <span className="ln-col" style={{ gap: 2 }}><b style={{ fontSize: 14 }}>{r.name || r.code}</b><span className="ln-xs ln-muted">{r.role_title} · {r.college} · {r.stage_label}{r.waiting_days ? ` · ${r.waiting_days} day${r.waiting_days === 1 ? '' : 's'}` : ''}</span></span>
+                <span className="ln-col" style={{ gap: 2 }}><b style={{ fontSize: 'var(--fs-body)' }}>{r.name || r.code}</b><span className="ln-xs ln-muted">{r.role_title} · {r.college} · {r.stage_label}{r.waiting_days ? ` · ${r.waiting_days} day${r.waiting_days === 1 ? '' : 's'}` : ''}</span></span>
                 <span className="ln-tag ln-tag-info">{r.readiness}</span>
               </Link>
             ))}
@@ -63,7 +63,7 @@ function Step({ n, done, title, children }) {
     <article className="ln-card" style={{ gap: 10 }}>
       <div className="ln-row" style={{ gap: 10, alignItems: 'center' }}>
         {done ? <CheckCircle2 size={22} color="var(--status-success)" aria-hidden="true" /> : <Circle size={22} aria-hidden="true" />}
-        <h2 className="ln-h2" style={{ margin: 0, fontSize: 18 }}>{n}. {title}</h2>
+        <h2 className="ln-h2" style={{ margin: 0, fontSize: 'var(--fs-h3)' }}>{n}. {title}</h2>
         {done && <span className="ln-tag ln-tag-success">Done</span>}
       </div>
       {children}

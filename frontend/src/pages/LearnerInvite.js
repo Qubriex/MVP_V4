@@ -40,14 +40,14 @@ export default function LearnerInvite() {
       <aside className="ln-login-aside">
         <a href="/" className="brand-home" aria-label="Qubirex home"><BrandLogo height={48} tone="onDark" /></a>
         <div className="ln-col ln-hide-phone" style={{ gap: 20 }}>
-          <h1 style={{ fontSize: 'clamp(32px, 3vw + 10px, 48px)' }}>Welcome. Let’s set up your sign-in.</h1>
-          <p style={{ fontSize: 17, lineHeight: 1.65, color: 'var(--stage-muted)', maxWidth: 460 }}>Choose a PIN only you know. You’ll use it with your learner reference and your cohort’s join code.</p>
+          <h1 style={{ fontSize: 'var(--fs-display)' }}>Welcome. Let’s set up your sign-in.</h1>
+          <p style={{ fontSize: 'var(--fs-h3)', lineHeight: 1.65, color: 'var(--stage-muted)', maxWidth: 460 }}>Choose a PIN only you know. You’ll use it with your learner reference and your cohort’s join code.</p>
         </div>
         <span className="ln-small ln-hide-phone" style={{ color: 'var(--stage-muted)' }}>Receive. Build. Return.</span>
       </aside>
       <div className="ln-login-main">
         <form className="ln-login-form" onSubmit={accept}>
-          <h2 style={{ fontSize: 32, fontFamily: 'var(--font-display)' }}>Set your PIN</h2>
+          <h2 style={{ fontSize: 'var(--fs-h1)', fontFamily: 'var(--font-display)' }}>Set your PIN</h2>
           {error && <div className="ln-error" role="alert">{error}</div>}
           {!invite && !error && <p className="ln-muted">Checking your invite…</p>}
           {!invite && error && <Link to="/learner-login" className="ln-link">Go to learner sign in</Link>}
@@ -61,10 +61,10 @@ export default function LearnerInvite() {
                 <span className="ln-xs ln-muted">Write these down — you’ll need them to sign in.</span>
               </div>
               <div className="ln-field"><label className="ln-label" htmlFor="p1">New 6-digit PIN</label>
-                <input id="p1" className="ln-input" style={{ minHeight: 48, fontSize: 18, letterSpacing: '0.3em' }} type="password" inputMode="numeric" maxLength={6} autoComplete="new-password" value={pin} onChange={e => setPin(e.target.value.replace(/\D/g, ''))} required /></div>
+                <input id="p1" className="ln-input" style={{ minHeight: 48, fontSize: 'var(--fs-h3)', letterSpacing: '0.3em' }} type="password" inputMode="numeric" maxLength={6} autoComplete="new-password" value={pin} onChange={e => setPin(e.target.value.replace(/\D/g, ''))} required /></div>
               <div className="ln-field"><label className="ln-label" htmlFor="p2">Type it again</label>
-                <input id="p2" className="ln-input" style={{ minHeight: 48, fontSize: 18, letterSpacing: '0.3em' }} type="password" inputMode="numeric" maxLength={6} autoComplete="new-password" value={pin2} onChange={e => setPin2(e.target.value.replace(/\D/g, ''))} required /></div>
-              <button type="submit" className="ln-btn ln-btn-primary ln-btn-block" style={{ minHeight: 52, fontSize: 16 }} disabled={busy}>{busy ? 'Saving…' : 'Set PIN and start'}</button>
+                <input id="p2" className="ln-input" style={{ minHeight: 48, fontSize: 'var(--fs-h3)', letterSpacing: '0.3em' }} type="password" inputMode="numeric" maxLength={6} autoComplete="new-password" value={pin2} onChange={e => setPin2(e.target.value.replace(/\D/g, ''))} required /></div>
+              <button type="submit" className="ln-btn ln-btn-primary ln-btn-block" style={{ minHeight: 52, fontSize: 'var(--fs-h3)' }} disabled={busy}>{busy ? 'Saving…' : 'Set PIN and start'}</button>
             </>
           )}
         </form>

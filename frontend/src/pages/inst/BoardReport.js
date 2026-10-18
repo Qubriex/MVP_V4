@@ -43,12 +43,12 @@ export default function BoardReport() {
       </div>
       <header className="ln-col" style={{ gap: 4 }}>
         <span className="ln-kicker">{inst?.name}{inst?.city ? ` · ${inst.city}` : ''}</span>
-        <h1 className="ln-title" style={{ fontSize: 30 }}>{t.title}</h1>
+        <h1 className="ln-title" style={{ fontSize: 'var(--fs-h1)' }}>{t.title}</h1>
         <span className="ln-small ln-muted">{t.generated} {when(data.generated_at)}</span>
       </header>
       <section className="ln-card" style={{ gap: 6 }}>
         <span className="ln-label">{t.target}</span>
-        <b style={{ fontSize: 18 }}>{inst?.mou_target_pct ? `${inst.mou_target_pct}% · ${inst.mou_target_label || ''}${inst.mou_target_date ? ` · ${t.by} ${when(inst.mou_target_date)}` : ''}` : t.none}</b>
+        <b style={{ fontSize: 'var(--fs-h3)' }}>{inst?.mou_target_pct ? `${inst.mou_target_pct}% · ${inst.mou_target_label || ''}${inst.mou_target_date ? ` · ${t.by} ${when(inst.mou_target_date)}` : ''}` : t.none}</b>
       </section>
       <div className="ln-tablewrap"><table className="ln-table">
         <thead><tr><th>{t.cohort}</th><th>{t.students}</th><th>{t.ready}</th><th>{t.nearly}</th><th>{t.building}</th><th>{t.active}</th><th>{t.logs}</th><th>{t.gap}</th></tr></thead>
@@ -60,10 +60,10 @@ export default function BoardReport() {
       <section className="ln-card" style={{ gap: 8 }}>
         <h2 className="ln-h2">{t.placements}</h2>
         <div className="ln-grid ln-g-4" style={{ gap: 10 }}>
-          <div className="ln-tile"><b style={{ fontSize: 20 }}>{p.placed}</b><span className="ln-xs ln-muted">{t.placed}</span></div>
-          <div className="ln-tile"><b style={{ fontSize: 20 }}>{p.offers}</b><span className="ln-xs ln-muted">{t.offers}</span></div>
-          <div className="ln-tile"><b style={{ fontSize: 20 }}>{p.offers >= 5 && p.median_salary_lpa != null ? `${p.median_salary_lpa} ${t.lpa}` : '—'}</b><span className="ln-xs ln-muted">{t.median}</span></div>
-          <div className="ln-tile"><b style={{ fontSize: 20 }}>{p.rated_90d >= 5 && p.avg_rating_90d != null ? `${p.avg_rating_90d} / 5` : '—'}</b><span className="ln-xs ln-muted">{t.rating}</span></div>
+          <div className="ln-tile"><b style={{ fontSize: 'var(--fs-h2)' }}>{p.placed}</b><span className="ln-xs ln-muted">{t.placed}</span></div>
+          <div className="ln-tile"><b style={{ fontSize: 'var(--fs-h2)' }}>{p.offers}</b><span className="ln-xs ln-muted">{t.offers}</span></div>
+          <div className="ln-tile"><b style={{ fontSize: 'var(--fs-h2)' }}>{p.offers >= 5 && p.median_salary_lpa != null ? `${p.median_salary_lpa} ${t.lpa}` : '—'}</b><span className="ln-xs ln-muted">{t.median}</span></div>
+          <div className="ln-tile"><b style={{ fontSize: 'var(--fs-h2)' }}>{p.rated_90d >= 5 && p.avg_rating_90d != null ? `${p.avg_rating_90d} / 5` : '—'}</b><span className="ln-xs ln-muted">{t.rating}</span></div>
         </div>
         <span className="ln-small">{t.sponsored}: {p.sponsored_cohorts}</span>
       </section>

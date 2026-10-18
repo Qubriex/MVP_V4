@@ -53,8 +53,8 @@ export function MatchRing({ pct, size = 72, label = 'MATCH' }) {
     <div className="ln-ring" style={{ width: size, height: size, background: `conic-gradient(${color} ${pct}%, var(--color-border) 0)` }}
       role="img" aria-label={`${pct}% skill match`}>
       <div style={{ width: inner, height: inner }}>
-        <span style={{ fontSize: size > 100 ? 34 : 17, fontWeight: 700, fontFamily: size > 100 ? 'var(--font-display)' : undefined, lineHeight: 1.1 }}>{pct}%</span>
-        <span style={{ fontSize: size > 100 ? 11 : 9, color: 'var(--color-text-muted)', letterSpacing: '0.06em' }}>{label}</span>
+        <span style={{ fontSize: size > 100 ? 'var(--fs-h1)' : 'var(--fs-h3)', fontWeight: 700, fontFamily: size > 100 ? 'var(--font-display)' : undefined, lineHeight: 1.1 }}>{pct}%</span>
+        <span style={{ fontSize: 'var(--fs-caption)', color: 'var(--color-text-muted)', letterSpacing: '0.06em' }}>{label}</span>
       </div>
     </div>
   );

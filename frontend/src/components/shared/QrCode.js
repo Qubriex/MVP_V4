@@ -11,5 +11,5 @@ export default function QrCode({ value, size = 160, label }) {
     return () => { live = false; };
   }, [value, size]);
   if (!src) return <div style={{ width: size, height: size }} className="ln-skeleton" aria-hidden="true" />;
-  return <img src={src} width={size} height={size} alt={label || `QR code for ${value}`} style={{ borderRadius: 8, background: '#fff' }} />;
+  return <img src={src} width={size} height={size} alt={label || `QR code for ${value}`} style={{ borderRadius: 8, background: '#FFFFFF' /* QR codes need a white quiet zone in both themes */ }} />;
 }

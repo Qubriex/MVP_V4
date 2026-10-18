@@ -59,7 +59,7 @@ export default function LearningCurve({ data }) {
 
       <div className="ln-grid ln-g-4" style={{ gap: 10 }}>
         {[['Test-out rate', rate(data.rates.test_out_rate)], ['Review pass rate', rate(data.rates.review_pass_rate)], ['Checks at A1+ (own words)', rate(data.rates.checks_at_a1_plus)], ['Checks at A2+ (challenge)', rate(data.rates.checks_at_a2_plus)]].map(([k, v]) => (
-          <div key={k} className="ln-tile ln-col" style={{ gap: 2 }}><span className="ln-xs ln-muted">{k}</span><span style={{ fontSize: 20, fontWeight: 700 }}>{v}</span></div>
+          <div key={k} className="ln-tile ln-col" style={{ gap: 2 }}><span className="ln-xs ln-muted">{k}</span><span style={{ fontSize: 'var(--fs-h2)', fontWeight: 700 }}>{v}</span></div>
         ))}
       </div>
     </div>

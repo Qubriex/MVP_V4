@@ -11,6 +11,8 @@ import { Bar } from '../learn/ui';
 import CommandBox from '../shared/CommandBox';
 import { WhyThis, HowCounted } from '../shared/Popover';
 import { SmallSample, TooFew } from '../shared/SampleSize';
+import { BandBar } from '../shared/ui';
+import BandDrawer from './BandDrawer';
 
 const TONE = { quiet: 'ln-tag-warning', stuck: 'ln-tag-accent', nearly: 'ln-tag-info', reviews: 'ln-tag-info', requests: 'ln-tag-success' };
 
@@ -37,6 +39,8 @@ function TargetForm({ sb, onDone }) {
 }
 
 export default function CommandCentre({ role }) {
+  const [drill, setDrill] = useState(null);
+  const onBand = (b) => setDrill(b);
   const { data, reload } = useCachedGet('/institution/command-centre');
   const [editing, setEditing] = useState(false);
   if (!data) return <CommandBox side="staff" />;
@@ -66,10 +70,10 @@ export default function CommandCentre({ role }) {
           <div className="ln-grid ln-g-3" style={{ gap: 14 }}>
             {cards.map(c => (
               <div key={c.kind} className="ln-card" style={{ padding: 18, borderRadius: 'var(--radius-lg)', gap: 8 }}>
-                <div className="ln-row" style={{ gap: 10 }}><span className={`ln-tag ${TONE[c.kind] || 'ln-tag-info'}`}>{c.count}</span><span style={{ fontSize: 15, fontWeight: 600 }}>{c.title}</span></div>
+                <div className="ln-row" style={{ gap: 10 }}><span className={`ln-tag ${TONE[c.kind] || 'ln-tag-info'}`}>{c.count}</span><span style={{ fontSize: 'var(--fs-body)', fontWeight: 600 }}>{c.title}</span></div>
                 <span className="ln-small">{c.body}</span>
                 <div className="ln-between ln-wrap" style={{ gap: 8 }}>
-                  <Link to={c.href} className="ln-link" style={{ fontSize: 13 }}>{c.cta} →</Link>
+                  <Link to={c.href} className="ln-link" style={{ fontSize: 'var(--fs-small)' }}>{c.cta} →</Link>
                   <WhyThis title="Why this?">{c.why}</WhyThis>
                 </div>
               </div>
@@ -95,13 +99,7 @@ export default function CommandCentre({ role }) {
         <section className="ln-card" style={{ gap: 10 }} aria-label="Readiness">
           <div className="ln-between"><span className="ln-kicker">Readiness</span><SmallSample n={rd.total} /></div>
           <TooFew n={rd.total}>
-            {[['Ready', rd.ready, 'ln-bar-good'], ['Nearly ready', rd.nearly, ''], ['Building', rd.building, '']].map(([label, n, v]) => (
-              <div key={label} className="ln-row" style={{ gap: 10 }}>
-                <span className="ln-small" style={{ width: 96 }}>{label}</span>
-                <div style={{ flex: 1 }}><Bar pct={rd.total ? (n / rd.total) * 100 : 0} variant={v} label={`${label}: ${n}`} /></div>
-                <b style={{ width: 28, textAlign: 'right' }}>{n}</b>
-              </div>
-            ))}
+            <BandBar counts={{ ready: rd.ready, nearly: rd.nearly, building: rd.building }} onSelect={onBand} />
           </TooFew>
           <HowCounted>Readiness is the match between a student’s verified skills and the best-fitting job role, from 0 to 100. Ready is 80 or more, Nearly ready 60–79, Building under 60.</HowCounted>
         </section>
@@ -117,6 +115,7 @@ export default function CommandCentre({ role }) {
           <HowCounted>Time the AI spent teaching, checking and answering for your students since the 1st of this month.</HowCounted>
         </section>
       </div>
+      {drill && <BandDrawer band={drill} onClose={() => setDrill(null)} />}
     </>
   );
 }

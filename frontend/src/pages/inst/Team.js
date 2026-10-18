@@ -7,6 +7,7 @@ import api from '../../utils/api';
 import { Avatar, ROLE_LABEL, useStaff } from '../../components/inst/InstitutionLayout';
 import CopyLink from '../../components/inst/CopyLink';
 import { errMsg } from '../../utils/errors';
+import { Select } from '../../components/shared/ui';
 
 const STATUS = { active: ['Active', 'ln-tag-success'], invited: ['Invited', 'ln-tag-info'], expired: ['Expired', 'ln-tag-warning'], disabled: ['Disabled', 'ln-tag-neutral'] };
 
@@ -16,7 +17,7 @@ function CohortPicker({ cohorts, value, onChange }) {
       {cohorts.length === 0 && <span className="ln-small ln-muted">No cohorts yet.</span>}
       {cohorts.map(c => {
         const on = value.includes(c.id);
-        return <button key={c.id} type="button" className="ln-pilltab" style={{ minHeight: 34, fontSize: 13 }} aria-pressed={on} aria-selected={on}
+        return <button key={c.id} type="button" className="ln-pilltab" style={{ minHeight: 34, fontSize: 'var(--fs-small)' }} aria-pressed={on} aria-selected={on}
           onClick={() => onChange(on ? value.filter(x => x !== c.id) : [...value, c.id])}>{c.title}</button>;
       })}
     </div>
@@ -40,7 +41,7 @@ function EditModal({ member, cohorts, onClose, onSaved }) {
         <h2 id="edit-title" className="ln-h2">{member.name || member.email}</h2>
         <div className="ln-grid ln-g-2" style={{ gap: 12 }}>
           <div className="ln-field"><label className="ln-label" htmlFor="er">Role</label>
-            <select id="er" className="ln-select" value={role} onChange={e => setRole(e.target.value)}>{Object.entries(ROLE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></div>
+            <Select id="er" value={role} onChange={e => setRole(e.target.value)}>{Object.entries(ROLE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</Select></div>
           <div className="ln-field"><label className="ln-label" htmlFor="ed">Department</label><input id="ed" className="ln-input" value={department} onChange={e => setDepartment(e.target.value)} /></div>
         </div>
         <div className="ln-col" style={{ gap: 8 }}><span className="ln-label">Cohorts</span>
@@ -106,7 +107,7 @@ export default function Team() {
           <div className="ln-field"><label className="ln-label" htmlFor="in">Name <span style={{ fontWeight: 400, color: 'var(--color-text-muted)' }}>· optional</span></label><input id="in" className="ln-input" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /></div>
           <div className="ln-field"><label className="ln-label" htmlFor="idp">Department</label><input id="idp" className="ln-input" placeholder="e.g. CSE" value={form.department} onChange={e => setForm({ ...form, department: e.target.value })} /></div>
           <div className="ln-field"><label className="ln-label" htmlFor="irl">Role</label>
-            <select id="irl" className="ln-select" value={form.role} onChange={e => setForm({ ...form, role: e.target.value })}>{Object.entries(ROLE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></div>
+            <Select id="irl" value={form.role} onChange={e => setForm({ ...form, role: e.target.value })}>{Object.entries(ROLE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</Select></div>
           <button type="submit" className="ln-btn ln-btn-primary">Send invite</button>
         </div>
         {form.role !== 'admin' && (
@@ -149,9 +150,9 @@ export default function Team() {
       </section>
 
       <section className="ln-grid ln-g-3" style={{ gap: 14 }}>
-        <div className="ln-tile" style={{ padding: 18, gap: 8 }}><b style={{ fontSize: 15 }}>Admin</b><span className="ln-small" style={{ lineHeight: 1.55 }}>All cohorts and students. Invites staff, sets up cohorts and capability targets, produces and exports mastery logs.</span></div>
-        <div className="ln-tile" style={{ padding: 18, gap: 8 }}><b style={{ fontSize: 15 }}>Professor</b><span className="ln-small" style={{ lineHeight: 1.55 }}>Assigned cohorts only. Adds and removes students, resets PINs, views progress, insights and mastery logs.</span></div>
-        <div className="ln-tile" style={{ padding: 18, gap: 8 }}><b style={{ fontSize: 15 }}>Viewer</b><span className="ln-small" style={{ lineHeight: 1.55 }}>Read-only, for placement officers or HODs who need reports but don’t manage students.</span></div>
+        <div className="ln-tile" style={{ padding: 18, gap: 8 }}><b style={{ fontSize: 'var(--fs-body)' }}>Admin</b><span className="ln-small" style={{ lineHeight: 1.55 }}>All cohorts and students. Invites staff, sets up cohorts and capability targets, produces and exports mastery logs.</span></div>
+        <div className="ln-tile" style={{ padding: 18, gap: 8 }}><b style={{ fontSize: 'var(--fs-body)' }}>Professor</b><span className="ln-small" style={{ lineHeight: 1.55 }}>Assigned cohorts only. Adds and removes students, resets PINs, views progress, insights and mastery logs.</span></div>
+        <div className="ln-tile" style={{ padding: 18, gap: 8 }}><b style={{ fontSize: 'var(--fs-body)' }}>Viewer</b><span className="ln-small" style={{ lineHeight: 1.55 }}>Read-only, for placement officers or HODs who need reports but don’t manage students.</span></div>
       </section>
 
       {editing && <EditModal member={editing} cohorts={cohorts} onClose={() => setEditing(null)} onSaved={() => { setEditing(null); load(); }} />}

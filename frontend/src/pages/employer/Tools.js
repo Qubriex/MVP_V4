@@ -30,7 +30,7 @@ export function BulkVerify() {
   return (
     <>
       <header className="ln-pagehead"><div className="ln-col" style={{ gap: 4 }}><h1 className="ln-title">Verify in bulk</h1><span className="ln-sub">Check many Evidence IDs at once — from a CSV or pasted from your ATS.</span></div></header>
-      <section className="ln-card" style={{ gap: 10, maxWidth: 900 }}>
+      <section className="ui-narrow ln-card" style={{ gap: 10 }}>
         <label className="ln-label" htmlFor="bv">Evidence IDs (one per line, or comma-separated)</label>
         <textarea id="bv" className="ln-input in-code" rows={6} value={text} onChange={e => setText(e.target.value)} placeholder="QBX-7K2M9P4XQ8RT" />
         <div className="ln-row ln-wrap" style={{ gap: 8 }}>
@@ -98,8 +98,8 @@ export function Billing() {
       <div className="ln-grid ln-g-3" style={{ gap: 14 }}>
         {PLANS.map(([name, sub, feats]) => (
           <article key={name} className="ln-card" style={{ gap: 8 }}>
-            <b style={{ fontSize: 18 }}>{name}</b><span className="ln-small ln-muted">{sub}</span>
-            <span className="ln-stat" style={{ fontSize: 26 }}>[PRICE]<span className="ln-small ln-muted"> / month + GST</span></span>
+            <b style={{ fontSize: 'var(--fs-h3)' }}>{name}</b><span className="ln-small ln-muted">{sub}</span>
+            <span className="ln-stat" style={{ fontSize: 'var(--fs-h1)' }}>[PRICE]<span className="ln-small ln-muted"> / month + GST</span></span>
             <ul className="ln-small" style={{ margin: 0, paddingLeft: 18, display: 'grid', gap: 4 }}>{feats.map(f => <li key={f}>{f}</li>)}</ul>
             <button type="button" className="ln-btn ln-btn-sm" aria-expanded={asked === name} onClick={() => setAsked(name)}>Choose {name}</button>
             {asked === name && <span className="ln-xs" role="status">Coming soon: pricing is being finalised. Use Help → Contact and we will set up {name} for you.</span>}

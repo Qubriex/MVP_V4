@@ -53,7 +53,7 @@ export default function CohortLive() {
         <div className="in-livecount" role="group" aria-label="Filter by status">
           {['green', 'yellow', 'red'].map(l => (
             <button key={l} type="button" className="ln-btn" aria-pressed={filter === l} onClick={() => setFilter(f => (f === l ? 'all' : l))} style={filter === l ? { outline: '2px solid var(--accent-600)' } : undefined}>
-              <Light light={l} /> <b style={{ fontSize: 18 }}>{data.counts[l]}</b>
+              <Light light={l} /> <b style={{ fontSize: 'var(--fs-h3)' }}>{data.counts[l]}</b>
             </button>
           ))}
           <label className="ln-search" style={{ flex: 1, minWidth: 200 }}><Search size={18} aria-hidden="true" /><input aria-label="Search students" placeholder="Name or ref" value={q} onChange={e => setQ(e.target.value)} /></label>

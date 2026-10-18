@@ -26,7 +26,7 @@ function VoiceCheck() {
           aria-label={mic.listening ? t('session.tapStop') : t('session.tapSpeak')} aria-pressed={mic.listening} disabled={!mic.supported}>
           <Mic size={24} aria-hidden="true" />
         </button>
-        <span className="ln-indic" style={{ fontSize: 16 }}>{mic.listening ? (mic.interim || 'Listening…') : heard || (mic.supported ? 'Not tried yet' : 'Voice input isn’t available in this browser — you can still type in every session.')}</span>
+        <span className="ln-indic" style={{ fontSize: 'var(--fs-h3)' }}>{mic.listening ? (mic.interim || 'Listening…') : heard || (mic.supported ? 'Not tried yet' : 'Voice input isn’t available in this browser — you can still type in every session.')}</span>
       </div>
       {mic.error && <div className="ln-error">{mic.error}</div>}
     </Section>
@@ -52,7 +52,7 @@ export default function Welcome() {
   };
 
   return (
-    <div className="ln-col" style={{ gap: 20, maxWidth: 880 }}>
+    <div className="ui-narrow ln-col" style={{ gap: 20 }}>
       <header className="ln-col" style={{ gap: 6 }}>
         <span className="ln-kicker">Step {step + 1} of {STEPS.length} · {STEPS[step]}</span>
         <h1 className="ln-title">Welcome, {(form.draft.name || '').split(' ')[0]}</h1>

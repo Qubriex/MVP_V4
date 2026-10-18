@@ -132,7 +132,7 @@ export function TeachingFields({ form }) {
         {(draft.cohorts || []).length === 0 && <span className="ln-small ln-muted">None yet. Your admin assigns cohorts from Team &amp; roles.</span>}
         {(draft.cohorts || []).map(c => (
           <div key={c.id} className="ln-card ln-between" style={{ padding: '14px 16px', borderRadius: 'var(--radius-lg)', flexDirection: 'row' }}>
-            <div className="ln-col"><span style={{ fontSize: 15, fontWeight: 600 }}>{c.title}</span>
+            <div className="ln-col"><span style={{ fontSize: 'var(--fs-body)', fontWeight: 600 }}>{c.title}</span>
               <span className="ln-small ln-muted">{c.students} students · {c.language === 'hindi' ? 'Hindi' : 'Telugu'} · {c.cohort_role === 'lead' ? 'Lead professor' : 'Co-professor'}</span></div>
             <span className={`ln-tag ln-tag-lg ${c.status === 'active' ? 'ln-tag-success' : 'ln-tag-warning'}`}>{c.status === 'active' ? 'Active' : c.status === 'setup' ? 'Setting up' : c.status}</span>
           </div>
@@ -172,8 +172,8 @@ export function StudentPreview({ person }) {
       <span className="ln-kicker">How students see you</span>
       <div className="ln-card" style={{ alignItems: 'center', textAlign: 'center', gap: 8, padding: '28px 24px' }}>
         <Avatar person={person} size={72} />
-        <span style={{ fontSize: 18, fontWeight: 600 }}>{name}</span>
-        {(person?.designation || person?.department) && <span style={{ fontSize: 14 }}>{[person.designation, person.department].filter(Boolean).join(' · ')}</span>}
+        <span style={{ fontSize: 'var(--fs-h3)', fontWeight: 600 }}>{name}</span>
+        {(person?.designation || person?.department) && <span style={{ fontSize: 'var(--fs-body)' }}>{[person.designation, person.department].filter(Boolean).join(' · ')}</span>}
         {(person?.specialisations || []).length > 0 && <span className="ln-small ln-muted">{person.specialisations.join(' · ')}</span>}
         {person?.office_hours && <span className="ln-small ln-muted">Office hours: {person.office_hours}</span>}
       </div>

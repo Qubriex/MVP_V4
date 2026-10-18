@@ -5,6 +5,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import api from '../../utils/api';
 import { errMsg } from '../../utils/errors';
+import { Select } from '../../components/shared/ui';
 
 function Item({ item, skills, onDone }) {
   const [mode, setMode] = useState('alias');
@@ -28,14 +29,14 @@ function Item({ item, skills, onDone }) {
         </div>
         <div className="ln-row ln-wrap" style={{ gap: 8 }}>
           {mode === 'alias' ? (
-            <select className="ln-select" aria-label="Existing skill" value={skillId} onChange={e => setSkillId(e.target.value)} style={{ minWidth: 260 }}>
+            <Select aria-label="Existing skill" value={skillId} onChange={e => setSkillId(e.target.value)} style={{ minWidth: 260 }}>
               <option value="">Pick a skill…</option>{skills.map(s => <option key={s.skill_id} value={s.skill_id}>{s.parent_skill_id ? '  ↳ ' : ''}{s.name} ({s.domain})</option>)}
-            </select>
+            </Select>
           ) : <>
             <input className="ln-input" aria-label="Skill name" value={name} onChange={e => setName(e.target.value)} />
-            <select className="ln-select" aria-label="Parent skill" value={parent} onChange={e => setParent(e.target.value)}>
+            <Select aria-label="Parent skill" value={parent} onChange={e => setParent(e.target.value)}>
               <option value="">No parent (top-level)</option>{skills.filter(s => !s.parent_skill_id).map(s => <option key={s.skill_id} value={s.skill_id}>{s.name}</option>)}
-            </select>
+            </Select>
           </>}
           <button type="button" className="ln-btn ln-btn-primary" disabled={mode === 'alias' ? !skillId : !name.trim()} onClick={() => act(mode)}>{mode === 'alias' ? 'Add alias' : 'Create skill'}</button>
           <button type="button" className="ln-btn" onClick={() => act('reject')}>Reject</button>

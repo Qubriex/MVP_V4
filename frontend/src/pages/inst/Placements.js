@@ -10,6 +10,7 @@ import { Bar } from '../../components/learn/ui';
 import EmptyState from '../../components/shared/EmptyState';
 import { HowCounted } from '../../components/shared/Popover';
 import { SmallSample, TooFew } from '../../components/shared/SampleSize';
+import { Select } from '../../components/shared/ui';
 
 const STATUS = { offer: ['Offer', 'ln-tag-info'], placed: ['Placed', 'ln-tag-success'], declined: ['Declined', 'ln-tag-warning'] };
 
@@ -30,12 +31,12 @@ function AddPlacement({ onDone }) {
     try { await api.post('/institution/placements', f); onDone(); } catch (err) { setMsg(errMsg(err, 'Couldn’t save.')); }
   };
   return (
-    <form className="ln-card" style={{ gap: 12, maxWidth: 860 }} onSubmit={save}>
+    <form className="ui-narrow ln-card" style={{ gap: 12 }} onSubmit={save}>
       <h2 className="ln-h2">Record an offer or placement</h2>
       <div className="ln-grid ln-g-3" style={{ gap: 12 }}>
-        <div className="ln-field"><label className="ln-label" htmlFor="pl-c">Cohort</label><select id="pl-c" className="ln-select" value={cohortId} onChange={e => { setCohortId(e.target.value); setF(x => ({ ...x, el_id: '' })); }}>{(cohorts || []).map(c => <option key={c.id} value={c.id}>{c.title}</option>)}</select></div>
-        <div className="ln-field"><label className="ln-label" htmlFor="pl-s">Student</label><select id="pl-s" className="ln-select" value={f.el_id} onChange={set('el_id')} required><option value="">Choose…</option>{learners.map(l => <option key={l.el_id} value={l.el_id}>{l.name} · {l.learner_ref}</option>)}</select></div>
-        <div className="ln-field"><label className="ln-label" htmlFor="pl-st">Status</label><select id="pl-st" className="ln-select" value={f.status} onChange={set('status')}><option value="offer">Offer</option><option value="placed">Placed (joined)</option><option value="declined">Declined</option></select></div>
+        <div className="ln-field"><label className="ln-label" htmlFor="pl-c">Cohort</label><Select id="pl-c" value={cohortId} onChange={e => { setCohortId(e.target.value); setF(x => ({ ...x, el_id: '' })); }}>{(cohorts || []).map(c => <option key={c.id} value={c.id}>{c.title}</option>)}</Select></div>
+        <div className="ln-field"><label className="ln-label" htmlFor="pl-s">Student</label><Select id="pl-s" value={f.el_id} onChange={set('el_id')} required><option value="">Choose…</option>{learners.map(l => <option key={l.el_id} value={l.el_id}>{l.name} · {l.learner_ref}</option>)}</Select></div>
+        <div className="ln-field"><label className="ln-label" htmlFor="pl-st">Status</label><Select id="pl-st" value={f.status} onChange={set('status')}><option value="offer">Offer</option><option value="placed">Placed (joined)</option><option value="declined">Declined</option></Select></div>
         <div className="ln-field"><label className="ln-label" htmlFor="pl-e">Employer</label><input id="pl-e" className="ln-input" value={f.employer_name} onChange={set('employer_name')} required /></div>
         <div className="ln-field"><label className="ln-label" htmlFor="pl-r">Role</label><input id="pl-r" className="ln-input" value={f.role_title} onChange={set('role_title')} /></div>
         <div className="ln-field"><label className="ln-label" htmlFor="pl-sal">Salary (LPA)</label><input id="pl-sal" type="number" step="0.1" min="0" className="ln-input" value={f.salary_lpa} onChange={set('salary_lpa')} /></div>
@@ -78,7 +79,7 @@ function Sponsorships({ isAdmin }) {
           {s.message && <span className="ln-small">“{s.message}”</span>}
           {s.status === 'proposed' && isAdmin && (
             <div className="ln-row ln-wrap" style={{ gap: 8 }}>
-              <select className="ln-select" style={{ minHeight: 34, width: 240 }} aria-label="Cohort to sponsor" value={pick[s.id] || ''} onChange={e => setPick(p => ({ ...p, [s.id]: e.target.value }))}><option value="">Choose a cohort…</option>{(cohorts || []).map(c => <option key={c.id} value={c.id}>{c.title}</option>)}</select>
+              <Select style={{ minHeight: 34, width: 240 }} aria-label="Cohort to sponsor" value={pick[s.id] || ''} onChange={e => setPick(p => ({ ...p, [s.id]: e.target.value }))}><option value="">Choose a cohort…</option>{(cohorts || []).map(c => <option key={c.id} value={c.id}>{c.title}</option>)}</Select>
               <button type="button" className="ln-btn ln-btn-sm ln-btn-primary" disabled={!pick[s.id]} onClick={() => decide(s.id, true)}>Accept</button>
               <button type="button" className="ln-btn ln-btn-sm" onClick={() => decide(s.id, false)}>Decline</button>
             </div>
@@ -136,7 +137,7 @@ export default function Placements() {
               <td><b style={{ fontWeight: 600 }}>{p.name || '—'}</b> <span className="ln-xs ln-muted">{p.cohort}</span></td>
               <td className="ln-small">{p.employer_name}{p.role_title ? ` · ${p.role_title}` : ''}{p.source === 'employer' ? <span className="ln-tag ln-tag-info" style={{ marginLeft: 6 }}>from employer</span> : null}</td>
               <td>{canEdit ? (
-                <select className="ln-select" style={{ minHeight: 32, width: 120 }} aria-label="Status" value={p.status} onChange={e => setStatus(p.id, e.target.value)}>{Object.entries(STATUS).map(([k, v]) => <option key={k} value={k}>{v[0]}</option>)}</select>
+                <Select style={{ minHeight: 32, width: 120 }} aria-label="Status" value={p.status} onChange={e => setStatus(p.id, e.target.value)}>{Object.entries(STATUS).map(([k, v]) => <option key={k} value={k}>{v[0]}</option>)}</Select>
               ) : <span className={`ln-tag ${STATUS[p.status][1]}`}>{STATUS[p.status][0]}</span>}</td>
               <td>{p.salary_lpa ? `${p.salary_lpa} LPA` : '—'}</td>
               <td>{p.status === 'placed' && canEdit ? <Rate p={p} onDone={refresh} /> : p.rating_90d ? `${p.rating_90d} / 5` : '—'}</td>

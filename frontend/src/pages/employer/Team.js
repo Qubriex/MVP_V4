@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import api from '../../utils/api';
 import { errMsg } from '../../utils/errors';
 import { useEmployer } from './Layout';
+import { Select } from '../../components/shared/ui';
 
 export default function EmployerTeam() {
   const { me, isOwner } = useEmployer();
@@ -31,11 +32,11 @@ export default function EmployerTeam() {
       {error && <div className="ln-error" role="alert">{error}</div>}
       {isOwner && (
         <form className="ln-card" style={{ gap: 12, marginBottom: 16 }} onSubmit={invite}>
-          <h2 className="ln-h2" style={{ margin: 0, fontSize: 18 }}>Invite a colleague</h2>
+          <h2 className="ln-h2" style={{ margin: 0, fontSize: 'var(--fs-h3)' }}>Invite a colleague</h2>
           <div className="ln-row ln-wrap" style={{ gap: 10 }}>
             <input className="ln-input" style={{ flex: '2 1 220px' }} type="email" aria-label="Work email" placeholder={`name@${me?.employer?.domain || 'company.com'}`} value={inv.email} onChange={e => setInv(v => ({ ...v, email: e.target.value }))} required />
             <input className="ln-input" style={{ flex: '1 1 160px' }} aria-label="Name" placeholder="Name (optional)" value={inv.name} onChange={e => setInv(v => ({ ...v, name: e.target.value }))} />
-            <select className="ln-select" aria-label="Role" value={inv.role} onChange={e => setInv(v => ({ ...v, role: e.target.value }))}><option value="recruiter">Recruiter</option><option value="viewer">Viewer</option></select>
+            <Select aria-label="Role" value={inv.role} onChange={e => setInv(v => ({ ...v, role: e.target.value }))}><option value="recruiter">Recruiter</option><option value="viewer">Viewer</option></Select>
             <button type="submit" className="ln-btn ln-btn-primary">Send invite</button>
           </div>
           {link && <div className="ln-note ln-small">Invite sent. You can also share this link: <code style={{ wordBreak: 'break-all' }}>{link}</code></div>}
@@ -49,8 +50,8 @@ export default function EmployerTeam() {
               <tr key={u.id}>
                 <td style={{ fontWeight: 600 }}>{u.name || '—'}</td><td>{u.email}</td>
                 <td>{isOwner && u.id !== me?.user?.id ? (
-                  <select className="ln-select" aria-label={`Role for ${u.email}`} value={u.role} onChange={e => update(u.id, { role: e.target.value })}>
-                    <option value="owner">Owner</option><option value="recruiter">Recruiter</option><option value="viewer">Viewer</option></select>) : u.role}</td>
+                  <Select aria-label={`Role for ${u.email}`} value={u.role} onChange={e => update(u.id, { role: e.target.value })}>
+                    <option value="owner">Owner</option><option value="recruiter">Recruiter</option><option value="viewer">Viewer</option></Select>) : u.role}</td>
                 <td>{isOwner && u.id !== me?.user?.id ? (
                   <button type="button" className="ln-btn ln-btn-sm" onClick={() => update(u.id, { status: u.status === 'active' ? 'disabled' : 'active' })}>{u.status === 'active' ? 'Disable' : 'Enable'}</button>) : u.status}</td>
                 <td className="ln-small ln-muted">{u.last_login_at ? new Date(u.last_login_at).toLocaleString() : 'Never'}</td>

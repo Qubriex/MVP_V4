@@ -115,7 +115,7 @@ export default function AddStudents() {
       <>
         <Link to="/institution/students" className="ln-link" style={{ alignSelf: 'flex-start' }}>← Students &amp; access</Link>
         <section className="ln-card" style={{ gap: 18 }}>
-          <h1 className="ln-title" style={{ fontSize: 30 }}>{done.added} student{done.added === 1 ? '' : 's'} now {done.added === 1 ? 'has' : 'have'} access</h1>
+          <h1 className="ln-title" style={{ fontSize: 'var(--fs-h1)' }}>{done.added} student{done.added === 1 ? '' : 's'} now {done.added === 1 ? 'has' : 'have'} access</h1>
           <span className="ln-sub">Cohort: <b>{done.cohort.title}</b> · Join code <b className="in-code">{done.cohort.join_code}</b></span>
           <AccessResults invites={done.invites} slips={done.slips} kept={done.kept} skipped={done.skipped} />
           <div className="ln-row in-no-print" style={{ gap: 10 }}>
@@ -162,7 +162,7 @@ export default function AddStudents() {
                 <div className="ln-tile ln-between ln-wrap" style={{ padding: 14, flexDirection: 'row' }}>
                   <div className="ln-col"><b>{csv ? csv.name : 'No file yet'}</b>
                     <span className="ln-small ln-muted">{csv ? `${csv.rows.length} rows read` : 'Columns: name, learner_ref (roll no.), email. From Excel, save as CSV.'}{' · '}
-                      <button type="button" className="ln-link" style={{ fontSize: 13 }} onClick={downloadTemplate}><Download size={12} aria-hidden="true" style={{ display: 'inline' }} /> Download template</button></span></div>
+                      <button type="button" className="ln-link" style={{ fontSize: 'var(--fs-small)' }} onClick={downloadTemplate}><Download size={12} aria-hidden="true" style={{ display: 'inline' }} /> Download template</button></span></div>
                   <input ref={fileRef} type="file" accept=".csv,text/csv" className="ln-sr" onChange={readFile} id="csvfile" />
                   <button type="button" className="ln-btn" onClick={() => fileRef.current?.click()}><Upload size={16} aria-hidden="true" />{csv ? 'Replace file' : 'Choose file'}</button>
                 </div>
@@ -229,13 +229,13 @@ export default function AddStudents() {
 
         <aside className="ln-card ln-card-dark" style={{ gap: 12, position: 'sticky', top: 24, alignSelf: 'start' }}>
           <span className="ln-kicker" style={{ color: 'var(--stage-muted)' }}>Summary</span>
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: 34, fontWeight: 600 }}>{s ? s.adding : 0} student{s?.adding === 1 ? '' : 's'}</span>
-          <span style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--stage-muted)' }}>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-h1)', fontWeight: 600 }}>{s ? s.adding : 0} student{s?.adding === 1 ? '' : 's'}</span>
+          <span style={{ fontSize: 'var(--fs-body)', lineHeight: 1.6, color: 'var(--stage-muted)' }}>
             {cohort ? <>join <b style={{ color: 'var(--stage-text)' }}>{cohort.title}</b>.</> : 'Pick a cohort.'}
             {s && <> {s.invites ? `${s.invites} get an email invite. ` : ''}{s.slips ? `${s.slips} get printed slips. ` : ''}{s.keep_pin ? `${s.keep_pin} keep their existing PIN. ` : ''}{s.skipped ? `${s.skipped} row${s.skipped > 1 ? 's' : ''} skipped until fixed.` : ''}</>}
           </span>
           {error && <div className="ln-error" role="alert">{error}</div>}
-          <button type="button" className="ln-btn ln-btn-amber" style={{ borderRadius: 'var(--radius-md)' }} disabled={busy || !s || !s.adding} onClick={submit}>{busy ? 'Giving access…' : 'Give access'}</button>
+          <button type="button" className="ln-btn ln-btn-primary ln-btn-lg" style={{ borderRadius: 'var(--radius-md)' }} disabled={busy || !s || !s.adding} onClick={submit}>{busy ? 'Giving access…' : 'Give access'}</button>
           <span className="ln-xs" style={{ color: 'var(--stage-muted)', lineHeight: 1.5 }}>This is one step on the server: students, enrolment and invites are created together, so nothing is left half-done if you close the page.</span>
         </aside>
       </div>

@@ -21,7 +21,7 @@ function SkillLine({ s }) {
     <div className="ln-card" style={{ gap: 10 }}>
       <div className="ln-between ln-wrap" style={{ gap: 10, alignItems: 'flex-start' }}>
         <div className="ln-col" style={{ gap: 6 }}>
-          <span style={{ fontWeight: 600, fontSize: 16 }}>{s.name}</span>
+          <span style={{ fontWeight: 600, fontSize: 'var(--fs-h3)' }}>{s.name}</span>
           <div className="ln-row ln-wrap" style={{ gap: 6 }}>
             <span className={`ln-tag ln-tag-lg ${lab.cls}`}>{lab.text}</span>
             {s.evidence && <span className="ln-tag ln-tag-neutral" title="How strongly the skill was assessed">{LEVEL[s.evidence]}</span>}
@@ -105,7 +105,7 @@ export default function Passport() {
           <div className="ln-between ln-wrap" style={{ gap: 12 }}>
             <div className="ln-col" style={{ gap: 4 }}>
               <span className="ln-kicker" style={{ color: 'var(--accent-400)' }}>Evidence ID</span>
-              <span className="ln-row" style={{ gap: 10 }}><b style={{ fontSize: 22, letterSpacing: '0.04em', fontFamily: 'var(--font-mono, monospace)' }}>{p.evidence_id}</b>
+              <span className="ln-row" style={{ gap: 10 }}><b style={{ fontSize: 'var(--fs-h2)', letterSpacing: '0.04em', fontFamily: 'var(--font-mono)' }}>{p.evidence_id}</b>
                 <button type="button" className="ln-btn ln-btn-sm ln-btn-ghost-dark in-no-print" onClick={copy}><Copy size={14} aria-hidden="true" />{copied ? 'Copied' : 'Copy'}</button></span>
             </div>
             <div className="ln-row" style={{ gap: 12, alignItems: 'flex-start' }}>
@@ -140,7 +140,7 @@ export default function Passport() {
               {p.renewal.items.map(it => (
                 <div key={it.instance_id} className="ln-tile ln-col" style={{ gap: 8 }}>
                   <div className="ln-between ln-wrap"><span style={{ fontWeight: 600 }}>{it.name}</span>{it.answered ? <span className="ln-tag ln-tag-success">Answered</span> : <button type="button" className="ln-btn ln-btn-sm ln-btn-primary" onClick={() => setRenewItem(it)}>Answer</button>}</div>
-                  {renewItem?.instance_id === it.instance_id && (<><p className="ln-indic" style={{ fontSize: 16 }}>{it.question}</p><AnswerBox onSubmit={answerRenewal} busy={busy} /></>)}
+                  {renewItem?.instance_id === it.instance_id && (<><p className="ln-indic" style={{ fontSize: 'var(--fs-h3)' }}>{it.question}</p><AnswerBox onSubmit={answerRenewal} busy={busy} /></>)}
                 </div>
               ))}
             </div>

@@ -11,6 +11,7 @@ import { Bar } from '../../components/learn/ui';
 import EmptyState, { LoadingRows } from '../../components/shared/EmptyState';
 import { HowCounted } from '../../components/shared/Popover';
 import { SmallSample } from '../../components/shared/SampleSize';
+import { Select } from '../../components/shared/ui';
 
 const STATUS = { proposed: ['Waiting for the college', 'ln-tag-warning'], accepted: ['Accepted', 'ln-tag-success'], declined: ['Declined', 'ln-tag-neutral'], running: ['Running', 'ln-tag-info'], done: ['Done', 'ln-tag-neutral'] };
 
@@ -30,12 +31,12 @@ export function SponsorPage() {
     <>
       <header className="ln-pagehead"><div className="ln-col" style={{ gap: 4 }}><h1 className="ln-title">Sponsor a cohort</h1>
         <span className="ln-sub">Pay for a college cohort to practise what your role needs. Each student who reaches your bar gets an interview.</span></div></header>
-      <form className="ln-card" style={{ gap: 12, maxWidth: 820 }} onSubmit={send}>
+      <form className="ln-card" style={{ gap: 12 }} onSubmit={send}>
         <div className="ln-grid ln-g-2" style={{ gap: 12 }}>
           <div className="ln-field"><label className="ln-label" htmlFor="sp-c">College</label>
-            <select id="sp-c" className="ln-select" value={f.institution_id} onChange={set('institution_id')} required><option value="">Choose…</option>{(colleges?.colleges || []).map(c => <option key={c.institution_id} value={c.institution_id}>{c.college}{c.city ? ` · ${c.city}` : ''}</option>)}</select></div>
+            <Select id="sp-c" value={f.institution_id} onChange={set('institution_id')} required><option value="">Choose…</option>{(colleges?.colleges || []).map(c => <option key={c.institution_id} value={c.institution_id}>{c.college}{c.city ? ` · ${c.city}` : ''}</option>)}</Select></div>
           <div className="ln-field"><label className="ln-label" htmlFor="sp-r">For role</label>
-            <select id="sp-r" className="ln-select" value={f.role_id} onChange={set('role_id')}><option value="">Any role</option>{(roles || []).map(r => <option key={r.id} value={r.id}>{r.title}</option>)}</select></div>
+            <Select id="sp-r" value={f.role_id} onChange={set('role_id')}><option value="">Any role</option>{(roles || []).map(r => <option key={r.id} value={r.id}>{r.title}</option>)}</Select></div>
           <div className="ln-field"><label className="ln-label" htmlFor="sp-s">Seats</label><input id="sp-s" type="number" min="1" max="500" className="ln-input" value={f.seats} onChange={set('seats')} /></div>
           <label className="ln-check" style={{ alignSelf: 'end' }}><input type="checkbox" checked={f.interview_promise} onChange={set('interview_promise')} />Interview everyone who reaches the bar</label>
         </div>

@@ -11,6 +11,7 @@ import { errMsg } from '../../utils/errors';
 import { SampleBadge } from '../../components/learn/ui';
 import EmptyState, { LoadingRows } from '../../components/shared/EmptyState';
 import { WhyThis } from '../../components/shared/Popover';
+import { Select } from '../../components/shared/ui';
 
 const ITEMS = { skills: ['Skills and evidence', 'Your verified skills, when you last showed each one, and your Evidence ID.'], resume: ['Résumé', 'Your headline and summary.'], contact: ['Contact details', 'Your email and phone number.'] };
 const STAGE_TAG = { requested: 'ln-tag-warning', access_granted: 'ln-tag-success', applied: 'ln-tag-info', interview: 'ln-tag-success', dayone: 'ln-tag-success', offer: 'ln-tag-success', hired: 'ln-tag-success', hold: 'ln-tag-neutral', not_now: 'ln-tag-neutral', declined: 'ln-tag-neutral', withdrawn: 'ln-tag-neutral' };
@@ -30,7 +31,7 @@ function RequestCard({ r, onDone }) {
     <div className="ln-card" style={{ gap: 10 }}>
       <div className="ln-between ln-wrap" style={{ gap: 8 }}>
         <div className="ln-col" style={{ gap: 2 }}>
-          <b style={{ fontSize: 16 }}><Building2 size={15} aria-hidden="true" style={{ verticalAlign: -2, marginRight: 6 }} />{r.employer}</b>
+          <b style={{ fontSize: 'var(--fs-h3)' }}><Building2 size={15} aria-hidden="true" style={{ verticalAlign: -2, marginRight: 6 }} />{r.employer}</b>
           <span className="ln-small ln-muted">{r.role_title}{r.city ? ` · ${r.city}` : ''} · {day(r.created_at)}</span>
         </div>
         <div className="ln-row" style={{ gap: 6 }}>
@@ -80,7 +81,7 @@ export default function Jobs() {
         <div className="ln-col" style={{ gap: 4 }}><h1 className="ln-title">Jobs &amp; applications</h1>
           <span className="ln-sub">Employers who asked about you, jobs that fit, and where each application stands.</span></div>
         <label className="ln-selectwrap"><span><MapPin size={14} aria-hidden="true" /> City</span>
-          <select value={city} onChange={e => setCity(e.target.value)}><option value="">All cities</option>{(data?.cities || []).map(c => <option key={c} value={c}>{c}</option>)}</select></label>
+          <Select value={city} onChange={e => setCity(e.target.value)}><option value="">All cities</option>{(data?.cities || []).map(c => <option key={c} value={c}>{c}</option>)}</Select></label>
       </header>
       {msg && <div className="ln-note" role="status">{msg}</div>}
       {!data ? <LoadingRows rows={4} /> : (

@@ -46,7 +46,7 @@ export default function StaffInvite() {
       <div className="ln-login-main">
         <form className="ln-login-form" onSubmit={accept}>
           <div className="ln-col" style={{ gap: 6 }}>
-            <h2 style={{ fontSize: 32 }}>Set up your account</h2>
+            <h2 style={{ fontSize: 'var(--fs-h1)' }}>Set up your account</h2>
             {invite && <p className="ln-muted">Invited{invite.invited_by ? ` by ${invite.invited_by}` : ''} to {invite.institution_name}{invite.department ? ` · ${invite.department}` : ''}</p>}
           </div>
           {error && <div className="ln-error" role="alert">{error}</div>}
@@ -61,7 +61,7 @@ export default function StaffInvite() {
                 Link expires {new Date(invite.expires_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}. Role: <b style={{ color: 'var(--color-text)' }}>{ROLE[invite.role]}</b>
                 {invite.cohorts.length > 0 && ` · ${invite.cohorts.length} cohort${invite.cohorts.length > 1 ? 's' : ''} assigned`}
               </span>
-              <button type="submit" className="ln-btn ln-btn-primary ln-btn-block" style={{ minHeight: 52, fontSize: 16 }} disabled={busy}>{busy ? 'Setting up…' : 'Continue to profile setup →'}</button>
+              <button type="submit" className="ln-btn ln-btn-primary ln-btn-block" style={{ minHeight: 52, fontSize: 'var(--fs-h3)' }} disabled={busy}>{busy ? 'Setting up…' : 'Continue to profile setup →'}</button>
             </>
           )}
         </form>

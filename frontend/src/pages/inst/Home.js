@@ -59,9 +59,9 @@ export default function InstHome() {
               const [Icon, cls] = ALERT_ICON[a.kind] || [AlertTriangle, 'ln-tag-warning'];
               return (
                 <div key={a.kind} className="ln-card" style={{ padding: 18, borderRadius: 'var(--radius-lg)', gap: 10 }}>
-                  <div className="ln-row" style={{ gap: 10 }}><span className={`ln-tag ${cls}`} style={{ width: 30, height: 30, padding: 0, justifyContent: 'center' }}><Icon size={15} aria-hidden="true" /></span><span style={{ fontSize: 15, fontWeight: 600 }}>{a.title}</span></div>
+                  <div className="ln-row" style={{ gap: 10 }}><span className={`ln-tag ${cls}`} style={{ width: 30, height: 30, padding: 0, justifyContent: 'center' }}><Icon size={15} aria-hidden="true" /></span><span style={{ fontSize: 'var(--fs-body)', fontWeight: 600 }}>{a.title}</span></div>
                   <span className="ln-small">{a.body}</span>
-                  <Link to={a.href} className="ln-link" style={{ fontSize: 13 }}>{a.cta} →</Link>
+                  <Link to={a.href} className="ln-link" style={{ fontSize: 'var(--fs-small)' }}>{a.cta} →</Link>
                 </div>
               );
             })}
@@ -77,13 +77,13 @@ export default function InstHome() {
       </div>
 
       <section className="ln-col" style={{ gap: 14 }}>
-        <div className="ln-between"><h2 className="ln-h2" style={{ fontSize: 20 }}>{role === 'professor' ? 'My cohorts' : 'Cohorts'}</h2><Link to="/institution/cohorts" className="ln-link">All cohorts →</Link></div>
+        <div className="ln-between"><h2 className="ln-h2" style={{ fontSize: 'var(--fs-h2)' }}>{role === 'professor' ? 'My cohorts' : 'Cohorts'}</h2><Link to="/institution/cohorts" className="ln-link">All cohorts →</Link></div>
         {cohorts.length === 0 && <div className="ln-card ln-muted">{role === 'professor' ? 'No cohorts are assigned to you yet. Your admin assigns them from Team & roles.' : 'No cohorts yet. Create one to start.'}</div>}
         <div className="ln-grid ln-g-2" style={{ gap: 16 }}>
           {cohorts.map(c => (
             <Link key={c.id} to={`/institution/cohorts/${c.id}`} className="ln-card ln-card-link" style={{ gap: 14 }}>
               <div className="ln-between" style={{ alignItems: 'flex-start' }}>
-                <div className="ln-col" style={{ gap: 2 }}><span style={{ fontSize: 17, fontWeight: 600 }}>{c.title}</span><span className="ln-small ln-muted">{c.learner_count} students · {c.language === 'hindi' ? 'Hindi' : 'Telugu'} · <span className="in-code">{c.join_code}</span></span></div>
+                <div className="ln-col" style={{ gap: 2 }}><span style={{ fontSize: 'var(--fs-h3)', fontWeight: 600 }}>{c.title}</span><span className="ln-small ln-muted">{c.learner_count} students · {c.language === 'hindi' ? 'Hindi' : 'Telugu'} · <span className="in-code">{c.join_code}</span></span></div>
                 <span className={`ln-tag ln-tag-lg ${c.status === 'active' ? 'ln-tag-success' : 'ln-tag-warning'}`}>{c.status === 'active' ? 'Active' : c.status === 'completed' ? 'Completed' : 'Setting up'}</span>
               </div>
               <div className="ln-col" style={{ gap: 6 }}>
@@ -91,9 +91,9 @@ export default function InstHome() {
                 <Bar pct={c.avg_progress} variant="ln-bar-vivid" label={`Average progress ${c.avg_progress}%`} />
               </div>
               <div className="ln-grid ln-g-3" style={{ gap: 10, gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}>
-                <div className="ln-tile"><b style={{ fontSize: 20 }}>{c.active_week}</b><span className="ln-xs ln-muted">active this week</span></div>
-                <div className="ln-tile"><b style={{ fontSize: 20 }}>{c.stuck}</b><span className="ln-xs ln-muted">stuck 3+ loops</span></div>
-                <div className="ln-tile"><b style={{ fontSize: 20 }}>{c.not_signed_in}</b><span className="ln-xs ln-muted">not signed in</span></div>
+                <div className="ln-tile"><b style={{ fontSize: 'var(--fs-h2)' }}>{c.active_week}</b><span className="ln-xs ln-muted">active this week</span></div>
+                <div className="ln-tile"><b style={{ fontSize: 'var(--fs-h2)' }}>{c.stuck}</b><span className="ln-xs ln-muted">stuck 3+ loops</span></div>
+                <div className="ln-tile"><b style={{ fontSize: 'var(--fs-h2)' }}>{c.not_signed_in}</b><span className="ln-xs ln-muted">not signed in</span></div>
               </div>
             </Link>
           ))}
@@ -107,7 +107,7 @@ export default function InstHome() {
             <div className="ln-divided ln-col">
               {pulse.map(p => (
                 <div key={p.name} className="ln-row" style={{ padding: '10px 0', gap: 12 }}>
-                  <span style={{ flex: 1, fontSize: 15, fontWeight: 600 }}>{p.name}</span>
+                  <span style={{ flex: 1, fontSize: 'var(--fs-body)', fontWeight: 600 }}>{p.name}</span>
                   <span className="ln-small ln-muted">{p.share}% of JDs</span>
                   <span className={`ln-tag ${COVERAGE[p.coverage][1]}`}>{COVERAGE[p.coverage][0]}</span>
                 </div>
