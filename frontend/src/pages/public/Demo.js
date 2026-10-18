@@ -71,7 +71,7 @@ function LearnerDemo() {
               <button type="button" className={`ln-btn ${mic.listening ? 'ln-btn-primary' : 'ln-btn-secondary'}`} onClick={() => (mic.listening ? mic.stop() : (demoStop(), mic.start()))} aria-pressed={mic.listening} disabled={!mic.supported}>
                 {mic.listening ? <><Square size={16} aria-hidden="true" />{t('demo.l.stopMic')}</> : <><Mic size={16} aria-hidden="true" />{t('demo.l.speak')}</>}
               </button>
-              <button type="button" className="ln-btn" onClick={() => say(t('demo.l.question'))} disabled={speaking}><Volume2 size={16} aria-hidden="true" />{t('demo.l.replay')}</button>
+              <button type="button" className="ln-btn" onClick={() => say(t('pub.demo.whichRowsDoesAn'))} disabled={speaking}><Volume2 size={16} aria-hidden="true" />{t('demo.l.replay')}</button>
             </div>
             {mic.listening && <span className="ln-small ln-muted" aria-live="polite">{mic.interim || t('demo.l.listening')}</span>}
             {!mic.supported && <span className="ln-small" role="alert">{t('demo.micNone')}</span>}

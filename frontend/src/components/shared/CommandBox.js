@@ -10,6 +10,7 @@ import AskQubirex from './AskQubirex';
 const SHORT = { english: ['en', 'en-IN'], telugu: ['te', 'te-IN'], hindi: ['hi', 'hi-IN'] };
 
 export default function CommandBox({ side, placeholder = 'Ask about your data — for example, who is nearly ready?' }) {
+  const { t } = useUiLang();
   const { lang } = useUiLang();
   const [q, setQ] = useState('');
   const [open, setOpen] = useState(null);
@@ -19,10 +20,10 @@ export default function CommandBox({ side, placeholder = 'Ask about your data �
     <>
       <form className="sk-command" onSubmit={e => { e.preventDefault(); if (q.trim()) { setOpen(q.trim()); setQ(''); } }}>
         <Sparkles size={18} aria-hidden="true" />
-        <label htmlFor={`cmd-${side}`} className="ln-sr">Ask Qubirex</label>
+        <label htmlFor={`cmd-${side}`} className="ln-sr">{t('shared.commandBox.askQubirex')}</label>
         <input id={`cmd-${side}`} className="ln-indic" value={mic.listening ? mic.interim || 'Listening…' : q} onChange={e => setQ(e.target.value)} placeholder={placeholder} disabled={mic.listening} />
-        {mic.supported && <button type="button" className={`sk-mic ${mic.listening ? 'is-on' : ''}`} style={{ width: 38, height: 38 }} onClick={() => (mic.listening ? mic.stop() : mic.start())} aria-label="Speak your question"><Mic size={16} aria-hidden="true" /></button>}
-        <button type="submit" className="ln-btn ln-btn-primary ln-btn-sm" disabled={!q.trim()}>Ask</button>
+        {mic.supported && <button type="button" className={`sk-mic ${mic.listening ? 'is-on' : ''}`} style={{ width: 38, height: 38 }} onClick={() => (mic.listening ? mic.stop() : mic.start())} aria-label={t('shared.commandBox.speakQuestion')}><Mic size={16} aria-hidden="true" /></button>}
+        <button type="submit" className="ln-btn ln-btn-primary ln-btn-sm" disabled={!q.trim()}>{t('shared.commandBox.ask')}</button>
       </form>
       {open && <AskQubirex side={side} initialLang={code} initialQuestion={open} onClose={() => setOpen(null)} />}
     </>

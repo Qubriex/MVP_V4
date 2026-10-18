@@ -37,7 +37,7 @@ import { enqueue, flush } from '../../utils/offlineQueue';
 import { useLowBandwidth, recorderOptions } from '../../utils/lowBandwidth';
 import { errMsg } from '../../utils/errors';
 
-const APPROACH_NAMES = { native_concept: 'Native concept', analogy: 'Analogy', worked_example: 'Worked example', decomposition: 'Building blocks', socratic: 'Socratic' };
+const APPROACH_NAMES = { native_concept: 'learn.session.approachNames.nativeConcept', analogy: 'learn.session.approachNames.analogy', worked_example: 'learn.session.approachNames.workedExample', decomposition: 'learn.session.approachNames.buildingBlocks', socratic: 'learn.session.approachNames.socratic' };
 const LANG_LABEL = { telugu: 'తెలుగు', hindi: 'हिंदी' };
 const RATES = [0.8, 1, 1.2];
 const WAVE = [8, 14, 22, 30, 18, 26, 34, 20, 12, 24, 32, 16, 10, 22, 28, 14, 20, 30, 24, 12, 18, 26, 16, 10, 20, 14, 8, 12];
@@ -194,12 +194,12 @@ export default function Session() {
       // Authenticity gate (A0): not evaluated; answer again in your own words.
       ai.type = 'feedback';
       setPhase('mastery_check');
-      setNotice(data.caption_en || 'Please answer in your own words.');
+      setNotice(data.caption_en || t('learn.session.pleaseAnswerInYour'));
     } else if (data.result === 'advance') {
       ai.type = 'advance_trigger';
       setResult(data);
       setPhase('result');
-      if (data.provisional) setNotice('Your professor will double-check this answer. You can keep going.');
+      if (data.provisional) setNotice(t('learn.session.professorWillDoubleCheck'));
     } else if (data.result === 'loop') {
       ai.type = 'loop_trigger';
       setLoopCount(data.loop_count);
@@ -243,7 +243,7 @@ export default function Session() {
       applyResponse(res.data);
     } catch (e) {
       if (speech.speakingId === '__filler') speech.stop();
-      setError(navigator.onLine ? 'Couldn’t reach Professor Qubirex. Try again.' : 'You are offline. Lessons and checks need a connection — your active time is saved and will sync.');
+      setError(navigator.onLine ? t('learn.session.couldnTReachProfessor') : t('learn.session.youAreOfflineLessons'));
     }
     busyRef.current = false;
     setBusy(false);
@@ -255,7 +255,7 @@ export default function Session() {
     trackerRef.current = { ...tr, mode: 'voice', original: `${tr.original ? `${tr.original} ` : ''}${text}`.trim() };
     setDraft(d => `${d ? `${d} ` : ''}${text}`.trim());
     setMode('typing');
-    setNotice('Check your spoken answer, fix anything misheard, then press Send.');
+    setNotice(t('learn.session.checkSpokenAnswerFix'));
   }, []);
 
   const sendAudio = useCallback(async (blob) => {
@@ -272,7 +272,7 @@ export default function Session() {
       applyResponse(res.data);
     } catch (e) {
       if (speech.speakingId === '__filler') speech.stop();
-      setError(errMsg(e, 'Couldn’t hear that. Try again, or type your answer.'));
+      setError(errMsg(e, t('learn.session.couldnTHearTry')));
     }
     busyRef.current = false;
     setTranscribing(false); setBusy(false);
@@ -286,13 +286,13 @@ export default function Session() {
     if (cmd === 'slower') {
       const slower = RATES[Math.max(0, RATES.indexOf(rate) - 1)];
       setRate(slower); speech.setRate(slower);
-      setNotice(`Speaking slower (${slower.toFixed(1)}×).`);
+      setNotice(t('learn.session.speakingSlowerTofixed', { toFixed: slower.toFixed(1) }));
       if (!speech.speakingId) speech.replay();
       return true;
     }
     if (cmd === 'english') {
       if (last?.caption_en) say(last.caption_en, last.id, { lang: 'en-IN' });
-      else setNotice('There is no English version of that one.');
+      else setNotice(t('learn.session.thereNoEnglishVersion'));
       return true;
     }
     if (cmd === 'ready' && phaseRef.current === 'instruction') { send('', 'voice', { requestCheck: true }); return true; }
@@ -366,34 +366,34 @@ export default function Session() {
     <div className="ln-session">
       <header className="ln-session-head">
         <Link to="/learn/dashboard" className="ln-btn ln-btn-sm ln-hide-phone" onClick={() => speech.stop()}><ArrowLeft size={16} aria-hidden="true" />{t('nav.home')}</Link>
-        <Link to="/learn/dashboard" className="ln-roundbtn ln-show-phone" aria-label="Back to home" onClick={() => speech.stop()}><ArrowLeft size={18} aria-hidden="true" /></Link>
+        <Link to="/learn/dashboard" className="ln-roundbtn ln-show-phone" aria-label={t('learn.session.backHome')} onClick={() => speech.stop()}><ArrowLeft size={18} aria-hidden="true" /></Link>
         <div className="ln-col" style={{ flex: 1, minWidth: 0 }}>
           <span className="ln-session-title" style={{ fontSize: 'var(--fs-h3)', fontWeight: 600 }}>{nodeLabel || '…'}</span>
           <span className="ln-small ln-session-sub-desk" style={{ opacity: 0.75 }}>
-            {clusterLabel}{nodePos ? ` · Node ${nodePos.i} of ${nodePos.n}` : ''}
+            {clusterLabel}{nodePos ? ` · ${t('learn.session.lessonOf', { i: nodePos.i, n: nodePos.n })}` : ''}
           </span>
-          <span className="ln-session-sub-phone ln-indic">{[APPROACH_NAMES[approach], langName, loopCount > 0 && `Loop ${loopCount}`].filter(Boolean).join(' · ')}</span>
+          <span className="ln-session-sub-phone ln-indic">{[APPROACH_NAMES[approach] && t(APPROACH_NAMES[approach]), langName, loopCount > 0 && `Loop ${loopCount}`].filter(Boolean).join(' · ')}</span>
         </div>
         <div className="ln-row ln-wrap" style={{ gap: 8 }}>
-          <span className="ln-tag ln-tag-lg ln-tag-info ln-hide-phone">Approach: {APPROACH_NAMES[approach] || approach}</span>
+          <span className="ln-tag ln-tag-lg ln-tag-info ln-hide-phone">{t('learn.session.approach')}{' '} {APPROACH_NAMES[approach] ? t(APPROACH_NAMES[approach]) : approach}</span>
           <span className="ln-tag ln-tag-lg ln-tag-accent ln-indic ln-hide-phone">{langName}</span>
-          {loopCount > 0 && <span className="ln-tag ln-tag-lg ln-tag-warning ln-hide-phone">Loop {loopCount}</span>}
-          <span className="ln-row ln-small" style={{ gap: 6, opacity: 0.75 }} aria-label={`Session time ${clock}`}><Clock size={16} aria-hidden="true" />{clock}</span>
+          {loopCount > 0 && <span className="ln-tag ln-tag-lg ln-tag-warning ln-hide-phone">{t('learn.session.loopLoopcount', { loopCount })}</span>}
+          <span className="ln-row ln-small" style={{ gap: 6, opacity: 0.75 }} aria-label={t('learn.session.sessionTimeClock', { clock })}><Clock size={16} aria-hidden="true" />{clock}</span>
           <button type="button" className="ln-btn ln-btn-sm ln-hide-phone ln-indic" onClick={endSession}>{t('session.end')}</button>
         </div>
       </header>
 
       <div className="ln-session-body">
-        <section className="ln-stage" aria-label="Voice stage">
+        <section className="ln-stage" aria-label={t('learn.session.voiceStage')}>
           {phase === 'mastery_check' && (
             <div className="ln-banner-check ln-indic" role="status"><Award size={18} aria-hidden="true" /><span>{t('session.check')}</span></div>
           )}
           {warmups > 0 && (
             <div className="ln-banner-check" role="status" style={{ flexWrap: 'wrap', gap: 10 }}>
-              <span>Warm-up first: {warmups} short review{warmups === 1 ? '' : 's'} of earlier skills (about 2 minutes).</span>
+              <span>{t('learn.session.warmUpFirstWarmups', { warmups })}</span>
               <span className="ln-row" style={{ gap: 8 }}>
-                <button type="button" className="ln-btn ln-btn-sm ln-btn-primary" onClick={() => navigate('/learn/reviews?warmup=1')}>Start warm-up</button>
-                <button type="button" className="ln-btn ln-btn-sm ln-btn-ghost-dark" onClick={() => { setWarmups(0); try { sessionStorage.setItem('qubirex_warmup_later', '1'); } catch { /* ignore */ } }}>Later</button>
+                <button type="button" className="ln-btn ln-btn-sm ln-btn-primary" onClick={() => navigate('/learn/reviews?warmup=1')}>{t('learn.session.startWarmUp')}</button>
+                <button type="button" className="ln-btn ln-btn-sm ln-btn-ghost-dark" onClick={() => { setWarmups(0); try { sessionStorage.setItem('qubirex_warmup_later', '1'); } catch { /* ignore */ } }}>{t('learn.session.later')}</button>
               </span>
             </div>
           )}
@@ -401,7 +401,7 @@ export default function Session() {
           <div className="ln-col ln-stage-main" style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 22, width: '100%' }}>
             <div className={`ln-orb-ring is-${orb}`}><div><div className="ln-orb" /></div></div>
             <div className="ln-col" style={{ alignItems: 'center', gap: 4 }}>
-              <span className="ln-kicker" style={{ color: 'var(--accent-400)' }}>Professor Qubirex</span>
+              <span className="ln-kicker" style={{ color: 'var(--accent-400)' }}>{t('learn.session.professorQubirex')}</span>
               <span className="ln-indic" style={{ fontSize: 'var(--fs-body)', color: 'var(--stage-muted)' }} aria-live="polite">{orbLabel}</span>
             </div>
             <div className={`ln-wave ${orb === 'speaking' || orb === 'listening' ? 'is-on' : ''} ${orb === 'listening' ? 'is-listening' : ''}`} aria-hidden="true">
@@ -414,7 +414,7 @@ export default function Session() {
                 {result?.programme_complete ? (
                   <>
                     <strong style={{ fontSize: 'var(--fs-h2)', color: 'var(--stage-listen)' }}>{t('session.complete')}</strong>
-                    <Link to="/learn/record" className="ln-btn ln-btn-primary ln-btn-lg">See your capability record</Link>
+                    <Link to="/learn/record" className="ln-btn ln-btn-primary ln-btn-lg">{t('learn.session.seeCapabilityRecord')}</Link>
                   </>
                 ) : (
                   <>
@@ -434,7 +434,7 @@ export default function Session() {
                   <p lang={bcp47} className="ln-caption-te" aria-live="polite">{liveCaption || (busy ? '' : '…')}</p>
                 )}
                 {mode === 'voice' && !busy && !mic.listening && phase === 'instruction' && (
-                  <p className="ln-xs" style={{ color: 'var(--stage-muted)', margin: 0 }}>Say “repeat”, “slower”, “in English”, “give an example” or “I’m ready for the test”.{handsFree ? ' Hands-free is on: just start talking.' : ''}</p>
+                  <p className="ln-xs" style={{ color: 'var(--stage-muted)', margin: 0 }}>{t('learn.session.sayRepeatSlowerEnglish')}{handsFree ? t('learn.session.handsFreeJustStart') : ''}</p>
                 )}
                 {showEnglish && !mic.listening && lastAi?.caption_en && <p className="ln-caption-en">{lastAi.caption_en}</p>}
                 {orb !== 'listening' && <VoiceStatus speech={speech} dark />}
@@ -447,7 +447,7 @@ export default function Session() {
 
           {mode === 'typing' && phase !== 'result' && (
             <div className="ln-typebar">
-              <label htmlFor="typed" className="ln-sr">Type your answer</label>
+              <label htmlFor="typed" className="ln-sr">{t('learn.session.typeAnswer')}</label>
               <textarea id="typed" rows={2} value={draft} disabled={busy} autoFocus
                 placeholder={t('session.typeHere')}
                 onChange={e => setDraft(e.target.value)}
@@ -459,8 +459,8 @@ export default function Session() {
 
           {phase !== 'result' && (
             <div className="ln-row ln-stage-controls" style={{ gap: 18, justifyContent: 'center' }}>
-              <button type="button" className="ln-roundbtn" aria-label="Replay last answer" disabled={!lastAi || !speech.supported} onClick={() => lastAi && say(lastAi.content, lastAi.id)}><RotateCcw size={20} aria-hidden="true" /></button>
-              <button type="button" className="ln-roundbtn ln-hide-stage-phone" aria-label={`Playback speed ${rate}×, change`} onClick={() => setRate(r => RATES[(RATES.indexOf(r) + 1) % RATES.length])}>{rate.toFixed(1)}×</button>
+              <button type="button" className="ln-roundbtn" aria-label={t('learn.session.replayLastAnswer')} disabled={!lastAi || !speech.supported} onClick={() => lastAi && say(lastAi.content, lastAi.id)}><RotateCcw size={20} aria-hidden="true" /></button>
+              <button type="button" className="ln-roundbtn ln-hide-stage-phone" aria-label={t('learn.session.playbackSpeedRateChange', { rate })} onClick={() => setRate(r => RATES[(RATES.indexOf(r) + 1) % RATES.length])}>{rate.toFixed(1)}×</button>
               <div className="ln-col" style={{ alignItems: 'center', gap: 8 }}>
                 <button type="button" className={`ln-mic ${mic.listening ? 'is-listening' : ''}`} onClick={toggleMic} disabled={(busy && !mic.listening) || !mic.supported}
                   aria-label={mic.listening ? t('session.tapStop') : t('session.tapSpeak')} aria-pressed={mic.listening}>
@@ -468,21 +468,21 @@ export default function Session() {
                 </button>
                 <span className="ln-small ln-indic" style={{ color: 'var(--stage-muted)' }}>{mic.listening ? t('session.tapStop') : t('session.tapSpeak')}</span>
               </div>
-              <button type="button" className="ln-roundbtn ln-hide-stage-phone" aria-label={speech.paused ? 'Resume voice' : 'Pause voice'} disabled={!speech.speakingId}
+              <button type="button" className="ln-roundbtn ln-hide-stage-phone" aria-label={speech.paused ? t('learn.session.resumeVoice') : t('learn.session.pauseVoice')} disabled={!speech.speakingId}
                 onClick={() => (speech.paused ? speech.resume() : speech.pause())}>
                 {speech.paused ? <Play size={20} aria-hidden="true" /> : <Pause size={20} aria-hidden="true" />}
               </button>
-              <button type="button" className="ln-roundbtn" aria-label="Switch to typing" aria-pressed={mode === 'typing'} onClick={toggleTyping}><Keyboard size={20} aria-hidden="true" /></button>
+              <button type="button" className="ln-roundbtn" aria-label={t('learn.session.switchTyping')} aria-pressed={mode === 'typing'} onClick={toggleTyping}><Keyboard size={20} aria-hidden="true" /></button>
             </div>
           )}
         </section>
 
-        <aside className={`ln-sidepanel ${sheetOpen ? 'is-open' : ''}`} aria-label="Transcript and board">
-          <button type="button" className="ln-sheet-handle" onClick={() => setSheetOpen(o => !o)} aria-label={sheetOpen ? 'Hide transcript' : 'Show transcript and board'} aria-expanded={sheetOpen} />
+        <aside className={`ln-sidepanel ${sheetOpen ? 'is-open' : ''}`} aria-label={t('learn.session.transcriptBoard')}>
+          <button type="button" className="ln-sheet-handle" onClick={() => setSheetOpen(o => !o)} aria-label={sheetOpen ? t('learn.session.hideTranscript') : t('learn.session.showTranscriptBoard')} aria-expanded={sheetOpen} />
           <div className="ln-tabs" role="tablist" style={{ padding: '6px 20px 0' }}>
             <button type="button" role="tab" className="ln-tab ln-indic" aria-selected={tab === 'transcript'} onClick={() => { setTab('transcript'); setSheetOpen(true); }}>{t('session.transcript')}</button>
             <button type="button" role="tab" className="ln-tab ln-indic" aria-selected={tab === 'board'} onClick={() => { setTab('board'); setSheetOpen(true); }}>
-              {t('session.board')}{board.length > 0 && ` · ${board.length}`}{boardNew && <span className="ln-sr"> (new)</span>}
+              {t('session.board')}{board.length > 0 && ` · ${board.length}`}{boardNew && <span className="ln-sr"> {' '}{t('learn.session.new')}</span>}
               {boardNew && <span aria-hidden="true" style={{ display: 'inline-block', width: 7, height: 7, borderRadius: 99, background: 'var(--accent-700)', marginLeft: 6, verticalAlign: 'middle' }} />}
             </button>
           </div>
@@ -496,26 +496,26 @@ export default function Session() {
                   const cls = now ? 'is-now' : m.type === 'mastery_check' ? 'is-check' : m.type === 'advance_trigger' ? 'is-advance' : '';
                   return (
                     <div key={m.id} className={`ln-msg ${you ? 'is-you' : ''}`}>
-                      <span className="ln-msg-who">{you ? `You · ${m.input_mode === 'voice' ? 'spoken' : 'typed'}` : `Professor Qubirex${now ? ' · speaking' : ''}`}</span>
+                      <span className="ln-msg-who">{you ? t(m.input_mode === 'voice' ? 'learn.session.youSpoken' : 'learn.session.youTyped') : `${t('learn.session.professorName')}${now ? ' ' + t('learn.session.speaking') : ''}`}</span>
                       <div className={`ln-bubble ${cls}`} lang={bcp47}>
                         {m.content}
                         {!you && showEnglish && m.caption_en && <span className="ln-bubble-en" lang="en">{m.caption_en}</span>}
                       </div>
                       {speech.supported && (
                         <button type="button" className="ln-play" onClick={() => (now ? speech.stop() : say(m.content, m.id))}>
-                          <Volume2 size={14} aria-hidden="true" />{now ? 'Stop' : 'Play'}
+                          <Volume2 size={14} aria-hidden="true" />{now ? t('learn.session.stop') : t('learn.session.play')}
                         </button>
                       )}
                     </div>
                   );
                 })}
-                {busy && <div className="ln-msg"><span className="ln-msg-who">Professor Qubirex</span><div className="ln-bubble"><span className="ln-typing-dots" aria-label="Thinking"><span /><span /><span /></span></div></div>}
+                {busy && <div className="ln-msg"><span className="ln-msg-who">{t('learn.session.professorQubirex')}</span><div className="ln-bubble"><span className="ln-typing-dots" aria-label={t('learn.session.thinking')}><span /><span /><span /></span></div></div>}
                 <div ref={endRef} />
               </>
             ) : (
               <>
-                <span className="ln-small ln-muted">Diagrams and code the professor shares appear here.</span>
-                {board.length === 0 && <div className="ln-tile ln-small ln-muted" style={{ padding: 20, textAlign: 'center' }}>Nothing on the board yet.</div>}
+                <span className="ln-small ln-muted">{t('learn.session.diagramsCodeProfessorShares')}</span>
+                {board.length === 0 && <div className="ln-tile ln-small ln-muted" style={{ padding: 20, textAlign: 'center' }}>{t('learn.session.nothingBoardYet')}</div>}
                 {[...board].reverse().map(m => (
                   <div key={m.id} className="ln-col" style={{ gap: 10 }}>
                     {m.mermaid && <MermaidDiagram source={m.mermaid} />}
@@ -533,7 +533,7 @@ export default function Session() {
                 {t('session.ready')}
               </button>
               <span className="ln-xs ln-muted ln-panel-note" style={{ textAlign: 'center' }}>
-                {mic.onDevice ? 'Your browser turns speech into text; only the text is sent.' : 'Voice is transcribed on the server and kept with this session only.'}
+                {mic.onDevice ? t('learn.session.browserTurnsSpeechInto') : t('learn.session.voiceTranscribedServerKept')}
               </span>
             </div>
           )}

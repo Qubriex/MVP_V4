@@ -1,28 +1,27 @@
 // src/components/shared/TopActions.js — the row at the top of every signed-in
 // page: Ask Qubirex, Help, Notifications and the language switch
-// (EN · తె · हि). One component for all three sides.
+// (EN · తెలుగు · हिंदी; a globe button on phones). One component for all three sides.
 import React, { useState } from 'react';
 import { Sparkles, HelpCircle } from 'lucide-react';
 import { useUiLang } from '../../context/UiLangContext';
 import AskQubirex from './AskQubirex';
 import HelpPanel from './HelpPanel';
+import LangSwitch from './LangSwitch';
 import { BellButton, NotificationsPanel, useNotifications } from './Notifications';
 
 const SHORT = [['english', 'EN', 'en'], ['telugu', 'తె', 'te'], ['hindi', 'हि', 'hi']];
 
 export default function TopActions({ side = 'learner', settingsHref }) {
-  const { lang, setLang, t } = useUiLang();
+  const { lang, t } = useUiLang();
   const [panel, setPanel] = useState(null); // ask | help | notes
   const notes = useNotifications();
   const askLang = (SHORT.find(s => s[0] === lang) || SHORT[0])[2];
   return (
     <>
       <div className="sk-topactions" role="toolbar" aria-label={t('top.toolbar')}>
-        <button type="button" className="sk-askbtn" onClick={() => setPanel('ask')}><Sparkles size={16} aria-hidden="true" />{t('top.ask')}</button>
+        <button type="button" className="sk-askbtn" onClick={() => setPanel('ask')} aria-label={t('top.ask')}><Sparkles size={16} aria-hidden="true" /><span className="sk-askbtn-label">{t('top.ask')}</span></button>
         <span style={{ flex: 1 }} />
-        <div className="sk-langswitch ln-indic" role="group" aria-label={t('lang.label')}>
-          {SHORT.map(([id, label]) => <button key={id} type="button" aria-pressed={lang === id} onClick={() => setLang(id)}>{label}</button>)}
-        </div>
+        <LangSwitch />
         <button type="button" className="sk-iconbtn" onClick={() => setPanel('help')} aria-label={t('top.help')}><HelpCircle size={18} aria-hidden="true" /></button>
         <BellButton unread={notes.unread} onClick={() => setPanel('notes')} />
       </div>

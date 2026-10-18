@@ -2,7 +2,9 @@
 import React, { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 
+import { useUiLang } from '../../../context/UiLangContext';
 export default function Modal({ title, onClose, children, footer, width = 520 }) {
+  const { t } = useUiLang();
   const ref = useRef(null);
   useEffect(() => {
     const prev = document.activeElement;
@@ -26,7 +28,7 @@ export default function Modal({ title, onClose, children, footer, width = 520 })
       <div className="ui-modal" role="dialog" aria-modal="true" aria-labelledby={id} style={{ maxWidth: width }} ref={ref} tabIndex={-1} onClick={e => e.stopPropagation()}>
         <div className="ln-between" style={{ gap: 12 }}>
           <h2 id={id} className="ln-h2">{title}</h2>
-          <button type="button" className="ui-iconbtn ui-modal-x" aria-label="Close" onClick={onClose}><X size={18} aria-hidden="true" /></button>
+          <button type="button" className="ui-iconbtn ui-modal-x" aria-label={t('ui.modal.close')} onClick={onClose}><X size={18} aria-hidden="true" /></button>
         </div>
         <div className="ui-modal-body">{children}</div>
         {footer && <div className="ui-modal-foot">{footer}</div>}

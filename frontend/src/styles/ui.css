@@ -117,3 +117,34 @@ button.ui-stat { text-align: left; cursor: pointer; font: inherit; color: inheri
 /* Select inside the labelled filter pill (.ln-selectwrap) */
 .ln-selectwrap .ui-select { min-width: 120px; }
 .ln-selectwrap .ui-select-btn { border: 0; min-height: 40px; font-weight: 600; padding: 0 8px; background: transparent; }
+
+/* ── Language switch: one component; globe menu on phones ───────────────── */
+.ui-lang { position: relative; display: inline-flex; }
+.ui-lang-globe { display: none; color: var(--color-text); }
+.ui-lang-menu { position: absolute; top: calc(100% + 6px); right: 0; z-index: 60; min-width: 168px; display: flex; flex-direction: column; padding: 6px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md, 10px); box-shadow: var(--shadow-md); }
+.ui-lang-menu button { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 0 12px; border: 0; border-radius: 8px; background: none; color: var(--color-text); font-size: var(--fs-body); text-align: left; cursor: pointer; }
+.ui-lang-menu button:hover, .ui-lang-menu button:focus-visible { background: var(--color-surface-2); }
+.ui-lang-menu button[aria-checked='true'] { font-weight: 600; color: var(--brand-primary-strong); }
+[data-theme='dark'] .ui-lang-menu button[aria-checked='true'] { color: var(--accent-400); }
+@media (max-width: 639px) {
+  .ui-lang:not(.is-full) .ui-lang-full { display: none; }
+  .ui-lang:not(.is-full) .ui-lang-globe { display: inline-flex; }
+}
+
+/* ── Portal top bar: Ask Qubirex never wraps; icon-only on phones ─────────── */
+.sk-askbtn { white-space: nowrap; flex-shrink: 0; }
+@media (max-width: 639px) {
+  .sk-askbtn { padding: 0; width: 44px; min-height: 44px; justify-content: center; }
+  .sk-askbtn-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .sk-topactions { flex-wrap: nowrap; }
+}
+
+/* ── Sign-in pages: slim header (back to home + language) ─────────────────── */
+.ln-login-main { flex-direction: column; justify-content: flex-start; gap: 24px; }
+.ui-signin-bar { width: 100%; max-width: 880px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.ui-signin-bar .ui-signin-logo { display: none; }
+.ln-login-main > form, .ln-login-main > .ln-login-form { margin: auto 0; }
+
+/* Evidence / authorship tag: plain words; the code is in the popover. */
+.sk-codetag { cursor: help; border-style: dashed; font: inherit; font-size: var(--fs-caption); }
+.sk-codetag:focus-visible { outline: 3px solid var(--accent-400); outline-offset: 2px; }

@@ -4,7 +4,9 @@
 // column's header into its cells' data-label.
 import React, { useEffect } from 'react';
 
+import { useUiLang } from '../../../context/UiLangContext';
 export function Table({ columns, rows, rowKey, empty, caption, onRowClick }) {
+  const { t } = useUiLang();
   return (
     <div className="ln-tablewrap">
       <table className="ln-table ui-table">

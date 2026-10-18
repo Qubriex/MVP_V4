@@ -29,7 +29,7 @@ export default function PortalLayout({ kicker, org, account, items, loginPath, c
       </div>
       {open && <div className="ln-scrim" onClick={() => setOpen(false)} aria-hidden="true" />}
 
-      <nav className={`ln-sidebar in-sidebar ${open ? 'is-open' : ''}`} aria-label={`${kicker} navigation`}>
+      <nav className={`ln-sidebar in-sidebar ${open ? 'is-open' : ''}`} aria-label={t('ui.portalLayout.kickerNavigation', { kicker })}>
         <div className="ln-between">
           <span className="ln-col" style={{ gap: 4 }}><a href="/" className="brand-home" aria-label={t('nav.logoHome')}><BrandLogo height={38} tone="onDark" /></a><small className="ln-xs" style={{ color: 'var(--ink-muted)', letterSpacing: '0.08em', paddingLeft: 4 }}>{kicker}</small></span>
           {open && <button type="button" className="in-iconbtn" onClick={() => setOpen(false)} aria-label={t('nav.closeMenu')}><X size={18} aria-hidden="true" /></button>}

@@ -5,16 +5,18 @@ import api from '../../utils/api';
 import { errMsg } from '../../utils/errors';
 import { useEmployer } from './Layout';
 
-const FIELDS = [['name', 'Company name'], ['website', 'Website'], ['contact_name', 'Contact person'], ['contact_phone', 'Contact phone'], ['city', 'City'], ['gstin', 'GSTIN (optional)']];
+import { useUiLang } from '../../context/UiLangContext';
+const FIELDS = [['name', 'emp.company.fields.companyName'], ['website', 'emp.company.fields.website'], ['contact_name', 'emp.company.fields.contactPerson'], ['contact_phone', 'emp.company.fields.contactPhone'], ['city', 'emp.company.fields.city'], ['gstin', 'emp.company.fields.gstinOptional']];
 
 export default function EmployerCompany() {
+  const { t } = useUiLang();
   const { me, refresh, isOwner } = useEmployer();
   const [f, setF] = useState(null);
   const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
   const [busy, setBusy] = useState(false);
   useEffect(() => { if (me && !f) setF(Object.fromEntries(FIELDS.map(([k]) => [k, me.employer[k] || '']))); }, [me, f]);
-  if (!f) return <p className="ln-muted">Loading…</p>;
+  if (!f) return <p className="ln-muted">{t('emp.company.loading')}</p>;
 
   const save = async (e) => {
     e.preventDefault();
@@ -26,20 +28,20 @@ export default function EmployerCompany() {
 
   return (
     <>
-      <header className="ln-pagehead"><div className="ln-col" style={{ gap: 4 }}><h1 className="ln-title">Company</h1>
-        <span className="ln-sub">Domain: @{me.employer.domain}{me.employer.gst_state_code ? ` · GST state ${me.employer.gst_state_code}` : ''}</span></div></header>
+      <header className="ln-pagehead"><div className="ln-col" style={{ gap: 4 }}><h1 className="ln-title">{t('emp.company.company')}</h1>
+        <span className="ln-sub">{t('emp.company.domainDomain', { domain: me.employer.domain })}{me.employer.gst_state_code ? ` · ${t('emp.company.gstState', { code: me.employer.gst_state_code })}` : ''}</span></div></header>
       <form className="ui-narrow ln-card" style={{ gap: 14 }} onSubmit={save}>
         {error && <div className="ln-error" role="alert">{error}</div>}
-        {saved && <div className="ln-note" role="status">Saved.</div>}
+        {saved && <div className="ln-note" role="status">{t('emp.company.saved')}</div>}
         {FIELDS.map(([k, label]) => (
-          <div className="ln-field" key={k}><label className="ln-label" htmlFor={k}>{label}</label>
+          <div className="ln-field" key={k}><label className="ln-label" htmlFor={k}>{t(label)}</label>
             <input id={k} className="ln-input" value={f[k]} disabled={!isOwner} required={k === 'name'}
               style={k === 'gstin' ? { textTransform: 'uppercase', letterSpacing: '0.05em' } : undefined}
               maxLength={k === 'gstin' ? 15 : undefined} placeholder={k === 'gstin' ? '36AABCU9603R1ZV' : undefined}
               onChange={e => setF(v => ({ ...v, [k]: k === 'gstin' ? e.target.value.toUpperCase() : e.target.value }))} /></div>
         ))}
-        {isOwner ? <button type="submit" className="ln-btn ln-btn-primary" style={{ alignSelf: 'flex-start' }} disabled={busy}>{busy ? 'Saving…' : 'Save'}</button>
-          : <span className="ln-small ln-muted">Only owners can change company details.</span>}
+        {isOwner ? <button type="submit" className="ln-btn ln-btn-primary" style={{ alignSelf: 'flex-start' }} disabled={busy}>{busy ? t('emp.company.saving') : t('emp.company.save')}</button>
+          : <span className="ln-small ln-muted">{t('emp.company.onlyOwnersCanChange')}</span>}
       </form>
     </>
   );

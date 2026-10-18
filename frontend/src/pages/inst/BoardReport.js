@@ -1,6 +1,6 @@
-// src/pages/inst/BoardReport.js — /institution/board-report?lang=en|te
+// src/pages/inst/BoardReport.js — /institution/board-report?lang=en|te|hi
 // (v4.3 canvas I1): one printable page for the board or principal, in
-// English or Telugu. "Save as PDF" uses the browser's print dialog.
+// English, Telugu or Hindi (independent of the screen language). "Save as PDF" uses the browser's print dialog.
 import React from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Printer } from 'lucide-react';
@@ -8,38 +8,29 @@ import { useCachedGet } from '../../utils/cachedGet';
 import { errMsg } from '../../utils/errors';
 import { TooFew } from '../../components/shared/SampleSize';
 
-const T = {
-  en: {
-    title: 'Board report', generated: 'Prepared on', target: 'Placement target', by: 'by', none: 'No target set',
-    cohort: 'Cohort', students: 'Students', ready: 'Ready', nearly: 'Nearly ready', building: 'Building', active: 'Active in last 30 days', logs: 'Mastery Logs', gap: 'Skill holding most back',
-    placements: 'Placements', placed: 'Placed', offers: 'Offers', median: 'Median salary', rating: '90-day rating', sponsored: 'Sponsored cohorts',
-    how: 'How it is counted: readiness is the match between a student’s verified skills and the best-fitting job role (Ready 80+, Nearly ready 60–79, Building under 60). Groups under 5 students are not shown.',
-    print: 'Save as PDF', other: 'తెలుగులో చూడండి', otherLang: 'te', back: 'Back to Home', lpa: 'LPA'
-  },
-  te: {
-    title: 'బోర్డు నివేదిక', generated: 'తయారైన తేదీ', target: 'ప్లేస్‌మెంట్ లక్ష్యం', by: 'గడువు', none: 'లక్ష్యం పెట్టలేదు',
-    cohort: 'బ్యాచ్', students: 'విద్యార్థులు', ready: 'సిద్ధం', nearly: 'దాదాపు సిద్ధం', building: 'నేర్చుకుంటున్నారు', active: 'గత 30 రోజుల్లో చురుకుగా', logs: 'మాస్టరీ లాగ్‌లు', gap: 'ఎక్కువగా వెనక్కి లాగుతున్న నైపుణ్యం',
-    placements: 'ప్లేస్‌మెంట్లు', placed: 'చేరినవారు', offers: 'ఆఫర్లు', median: 'మధ్యస్థ జీతం', rating: '90 రోజుల రేటింగ్', sponsored: 'స్పాన్సర్ చేసిన బ్యాచ్‌లు',
-    how: 'ఎలా లెక్కిస్తాం: విద్యార్థి ధృవీకరించిన నైపుణ్యాలు సరిపోయే ఉద్యోగ పాత్రకు ఎంత సరిపోతాయో అదే సిద్ధత (80+ సిద్ధం, 60–79 దాదాపు సిద్ధం, 60 కంటే తక్కువ నేర్చుకుంటున్నారు). 5 కంటే తక్కువ మంది ఉన్న గుంపులు చూపించము.',
-    print: 'PDF గా సేవ్ చేయండి', other: 'View in English', otherLang: 'en', back: 'హోమ్‌కు తిరిగి', lpa: 'లక్షలు'
-  }
-};
+import { useUiLang, translate, formatDate } from '../../context/UiLangContext';
+const KEYS = ['title', 'generated', 'target', 'by', 'none', 'cohort', 'students', 'ready', 'nearly', 'building', 'active', 'logs', 'gap', 'placements', 'placed', 'offers', 'median', 'rating', 'sponsored', 'how', 'print', 'back', 'lpa'];
+const REPORT_LANGS = [['en', 'english', 'English'], ['te', 'telugu', 'తెలుగు'], ['hi', 'hindi', 'हिंदी']];
 
 export default function BoardReport() {
+  const { t: tx } = useUiLang();
   const [params] = useSearchParams();
-  const lang = params.get('lang') === 'te' ? 'te' : 'en';
-  const t = T[lang];
+  const lang = (REPORT_LANGS.find(l => l[0] === params.get('lang')) || REPORT_LANGS[0])[0];
+  const uiLang = REPORT_LANGS.find(l => l[0] === lang)[1];
+  const t = Object.fromEntries(KEYS.map(k => [k, translate(uiLang, `inst.boardReport.r.${k}`)]));
   const { data, error } = useCachedGet('/institution/board-report');
-  if (error && !data) return <div className="ln-error">{errMsg(error, 'Couldn’t prepare the report.')}</div>;
-  if (!data) return <p className="ln-muted">Loading…</p>;
+  if (error && !data) return <div className="ln-error">{errMsg(error, tx('inst.boardReport.couldnTPrepareReport'))}</div>;
+  if (!data) return <p className="ln-muted">{tx('inst.boardReport.loading')}</p>;
   const { institution: inst, cohorts, placements: p } = data;
-  const when = (s) => new Date(s).toLocaleDateString(lang === 'te' ? 'te-IN' : 'en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+  const when = (s) => formatDate(uiLang, s, { day: 'numeric', month: 'long', year: 'numeric' });
   return (
-    <div className={`sk-report ${lang === 'te' ? 'ln-indic' : ''}`} lang={lang}>
+    <div className={`sk-report ${lang !== 'en' ? 'ln-indic' : ''}`} lang={lang}>
       <div className="ln-row ln-wrap sk-noprint" style={{ gap: 8 }}>
         <Link to="/institution/home" className="ln-btn ln-btn-sm">← {t.back}</Link>
         <button type="button" className="ln-btn ln-btn-sm ln-btn-primary" onClick={() => window.print()}><Printer size={14} aria-hidden="true" />{t.print}</button>
-        <Link to={`/institution/board-report?lang=${t.otherLang}`} className="ln-btn ln-btn-sm">{t.other}</Link>
+        <div className="ln-row" style={{ gap: 6 }} role="group" aria-label={translate(uiLang, 'inst.boardReport.r.lang')}>
+          {REPORT_LANGS.map(([code, , label]) => <Link key={code} to={`/institution/board-report?lang=${code}`} lang={code} aria-current={code === lang ? 'true' : undefined} className={`ln-btn ln-btn-sm ln-indic ${code === lang ? 'ln-btn-primary' : ''}`}>{label}</Link>)}
+        </div>
       </div>
       <header className="ln-col" style={{ gap: 4 }}>
         <span className="ln-kicker">{inst?.name}{inst?.city ? ` · ${inst.city}` : ''}</span>

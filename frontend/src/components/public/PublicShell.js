@@ -11,20 +11,11 @@ import BrandLogo from '../BrandLogo';
 import ThemeToggle from '../ThemeToggle';
 import TalkToUs from './TalkToUs';
 import { useUiLang } from '../../context/UiLangContext';
+import LangSwitch from '../shared/LangSwitch';
 
-const LANGS = [['english', 'EN', 'English'], ['telugu', 'తెలుగు', 'తెలుగు'], ['hindi', 'हिंदी', 'हिंदी']];
 export const SIGN_IN = [['/learner-login', 'signin.learner', GraduationCap], ['/login', 'signin.staff', School], ['/employer/login', 'signin.employer', Briefcase]];
 
-export function LangSwitch({ className = '' }) {
-  const { lang, setLang, t } = useUiLang();
-  return (
-    <div className={`pb-langs ${className}`} role="group" aria-label={t('lang.label')}>
-      {LANGS.map(([k, short, full]) => (
-        <button key={k} type="button" className={`ln-indic ${lang === k ? 'is-on' : ''}`} aria-pressed={lang === k} aria-label={full} onClick={() => setLang(k)}>{short}</button>
-      ))}
-    </div>
-  );
-}
+export { LangSwitch };
 
 /** "Sign in" opens a short menu: Learner / College staff / Employer. */
 export function SignInMenu() {
@@ -77,7 +68,7 @@ export default function PublicShell({ children, demo = false }) {
         <Link to="/" className="brand-home" aria-label={t('nav.logoHome')}><BrandLogo height={40} /></Link>
         <nav id="pb-nav" className={`pb-nav ${open ? 'is-open' : ''}`} aria-label={t('nav.main')}>
           {NAV.map(([to, key]) => <NavLink key={to} to={to} className={({ isActive }) => (isActive || (to === '/demo' && location.pathname.startsWith('/demo')) ? 'active' : undefined)}>{t(key)}</NavLink>)}
-          <div className="pb-nav-extra"><LangSwitch /><button type="button" className="ln-btn ln-btn-secondary ln-btn-sm" onClick={() => setTalk(true)}>{t('nav.talk')}</button></div>
+          <div className="pb-nav-extra"><LangSwitch full /><button type="button" className="ln-btn ln-btn-secondary ln-btn-sm" onClick={() => setTalk(true)}>{t('nav.talk')}</button></div>
         </nav>
         <div className="pb-actions">
           <LangSwitch className="pb-hide-phone" />

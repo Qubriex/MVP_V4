@@ -6,7 +6,9 @@ import { errMsg } from '../../utils/errors';
 import { useEmployer } from './Layout';
 import { Select } from '../../components/shared/ui';
 
+import { useUiLang, uiLocale } from '../../context/UiLangContext';
 export default function EmployerTeam() {
+  const { t } = useUiLang();
   const { me, isOwner } = useEmployer();
   const [data, setData] = useState(null);
   const [inv, setInv] = useState({ email: '', name: '', role: 'recruiter' });
@@ -27,38 +29,38 @@ export default function EmployerTeam() {
 
   return (
     <>
-      <header className="ln-pagehead"><div className="ln-col" style={{ gap: 4 }}><h1 className="ln-title">Team</h1>
-        <span className="ln-sub">Owners manage the account · recruiters search and request access · viewers read.</span></div></header>
+      <header className="ln-pagehead"><div className="ln-col" style={{ gap: 4 }}><h1 className="ln-title">{t('emp.team.team')}</h1>
+        <span className="ln-sub">{t('emp.team.ownersManageAccountRecruiters')}</span></div></header>
       {error && <div className="ln-error" role="alert">{error}</div>}
       {isOwner && (
         <form className="ln-card" style={{ gap: 12, marginBottom: 16 }} onSubmit={invite}>
-          <h2 className="ln-h2" style={{ margin: 0, fontSize: 'var(--fs-h3)' }}>Invite a colleague</h2>
+          <h2 className="ln-h2" style={{ margin: 0, fontSize: 'var(--fs-h3)' }}>{t('emp.team.inviteColleague')}</h2>
           <div className="ln-row ln-wrap" style={{ gap: 10 }}>
-            <input className="ln-input" style={{ flex: '2 1 220px' }} type="email" aria-label="Work email" placeholder={`name@${me?.employer?.domain || 'company.com'}`} value={inv.email} onChange={e => setInv(v => ({ ...v, email: e.target.value }))} required />
-            <input className="ln-input" style={{ flex: '1 1 160px' }} aria-label="Name" placeholder="Name (optional)" value={inv.name} onChange={e => setInv(v => ({ ...v, name: e.target.value }))} />
-            <Select aria-label="Role" value={inv.role} onChange={e => setInv(v => ({ ...v, role: e.target.value }))}><option value="recruiter">Recruiter</option><option value="viewer">Viewer</option></Select>
-            <button type="submit" className="ln-btn ln-btn-primary">Send invite</button>
+            <input className="ln-input" style={{ flex: '2 1 220px' }} type="email" aria-label={t('emp.team.workEmail')} placeholder={`name@${me?.employer?.domain || 'company.com'}`} value={inv.email} onChange={e => setInv(v => ({ ...v, email: e.target.value }))} required />
+            <input className="ln-input" style={{ flex: '1 1 160px' }} aria-label={t('emp.team.name')} placeholder={t('emp.team.nameOptional')} value={inv.name} onChange={e => setInv(v => ({ ...v, name: e.target.value }))} />
+            <Select aria-label={t('emp.team.role')} value={inv.role} onChange={e => setInv(v => ({ ...v, role: e.target.value }))}><option value="recruiter">{t('emp.team.recruiter')}</option><option value="viewer">{t('emp.team.viewer')}</option></Select>
+            <button type="submit" className="ln-btn ln-btn-primary">{t('emp.team.sendInvite')}</button>
           </div>
-          {link && <div className="ln-note ln-small">Invite sent. You can also share this link: <code style={{ wordBreak: 'break-all' }}>{link}</code></div>}
+          {link && <div className="ln-note ln-small">{t('emp.team.inviteSentCanAlso')}{' '} <code style={{ wordBreak: 'break-all' }}>{link}</code></div>}
         </form>
       )}
       <div className="ln-tablewrap">
         <table className="ln-table">
-          <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Last sign in</th></tr></thead>
+          <thead><tr><th>{t('emp.team.name')}</th><th>{t('emp.team.email')}</th><th>{t('emp.team.role')}</th><th>{t('emp.team.status')}</th><th>{t('emp.team.lastSign')}</th></tr></thead>
           <tbody>
             {(data?.users || []).map(u => (
               <tr key={u.id}>
                 <td style={{ fontWeight: 600 }}>{u.name || '—'}</td><td>{u.email}</td>
                 <td>{isOwner && u.id !== me?.user?.id ? (
-                  <Select aria-label={`Role for ${u.email}`} value={u.role} onChange={e => update(u.id, { role: e.target.value })}>
-                    <option value="owner">Owner</option><option value="recruiter">Recruiter</option><option value="viewer">Viewer</option></Select>) : u.role}</td>
+                  <Select aria-label={t('emp.team.roleEmail', { email: u.email })} value={u.role} onChange={e => update(u.id, { role: e.target.value })}>
+                    <option value="owner">{t('emp.team.owner')}</option><option value="recruiter">{t('emp.team.recruiter')}</option><option value="viewer">{t('emp.team.viewer')}</option></Select>) : u.role}</td>
                 <td>{isOwner && u.id !== me?.user?.id ? (
-                  <button type="button" className="ln-btn ln-btn-sm" onClick={() => update(u.id, { status: u.status === 'active' ? 'disabled' : 'active' })}>{u.status === 'active' ? 'Disable' : 'Enable'}</button>) : u.status}</td>
-                <td className="ln-small ln-muted">{u.last_login_at ? new Date(u.last_login_at).toLocaleString() : 'Never'}</td>
+                  <button type="button" className="ln-btn ln-btn-sm" onClick={() => update(u.id, { status: u.status === 'active' ? 'disabled' : 'active' })}>{u.status === 'active' ? t('emp.team.disable') : t('emp.team.enable')}</button>) : u.status}</td>
+                <td className="ln-small ln-muted">{u.last_login_at ? new Date(u.last_login_at).toLocaleString(uiLocale()) : t('emp.team.never')}</td>
               </tr>
             ))}
             {(data?.invites || []).map(i => (
-              <tr key={i.id}><td>{i.name || '—'}</td><td>{i.email}</td><td>{i.role}</td><td><span className="ln-tag ln-tag-neutral">Invited</span></td><td className="ln-small ln-muted">Expires {new Date(i.expires_at).toLocaleDateString()}</td></tr>
+              <tr key={i.id}><td>{i.name || '—'}</td><td>{i.email}</td><td>{i.role}</td><td><span className="ln-tag ln-tag-neutral">{t('emp.team.invited')}</span></td><td className="ln-small ln-muted">{t('emp.team.expiresTolocaledatestring', { toLocaleDateString: new Date(i.expires_at).toLocaleDateString(uiLocale()) })}</td></tr>
             ))}
           </tbody>
         </table>

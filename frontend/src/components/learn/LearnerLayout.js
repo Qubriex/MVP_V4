@@ -65,7 +65,7 @@ export default function LearnerLayout() {
         <div className="ln-usercard">
           <div className="ln-avatar">{initials(user?.name)}</div>
           <div className="ln-col" style={{ minWidth: 0 }}>
-            <span style={{ fontSize: 'var(--fs-body)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.name || 'Learner'}</span>
+            <span style={{ fontSize: 'var(--fs-body)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.name || t('learn.learnerLayout.learner')}</span>
             <span className="ln-xs ln-muted ln-indic">{[user?.learner_ref, langLabel].filter(Boolean).join(' · ')}</span>
           </div>
         </div>

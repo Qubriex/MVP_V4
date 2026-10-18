@@ -5,6 +5,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Mic, School, Briefcase, ShieldCheck, ArrowRight } from 'lucide-react';
+import { CodeTag } from '../../components/shared/Popover';
 import PublicShell, { SIGN_IN } from '../../components/public/PublicShell';
 import { useUiLang } from '../../context/UiLangContext';
 
@@ -37,7 +38,7 @@ export default function Home() {
           <h1>{t('home.title')}</h1>
           {/* Brand line: the one place all three languages appear together. */}
           <p className="ln-indic ln-muted" style={{ margin: 0, fontSize: 'var(--fs-body)', lineHeight: 1.7 }} aria-label={t('home.tagline')}>
-            <span lang="en">Your Language. Your Skills. Your Future</span><br />
+            <span lang="en">{t('pub.home.languageSkillsFuture')}</span><br />
             <span lang="te">మీ భాష. మీ నైపుణ్యాలు. మీ భవిష్యత్తు</span><br />
             <span lang="hi">आपकी भाषा। आपके कौशल। आपका भविष्य</span>
           </p>
@@ -49,8 +50,9 @@ export default function Home() {
         <article className="ln-card" style={{ gap: 10 }} aria-label={t('home.sampleLabel')}>
           <div className="ln-between"><span className="ln-kicker">{t('home.sampleLabel')}</span><span className="ln-tag ln-tag-neutral">{t('common.demoData')}</span></div>
           <b style={{ fontSize: 'var(--fs-h3)' }}>{t('home.sampleProgramme')}</b>
-          {[['home.s1', 'Confirmed · L2 · A3', true], ['home.s2', 'Confirmed · L2 · A2', true], ['home.s3', 'Partial · L2 · A2', false]].map(([k, l, ok]) => (
-            <div key={k} className="ln-between ln-small"><span>{t(k)}</span><span className={`ln-tag ${ok ? 'ln-tag-success' : 'ln-tag-info'}`}>{ok ? t('label.confirmed') : t('label.partial')} · {l.split(' · ').slice(1).join(' · ')}</span></div>
+          {[['home.s1', 'A3', true], ['home.s2', 'A2', true], ['home.s3', 'A2', false]].map(([k, a, ok]) => (
+            <div key={k} className="ln-between ln-small ln-wrap" style={{ gap: 6 }}><span>{t(k)}</span>
+              <span className="ln-row" style={{ gap: 4 }}><span className={`ln-tag ${ok ? 'ln-tag-success' : 'ln-tag-info'}`}>{ok ? t('label.confirmed') : t('label.partial')}</span><CodeTag code="L2" label={t('level.L2')} /><CodeTag code={a} label={t(`assure.${a}`)} /></span></div>
           ))}
           <span className="ln-xs ln-muted">{t('home.sampleNote')}</span>
         </article>

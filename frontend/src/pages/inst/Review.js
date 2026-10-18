@@ -11,10 +11,12 @@ import { errMsg } from '../../utils/errors';
 import { useStaff } from '../../components/inst/InstitutionLayout';
 import { Select } from '../../components/shared/ui';
 
-const BAND_TEXT = { '0.0-0.49': 'Weak (0–0.49)', '0.5-0.69': 'Partial (0.5–0.69)', '0.7-0.89': 'Good (0.7–0.89)', '0.9-1.0': 'Excellent (0.9–1.0)' };
-const CAL = { calibrated: ['Calibrated', 'ln-tag-success'], rubric_under_review: ['Rubric under review', 'ln-tag-warning'], sampling: ['Sampling', 'ln-tag-neutral'] };
+import { useUiLang, uiLocale } from '../../context/UiLangContext';
+const BAND_TEXT = { '0.0-0.49': 'inst.review.bandText.weak0049', '0.5-0.69': 'inst.review.bandText.partial050', '0.7-0.89': 'inst.review.bandText.good070', '0.9-1.0': 'inst.review.bandText.excellent091' };
+const CAL = { calibrated: ['inst.review.cal.calibrated', 'ln-tag-success'], rubric_under_review: ['inst.review.cal.rubricUnderReview', 'ln-tag-warning'], sampling: ['inst.review.cal.sampling', 'ln-tag-neutral'] };
 
 function ReviewCard({ item, onDone, canDecide }) {
+  const { t } = useUiLang();
   const [verdict, setVerdict] = useState('');
   const [band, setBand] = useState('');
   const [notes, setNotes] = useState('');
@@ -31,35 +33,36 @@ function ReviewCard({ item, onDone, canDecide }) {
   };
   return (
     <article className="ln-card" style={{ gap: 12 }}>
-      <div className="ln-between ln-wrap"><span className="ln-kicker">{item.cluster} · {item.node}</span><span className="ln-xs ln-muted">{item.purpose} · {new Date(item.created_at).toLocaleDateString()}</span></div>
-      <div className="ln-col" style={{ gap: 4 }}><span className="ln-xs ln-muted">Question</span><p style={{ margin: 0, lineHeight: 1.6 }}>{item.question || '—'}</p></div>
-      <div className="ln-col" style={{ gap: 4 }}><span className="ln-xs ln-muted">Student answer (student hidden until you submit)</span>
+      <div className="ln-between ln-wrap"><span className="ln-kicker">{item.cluster} · {item.node}</span><span className="ln-xs ln-muted">{item.purpose} · {new Date(item.created_at).toLocaleDateString(uiLocale())}</span></div>
+      <div className="ln-col" style={{ gap: 4 }}><span className="ln-xs ln-muted">{t('inst.review.question')}</span><p style={{ margin: 0, lineHeight: 1.6 }}>{item.question || '—'}</p></div>
+      <div className="ln-col" style={{ gap: 4 }}><span className="ln-xs ln-muted">{t('inst.review.studentAnswerStudentHidden')}</span>
         <blockquote style={{ margin: 0, padding: '10px 14px', background: 'var(--color-surface-2)', borderRadius: 10, whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{item.answer || '—'}</blockquote></div>
-      <details><summary className="ln-small" style={{ cursor: 'pointer' }}>Rubric</summary>
+      <details><summary className="ln-small" style={{ cursor: 'pointer' }}>{t('inst.review.rubric')}</summary>
         <div className="ln-grid ln-g-2" style={{ gap: 10, marginTop: 8 }}>
-          <div><b className="ln-small">Passing criteria</b><ul className="ln-small" style={{ margin: '4px 0 0', paddingLeft: 18 }}>{item.rubric.passing.map(c => <li key={c}>{c}</li>)}</ul></div>
-          <div><b className="ln-small">Failing indicators</b><ul className="ln-small" style={{ margin: '4px 0 0', paddingLeft: 18 }}>{item.rubric.failing.map(c => <li key={c}>{c}</li>)}</ul></div>
+          <div><b className="ln-small">{t('inst.review.passingCriteria')}</b><ul className="ln-small" style={{ margin: '4px 0 0', paddingLeft: 18 }}>{item.rubric.passing.map(c => <li key={c}>{c}</li>)}</ul></div>
+          <div><b className="ln-small">{t('inst.review.failingIndicators')}</b><ul className="ln-small" style={{ margin: '4px 0 0', paddingLeft: 18 }}>{item.rubric.failing.map(c => <li key={c}>{c}</li>)}</ul></div>
         </div>
       </details>
       {canDecide ? (
         <div className="ln-col" style={{ gap: 10 }}>
-          <div className="ln-row ln-wrap" style={{ gap: 8 }} role="group" aria-label="Verdict">
-            <button type="button" className={`ln-btn ${verdict === 'pass' ? 'ln-btn-primary' : ''}`} aria-pressed={verdict === 'pass'} onClick={() => setVerdict('pass')}><CheckCircle2 size={16} aria-hidden="true" />Pass</button>
-            <button type="button" className={`ln-btn ${verdict === 'fail' ? 'ln-btn-primary' : ''}`} aria-pressed={verdict === 'fail'} onClick={() => setVerdict('fail')}><XCircle size={16} aria-hidden="true" />Not yet</button>
+          <div className="ln-row ln-wrap" style={{ gap: 8 }} role="group" aria-label={t('inst.review.verdict')}>
+            <button type="button" className={`ln-btn ${verdict === 'pass' ? 'ln-btn-primary' : ''}`} aria-pressed={verdict === 'pass'} onClick={() => setVerdict('pass')}><CheckCircle2 size={16} aria-hidden="true" />{t('inst.review.pass')}</button>
+            <button type="button" className={`ln-btn ${verdict === 'fail' ? 'ln-btn-primary' : ''}`} aria-pressed={verdict === 'fail'} onClick={() => setVerdict('fail')}><XCircle size={16} aria-hidden="true" />{t('inst.review.notYet')}</button>
           </div>
-          <div className="ln-row ln-wrap" style={{ gap: 6 }} role="group" aria-label="Band">
-            {item.bands.map(b => <button key={b} type="button" className={`ln-chip ${band === b ? 'ln-tag-accent' : ''}`} aria-pressed={band === b} onClick={() => setBand(b)}>{BAND_TEXT[b]}</button>)}
+          <div className="ln-row ln-wrap" style={{ gap: 6 }} role="group" aria-label={t('inst.review.band')}>
+            {item.bands.map(b => <button key={b} type="button" className={`ln-chip ${band === b ? 'ln-tag-accent' : ''}`} aria-pressed={band === b} onClick={() => setBand(b)}>{t(BAND_TEXT[b])}</button>)}
           </div>
-          <textarea className="ln-textarea" rows={2} placeholder="Notes (optional)" value={notes} onChange={e => setNotes(e.target.value)} />
+          <textarea className="ln-textarea" rows={2} placeholder={t('inst.review.notesOptional')} value={notes} onChange={e => setNotes(e.target.value)} />
           {error && <div className="ln-error">{error}</div>}
-          <button type="button" className="ln-btn ln-btn-primary" style={{ alignSelf: 'flex-start' }} disabled={!verdict || !band || busy} onClick={submit}>{busy ? 'Saving…' : 'Submit review'}</button>
+          <button type="button" className="ln-btn ln-btn-primary" style={{ alignSelf: 'flex-start' }} disabled={!verdict || !band || busy} onClick={submit}>{busy ? t('inst.review.saving') : t('inst.review.submitReview')}</button>
         </div>
-      ) : <span className="ln-small ln-muted">Viewers can read the queue; professors and admins decide.</span>}
+      ) : <span className="ln-small ln-muted">{t('inst.review.viewersCanReadQueue')}</span>}
     </article>
   );
 }
 
 export default function Review() {
+  const { t } = useUiLang();
   const { role } = useStaff();
   const [tab, setTab] = useState('queue');
   const [cohorts, setCohorts] = useState([]);
@@ -88,16 +91,16 @@ export default function Review() {
     <>
       <header className="ln-pagehead">
         <div className="ln-col" style={{ gap: 4 }}>
-          <h1 className="ln-title">Faculty review</h1>
-          <span className="ln-sub">Blind review of checks the evaluator was unsure about, plus a random sample that tells you how far to trust it.</span>
+          <h1 className="ln-title">{t('inst.review.facultyReview')}</h1>
+          <span className="ln-sub">{t('inst.review.blindReviewChecksEvaluator')}</span>
         </div>
       </header>
       {error && <div className="ln-error" role="alert">{error}</div>}
       <div className="ln-filterbar">
-        <label className="ln-selectwrap"><span>Cohort</span>
+        <label className="ln-selectwrap"><span>{t('inst.review.cohort')}</span>
           <Select value={cohortId} onChange={e => setCohortId(e.target.value)}>{cohorts.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}</Select></label>
         <div className="ln-pilltabs" role="tablist">
-          {[['queue', `Queue${queue ? ` · ${queue.items.length}` : ''}`], ['calibration', 'Calibration'], ['load', 'Review load']].map(([id, label]) => (
+          {[['queue', `Queue${queue ? ` · ${queue.items.length}` : ''}`], ['calibration', t('inst.review.calibration')], ['load', t('inst.review.reviewLoad')]].map(([id, label]) => (
             <button key={id} type="button" role="tab" className="ln-pilltab" aria-selected={tab === id} onClick={() => setTab(id)}>{label}</button>
           ))}
         </div>
@@ -105,31 +108,31 @@ export default function Review() {
 
       {tab === 'queue' && (
         <section className="ln-col" style={{ gap: 14 }}>
-          <div className="ln-note" role="note"><b>Integrity flags are a reason to talk, not a verdict.</b> A flag means an answer looked unusual (very fast, pasted, or unlike the student’s other work). Ask the student about it before deciding anything.</div>
-          {queue?.cap_reached && <div className="ln-note">This week’s contracted review time is used up. Only priority items (persistence, authenticity, weak viva, borderline) are shown; the random sample waits.</div>}
+          <div className="ln-note" role="note"><b>{t('inst.review.integrityFlagsReasonTalk')}</b> {' '}{t('inst.review.flagMeansAnswerLooked')}</div>
+          {queue?.cap_reached && <div className="ln-note">{t('inst.review.weekSContractedReview')}</div>}
           {done.map(d => (
             <div key={d.item.id} className="ln-card ln-card-sm" role="status" style={{ gap: 4 }}>
-              <span><b>Saved.</b> {d.item.node} — {d.item.learner ? `${d.item.learner.name} (${d.item.learner.learner_ref})` : ''}</span>
-              <span className="ln-small ln-muted">{d.outcome.recheck ? 'You disagreed with a pass: the student will get a fresh question on this skill.' : d.outcome.lifted ? 'Agreed on a calibrated node: the evidence is now faculty-confirmed (L3).' : d.outcome.provisionalCleared ? 'Agreed: the provisional pass is now final.' : 'Recorded.'}</span>
+              <span><b>{t('inst.review.saved')}</b> {d.item.node} — {d.item.learner ? `${d.item.learner.name} (${d.item.learner.learner_ref})` : ''}</span>
+              <span className="ln-small ln-muted">{d.outcome.recheck ? t('inst.review.disagreedPassStudentWill') : d.outcome.lifted ? t('inst.review.agreedOnACalibrated') : d.outcome.provisionalCleared ? t('inst.review.agreedTheProvisionalPass') : t('inst.review.recorded')}</span>
             </div>
           ))}
-          {queue && queue.items.length === 0 && <div className="ln-card ln-muted">Nothing to review for this cohort right now.</div>}
+          {queue && queue.items.length === 0 && <div className="ln-card ln-muted">{t('inst.review.nothingReviewCohortRight')}</div>}
           {(queue?.items || []).map(item => (
             <ReviewCard key={item.id} item={item} canDecide={role !== 'viewer'} onDone={(r) => { setDone(d => [r, ...d].slice(0, 5)); refresh(); }} />
           ))}
-          <span className="ln-xs ln-muted">About {queue?.minutes_per_review || 2} minutes per review. Every reviewed answer can become a gold example for this node (with the student’s consent).</span>
+          <span className="ln-xs ln-muted">{t('inst.review.about')}{' '} {queue?.minutes_per_review || 2} {' '}{t('inst.review.minutesPerReviewEvery')}</span>
         </section>
       )}
 
       {tab === 'calibration' && cal && (
         <section className="ln-card" style={{ gap: 12 }}>
-          <span className="ln-small ln-muted">Agreement between faculty bands and the evaluator on the random calibration sample only (decision reviews are never used). Rule: n ≥ {cal.rule.min_n}, lower bound ≥ {cal.rule.min_lower} and κ ≥ {cal.rule.min_point} → calibrated; faculty-agreed passes on calibrated nodes become L3 evidence.</span>
+          <span className="ln-small ln-muted">{t('inst.review.agreementBetweenFacultyBands', { min_n: cal.rule.min_n, min_lower: cal.rule.min_lower, min_point: cal.rule.min_point })}</span>
           <div className="ln-tablewrap"><table className="ln-table">
-            <thead><tr><th>Node</th><th>Reviews</th><th>Weighted κ</th><th>90% interval</th><th>Status</th></tr></thead>
+            <thead><tr><th>{t('inst.review.node')}</th><th>{t('inst.review.reviews')}</th><th>{t('inst.review.weighted')}</th><th>{t('inst.review.90Interval')}</th><th>{t('inst.review.status')}</th></tr></thead>
             <tbody>{cal.nodes.map(n => (
               <tr key={n.node_id}><td>{n.node}<span className="ln-xs ln-muted" style={{ display: 'block' }}>{n.cluster}</span></td><td>{n.n}</td>
                 <td>{n.kappa == null ? '—' : n.kappa.toFixed(2)}</td><td>{n.lower == null ? '—' : `${n.lower.toFixed(2)} – ${n.upper.toFixed(2)}`}</td>
-                <td><span className={`ln-tag ${CAL[n.status][1]}`}>{CAL[n.status][0]}</span></td></tr>
+                <td><span className={`ln-tag ${CAL[n.status][1]}`}>{t(CAL[n.status][0])}</span></td></tr>
             ))}</tbody>
           </table></div>
         </section>
@@ -138,19 +141,19 @@ export default function Review() {
       {tab === 'load' && load && (
         <section className="ln-grid ln-g-2" style={{ gap: 16 }}>
           <div className="ln-card" style={{ gap: 10 }}>
-            <span className="ln-kicker">Forecast</span>
-            <span className="ln-stat">{load.forecast_minutes_per_week} min / week</span>
-            <span className="ln-small ln-muted">{load.learners} students × {load.nodes} nodes over {load.weeks} weeks ≈ {load.expected_checks_per_week} checks a week; {Math.round(load.decision_rate * 100)}% need a decision review ({load.decision_rate_source === 'prior' ? 'starting estimate' : 'measured'}), plus the calibration sample.</span>
-            <span className="ln-small">Contracted: <b>{load.contracted_minutes_per_week == null ? 'not set' : `${load.contracted_minutes_per_week} min / week`}</b> · used this week: {load.minutes_used_this_week} min · open items: {load.open_items}</span>
+            <span className="ln-kicker">{t('inst.review.forecast')}</span>
+            <span className="ln-stat">{t('inst.review.forecastMinutesPerWeek', { forecast_minutes_per_week: load.forecast_minutes_per_week })}</span>
+            <span className="ln-small ln-muted">{t('inst.review.learnersStudentsNodesNodes', { learners: load.learners, nodes: load.nodes, weeks: load.weeks, expected_checks_per_week: load.expected_checks_per_week, round: Math.round(load.decision_rate * 100) })}{load.decision_rate_source === 'prior' ? t('inst.review.startingEstimate') : t('inst.review.measured')}{t('inst.review.plusCalibrationSample')}</span>
+            <span className="ln-small">{t('inst.review.contracted')}{' '} <b>{load.contracted_minutes_per_week == null ? t('inst.review.notSet') : t('inst.review.minPerWeek', { n: load.contracted_minutes_per_week })}</b> {' '}{t('inst.review.usedWeekMinutesUsed', { minutes_used_this_week: load.minutes_used_this_week, open_items: load.open_items })}</span>
             <div className={load.over_contract ? 'ln-error' : 'ln-note'}>{load.advice}</div>
           </div>
           {role === 'admin' && (
             <div className="ln-card" style={{ gap: 10 }}>
-              <span className="ln-kicker">Contracted review time</span>
-              <span className="ln-small ln-muted">Minutes of faculty review per 100 students per week, as agreed in the engagement contract.</span>
+              <span className="ln-kicker">{t('inst.review.contractedReviewTime')}</span>
+              <span className="ln-small ln-muted">{t('inst.review.minutesFacultyReviewPer')}</span>
               <div className="ln-row" style={{ gap: 8 }}>
-                <input className="ln-input" type="number" min="0" placeholder={load.contracted_minutes_per_100 != null ? `Now ${load.contracted_minutes_per_100}` : 'e.g. 120'} value={contract} onChange={e => setContract(e.target.value)} aria-label="Minutes per 100 students per week" />
-                <button type="button" className="ln-btn ln-btn-primary" disabled={contract === ''} onClick={saveContract}>Save</button>
+                <input className="ln-input" type="number" min="0" placeholder={load.contracted_minutes_per_100 != null ? t('inst.review.nowN', { n: load.contracted_minutes_per_100 }) : t('inst.review.eg120')} value={contract} onChange={e => setContract(e.target.value)} aria-label={t('inst.review.minutesPer100Students')} />
+                <button type="button" className="ln-btn ln-btn-primary" disabled={contract === ''} onClick={saveContract}>{t('inst.review.save')}</button>
               </div>
             </div>
           )}

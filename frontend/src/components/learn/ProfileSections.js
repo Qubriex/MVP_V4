@@ -18,16 +18,18 @@ const EDITABLE = ['email', 'phone', 'city', 'link_url', 'headline', 'about', 'ta
   'share_with_institution'];
 // Low-bandwidth mode (v4.3 §19) is a setting of this device, not the profile.
 export function LowBandwidthToggle() {
+  const { t } = useUiLang();
   const [on, set] = useLowBandwidth();
   return (
     <label className="ln-toggle-row">
-      <span>Low-bandwidth mode on this device<span className="ln-xs ln-muted" style={{ display: 'block' }}>Text first (no automatic speech), smaller voice uploads, the next lessons’ outlines saved for offline, time synced when you reconnect. Checks still need a connection.</span></span>
+      <span>{t('learn.profileSections.lowBandwidthModeDevice')}<span className="ln-xs ln-muted" style={{ display: 'block' }}>{t('learn.profileSections.textFirstNoAutomatic')}</span></span>
       <input type="checkbox" checked={on} onChange={e => set(e.target.checked)} />
     </label>
   );
 }
 
 export function useProfileDraft() {
+  const { t } = useUiLang();
   const [profile, setProfile] = useState(null);
   const [draft, setDraft] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -55,7 +57,7 @@ export function useProfileDraft() {
       setStatus('saved');
       return true;
     } catch (e) {
-      setStatus(errMsg(e, 'Couldn’t save — check your connection and try again.'));
+      setStatus(errMsg(e, t('learn.profileSections.couldntSave')));
       return false;
     } finally {
       setSaving(false);
@@ -86,6 +88,7 @@ function Field({ id, label, hint, ...props }) {
 }
 
 export function ChipEditor({ label, values = [], onChange, placeholder = 'Add', tone = 'neutral' }) {
+  const { t } = useUiLang();
   const [text, setText] = useState('');
   const add = () => {
     const v = text.trim();
@@ -98,7 +101,7 @@ export function ChipEditor({ label, values = [], onChange, placeholder = 'Add', 
       <div className="ln-row ln-wrap" style={{ gap: 6 }}>
         {values.map(v => (
           <span key={v} className={`ln-chip ${tone === 'accent' ? 'ln-tag-accent' : ''}`}>
-            {v}<button type="button" className="ln-chip-x" aria-label={`Remove ${v}`} onClick={() => onChange(values.filter(x => x !== v))}>×</button>
+            {v}<button type="button" className="ln-chip-x" aria-label={t('learn.profileSections.removeV', { v })} onClick={() => onChange(values.filter(x => x !== v))}>×</button>
           </span>
         ))}
         <input className="ln-chip-input" aria-label={`${placeholder}${label ? ` to ${label}` : ''}`} placeholder={`+ ${placeholder}`} value={text}
@@ -110,6 +113,7 @@ export function ChipEditor({ label, values = [], onChange, placeholder = 'Add', 
 
 // A list of small records (education, projects, experience, certifications).
 function RecordList({ items = [], onChange, fields, empty, addLabel, render }) {
+  const { t } = useUiLang();
   const [editing, setEditing] = useState(null);
   const update = (i, key, v) => onChange(items.map((it, j) => (j === i ? { ...it, [key]: v } : it)));
   return (
@@ -135,14 +139,14 @@ function RecordList({ items = [], onChange, fields, empty, addLabel, render }) {
             )))}
           </div>
           <div className="ln-row" style={{ justifyContent: 'flex-end' }}>
-            <button type="button" className="ln-btn ln-btn-sm" onClick={() => { onChange(items.filter((_, j) => j !== i)); setEditing(null); }}><Trash2 size={14} aria-hidden="true" />Remove</button>
-            <button type="button" className="ln-btn ln-btn-sm ln-btn-ink" onClick={() => setEditing(null)}>Done</button>
+            <button type="button" className="ln-btn ln-btn-sm" onClick={() => { onChange(items.filter((_, j) => j !== i)); setEditing(null); }}><Trash2 size={14} aria-hidden="true" />{t('learn.profileSections.remove')}</button>
+            <button type="button" className="ln-btn ln-btn-sm ln-btn-ink" onClick={() => setEditing(null)}>{t('learn.profileSections.done')}</button>
           </div>
         </div>
       ) : (
         <div key={i} className="ln-tile ln-between" style={{ padding: '14px 16px', alignItems: 'flex-start' }}>
           <div className="ln-col" style={{ gap: 2, minWidth: 0 }}>{render(it)}</div>
-          <button type="button" className="ln-btn ln-btn-sm" onClick={() => setEditing(i)}>Edit</button>
+          <button type="button" className="ln-btn ln-btn-sm" onClick={() => setEditing(i)}>{t('learn.profileSections.edit')}</button>
         </div>
       )))}
       <button type="button" className="ln-btn ln-btn-sm" style={{ alignSelf: 'flex-start', fontWeight: 600 }}
@@ -153,6 +157,7 @@ function RecordList({ items = [], onChange, fields, empty, addLabel, render }) {
 
 // ─── Sections ──────────────────────────────────────────────────────────────────
 export function PersonalSection({ form }) {
+  const { t } = useUiLang();
   const { user } = useAuth();
   const { draft, set } = form;
   const language = user?.language || draft.language || 'telugu';
@@ -166,7 +171,7 @@ export function PersonalSection({ form }) {
       const res = await api.post('/learner/profile/summary-from-speech', { transcript });
       set('about', res.data.summary);
     } catch (e) {
-      setErr('Couldn’t write the summary right now. You can type it instead.');
+      setErr(t('learn.profileSections.couldnTWriteThe'));
     }
     setWriting(false);
   };
@@ -177,34 +182,34 @@ export function PersonalSection({ form }) {
       f.append('audio', blob, 'about.webm');
       const res = await api.post('/learner/transcribe', f);
       await writeSummary(res.data.transcript);
-    } catch (e) { setErr('Couldn’t hear that. Try again, or type it.'); setWriting(false); }
+    } catch (e) { setErr(t('learn.profileSections.couldnTHearThat')); setWriting(false); }
   };
   const mic = useSpeechInput({ lang: speechTag(language), onFinal: writeSummary, onAudio: transcribe });
-  const langName = language === 'hindi' ? 'Hindi' : 'Telugu';
+  const langName = language === 'hindi' ? t('learn.profileSections.hindi') : t('learn.profileSections.telugu');
 
   return (
-    <Section id="personal" title="Personal info" note="Name and learner ref come from your institution">
+    <Section id="personal" title={t('learn.profileSections.personalInfo')} note={t('learn.profileSections.nameLearnerRefCome')}>
       <div className="ln-grid ln-g-2" style={{ gap: 16 }}>
-        <Field id="fn" label="Full name" value={draft.name || ''} readOnly />
-        <Field id="ref" label="Learner reference" value={draft.learner_ref || ''} readOnly />
-        <Field id="em" label="Email" type="email" value={draft.email || ''} onChange={e => set('email', e.target.value)} autoComplete="email" />
-        <Field id="ph" label="Phone" type="tel" placeholder="+91" value={draft.phone || ''} onChange={e => set('phone', e.target.value)} autoComplete="tel" />
-        <Field id="city" label="City" value={draft.city || ''} onChange={e => set('city', e.target.value)} />
-        <Field id="li" label="LinkedIn or GitHub" placeholder="https://" type="url" value={draft.link_url || ''} onChange={e => set('link_url', e.target.value)} />
+        <Field id="fn" label={t('learn.profileSections.fullName')} value={draft.name || ''} readOnly />
+        <Field id="ref" label={t('learn.profileSections.learnerReference')} value={draft.learner_ref || ''} readOnly />
+        <Field id="em" label={t('learn.profileSections.email')} type="email" value={draft.email || ''} onChange={e => set('email', e.target.value)} autoComplete="email" />
+        <Field id="ph" label={t('learn.profileSections.phone')} type="tel" placeholder="+91" value={draft.phone || ''} onChange={e => set('phone', e.target.value)} autoComplete="tel" />
+        <Field id="city" label={t('learn.profileSections.city')} value={draft.city || ''} onChange={e => set('city', e.target.value)} />
+        <Field id="li" label={t('learn.profileSections.linkedinGithub')} placeholder={t('learn.profileSections.https')} type="url" value={draft.link_url || ''} onChange={e => set('link_url', e.target.value)} />
         <div style={{ gridColumn: '1 / -1' }}>
-          <Field id="hl" label="Headline" hint="one line under your name" placeholder="e.g. Aspiring frontend developer · B.Tech CSE, final year" value={draft.headline || ''} onChange={e => set('headline', e.target.value)} />
+          <Field id="hl" label={t('learn.profileSections.headline')} hint={t('learn.profileSections.oneLineUnderName')} placeholder={t('learn.profileSections.eGAspiringFrontend')} value={draft.headline || ''} onChange={e => set('headline', e.target.value)} />
         </div>
       </div>
       <div className="ln-field">
-        <label htmlFor="about" className="ln-label">About you <span style={{ fontWeight: 400, color: 'var(--color-text-muted)' }}>· used as your resume summary</span></label>
+        <label htmlFor="about" className="ln-label">{t('learn.profileSections.aboutYou')}{' '} <span style={{ fontWeight: 400, color: 'var(--color-text-muted)' }}>{t('learn.profileSections.usedAsResumeSummary')}</span></label>
         <textarea id="about" className="ln-textarea" rows={3} value={draft.about || ''} onChange={e => set('about', e.target.value)} />
         <div className="ln-row ln-wrap" style={{ gap: 10 }}>
           <button type="button" className={`ln-btn ln-btn-sm ${mic.listening ? 'ln-btn-ink' : ''}`} onClick={() => (mic.listening ? mic.stop() : mic.start())} disabled={writing || !mic.supported} aria-pressed={mic.listening}>
-            <Mic size={14} aria-hidden="true" />{mic.listening ? 'Stop — I’m done' : writing ? 'Writing it in English…' : `Say it in ${langName}, we’ll write it in English`}
+            <Mic size={14} aria-hidden="true" />{mic.listening ? t('learn.profileSections.stopIMDone') : writing ? t('learn.profileSections.writingItInEnglish') : t('learn.profileSections.sayItIn', { lang: langName })}
           </button>
-          {mic.listening && <span className="ln-small ln-muted ln-indic">{mic.interim || 'Listening…'}</span>}
+          {mic.listening && <span className="ln-small ln-muted ln-indic">{mic.interim || t('learn.profileSections.listening')}</span>}
         </div>
-        {heard && !mic.listening && <span className="ln-xs ln-muted ln-indic">You said: “{heard}”</span>}
+        {heard && !mic.listening && <span className="ln-xs ln-muted ln-indic">{t('learn.profileSections.saidHeard', { heard })}</span>}
         {(err || mic.error) && <div className="ln-error">{err || mic.error}</div>}
       </div>
     </Section>
@@ -212,95 +217,102 @@ export function PersonalSection({ form }) {
 }
 
 export function EducationSection({ form }) {
+  const { t } = useUiLang();
   return (
-    <Section id="education" title="Education">
+    <Section id="education" title={t('learn.profileSections.education')}>
       <RecordList items={form.draft.education} onChange={v => form.set('education', v)} addLabel="Add education"
         empty={{ title: 'No education added', text: 'Add your degree or diploma, where you studied and when.' }}
         fields={[{ key: 'degree', label: 'Degree', placeholder: 'B.Tech, Computer Science' }, { key: 'institution_name', label: 'College or school' },
           { key: 'city', label: 'City' }, { key: 'grade', label: 'CGPA or %' }, { key: 'start_year', label: 'Start year' }, { key: 'end_year', label: 'End year' }]}
-        render={e => <><span style={{ fontSize: 'var(--fs-body)', fontWeight: 600 }}>{e.degree || 'Untitled'}</span><span className="ln-small">{[e.institution_name, e.city].filter(Boolean).join(', ')}{e.start_year || e.end_year ? ` · ${e.start_year || ''}–${e.end_year || ''}` : ''}</span>{e.grade && <span className="ln-small ln-muted">{e.grade}</span>}</>} />
+        render={e => <><span style={{ fontSize: 'var(--fs-body)', fontWeight: 600 }}>{e.degree || t('learn.profileSections.untitled')}</span><span className="ln-small">{[e.institution_name, e.city].filter(Boolean).join(', ')}{e.start_year || e.end_year ? ` · ${e.start_year || ''}–${e.end_year || ''}` : ''}</span>{e.grade && <span className="ln-small ln-muted">{e.grade}</span>}</>} />
     </Section>
   );
 }
 
 export function ExperienceSection({ form }) {
+  const { t } = useUiLang();
   return (
-    <Section id="experience" title="Experience" note="Optional — internships, part-time work, volunteering">
+    <Section id="experience" title={t('learn.profileSections.experience')} note={t('learn.profileSections.optionalInternshipsPartTime')}>
       <RecordList items={form.draft.experience} onChange={v => form.set('experience', v)} addLabel="Add experience"
         empty={{ title: 'No experience added', text: 'Freshers often skip this. Internships and volunteering count.' }}
         fields={[{ key: 'role', label: 'Role' }, { key: 'org', label: 'Organisation' }, { key: 'period', label: 'When', placeholder: 'May–Jul 2026' }, { key: 'notes', label: 'What you did', multiline: true }]}
-        render={x => <><span style={{ fontSize: 'var(--fs-body)', fontWeight: 600 }}>{x.role || 'Untitled'}</span><span className="ln-small">{[x.org, x.period].filter(Boolean).join(' · ')}</span></>} />
+        render={x => <><span style={{ fontSize: 'var(--fs-body)', fontWeight: 600 }}>{x.role || t('learn.profileSections.untitled')}</span><span className="ln-small">{[x.org, x.period].filter(Boolean).join(' · ')}</span></>} />
     </Section>
   );
 }
 
 export function ProjectsSection({ form }) {
+  const { t } = useUiLang();
   return (
-    <Section id="projects" title="Projects">
+    <Section id="projects" title={t('learn.profileSections.projects')}>
       <RecordList items={form.draft.projects} onChange={v => form.set('projects', v)} addLabel="Add project"
         empty={{ title: 'No projects yet', text: 'Add a title, what you built, the tools you used and a GitHub or demo link. Projects are what recruiters read first on a fresher resume.' }}
         fields={[{ key: 'title', label: 'Title' }, { key: 'link_url', label: 'GitHub or demo link', placeholder: 'https://' }, { key: 'tools', label: 'Tools (comma separated)', list: true }, { key: 'description', label: 'What you built', multiline: true }]}
-        render={p => <><span style={{ fontSize: 'var(--fs-body)', fontWeight: 600 }}>{p.title || 'Untitled'}</span>{p.description && <span className="ln-small">{p.description}</span>}{(p.tools || []).length > 0 && <span className="ln-xs ln-muted">{p.tools.join(' · ')}</span>}</>} />
+        render={p => <><span style={{ fontSize: 'var(--fs-body)', fontWeight: 600 }}>{p.title || t('learn.profileSections.untitled')}</span>{p.description && <span className="ln-small">{p.description}</span>}{(p.tools || []).length > 0 && <span className="ln-xs ln-muted">{p.tools.join(' · ')}</span>}</>} />
     </Section>
   );
 }
 
 export function SkillsSection({ form }) {
+  const { t } = useUiLang();
   const { draft, set } = form;
   return (
-    <Section id="skills" title="Skills">
+    <Section id="skills" title={t('learn.profileSections.skills')}>
       <div className="ln-col" style={{ gap: 8 }}>
-        <span className="ln-small" style={{ fontWeight: 600, color: 'var(--status-success)' }}>Verified by Qubirex · from your mastery checks</span>
+        <span className="ln-small" style={{ fontWeight: 600, color: 'var(--status-success)' }}>{t('learn.profileSections.verifiedByQubirexFrom')}</span>
         <div className="ln-row ln-wrap" style={{ gap: 8 }}>
-          {(draft.verified_skills || []).length === 0 && <span className="ln-small ln-muted">Skills appear here as you pass mastery checks.</span>}
+          {(draft.verified_skills || []).length === 0 && <span className="ln-small ln-muted">{t('learn.profileSections.skillsAppearHereAs')}</span>}
           {(draft.verified_skills || []).map(v => <span key={v} className="ln-chip ln-tag-success" style={{ fontWeight: 500 }}>✓ {v}</span>)}
         </div>
       </div>
-      <ChipEditor label="Self-declared" values={draft.self_skills} onChange={v => set('self_skills', v)} placeholder="Add skill" />
-      <span className="ln-xs ln-muted">Self-declared skills are shown separately on your resume and never marked as verified.</span>
+      <ChipEditor label={t('learn.profileSections.selfDeclared')} values={draft.self_skills} onChange={v => set('self_skills', v)} placeholder={t('learn.profileSections.addSkill')} />
+      <span className="ln-xs ln-muted">{t('learn.profileSections.selfDeclaredSkillsShown')}</span>
     </Section>
   );
 }
 
 export function CertificationsSection({ form }) {
+  const { t } = useUiLang();
   const clusters = form.draft.record?.clusters_done || [];
   return (
-    <Section id="certifications" title="Certifications" note="Optional">
+    <Section id="certifications" title={t('learn.profileSections.certifications')} note={t('learn.profileSections.optional')}>
       {clusters.length > 0 && (
         <div className="ln-row ln-wrap" style={{ gap: 8 }}>
-          {clusters.map(c => <span key={c} className="ln-chip ln-tag-success">Qubirex cluster certificate · {c}</span>)}
+          {clusters.map(c => <span key={c} className="ln-chip ln-tag-success">{t('learn.profileSections.qubirexClusterCertificateC', { c })}</span>)}
         </div>
       )}
       <RecordList items={form.draft.certifications} onChange={v => form.set('certifications', v)} addLabel="Add certification"
         empty={{ title: 'No other certifications', text: 'Add certificates from courses or exams you have passed elsewhere.' }}
         fields={[{ key: 'name', label: 'Name' }, { key: 'issuer', label: 'Issued by' }, { key: 'year', label: 'Year' }]}
-        render={c => <><span style={{ fontSize: 'var(--fs-body)', fontWeight: 600 }}>{c.name || 'Untitled'}</span><span className="ln-small">{[c.issuer, c.year].filter(Boolean).join(' · ')}</span></>} />
+        render={c => <><span style={{ fontSize: 'var(--fs-body)', fontWeight: 600 }}>{c.name || t('learn.profileSections.untitled')}</span><span className="ln-small">{[c.issuer, c.year].filter(Boolean).join(' · ')}</span></>} />
     </Section>
   );
 }
 
 export function GoalsSection({ form }) {
+  const { t } = useUiLang();
   const { draft, set } = form;
   return (
-    <Section id="goals" title="Career goals">
+    <Section id="goals" title={t('learn.profileSections.careerGoals')}>
       <div className="ln-grid ln-g-2" style={{ gap: 16 }}>
-        <ChipEditor label="Target roles" values={draft.target_roles} onChange={v => set('target_roles', v)} placeholder="Add role" tone="accent" />
-        <ChipEditor label="Preferred cities" values={draft.preferred_cities} onChange={v => set('preferred_cities', v)} placeholder="Add city" />
+        <ChipEditor label={t('learn.profileSections.targetRoles')} values={draft.target_roles} onChange={v => set('target_roles', v)} placeholder={t('learn.profileSections.addRole')} tone="accent" />
+        <ChipEditor label={t('learn.profileSections.preferredCities')} values={draft.preferred_cities} onChange={v => set('preferred_cities', v)} placeholder={t('learn.profileSections.addCity')} />
         <div className="ln-field">
-          <label className="ln-label" htmlFor="gradyear">Graduation year</label>
+          <label className="ln-label" htmlFor="gradyear">{t('learn.profileSections.graduationYear')}</label>
           <Select id="gradyear" value={draft.graduation_year || ''} onChange={e => set('graduation_year', e.target.value ? Number(e.target.value) : null)}>
-            <option value="">Choose a year</option>
+            <option value="">{t('learn.profileSections.chooseYear')}</option>
             {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - 3 + i).map(y => <option key={y} value={y}>{y}</option>)}
           </Select>
-          <span className="ln-xs ln-muted">Employers see you as available from June of this year.</span>
+          <span className="ln-xs ln-muted">{t('learn.profileSections.employersSeeAsAvailable')}</span>
         </div>
-        <Field id="sal" label="Expected salary" hint="private, used for job filters" placeholder="e.g. ₹4 LPA" value={draft.expected_salary || ''} onChange={e => set('expected_salary', e.target.value)} />
+        <Field id="sal" label={t('learn.profileSections.expectedSalary')} hint={t('learn.profileSections.privateUsedJobFilters')} placeholder={t('learn.profileSections.egSalary')} value={draft.expected_salary || ''} onChange={e => set('expected_salary', e.target.value)} />
       </div>
     </Section>
   );
 }
 
 export function VoiceSection({ form }) {
+  const { t } = useUiLang();
   const { user } = useAuth();
   const { setLang } = useUiLang();
   const { draft, set } = form;
@@ -312,27 +324,27 @@ export function VoiceSection({ form }) {
   const preview = () => speech.speak(sample, 'preview');
 
   return (
-    <Section id="preferences" title="Learning and voice preferences">
+    <Section id="preferences" title={t('learn.profileSections.learningVoicePreferences')}>
       <div className="ln-grid ln-g-2" style={{ gap: 16 }}>
-        <div className="ln-field"><span className="ln-label">Teaching language</span>
-          <span className="ln-tile ln-indic" style={{ fontSize: 'var(--fs-body)', padding: '12px 14px' }}>{language === 'hindi' ? 'हिंदी' : 'తెలుగు'} <span className="ln-muted">· set by your institution</span></span></div>
-        <div className="ln-field"><span className="ln-label" id="ui-lang">Interface language</span>
+        <div className="ln-field"><span className="ln-label">{t('learn.profileSections.teachingLanguage')}</span>
+          <span className="ln-tile ln-indic" style={{ fontSize: 'var(--fs-body)', padding: '12px 14px' }}>{language === 'hindi' ? 'हिंदी' : 'తెలుగు'} <span className="ln-muted">{t('learn.profileSections.setByInstitution')}</span></span></div>
+        <div className="ln-field"><span className="ln-label" id="ui-lang">{t('learn.profileSections.interfaceLanguage')}</span>
           <div className="ln-seg ln-indic" role="group" aria-labelledby="ui-lang">
             {UI_LANGS.map(l => <button key={l.id} type="button" aria-pressed={draft.ui_language === l.id} onClick={() => { set('ui_language', l.id); setLang(l.id); }}>{l.label}</button>)}
           </div></div>
-        <div className="ln-field"><span className="ln-label">Professor’s voice</span>
+        <div className="ln-field"><span className="ln-label">{t('learn.profileSections.professorSVoice')}</span>
           <button type="button" className="ln-btn ln-btn-sm" style={{ alignSelf: 'flex-start' }} onClick={preview}>
-            <Play size={12} aria-hidden="true" />Hear Professor Qubirex
+            <Play size={12} aria-hidden="true" />{t('learn.profileSections.hearProfessorQubirex')}
           </button></div>
-        <div className="ln-field"><span className="ln-label" id="rate-pick">Speaking speed</span>
+        <div className="ln-field"><span className="ln-label" id="rate-pick">{t('learn.profileSections.speakingSpeed')}</span>
           <div className="ln-seg" role="group" aria-labelledby="rate-pick">
             {[0.8, 1, 1.2].map(r => <button key={r} type="button" aria-pressed={(prefs.rate || 1) === r} onClick={() => setPref('rate', r)}>{r.toFixed(1)}×</button>)}
           </div></div>
       </div>
       <div className="ln-col" style={{ gap: 6 }}>
-        <label className="ln-toggle-row"><span>Start sessions in voice mode</span><input type="checkbox" checked={prefs.startInVoice !== false} onChange={e => setPref('startInVoice', e.target.checked)} /></label>
-        <label className="ln-toggle-row"><span>Show English captions under {language === 'hindi' ? 'Hindi' : 'Telugu'} speech</span><input type="checkbox" checked={prefs.showEnglishCaptions !== false} onChange={e => setPref('showEnglishCaptions', e.target.checked)} /></label>
-        <label className="ln-toggle-row"><span>Daily study reminder</span><input type="checkbox" checked={!!prefs.dailyReminder} onChange={e => setPref('dailyReminder', e.target.checked)} /></label>
+        <label className="ln-toggle-row"><span>{t('learn.profileSections.startSessionsVoiceMode')}</span><input type="checkbox" checked={prefs.startInVoice !== false} onChange={e => setPref('startInVoice', e.target.checked)} /></label>
+        <label className="ln-toggle-row"><span>{t('learn.profileSections.showEnglishCaptionsUnder')}{' '} {language === 'hindi' ? t('learn.profileSections.hindi') : t('learn.profileSections.telugu')} {' '}{t('learn.profileSections.speech')}</span><input type="checkbox" checked={prefs.showEnglishCaptions !== false} onChange={e => setPref('showEnglishCaptions', e.target.checked)} /></label>
+        <label className="ln-toggle-row"><span>{t('learn.profileSections.dailyStudyReminder')}</span><input type="checkbox" checked={!!prefs.dailyReminder} onChange={e => setPref('dailyReminder', e.target.checked)} /></label>
         <LowBandwidthToggle />
       </div>
     </Section>

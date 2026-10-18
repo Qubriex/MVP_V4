@@ -12,6 +12,7 @@ import { MOCK_RESUME } from '../../utils/learnerMockData';
 import { useAuth } from '../../context/AuthContext';
 import { Select } from '../../components/shared/ui';
 
+import { useUiLang } from '../../context/UiLangContext';
 const TEMPLATES = [
   { id: 'classic', name: 'Classic', thumb: { borderTop: '6px solid var(--accent-800)' } },
   { id: 'modern', name: 'Modern', thumb: { borderLeft: '16px solid #201F1A' } },
@@ -29,6 +30,7 @@ function orderBy(list, order) {
 }
 
 export default function Resume() {
+  const { t } = useUiLang();
   const { user } = useAuth();
   const [params] = useSearchParams();
   const [data, setData] = useState(null);
@@ -84,7 +86,7 @@ export default function Resume() {
         if (draft) {
           setTemplate(draft.template); setSections(draft.sections); setSummary(draft.summary);
           setSkillOrder(draft.skillOrder); setTailoredFor(draft.tailoredFor);
-          setMessage('Restored your unsaved changes from this device. Save a version to keep them.');
+          setMessage(t('learn.resume.restoredUnsavedChangesFrom'));
         }
       } catch { /* no draft */ }
       const list = [...d.saved_jobs];
@@ -113,9 +115,9 @@ export default function Resume() {
       setSummary(res.data.summary);
       setSkillOrder(res.data.skill_order);
       setTailoredFor(jobId);
-      setMessage('Tailored. Review the summary, then save a version.');
+      setMessage(t('learn.resume.tailoredReviewSummaryThen'));
     } catch (e) {
-      setMessage('Couldn’t tailor right now. Try again in a moment.');
+      setMessage(t('learn.resume.couldnTTailorRight'));
     }
     setBusy('');
   };
@@ -127,19 +129,19 @@ export default function Resume() {
       setData(d => ({ ...d, resume: res.data, versions: [{ version: res.data.version, template: res.data.template, tailored_job_id: res.data.tailored_job_id, created_at: res.data.created_at }, ...d.versions] }));
       setSaved({ ...current });
       try { localStorage.removeItem(draftKey); } catch { /* ignore */ }
-      setMessage(`Saved as version ${res.data.version}.`);
+      setMessage(t('learn.resume.savedAsVersionVersion', { version: res.data.version }));
     } catch (e) {
-      setMessage('Couldn’t save — check your connection.');
+      setMessage(t('learn.resume.couldnTSaveCheck'));
     }
     setBusy('');
   };
 
   const loadVersion = async (v) => {
     setShowVersions(false);
-    try { const res = await api.get(`/learner/resume/versions/${v}`); apply(res.data, p); setMessage(`Loaded version ${v}.`); } catch (e) { setMessage('Couldn’t load that version.'); }
+    try { const res = await api.get(`/learner/resume/versions/${v}`); apply(res.data, p); setMessage(t('learn.resume.loadedVersionV', { v })); } catch (e) { setMessage(t('learn.resume.couldnTLoadVersion')); }
   };
 
-  if (!data) return <p className="ln-muted">Loading…</p>;
+  if (!data) return <p className="ln-muted">{t('learn.resume.loading')}</p>;
   const accent = ACCENT[template];
   const H = ({ children }) => <span className="ln-a4-h" style={{ color: accent }}>{children}</span>;
   const tailoredJob = jobs.find(j => j.id === tailoredFor);
@@ -147,38 +149,38 @@ export default function Resume() {
   const record = p.record || {};
 
   const blocks = {
-    summary: summary && (<div className="ln-col" style={{ gap: 5 }}><H>SUMMARY</H><p>{summary}</p></div>),
+    summary: summary && (<div className="ln-col" style={{ gap: 5 }}><H>{t('learn.resume.h.summary')}</H><p>{summary}</p></div>),
     skills: (verified.length + declared.length > 0) && (
-      <div className="ln-col" style={{ gap: 6 }}><H>SKILLS</H>
+      <div className="ln-col" style={{ gap: 6 }}><H>{t('learn.resume.h.skills')}</H>
         <div style={{ display: 'grid', gridTemplateColumns: '110px minmax(0, 1fr)', gap: '4px 12px', fontSize: template === 'compact' ? 10.5 : 11.5, lineHeight: 1.5 }}>
-          {verified.length > 0 && <><b>Verified</b><span>{verified.join(', ')}</span></>}
-          {(p.learning_skills || []).length > 0 && <><b>Learning</b><span>{p.learning_skills.join(', ')}</span></>}
-          {declared.length > 0 && <><b>Also</b><span>{declared.join(', ')}</span></>}
+          {verified.length > 0 && <><b>{t('learn.resume.verified')}</b><span>{verified.join(', ')}</span></>}
+          {(p.learning_skills || []).length > 0 && <><b>{t('learn.resume.learning')}</b><span>{p.learning_skills.join(', ')}</span></>}
+          {declared.length > 0 && <><b>{t('learn.resume.also')}</b><span>{declared.join(', ')}</span></>}
         </div>
       </div>),
     projects: (
-      <div className="ln-col" style={{ gap: 6 }}><H>PROJECTS</H>
+      <div className="ln-col" style={{ gap: 6 }}><H>{t('learn.resume.h.projects')}</H>
         {(p.projects || []).length === 0
-          ? <div style={{ padding: '10px 12px', border: '1px dashed #D6CDB6', borderRadius: 6, fontSize: 11, color: '#6B6659' }}>[Add a project in your profile — it will appear here]</div>
+          ? <div style={{ padding: '10px 12px', border: '1px dashed #D6CDB6', borderRadius: 6, fontSize: 11, color: '#6B6659' }}>{t('learn.resume.addProjectProfileWill')}</div>
           : p.projects.map(pr => <p key={pr.title}><b>{pr.title}</b>{pr.description ? ` — ${pr.description}` : ''}{(pr.tools || []).length ? ` (${pr.tools.join(', ')})` : ''}{pr.link_url ? ` · ${pr.link_url}` : ''}</p>)}
       </div>),
     education: (p.education || []).length > 0 && (
-      <div className="ln-col" style={{ gap: 6 }}><H>EDUCATION</H>
+      <div className="ln-col" style={{ gap: 6 }}><H>{t('learn.resume.h.education')}</H>
         {p.education.map(e => <div key={e.degree} className="ln-between" style={{ fontSize: 11.5 }}><span><b>{e.degree}</b>{e.institution_name ? ` · ${e.institution_name}` : ''}{e.city ? `, ${e.city}` : ''}{e.grade ? ` · ${e.grade}` : ''}</span><span style={{ color: '#6B6659' }}>{[e.start_year, e.end_year].filter(Boolean).join('–')}</span></div>)}
       </div>),
     experience: (p.experience || []).length > 0 && (
-      <div className="ln-col" style={{ gap: 6 }}><H>EXPERIENCE</H>
+      <div className="ln-col" style={{ gap: 6 }}><H>{t('learn.resume.h.experience')}</H>
         {p.experience.map(x => <p key={`${x.role}${x.org}`}><b>{x.role}</b>{x.org ? `, ${x.org}` : ''}{x.period ? ` · ${x.period}` : ''}{x.notes ? ` — ${x.notes}` : ''}</p>)}
       </div>),
     certifications: ((p.certifications || []).length + (record.clusters_done || []).length > 0) && (
-      <div className="ln-col" style={{ gap: 6 }}><H>CERTIFICATIONS</H>
-        {(record.clusters_done || []).map(c => <p key={c}>Qubirex cluster certificate — {c}</p>)}
+      <div className="ln-col" style={{ gap: 6 }}><H>{t('learn.resume.h.certifications')}</H>
+        {(record.clusters_done || []).map(c => <p key={c}>{t('learn.resume.qubirexClusterCertificateC', { c })}</p>)}
         {(p.certifications || []).map(c => <p key={c.name}>{c.name}{c.issuer ? `, ${c.issuer}` : ''}{c.year ? ` · ${c.year}` : ''}</p>)}
       </div>),
     capability_record: (
-      <div className="ln-col" style={{ gap: 6 }}><H>CAPABILITY RECORD</H>
-        <p>{p.engagement_title}{p.institution_name ? `, ${p.institution_name}` : ''} via Qubirex · {record.nodes_mastered ?? 0} of {record.total_nodes ?? 0} skill nodes mastered{(record.clusters_done || []).length ? ` · ${record.clusters_done.join(' and ')} complete` : ''}.</p>
-        <span style={{ fontSize: 10.5, color: '#6B6659' }}>Each verified skill was passed in an applied mastery check. Full Mastery Log available from the institution.</span>
+      <div className="ln-col" style={{ gap: 6 }}><H>{t('learn.resume.h.capabilityRecord')}</H>
+        <p>{p.engagement_title}{p.institution_name ? `, ${p.institution_name}` : ''} {' '}{t('learn.resume.viaQubirex')}{' '} {record.nodes_mastered ?? 0} {' '}{t('learn.resume.of')}{' '} {record.total_nodes ?? 0} {' '}{t('learn.resume.skillNodesMastered')}{(record.clusters_done || []).length ? ` · ${t('learn.resume.groupsComplete', { list: record.clusters_done.join(', ') })}` : ''}.</p>
+        <span style={{ fontSize: 10.5, color: '#6B6659' }}>{t('learn.resume.eachVerifiedSkillWas')}</span>
       </div>)
   };
 
@@ -186,21 +188,21 @@ export default function Resume() {
     <>
       <header className="ln-pagehead" style={{ alignItems: 'center' }}>
         <div className="ln-col" style={{ gap: 4 }}>
-          <h1 className="ln-title" style={{ fontSize: 36 }}>Resume builder</h1>
+          <h1 className="ln-title" style={{ fontSize: 36 }}>{t('learn.resume.resumeBuilder')}</h1>
           <span className="ln-small ln-muted">
-            Drafted from your <Link to="/learn/profile" className="ln-link" style={{ fontSize: 14 }}>profile</Link>. Edits here don’t change your profile.
-            {data.resume.version ? ` Saved as version ${data.resume.version}.` : ' Not saved yet.'}
+            {t('learn.resume.draftedFrom')}{' '} <Link to="/learn/profile" className="ln-link" style={{ fontSize: 14 }}>{t('learn.resume.profile')}</Link>{t('learn.resume.editsHereDonT')}
+            {data.resume.version ? ` ${t('learn.resume.savedVersion', { n: data.resume.version })}` : t('learn.resume.notSavedYet')}
           </span>
         </div>
         <div className="ln-row ln-wrap" style={{ gap: 10, position: 'relative' }}>
-          <button type="button" className="ln-btn" aria-expanded={showVersions} onClick={() => setShowVersions(v => !v)} disabled={!data.versions.length}><History size={16} aria-hidden="true" />Versions</button>
+          <button type="button" className="ln-btn" aria-expanded={showVersions} onClick={() => setShowVersions(v => !v)} disabled={!data.versions.length}><History size={16} aria-hidden="true" />{t('learn.resume.versions')}</button>
           {showVersions && (
             <div className="ln-card" style={{ position: 'absolute', top: 52, left: 0, zIndex: 5, padding: 8, gap: 2, minWidth: 240, boxShadow: 'var(--shadow-lg)' }}>
-              {data.versions.map(v => <button key={v.version} type="button" className="ln-navlink" onClick={() => loadVersion(v.version)}>Version {v.version}{v.tailored_job_id ? ' · tailored' : ''}<span className="ln-xs ln-muted" style={{ marginLeft: 'auto' }}>{(v.created_at || '').slice(0, 10)}</span></button>)}
+              {data.versions.map(v => <button key={v.version} type="button" className="ln-navlink" onClick={() => loadVersion(v.version)}>{t('learn.resume.versionVersion', { version: v.version })}{v.tailored_job_id ? t('learn.resume.tailored') : ''}<span className="ln-xs ln-muted" style={{ marginLeft: 'auto' }}>{(v.created_at || '').slice(0, 10)}</span></button>)}
             </div>
           )}
-          <button type="button" className="ln-btn" onClick={saveVersion} disabled={busy === 'save'}>{busy === 'save' ? 'Saving…' : 'Save version'}</button>
-          <button type="button" className="ln-btn ln-btn-primary" onClick={() => window.print()}><Download size={16} aria-hidden="true" />Download PDF</button>
+          <button type="button" className="ln-btn" onClick={saveVersion} disabled={busy === 'save'}>{busy === 'save' ? t('learn.resume.saving') : t('learn.resume.saveVersion')}</button>
+          <button type="button" className="ln-btn ln-btn-primary" onClick={() => window.print()}><Download size={16} aria-hidden="true" />{t('learn.resume.downloadPdf')}</button>
         </div>
       </header>
       {message && <div className="ln-note" role="status">{message}</div>}
@@ -208,7 +210,7 @@ export default function Resume() {
       <div className="ln-row" style={{ gap: 28, alignItems: 'flex-start', flexWrap: 'wrap' }}>
         <aside className="ln-col" style={{ width: 400, maxWidth: '100%', flexShrink: 0, gap: 16 }}>
           <section className="ln-card" style={{ padding: 20, borderRadius: 'var(--radius-lg)', gap: 12 }}>
-            <h2 className="ln-h2" style={{ fontSize: 15 }}>Template</h2>
+            <h2 className="ln-h2" style={{ fontSize: 15 }}>{t('learn.resume.template')}</h2>
             <div className="ln-grid ln-g-3" style={{ gap: 10, gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}>
               {TEMPLATES.map(tp => (
                 <button key={tp.id} type="button" className="ln-tplbtn" aria-pressed={template === tp.id} onClick={() => setTemplate(tp.id)}>
@@ -219,49 +221,49 @@ export default function Resume() {
           </section>
 
           <section className="ln-card ln-card-warm" style={{ padding: 20, borderRadius: 'var(--radius-lg)', gap: 10 }}>
-            <h2 className="ln-h2" style={{ fontSize: 15 }}>Tailor to a job</h2>
+            <h2 className="ln-h2" style={{ fontSize: 15 }}>{t('learn.resume.tailorJob')}</h2>
             {jobs.length === 0 ? (
-              <span className="ln-small">Save a job from the <Link to="/learn/market" className="ln-link" style={{ fontSize: 13 }}>job market</Link> to tailor your resume to it.</span>
+              <span className="ln-small">{t('learn.resume.saveJobFrom')}{' '} <Link to="/learn/market" className="ln-link" style={{ fontSize: 13 }}>{t('learn.resume.jobMarket')}</Link> {' '}{t('learn.resume.tailorResume')}</span>
             ) : (
               <>
-                <label className="ln-sr" htmlFor="tailor-job">Job to tailor to</label>
+                <label className="ln-sr" htmlFor="tailor-job">{t('learn.resume.jobTailor')}</label>
                 <Select id="tailor-job" value={jobId} onChange={e => setJobId(e.target.value)}>
                   {jobs.map(j => <option key={j.id} value={j.id}>{j.title} · {j.company_type}</option>)}
                 </Select>
-                <span className="ln-small" style={{ lineHeight: 1.5 }}>Reorders skills to match the JD and rewrites the summary. Only claims skills you have mastered or declared.</span>
-                <button type="button" className="ln-btn ln-btn-ink" onClick={tailor} disabled={busy === 'tailor'}>{busy === 'tailor' ? ['Reading the job description…', 'Matching your skills…', 'Writing your summary…'][step] : 'Tailor resume'}</button>
-                {tailoredJob && <span className="ln-xs ln-muted">Currently tailored to: {tailoredJob.title}</span>}
+                <span className="ln-small" style={{ lineHeight: 1.5 }}>{t('learn.resume.reordersSkillsMatchJd')}</span>
+                <button type="button" className="ln-btn ln-btn-ink" onClick={tailor} disabled={busy === 'tailor'}>{busy === 'tailor' ? ['Reading the job description…', 'Matching your skills…', 'Writing your summary…'][step] : t('learn.resume.tailorResume2')}</button>
+                {tailoredJob && <span className="ln-xs ln-muted">{t('learn.resume.currentlyTailoredTitle', { title: tailoredJob.title })}</span>}
               </>
             )}
           </section>
 
           <section className="ln-card" style={{ padding: 20, borderRadius: 'var(--radius-lg)', gap: 4 }}>
-            <div className="ln-between" style={{ paddingBottom: 8 }}><h2 className="ln-h2" style={{ fontSize: 15 }}>Sections</h2><span className="ln-xs ln-muted">Use the arrows to reorder</span></div>
+            <div className="ln-between" style={{ paddingBottom: 8 }}><h2 className="ln-h2" style={{ fontSize: 15 }}>{t('learn.resume.sections')}</h2><span className="ln-xs ln-muted">{t('learn.resume.useArrowsReorder')}</span></div>
             {sections.map((s, i) => (
               <div key={s.key} className="ln-row" style={{ minHeight: 44, borderTop: '1px solid var(--color-surface-2)', gap: 6 }}>
                 <label className="ln-check" style={{ flex: 1 }}><input type="checkbox" checked={s.on} onChange={() => toggle(s.key)} />{SECTION_NAMES[s.key]}</label>
-                <button type="button" className="ln-btn ln-btn-sm" style={{ minHeight: 32, padding: '0 6px' }} aria-label={`Move ${SECTION_NAMES[s.key]} up`} disabled={i === 0} onClick={() => move(i, -1)}><ChevronUp size={14} aria-hidden="true" /></button>
-                <button type="button" className="ln-btn ln-btn-sm" style={{ minHeight: 32, padding: '0 6px' }} aria-label={`Move ${SECTION_NAMES[s.key]} down`} disabled={i === sections.length - 1} onClick={() => move(i, 1)}><ChevronDown size={14} aria-hidden="true" /></button>
+                <button type="button" className="ln-btn ln-btn-sm" style={{ minHeight: 32, padding: '0 6px' }} aria-label={t('learn.resume.moveValueUp', { value: SECTION_NAMES[s.key] })} disabled={i === 0} onClick={() => move(i, -1)}><ChevronUp size={14} aria-hidden="true" /></button>
+                <button type="button" className="ln-btn ln-btn-sm" style={{ minHeight: 32, padding: '0 6px' }} aria-label={t('learn.resume.moveValueDown', { value: SECTION_NAMES[s.key] })} disabled={i === sections.length - 1} onClick={() => move(i, 1)}><ChevronDown size={14} aria-hidden="true" /></button>
               </div>
             ))}
           </section>
 
           <section className="ln-card" style={{ padding: 20, borderRadius: 'var(--radius-lg)', gap: 8 }}>
-            <label htmlFor="rsum" className="ln-h2" style={{ fontSize: 15 }}>Summary on this resume</label>
+            <label htmlFor="rsum" className="ln-h2" style={{ fontSize: 15 }}>{t('learn.resume.summaryResume')}</label>
             <textarea id="rsum" className="ln-textarea" rows={5} value={summary} onChange={e => setSummary(e.target.value)} />
             <div className="ln-row ln-wrap" style={{ gap: 10, alignItems: 'center' }}>
-              <button type="button" className="ln-btn ln-btn-primary ln-btn-sm" onClick={saveVersion} disabled={busy === 'save' || !dirty}>{busy === 'save' ? 'Saving…' : dirty ? 'Save' : '✓ Saved'}</button>
-              {dirty && <span className="ln-xs ln-muted">Unsaved changes · kept on this device until you save</span>}
-              <button type="button" className="ln-link" style={{ fontSize: 13, marginLeft: 'auto' }} onClick={() => setSummary(p.about || '')}>Reset to “About you” from profile</button>
+              <button type="button" className="ln-btn ln-btn-primary ln-btn-sm" onClick={saveVersion} disabled={busy === 'save' || !dirty}>{busy === 'save' ? t('learn.resume.saving') : dirty ? t('learn.resume.save') : t('learn.resume.savedTick')}</button>
+              {dirty && <span className="ln-xs ln-muted">{t('learn.resume.unsavedChangesKeptDevice')}</span>}
+              <button type="button" className="ln-link" style={{ fontSize: 13, marginLeft: 'auto' }} onClick={() => setSummary(p.about || '')}>{t('learn.resume.resetAboutFromProfile')}</button>
             </div>
           </section>
         </aside>
 
         <div className="ln-resume-stage">
-          <article aria-label="Resume preview" className={`ln-a4 tpl-${template}`}>
+          <article aria-label={t('learn.resume.resumePreview')} className={`ln-a4 tpl-${template}`}>
             <div className="ln-col" style={{ gap: 4, paddingBottom: 12, borderBottom: `2px solid ${accent}` }}>
               <span style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 600, letterSpacing: '-0.01em' }}>{p.name}</span>
-              <span style={{ fontSize: 12, color: '#3A3833' }}>{contact || '[Add your email, phone and city in your profile]'}</span>
+              <span style={{ fontSize: 12, color: '#3A3833' }}>{contact || t('learn.resume.addEmailPhoneCity')}</span>
             </div>
             {sections.filter(s => s.on).map(s => blocks[s.key] ? <React.Fragment key={s.key}>{blocks[s.key]}</React.Fragment> : null)}
           </article>

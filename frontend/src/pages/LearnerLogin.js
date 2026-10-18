@@ -1,23 +1,21 @@
 // src/pages/LearnerLogin.js
 // Learner sign-in: learner reference + engagement ID + PIN (unchanged auth),
-// with the interface language picked up front. The choice is stored locally
+// with the shared language switch in the header. The choice is stored locally
 // right away and written to the learner's profile after sign-in.
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { useUiLang, UI_LANGS } from '../context/UiLangContext';
+import { useUiLang } from '../context/UiLangContext';
 import api from '../utils/api';
 import BrandLogo from '../components/BrandLogo';
 import { errMsg } from '../utils/errors';
+import SignInBar from '../components/shared/SignInBar';
 
-const COPY = {
-  telugu: { title: 'లెర్నర్ సైన్ ఇన్', sub: 'మీ సంస్థ ఇచ్చిన వివరాలు వాడండి.', ref: 'లెర్నర్ రిఫరెన్స్ నంబర్', eng: 'జాయిన్ కోడ్', pin: '6 అంకెల PIN', keep: 'ఈ పరికరంలో సైన్ ఇన్‌లో ఉంచండి', go: 'సైన్ ఇన్', lang: 'ఇంటర్‌ఫేస్ భాష' },
-  hindi: { title: 'लर्नर साइन इन', sub: 'अपने संस्थान से मिली जानकारी डालें।', ref: 'लर्नर रेफ़रेंस नंबर', eng: 'जॉइन कोड', pin: '6 अंकों का PIN', keep: 'इस डिवाइस पर साइन इन रखें', go: 'साइन इन', lang: 'इंटरफ़ेस भाषा' },
-  english: { title: 'Learner sign in', sub: 'Use the details your institution gave you.', ref: 'Learner reference number', eng: 'Join code', pin: '6-digit PIN', keep: 'Keep me signed in on this device', go: 'Sign in', lang: 'Interface language' }
-};
+const COPY = Object.fromEntries(['title', 'sub', 'ref', 'eng', 'pin', 'keep', 'go'].map(k => [k, `page.learnerLogin.copy.${k}`]));
 
 export default function LearnerLogin() {
+  const { t } = useUiLang();
   const [ref, setRef] = useState('');
   const [engagementId, setEngagementId] = useState('');
   const [pin, setPin] = useState('');
@@ -28,9 +26,9 @@ export default function LearnerLogin() {
   const [showPinHelp, setShowPinHelp] = useState(false);
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
-  const { lang, setLang } = useUiLang();
+  const { lang } = useUiLang();
   const navigate = useNavigate();
-  const c = COPY[lang];
+  const c = Object.fromEntries(Object.entries(COPY).map(([k, key]) => [k, t(key)]));
 
   const [mustChange, setMustChange] = useState(false);
   const [newPin, setNewPin] = useState('');
@@ -52,19 +50,19 @@ export default function LearnerLogin() {
   // details matched, so it can't be used to probe the roster.
   const requestReset = async () => {
     setResetSent('');
-    if (!ref.trim() || !engagementId.trim()) { setResetSent('Enter your learner reference and join code first.'); return; }
+    if (!ref.trim() || !engagementId.trim()) { setResetSent(t('page.learnerLogin.enterYourLearnerReference')); return; }
     try {
       const res = await api.post('/auth/learner/pin-reset-request', { learner_ref: ref.trim(), join_code: engagementId.trim() });
       setResetSent(res.data.message);
-    } catch (e) { setResetSent('Couldn’t send the request. Ask your professor directly.'); }
+    } catch (e) { setResetSent(t('page.learnerLogin.couldnTSendThe')); }
   };
 
   const changePin = async (e) => {
     e.preventDefault(); setError('');
-    if (!/^\d{6}$/.test(newPin)) return setError('Your PIN must be exactly 6 digits.');
-    if (newPin !== newPin2) return setError('The two PINs don’t match.');
+    if (!/^\d{6}$/.test(newPin)) return setError(t('page.learnerLogin.pinMustExactly6'));
+    if (newPin !== newPin2) return setError(t('page.learnerLogin.twoPinsDonT'));
     setLoading(true);
-    try { await api.put('/learner/pin', { new_pin: newPin }); await enter(); } catch (err) { setError(errMsg(err, 'Couldn’t change your PIN.')); }
+    try { await api.put('/learner/pin', { new_pin: newPin }); await enter(); } catch (err) { setError(errMsg(err, t('page.learnerLogin.couldnTChangePin'))); }
     setLoading(false);
   };
 
@@ -77,7 +75,7 @@ export default function LearnerLogin() {
       if (res.data.must_change_pin) { setMustChange(true); setLoading(false); return; }
       await enter();
     } catch (err) {
-      setError(errMsg(err, 'Login failed. Check your learner reference, join code and PIN.'));
+      setError(errMsg(err, t('page.learnerLogin.loginFailedCheckLearner')));
     }
     setLoading(false);
   };
@@ -85,34 +83,35 @@ export default function LearnerLogin() {
   return (
     <div className="ln-login">
       <aside className="ln-login-aside">
-        <a href="/" className="brand-home" aria-label="Qubirex home"><BrandLogo height={48} tone="onDark" /></a>
+        <a href="/" className="brand-home" aria-label={t('page.learnerLogin.qubirexHome')}><BrandLogo height={48} tone="onDark" /></a>
         <div className="ln-col ln-hide-phone" style={{ gap: 24 }}>
-          <h1 style={{ fontSize: 'var(--fs-display)' }}>Learn in your language.<br />Speak, listen, build.</h1>
+          <h1 style={{ fontSize: 'var(--fs-display)' }}>{t('page.learnerLogin.learnLanguage')}<br />{t('page.learnerLogin.speakListenBuild')}</h1>
           <p style={{ fontSize: 'var(--fs-h3)', lineHeight: 1.65, color: 'var(--stage-muted)', maxWidth: 460 }}>
-            Your institution has set a path for you. Professor Qubirex teaches it in Telugu or Hindi, by voice or text, and shows you which jobs your skills open up.
+            {t('page.learnerLogin.institutionHasSetPath')}
           </p>
           <ul className="ln-col" style={{ gap: 12, paddingTop: 8 }}>
-            {['Voice sessions in తెలుగు and हिंदी', 'Job market matched to your skills', 'A resume built from what you have mastered'].map((text, i) => (
+            {[t('page.learnerLogin.voiceSessionsInAnd'), t('page.learnerLogin.jobMarketMatchedTo'), t('page.learnerLogin.aResumeBuiltFrom')].map((text, i) => (
               <li key={text} className="ln-row" style={{ gap: 14 }}><span className="ln-login-num">0{i + 1}</span><span className="ln-indic" style={{ fontSize: 'var(--fs-body)' }}>{text}</span></li>
             ))}
           </ul>
         </div>
-        <span className="ln-small ln-hide-phone" style={{ color: 'var(--stage-muted)' }}>Receive. Build. Return.</span>
+        <span className="ln-small ln-hide-phone" style={{ color: 'var(--stage-muted)' }}>{t('brand.tagline')}</span>
       </aside>
 
       <div className="ln-login-main">
+        <SignInBar />
         {mustChange ? (
           <form className="ln-login-form" onSubmit={changePin}>
             <div className="ln-col" style={{ gap: 8 }}>
-              <h2 style={{ fontSize: 'var(--fs-h1)', fontFamily: 'var(--font-display)' }}>Choose your own PIN</h2>
-              <p className="ln-muted">You signed in with a one-time PIN. Pick a 6-digit PIN only you know.</p>
+              <h2 style={{ fontSize: 'var(--fs-h1)', fontFamily: 'var(--font-display)' }}>{t('page.learnerLogin.chooseOwnPin')}</h2>
+              <p className="ln-muted">{t('page.learnerLogin.signedOneTimePin')}</p>
             </div>
             {error && <div className="ln-error" role="alert">{error}</div>}
-            <div className="ln-field"><label className="ln-label" htmlFor="np1">New PIN</label>
+            <div className="ln-field"><label className="ln-label" htmlFor="np1">{t('page.learnerLogin.newPin')}</label>
               <input id="np1" className="ln-input" style={{ minHeight: 48, fontSize: 'var(--fs-h3)', letterSpacing: '0.3em' }} type="password" inputMode="numeric" maxLength={6} autoComplete="new-password" value={newPin} onChange={e => setNewPin(e.target.value.replace(/\D/g, ''))} required /></div>
-            <div className="ln-field"><label className="ln-label" htmlFor="np2">Type it again</label>
+            <div className="ln-field"><label className="ln-label" htmlFor="np2">{t('page.learnerLogin.typeAgain')}</label>
               <input id="np2" className="ln-input" style={{ minHeight: 48, fontSize: 'var(--fs-h3)', letterSpacing: '0.3em' }} type="password" inputMode="numeric" maxLength={6} autoComplete="new-password" value={newPin2} onChange={e => setNewPin2(e.target.value.replace(/\D/g, ''))} required /></div>
-            <button className="ln-btn ln-btn-primary ln-btn-block" type="submit" disabled={loading} style={{ minHeight: 52, fontSize: 'var(--fs-h3)' }}>{loading ? '…' : 'Save PIN and continue'}</button>
+            <button className="ln-btn ln-btn-primary ln-btn-block" type="submit" disabled={loading} style={{ minHeight: 52, fontSize: 'var(--fs-h3)' }}>{loading ? '…' : t('page.learnerLogin.savePinContinue')}</button>
           </form>
         ) : (
         <form className="ln-login-form ln-indic" onSubmit={handleSubmit}>
@@ -121,16 +120,7 @@ export default function LearnerLogin() {
             <p className="ln-muted" style={{ fontSize: 'var(--fs-body)' }}>{c.sub}</p>
           </div>
 
-          <fieldset style={{ border: 0, margin: 0, padding: 0 }}>
-            <legend className="ln-label" style={{ marginBottom: 8, padding: 0 }}>{c.lang}</legend>
-            <div className="ln-seg">
-              {UI_LANGS.map(l => (
-                <button key={l.id} type="button" aria-pressed={lang === l.id} onClick={() => setLang(l.id)} lang={l.bcp47}>{l.label}</button>
-              ))}
-            </div>
-          </fieldset>
-
-          {signedOutReason && !error && <div className="ln-note" role="status">{signedOutReason} If that wasn’t you, sign in and change your PIN in Settings.</div>}
+          {signedOutReason && !error && <div className="ln-note" role="status">{t('page.learnerLogin.signedoutreasonIfWasnT', { signedOutReason })}</div>}
           {error && <div className="ln-error" role="alert">{error}</div>}
 
           <div className="ln-field">
@@ -144,14 +134,14 @@ export default function LearnerLogin() {
           <div className="ln-field">
             <div className="ln-between">
               <label className="ln-label" htmlFor="lpin">{c.pin}</label>
-              <button type="button" className="ln-link" style={{ fontSize: 'var(--fs-small)' }} onClick={() => setShowPinHelp(v => !v)} aria-expanded={showPinHelp}>Forgot PIN?</button>
+              <button type="button" className="ln-link" style={{ fontSize: 'var(--fs-small)' }} onClick={() => setShowPinHelp(v => !v)} aria-expanded={showPinHelp}>{t('page.learnerLogin.forgotPin')}</button>
             </div>
             <input id="lpin" className="ln-input" style={{ minHeight: 48, fontSize: 'var(--fs-h3)', letterSpacing: '0.3em' }} type="password" inputMode="numeric" pattern="[0-9]*" maxLength={6}
               value={pin} onChange={e => setPin(e.target.value.replace(/\D/g, ''))} placeholder="••••••" autoComplete="current-password" required />
             {showPinHelp && (
               <div className="ln-note ln-col" style={{ gap: 8 }}>
-                <span>We’ll ask your professor to reset your PIN. Enter your learner reference and join code above, then:</span>
-                <button type="button" className="ln-btn ln-btn-sm" style={{ alignSelf: 'flex-start' }} onClick={requestReset}>Ask for a PIN reset</button>
+                <span>{t('page.learnerLogin.weLlAskProfessor')}</span>
+                <button type="button" className="ln-btn ln-btn-sm" style={{ alignSelf: 'flex-start' }} onClick={requestReset}>{t('page.learnerLogin.askPinReset')}</button>
                 {resetSent && <span role="status">{resetSent}</span>}
               </div>
             )}
@@ -162,7 +152,7 @@ export default function LearnerLogin() {
           <button className="ln-btn ln-btn-primary ln-btn-block" type="submit" disabled={loading} style={{ minHeight: 52, fontSize: 'var(--fs-h3)' }}>
             {loading ? '…' : c.go}<ArrowRight size={18} aria-hidden="true" />
           </button>
-          <p className="ln-small ln-muted" style={{ textAlign: 'center' }}>Are you an institution? <Link to="/login" className="ln-link" style={{ fontSize: 'var(--fs-small)' }}>Institution login</Link></p>
+          <p className="ln-small ln-muted" style={{ textAlign: 'center' }}>{t('page.learnerLogin.institution')}{' '} <Link to="/login" className="ln-link" style={{ fontSize: 'var(--fs-small)' }}>{t('page.learnerLogin.institutionLogin')}</Link></p>
         </form>
         )}
       </div>

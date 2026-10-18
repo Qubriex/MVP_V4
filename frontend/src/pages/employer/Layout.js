@@ -8,7 +8,7 @@ import api from '../../utils/api';
 import PortalLayout from '../../components/PortalLayout';
 
 export const useEmployer = () => useOutletContext();
-export const KYB_TEXT = { pending: ['Verification pending', 'ln-tag-warning'], verified: ['Verified company', 'ln-tag-success'], rejected: ['Rejected', 'ln-tag-neutral'], suspended: ['Suspended', 'ln-tag-neutral'] };
+export const KYB_TEXT = { pending: ['emp.layout.kybText.verificationPending', 'ln-tag-warning'], verified: ['emp.layout.kybText.verifiedCompany', 'ln-tag-success'], rejected: ['emp.layout.kybText.rejected', 'ln-tag-neutral'], suspended: ['emp.layout.kybText.suspended', 'ln-tag-neutral'] };
 
 export default function EmployerLayout() {
   const { t } = useUiLang();
@@ -32,8 +32,8 @@ export default function EmployerLayout() {
     { to: '/verify', label: t('emp.nav.verify'), icon: BadgeCheck }
   ];
   return (
-    <PortalLayout kicker={t('emp.kicker')} loginPath="/employer/login" items={items} side="employer"
-      org={<><b style={{ fontWeight: 600 }}>{me?.employer?.name || 'Your company'}</b>{me?.employer?.domain && <span>@{me.employer.domain}</span>}</>}
+    <PortalLayout kicker={'FOR EMPLOYERS'} loginPath="/employer/login" items={items} side="employer"
+      org={<><b style={{ fontWeight: 600 }}>{me?.employer?.name || t('emp.layout.yourCompany')}</b>{me?.employer?.domain && <span>@{me.employer.domain}</span>}</>}
       account={{ primary: me?.user?.name || me?.user?.email, secondary: me?.user?.role }}
       context={{ me, refresh, isOwner: me?.user?.role === 'owner' }} />
   );

@@ -3,10 +3,12 @@
 import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
 
+import { useUiLang } from '../../../context/UiLangContext';
 const Ctx = createContext(null);
 const ICON = { success: CheckCircle2, error: AlertCircle, info: Info };
 
 export function ToastProvider({ children }) {
+  const { t } = useUiLang();
   const [items, setItems] = useState([]);
   const seq = useRef(0);
   const dismiss = useCallback((id) => setItems(xs => xs.filter(x => x.id !== id)), []);
@@ -26,7 +28,7 @@ export function ToastProvider({ children }) {
           return (
             <div key={x.id} className={`ui-toast ui-toast-${x.kind}`} role={x.kind === 'error' ? 'alert' : 'status'}>
               <Icon size={18} aria-hidden="true" /><span>{x.text}</span>
-              <button type="button" className="ui-toast-x" aria-label="Close" onClick={() => dismiss(x.id)}><X size={14} aria-hidden="true" /></button>
+              <button type="button" className="ui-toast-x" aria-label={t('ui.toast.close')} onClick={() => dismiss(x.id)}><X size={14} aria-hidden="true" /></button>
             </div>
           );
         })}

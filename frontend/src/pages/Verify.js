@@ -12,7 +12,8 @@ import PublicShell, { BackHome } from '../components/public/PublicShell';
 import QrScanner from '../components/public/QrScanner';
 import { useUiLang, LANG_CODE } from '../context/UiLangContext';
 
-import { LABEL } from '../components/learn/evidenceText';
+import { LABEL, FRESH, freshBand } from '../components/learn/evidenceText';
+import { CodeTag } from '../components/shared/Popover';
 
 // Dates in the interface language (te-IN, hi-IN, en-IN).
 const useFmtDate = () => { const { lang } = useUiLang(); return (iso) => (iso ? new Date(iso).toLocaleDateString(`${LANG_CODE[lang] || 'en'}-IN`, { day: 'numeric', month: 'short', year: 'numeric' }) : '—'); };
@@ -136,9 +137,9 @@ export default function Verify() {
                     <span className={`ln-tag ln-tag-lg ${(LABEL[s.label] || LABEL.none).cls}`}>{t(`label.${(s.label || 'none').toLowerCase()}`)}</span>
                   </div>
                   <div className="ln-row ln-wrap ln-small" style={{ gap: 8 }}>
-                    {s.evidence && <span className="ln-tag ln-tag-neutral">{t(`level.${s.evidence}`)}</span>}
-                    {s.assurance && <span className="ln-tag ln-tag-neutral">{t(`assure.${s.assurance}`)}</span>}
-                    <span className="ln-muted">{t('verify.skillLine', { fresh: Math.round((s.freshness || 0) * 100), date: fmtDate(s.last_demonstrated), theta: s.theta })}</span>
+                    {s.evidence && <CodeTag code={s.evidence} label={t(`level.${s.evidence}`)} />}
+                    {s.assurance && <CodeTag code={s.assurance} label={t(`assure.${s.assurance}`)} />}
+                    <span className={`ln-tag ${FRESH[freshBand(s.freshness || 0)][1]}`}>{t(FRESH[freshBand(s.freshness || 0)][0])}</span><span className="ln-muted">{t('verify.skillLine', { date: fmtDate(s.last_demonstrated) })}</span>
                   </div>
                 </div>
               ))}
@@ -150,7 +151,7 @@ export default function Verify() {
         )}
         <Limits />
         <nav className="ln-row ln-wrap ln-xs" style={{ gap: 14 }} aria-label={t('verify.dev')}>
-          <span className="ln-muted">did:web:qubirex.in · {t('verify.statusLists')}</span>
+          <span className="ln-muted">{t('page.verify.didWebQubirexT', { t: t('verify.statusLists') })}</span>
           <a className="ln-link" href="/api/verify/jwks.json" target="_blank" rel="noopener">{t('verify.keys')}</a>
           <Link className="ln-link" to="/employer/verify-bulk">{t('verify.bulk')}</Link>
         </nav>

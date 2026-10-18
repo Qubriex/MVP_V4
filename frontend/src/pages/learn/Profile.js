@@ -13,15 +13,17 @@ import {
   SkillsSection, CertificationsSection, GoalsSection
 } from '../../components/learn/ProfileSections';
 
+import { useUiLang } from '../../context/UiLangContext';
 const NAV = [
-  ['personal', 'Personal info', 'personal'], ['education', 'Education', 'education'], ['experience', 'Experience', null],
-  ['projects', 'Projects', 'projects'], ['skills', 'Skills', 'skills'], ['certifications', 'Certifications', null],
-  ['goals', 'Career goals', 'goals'], ['account', 'Account & sharing', undefined]
+  ['personal', 'learn.profile.nav.personalInfo', 'personal'], ['education', 'learn.profile.nav.education', 'education'], ['experience', 'learn.profile.nav.experience', null],
+  ['projects', 'learn.profile.nav.projects', 'projects'], ['skills', 'learn.profile.nav.skills', 'skills'], ['certifications', 'learn.profile.nav.certifications', null],
+  ['goals', 'learn.profile.nav.careerGoals', 'goals'], ['account', 'learn.profile.nav.accountSharing', undefined]
 ];
-const MISSING_LABEL = { personal: 'your details', education: 'education', projects: 'projects', skills: 'skills', goals: 'goals' };
+const MISSING_LABEL = { personal: 'learn.profile.missingLabel.yourDetails', education: 'learn.dashboard.sectionNames.education', projects: 'learn.profile.missingLabel.projects', skills: 'learn.dashboard.sectionNames.skills', goals: 'learn.profile.missingLabel.goals' };
 
 
 export default function Profile() {
+  const { t } = useUiLang();
   const form = useProfileDraft();
   const { logout } = useAuth();
   const navigate = useNavigate();
@@ -32,7 +34,7 @@ export default function Profile() {
     if (draft && location.hash) document.getElementById(location.hash.slice(1))?.scrollIntoView({ behavior: 'smooth' });
   }, [draft, location.hash]);
 
-  if (!draft) return <p className="ln-muted">Loading…</p>;
+  if (!draft) return <p className="ln-muted">{t('learn.profile.loading')}</p>;
   const c = profile.completeness || { pct: 0, sections: {}, missing: [] };
   const missing = c.missing.filter(k => MISSING_LABEL[k]);
 
@@ -46,23 +48,23 @@ export default function Profile() {
           <span className="ln-small ln-muted">{[draft.learner_ref, draft.engagement_title, draft.city].filter(Boolean).join(' · ')}</span>
         </div>
         <div className="ln-col" style={{ width: 260, gap: 8 }}>
-          <div className="ln-between" style={{ fontSize: 'var(--fs-body)' }}><span style={{ fontWeight: 600 }}>Profile strength</span><b>{c.pct}%</b></div>
-          <Bar pct={c.pct} label="Profile strength" />
-          <span className="ln-xs ln-muted">{missing.length ? `Add ${missing.map(k => MISSING_LABEL[k]).join(' and ')} to reach 100%` : 'Complete — nice work.'}</span>
+          <div className="ln-between" style={{ fontSize: 'var(--fs-body)' }}><span style={{ fontWeight: 600 }}>{t('learn.profile.profileStrength')}</span><b>{c.pct}%</b></div>
+          <Bar pct={c.pct} label={t('learn.profile.profileStrength')} />
+          <span className="ln-xs ln-muted">{missing.length ? t('learn.profile.addToReach', { sections: missing.map(k => t(MISSING_LABEL[k])).join(', ') }) : t('learn.profile.completeNiceWork')}</span>
         </div>
-        <Link to="/learn/resume" className="ln-btn ln-btn-primary">Build resume →</Link>
+        <Link to="/learn/resume" className="ln-btn ln-btn-primary">{t('learn.profile.buildResume')}</Link>
       </section>
 
-      {form.offline && <div className="ln-note">Showing sample profile data — the server isn’t reachable, so changes can’t be saved yet.</div>}
+      {form.offline && <div className="ln-note">{t('learn.profile.showingSampleProfileData')}</div>}
 
       <div className="ln-grid ln-g-side">
-        <nav aria-label="Profile sections" className="ln-col" style={{ gap: 2, position: 'sticky', top: 24 }}>
+        <nav aria-label={t('learn.profile.profileSections')} className="ln-col" style={{ gap: 2, position: 'sticky', top: 24 }}>
           {NAV.map(([id, label, key]) => {
-            const state = key === undefined ? '' : key === null ? 'Optional' : c.sections[key] ? 'Done' : 'Add';
+            const state = key === undefined ? '' : key === null ? t('learn.profile.optional') : c.sections[key] ? t('learn.profile.done') : t('learn.profile.add');
             return (
               <a key={id} href={`#${id}`} className={`ln-navlink ${location.hash === `#${id}` ? 'is-active' : ''}`} style={{ justifyContent: 'space-between' }}
                 onClick={(e) => { e.preventDefault(); navigate(`#${id}`, { replace: true }); }}>
-                <span>{label}</span>
+                <span>{t(label)}</span>
                 <span className="ln-xs" style={{ fontWeight: 600, color: state === 'Done' ? 'var(--status-success)' : state === 'Add' ? 'var(--accent-ink)' : 'var(--color-text-muted)' }}>{state}</span>
               </a>
             );
@@ -77,21 +79,21 @@ export default function Profile() {
           <SkillsSection form={form} />
           <CertificationsSection form={form} />
           <GoalsSection form={form} />
-          <Section id="account" title="Account, PIN and sharing">
-            <span className="ln-small">You sign in with your learner reference, your cohort’s join code and your 6-digit PIN. Voice, language, your PIN, signed-in devices and your data are in <Link to="/learn/settings" className="ln-link">Settings</Link>.</span>
+          <Section id="account" title={t('learn.profile.accountPinSharing')}>
+            <span className="ln-small">{t('learn.profile.signLearnerReferenceCohort')}{' '} <Link to="/learn/settings" className="ln-link">{t('learn.profile.settings')}</Link>.</span>
             <label className="ln-toggle-row" style={{ alignItems: 'flex-start' }}>
-              <span className="ln-col" style={{ gap: 2 }}><span>Share my capability record with my institution’s placement cell</span>
-                <span className="ln-xs ln-muted">Lets your professors list you among students closest to job-ready, with your verified skills and job match. Off by default; you can turn it off any time.</span></span>
+              <span className="ln-col" style={{ gap: 2 }}><span>{t('learn.profile.shareMyCapabilityRecord')}</span>
+                <span className="ln-xs ln-muted">{t('learn.profile.letsProfessorsListAmong')}</span></span>
               <input type="checkbox" checked={!!draft.share_with_institution} onChange={e => form.set('share_with_institution', e.target.checked)} />
             </label>
-            <button type="button" className="ln-btn" style={{ alignSelf: 'flex-start' }} onClick={() => { logout(); navigate('/learner-login'); }}>Sign out of this device</button>
+            <button type="button" className="ln-btn" style={{ alignSelf: 'flex-start' }} onClick={() => { logout(); navigate('/learner-login'); }}>{t('learn.profile.signOutDevice')}</button>
           </Section>
 
           <div className="ln-row ln-wrap" style={{ justifyContent: 'flex-end', gap: 10, position: 'sticky', bottom: 0, padding: '12px 0', background: 'var(--color-bg)' }}>
-            {form.status === 'saved' && <span className="ln-small" style={{ color: 'var(--status-success)' }} role="status">Saved</span>}
+            {form.status === 'saved' && <span className="ln-small" style={{ color: 'var(--status-success)' }} role="status">{t('learn.profile.saved')}</span>}
             {form.status && form.status !== 'saved' && <span className="ln-small" style={{ color: 'var(--status-danger)' }} role="alert">{form.status}</span>}
-            <button type="button" className="ln-btn" style={{ minHeight: 48, fontSize: 'var(--fs-body)' }} onClick={form.discard} disabled={!form.dirty || form.saving}>Discard</button>
-            <button type="button" className="ln-btn ln-btn-primary" style={{ minHeight: 48, fontSize: 'var(--fs-body)' }} onClick={form.save} disabled={!form.dirty || form.saving}>{form.saving ? 'Saving…' : 'Save changes'}</button>
+            <button type="button" className="ln-btn" style={{ minHeight: 48, fontSize: 'var(--fs-body)' }} onClick={form.discard} disabled={!form.dirty || form.saving}>{t('learn.profile.discard')}</button>
+            <button type="button" className="ln-btn ln-btn-primary" style={{ minHeight: 48, fontSize: 'var(--fs-body)' }} onClick={form.save} disabled={!form.dirty || form.saving}>{form.saving ? t('learn.profile.saving') : t('learn.profile.saveChanges')}</button>
           </div>
         </div>
       </div>

@@ -7,7 +7,10 @@ import api from '../../utils/api';
 import { errMsg } from '../../utils/errors';
 import { EmployerAside } from './Login';
 
+import { useUiLang } from '../../context/UiLangContext';
+import SignInBar from '../../components/shared/SignInBar';
 export default function EmployerInvite() {
+  const { t } = useUiLang();
   const { token } = useParams();
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -36,22 +39,23 @@ export default function EmployerInvite() {
     <div className="ln-login">
       <EmployerAside />
       <div className="ln-login-main">
+        <SignInBar />
         <div className="ln-login-form">
           {!inv ? (
             <div className="ln-col" style={{ gap: 12 }}>
-              <h2 style={{ fontSize: 'var(--fs-h1)' }}>Join your team</h2>
-              {error ? <div className="ln-error" role="alert">{error}</div> : <p className="ln-muted">Checking your invite…</p>}
-              <Link to="/employer/login" className="ln-link">Go to sign in</Link>
+              <h2 style={{ fontSize: 'var(--fs-h1)' }}>{t('emp.invite.joinTeam')}</h2>
+              {error ? <div className="ln-error" role="alert">{error}</div> : <p className="ln-muted">{t('emp.invite.checkingInvite')}</p>}
+              <Link to="/employer/login" className="ln-link">{t('emp.invite.goSign')}</Link>
             </div>
           ) : (
             <form className="ln-col" style={{ gap: 16 }} onSubmit={accept}>
-              <div className="ln-col" style={{ gap: 6 }}><h2 style={{ fontSize: 'var(--fs-h1)' }}>Join {inv.employer_name}</h2>
-                <p className="ln-muted">You were invited as a <b>{inv.role}</b> ({inv.email}).</p></div>
+              <div className="ln-col" style={{ gap: 6 }}><h2 style={{ fontSize: 'var(--fs-h1)' }}>{t('emp.invite.joinEmployerName', { employer_name: inv.employer_name })}</h2>
+                <p className="ln-muted">{t('emp.invite.wereInvitedAs')}{' '} <b>{inv.role}</b> ({inv.email}).</p></div>
               {error && <div className="ln-error" role="alert">{error}</div>}
-              <div className="ln-field"><label className="ln-label" htmlFor="nm">Your name</label><input id="nm" className="ln-input" value={name} onChange={e => setName(e.target.value)} required /></div>
-              <div className="ln-field"><label className="ln-label" htmlFor="pw">Choose a password</label><input id="pw" className="ln-input" type="password" autoComplete="new-password" minLength={10} value={password} onChange={e => setPassword(e.target.value)} required />
-                <span className="ln-xs ln-muted">At least 10 characters.</span></div>
-              <button type="submit" className="ln-btn ln-btn-primary ln-btn-block" style={{ minHeight: 52 }} disabled={busy}>{busy ? 'Setting up…' : 'Accept and continue'}</button>
+              <div className="ln-field"><label className="ln-label" htmlFor="nm">{t('emp.invite.yourName')}</label><input id="nm" className="ln-input" value={name} onChange={e => setName(e.target.value)} required /></div>
+              <div className="ln-field"><label className="ln-label" htmlFor="pw">{t('emp.invite.choosePassword')}</label><input id="pw" className="ln-input" type="password" autoComplete="new-password" minLength={10} value={password} onChange={e => setPassword(e.target.value)} required />
+                <span className="ln-xs ln-muted">{t('emp.invite.atLeast10Characters')}</span></div>
+              <button type="submit" className="ln-btn ln-btn-primary ln-btn-block" style={{ minHeight: 52 }} disabled={busy}>{busy ? t('emp.invite.settingUp') : t('emp.invite.acceptContinue')}</button>
             </form>
           )}
         </div>

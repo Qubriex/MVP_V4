@@ -8,7 +8,10 @@ import api from '../utils/api';
 import BrandLogo from '../components/BrandLogo';
 import { errMsg } from '../utils/errors';
 
+import { useUiLang } from '../context/UiLangContext';
+import SignInBar from '../components/shared/SignInBar';
 export default function LearnerInvite() {
+  const { t } = useUiLang();
   const { token } = useParams();
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -19,52 +22,53 @@ export default function LearnerInvite() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    api.get(`/auth/learner/invite/${token}`).then(r => setInvite(r.data)).catch(e => setError(errMsg(e, 'This invite link is invalid or has expired.')));
+    api.get(`/auth/learner/invite/${token}`).then(r => setInvite(r.data)).catch(e => setError(errMsg(e, t('page.learnerInvite.inviteLinkInvalidHas'))));
   }, [token]);
 
   const accept = async (e) => {
     e.preventDefault(); setError('');
-    if (!/^\d{6}$/.test(pin)) return setError('Your PIN must be exactly 6 digits.');
-    if (pin !== pin2) return setError('The two PINs don’t match.');
+    if (!/^\d{6}$/.test(pin)) return setError(t('page.learnerInvite.pinMustExactly6'));
+    if (pin !== pin2) return setError(t('page.learnerInvite.twoPinsDonT'));
     setBusy(true);
     try {
       const res = await api.post(`/auth/learner/invite/${token}/accept`, { pin });
       login(res.data.token, res.data.learner, 'learner');
       navigate('/learn/welcome');
-    } catch (err) { setError(errMsg(err, 'Couldn’t set your PIN.')); }
+    } catch (err) { setError(errMsg(err, t('page.learnerInvite.couldnTSetPin'))); }
     setBusy(false);
   };
 
   return (
     <div className="ln-login">
       <aside className="ln-login-aside">
-        <a href="/" className="brand-home" aria-label="Qubirex home"><BrandLogo height={48} tone="onDark" /></a>
+        <a href="/" className="brand-home" aria-label={t('page.learnerInvite.qubirexHome')}><BrandLogo height={48} tone="onDark" /></a>
         <div className="ln-col ln-hide-phone" style={{ gap: 20 }}>
-          <h1 style={{ fontSize: 'var(--fs-display)' }}>Welcome. Let’s set up your sign-in.</h1>
-          <p style={{ fontSize: 'var(--fs-h3)', lineHeight: 1.65, color: 'var(--stage-muted)', maxWidth: 460 }}>Choose a PIN only you know. You’ll use it with your learner reference and your cohort’s join code.</p>
+          <h1 style={{ fontSize: 'var(--fs-display)' }}>{t('page.learnerInvite.welcomeLetSSet')}</h1>
+          <p style={{ fontSize: 'var(--fs-h3)', lineHeight: 1.65, color: 'var(--stage-muted)', maxWidth: 460 }}>{t('page.learnerInvite.choosePinOnlyKnow')}</p>
         </div>
-        <span className="ln-small ln-hide-phone" style={{ color: 'var(--stage-muted)' }}>Receive. Build. Return.</span>
+        <span className="ln-small ln-hide-phone" style={{ color: 'var(--stage-muted)' }}>{t('brand.tagline')}</span>
       </aside>
       <div className="ln-login-main">
+        <SignInBar />
         <form className="ln-login-form" onSubmit={accept}>
-          <h2 style={{ fontSize: 'var(--fs-h1)', fontFamily: 'var(--font-display)' }}>Set your PIN</h2>
+          <h2 style={{ fontSize: 'var(--fs-h1)', fontFamily: 'var(--font-display)' }}>{t('page.learnerInvite.setPin')}</h2>
           {error && <div className="ln-error" role="alert">{error}</div>}
-          {!invite && !error && <p className="ln-muted">Checking your invite…</p>}
-          {!invite && error && <Link to="/learner-login" className="ln-link">Go to learner sign in</Link>}
+          {!invite && !error && <p className="ln-muted">{t('page.learnerInvite.checkingInvite')}</p>}
+          {!invite && error && <Link to="/learner-login" className="ln-link">{t('page.learnerInvite.goLearnerSign')}</Link>}
           {invite && (
             <>
               <div className="ln-card" style={{ padding: 16, gap: 6, borderRadius: 'var(--radius-lg)' }}>
                 <b>{invite.name}</b>
                 <span className="ln-small ln-muted">{invite.cohort_title} · {invite.institution_name}</span>
-                <span className="ln-small">Learner reference: <b className="in-code">{invite.learner_ref}</b></span>
-                <span className="ln-small">Join code: <b className="in-code">{invite.join_code}</b></span>
-                <span className="ln-xs ln-muted">Write these down — you’ll need them to sign in.</span>
+                <span className="ln-small">{t('page.learnerInvite.learnerReference')}{' '} <b className="in-code">{invite.learner_ref}</b></span>
+                <span className="ln-small">{t('page.learnerInvite.joinCode')}{' '} <b className="in-code">{invite.join_code}</b></span>
+                <span className="ln-xs ln-muted">{t('page.learnerInvite.writeTheseDownLl')}</span>
               </div>
-              <div className="ln-field"><label className="ln-label" htmlFor="p1">New 6-digit PIN</label>
+              <div className="ln-field"><label className="ln-label" htmlFor="p1">{t('page.learnerInvite.new6DigitPin')}</label>
                 <input id="p1" className="ln-input" style={{ minHeight: 48, fontSize: 'var(--fs-h3)', letterSpacing: '0.3em' }} type="password" inputMode="numeric" maxLength={6} autoComplete="new-password" value={pin} onChange={e => setPin(e.target.value.replace(/\D/g, ''))} required /></div>
-              <div className="ln-field"><label className="ln-label" htmlFor="p2">Type it again</label>
+              <div className="ln-field"><label className="ln-label" htmlFor="p2">{t('page.learnerInvite.typeAgain')}</label>
                 <input id="p2" className="ln-input" style={{ minHeight: 48, fontSize: 'var(--fs-h3)', letterSpacing: '0.3em' }} type="password" inputMode="numeric" maxLength={6} autoComplete="new-password" value={pin2} onChange={e => setPin2(e.target.value.replace(/\D/g, ''))} required /></div>
-              <button type="submit" className="ln-btn ln-btn-primary ln-btn-block" style={{ minHeight: 52, fontSize: 'var(--fs-h3)' }} disabled={busy}>{busy ? 'Saving…' : 'Set PIN and start'}</button>
+              <button type="submit" className="ln-btn ln-btn-primary ln-btn-block" style={{ minHeight: 52, fontSize: 'var(--fs-h3)' }} disabled={busy}>{busy ? t('page.learnerInvite.saving') : t('page.learnerInvite.setPinStart')}</button>
             </>
           )}
         </form>

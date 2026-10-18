@@ -5,16 +5,18 @@ import { ChevronRight } from 'lucide-react';
 import { HowCounted } from '../Popover';
 import { SmallSample } from '../SampleSize';
 
+import { useUiLang } from '../../../context/UiLangContext';
 export function Card({ as: As = 'section', className = '', interactive = false, children, ...rest }) {
   return <As className={`ln-card ${interactive ? 'ui-card-hover' : ''} ${className}`} {...rest}>{children}</As>;
 }
 
 /** Title, subtitle, actions and an optional breadcrumb — the top of every page. */
 export function PageHeader({ title, subtitle, actions, crumbs }) {
+  const { t } = useUiLang();
   return (
     <header className="ui-pagehead">
       {crumbs && (
-        <nav aria-label="Breadcrumb" className="ui-crumbs">
+        <nav aria-label={t('ui.layout.breadcrumb')} className="ui-crumbs">
           {crumbs.map((c, i) => (
             <span key={i} className="ln-row" style={{ gap: 4 }}>
               {c.to ? <Link to={c.to} className="ln-link ln-small">{c.label}</Link> : <span className="ln-small" aria-current="page">{c.label}</span>}

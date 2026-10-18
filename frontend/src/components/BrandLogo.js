@@ -5,6 +5,7 @@
 // that are dark in both themes (the college sidebar, sign-in side panels).
 import React from 'react';
 
+import { useUiLang } from '../context/UiLangContext';
 const SRC = {
   light: ['/brand/qubirex-logo-640.png', '/brand/qubirex-logo-1280.png'],
   dark: ['/brand/qubirex-logo-on-dark-640.png', '/brand/qubirex-logo-on-dark-1280.png']
@@ -12,11 +13,12 @@ const SRC = {
 const RATIO = 1754 / 458; // width / height of the full logo
 
 export default function BrandLogo({ variant = 'full', height = 36, tone = 'auto', className = '' }) {
+  const { t } = useUiLang();
   if (variant === 'mark') {
     return <img src={height > 48 ? '/brand/qubirex-mark-192.png' : '/brand/qubirex-mark-64.png'} width={height} height={height} alt="Qubirex" className={`brand-logo ${className}`} />;
   }
   const w = Math.round(height * RATIO);
-  const img = (set, cls) => <img src={set[0]} srcSet={`${set[0]} 1x, ${set[1]} 2x`} width={w} height={height} alt="Qubirex — Your Language. Your Skills. Your Future" className={`brand-logo ${cls} ${className}`} />;
+  const img = (set, cls) => <img src={set[0]} srcSet={`${set[0]} 1x, ${set[1]} 2x`} width={w} height={height} alt={t('ui.brandLogo.qubirexLanguageSkillsFuture')} className={`brand-logo ${cls} ${className}`} />;
   if (tone === 'onDark') return img(SRC.dark, '');
   return <>{img(SRC.light, 'brand-logo-light')}{img(SRC.dark, 'brand-logo-dark')}</>;
 }

@@ -6,6 +6,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import { UiLangProvider } from './context/UiLangContext';
 import DevNav from './components/DevNav';
 import PageTransition from './components/PageTransition';
+import { RouteTitle } from './hooks/usePageTitle';
 import { ToastProvider, TableLabels } from './components/shared/ui';
 
 // Pages
@@ -94,6 +95,7 @@ export default function App() {
         <ToastProvider>
         <TableLabels />
         <BrowserRouter>
+          <RouteTitle />
           <PageTransition>
             <Routes>
               <Route path="/" element={<PublicHome />} />

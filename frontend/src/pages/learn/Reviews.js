@@ -12,7 +12,9 @@ import { errMsg } from '../../utils/errors';
 import AnswerBox from '../../components/learn/AnswerBox';
 import { fmtDate } from '../../components/learn/evidenceText';
 
+import { useUiLang } from '../../context/UiLangContext';
 export default function Reviews() {
+  const { t } = useUiLang();
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const warmup = params.get('warmup') === '1';
@@ -23,7 +25,7 @@ export default function Reviews() {
   const [outcome, setOutcome] = useState(null);
   const [done, setDone] = useState(0);
 
-  const load = useCallback(() => api.get('/learner/reviews/due').then(r => setData(r.data)).catch(e => setError(errMsg(e, 'Could not load your reviews.'))), []);
+  const load = useCallback(() => api.get('/learner/reviews/due').then(r => setData(r.data)).catch(e => setError(errMsg(e, t('learn.reviews.couldNotLoadReviews')))), []);
   useEffect(() => { load(); }, [load]);
 
   const start = async (item) => {
@@ -40,7 +42,7 @@ export default function Reviews() {
     try {
       const r = await api.post(`/learner/reviews/instances/${active.instance_id}/answer`, { answer: text, provenance });
       if (r.data.result === 'hold') {
-        setOutcome({ kind: 'hold', text: 'This needs to be in your own words — pasted text or a heavily edited transcript does not count. Please answer again.' });
+        setOutcome({ kind: 'hold', text: t('learn.reviews.needsOwnWordsPasted') });
       } else {
         clear();
         setOutcome({ kind: r.data.passed ? 'pass' : 'fail', feedback: r.data.feedback, next: r.data.next_review_at, provisional: r.data.provisional });
@@ -59,10 +61,10 @@ export default function Reviews() {
     <>
       <header className="ln-pagehead">
         <div className="ln-col" style={{ gap: 4 }}>
-          <h1 className="ln-title">{warmup ? 'Warm-up' : 'Reviews'}</h1>
-          <span className="ln-sub">{warmup ? 'Two minutes on earlier skills before today’s lesson.' : 'Short questions that keep your skills fresh. Each one is added to your passport.'}</span>
+          <h1 className="ln-title">{warmup ? t('learn.reviews.warmUp') : t('learn.reviews.reviews')}</h1>
+          <span className="ln-sub">{warmup ? t('learn.reviews.twoMinutesEarlierSkills') : t('learn.reviews.shortQuestionsKeepSkills')}</span>
         </div>
-        {warmup && <button type="button" className="ln-btn ln-btn-primary" onClick={() => navigate('/learn/session')}>{warmupsLeft ? 'Skip to lesson' : 'Continue to lesson →'}</button>}
+        {warmup && <button type="button" className="ln-btn ln-btn-primary" onClick={() => navigate('/learn/session')}>{warmupsLeft ? t('learn.reviews.skipLesson') : t('learn.reviews.continueLesson')}</button>}
       </header>
       {error && <div className="ln-error" role="alert">{error}</div>}
 
@@ -70,43 +72,43 @@ export default function Reviews() {
         <div className={`ln-card ${outcome.kind === 'pass' ? 'ln-card-warm' : ''}`} role="status" style={{ gap: 6 }}>
           {outcome.kind === 'hold' ? <strong>{outcome.text}</strong> : (
             <>
-              <strong className="ln-row" style={{ gap: 8 }}>{outcome.kind === 'pass' ? <><CheckCircle2 size={18} aria-hidden="true" />Well done — review passed.</> : 'Not quite yet — we’ll ask again tomorrow.'}</strong>
+              <strong className="ln-row" style={{ gap: 8 }}>{outcome.kind === 'pass' ? <><CheckCircle2 size={18} aria-hidden="true" />{t('learn.reviews.wellDoneReviewPassed')}</> : t('learn.reviews.notQuiteYetWe')}</strong>
               {outcome.feedback && <span>{outcome.feedback}</span>}
-              {outcome.provisional && <span className="ln-small ln-muted">Your professor will double-check this answer.</span>}
-              {outcome.next && <span className="ln-small ln-muted">Next review of this skill: {fmtDate(outcome.next)}</span>}
+              {outcome.provisional && <span className="ln-small ln-muted">{t('learn.reviews.professorWillDoubleCheck')}</span>}
+              {outcome.next && <span className="ln-small ln-muted">{t('learn.reviews.nextReviewSkillFmtdate', { fmtDate: fmtDate(outcome.next) })}</span>}
             </>
           )}
         </div>
       )}
 
       {active ? (
-        <section className="ln-card" style={{ gap: 14 }} aria-label="Review question">
-          <div className="ln-between ln-wrap"><span className="ln-kicker">{active.kind === 'recheck' ? 'Recheck' : 'Review'} · {active.node_label}</span>
-            <button type="button" className="ln-link" onClick={() => setActive(null)}>Back to list</button></div>
+        <section className="ln-card" style={{ gap: 14 }} aria-label={t('learn.reviews.reviewQuestion')}>
+          <div className="ln-between ln-wrap"><span className="ln-kicker">{active.kind === 'recheck' ? t('learn.reviews.recheck') : t('learn.reviews.review')} · {active.node_label}</span>
+            <button type="button" className="ln-link" onClick={() => setActive(null)}>{t('learn.reviews.backList')}</button></div>
           <p className="ln-indic" style={{ fontSize: 'var(--fs-h3)', lineHeight: 1.6 }}>{active.question}</p>
           <AnswerBox onSubmit={answer} busy={busy} />
         </section>
       ) : (
         <>
           <section className="ln-col" style={{ gap: 12 }}>
-            <h2 className="ln-h2">Due now {due.length > 0 && <span className="ln-tag ln-tag-accent">{due.length}</span>}</h2>
+            <h2 className="ln-h2">{t('learn.reviews.dueNow')}{' '} {due.length > 0 && <span className="ln-tag ln-tag-accent">{due.length}</span>}</h2>
             {!data && !error && [0, 1, 2].map(i => (
               <div key={i} className="ln-card ln-skeleton" aria-hidden="true" style={{ height: 76 }} />
             ))}
-            {data && due.length === 0 && <div className="ln-card ln-muted">Nothing due. {done > 0 ? 'Nice work today.' : 'Reviews appear here 3 days after you master a node, then at growing intervals.'}</div>}
+            {data && due.length === 0 && <div className="ln-card ln-muted">{t('learn.reviews.nothingDue')}{' '} {done > 0 ? t('learn.reviews.niceWorkToday') : t('learn.reviews.reviewsAppearHere3')}</div>}
             {due.map(item => (
               <div key={`${item.kind}-${item.node_id}`} className="ln-card ln-between ln-wrap" style={{ gap: 12 }}>
                 <div className="ln-col" style={{ gap: 4 }}>
                   <span style={{ fontWeight: 600 }}>{item.node_label}</span>
-                  <span className="ln-small ln-muted">{item.kind === 'recheck' ? 'Your professor asked for a fresh question on this skill.' : `${item.cluster_label} · due ${fmtDate(item.due_at)}${item.last_result === 'fail' ? ' · retry' : ''}`}</span>
+                  <span className="ln-small ln-muted">{item.kind === 'recheck' ? t('learn.reviews.professorAskedFreshQuestion') : `${item.cluster_label} · ${t('learn.reviews.dueOn', { date: fmtDate(item.due_at) })}${item.last_result === 'fail' ? ' ' + t('learn.reviews.retry') : ''}`}</span>
                 </div>
-                <button type="button" className="ln-btn ln-btn-primary" onClick={() => start(item)} disabled={busy}><RotateCcw size={16} aria-hidden="true" />{item.open_instance ? 'Continue' : 'Start'}</button>
+                <button type="button" className="ln-btn ln-btn-primary" onClick={() => start(item)} disabled={busy}><RotateCcw size={16} aria-hidden="true" />{item.open_instance ? t('learn.reviews.continue') : t('learn.reviews.start')}</button>
               </div>
             ))}
           </section>
           {data?.upcoming?.length > 0 && (
             <section className="ln-col" style={{ gap: 10 }}>
-              <h2 className="ln-h2">Coming up</h2>
+              <h2 className="ln-h2">{t('learn.reviews.comingUp')}</h2>
               <div className="ln-card ln-col" style={{ gap: 8 }}>
                 {data.upcoming.map(u => (
                   <div key={u.node_id} className="ln-between"><span>{u.node_label}</span><span className="ln-small ln-muted ln-row" style={{ gap: 6 }}><CalendarClock size={14} aria-hidden="true" />{fmtDate(u.due_at)}</span></div>
@@ -114,7 +116,7 @@ export default function Reviews() {
               </div>
             </section>
           )}
-          <p className="ln-small ln-muted">Your passport shows how fresh each skill is. <Link className="ln-link" to="/learn/passport">Open your passport</Link></p>
+          <p className="ln-small ln-muted">{t('learn.reviews.passportShowsHowFresh')}{' '} <Link className="ln-link" to="/learn/passport">{t('learn.reviews.openPassport')}</Link></p>
         </>
       )}
     </>

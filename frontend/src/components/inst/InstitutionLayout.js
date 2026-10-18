@@ -19,7 +19,7 @@ import TopActions from '../shared/TopActions';
 const StaffContext = createContext(null);
 export const useStaff = () => useContext(StaffContext);
 
-export const ROLE_LABEL = { admin: 'Admin', professor: 'Professor', viewer: 'Viewer' };
+export const ROLE_LABEL = { admin: 'inst.institutionLayout.roleLabel.admin', professor: 'inst.institutionLayout.roleLabel.professor', viewer: 'inst.institutionLayout.roleLabel.viewer' };
 
 export function Avatar({ person, size = 36, className = '' }) {
   const name = [person?.title, person?.name].filter(Boolean).join(' ') || person?.email || '';
@@ -40,7 +40,7 @@ export default function InstitutionLayout() {
   const [me, setMe] = useState(null);
   const [alerts, setAlerts] = useState(0);
 
-  const refresh = useCallback(() => api.get('/institution/me').then(r => setMe(r.data)).catch(() => setMe(m => m || { role: 'admin', name: 'Staff' })), []);
+  const refresh = useCallback(() => api.get('/institution/me').then(r => setMe(r.data)).catch(() => setMe(m => m || { role: 'admin', name: t('inst.institutionLayout.staff') })), []);
   useEffect(() => { refresh(); }, [refresh]);
   // Alerts badge: from the shared overview cache (the Home page reads the same
   // data), refreshed every minute rather than on every navigation.
@@ -90,7 +90,7 @@ export default function InstitutionLayout() {
             {open && <button type="button" className="in-iconbtn" onClick={() => setOpen(false)} aria-label={t('nav.closeMenu')}><X size={18} aria-hidden="true" /></button>}
           </div>
           <div className="in-org">
-            <b style={{ fontWeight: 600 }}>{me?.institution_name || 'Your institution'}</b>
+            <b style={{ fontWeight: 600 }}>{me?.institution_name || t('inst.institutionLayout.yourInstitution')}</b>
             {me?.department && <span>{me.department}</span>}
           </div>
 
@@ -101,7 +101,7 @@ export default function InstitutionLayout() {
                 {g.items.map(({ to, label, icon: Icon, badge }) => (
                   <NavLink key={to} to={to} className={({ isActive }) => `ln-navlink ${isActive ? 'is-active' : ''}`}>
                     <Icon size={18} strokeWidth={1.8} aria-hidden="true" /><span>{label}</span>
-                    {badge ? <span className="in-badge" aria-label={`${badge} items need attention`}>{badge}</span> : null}
+                    {badge ? <span className="in-badge" aria-label={t('inst.institutionLayout.badgeItemsNeedAttention', { badge })}>{badge}</span> : null}
                   </NavLink>
                 ))}
               </div>
@@ -112,7 +112,7 @@ export default function InstitutionLayout() {
             <Avatar person={me} />
             <div className="ln-col" style={{ flex: 1, minWidth: 0 }}>
               <span style={{ fontSize: 'var(--fs-small)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{[me?.title, me?.name].filter(Boolean).join(' ') || me?.email || '…'}</span>
-              <span style={{ fontSize: 'var(--fs-caption)', color: 'var(--stage-muted)' }}>{[me?.designation, ROLE_LABEL[role]].filter(Boolean).join(' · ')}</span>
+              <span style={{ fontSize: 'var(--fs-caption)', color: 'var(--stage-muted)' }}>{[me?.designation, t(ROLE_LABEL[role])].filter(Boolean).join(' · ')}</span>
             </div>
             <ThemeToggle />
             <button type="button" className="in-iconbtn" onClick={doLogout} aria-label={t('nav.logout')} title={t('nav.logout')}><LogOut size={18} aria-hidden="true" /></button>
