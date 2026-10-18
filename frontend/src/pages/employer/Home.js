@@ -13,6 +13,7 @@ import { HowCounted } from '../../components/shared/Popover';
 import { Bar } from '../../components/learn/ui';
 
 import { useUiLang, uiLocale } from '../../context/UiLangContext';
+import { LoadingRows } from '../../components/shared/EmptyState';
 // The hiring side of Home (v4.3 canvas E1): who is waiting for a decision,
 // open roles and the funnel. Verification steps follow until approved.
 function Hiring() {
@@ -81,7 +82,7 @@ export default function EmployerHome() {
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  if (!me) return <p className="ln-muted">{t('emp.home.loading')}</p>;
+  if (!me) return <LoadingRows rows={5} />;
   const e = me.employer;
   const s = e.kyb_steps;
   const [kybLabel, kybClass] = KYB_TEXT[e.kyb_status] || KYB_TEXT.pending;

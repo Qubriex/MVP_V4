@@ -7,6 +7,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { Mic, Square, Volume2, CheckCircle2, Circle, Send } from 'lucide-react';
 import PublicShell, { BackHome } from '../../components/public/PublicShell';
+import DemoTour from '../../components/public/DemoTour';
 import Drawer from '../../components/shared/Drawer';
 import { Bar } from '../../components/learn/ui';
 import { useUiLang, UI_LANGS, LANG_CODE } from '../../context/UiLangContext';
@@ -58,7 +59,7 @@ function LearnerDemo() {
   const start = () => { setStep('lesson'); setChat([{ who: 'q', text: t('demo.l.lesson') }, { who: 'q', text: t('demo.l.question') }]); say(`${t('demo.l.lesson')} ${t('demo.l.question')}`); };
   return (
     <div className="ln-grid ln-g-2" style={{ gap: 20, alignItems: 'start' }}>
-      <section className="pb-phone ln-col" style={{ gap: 10 }} aria-label={t('demo.learnerTitle')}>
+      <section className="pb-phone ln-col" style={{ gap: 10 }} aria-label={t('demo.learnerTitle')} data-tour="lesson">
         <b style={{ fontSize: 'var(--fs-h3)' }}>{t('demo.l.hello')}</b>
         <span className="ln-small">{t('demo.l.today')}</span>
         {step === 'start' && <button type="button" className="ln-btn ln-btn-primary ln-btn-lg" onClick={start}><Volume2 size={18} aria-hidden="true" />{t('demo.l.start')}</button>}
@@ -75,7 +76,7 @@ function LearnerDemo() {
             </div>
             {mic.listening && <span className="ln-small ln-muted" aria-live="polite">{mic.interim || t('demo.l.listening')}</span>}
             {!mic.supported && <span className="ln-small" role="alert">{t('demo.micNone')}</span>}
-            <form className="ln-row" style={{ gap: 6 }} onSubmit={e => { e.preventDefault(); if (typed.trim()) { reply(typed.trim()); setTyped(''); } }}>
+            <form data-tour="answer" className="ln-row" style={{ gap: 6 }} onSubmit={e => { e.preventDefault(); if (typed.trim()) { reply(typed.trim()); setTyped(''); } }}>
               <label htmlFor="demo-answer" className="ln-sr">{t('demo.l.typeLabel')}</label>
               <input id="demo-answer" className="ln-input" value={typed} onChange={e => setTyped(e.target.value)} placeholder={t('demo.l.typeLabel')} />
               <button type="submit" className="ln-btn ln-btn-sm" aria-label={t('demo.l.send')}><Send size={16} aria-hidden="true" /></button>
@@ -85,7 +86,7 @@ function LearnerDemo() {
         {(note || micError) && <span className="ln-small" role="alert" style={{ color: 'var(--warn)' }}>{micError || note}</span>}
         {step === 'answered' && <button type="button" className="ln-btn ln-btn-sm" onClick={start}>{t('demo.l.again')}</button>}
       </section>
-      <section className="ln-card" style={{ gap: 8 }}>
+      <section className="ln-card" style={{ gap: 8 }} data-tour="record">
         <b>{t('demo.l.passport')}</b>
         {[['demo.l.skill1', true], ['demo.l.skill2', done], ['demo.l.skill3', false]].map(([k, ok]) => <span key={k} className="ln-row ln-small" style={{ gap: 8 }}>{ok ? <CheckCircle2 size={16} style={{ color: 'var(--ok)' }} aria-label={t('common.done')} /> : <Circle size={16} aria-label={t('common.notDone')} />}{t(k)}</span>)}
         <span className="ln-xs ln-muted">{t('demo.l.passportNote')}</span>
@@ -111,17 +112,17 @@ function CollegeDemo() {
   return (
     <div className="ln-col" style={{ gap: 16 }}>
       <div className="ln-grid ln-g-2" style={{ gap: 20, alignItems: 'start' }}>
-        <section className="ln-card" style={{ gap: 10 }}>
+        <section className="ln-card" style={{ gap: 10 }} data-tour="bands">
           <span className="ln-kicker">{t('demo.c.cohort')}</span>
           <BandBar counts={COHORT} />
         </section>
-        <section className="ln-card ln-card-warm" style={{ gap: 8 }}>
+        <section className="ln-card ln-card-warm" style={{ gap: 8 }} data-tour="bridge">
           <b>{t('demo.c.nearly', { n: COHORT.nearly })}</b>
           <button type="button" className="ln-btn ln-btn-primary ln-btn-sm" style={{ alignSelf: 'flex-start' }} onClick={() => setOpen(true)}>{t('demo.c.start')}</button>
           {msg && <span className="ln-small" role="status">{msg}</span>}
         </section>
       </div>
-      <section className="ln-card" style={{ gap: 8 }} aria-live="polite">
+      <section className="ln-card" style={{ gap: 8 }} aria-live="polite" data-tour="result">
         <b>{t('demo.c.listTitle')}</b>
         {list.length === 0 ? <span className="ln-small ln-muted">{t('demo.c.empty')}</span> : list.map(b => (
           <div key={b.id} className="ln-between ln-wrap ln-small" style={{ gap: 8 }}>
@@ -158,13 +159,13 @@ function EmployerDemo() {
   return (
     <section className="ln-card" style={{ gap: 10 }}>
       <span className="ln-kicker">{t('demo.e.role')}</span>
-      <div className="ln-tablewrap"><table className="ln-table"><thead><tr><th>{t('demo.e.candidate')}</th><th>{t('demo.e.readiness')}</th><th><span className="ln-sr">{t('demo.e.action')}</span></th></tr></thead>
+      <div className="ln-tablewrap" data-tour="readiness"><table className="ln-table"><thead><tr><th>{t('demo.e.candidate')}</th><th>{t('demo.e.readiness')}</th><th><span className="ln-sr">{t('demo.e.action')}</span></th></tr></thead>
         <tbody>{CANDIDATES.map(([n, r, band]) => (
           <tr key={n}><td>{t('demo.e.cand', { n })}<span className="ln-xs ln-muted" style={{ display: 'block' }}>{t('demo.e.college')}</span></td>
             <td><BandPill band={band} score={r} /></td>
-            <td>{asked[n] ? <span className="ln-small ln-muted" role="status">{t('demo.e.asked')}</span> : <button type="button" className="ln-btn ln-btn-sm" onClick={() => setAsked(a => ({ ...a, [n]: true }))}>{t('demo.e.request')}</button>}</td></tr>
+            <td data-tour={n === CANDIDATES[0][0] ? 'ask' : undefined}>{asked[n] ? <span className="ln-small ln-muted" role="status">{t('demo.e.asked')}</span> : <button type="button" className="ln-btn ln-btn-sm" onClick={() => setAsked(a => ({ ...a, [n]: true }))}>{t('demo.e.request')}</button>}</td></tr>
         ))}</tbody></table></div>
-      <span className="ln-xs ln-muted">{t('demo.e.note')}</span>
+      <span className="ln-xs ln-muted" data-tour="privacy">{t('demo.e.note')}</span>
     </section>
   );
 }
@@ -184,6 +185,7 @@ export function DemoSide() {
         <h1 className="ln-title">{t(title)}</h1>
         <span className="ln-sub">{t(text)}</span>
       </header>
+      <DemoTour side={side} />
       <Comp />
       <p className="ln-xs ln-muted">{t('demo.footer')}</p>
     </PublicShell>

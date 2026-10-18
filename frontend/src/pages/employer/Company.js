@@ -6,6 +6,7 @@ import { errMsg } from '../../utils/errors';
 import { useEmployer } from './Layout';
 
 import { useUiLang } from '../../context/UiLangContext';
+import { LoadingRows } from '../../components/shared/EmptyState';
 const FIELDS = [['name', 'emp.company.fields.companyName'], ['website', 'emp.company.fields.website'], ['contact_name', 'emp.company.fields.contactPerson'], ['contact_phone', 'emp.company.fields.contactPhone'], ['city', 'emp.company.fields.city'], ['gstin', 'emp.company.fields.gstinOptional']];
 
 export default function EmployerCompany() {
@@ -16,7 +17,7 @@ export default function EmployerCompany() {
   const [saved, setSaved] = useState(false);
   const [busy, setBusy] = useState(false);
   useEffect(() => { if (me && !f) setF(Object.fromEntries(FIELDS.map(([k]) => [k, me.employer[k] || '']))); }, [me, f]);
-  if (!f) return <p className="ln-muted">{t('emp.company.loading')}</p>;
+  if (!f) return <LoadingRows rows={5} />;
 
   const save = async (e) => {
     e.preventDefault();

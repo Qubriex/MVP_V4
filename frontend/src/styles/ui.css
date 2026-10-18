@@ -269,3 +269,20 @@ button.ui-stat { text-align: left; cursor: pointer; font: inherit; color: inheri
 .in-heat-cell { text-align: center; font-variant-numeric: tabular-nums; font-weight: 600; }
 .in-heat-cell a { color: var(--color-text); text-decoration: none; display: block; padding: 4px 0; }
 .in-heat-cell a:hover, .in-heat-cell a:focus-visible { text-decoration: underline; }
+
+/* ── Demo tour ───────────────────────────────────────────────────────────── */
+.pb-tour { position: fixed; z-index: 70; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(440px, calc(100vw - 32px)); box-sizing: border-box;
+  display: flex; flex-direction: column; gap: 8px; padding: 16px 18px; border-radius: 16px; background: var(--brand-ink); color: #FFFFFF; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3); }
+.pb-tour .in-iconbtn { color: #C9D3DA; width: 44px; height: 44px; }
+.pb-tour .ln-btn:not(.ln-btn-primary) { background: transparent; color: #FFFFFF; border-color: rgba(255, 255, 255, 0.3); }
+.pb-tour .ln-btn-primary { background: var(--accent-400); color: var(--brand-ink); border-color: var(--accent-400); }
+.tour-on { outline: 3px solid var(--accent-400) !important; outline-offset: 6px; border-radius: 12px; position: relative; z-index: 1; transition: outline-offset 0.2s; }
+@media (prefers-reduced-motion: reduce) { .tour-on { transition: none; } }
+
+/* ── Stepper (employer first role) ───────────────────────────────────────── */
+.ui-steps { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 0; padding: 0; list-style: none; counter-reset: step; font-size: var(--fs-small); color: var(--color-text-muted); }
+.ui-steps li { display: inline-flex; align-items: center; gap: 8px; counter-increment: step; }
+.ui-steps li::before { content: counter(step); width: 24px; height: 24px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--color-border-strong); font-weight: 600; font-size: var(--fs-caption); }
+.ui-steps li.is-on { color: var(--color-text); font-weight: 600; }
+.ui-steps li.is-on::before { background: var(--brand-primary-strong); border-color: var(--brand-primary-strong); color: #FFFFFF; }
+.ui-steps li.is-done::before { content: '✓'; background: var(--ok-bg); border-color: var(--ok); color: var(--ok); }

@@ -14,6 +14,7 @@ import { Select } from '../../components/shared/ui';
 
 import { useUiLang, uiLocale } from '../../context/UiLangContext';
 import { enumText } from '../../i18n/enums';
+import { LoadingRows } from '../../components/shared/EmptyState';
 export const COVER = { covered: ['✓ ', 'ln-tag-success'], partly: ['◐ ', 'ln-tag-info'], missing: ['+ ', 'ln-tag-accent'] };
 
 export default function Curriculum() {
@@ -40,7 +41,7 @@ export default function Curriculum() {
   const draftModule = (t) => navigate('/institution/cohorts/new', { state: { draft: `Elective module: ${t.name}.\nLearning order: ${t.steps.join(' → ')}.\n${t.why}` } });
 
   if (error) return <div className="ln-error">{error}</div>;
-  if (!data) return <p className="ln-muted">{tx('inst.curriculum.loading')}</p>;
+  if (!data) return <LoadingRows rows={5} />;
   if (data.empty) return <><h1 className="ln-title">{tx('inst.curriculum.curriculumVsMarket')}</h1><div className="ln-card ln-muted">{tx('inst.curriculum.noCohortsScopeYet')}</div></>;
   const k = data.kpis;
 

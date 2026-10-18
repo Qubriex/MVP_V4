@@ -9,6 +9,7 @@ import { errMsg } from '../../utils/errors';
 import { TooFew } from '../../components/shared/SampleSize';
 
 import { useUiLang, translate, formatDate } from '../../context/UiLangContext';
+import { LoadingRows } from '../../components/shared/EmptyState';
 const KEYS = ['title', 'generated', 'target', 'by', 'none', 'cohort', 'students', 'ready', 'nearly', 'building', 'active', 'logs', 'gap', 'placements', 'placed', 'offers', 'median', 'rating', 'sponsored', 'how', 'print', 'back', 'lpa'];
 const REPORT_LANGS = [['en', 'english', 'English'], ['te', 'telugu', 'తెలుగు'], ['hi', 'hindi', 'हिंदी']];
 
@@ -21,7 +22,7 @@ export default function BoardReport() {
   const t = Object.fromEntries(KEYS.map(k => [k, translate(uiLang, `inst.boardReport.r.${k}`)]));
   const { data, error } = useCachedGet('/institution/board-report');
   if (error && !data) return <div className="ln-error">{errMsg(error, tx('inst.boardReport.couldnTPrepareReport'))}</div>;
-  if (!data) return <p className="ln-muted">{tx('inst.boardReport.loading')}</p>;
+  if (!data) return <LoadingRows rows={5} />;
   const { institution: inst, cohorts, placements: p } = data;
   const when = (s) => formatDate(uiLang, s, { day: 'numeric', month: 'long', year: 'numeric' });
   return (

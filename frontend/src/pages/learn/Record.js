@@ -12,6 +12,7 @@ import { minutes } from '../../components/learn/ui';
 import LearningCurve from '../../components/learn/LearningCurve';
 
 import { useUiLang } from '../../context/UiLangContext';
+import { LoadingRows } from '../../components/shared/EmptyState';
 const CLUSTER_TAG = { done: ['learn.record.clusterTag.certificateEarned', 'ln-tag-success'], now: ['learn.record.clusterTag.inProgress', 'ln-tag-accent'], next: ['learn.record.clusterTag.upcoming', 'ln-tag-neutral'] };
 const CONFIDENCE = { high: 'learn.record.confidence.high', solid: 'learn.record.confidence.solid', building: 'learn.record.confidence.building' };
 
@@ -53,7 +54,7 @@ export default function Record() {
     try { await navigator.clipboard.writeText(lines.join('\n')); setCopied(true); setTimeout(() => setCopied(false), 2500); } catch (e) { /* clipboard blocked */ }
   };
 
-  if (!data) return <p className="ln-muted">{t('learn.record.loading')}</p>;
+  if (!data) return <LoadingRows rows={5} />;
   const s = data.summary;
 
   return (

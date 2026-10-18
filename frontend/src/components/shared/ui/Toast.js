@@ -1,6 +1,6 @@
 // Toasts: success / error / info, announced to screen readers, auto-dismissed.
 // <ToastProvider> wraps the app; const toast = useToast(); toast.success('Saved').
-import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import React, { useEffect, createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
 
 import { useUiLang } from '../../../context/UiLangContext';
@@ -18,6 +18,12 @@ export function ToastProvider({ children }) {
     setTimeout(() => dismiss(id), ms);
     return id;
   }, [dismiss]);
+  // Successful changes made through the API client (see utils/api.js).
+  useEffect(() => {
+    const on = (e) => push('success', t(e.detail?.kind === 'deleted' ? 'toast.deleted' : 'toast.saved'), 2500);
+    window.addEventListener('qubirex:saved', on);
+    return () => window.removeEventListener('qubirex:saved', on);
+  }, [push, t]);
   const api = useMemo(() => ({ success: (t, ms) => push('success', t, ms), error: (t, ms) => push('error', t, ms), info: (t, ms) => push('info', t, ms), dismiss }), [push, dismiss]);
   return (
     <Ctx.Provider value={api}>

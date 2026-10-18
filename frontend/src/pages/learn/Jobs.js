@@ -105,7 +105,7 @@ export default function Jobs() {
           <section className="ln-col" style={{ gap: 12 }}>
             <div className="ln-row" style={{ gap: 8 }}><h2 className="ln-h2">{t('learn.jobs.employersHiringQubirex')}</h2>
               <WhyThis title={t('learn.jobs.pointsShort')}>{t('learn.jobs.readinessHowMuchWhat')}</WhyThis></div>
-            {data.roles.length === 0 ? <EmptyState title={t('learn.jobs.noOpenRolesCity')} text={t('learn.jobs.employersPostRolesHere')} /> : (
+            {data.roles.length === 0 ? <EmptyState title={t('learn.jobs.noOpenRolesCity')} text={t('learn.jobs.employersPostRolesHere')} action={<Link to="/learn/market" className="ln-btn ln-btn-primary">{t('nav.market')}</Link>} /> : (
               <div className="ln-grid ln-g-2" style={{ gap: 12 }}>
                 {data.roles.map(r => (
                   <div key={r.id} className="ln-card" style={{ gap: 8 }}>
@@ -140,7 +140,7 @@ export default function Jobs() {
 
           <section className="ln-col" style={{ gap: 12 }}>
             <h2 className="ln-h2">{t('learn.jobs.myApplications')}</h2>
-            {data.applications.length === 0 ? <EmptyState title={t('learn.jobs.noApplicationsYet')} text={t('learn.jobs.markJobPostAs')} /> : (
+            {data.applications.length === 0 ? <EmptyState title={t('learn.jobs.noApplicationsYet')} text={t('learn.jobs.markJobPostAs')} action={<Link to="/learn/market" className="ln-btn ln-btn-primary">{t('nav.market')}</Link>} /> : (
               <div className="ln-tablewrap"><table className="ln-table">
                 <thead><tr><th>{t('learn.jobs.job')}</th><th>{t('learn.jobs.city')}</th><th>{t('learn.jobs.status')}</th><th /></tr></thead>
                 <tbody>{data.applications.map(a => (

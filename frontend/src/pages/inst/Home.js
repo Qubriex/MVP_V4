@@ -11,6 +11,7 @@ import { errMsg } from '../../utils/errors';
 import CommandCentre from '../../components/inst/CommandCentre';
 
 import { useUiLang } from '../../context/UiLangContext';
+import { LoadingRows } from '../../components/shared/EmptyState';
 const ALERT_ICON = { never_signed_in: [AlertTriangle, 'ln-tag-warning'], stuck: [RotateCcw, 'ln-tag-accent'], pin_reset: [KeyRound, 'ln-tag-info'] };
 const COVERAGE = { covered: ['inst.home.coverage.inCurriculum', 'ln-tag-success'], partly: ['inst.home.coverage.partlyCovered', 'ln-tag-info'], missing: ['inst.home.coverage.notCovered', 'ln-tag-accent'] };
 
@@ -29,7 +30,7 @@ export default function InstHome() {
   const [hello] = useState(greeting);
 
   if (error) return <div className="ln-error">{error}</div>;
-  if (!data) return <p className="ln-muted" style={{ minHeight: '60vh' }}>{t('inst.home.loading')}</p>;
+  if (!data) return <LoadingRows rows={5} />;
   const { me, kpis, cohorts, alerts, pulse } = data;
   // "Dr. Rao" when there's a title, otherwise the first name.
   const parts = (me?.name || '').trim().split(/\s+/).filter(Boolean);

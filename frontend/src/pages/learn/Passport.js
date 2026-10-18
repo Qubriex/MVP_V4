@@ -18,6 +18,7 @@ import { LABEL, LEVEL, ASSURANCE, MISSING, FRESH, freshBand, fmtDate } from '../
 
 import { useUiLang } from '../../context/UiLangContext';
 import { CodeTag } from '../../components/shared/Popover';
+import { LoadingRows } from '../../components/shared/EmptyState';
 function SkillLine({ s }) {
   const { t } = useUiLang();
   const [open, setOpen] = useState(false);
@@ -139,7 +140,7 @@ export default function Passport() {
     } catch { toast.error(t('learn.passport.cardFailed')); }
   };
 
-  if (!p) return <>{error ? <div className="ln-error">{error}</div> : <div className="ln-card ln-muted">{t('learn.passport.loading')}</div>}</>;
+  if (!p) return <>{error ? <div className="ln-error">{error}</div> : <LoadingRows rows={5} />}</>;
 
   return (
     <>

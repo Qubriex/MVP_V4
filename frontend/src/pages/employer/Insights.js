@@ -3,7 +3,7 @@
 // promise; see which colleges have students ready for your roles. College
 // groups under 5 students are never shown.
 import React, { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import api from '../../utils/api';
 import { useCachedGet, dropCached } from '../../utils/cachedGet';
 import { errMsg } from '../../utils/errors';
@@ -69,7 +69,7 @@ export function CollegesPage() {
       <header className="ln-pagehead"><div className="ln-col" style={{ gap: 4 }}><h1 className="ln-title">{t('emp.insights.collegesInsights')}</h1>
         <span className="ln-sub">{t('emp.insights.whereStudentsReady')}{' '} {data.roles_used.length ? data.roles_used.join(', ') : t('emp.insights.yourRoles')} {' '}{t('emp.insights.whichSkillsScarce')}</span></div>
         <SmallSample n={data.total} /></header>
-      {data.colleges.length === 0 ? <EmptyState title={t('emp.insights.noStudentsOpenEmployers')} text={t('emp.insights.collegesAppearHereAs')} /> : (
+      {data.colleges.length === 0 ? <EmptyState title={t('emp.insights.noStudentsOpenEmployers')} text={t('emp.insights.collegesAppearHereAs')} action={<Link to="/employer/sponsor" className="ln-btn ln-btn-primary">{t('emp.nav.sponsor')}</Link>} /> : (
         <div className="ln-tablewrap"><table className="ln-table">
           <thead><tr><th>{t('emp.insights.college')}</th><th>{t('emp.insights.students')}</th><th>{t('emp.insights.ready')}</th><th>{t('emp.insights.nearlyReady')}</th><th>{t('emp.insights.building')}</th><th>{t('emp.insights.mostMissing')}</th></tr></thead>
           <tbody>{data.colleges.map(g => (

@@ -19,6 +19,12 @@ import { Select } from '../../components/shared/ui';
 
 
 import { useUiLang } from '../../context/UiLangContext';
+// A realistic fresher JD so a first-time employer can see the whole flow.
+const SAMPLE_JD = {
+  title: 'Junior data analyst', city: 'Hyderabad',
+  jd_text: 'We are hiring a junior data analyst (fresher, 0–1 year).\nYou will clean sales data, write SQL queries and build weekly dashboards in Excel.\nRequired: SQL, Excel and spreadsheets, Python basics, data cleaning.\nNice to have: Power BI, statistics.\nWork from our Hyderabad office; hybrid after 3 months.'
+};
+
 function NewRole({ onDone }) {
   const { t } = useUiLang();
   const navigate = useNavigate();
@@ -38,14 +44,27 @@ function NewRole({ onDone }) {
   const add = (key) => { const s = all.find(x => x.key === key); if (s && !skills.some(x => x.key === key)) setSkills([...skills, { ...s, required: true, market_share: null }]); };
   return (
     <form className="ui-narrow ln-card" style={{ gap: 14 }} onSubmit={save}>
-      <h2 className="ln-h2">{t('emp.roles.newRole')}</h2>
+      <div className="ln-between ln-wrap" style={{ gap: 10 }}>
+        <h2 className="ln-h2">{t('emp.roles.newRole')}</h2>
+        <button type="button" className="ln-btn ln-btn-sm ln-btn-secondary" onClick={() => { setF(x => ({ ...x, ...SAMPLE_JD })); setSkills(null); setMsg(''); }}>{t('emp.roles.useSample')}</button>
+      </div>
+      <ol className="ui-steps" aria-label={t('emp.roles.stepsLabel')}>
+        {['emp.roles.step1', 'emp.roles.step2', 'emp.roles.step3'].map((k, i) => {
+          const done = i === 0 ? f.jd_text.trim().length >= 20 : i === 1 ? !!skills?.length : false;
+          const on = i === 0 ? !done : i === 1 ? f.jd_text.trim().length >= 20 && !skills?.length : !!skills?.length;
+          return <li key={k} className={`${done ? 'is-done' : ''} ${on ? 'is-on' : ''}`} aria-current={on ? 'step' : undefined}>{t(k)}</li>;
+        })}
+      </ol>
       <div className="ln-grid ln-g-2" style={{ gap: 12 }}>
         <div className="ln-field"><label className="ln-label" htmlFor="r-title">{t('emp.roles.roleTitle')}</label><input id="r-title" className="ln-input" value={f.title} onChange={set('title')} required placeholder={t('emp.roles.dataAnalystFresher')} /></div>
         <div className="ln-field"><label className="ln-label" htmlFor="r-city">{t('emp.roles.city')}</label><input id="r-city" className="ln-input" value={f.city} onChange={set('city')} placeholder={t('emp.roles.hyderabad')} /></div>
       </div>
       <div className="ln-field"><label className="ln-label" htmlFor="r-jd">{t('emp.roles.jobDescription')}</label>
         <textarea id="r-jd" className="ln-input" rows={7} value={f.jd_text} onChange={set('jd_text')} placeholder={t('emp.roles.pasteJobDescriptionLines')} /></div>
-      <button type="button" className="ln-btn" style={{ alignSelf: 'flex-start' }} onClick={parse} disabled={f.jd_text.trim().length < 20}>{t('emp.roles.pickOutSkills')}</button>
+      <div className="ln-row ln-wrap" style={{ gap: 10 }}>
+        <button type="button" className="ln-btn" onClick={parse} disabled={f.jd_text.trim().length < 20} aria-describedby={f.jd_text.trim().length < 20 ? 'r-jd-why' : undefined}>{t('emp.roles.pickOutSkills')}</button>
+        {f.jd_text.trim().length < 20 && <span id="r-jd-why" className="ln-xs ln-muted">{t('emp.roles.pickWhyDisabled')}</span>}
+      </div>
       {skills && (
         <section className="ln-col" style={{ gap: 8 }}>
           <div className="ln-row" style={{ gap: 8 }}><span className="ln-label">{t('emp.roles.skillsBarVsMarket')}</span>
@@ -87,7 +106,8 @@ export function RoleList() {
         {!creating && <button type="button" className="ln-btn ln-btn-primary" onClick={() => setParams({ new: '1' })}><Plus size={16} aria-hidden="true" />{t('emp.roles.newRole')}</button>}
       </header>
       {creating && <NewRole onDone={() => setParams({})} />}
-      {!data ? <LoadingRows /> : data.length === 0 && !creating ? <EmptyState title={t('emp.roles.noRolesYet')} text={t('emp.roles.pasteJobDescriptionCreate')} /> : (
+      {!data ? <LoadingRows /> : data.length === 0 && !creating ? <EmptyState title={t('emp.roles.noRolesYet')} text={t('emp.roles.pasteJobDescriptionCreate')}
+        action={<button type="button" className="ln-btn ln-btn-primary" onClick={() => setParams({ new: '1' })}><Plus size={16} aria-hidden="true" />{t('emp.roles.newRole')}</button>} /> : (
         <div className="ln-tablewrap"><table className="ln-table">
           <thead><tr><th>{t('emp.roles.role')}</th><th>{t('emp.roles.city')}</th><th>{t('emp.roles.bar')}</th><th>{t('emp.roles.skills')}</th><th>{t('emp.roles.inPipeline')}</th><th /></tr></thead>
           <tbody>{data.map(r => (
@@ -134,7 +154,7 @@ export function RoleSearch() {
       </div>
       <div className="ln-grid" style={{ gridTemplateColumns: 'minmax(0, 2.2fr) minmax(260px, 1fr)', gap: 16 }}>
         <section className="ln-col" style={{ gap: 10, minWidth: 0 }}>
-          {data.candidates.length === 0 ? <EmptyState title={t('emp.roles.noCandidatesMatchYet')} text={t('emp.roles.onlyStudentsWhoTurned')} /> : (
+          {data.candidates.length === 0 ? <EmptyState title={t('emp.roles.noCandidatesMatchYet')} text={t('emp.roles.onlyStudentsWhoTurned')} action={<Link to={`/employer/sponsor?role=${id}`} className="ln-btn ln-btn-primary">{t('emp.nav.sponsor')}</Link>} /> : (
             <div className="ln-tablewrap"><table className="ln-table">
               <thead><tr><th>{t('emp.roles.candidate')}</th><th>{t('emp.roles.readiness')}</th><th>{t('emp.roles.verified')}</th><th>{t('emp.roles.stillMissing')}</th><th /></tr></thead>
               <tbody>{data.candidates.map(c => (
