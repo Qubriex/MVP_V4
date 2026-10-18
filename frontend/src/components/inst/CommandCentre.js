@@ -12,6 +12,7 @@ import CommandBox from '../shared/CommandBox';
 import { WhyThis, HowCounted } from '../shared/Popover';
 import { SmallSample, TooFew } from '../shared/SampleSize';
 import { BandBar } from '../shared/ui';
+import SkillHeatMap from './SkillHeatMap';
 import BandDrawer from './BandDrawer';
 
 import { useUiLang } from '../../context/UiLangContext';
@@ -119,6 +120,7 @@ export default function CommandCentre({ role }) {
           <HowCounted>{t('inst.commandCentre.timeAiSpentTeaching')}</HowCounted>
         </section>
       </div>
+      <SkillHeatMap />
       {drill && <BandDrawer band={drill} onClose={() => setDrill(null)} />}
     </>
   );

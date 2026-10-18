@@ -114,7 +114,7 @@ function Grievance() {
   const { t } = useUiLang();
   return (
     <Section id="grievance" title={t('learn.settings.questionsComplaintsAboutData')}>
-      <span className="ln-small">{t('learn.settings.grievanceOfficer')}{' '} <b>{CONTACT.grievanceOfficer}</b> · <a className="ln-link" href={`mailto:${CONTACT.grievance}`}>{CONTACT.grievance}</a></span>
+      <span className="ln-small">{t('learn.settings.grievanceOfficer')}{' '} <b>{CONTACT.grievanceOfficer || t('contact.officerRole')}</b> · <a className="ln-link" href={`mailto:${CONTACT.grievance}`}>{CONTACT.grievance}</a></span>
       <span className="ln-xs ln-muted">{t('learn.settings.weReplyWithin7')}</span>
     </Section>
   );

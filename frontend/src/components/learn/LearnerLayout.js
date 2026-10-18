@@ -1,7 +1,8 @@
 // src/components/learn/LearnerLayout.js
 // Shared shell for every /learn/* page except the voice session: a sidebar
 // with the learner card and three nav groups (Learn · Career · Me). Below
-// 960px the sidebar becomes a drawer opened from a slim top bar.
+// 960px the sidebar becomes a drawer opened from a slim top bar, and below
+// 640px a bottom tab bar (Home · Learn · Passport · Jobs · Me) is always in reach.
 import React, { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Home, Mic, Route as RouteIcon, Briefcase, TrendingUp, User, FileText, Settings, LogOut, Menu, X, RotateCcw, BadgeCheck, Handshake } from 'lucide-react';
@@ -11,6 +12,15 @@ import BrandLogo from '../BrandLogo';
 import ThemeToggle from '../ThemeToggle';
 import { initials } from './ui';
 import TopActions from '../shared/TopActions';
+
+// Bottom tabs on phones; each lights up for the pages it stands for.
+const TABS = [
+  { to: '/learn/dashboard', label: 'nav.home', icon: Home, match: ['/learn/dashboard', '/learn/welcome'] },
+  { to: '/learn/session', label: 'nav.learn', icon: Mic, match: ['/learn/session', '/learn/record', '/learn/reviews'] },
+  { to: '/learn/passport', label: 'nav.tabPassport', icon: BadgeCheck, match: ['/learn/passport'] },
+  { to: '/learn/jobs', label: 'nav.tabJobs', icon: Handshake, match: ['/learn/jobs', '/learn/market', '/learn/topics'] },
+  { to: '/learn/profile', label: 'nav.me', icon: User, match: ['/learn/profile', '/learn/resume', '/learn/settings'] }
+];
 
 const GROUPS = [
   { label: 'nav.learn', items: [
@@ -97,6 +107,17 @@ export default function LearnerLayout() {
         <TopActions side="learner" settingsHref="/learn/settings" />
         <div key={location.pathname} className="ln-page-fade"><Outlet /></div>
       </main>
+
+      <nav className="ln-tabbar" aria-label={t('nav.tabs')}>
+        {TABS.map(({ to, label, icon: Icon, match }) => {
+          const on = match.some(m => location.pathname.startsWith(m));
+          return (
+            <NavLink key={to} to={to} className={`ln-tab ln-indic ${on ? 'is-active' : ''}`} aria-current={on ? 'page' : undefined}>
+              <Icon size={22} strokeWidth={on ? 2.2 : 1.8} aria-hidden="true" /><span>{t(label)}</span>
+            </NavLink>
+          );
+        })}
+      </nav>
     </div>
   );
 }

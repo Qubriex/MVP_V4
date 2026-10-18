@@ -46,7 +46,7 @@ export default function StaffProfile() {
           <span className="ln-sub">{form.draft.email} · {t(ROLE_LABEL[form.draft.role])}</span>
         </div>
       </header>
-      <div className="ln-grid ln-g-detail" style={{ gridTemplateColumns: 'minmax(0, 1fr) 340px' }}>
+      <div className="ln-grid ln-g-detail ui-g-side">
         <div className="ln-col" style={{ gap: 20, minWidth: 0 }}>
           <Section title={t('inst.staffProfile.profile')}><ProfileFields form={form} /></Section>
           <Section title={t('inst.staffProfile.teaching')}><TeachingFields form={form} /></Section>

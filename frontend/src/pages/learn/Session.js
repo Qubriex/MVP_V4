@@ -372,7 +372,7 @@ export default function Session() {
           <span className="ln-small ln-session-sub-desk" style={{ opacity: 0.75 }}>
             {clusterLabel}{nodePos ? ` · ${t('learn.session.lessonOf', { i: nodePos.i, n: nodePos.n })}` : ''}
           </span>
-          <span className="ln-session-sub-phone ln-indic">{[APPROACH_NAMES[approach] && t(APPROACH_NAMES[approach]), langName, loopCount > 0 && `Loop ${loopCount}`].filter(Boolean).join(' · ')}</span>
+          <span className="ln-session-sub-phone ln-indic">{[APPROACH_NAMES[approach] && t(APPROACH_NAMES[approach]), langName, loopCount > 0 && t('learn.session.loopLoopcount', { loopCount })].filter(Boolean).join(' · ')}</span>
         </div>
         <div className="ln-row ln-wrap" style={{ gap: 8 }}>
           <span className="ln-tag ln-tag-lg ln-tag-info ln-hide-phone">{t('learn.session.approach')}{' '} {APPROACH_NAMES[approach] ? t(APPROACH_NAMES[approach]) : approach}</span>

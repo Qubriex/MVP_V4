@@ -13,9 +13,10 @@ const KEYS = ['title', 'generated', 'target', 'by', 'none', 'cohort', 'students'
 const REPORT_LANGS = [['en', 'english', 'English'], ['te', 'telugu', 'తెలుగు'], ['hi', 'hindi', 'हिंदी']];
 
 export default function BoardReport() {
-  const { t: tx } = useUiLang();
+  const { t: tx, lang: uiLang0 } = useUiLang();
   const [params] = useSearchParams();
-  const lang = (REPORT_LANGS.find(l => l[0] === params.get('lang')) || REPORT_LANGS[0])[0];
+  // ?lang= picks the report language; without it the report follows the screen.
+  const lang = (REPORT_LANGS.find(l => l[0] === params.get('lang')) || REPORT_LANGS.find(l => l[1] === uiLang0) || REPORT_LANGS[0])[0];
   const uiLang = REPORT_LANGS.find(l => l[0] === lang)[1];
   const t = Object.fromEntries(KEYS.map(k => [k, translate(uiLang, `inst.boardReport.r.${k}`)]));
   const { data, error } = useCachedGet('/institution/board-report');

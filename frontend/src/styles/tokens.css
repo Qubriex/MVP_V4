@@ -50,7 +50,7 @@
   --brand-gradient: linear-gradient(135deg, #F89833 0%, #F1592D 40%, #E73B2B 70%, #BC1F3D 100%);
 
   /* Status — each 4.5:1 or better on white and on its own background */
-  --ok: #2E7D4F;      --ok-bg: #E6F3EB;
+  --ok: #287045;      --ok-bg: #E6F3EB;
   --warn: #9A5B00;    --warn-bg: #FBF0DD;
   --danger: #B42318;  --danger-bg: #FCE8E6;
   --info: #2F5F8A;    --info-bg: #E6EEF6;

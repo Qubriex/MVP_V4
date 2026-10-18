@@ -13,15 +13,16 @@ import { useCachedGet } from '../../utils/cachedGet';
 import { useUiLang, uiLocale } from '../../context/UiLangContext';
 const LABEL = { green: 'inst.cohortLive.label.activeNow', yellow: 'inst.cohortLive.label.idleOrLooping', red: 'inst.cohortLive.label.inactiveOrStuck' };
 export function Light({ light, label }) {
+  const { t } = useUiLang();
   return <span className={`in-light is-${light}`}><i aria-hidden="true" />{label || t(LABEL[light])}</span>;
 }
-function ago(t, now) {
-  if (!t) return 'Never';
-  const m = Math.round((now - Date.parse(t)) / 60000);
-  if (m < 1) return 'Just now';
-  if (m < 60) return `${m} min ago`;
-  if (m < 1440) return `${Math.floor(m / 60)} h ago`;
-  return `${Math.floor(m / 1440)} days ago`;
+function ago(when, now, t) {
+  if (!when) return t('inst.cohortLive.ago.never');
+  const m = Math.round((now - Date.parse(when)) / 60000);
+  if (m < 1) return t('inst.cohortLive.ago.now');
+  if (m < 60) return t('inst.cohortLive.ago.min', { n: m });
+  if (m < 1440) return t('inst.cohortLive.ago.h', { n: Math.floor(m / 60) });
+  return t('inst.cohortLive.ago.d', { n: Math.floor(m / 1440) });
 }
 const stamp = (t) => (t ? new Date(t).toLocaleString(uiLocale(), { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—');
 
@@ -74,7 +75,7 @@ export default function CohortLive() {
                   <td style={{ paddingLeft: 16 }}><Light light={s.light} /></td>
                   <td><b style={{ fontWeight: 600 }}>{s.name}</b> <span className="ln-xs ln-muted">{s.learner_ref}</span></td>
                   <td className="ln-small">{s.current_node || '—'}</td>
-                  <td className="ln-small"><span title={stamp(s.last_active_at)}>{ago(s.last_active_at, now)}</span><br /><span className="ln-xs ln-muted">{stamp(s.last_active_at)}</span></td>
+                  <td className="ln-small"><span title={stamp(s.last_active_at)}>{ago(s.last_active_at, now, t)}</span><br /><span className="ln-xs ln-muted">{stamp(s.last_active_at)}</span></td>
                   <td className="ln-small">{t('inst.cohortLive.activeMinutesTodayMin', { active_minutes_today: s.active_minutes_today })}</td>
                   <td className="ln-small">{s.reason}</td>
                 </tr>
