@@ -7,7 +7,7 @@ import { useCachedGet, dropCached } from '../../utils/cachedGet';
 import { errMsg } from '../../utils/errors';
 import { useStaff } from '../../components/inst/InstitutionLayout';
 import { Bar } from '../../components/learn/ui';
-import EmptyState from '../../components/shared/EmptyState';
+import EmptyState, { LoadingRows } from '../../components/shared/EmptyState';
 import { HowCounted } from '../../components/shared/Popover';
 import { SmallSample, TooFew } from '../../components/shared/SampleSize';
 import { Select } from '../../components/shared/ui';
@@ -101,7 +101,7 @@ export default function Placements() {
   const [adding, setAdding] = useState(false);
   const refresh = () => { dropCached('/institution/placements'); dropCached('/institution/command-centre'); reload(); };
   if (error && !data) return <div className="ln-error">{errMsg(error, t('inst.placements.couldnTLoadPlacements'))}</div>;
-  if (!data) return <p className="ln-muted">{t('inst.placements.loading')}</p>;
+  if (!data) return <LoadingRows rows={5} />;
   const { rows, summary: s } = data;
   const canEdit = role !== 'viewer';
   const maxBand = Math.max(1, ...s.salary_bands.map(b => b.count));

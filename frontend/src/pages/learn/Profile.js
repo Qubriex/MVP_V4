@@ -14,6 +14,7 @@ import {
 } from '../../components/learn/ProfileSections';
 
 import { useUiLang } from '../../context/UiLangContext';
+import { LoadingRows } from '../../components/shared/EmptyState';
 const NAV = [
   ['personal', 'learn.profile.nav.personalInfo', 'personal'], ['education', 'learn.profile.nav.education', 'education'], ['experience', 'learn.profile.nav.experience', null],
   ['projects', 'learn.profile.nav.projects', 'projects'], ['skills', 'learn.profile.nav.skills', 'skills'], ['certifications', 'learn.profile.nav.certifications', null],
@@ -34,7 +35,7 @@ export default function Profile() {
     if (draft && location.hash) document.getElementById(location.hash.slice(1))?.scrollIntoView({ behavior: 'smooth' });
   }, [draft, location.hash]);
 
-  if (!draft) return <p className="ln-muted">{t('learn.profile.loading')}</p>;
+  if (!draft) return <LoadingRows rows={5} />;
   const c = profile.completeness || { pct: 0, sections: {}, missing: [] };
   const missing = c.missing.filter(k => MISSING_LABEL[k]);
 

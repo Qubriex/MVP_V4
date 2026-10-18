@@ -111,6 +111,8 @@ async function curriculumCoverage(db, { capabilityTargetId, engagementId = null 
     return covered < t.steps.length ? {
       id: t.id, name: t.name, growth: t.growth, sector: t.sector,
       why: `${t.desc} Your pathway covers ${covered} of ${t.steps.length} steps; missing: ${(await filterSeq(t.steps, async st => !await taught(st))).map(st => st.name).join(', ')}.`,
+      // The same facts as fields, so the screen can say them in the reader's language.
+      desc: t.desc, covered, total: t.steps.length, missing: (await filterSeq(t.steps, async st => !await taught(st))).map(st => st.name),
       steps: t.steps.map(st => st.name)
     } : null;
   })).filter(Boolean).slice(0, 4);

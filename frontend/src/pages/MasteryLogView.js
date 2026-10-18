@@ -6,6 +6,7 @@ import api from '../utils/api';
 import Reveal from '../components/Reveal';
 
 import { useUiLang, uiLocale } from '../context/UiLangContext';
+import { LoadingRows } from '../components/shared/EmptyState';
 export default function MasteryLogView() {
   const { t } = useUiLang();
   const { logId } = useParams();
@@ -22,7 +23,7 @@ export default function MasteryLogView() {
   }, [logId]);
 
   if (error) return <div className="ln-error">{error}</div>;
-  if (!record) return <p className="ln-muted">{t('page.masteryLogView.loading')}</p>;
+  if (!record) return <LoadingRows rows={5} />;
   const log = record.log_data;
 
   const clustersCompleted = (log.clusters || []).filter(c => c.nodes.length > 0 && c.nodes.every(n => n.advanced)).length;

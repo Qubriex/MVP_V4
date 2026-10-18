@@ -13,6 +13,8 @@ import { errMsg } from '../../utils/errors';
 import { Select } from '../../components/shared/ui';
 
 import { useUiLang, uiLocale } from '../../context/UiLangContext';
+import { enumText } from '../../i18n/enums';
+import { LoadingRows } from '../../components/shared/EmptyState';
 export const COVER = { covered: ['✓ ', 'ln-tag-success'], partly: ['◐ ', 'ln-tag-info'], missing: ['+ ', 'ln-tag-accent'] };
 
 export default function Curriculum() {
@@ -39,7 +41,7 @@ export default function Curriculum() {
   const draftModule = (t) => navigate('/institution/cohorts/new', { state: { draft: `Elective module: ${t.name}.\nLearning order: ${t.steps.join(' → ')}.\n${t.why}` } });
 
   if (error) return <div className="ln-error">{error}</div>;
-  if (!data) return <p className="ln-muted">{tx('inst.curriculum.loading')}</p>;
+  if (!data) return <LoadingRows rows={5} />;
   if (data.empty) return <><h1 className="ln-title">{tx('inst.curriculum.curriculumVsMarket')}</h1><div className="ln-card ln-muted">{tx('inst.curriculum.noCohortsScopeYet')}</div></>;
   const k = data.kpis;
 
@@ -94,11 +96,11 @@ export default function Curriculum() {
                 <tr key={s.key}>
                   <td style={{ fontWeight: 600 }}>{s.name}</td>
                   <td><div className="ln-row" style={{ gap: 8 }}><div className="ln-bar" style={{ width: 80 }}><span style={{ width: `${s.share}%` }} /></div><span className="ln-small">{s.share}%</span></div></td>
-                  <td className="ln-small">{s.trend}</td>
-                  <td><span className={`ln-tag ln-tag-lg ${COVER[s.coverage][1]}`}>{COVER[s.coverage][0]}{s.where}</span></td>
-                  <td className="ln-small">{s.mastery_note}</td>
+                  <td className="ln-small">{enumText(tx, s.trend)}</td>
+                  <td><span className={`ln-tag ln-tag-lg ${COVER[s.coverage][1]}`}>{COVER[s.coverage][0]}{enumText(tx, s.where)}</span></td>
+                  <td className="ln-small">{enumText(tx, s.mastery_note)}</td>
                   <td className="ln-small">{s.requested_by ? (s.requested_by === 1 ? tx('inst.curriculum.oneStudent') : tx('inst.curriculum.nStudents', { n: s.requested_by })) : '—'}</td>
-                  <td><span className={`ln-tag ${s.suggestion === 'Keep' ? 'ln-tag-neutral' : s.suggestion === 'Extend' ? 'ln-tag-info' : 'ln-tag-accent'}`}>{s.suggestion}</span></td>
+                  <td><span className={`ln-tag ${s.suggestion === 'Keep' ? 'ln-tag-neutral' : s.suggestion === 'Extend' ? 'ln-tag-info' : 'ln-tag-accent'}`}>{enumText(tx, s.suggestion)}</span></td>
                 </tr>
               ))}
             </tbody>
@@ -112,7 +114,7 @@ export default function Curriculum() {
           {data.topics.length === 0 && <span className="ln-small ln-muted">{tx('inst.curriculum.pathwayAlreadyCoversEmerging')}</span>}
           {data.topics.map(t => (
             <div key={t.id} className="ln-tile ln-between" style={{ padding: 14, flexDirection: 'row', alignItems: 'flex-start', gap: 12 }}>
-              <div className="ln-col" style={{ gap: 4 }}><b>{t.name} <span className="ln-tag ln-tag-success" style={{ marginLeft: 4 }}>{t.growth}</span></b><span className="ln-small">{t.why}</span></div>
+              <div className="ln-col" style={{ gap: 4 }}><b>{t.name} <span className="ln-tag ln-tag-success" style={{ marginLeft: 4 }}>{enumText(tx, t.growth)}</span></b><span className="ln-small">{t.covered != null ? <>{t.desc} {tx('inst.curriculum.topicCoverage', { covered: t.covered, total: t.total, missing: t.missing.join(', ') })}</> : t.why}</span></div>
               {role === 'admin' && <button type="button" className="ln-btn ln-btn-sm" onClick={() => draftModule(t)}>{tx('inst.curriculum.draftModule2')}</button>}
             </div>
           ))}

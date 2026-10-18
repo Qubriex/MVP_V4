@@ -9,8 +9,22 @@ api.interceptors.request.use(config => {
   return config;
 });
 
+// Every successful create / update / delete on a portal record raises a
+// "qubirex:saved" event; the ToastProvider turns it into a short toast.
+// Previews, AI calls, transcription, heartbeats, sign-in and reads sent as
+// POST are left out — they are not changes the person made.
+const TOAST_SKIP = /\/(parse|preview|transcribe|tts|heartbeat|voice-metrics|session\/|summary-from-speech|tailor|login|logout|verify\/|verify-domain\/request|bulk|ask|assist|read-all|path\/node|doubts|help\/contact|passport\/|reviews\/instances)/;
+const TOAST_SCOPE = /^\/(institution|employer|admin|learner|notifications|market\/jobs)\//;
+const noteSaved = (res) => {
+  const { method, url = '' } = res.config || {};
+  if (!['post', 'put', 'patch', 'delete'].includes(method) || res.config?.quiet) return;
+  const path = url.replace(/^https?:\/\/[^/]+/, '').replace(/^\/api/, '').split('?')[0];
+  if (!TOAST_SCOPE.test(path) || TOAST_SKIP.test(path)) return;
+  try { window.dispatchEvent(new CustomEvent('qubirex:saved', { detail: { kind: method === 'delete' ? 'deleted' : 'saved' } })); } catch { /* old browsers */ }
+};
+
 api.interceptors.response.use(
-  res => res,
+  res => { noteSaved(res); return res; },
   err => {
     if (err.response?.status === 401) {
       const role = localStorage.getItem('qubirex_role');

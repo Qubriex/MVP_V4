@@ -4,7 +4,8 @@
 //   1. a key in en.json is missing from te.json or hi.json, or a translation
 //      drops or renames a {placeholder};
 //   2. a key used as t('…') in the code is not in en.json;
-//   3. English text is shown without t(): a JSX text node, a string or
+//   3. t() is called where no useUiLang() hook defines it;
+//   4. English text is shown without t(): a JSX text node, a string or
 //      template literal rendered as a JSX child, or a readable attribute
 //      (placeholder, title, aria-label, alt, label) with 3+ Latin letters.
 // Product names, codes, sample data and the like are listed in ALLOW; a line
@@ -77,6 +78,7 @@ for (const file of files(ROOT)) {
   traverse(ast, {
     CallExpression(p) {
       const c = p.node.callee;
+      if (c.type === 'Identifier' && (c.name === 't' || c.name === 'tx') && !p.scope.hasBinding(c.name)) problems.push(`no hook: ${at(p.node)} calls ${c.name}() without useUiLang() in scope`);
       if ((c.type === 'Identifier' && (c.name === 't' || c.name === 'tx')) || (c.type === 'Identifier' && c.name === 'translate')) {
         const a = p.node.arguments[c.name === 'translate' ? 1 : 0];
         if (a && a.type === 'StringLiteral' && /^[a-z][\w-]*(\.[\w-]+)+$/.test(a.value)) usedKeys.add(a.value);

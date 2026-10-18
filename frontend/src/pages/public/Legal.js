@@ -13,7 +13,7 @@ export default function Legal() {
   const { t } = useUiLang();
   const { page } = useParams();
   const key = PAGES[page] ? page : 'privacy';
-  const vars = { officer: CONTACT.grievanceOfficer, company: CONTACT.company, city: CONTACT.city, email: CONTACT.grievance };
+  const vars = { officer: CONTACT.grievanceOfficer || t('contact.officerRole'), company: CONTACT.company, city: CONTACT.city, email: CONTACT.grievance };
   return (
     <PublicShell>
       <BackHome />

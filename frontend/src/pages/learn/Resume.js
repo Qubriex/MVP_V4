@@ -13,13 +13,14 @@ import { useAuth } from '../../context/AuthContext';
 import { Select } from '../../components/shared/ui';
 
 import { useUiLang } from '../../context/UiLangContext';
+import { LoadingRows } from '../../components/shared/EmptyState';
 const TEMPLATES = [
   { id: 'classic', name: 'Classic', thumb: { borderTop: '6px solid var(--accent-800)' } },
   { id: 'modern', name: 'Modern', thumb: { borderLeft: '16px solid #201F1A' } },
   { id: 'compact', name: 'Compact', thumb: { background: 'repeating-linear-gradient(var(--color-bg-alt) 0 6px, var(--color-border) 6px 8px)' } }
 ];
 const SECTION_NAMES = { summary: 'Summary', skills: 'Skills', projects: 'Projects', education: 'Education', experience: 'Experience', certifications: 'Certifications', capability_record: 'Capability record' };
-const ACCENT = { classic: '#9B3A2A', modern: '#201F1A', compact: '#3B5A75' };
+const ACCENT = { classic: '#C4302A', modern: '#201F1A', compact: '#3B5A75' };
 
 function orderBy(list, order) {
   if (!order) return list;
@@ -141,7 +142,7 @@ export default function Resume() {
     try { const res = await api.get(`/learner/resume/versions/${v}`); apply(res.data, p); setMessage(t('learn.resume.loadedVersionV', { v })); } catch (e) { setMessage(t('learn.resume.couldnTLoadVersion')); }
   };
 
-  if (!data) return <p className="ln-muted">{t('learn.resume.loading')}</p>;
+  if (!data) return <LoadingRows rows={5} />;
   const accent = ACCENT[template];
   const H = ({ children }) => <span className="ln-a4-h" style={{ color: accent }}>{children}</span>;
   const tailoredJob = jobs.find(j => j.id === tailoredFor);

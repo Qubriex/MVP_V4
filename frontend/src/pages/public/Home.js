@@ -5,13 +5,51 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Mic, School, Briefcase, ShieldCheck, ArrowRight } from 'lucide-react';
-import { CodeTag } from '../../components/shared/Popover';
+import HeroDemo from '../../components/public/HeroDemo';
+import { FEATURES } from '../../config/features';
 import PublicShell, { SIGN_IN } from '../../components/public/PublicShell';
 import { useUiLang } from '../../context/UiLangContext';
 
 export const SIDES = [
   ['learners', Mic], ['colleges', School], ['employers', Briefcase]
 ];
+
+const SCREENS = [['learner-home', 'home.screen.learner'], ['passport', 'home.screen.passport'], ['college-home', 'home.screen.college'], ['employer-home', 'home.screen.employer']];
+const FAQ = [1, 2, 3, 4, 5];
+
+/** Screenshots of each portal (sample data), scrolled sideways on small screens. */
+function ScreenStrip() {
+  const { t } = useUiLang();
+  return (
+    <section className="ln-col" style={{ gap: 12 }} aria-labelledby="home-screens">
+      <h2 id="home-screens" className="ln-h2">{t('home.screensTitle')}</h2>
+      <div className="pb-screens" tabIndex={0} role="region" aria-label={t('home.screensTitle')}>
+        {SCREENS.map(([file, key]) => (
+          <figure key={file} className="pb-screen">
+            <img src={`/screens/${file}.png`} alt={t(key)} loading="lazy" width="640" height="400" />
+            <figcaption className="ln-small">{t(key)}</figcaption>
+          </figure>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/** Questions people ask first; native details/summary, so keyboard and screen readers work. */
+function Faq() {
+  const { t } = useUiLang();
+  return (
+    <section className="ln-col" style={{ gap: 10 }} aria-labelledby="home-faq">
+      <h2 id="home-faq" className="ln-h2">{t('home.faqTitle')}</h2>
+      {FAQ.map(i => (
+        <details key={i} className="pb-faq">
+          <summary>{t(`home.faq.q${i}`)}</summary>
+          <p className="ln-small" style={{ margin: 0 }}>{t(`home.faq.a${i}`)}</p>
+        </details>
+      ))}
+    </section>
+  );
+}
 
 export function SignInStrip() {
   const { t } = useUiLang();
@@ -39,23 +77,15 @@ export default function Home() {
           {/* Brand line: the one place all three languages appear together. */}
           <p className="ln-indic ln-muted" style={{ margin: 0, fontSize: 'var(--fs-body)', lineHeight: 1.7 }} aria-label={t('home.tagline')}>
             <span lang="en">{t('pub.home.languageSkillsFuture')}</span><br />
-            <span lang="te">మీ భాష. మీ నైపుణ్యాలు. మీ భవిష్యత్తు</span><br />
-            <span lang="hi">आपकी भाषा। आपके कौशल। आपका भविष्य</span>
+            <span lang="te">మీ భాష. మీ నైపుణ్యాలు. మీ భవిష్యత్తు.</span><br />
+            <span lang="hi">आपकी भाषा। आपके कौशल। आपका भविष्य।</span>
           </p>
           <div className="ln-row ln-wrap" style={{ gap: 10 }}>
             <Link to="/demo" className="ln-btn ln-btn-primary">{t('nav.demo')}<ArrowRight size={16} aria-hidden="true" /></Link>
             <Link to="/verify/QBX-DEMO-0000" className="ln-btn ln-btn-secondary"><ShieldCheck size={16} aria-hidden="true" />{t('home.verifySample')}</Link>
           </div>
         </div>
-        <article className="ln-card" style={{ gap: 10 }} aria-label={t('home.sampleLabel')}>
-          <div className="ln-between"><span className="ln-kicker">{t('home.sampleLabel')}</span><span className="ln-tag ln-tag-neutral">{t('common.demoData')}</span></div>
-          <b style={{ fontSize: 'var(--fs-h3)' }}>{t('home.sampleProgramme')}</b>
-          {[['home.s1', 'A3', true], ['home.s2', 'A2', true], ['home.s3', 'A2', false]].map(([k, a, ok]) => (
-            <div key={k} className="ln-between ln-small ln-wrap" style={{ gap: 6 }}><span>{t(k)}</span>
-              <span className="ln-row" style={{ gap: 4 }}><span className={`ln-tag ${ok ? 'ln-tag-success' : 'ln-tag-info'}`}>{ok ? t('label.confirmed') : t('label.partial')}</span><CodeTag code="L2" label={t('level.L2')} /><CodeTag code={a} label={t(`assure.${a}`)} /></span></div>
-          ))}
-          <span className="ln-xs ln-muted">{t('home.sampleNote')}</span>
-        </article>
+        <HeroDemo />
       </section>
 
       <section className="pb-steps" aria-label={t('home.howTitle')}>
@@ -82,6 +112,17 @@ export default function Home() {
           {proves.map(([yes, k]) => <span key={k} className="ln-small"><span className={yes ? 'pb-yes' : 'pb-no'}>{yes ? t('common.yes') : t('common.no')}</span>{t(k)}</span>)}
         </div>
       </section>
+
+      <ScreenStrip />
+
+      {FEATURES.trustedBy && FEATURES.trustedByNames.length > 0 && (
+        <section className="ln-card" style={{ gap: 10 }} aria-labelledby="home-trusted">
+          <h2 id="home-trusted" className="ln-h2">{t('home.trustedTitle')}</h2>
+          <ul className="ln-row ln-wrap" style={{ gap: 18, listStyle: 'none', margin: 0, padding: 0 }}>{FEATURES.trustedByNames.map(n => <li key={n} className="ln-small" style={{ fontWeight: 600 }}>{n}</li>)}</ul>
+        </section>
+      )}
+
+      <Faq />
 
       <section className="ln-grid ln-g-4" style={{ gap: 12 }} aria-label={t('home.whyTitle')}>
         {[1, 2, 3, 4].map(i => <div key={i} className="ln-tile" style={{ padding: 16 }}><b style={{ fontSize: 'var(--fs-body)' }}>{t(`home.why${i}`)}</b></div>)}

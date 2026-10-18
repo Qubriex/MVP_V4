@@ -20,6 +20,7 @@ import CohortGrid from '../../components/inst/CohortGrid';
 import { Select } from '../../components/shared/ui';
 
 import { useUiLang, uiLocale } from '../../context/UiLangContext';
+import { LoadingRows } from '../../components/shared/EmptyState';
 // Tab ids (also used in ?tab=) and their translated labels.
 const TABS = ['Overview', 'Readiness', 'Students', 'Pathway', 'Mastery logs', 'Settings'];
 const TAB_KEY = { Overview: 'inst.cohort.tabs.overview', Readiness: 'inst.cohort.tabs.readiness', Students: 'inst.cohort.tabs.students', Pathway: 'inst.cohort.tabs.pathway', 'Mastery logs': 'inst.cohort.tabs.masteryLogs', Settings: 'inst.cohort.tabs.settings' };
@@ -97,7 +98,7 @@ function Pathway({ c, studentId, setStudentId }) {
       {view === 'student' ? (
         students.length === 0 ? <div className="ln-card ln-muted">{t('inst.cohort.noStudentsCohortYet')}</div>
           : error ? <div className="ln-error">{t('inst.cohort.couldnTLoadStudent')}</div>
-            : !p ? <p className="ln-muted">{t('inst.cohort.loading')}</p> : (
+            : !p ? <LoadingRows rows={5} /> : (
               <>
                 <div className="ln-card ln-card-sm" style={{ gap: 6 }}>
                   <div className="ln-between ln-wrap"><b>{p.student.name}</b><span className="ln-small">{t('inst.cohort.masteredTotalSkillsMastered', { mastered: p.mastered, total: p.total })}{' '} <b>{p.pct}%</b></span></div>
@@ -241,7 +242,7 @@ export default function Cohort() {
   };
 
   if (error) return <div className="ln-error">{error}</div>;
-  if (!c) return <p className="ln-muted">{t('inst.cohort.loading')}</p>;
+  if (!c) return <LoadingRows rows={5} />;
   const st = COHORT_STATUS[c.status] || COHORT_STATUS.setup;
   const loginUrl = `${window.location.origin}/learner-login`;
 

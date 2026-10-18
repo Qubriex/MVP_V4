@@ -4,7 +4,7 @@
 // nudge to finish the profile.
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mic, Keyboard, Check, CheckCircle2, Circle, Route as RouteIcon, Building2, RotateCcw } from 'lucide-react';
+import { Mic, Keyboard, Check, Flame, CheckCircle2, Circle, Route as RouteIcon, Building2, RotateCcw } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useUiLang } from '../../context/UiLangContext';
 import api, { getOr } from '../../utils/api';
@@ -12,6 +12,7 @@ import { MOCK_LEARNER_DASHBOARD, MOCK_MARKET_SNAPSHOT, MOCK_PROFILE_BASICS } fro
 import { Bar, SampleBadge, StatusTag, salary, minutes, RequestButton, useSkillRequests } from '../../components/learn/ui';
 import { useLowBandwidth, slowConnection, cacheOutlines, cachedOutlines } from '../../utils/lowBandwidth';
 import CommandBox from '../../components/shared/CommandBox';
+import { ProgressRing } from '../../components/shared/ui';
 
 // "Start here" for a new student, and "Today": practice from the college,
 // employer requests and reviews due, each one tap away (v4.3 canvas L1).
@@ -158,14 +159,15 @@ export default function Dashboard() {
         </section>
 
         <section className="ln-card">
-          <div className="ln-between" style={{ alignItems: 'baseline' }}>
-            <span className="ln-indic" style={{ fontSize: 'var(--fs-body)', fontWeight: 600 }}>{t('dash.progress')}</span>
-            <span className="ln-stat" style={{ color: 'var(--status-success)', fontSize: 'var(--fs-h1)' }}>{data?.progress_pct ?? 0}%</span>
+          <div className="ln-row" style={{ gap: 16 }}>
+            <ProgressRing pct={data?.progress_pct} size={104} label={t('learn.dashboard.ringLabel', { pct: data?.progress_pct ?? 0 })} />
+            <div className="ln-col" style={{ gap: 4 }}>
+              <span className="ln-indic" style={{ fontSize: 'var(--fs-body)', fontWeight: 600 }}>{t('dash.progress')}</span>
+              <span className="ln-small ln-muted">{t('learn.dashboard.skillsDone', { n: data?.nodes_mastered ?? 0, total: data?.total_nodes ?? 0 })}</span>
+            </div>
           </div>
-          <Bar pct={data?.progress_pct} variant="ln-bar-vivid" label={t('learn.dashboard.overallProgress')} />
-          <span className="ln-small ln-muted">{data?.nodes_mastered ?? 0} {' '}{t('learn.dashboard.of')}{' '} {data?.total_nodes ?? 0} {' '}{t('learn.dashboard.skillNodesMastered')}</span>
           <div className="ln-grid ln-g-3" style={{ gap: 10, gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}>
-            <div className="ln-tile"><span style={{ fontSize: 'var(--fs-h2)', fontWeight: 700 }}>{data?.streak?.current_streak ?? 0}</span><span className="ln-xs ln-muted">{t('learn.dashboard.dayStreak')}</span></div>
+            <div className="ln-tile"><span style={{ fontSize: 'var(--fs-h2)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}><Flame size={20} aria-hidden="true" style={{ color: data?.streak?.current_streak ? 'var(--brand-accent)' : 'var(--color-text-muted)' }} />{data?.streak?.current_streak ?? 0}</span><span className="ln-xs ln-muted">{t('learn.dashboard.dayStreak')}</span></div>
             <div className="ln-tile"><span style={{ fontSize: 'var(--fs-h2)', fontWeight: 700 }}>{minutes(data?.week_minutes)}</span><span className="ln-xs ln-muted">{t('learn.dashboard.thisWeek')}</span></div>
             <div className="ln-tile"><span style={{ fontSize: 'var(--fs-h2)', fontWeight: 700 }}>{data?.clusters_done ?? 0}</span><span className="ln-xs ln-muted">{t('learn.dashboard.clustersDone')}</span></div>
           </div>

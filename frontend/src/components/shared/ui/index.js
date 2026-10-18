@@ -10,3 +10,5 @@ export { default as Modal } from './Modal';
 export { Table, TableLabels } from './Table';
 export { default as Drawer } from '../Drawer';
 export { default as EmptyState } from '../EmptyState';
+export { default as Switch } from './Switch';
+export { default as ProgressRing } from './ProgressRing';

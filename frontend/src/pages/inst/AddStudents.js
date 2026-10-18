@@ -134,7 +134,7 @@ export default function AddStudents() {
       <Link to="/institution/students" className="ln-link" style={{ alignSelf: 'flex-start' }}>{tx('inst.addStudents.studentsAccess')}</Link>
       <h1 className="ln-title">{tx('inst.addStudents.addStudentsGiveAccess')}</h1>
 
-      <div className="ln-grid ln-g-detail" style={{ gridTemplateColumns: 'minmax(0, 1fr) 340px' }}>
+      <div className="ln-grid ln-g-detail ui-g-side">
         <div className="ln-col" style={{ gap: 20, minWidth: 0 }}>
           <section className="ln-card">
             <div className="ln-between ln-wrap"><h2 className="ln-h2">{tx('inst.addStudents.1Who')}</h2>

@@ -156,7 +156,7 @@ export default function Students() {
       <div className="ln-pilltabs" role="tablist" aria-label={t('inst.students.accessStatus')}>
         {FILTERS.map(([id, label]) => (
           <button key={id} type="button" role="tab" className="ln-pilltab" aria-selected={status === id} onClick={() => setParam('status', id === 'all' ? '' : id)}>
-            {label} <span className="ln-tag ln-tag-neutral" style={{ marginLeft: 4 }}>{data?.counts?.[id] ?? 0}</span>
+            {t(label)} <span className="ln-tag ln-tag-neutral" style={{ marginLeft: 4 }}>{data?.counts?.[id] ?? 0}</span>
           </button>
         ))}
       </div>

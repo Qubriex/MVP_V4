@@ -15,6 +15,7 @@ import { MOCK_JOB_DETAIL } from '../../utils/learnerMockData';
 import { MatchRing, SampleBadge, RequestButton, useSkillRequests, salary, posted } from '../../components/learn/ui';
 
 import { useUiLang } from '../../context/UiLangContext';
+import { LoadingRows } from '../../components/shared/EmptyState';
 const LANG_LABEL = { telugu: 'తెలుగు', hindi: 'हिंदी' };
 
 export default function JobDetail() {
@@ -56,7 +57,7 @@ export default function JobDetail() {
     setReading(false);
   };
 
-  if (!data) return <p className="ln-muted">{t('learn.jobDetail.loading')}</p>;
+  if (!data) return <LoadingRows rows={5} />;
   const { job, gap } = data;
   const have = gap.skills.filter(s => s.status !== 'not_in_path' && s.status !== 'requested');
   const toLearn = gap.skills.filter(s => s.status === 'not_in_path' || s.status === 'requested');

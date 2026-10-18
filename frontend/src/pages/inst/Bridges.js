@@ -10,7 +10,7 @@ import { useCachedGet, dropCached } from '../../utils/cachedGet';
 import { errMsg } from '../../utils/errors';
 import { useStaff } from '../../components/inst/InstitutionLayout';
 import Crumbs from '../../components/inst/Crumbs';
-import EmptyState from '../../components/shared/EmptyState';
+import EmptyState, { LoadingRows } from '../../components/shared/EmptyState';
 import { HowCounted } from '../../components/shared/Popover';
 import { SmallSample } from '../../components/shared/SampleSize';
 import { Select } from '../../components/shared/ui';
@@ -148,7 +148,7 @@ export function BridgeDetail() {
   const [msg, setMsg] = useState('');
   const avgUp = useMemo(() => (b?.result.readiness_now != null && b?.result.readiness_before != null ? b.result.readiness_now - b.result.readiness_before : null), [b]);
   if (error && !b) return <div className="ln-error">{errMsg(error, t('inst.bridges.couldnTLoadBridge2'))}</div>;
-  if (!b) return <p className="ln-muted">{t('inst.bridges.loading')}</p>;
+  if (!b) return <LoadingRows rows={5} />;
   const close = async () => {
     try { await api.post(`/institution/bridges/${id}/close`); dropCached('/institution/bridges'); reload(); } catch (e) { setMsg(errMsg(e, t('inst.bridges.couldnTClose'))); }
   };

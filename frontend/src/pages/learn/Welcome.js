@@ -9,6 +9,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useUiLang, speechTag } from '../../context/UiLangContext';
 import { useSpeechInput } from '../../utils/voice';
 import { useProfileDraft, PersonalSection, GoalsSection, VoiceSection, Section } from '../../components/learn/ProfileSections';
+import { LoadingRows } from '../../components/shared/EmptyState';
 
 const STEPS = ['learn.welcome.steps.basics', 'learn.welcome.steps.goals', 'learn.welcome.steps.voiceCheck'];
 
@@ -45,7 +46,7 @@ export default function Welcome() {
   const loaded = !!draft;
   useEffect(() => { if (loaded && draft.has_profile === false) set('ui_language', lang); }, [loaded]);
 
-  if (!form.draft) return <p className="ln-muted">{t('learn.welcome.loading')}</p>;
+  if (!form.draft) return <LoadingRows rows={5} />;
   const next = async () => {
     if (form.dirty || draft.has_profile === false) await form.save();
     if (step < STEPS.length - 1) setStep(step + 1);

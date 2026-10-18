@@ -11,6 +11,7 @@ import { errMsg } from '../../utils/errors';
 import { Select } from '../../components/shared/ui';
 
 import { useUiLang, uiLocale } from '../../context/UiLangContext';
+import { LoadingRows } from '../../components/shared/EmptyState';
 export default function Standing() {
   const { t } = useUiLang();
   const [cohortId, setCohortId] = useState('');
@@ -34,7 +35,7 @@ export default function Standing() {
   };
 
   if (error) return <div className="ln-error">{error}</div>;
-  if (!data) return <p className="ln-muted">{t('inst.standing.loading')}</p>;
+  if (!data) return <LoadingRows rows={5} />;
   if (data.empty) return <><h1 className="ln-title">{t('inst.standing.whereWeStand')}</h1><div className="ln-card ln-muted">{t('inst.standing.noCohortsScopeYet')}</div></>;
   const cmpLabel = data.comparison.label;
 

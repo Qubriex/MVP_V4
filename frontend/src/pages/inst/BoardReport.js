@@ -9,18 +9,20 @@ import { errMsg } from '../../utils/errors';
 import { TooFew } from '../../components/shared/SampleSize';
 
 import { useUiLang, translate, formatDate } from '../../context/UiLangContext';
+import { LoadingRows } from '../../components/shared/EmptyState';
 const KEYS = ['title', 'generated', 'target', 'by', 'none', 'cohort', 'students', 'ready', 'nearly', 'building', 'active', 'logs', 'gap', 'placements', 'placed', 'offers', 'median', 'rating', 'sponsored', 'how', 'print', 'back', 'lpa'];
 const REPORT_LANGS = [['en', 'english', 'English'], ['te', 'telugu', 'తెలుగు'], ['hi', 'hindi', 'हिंदी']];
 
 export default function BoardReport() {
-  const { t: tx } = useUiLang();
+  const { t: tx, lang: uiLang0 } = useUiLang();
   const [params] = useSearchParams();
-  const lang = (REPORT_LANGS.find(l => l[0] === params.get('lang')) || REPORT_LANGS[0])[0];
+  // ?lang= picks the report language; without it the report follows the screen.
+  const lang = (REPORT_LANGS.find(l => l[0] === params.get('lang')) || REPORT_LANGS.find(l => l[1] === uiLang0) || REPORT_LANGS[0])[0];
   const uiLang = REPORT_LANGS.find(l => l[0] === lang)[1];
   const t = Object.fromEntries(KEYS.map(k => [k, translate(uiLang, `inst.boardReport.r.${k}`)]));
   const { data, error } = useCachedGet('/institution/board-report');
   if (error && !data) return <div className="ln-error">{errMsg(error, tx('inst.boardReport.couldnTPrepareReport'))}</div>;
-  if (!data) return <p className="ln-muted">{tx('inst.boardReport.loading')}</p>;
+  if (!data) return <LoadingRows rows={5} />;
   const { institution: inst, cohorts, placements: p } = data;
   const when = (s) => formatDate(uiLang, s, { day: 'numeric', month: 'long', year: 'numeric' });
   return (

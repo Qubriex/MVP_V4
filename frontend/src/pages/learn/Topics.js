@@ -16,6 +16,7 @@ import { errMsg } from '../../utils/errors';
 import { Bar, SampleBadge, useSkillRequests, REQUEST_STATUS } from '../../components/learn/ui';
 
 import { useUiLang } from '../../context/UiLangContext';
+import { enumText } from '../../i18n/enums';
 export default function Topics() {
   const { t } = useUiLang();
   const { user } = useAuth();
@@ -71,7 +72,7 @@ export default function Topics() {
 
       <div className="ln-pilltabs" role="tablist" aria-label={t('learn.topics.sector')}>
         {['', ...(data?.sectors || MOCK_TOPICS.sectors)].map(s => (
-          <button key={s || 'all'} type="button" role="tab" className="ln-pilltab" aria-selected={sector === s} onClick={() => { setSector(s); setFeaturedId(null); }}>{s || t('learn.topics.all2')}</button>
+          <button key={s || 'all'} type="button" role="tab" className="ln-pilltab" aria-selected={sector === s} onClick={() => { setSector(s); setFeaturedId(null); }}>{s ? enumText(t, s) : t('learn.topics.all2')}</button>
         ))}
       </div>
 
@@ -79,7 +80,7 @@ export default function Topics() {
         <section className="ln-feature" aria-labelledby="featured-topic">
           <div>
             <div className="ln-row ln-wrap" style={{ gap: 8 }}>
-              <span className="ln-tag ln-tag-lg" style={{ background: 'var(--ok-bg)', color: 'var(--ok)' }}>{featured.growth}</span>
+              <span className="ln-tag ln-tag-lg" style={{ background: 'var(--ok-bg)', color: 'var(--ok)' }}>{enumText(t, featured.growth)}</span>
               {featured.have_pct >= 20 && <span className="ln-tag ln-tag-lg" style={{ background: 'var(--stage-surface)', color: 'var(--accent-200)' }}>{t('learn.topics.closePath')}</span>}
             </div>
             <h2 id="featured-topic" style={{ fontSize: 'var(--fs-h1)' }}>{featured.name}</h2>
@@ -114,10 +115,10 @@ export default function Topics() {
             {featured.steps.map(st => {
               const done = st.status === 'mastered' || st.status === 'declared';
               const note = done ? t('learn.topics.alreadyMastered')
-                : st.status === 'in_path' || st.status === 'in_progress' ? `In your path · about ${st.hours} h`
-                : requests.requested.has(st.name) ? `${t(REQUEST_STATUS[requests.statusOf(st.name)])} · about ${st.hours} h`
-                : st.status === 'requested' ? `${t(REQUEST_STATUS.pending)} · about ${st.hours} h`
-                : `About ${st.hours} h · not in your programme`;
+                : st.status === 'in_path' || st.status === 'in_progress' ? t('learn.topics.inPathHours', { h: st.hours })
+                : requests.requested.has(st.name) ? `${t(REQUEST_STATUS[requests.statusOf(st.name)])} · ${t('learn.topics.aboutHours', { h: st.hours })}`
+                : st.status === 'requested' ? `${t(REQUEST_STATUS.pending)} · ${t('learn.topics.aboutHours', { h: st.hours })}`
+                : t('learn.topics.notInProgrammeHours', { h: st.hours });
               return (
                 <div key={st.name} className="ln-step">
                   <span className={`ln-stepdot ${done ? 'is-done' : ''}`}>{done ? '✓' : st.n}</span>
@@ -132,7 +133,7 @@ export default function Topics() {
       <div className="ln-grid ln-g-3" style={{ gap: 16 }}>
         {rest.map(tp => (
           <article key={tp.id} className="ln-card" style={{ gap: 12, padding: 22, borderRadius: 'var(--radius-lg)' }}>
-            <div className="ln-between"><span className="ln-xs ln-muted">{tp.sector}</span><span className={`ln-tag ln-tag-lg ${tp.growth === 'Steady' ? 'ln-tag-neutral' : 'ln-tag-success'}`}>{tp.growth}</span></div>
+            <div className="ln-between"><span className="ln-xs ln-muted">{enumText(t, tp.sector)}</span><span className={`ln-tag ln-tag-lg ${tp.growth === 'Steady' ? 'ln-tag-neutral' : 'ln-tag-success'}`}>{enumText(t, tp.growth)}</span></div>
             <h3 style={{ fontSize: 'var(--fs-h3)' }}>{tp.name}</h3>
             <span style={{ fontSize: 'var(--fs-body)', lineHeight: 1.55 }}>{tp.desc}</span>
             <span className="ln-small ln-muted"><b style={{ color: 'var(--color-text)' }}>{t('learn.topics.newRoles2')}</b> {tp.roles.join(', ')}</span>
