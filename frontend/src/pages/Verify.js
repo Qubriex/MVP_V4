@@ -48,20 +48,39 @@ function NameCheck({ id }) {
   const { t } = useUiLang();
   const [name, setName] = useState('');
   const [res, setRes] = useState(null);
+  const [busy, setBusy] = useState(false);
   const check = async (e) => {
     e.preventDefault(); setRes(null);
-    if (id === DEMO_ID) { setRes({ match: /lakshmi/i.test(name) && /rao/i.test(name) }); return; }
-    try { setRes((await api.post(`/verify/${encodeURIComponent(id)}/name-check`, { name })).data); } catch (err) { setRes({ error: err.response?.data?.error?.message || t('verify.nameFailed') }); }
+    if (!id) { setRes({ error: t('verify.nameNeedsPassport') }); return; }
+    if (name.trim().split(/\s+/).filter(Boolean).length < 2) { setRes({ error: t('verify.nameTwoWords') }); return; }
+    if (id === DEMO_ID) {
+      const l = /lakshmi/i.test(name); const r = /rao/i.test(name);
+      setRes({ result: l && r ? 'match' : l || r ? 'unclear' : 'no_match' }); return;
+    }
+    setBusy(true);
+    try {
+      const d = (await api.post(`/verify/${encodeURIComponent(id)}/name-check`, { name })).data;
+      setRes({ result: d.result || (d.match ? 'match' : 'no_match') });
+    } catch (err) { setRes({ error: err.response?.data?.error?.message || t('verify.nameFailed') }); }
+    setBusy(false);
   };
+  const RESULT = { match: ['verify.match', 'ln-tag-success', 'verify.matchText'], unclear: ['verify.unclear', 'ln-tag-warning', 'verify.unclearText'], no_match: ['verify.noMatch', 'ln-tag-danger', 'verify.noMatchText'] };
   return (
     <section className="ln-card" style={{ gap: 8 }}>
       <h2 className="ln-h2" style={{ fontSize: 'var(--fs-h3)' }}><UserCheck size={17} aria-hidden="true" /> {t('verify.nameTitle')}</h2>
       <form className="ln-row ln-wrap" style={{ gap: 8 }} onSubmit={check}>
         <label htmlFor="vname" className="ln-sr">{t('verify.nameLabel')}</label>
         <input id="vname" className="ln-input" style={{ flex: 1, minWidth: 200 }} placeholder={t('verify.nameLabel')} value={name} onChange={e => setName(e.target.value)} />
-        <button type="submit" className="ln-btn" disabled={name.trim().split(/\s+/).length < 2}>{t('verify.nameCheck')}</button>
+        <button type="submit" className="ln-btn ln-btn-primary" disabled={busy}>{busy ? t('verify.nameChecking') : t('verify.nameCheck')}</button>
       </form>
-      {res && (res.error ? <span className="ln-small ln-error">{res.error}</span> : <span className={`ln-tag ${res.match ? 'ln-tag-success' : 'ln-tag-warning'}`} style={{ alignSelf: 'flex-start' }}>{res.match ? t('verify.match') : t('verify.noMatch')}</span>)}
+      <div aria-live="polite">
+        {res && (res.error ? <span className="ln-small ln-error" role="alert">{res.error}</span> : (
+          <span className="ln-row ln-wrap" style={{ gap: 8 }}>
+            <span className={`ln-tag ln-tag-lg ${RESULT[res.result][1]}`}>{t(RESULT[res.result][0])}</span>
+            <span className="ln-small">{t(RESULT[res.result][2])}</span>
+          </span>
+        ))}
+      </div>
       <span className="ln-xs ln-muted">{t('verify.nameNote')}</span>
     </section>
   );
@@ -150,11 +169,7 @@ export default function Verify() {
           </>
         )}
         <Limits />
-        <nav className="ln-row ln-wrap ln-xs" style={{ gap: 14 }} aria-label={t('verify.dev')}>
-          <span className="ln-muted">{t('page.verify.didWebQubirexT', { t: t('verify.statusLists') })}</span>
-          <a className="ln-link" href="/api/verify/jwks.json" target="_blank" rel="noopener">{t('verify.keys')}</a>
-          <Link className="ln-link" to="/employer/verify-bulk">{t('verify.bulk')}</Link>
-        </nav>
+        <Link className="ln-link ln-small" style={{ alignSelf: 'flex-start' }} to="/employer/verify-bulk">{t('verify.bulk')}</Link>
       </div>
     </PublicShell>
   );

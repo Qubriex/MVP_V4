@@ -170,6 +170,69 @@
         ]
       }
     },
+    "/api/admin/help-requests": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "get_admin_help_requests",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/api/admin/help-requests/{id}": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "post_admin_help_requests_id",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CsrfToken"
+          }
+        ]
+      }
+    },
     "/api/admin/institutions": {
       "get": {
         "tags": [
@@ -6085,6 +6148,31 @@
             "$ref": "#/components/parameters/CsrfToken"
           }
         ]
+      }
+    },
+    "/api/sample-lesson": {
+      "get": {
+        "tags": [
+          null
+        ],
+        "operationId": "get_sample_lesson",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
       }
     },
     "/api/verify/jwks.json": {

@@ -2,7 +2,7 @@
 import { describe, it, expect, beforeAll, afterEach } from 'vitest';
 import request from 'supertest';
 import * as dal from '../../core/db/dal.js';
-import { freshDb, makeApp, seedInstitution, seedPathway, login, PIN, PASSWORD } from '../helpers/setup.js';
+import { freshDb, makeApp, seedInstitution, seedPathway, seedAdmin, login, PIN, PASSWORD } from '../helpers/setup.js';
 import { setResponder } from '../../core/ai/adapters/mock.js';
 
 let app; let A; let learner; let staff; let restore = () => {};
@@ -84,5 +84,35 @@ describe('help and glossary', () => {
     const st = await request(app).get('/api/help/status');
     expect(st.body.ok).toBe(true);
     expect((await request(app).get('/api/glossary')).body.A3).toMatch(/supervision/);
+  });
+
+  it('accepts a message from a visitor whose old sign-in has expired (no 401, no sign-in redirect)', async () => {
+    const r = await request(app).post('/api/help/contact').set('Authorization', 'Bearer not-a-valid-token')
+      .send({ type: 'question', message: 'Pricing for 300 students?', reply_to: 'tpo@college.in' });
+    expect(r.status).toBe(201);
+    const row = await dal.one("SELECT actor_type FROM help_requests WHERE message = 'Pricing for 300 students?'");
+    expect(row.actor_type).toBe('public');
+  });
+
+  it('shows every message to Qubirex admins, who can mark it answered', async () => {
+    await seedAdmin();
+    const admin = await login(app, '/api/auth/admin/login', { email: 'root@qubirex.test', password: PASSWORD });
+    const h = { Authorization: `Bearer ${admin.token}` };
+    const open = await request(app).get('/api/admin/help-requests?status=open').set(h);
+    expect(open.status).toBe(200);
+    const msg = open.body.requests.find(m => m.message === 'Pricing for 300 students?');
+    expect(msg.reply_to).toBe('tpo@college.in');
+    expect((await request(app).post(`/api/admin/help-requests/${msg.id}`).set(h).send({ status: 'answered' })).status).toBe(200);
+    const answered = await request(app).get('/api/admin/help-requests?status=answered').set(h);
+    expect(answered.body.requests.some(m => m.id === msg.id)).toBe(true);
+    expect((await request(app).post(`/api/admin/help-requests/${msg.id}`).set(h).send({ status: 'deleted' })).status).toBe(400);
+    // Learners and staff cannot read the inbox.
+    expect((await learner.agent.get('/api/admin/help-requests').set(auth(learner))).status).toBe(403);
+  });
+
+  it('serves the home page sample lesson as audio without sign-in', async () => {
+    const r = await request(app).get('/api/sample-lesson?lang=telugu');
+    expect(r.status).toBe(200);
+    expect(r.headers['content-type']).toMatch(/^audio\//);
   });
 });

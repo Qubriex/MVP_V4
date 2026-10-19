@@ -6,6 +6,7 @@
 //   POST /api/help/contact               { type, message, reply_to? } (signed in or not)
 //   GET  /api/help/status                is the service up (public)
 //   GET  /api/glossary                   the plain-words glossary (public)
+//   GET  /api/sample-lesson?lang=telugu  the home page's sample lesson, spoken (public)
 import express from 'express';
 import * as dal from '../../core/db/dal.js';
 import { ulid } from '../../core/db/ulid.js';
@@ -14,10 +15,12 @@ import { loadStaff } from '../middleware/staff.js';
 import { rateLimit } from '../middleware/rateLimit.js';
 import { listFor, markAllRead, setChannels } from '../../core/notify.js';
 import { ask, GLOSSARY } from '../../core/assist.js';
-import { aiNotConfigured, AI_NOT_CONFIGURED } from '../../core/ai/gateway.js';
+import { aiNotConfigured, AI_NOT_CONFIGURED, synthesize } from '../../core/ai/gateway.js';
+import { hit, clientIp } from '../middleware/rateLimit.js';
 
 const router = express.Router();
 const signedIn = authenticate();
+const maybeSignedIn = authenticate({ optional: true });
 // Staff need their role and cohort scope loaded (professors see their cohorts only).
 const withStaff = (req, res, next) => (req.session?.actor_type === 'staff' ? loadStaff(req, res, next) : next());
 
@@ -47,11 +50,9 @@ router.post('/assist/ask', signedIn, withStaff, askLimit, async (req, res) => {
 });
 
 const contactLimit = rateLimit({ name: 'help:contact', limit: 10, windowMs: 3600000 });
-router.post('/help/contact', contactLimit, async (req, res, next) => {
-  // Optional sign-in: use it when present, but allow the public site too.
-  if (req.headers.authorization || /qbx_session/.test(req.headers.cookie || '')) return signedIn(req, res, next);
-  return next();
-}, async (req, res) => {
+// Sign-in is optional: a stale token from an old visit must not block (or
+// redirect) a visitor who only wants to send a message.
+router.post('/help/contact', contactLimit, maybeSignedIn, async (req, res) => {
   const type = ['question', 'problem', 'data_request', 'grievance'].includes(req.body?.type) ? req.body.type : 'question';
   const message = String(req.body?.message || '').trim().slice(0, 4000);
   if (message.length < 5) return res.status(400).json({ error: 'Please write a little more so we can help.' });
@@ -70,5 +71,33 @@ router.get('/help/status', async (req, res) => {
 });
 
 router.get('/glossary', (req, res) => res.json(GLOSSARY));
+
+// The home page's sample lesson in the server's teaching voice, so it plays
+// on every device (most browsers have no Telugu or Hindi voice of their own).
+// The text is fixed here — visitors cannot make it say anything else — and
+// each language is made once, then served from memory.
+export const SAMPLE_LESSON = {
+  telugu: 'React లో component అంటే ఒక చిన్న భాగం. ఒక బటన్ గురించి ఆలోచించండి — ఒకసారి రాస్తే, ఎక్కడైనా వాడొచ్చు. ఇప్పుడు మీరే ఒకటి రాయండి.',
+  hindi: 'React में component एक छोटा हिस्सा है। एक बटन के बारे में सोचिए — एक बार लिखो, कहीं भी इस्तेमाल करो। अब आप ख़ुद एक लिखिए।'
+};
+const sampleAudio = new Map();
+router.get('/sample-lesson', async (req, res) => {
+  const language = req.query.lang === 'hindi' ? 'hindi' : 'telugu';
+  if (!sampleAudio.has(language)) {
+    if (!hit('sample:lesson', clientIp(req), 20, 3600000).allowed) return res.status(429).json({ error: 'Please try again in a little while.' });
+    try {
+      const out = await synthesize({ text: SAMPLE_LESSON[language], language, institutionId: null });
+      sampleAudio.set(language, out);
+    } catch (err) {
+      if (aiNotConfigured(err)) return res.status(503).json({ error: AI_NOT_CONFIGURED });
+      req.log?.warn?.('sample_lesson.failed', { error: (err.cause || err).message });
+      return res.status(502).json({ error: 'The sample voice is unavailable right now.' });
+    }
+  }
+  const out = sampleAudio.get(language);
+  res.set('Content-Type', out.mimeType);
+  res.set('Cache-Control', 'public, max-age=86400');
+  res.send(out.audio);
+});
 
 export default router;

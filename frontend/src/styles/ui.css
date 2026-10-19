@@ -286,3 +286,19 @@ button.ui-stat { text-align: left; cursor: pointer; font: inherit; color: inheri
 .ui-steps li.is-on { color: var(--color-text); font-weight: 600; }
 .ui-steps li.is-on::before { background: var(--brand-primary-strong); border-color: var(--brand-primary-strong); color: #FFFFFF; }
 .ui-steps li.is-done::before { content: '✓'; background: var(--ok-bg); border-color: var(--ok); color: var(--ok); }
+
+/* Danger tag: no match, needs refresh, revoked. */
+.ln-tag-danger { background: var(--danger-bg); color: var(--danger); }
+.pb-play.is-loading svg { animation: pb-spin 1s linear infinite; }
+@keyframes pb-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .pb-play.is-loading svg { animation: none; } }
+
+/* Screenshot strip: each picture opens a larger view. */
+.pb-screen-btn { position: relative; display: block; padding: 0; border: 0; background: none; cursor: zoom-in; border-radius: 12px; }
+.pb-screen-btn:focus-visible { outline: 3px solid var(--accent-400); outline-offset: 3px; }
+.pb-screen-btn:hover img { box-shadow: var(--shadow-lg, var(--shadow-md)); }
+.pb-screen-zoom { position: absolute; right: 10px; bottom: 10px; width: 32px; height: 32px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; background: rgba(23, 34, 43, 0.75); color: #FFFFFF; }
+.pb-screen-full { display: block; width: 100%; height: auto; max-height: 72vh; object-fit: contain; border-radius: 8px; border: 1px solid var(--color-border); touch-action: pan-y; }
+
+/* Footer: the tagline as readable text under the logo. */
+.pb-foot-tagline { font-family: var(--font-display); font-size: var(--fs-body); font-weight: 600; color: var(--color-text); }

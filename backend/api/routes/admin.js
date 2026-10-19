@@ -191,4 +191,23 @@ router.post('/employers/:id/kyb', async (req, res) => {
   res.json({ ok: true, kyb_status: decision });
 });
 
+// ─── Messages from Talk to us / Help → Contact ────────────────────────────────
+router.get('/help-requests', async (req, res) => {
+  const status = ['open', 'answered', 'closed'].includes(req.query.status) ? req.query.status : 'open';
+  const rows = await dal.all(`SELECT id, actor_type, type, message, reply_to, status, created_at FROM help_requests
+    WHERE status = ? ORDER BY created_at DESC LIMIT 200`, status);
+  const counts = Object.fromEntries((await dal.all('SELECT status, COUNT(*) n FROM help_requests GROUP BY status')).map(r => [r.status, Number(r.n)]));
+  res.set('Cache-Control', 'no-store');
+  res.json({ requests: rows, counts });
+});
+
+router.post('/help-requests/:id', async (req, res) => {
+  const status = req.body?.status;
+  if (!['open', 'answered', 'closed'].includes(status)) return res.status(400).json({ error: 'Status must be open, answered or closed.' });
+  const r = await dal.one('SELECT id FROM help_requests WHERE id = ?', req.params.id);
+  if (!r) return res.status(404).json({ error: 'Not found' });
+  await dal.run('UPDATE help_requests SET status = ? WHERE id = ?', status, r.id);
+  res.json({ ok: true, status });
+});
+
 export default router;

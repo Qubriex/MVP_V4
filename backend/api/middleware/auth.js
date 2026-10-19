@@ -103,9 +103,11 @@ const timingSafeEqualHex = (a, b) => a.length === b.length && crypto.timingSafeE
  * @param {{ errors?: 'legacy'|'v2' }} [opts] legacy routes answer {error: string};
  *   new routes answer {error: {code, message}} (spec §9).
  */
-export function authenticate({ errors = 'legacy' } = {}) {
-  const fail = (res, status, code, message) => res.status(status).json({ error: errors === 'v2' ? { code, message } : message });
+export function authenticate({ errors = 'legacy', optional = false } = {}) {
   return async (req, res, next) => {
+    // optional: a missing, stale or revoked session is treated as signed out
+    // (public forms such as Talk to us), never as an error.
+    const fail = (r, status, code, message) => (optional ? next() : r.status(status).json({ error: errors === 'v2' ? { code, message } : message }));
     const header = req.headers.authorization || '';
     const bearer = header.startsWith('Bearer ') ? header.slice(7).trim() : null;
     const cookieToken = parseCookies(req.headers.cookie)[SESSION_COOKIE] || null;
