@@ -26,7 +26,7 @@ const OUT = process.argv.includes('--out') ? process.argv[process.argv.indexOf('
 const PASSWORD = 'QubirexTest2026!';
 
 const PUBLIC = ['/', '/pricing', '/learners', '/colleges', '/employers', '/demo', '/demo/learner', '/demo/college', '/demo/employer', '/signin',
-  '/legal/privacy', '/legal/terms', '/legal/dpdp', '/legal/grievance', '/login', '/learner-login', '/employer/login', '/employer/register', '/admin/login', '/verify', '/verify/QBX-DEMO-0000'];
+  '/legal/privacy', '/legal/terms', '/legal/dpdp', '/legal/grievance', '/developers', '/login', '/learner-login', '/employer/login', '/employer/register', '/admin/login', '/verify', '/verify/QBX-DEMO-0000'];
 const ROLES = {
   learner: { login: async (p) => { await p.goto(`${BASE}/learner-login`); await p.fill('#lref', 'TEST-LRNR-001'); await p.fill('#leng', 'QX-FSD-T01'); await p.fill('#lpin', '410585'); await p.click('form button[type=submit]'); await p.waitForURL(/\/learn\//); },
     routes: ['/learn/dashboard', '/learn/record', '/learn/reviews', '/learn/passport', '/learn/jobs', '/learn/market', '/learn/topics', '/learn/profile', '/learn/resume', '/learn/settings', '/learn/session'] },
@@ -36,7 +36,7 @@ const ROLES = {
   employer: { login: async (p) => { await p.goto(`${BASE}/employer/login`); await p.fill('#em', 'test.employer@qubirex.local'); await p.fill('#pw', PASSWORD); await p.click('form button[type=submit]'); await p.waitForURL(/\/employer\/(home|company)/); },
     routes: ['/employer/home', '/employer/company', '/employer/team', '/employer/api-keys', '/employer/roles', '/employer/pipeline', '/employer/sponsor', '/employer/colleges', '/employer/verify-bulk', '/employer/templates', '/employer/billing'] },
   admin: { login: async (p) => { await p.goto(`${BASE}/admin/login`); await p.fill('#em', 'test.admin@qubirex.local'); await p.fill('#pw', PASSWORD); await p.click('form button[type=submit]'); await p.waitForURL(/\/admin\/(?!login)/); },
-    routes: ['/admin/overview', '/admin/employers', '/admin/ontology', '/admin/quality'] }
+    routes: ['/admin/overview', '/admin/employers', '/admin/ontology', '/admin/quality', '/admin/messages'] }
 };
 const AXE_PAGES = new Set(['/', '/learn/dashboard', '/institution/home', '/employer/home', '/verify']);
 

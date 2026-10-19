@@ -67,6 +67,14 @@ export function namesMatch(typed, stored) {
   return full.every(w => take(x => x === w)) && initials.every(w => take(x => x[0] === w));
 }
 
+// match | unclear (a full word agrees, e.g. the surname, but not the whole
+// name) | no_match. Only this verdict is returned, never the stored name.
+export function nameResult(typed, stored) {
+  if (namesMatch(typed, stored)) return 'match';
+  const have = new Set(words(stored || ''));
+  return words(typed).some(w => w.length > 1 && have.has(w)) ? 'unclear' : 'no_match';
+}
+
 router.post('/:evidenceId/name-check', express.json(), async (req, res) => {
   const ip = clientIp(req);
   if (!hit('verify:name', ip, 10, HOUR).allowed) return res.status(429).json({ error: { code: 'rate_limited', message: 'Too many name checks. Try again in an hour.' } });
@@ -76,7 +84,8 @@ router.post('/:evidenceId/name-check', express.json(), async (req, res) => {
   if (!c) return res.status(404).json({ status: 'not_found' });
   const holder = await dal.one('SELECT l.name FROM engagement_learners el JOIN learners l ON l.id = el.learner_id WHERE el.id = ?', c.el_id);
   res.set('Cache-Control', 'no-store');
-  res.json({ match: namesMatch(name, holder?.name) });
+  const result = nameResult(name, holder?.name);
+  res.json({ match: result === 'match', result });
 });
 
 export default router;

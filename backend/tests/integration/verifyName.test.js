@@ -4,7 +4,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import request from 'supertest';
 import { freshDb, makeApp } from '../helpers/setup.js';
-import { namesMatch } from '../../api/routes/verify.js';
+import { namesMatch, nameResult } from '../../api/routes/verify.js';
 
 let app;
 beforeAll(async () => { await freshDb(); app = await makeApp(); });
@@ -16,6 +16,12 @@ describe('name check', () => {
     expect(namesMatch('లక్ష్మి రావు', 'రావు లక్ష్మి')).toBe(true);
     expect(namesMatch('Ravi Kumar', 'Ravi Kumar K')).toBe(false);
     expect(namesMatch('Ravi Sharma', 'Ravi Kumar')).toBe(false);
+  });
+
+  it('says match, unclear (part of the name agrees) or no match', () => {
+    expect(nameResult('Kumar Ravi', 'Ravi Kumar')).toBe('match');
+    expect(nameResult('Suresh Kumar', 'Ravi Kumar')).toBe('unclear');
+    expect(nameResult('Anil Sharma', 'Ravi Kumar')).toBe('no_match');
   });
 
   it('asks for a full name and does not reveal unknown IDs', async () => {

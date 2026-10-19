@@ -36,8 +36,11 @@ api.interceptors.response.use(
       localStorage.removeItem('qubirex_user');
       localStorage.removeItem('qubirex_role');
       const home = { learner: '/learner-login', employer: '/employer/login', admin: '/admin/login' }[role] || '/login';
-      // Public pages (verifier, sign-in screens) never redirect.
-      if (!/^\/(verify|employer\/login|employer\/register|employer\/invite|admin\/login|login|learner-login)/.test(window.location.pathname)) window.location.href = home;
+      // Only pages inside a portal send you to sign in. Public pages (home,
+      // demo, pricing, verify, Talk to us, sign-in screens) stay where they are.
+      const inPortal = /^\/(learn|institution|employer|admin)\//.test(window.location.pathname)
+        && !/^\/(employer\/(login|register|invite)|admin\/login|institution\/invite)/.test(window.location.pathname);
+      if (inPortal) window.location.href = home;
     }
     return Promise.reject(err);
   }

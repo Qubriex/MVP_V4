@@ -67,6 +67,8 @@ import { PipelinePage, CandidatePage } from './pages/employer/Pipeline';
 import { SponsorPage, CollegesPage } from './pages/employer/Insights';
 import { BulkVerify, Templates, Billing } from './pages/employer/Tools';
 import AdminLogin from './pages/admin/Login';
+import AdminMessages from './pages/admin/Messages';
+import Developers from './pages/public/Developers';
 import AdminLayout from './pages/admin/Layout';
 import AdminOverview from './pages/admin/Overview';
 import AdminEmployers from './pages/admin/Employers';
@@ -107,6 +109,7 @@ export default function App() {
               <Route path="/demo/:side" element={<DemoSide />} />
               <Route path="/signin" element={<SignIn />} />
               <Route path="/legal/:page" element={<Legal />} />
+              <Route path="/developers" element={<Developers />} />
               <Route path="/login" element={<StaffLogin />} />
               <Route path="/institution/invite/:token" element={<StaffInvite />} />
               <Route path="/learner-login" element={<LearnerLogin />} />
@@ -147,6 +150,7 @@ export default function App() {
                       <Route path="employers" element={<AdminEmployers />} />
                       <Route path="ontology" element={<AdminOntology />} />
                       <Route path="quality" element={<AdminQuality />} />
+                      <Route path="messages" element={<AdminMessages />} />
                       <Route path="*" element={<Navigate to="/admin/overview" replace />} />
                     </Route>
                   </Routes>

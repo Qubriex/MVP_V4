@@ -81,11 +81,12 @@ export default function PublicShell({ children, demo = false }) {
       <main id="main" className="pb-main">{children}</main>
       <footer className="pb-foot">
         <div className="ln-col" style={{ gap: 8 }}>
-          <Link to="/" className="brand-home" aria-label={t('nav.logoHome')}><BrandLogo height={36} /></Link>
+          <Link to="/" className="brand-home" aria-label={t('nav.logoHome')}><BrandLogo height={40} /></Link>
+          <span className="pb-foot-tagline ln-indic">{t('brand.tagline')}</span>
           <span>{t('foot.by')}</span>
         </div>
         <nav className="pb-foot-links" aria-label={t('foot.legal')}>
-          <Link to="/legal/privacy">{t('foot.privacy')}</Link><Link to="/legal/terms">{t('foot.terms')}</Link><Link to="/legal/dpdp">{t('foot.dpdp')}</Link><Link to="/legal/grievance">{t('foot.grievance')}</Link>
+          <Link to="/legal/privacy">{t('foot.privacy')}</Link><Link to="/legal/terms">{t('foot.terms')}</Link><Link to="/legal/dpdp">{t('foot.dpdp')}</Link><Link to="/legal/grievance">{t('foot.grievance')}</Link><Link to="/developers">{t('foot.developers')}</Link>
           <button type="button" className="ln-link" onClick={() => setTalk(true)}>{t('nav.talk')}</button>
         </nav>
       </footer>
