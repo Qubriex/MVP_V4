@@ -5,11 +5,12 @@
 // Until now only the institution could see this.
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Check, Copy, Lock, Play } from 'lucide-react';
+import { Check, Copy, Lock, Play, History as HistoryIcon, RotateCcw, School } from 'lucide-react';
 import api, { getOr } from '../../utils/api';
 import { MOCK_PATH } from '../../utils/learnerMockData';
 import { minutes } from '../../components/learn/ui';
 import LearningCurve from '../../components/learn/LearningCurve';
+import { WhyThis } from '../../components/shared/Popover';
 
 import { useUiLang } from '../../context/UiLangContext';
 import { LoadingRows } from '../../components/shared/EmptyState';
@@ -18,9 +19,9 @@ const CONFIDENCE = { high: 'learn.record.confidence.high', solid: 'learn.record.
 
 function NodePill({ n }) {
   const { t } = useUiLang();
-  if (n.status === 'mastered') return <span className="ln-chip ln-tag-success" style={{ padding: '7px 12px' }}><Check size={13} aria-hidden="true" />{n.label}<span className="ln-sr"> {' '}{t('learn.record.mastered')}</span></span>;
+  if (n.status === 'mastered') return <Link to={`/learn/skill/${n.id}`} className="ln-chip ln-tag-success" style={{ padding: '7px 12px' }}><Check size={13} aria-hidden="true" />{n.label}<span className="ln-sr"> {' '}{t('learn.record.mastered')}</span></Link>;
   if (n.status === 'current') return <Link to="/learn/session" className="ln-chip ln-tag-accent" style={{ padding: '7px 12px', fontWeight: 600, border: '1.5px solid var(--accent-800)' }}>● {n.label}<span className="ln-sr"> {' '}{t('learn.record.currentContinue')}</span></Link>;
-  return <span className="ln-chip" style={{ padding: '7px 12px', background: 'transparent', border: '1px solid var(--color-border-strong)', color: 'var(--color-text-muted)' }}>{n.label}</span>;
+  return <Link to={`/learn/skill/${n.id}`} className="ln-chip" style={{ padding: '7px 12px', background: 'transparent', border: '1px solid var(--color-border-strong)', color: 'var(--color-text-muted)' }}>{n.label}</Link>;
 }
 
 export default function Record() {
@@ -69,10 +70,16 @@ export default function Record() {
 
       <div className="ln-grid ln-g-4" style={{ gap: 16 }}>
         <div className="ln-card ln-card-sm"><span className="ln-small ln-muted">{t('learn.record.nodesMastered')}</span><span className="ln-stat">{s.nodes_mastered} / {s.total_nodes}</span></div>
-        <div className="ln-card ln-card-sm"><span className="ln-small ln-muted">{t('learn.record.averageMastery')}</span><span className="ln-stat">{s.average_mastery_pct != null ? `${s.average_mastery_pct}%` : '—'}</span></div>
-        <div className="ln-card ln-card-sm"><span className="ln-small ln-muted">{t('learn.record.activeLearningTime')}</span><span className="ln-stat">{minutes(s.active_minutes)}</span></div>
+        <div className="ln-card ln-card-sm"><span className="ln-small ln-muted">{t('learn.record.averageMastery')}</span><span className="ln-stat">{s.average_mastery_pct != null ? `${s.average_mastery_pct}%` : '—'}</span><span className="ln-xs ln-muted">{t('lj.record.avgExplain')}</span></div>
+        <div className="ln-card ln-card-sm"><span className="ln-small ln-muted">{t('learn.record.activeLearningTime')}</span><span className="ln-stat">{minutes(s.active_minutes)}</span><WhyThis title={t('learn.record.activeLearningTime')}>{t('lj.record.timeExplain')}</WhyThis></div>
         <div className="ln-card ln-card-sm"><span className="ln-small ln-muted">{t('learn.record.clusterCertificates')}</span><span className="ln-stat">{s.cluster_certificates}</span></div>
       </div>
+
+      <nav className="ln-row ln-wrap" style={{ gap: 8 }} aria-label={t('lj.record.more')}>
+        <Link className="ln-btn ln-btn-sm" to="/learn/reviews"><RotateCcw size={14} aria-hidden="true" />{t('nav.reviews')}</Link>
+        <Link className="ln-btn ln-btn-sm" to="/learn/assigned"><School size={14} aria-hidden="true" />{t('nav.assigned')}</Link>
+        <Link className="ln-btn ln-btn-sm" to="/learn/history"><HistoryIcon size={14} aria-hidden="true" />{t('nav.history')}</Link>
+      </nav>
 
       {curve && curve.points.length > 1 && (
         <section className="ln-card" style={{ gap: 12 }} aria-label={t('learn.record.learningCurve')}>

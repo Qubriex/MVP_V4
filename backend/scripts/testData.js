@@ -344,7 +344,7 @@ export async function seedTestData({ log = console.log } = {}) {
     VALUES ('test-pipe-0001', ?, 'test-role-0001', ?, ?, 'access_granted', ?, 1, ?, ?)`)
     .run(EMPLOYER_VERIFIED.id, EL_ID, LEARNER.id, JSON.stringify({ asked: ['skills', 'resume', 'contact'], granted: ['skills', 'resume'] }), now, now);
   await db.prepare(`INSERT OR IGNORE INTO bridge_programmes (id, institution_id, engagement_id, title, node_ids_json, scope, note, retest_at, status, created_by, created_at)
-    VALUES ('test-bridge-0001', ?, ?, 'JavaScript events refresher (test)', '["test-node-2-4"]', 'cohort', 'Seeded for review', ?, 'open', 'test-staff-admin-0001', ?)`)
+    VALUES ('test-bridge-0001', ?, ?, 'JavaScript events refresher (test)', '["test-node-2-4"]', 'cohort', 'Practise this before the re-test', ?, 'open', 'test-staff-admin-0001', ?)`)
     .run(INSTITUTION.id, ENGAGEMENT_ID, new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10), now);
   await db.prepare(`INSERT OR IGNORE INTO bridge_assignments (id, bridge_id, el_id, baseline_readiness, baseline_mastered_json, assigned_at)
     VALUES ('test-bridge-0001-a1', 'test-bridge-0001', ?, 40, '[]', ?)`).run(EL_ID, now);

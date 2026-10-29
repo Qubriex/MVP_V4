@@ -366,3 +366,43 @@
 @media (pointer: coarse) {
   .ln-btn, .ln-btn-sm, .sk-iconbtn, .in-iconbtn { min-height: 44px; min-width: 44px; }
 }
+
+/* ─── Learner journey screens ─────────────────────────────────────────────── */
+.lj-result { display: flex; flex-direction: column; gap: 10px; border-left: 4px solid var(--color-border); color: var(--color-text); }
+.lj-result.is-pass { border-left-color: var(--status-success); }
+.lj-result.is-partial { border-left-color: var(--status-warning); }
+.lj-result.is-fail { border-left-color: var(--status-danger); }
+.lj-feedback { display: grid; grid-template-columns: minmax(110px, max-content) 1fr; gap: 4px 12px; margin: 0; }
+.lj-feedback dt { font-weight: 600; font-size: var(--fs-small); }
+.lj-feedback dd { margin: 0; }
+@media (max-width: 480px) { .lj-feedback { grid-template-columns: 1fr; } .lj-feedback dd { margin-bottom: 6px; } }
+.lj-steps { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+.lj-steps li.is-done { color: var(--status-success); }
+.lj-steps svg { vertical-align: -2px; }
+.lj-groups { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.lj-groups li { display: grid; grid-template-columns: 20px 1fr auto; gap: 8px; align-items: center; }
+.lj-bars { display: flex; flex-direction: column; gap: 4px; }
+.lj-bar-row { display: grid; grid-template-columns: minmax(120px, 34%) 1fr 32px; gap: 8px; align-items: center; }
+.lj-bar-you span { background: var(--accent-700) !important; }
+.lj-bar-course span { background: var(--status-info, #2F6FB3) !important; }
+.lj-bar-employers span { background: var(--color-text-muted) !important; }
+.lj-legend { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; color: var(--color-text-muted); }
+.lj-dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; }
+.lj-dot.lj-bar-you { background: var(--accent-700); } .lj-dot.lj-bar-course { background: var(--status-info, #2F6FB3); } .lj-dot.lj-bar-employers { background: var(--color-text-muted); }
+.lj-code { font-family: var(--font-mono, ui-monospace, monospace); font-size: var(--fs-small); }
+.lj-checks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; font-size: var(--fs-small); }
+.lj-checks .is-pass { color: var(--status-success); } .lj-checks .is-fail { color: var(--status-danger); }
+.lj-quick .ln-btn.is-right { border-color: var(--status-success); } .lj-quick .ln-btn.is-wrong { border-color: var(--status-danger); }
+.lj-guide, .lj-prefs { width: 100%; border-collapse: collapse; font-size: var(--fs-small); }
+.lj-guide th, .lj-guide td, .lj-prefs th, .lj-prefs td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--color-border); vertical-align: top; overflow-wrap: anywhere; }
+.lj-prefs td { text-align: center; white-space: nowrap; }
+.lj-history, .lj-timeline { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.lj-timeline li { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.lj-tapstart { align-self: center; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 22px 28px; border-radius: var(--radius-lg);
+  border: 2px solid var(--accent-400); background: var(--stage-surface); color: var(--stage-text); font-size: var(--fs-h3); font-weight: 700; cursor: pointer; max-width: 420px; text-align: center; }
+.lj-tapstart .ln-small { font-weight: 400; color: var(--stage-muted); }
+.lj-tapstart:focus-visible { outline: 3px solid var(--accent-400); outline-offset: 3px; }
+.lj-check-banner { flex-wrap: wrap; border-width: 2px; }
+.lj-type-toggle { min-height: 44px; background: var(--stage-surface); color: var(--stage-text); border-color: var(--stage-muted); }
+.lj-session-result .ln-card { background: var(--color-surface); }
+.lj-start { border-left: 4px solid var(--accent-700); }

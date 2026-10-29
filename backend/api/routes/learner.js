@@ -143,7 +143,9 @@ router.get('/dashboard', async (req, res) => {
     clusters_done: clustersDone,
     total_clusters: clusterIds.length,
     week_minutes: Math.round(week.minutes),
-    recently_mastered: recent
+    recently_mastered: recent,
+    // "How well you know them": the average mastery of the skills done, 0–100.
+    avg_mastery: Math.round(Number((await dal.one('SELECT AVG(mastery_attainment) AS a FROM node_mastery WHERE engagement_learner_id = ? AND advanced_at IS NOT NULL', req.user.el_id))?.a || 0) * 100)
   });
 });
 
@@ -272,7 +274,16 @@ router.get('/path', async (req, res) => {
     WHERE sc.capability_target_id = (SELECT capability_target_id FROM engagements WHERE id = ?)
     ORDER BY sc.sequence_order, sn.sequence_order
   `).all(req.user.el_id, req.user.engagement_id), async r => ({ ...r, confidence_indicator: r.advanced_at ? await nodeConfidence(db, req.user.el_id, r.node_id) : null }));
-  const time = await db.prepare('SELECT COALESCE(SUM(active_minutes), 0) as minutes FROM learning_sessions WHERE engagement_learner_id = ?').get(req.user.el_id);
+  // Active time: each skill's session time, or its recorded time to mastery
+  // when the sessions recorded none (the same rule as the evidence table).
+  const time = await db.prepare(`SELECT COALESCE(SUM(m), 0) AS minutes FROM (
+      SELECT GREATEST(COALESCE((SELECT SUM(ls.active_minutes) FROM learning_sessions ls WHERE ls.engagement_learner_id = nm.engagement_learner_id AND ls.skill_node_id = nm.skill_node_id), 0),
+        COALESCE(nm.time_to_mastery_minutes, 0)) AS m
+      FROM node_mastery nm WHERE nm.engagement_learner_id = ? AND nm.advanced_at IS NOT NULL
+      UNION ALL
+      SELECT COALESCE(SUM(ls.active_minutes), 0) FROM learning_sessions ls WHERE ls.engagement_learner_id = ?
+        AND NOT EXISTS (SELECT 1 FROM node_mastery nm WHERE nm.engagement_learner_id = ls.engagement_learner_id AND nm.skill_node_id = ls.skill_node_id AND nm.advanced_at IS NOT NULL)
+    ) t`).get(req.user.el_id, req.user.el_id);
   db.close();
 
   const clusters = [];
