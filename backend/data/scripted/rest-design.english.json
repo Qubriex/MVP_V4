@@ -36,6 +36,34 @@
     "answer": "Good question. PUT replaces the whole record, PATCH changes only some fields. To update just a phone number, PATCH is the better fit. Does that help?",
     "captionEn": null
   },
+  "practice": {
+    "code": {
+      "prompt": "List the five endpoints for student records (list, one, add, update, delete) with their methods and status codes.",
+      "starter": "# METHOD  /path   → status\n",
+      "checks": [
+        {
+          "label": "GET /students",
+          "re": "GET\\s+/students\\b",
+          "flags": ""
+        },
+        {
+          "label": "POST with 201",
+          "re": "POST\\s+/students[\\s\\S]*201",
+          "flags": ""
+        },
+        {
+          "label": "PUT or PATCH with an id",
+          "re": "(PUT|PATCH)\\s+/students/",
+          "flags": ""
+        },
+        {
+          "label": "DELETE with an id",
+          "re": "DELETE\\s+/students/",
+          "flags": ""
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "Design REST endpoints for a {context}: list, read one, add, update and delete. Explain the methods and status codes.",

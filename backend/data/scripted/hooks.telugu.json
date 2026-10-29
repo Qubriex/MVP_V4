@@ -36,6 +36,34 @@
     "answer": "మంచి సందేహం. ప్రతి render లో hooks ఒకే వరుసలో నడవాలి, అప్పుడే React వాటిని జత చేయగలదు. అందుకే వాటిని if లేదా loop లోపల పెట్టం. సహాయపడిందా?",
     "captionEn": "Good doubt. Hooks must run in the same order every render, so React can match them up. That is why we never put them inside an if or a loop. Does that help?"
   },
+  "practice": {
+    "code": {
+      "prompt": "component కనిపించగానే ఒక్కసారి notices లోడ్ చేయండి: useState, ఖాళీ dependency array ఉన్న useEffect.",
+      "starter": "function Notices() {\n  \n}\n",
+      "checks": [
+        {
+          "label": "useState",
+          "re": "useState\\s*\\(",
+          "flags": ""
+        },
+        {
+          "label": "useEffect",
+          "re": "useEffect\\s*\\(",
+          "flags": ""
+        },
+        {
+          "label": "Runs once",
+          "re": ",\\s*\\[\\s*\\]\\s*\\)",
+          "flags": ""
+        },
+        {
+          "label": "Fetches",
+          "re": "fetch\\s*\\(",
+          "flags": ""
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "ఒక {context} లో పేజీ తెరవగానే data ఒక్కసారి లోడ్ కావాలి. దీనికి useState, useEffect కలిసి ఎలా పనిచేస్తాయో వివరించండి.",

@@ -36,6 +36,34 @@
     "answer": "अच्छा सवाल। middleware आपके handler से पहले चलता है, सभी requests के लिए या कुछ के लिए। express.json ऐसा middleware है जो request body को object में बदलता है। समझ आया?",
     "captionEn": "Good doubt. Middleware runs before your handler, for every request or some. express.json is middleware that turns the request body into an object. Does that help?"
   },
+  "practice": {
+    "code": {
+      "prompt": "एक GET /books/:id route जोड़िए जो किताब भेजे, या न मिलने पर 404।",
+      "starter": "const app = express();\n",
+      "checks": [
+        {
+          "label": "GET route with an id",
+          "re": "app\\.get\\s*\\(\\s*[\"']/books/:id",
+          "flags": ""
+        },
+        {
+          "label": "Reads req.params",
+          "re": "req\\.params",
+          "flags": ""
+        },
+        {
+          "label": "Sends 404 when missing",
+          "re": "status\\s*\\(\\s*404",
+          "flags": ""
+        },
+        {
+          "label": "Sends JSON",
+          "re": "res\\.json\\s*\\(",
+          "flags": ""
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "एक {context} के लिए दो Express routes design कीजिए, एक id से item पढ़ने के लिए और एक item जोड़ने के लिए। req, res और status codes समझाइए।",

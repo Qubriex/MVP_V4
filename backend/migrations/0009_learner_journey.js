@@ -17,6 +17,8 @@
 //   account_deletions      delete with an OTP and a grace period.
 //   learner_plan           skills a learner added to their plan.
 //   demonstrations.kind    + practice, task, challenge.
+//   evidence_records       + feedback_json: what was good / missing / next time,
+//                          for the result screen and attempt history.
 //   employer_pipeline      + shortlisted, interview date, source (request or
 //                          apply) and the stage history the learner sees.
 import * as dal from '../core/db/dal.js';
@@ -183,5 +185,6 @@ export async function up() {
     ALTER TABLE employer_pipeline ADD COLUMN IF NOT EXISTS interview_at TEXT;
     ALTER TABLE employer_pipeline ADD COLUMN IF NOT EXISTS source TEXT NOT NULL DEFAULT 'request';
     ALTER TABLE employer_pipeline ADD COLUMN IF NOT EXISTS history_json TEXT;
+    ALTER TABLE evidence_records ADD COLUMN IF NOT EXISTS feedback_json TEXT;
   `);
 }

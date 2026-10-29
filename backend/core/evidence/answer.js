@@ -60,6 +60,7 @@ export async function answerInstance({ instanceId, elId, learnerId, language, en
   const out = await dal.tx(async () => {
     const evidenceId = await record({ r: a.r_c, passed: passed ? 1 : 0, level: passed ? 'L1' : null, flags: a.flags.filter(f => f !== 'persistence'),
       provisional: a.provisional, rubric: a.evaluation.rubricVersion || 'default', perPoint: JSON.stringify({ gaps: a.evaluation.understandingGaps || [] }) });
+    await dal.run('UPDATE evidence_records SET feedback_json = ? WHERE id = ?', JSON.stringify({ good: a.evaluation.whatWasGood || '', missing: a.evaluation.whatWasMissing || '', next: a.evaluation.nextTime || '' }), evidenceId);
     const kind = KIND[inst.purpose];
     await dal.run(`INSERT INTO demonstrations (id, el_id, node_id, kind, date, passed, score, level, assurance, evidence_id, created_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, 'L1', ?, ?, ?)`, ulid(), elId, inst.node_id, kind, now, passed ? 1 : 0, a.r_c, gate.assurance, evidenceId, now);
@@ -73,6 +74,7 @@ export async function answerInstance({ instanceId, elId, learnerId, language, en
   });
   return {
     result: passed ? 'passed' : 'not_yet', passed, provisional: a.provisional, purpose: inst.purpose,
-    feedback: a.evaluation.feedbackForLearner || null, next_review_at: out.next.due, review_pending: !!(out.review && out.review.stratum === 'decision')
+    feedback: a.evaluation.feedbackForLearner || null, next_review_at: out.next.due,
+    feedback_parts: { good: a.evaluation.whatWasGood || '', missing: a.evaluation.whatWasMissing || '', next: a.evaluation.nextTime || '' }, review_pending: !!(out.review && out.review.stratum === 'decision')
   };
 }

@@ -36,6 +36,29 @@
     "answer": "Good doubt. Mobile first means you write the phone layout first, then add media queries with min-width for bigger screens. It keeps phones fast and simple. Does that help?",
     "captionEn": null
   },
+  "practice": {
+    "code": {
+      "prompt": "Make .grid one column on phones and three columns from 768px up.",
+      "starter": ".grid {\n  display: grid;\n}\n",
+      "checks": [
+        {
+          "label": "One column by default",
+          "re": "grid-template-columns\\s*:\\s*(1fr|repeat\\(\\s*1\\s*,)",
+          "flags": "i"
+        },
+        {
+          "label": "A min-width media query at 768px",
+          "re": "@media[^{]*min-width\\s*:\\s*768px",
+          "flags": "i"
+        },
+        {
+          "label": "Three columns inside it",
+          "re": "repeat\\(\\s*3\\s*,\\s*1fr\\s*\\)|1fr\\s+1fr\\s+1fr",
+          "flags": "i"
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "A {context} looks fine on a laptop but is cut off on a phone. Explain three things you would do to make it responsive.",

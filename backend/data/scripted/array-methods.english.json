@@ -36,6 +36,29 @@
     "answer": "Good question. forEach just runs code for each item and gives nothing back. map gives back a new array. Use map when you want the new list. Does that help?",
     "captionEn": null
   },
+  "practice": {
+    "code": {
+      "prompt": "From marks = [72, 45, 88, 91, 38], get the passing marks (40 and above) with filter, and their total with reduce.",
+      "starter": "const marks = [72, 45, 88, 91, 38];\n",
+      "checks": [
+        {
+          "label": "Uses filter",
+          "re": "\\.filter\\s*\\(",
+          "flags": ""
+        },
+        {
+          "label": "Keeps 40 and above",
+          "re": ">=\\s*40|>\\s*39",
+          "flags": ""
+        },
+        {
+          "label": "Uses reduce",
+          "re": "\\.reduce\\s*\\(",
+          "flags": ""
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "In a {context}, you have a list of numbers. Explain how you would use filter and map to get only the useful values and change them.",

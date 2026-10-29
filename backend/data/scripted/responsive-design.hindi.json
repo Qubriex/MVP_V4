@@ -36,6 +36,29 @@
     "answer": "अच्छा सवाल। mobile first मतलब पहले phone का layout लिखना, फिर बड़ी screens के लिए min-width वाली media queries जोड़ना। इससे phone तेज़ और सरल रहता है। समझ आया?",
     "captionEn": "Good doubt. Mobile first means you write the phone layout first, then add media queries with min-width for bigger screens. It keeps phones fast and simple. Does that help?"
   },
+  "practice": {
+    "code": {
+      "prompt": ".grid को phone पर एक column और 768px से ऊपर तीन columns बनाइए।",
+      "starter": ".grid {\n  display: grid;\n}\n",
+      "checks": [
+        {
+          "label": "One column by default",
+          "re": "grid-template-columns\\s*:\\s*(1fr|repeat\\(\\s*1\\s*,)",
+          "flags": "i"
+        },
+        {
+          "label": "A min-width media query at 768px",
+          "re": "@media[^{]*min-width\\s*:\\s*768px",
+          "flags": "i"
+        },
+        {
+          "label": "Three columns inside it",
+          "re": "repeat\\(\\s*3\\s*,\\s*1fr\\s*\\)|1fr\\s+1fr\\s+1fr",
+          "flags": "i"
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "एक {context} laptop पर ठीक दिखता है पर phone पर कटा हुआ है। उसे responsive बनाने के लिए आप तीन क्या काम करेंगे, समझाइए।",

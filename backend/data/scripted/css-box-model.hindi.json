@@ -36,6 +36,39 @@
     "answer": "अच्छा सवाल। background का रंग content और padding में भरता है, margin में नहीं। रंगीन जगह चाहिए तो padding, boxes के बीच खाली जगह चाहिए तो margin। समझ आया?",
     "captionEn": "Good doubt. Background colour fills content and padding, but not margin. So if you want coloured space, use padding. If you want empty space between boxes, use margin. Does that help?"
   },
+  "practice": {
+    "code": {
+      "prompt": "एक .card को style कीजिए जो कुल 200px चौड़ा हो, 16px padding, 2px border और 12px margin के साथ।",
+      "starter": ".card {\n  \n}\n",
+      "checks": [
+        {
+          "label": "Uses box-sizing: border-box",
+          "re": "box-sizing\\s*:\\s*border-box",
+          "flags": "i"
+        },
+        {
+          "label": "Width 200px",
+          "re": "width\\s*:\\s*200px",
+          "flags": "i"
+        },
+        {
+          "label": "Padding 16px",
+          "re": "padding\\s*:\\s*16px",
+          "flags": "i"
+        },
+        {
+          "label": "Border 2px",
+          "re": "border\\s*:\\s*2px",
+          "flags": "i"
+        },
+        {
+          "label": "Margin 12px",
+          "re": "margin\\s*:\\s*12px",
+          "flags": "i"
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "एक {context} में दो cards आपस में चिपके हैं और text किनारों को छू रहा है। कौन सी box model properties बदलेंगे, और क्यों?",

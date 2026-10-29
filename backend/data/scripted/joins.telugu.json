@@ -36,6 +36,34 @@
     "answer": "మంచి సందేహం. ON లేకపోతే లేదా తప్పు షరతు ఉంటే ప్రతి వరుస ప్రతి వరుసతో జత అవుతుంది, చాలా పెద్ద ఫలితం వస్తుంది. ఎప్పుడూ ఒక key మీద జత చేయండి. సహాయపడిందా?",
     "captionEn": "Good doubt. Without ON, or with a wrong condition, every row joins with every row, giving a huge result. Always match on a key. Does that help?"
   },
+  "practice": {
+    "code": {
+      "prompt": "student id మీద loans, students ని join చేసి, తిరిగి ఇవ్వని ప్రతి loan ని విద్యార్థి పేరుతో చూపించండి.",
+      "starter": "-- your query\n",
+      "checks": [
+        {
+          "label": "Joins two tables",
+          "re": "join\\s+\\w+",
+          "flags": "i"
+        },
+        {
+          "label": "Matches on the student id",
+          "re": "on\\s+[\\w.]*id\\s*=\\s*[\\w.]*student_id|on\\s+[\\w.]*student_id\\s*=\\s*[\\w.]*id",
+          "flags": "i"
+        },
+        {
+          "label": "Shows the name",
+          "re": "select[\\s\\S]*name",
+          "flags": "i"
+        },
+        {
+          "label": "Only unreturned",
+          "re": "returned",
+          "flags": "i"
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "ఒక {context} లో data ఒక id తో కలిసిన రెండు tables లో ఉంది. ఒక ప్రశ్నకు జవాబు కోసం వాటిని ఎలా join చేస్తారో, ON ఏం చేస్తుందో వివరించండి.",

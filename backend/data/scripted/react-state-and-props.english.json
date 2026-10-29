@@ -36,6 +36,34 @@
     "answer": "Good question. If you change a state variable directly, React does not know and does not redraw. Always use the setter, like setBooked. Does that help?",
     "captionEn": null
   },
+  "practice": {
+    "code": {
+      "prompt": "Write a SeatCounter that gets total as a prop, keeps booked in state, and adds one on click.",
+      "starter": "function SeatCounter({ total }) {\n  \n}\n",
+      "checks": [
+        {
+          "label": "Uses useState",
+          "re": "useState\\s*\\(",
+          "flags": ""
+        },
+        {
+          "label": "Updates with the setter",
+          "re": "set\\w+\\s*\\(",
+          "flags": ""
+        },
+        {
+          "label": "Handles a click",
+          "re": "onClick\\s*=",
+          "flags": ""
+        },
+        {
+          "label": "Shows total",
+          "re": "\\{\\s*total\\s*\\}",
+          "flags": ""
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "On a {context}, a component shows a count that changes when the user clicks. Explain which values are props and which are state, and why.",

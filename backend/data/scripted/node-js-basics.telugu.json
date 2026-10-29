@@ -36,6 +36,34 @@
     "answer": "మంచి ప్రశ్న. package.json మీ project packages, scripts జాబితా. npm install దాన్ని చదివి వాటిని download చేస్తుంది, అప్పుడు ఎవరైనా మీ project నడపగలరు. సహాయపడిందా?",
     "captionEn": "Good question. package.json lists your project's packages and scripts. npm install reads it and downloads them, so anyone can run your project. Does that help?"
   },
+  "practice": {
+    "code": {
+      "prompt": "ప్రతి request కి JSON తో జవాబిచ్చే HTTP server ని port 3000 మీద మొదలుపెట్టండి.",
+      "starter": "// server.js\n",
+      "checks": [
+        {
+          "label": "Loads http (or express)",
+          "re": "require\\s*\\(\\s*[\"'](http|express)|import\\s+.*from\\s+[\"'](http|express)",
+          "flags": ""
+        },
+        {
+          "label": "Creates a server",
+          "re": "createServer\\s*\\(|express\\s*\\(\\s*\\)",
+          "flags": ""
+        },
+        {
+          "label": "Sends JSON",
+          "re": "application/json|res\\.json\\s*\\(|JSON\\.stringify",
+          "flags": ""
+        },
+        {
+          "label": "Listens on 3000",
+          "re": "listen\\s*\\(\\s*3000",
+          "flags": ""
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "ఒక {context} కోసం చిన్న Node.js server request కి ఎలా జవాబిచ్చి data పంపుతుందో వివరించండి.",

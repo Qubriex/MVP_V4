@@ -69,6 +69,7 @@ import AdminLogin from './pages/admin/Login';
 import AdminMessages from './pages/admin/Messages';
 import Developers from './pages/public/Developers';
 import DevAccess from './pages/public/DevAccess';
+import DevJourney from './pages/public/DevJourney';
 import DevBar from './components/DevBar';
 import DemoBar from './components/DemoBar';
 import AdminLayout from './pages/admin/Layout';
@@ -113,6 +114,7 @@ export default function App() {
               <Route path="/legal/:page" element={<Legal />} />
               <Route path="/developers" element={<Developers />} />
               <Route path="/dev" element={<DevAccess />} />
+              <Route path="/dev/journey" element={<DevJourney />} />
               <Route path="/login" element={<StaffLogin />} />
               <Route path="/institution/invite/:token" element={<StaffInvite />} />
               <Route path="/learner-login" element={<LearnerLogin />} />

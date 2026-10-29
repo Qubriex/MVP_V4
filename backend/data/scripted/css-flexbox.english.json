@@ -36,6 +36,34 @@
     "answer": "Good question. justify-content works along the main direction, which is a row by default. align-items works across it. If you set flex-direction column, they swap. Does that help?",
     "captionEn": null
   },
+  "practice": {
+    "code": {
+      "prompt": "Lay out a .menu so its items sit in one row, spread apart, centred vertically, wrapping on small screens.",
+      "starter": ".menu {\n  \n}\n",
+      "checks": [
+        {
+          "label": "display: flex",
+          "re": "display\\s*:\\s*flex",
+          "flags": "i"
+        },
+        {
+          "label": "Spreads items apart",
+          "re": "justify-content\\s*:\\s*space-(between|around|evenly)",
+          "flags": "i"
+        },
+        {
+          "label": "Centres vertically",
+          "re": "align-items\\s*:\\s*center",
+          "flags": "i"
+        },
+        {
+          "label": "Wraps",
+          "re": "flex-wrap\\s*:\\s*wrap",
+          "flags": "i"
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "On a {context}, the header has a logo, three links and a button. Explain how you would use flexbox to place them in one row with even spacing.",

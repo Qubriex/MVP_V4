@@ -36,6 +36,34 @@
     "answer": "Good question. package.json lists your project's packages and scripts. npm install reads it and downloads them, so anyone can run your project. Does that help?",
     "captionEn": null
   },
+  "practice": {
+    "code": {
+      "prompt": "Start an HTTP server on port 3000 that answers every request with JSON.",
+      "starter": "// server.js\n",
+      "checks": [
+        {
+          "label": "Loads http (or express)",
+          "re": "require\\s*\\(\\s*[\"'](http|express)|import\\s+.*from\\s+[\"'](http|express)",
+          "flags": ""
+        },
+        {
+          "label": "Creates a server",
+          "re": "createServer\\s*\\(|express\\s*\\(\\s*\\)",
+          "flags": ""
+        },
+        {
+          "label": "Sends JSON",
+          "re": "application/json|res\\.json\\s*\\(|JSON\\.stringify",
+          "flags": ""
+        },
+        {
+          "label": "Listens on 3000",
+          "re": "listen\\s*\\(\\s*3000",
+          "flags": ""
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "For a {context}, explain how a small Node.js server would answer a request and send back data.",

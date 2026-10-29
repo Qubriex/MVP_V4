@@ -36,6 +36,34 @@
     "answer": "Good doubt. Hooks must run in the same order every render, so React can match them up. That is why we never put them inside an if or a loop. Does that help?",
     "captionEn": null
   },
+  "practice": {
+    "code": {
+      "prompt": "Load notices once when the component appears, using useState and useEffect with an empty dependency array.",
+      "starter": "function Notices() {\n  \n}\n",
+      "checks": [
+        {
+          "label": "useState",
+          "re": "useState\\s*\\(",
+          "flags": ""
+        },
+        {
+          "label": "useEffect",
+          "re": "useEffect\\s*\\(",
+          "flags": ""
+        },
+        {
+          "label": "Runs once",
+          "re": ",\\s*\\[\\s*\\]\\s*\\)",
+          "flags": ""
+        },
+        {
+          "label": "Fetches",
+          "re": "fetch\\s*\\(",
+          "flags": ""
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "On a {context}, data must load once when the page opens. Explain how useState and useEffect work together for this.",

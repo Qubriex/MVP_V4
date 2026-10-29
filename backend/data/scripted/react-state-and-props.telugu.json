@@ -36,6 +36,34 @@
     "answer": "మంచి ప్రశ్న. state variable ని నేరుగా మారిస్తే React కి తెలియదు, మళ్లీ గీయదు. ఎప్పుడూ setBooked లాంటి setter వాడండి. సహాయపడిందా?",
     "captionEn": "Good question. If you change a state variable directly, React does not know and does not redraw. Always use the setter, like setBooked. Does that help?"
   },
+  "practice": {
+    "code": {
+      "prompt": "total ని prop గా తీసుకుని, booked ని state లో ఉంచి, click కి ఒకటి కలిపే SeatCounter రాయండి.",
+      "starter": "function SeatCounter({ total }) {\n  \n}\n",
+      "checks": [
+        {
+          "label": "Uses useState",
+          "re": "useState\\s*\\(",
+          "flags": ""
+        },
+        {
+          "label": "Updates with the setter",
+          "re": "set\\w+\\s*\\(",
+          "flags": ""
+        },
+        {
+          "label": "Handles a click",
+          "re": "onClick\\s*=",
+          "flags": ""
+        },
+        {
+          "label": "Shows total",
+          "re": "\\{\\s*total\\s*\\}",
+          "flags": ""
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "ఒక {context} లో user click చేస్తే మారే సంఖ్యను ఒక component చూపిస్తుంది. ఏవి props, ఏవి state, ఎందుకో వివరించండి.",

@@ -36,6 +36,29 @@
     "answer": "अच्छा सवाल। function या block के अंदर let से बना variable बाहर इस्तेमाल नहीं हो सकता। बाहर चाहिए तो function से return कीजिए। समझ आया?",
     "captionEn": "Good doubt. A variable declared with let inside a function or a block cannot be used outside. If you need it outside, return it from the function. Does that help?"
   },
+  "practice": {
+    "code": {
+      "prompt": "billTotal(prices) function लिखिए जो कीमतों की सूची का जोड़ लौटाए।",
+      "starter": "function billTotal(prices) {\n  \n}\n",
+      "checks": [
+        {
+          "label": "Defines billTotal with a parameter",
+          "re": "(function\\s+billTotal\\s*\\(\\s*\\w+|billTotal\\s*=\\s*\\(?\\s*\\w+)",
+          "flags": ""
+        },
+        {
+          "label": "Keeps a running total",
+          "re": "(let|var)\\s+\\w+\\s*=\\s*0|reduce\\s*\\(",
+          "flags": ""
+        },
+        {
+          "label": "Returns the result",
+          "re": "return\\s+",
+          "flags": ""
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "एक {context} के लिए एक function लिखिए या समझाइए जो कुछ मान लेकर नतीजा return करे। उसके parameters और return मान बताइए।",

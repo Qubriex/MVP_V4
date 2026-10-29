@@ -36,6 +36,34 @@
     "answer": "Good question. A div has no meaning; it is only a box for styling. Use a semantic tag when the part has a clear role, like navigation or an article. Use a div only when no meaningful tag fits. Is that clearer now?",
     "captionEn": null
   },
+  "practice": {
+    "code": {
+      "prompt": "Write the page skeleton for a college fest site: a header with a nav, a main with one article (heading and paragraph), and a footer.",
+      "starter": "<!-- your page here -->\n",
+      "checks": [
+        {
+          "label": "Has a header with a nav",
+          "re": "<header[\\s\\S]*<nav[\\s\\S]*</nav>[\\s\\S]*</header>",
+          "flags": "i"
+        },
+        {
+          "label": "Has a main with an article",
+          "re": "<main[\\s\\S]*<article[\\s\\S]*</article>[\\s\\S]*</main>",
+          "flags": "i"
+        },
+        {
+          "label": "The article has a heading",
+          "re": "<article[\\s\\S]*<h[1-6]",
+          "flags": "i"
+        },
+        {
+          "label": "Has a footer",
+          "re": "<footer",
+          "flags": "i"
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "Think of a {context}. Which semantic tags would you use for its top area, main content and bottom area, and why do they help?",

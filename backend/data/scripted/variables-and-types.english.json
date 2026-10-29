@@ -36,6 +36,34 @@
     "answer": "Good question. \"5\" plus 1 gives \"51\" because a string joins text. 5 plus 1 gives 6. So always check the type before adding. Does that help?",
     "captionEn": null
   },
+  "practice": {
+    "code": {
+      "prompt": "Declare the shop name (never changes), items sold (a number that changes) and whether the shop is open; then add one to items sold.",
+      "starter": "// your code\n",
+      "checks": [
+        {
+          "label": "A const for the name",
+          "re": "const\\s+\\w+\\s*=\\s*[\"'`]",
+          "flags": ""
+        },
+        {
+          "label": "A let for the number",
+          "re": "let\\s+\\w+\\s*=\\s*\\d",
+          "flags": ""
+        },
+        {
+          "label": "A boolean",
+          "re": "=\\s*(true|false)",
+          "flags": ""
+        },
+        {
+          "label": "Increases the number",
+          "re": "(\\+\\+|\\+=\\s*1|=\\s*\\w+\\s*\\+\\s*1)",
+          "flags": ""
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "In a {context}, which values would you store as strings, numbers and booleans? Explain with let and const.",

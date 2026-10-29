@@ -36,6 +36,34 @@
     "answer": "अच्छा सवाल। हर render में hooks एक ही क्रम में चलने चाहिए, तभी React उन्हें मिला पाता है। इसलिए उन्हें if या loop के अंदर नहीं रखते। समझ आया?",
     "captionEn": "Good doubt. Hooks must run in the same order every render, so React can match them up. That is why we never put them inside an if or a loop. Does that help?"
   },
+  "practice": {
+    "code": {
+      "prompt": "component दिखते ही एक बार notices लोड कीजिए: useState और ख़ाली dependency array वाला useEffect।",
+      "starter": "function Notices() {\n  \n}\n",
+      "checks": [
+        {
+          "label": "useState",
+          "re": "useState\\s*\\(",
+          "flags": ""
+        },
+        {
+          "label": "useEffect",
+          "re": "useEffect\\s*\\(",
+          "flags": ""
+        },
+        {
+          "label": "Runs once",
+          "re": ",\\s*\\[\\s*\\]\\s*\\)",
+          "flags": ""
+        },
+        {
+          "label": "Fetches",
+          "re": "fetch\\s*\\(",
+          "flags": ""
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "एक {context} में पेज खुलते ही data एक बार लोड होना है। समझाइए कि useState और useEffect इसके लिए साथ कैसे काम करते हैं।",

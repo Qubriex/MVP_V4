@@ -36,6 +36,34 @@
     "answer": "మంచి సందేహం. preventDefault browser సాధారణంగా చేసే పనిని ఆపుతుంది, form submit అయినప్పుడు పేజీ reload అవ్వడం లాంటిది. అప్పుడు మీ code దాన్ని చూసుకుంటుంది. సహాయపడిందా?",
     "captionEn": "Good doubt. preventDefault stops the browser's normal action, like reloading the page on form submit. Then your code can handle it instead. Does that help?"
   },
+  "practice": {
+    "code": {
+      "prompt": "#add button click అయినప్పుడు cartCount పెంచి #badge లో చూపించండి.",
+      "starter": "let cartCount = 0;\n",
+      "checks": [
+        {
+          "label": "Finds the button",
+          "re": "querySelector\\s*\\(\\s*[\"']#add|getElementById\\s*\\(\\s*[\"']add",
+          "flags": ""
+        },
+        {
+          "label": "Listens for click",
+          "re": "addEventListener\\s*\\(\\s*[\"']click",
+          "flags": ""
+        },
+        {
+          "label": "Increases the count",
+          "re": "cartCount\\s*(\\+\\+|\\+=)",
+          "flags": ""
+        },
+        {
+          "label": "Updates the badge",
+          "re": "(textContent|innerText|innerHTML)\\s*=",
+          "flags": ""
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "ఒక {context} లో button click చేస్తే ఒక counter update అవ్వాలి. దీనికి addEventListener ఎలా వాడతారో వివరించండి.",

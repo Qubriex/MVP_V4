@@ -36,6 +36,34 @@
     "answer": "Good question. git pull brings your team's new commits to your computer. git push sends your commits to them. Pull before you start work, push when you finish. Does that help?",
     "captionEn": null
   },
+  "practice": {
+    "code": {
+      "prompt": "Write the commands to create a branch called events-page, switch to it, save index.html with a message, and share it.",
+      "starter": "# your commands\n",
+      "checks": [
+        {
+          "label": "Creates or switches to the branch",
+          "re": "git\\s+(branch|switch\\s+-c|checkout\\s+-b)\\s+events-page",
+          "flags": "i"
+        },
+        {
+          "label": "Stages the file",
+          "re": "git\\s+add\\s+\\S*index\\.html",
+          "flags": "i"
+        },
+        {
+          "label": "Commits with a message",
+          "re": "git\\s+commit\\s+-m\\s+[\"']",
+          "flags": "i"
+        },
+        {
+          "label": "Pushes",
+          "re": "git\\s+push",
+          "flags": "i"
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "Three friends work on a {context}. Explain how Git branches and commits help them work without overwriting each other.",

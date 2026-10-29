@@ -405,3 +405,19 @@ body.has-demobar .ln-session { height: calc(100vh - var(--dm-bar-h)); }
 .dx-page-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
 .dx-page-list button { background: none; border: 0; padding: 4px 0; text-align: left; cursor: pointer; font-size: var(--fs-caption); overflow-wrap: anywhere; }
 .dx-page-list button:disabled { cursor: default; opacity: 0.6; }
+
+/* /dev Learner journey: stage cards, the checklist, the developer bar controls. */
+.dx-stages { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr)); gap: 10px; }
+.dx-stage .ln-btn { margin-top: auto; justify-content: center; }
+.dx-stage-code { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 24px; padding: 0 6px; border-radius: 999px;
+  background: var(--dx-bg); color: var(--dx-ink); font-weight: 700; font-size: var(--fs-caption); }
+.dx-checklist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.dx-step { display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.dx-step.is-done { border-color: var(--status-success); }
+.dx-step-tick input { width: 22px; height: 22px; margin-top: 2px; accent-color: var(--dx-bg); }
+.dx-step-note { min-height: 36px; font-size: var(--fs-small); }
+.dx-controls { display: flex; flex-direction: column; gap: 8px; max-width: 460px; }
+.dx-controls-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.dx-controls-label { font-size: var(--fs-caption); opacity: 0.85; }
+.dx-controls-state, .dx-controls-note { font-size: var(--fs-caption); white-space: normal; }
+.dx-controls-note { color: var(--dx-accent); }

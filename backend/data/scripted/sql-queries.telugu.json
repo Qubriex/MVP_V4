@@ -36,6 +36,34 @@
     "answer": "మంచి సందేహం. WHERE గుంపులు చేసే ముందు వరుసలను వడపోస్తుంది. HAVING GROUP BY తర్వాత గుంపులను వడపోస్తుంది, 100 కంటే ఎక్కువ ప్రయాణికులు ఉన్న రైళ్లలా. సహాయపడిందా?",
     "captionEn": "Good doubt. WHERE filters rows before grouping. HAVING filters groups after GROUP BY, like trains with more than 100 passengers. Does that help?"
   },
+  "practice": {
+    "code": {
+      "prompt": "bookings table నుంచి 12 నవంబర్ 2026 confirmed bookings ని పేరు క్రమంలో చూపించండి.",
+      "starter": "-- your query\n",
+      "checks": [
+        {
+          "label": "SELECT … FROM bookings",
+          "re": "select[\\s\\S]+from\\s+bookings",
+          "flags": "i"
+        },
+        {
+          "label": "Filters with WHERE",
+          "re": "where",
+          "flags": "i"
+        },
+        {
+          "label": "Only confirmed",
+          "re": "confirmed",
+          "flags": "i"
+        },
+        {
+          "label": "Sorted by name",
+          "re": "order\\s+by\\s+\\w*name",
+          "flags": "i"
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "ఒక {context} కోసం ఒక షరతుతో కొన్ని వరుసలు కనుక్కుని క్రమంలో పెట్టే SQL query రాయండి లేదా వివరించండి. ప్రతి clause వివరించండి.",

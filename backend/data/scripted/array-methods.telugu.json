@@ -36,6 +36,29 @@
     "answer": "మంచి ప్రశ్న. forEach ప్రతి item కోసం code నడుపుతుంది, ఏమీ తిరిగి ఇవ్వదు. map కొత్త array తిరిగి ఇస్తుంది. కొత్త జాబితా కావాలంటే map వాడండి. సహాయపడిందా?",
     "captionEn": "Good question. forEach just runs code for each item and gives nothing back. map gives back a new array. Use map when you want the new list. Does that help?"
   },
+  "practice": {
+    "code": {
+      "prompt": "marks = [72, 45, 88, 91, 38] నుంచి filter తో pass మార్కులు (40 లేదా ఎక్కువ), reduce తో వాటి మొత్తం తీయండి.",
+      "starter": "const marks = [72, 45, 88, 91, 38];\n",
+      "checks": [
+        {
+          "label": "Uses filter",
+          "re": "\\.filter\\s*\\(",
+          "flags": ""
+        },
+        {
+          "label": "Keeps 40 and above",
+          "re": ">=\\s*40|>\\s*39",
+          "flags": ""
+        },
+        {
+          "label": "Uses reduce",
+          "re": "\\.reduce\\s*\\(",
+          "flags": ""
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "ఒక {context} లో సంఖ్యల జాబితా ఉంది. ఉపయోగపడే విలువలను మాత్రమే తీసుకుని, వాటిని మార్చడానికి filter, map ఎలా వాడతారో వివరించండి.",

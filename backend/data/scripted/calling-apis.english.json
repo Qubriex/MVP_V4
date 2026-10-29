@@ -36,6 +36,34 @@
     "answer": "Good doubt. fetch only fails on network problems. A 404 or 500 still counts as a response, so we check r.ok and treat it as an error ourselves. Does that help?",
     "captionEn": null
   },
+  "practice": {
+    "code": {
+      "prompt": "In a component, load /api/results with loading, success and error states, checking r.ok.",
+      "starter": "function Results() {\n  \n}\n",
+      "checks": [
+        {
+          "label": "Fetches the API",
+          "re": "fetch\\s*\\(\\s*[\"'`]/api/results",
+          "flags": ""
+        },
+        {
+          "label": "Checks ok",
+          "re": "\\.ok\\b",
+          "flags": ""
+        },
+        {
+          "label": "Has a loading state",
+          "re": "loading",
+          "flags": "i"
+        },
+        {
+          "label": "Handles errors",
+          "re": "(catch|error)",
+          "flags": "i"
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "On a {context}, data comes from an API. Explain the three states your React page should show, and how you handle each one.",

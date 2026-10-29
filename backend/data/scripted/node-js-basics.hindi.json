@@ -36,6 +36,34 @@
     "answer": "अच्छा सवाल। package.json आपके project के packages और scripts की सूची है। npm install उसे पढ़कर उन्हें download करता है, ताकि कोई भी आपका project चला सके। समझ आया?",
     "captionEn": "Good question. package.json lists your project's packages and scripts. npm install reads it and downloads them, so anyone can run your project. Does that help?"
   },
+  "practice": {
+    "code": {
+      "prompt": "port 3000 पर एक HTTP server शुरू कीजिए जो हर request का जवाब JSON में दे।",
+      "starter": "// server.js\n",
+      "checks": [
+        {
+          "label": "Loads http (or express)",
+          "re": "require\\s*\\(\\s*[\"'](http|express)|import\\s+.*from\\s+[\"'](http|express)",
+          "flags": ""
+        },
+        {
+          "label": "Creates a server",
+          "re": "createServer\\s*\\(|express\\s*\\(\\s*\\)",
+          "flags": ""
+        },
+        {
+          "label": "Sends JSON",
+          "re": "application/json|res\\.json\\s*\\(|JSON\\.stringify",
+          "flags": ""
+        },
+        {
+          "label": "Listens on 3000",
+          "re": "listen\\s*\\(\\s*3000",
+          "flags": ""
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "एक {context} के लिए समझाइए कि छोटा Node.js server request का जवाब कैसे देगा और data कैसे भेजेगा।",

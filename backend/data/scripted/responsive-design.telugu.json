@@ -36,6 +36,29 @@
     "answer": "మంచి సందేహం. mobile first అంటే ముందు phone layout రాసి, తర్వాత పెద్ద screens కోసం min-width తో media queries కలపడం. phones వేగంగా, సరళంగా ఉంటాయి. సహాయపడిందా?",
     "captionEn": "Good doubt. Mobile first means you write the phone layout first, then add media queries with min-width for bigger screens. It keeps phones fast and simple. Does that help?"
   },
+  "practice": {
+    "code": {
+      "prompt": ".grid phone లో ఒక column, 768px నుంచి మూడు columns ఉండేలా చేయండి.",
+      "starter": ".grid {\n  display: grid;\n}\n",
+      "checks": [
+        {
+          "label": "One column by default",
+          "re": "grid-template-columns\\s*:\\s*(1fr|repeat\\(\\s*1\\s*,)",
+          "flags": "i"
+        },
+        {
+          "label": "A min-width media query at 768px",
+          "re": "@media[^{]*min-width\\s*:\\s*768px",
+          "flags": "i"
+        },
+        {
+          "label": "Three columns inside it",
+          "re": "repeat\\(\\s*3\\s*,\\s*1fr\\s*\\)|1fr\\s+1fr\\s+1fr",
+          "flags": "i"
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "ఒక {context} laptop లో బాగుంది కానీ phone లో కత్తిరించినట్టు కనిపిస్తోంది. responsive చేయడానికి మీరు చేసే మూడు పనులు వివరించండి.",

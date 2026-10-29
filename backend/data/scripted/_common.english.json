@@ -1,5 +1,15 @@
 {
   "language": "english",
+  "quickStem": "Which of these is part of {skill}?",
+  "taskIntro": "Work task at a Hyderabad startup: your team lead asks you to answer this for a real project. {question}",
+  "taskDeliverable": "Write your answer in your own words: 5 to 10 sentences, with code if it helps.",
+  "guide": {
+    "covers": "Covers: {term}",
+    "ownWords": "Clear and in your own words",
+    "scenario": "Fits the work scenario"
+  },
+  "challengeAsk": "In your check you said: \"{excerpt}\". Now say it out loud: why does that work, and what would go wrong without it?",
+  "baselineIntro": "A few short questions so we know where to start you. There are no marks; answer what you can.",
   "ready": "Good. You have the core idea. Now a short check: answer it in your own words.",
   "advance": "Well done. You have this skill. Let us move on to the next one.",
   "loop": "Good try. Let us look at it from another angle.",

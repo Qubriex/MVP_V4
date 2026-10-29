@@ -36,6 +36,34 @@
     "answer": "మంచి ప్రశ్న. \"5\" కి 1 కలిపితే \"51\" వస్తుంది, ఎందుకంటే string text ని కలుపుతుంది. 5 కి 1 కలిపితే 6. అందుకే కలిపే ముందు type చూడండి. సహాయపడిందా?",
     "captionEn": "Good question. \"5\" plus 1 gives \"51\" because a string joins text. 5 plus 1 gives 6. So always check the type before adding. Does that help?"
   },
+  "practice": {
+    "code": {
+      "prompt": "దుకాణం పేరు (మారదు), అమ్మిన వస్తువులు (మారే సంఖ్య), దుకాణం తెరిచి ఉందా అనేవి declare చేసి, అమ్మిన వస్తువులకు ఒకటి కలపండి.",
+      "starter": "// your code\n",
+      "checks": [
+        {
+          "label": "A const for the name",
+          "re": "const\\s+\\w+\\s*=\\s*[\"'`]",
+          "flags": ""
+        },
+        {
+          "label": "A let for the number",
+          "re": "let\\s+\\w+\\s*=\\s*\\d",
+          "flags": ""
+        },
+        {
+          "label": "A boolean",
+          "re": "=\\s*(true|false)",
+          "flags": ""
+        },
+        {
+          "label": "Increases the number",
+          "re": "(\\+\\+|\\+=\\s*1|=\\s*\\w+\\s*\\+\\s*1)",
+          "flags": ""
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "ఒక {context} లో ఏ విలువలను string, number, boolean గా దాచుకుంటారు? let, const తో వివరించండి.",

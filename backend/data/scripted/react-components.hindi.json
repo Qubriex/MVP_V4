@@ -36,6 +36,34 @@
     "answer": "अच्छा सवाल। component के नाम बड़े अक्षर से शुरू होते हैं, तभी React समझता है कि ये components हैं, सामान्य HTML tags नहीं। समझ आया?",
     "captionEn": "Good question. Component names start with a capital letter so React knows they are components, not plain HTML tags. Does that help?"
   },
+  "practice": {
+    "code": {
+      "prompt": "EventCard component लिखिए जो भेजा गया title और date दिखाए, और उसे एक बार इस्तेमाल कीजिए।",
+      "starter": "function EventCard(props) {\n  \n}\n",
+      "checks": [
+        {
+          "label": "A component named EventCard",
+          "re": "(function\\s+EventCard|const\\s+EventCard\\s*=)",
+          "flags": ""
+        },
+        {
+          "label": "Returns JSX",
+          "re": "return\\s*\\(?\\s*<",
+          "flags": ""
+        },
+        {
+          "label": "Shows the title",
+          "re": "\\{\\s*(props\\.)?title\\s*\\}",
+          "flags": ""
+        },
+        {
+          "label": "Is used as a tag",
+          "re": "<EventCard\\b",
+          "flags": ""
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "एक {context} में कई items एक जैसे दिखते हैं। समझाइए कि एक item के लिए React component कैसे बनाएँगे और दोबारा इस्तेमाल करेंगे।",

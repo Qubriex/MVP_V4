@@ -36,6 +36,29 @@
     "answer": "अच्छा सवाल। forEach हर item के लिए code चलाता है, कुछ वापस नहीं देता। map नया array वापस देता है। नई सूची चाहिए तो map। समझ आया?",
     "captionEn": "Good question. forEach just runs code for each item and gives nothing back. map gives back a new array. Use map when you want the new list. Does that help?"
   },
+  "practice": {
+    "code": {
+      "prompt": "marks = [72, 45, 88, 91, 38] से filter से पास अंक (40 और ऊपर) और reduce से उनका जोड़ निकालिए।",
+      "starter": "const marks = [72, 45, 88, 91, 38];\n",
+      "checks": [
+        {
+          "label": "Uses filter",
+          "re": "\\.filter\\s*\\(",
+          "flags": ""
+        },
+        {
+          "label": "Keeps 40 and above",
+          "re": ">=\\s*40|>\\s*39",
+          "flags": ""
+        },
+        {
+          "label": "Uses reduce",
+          "re": "\\.reduce\\s*\\(",
+          "flags": ""
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "एक {context} में संख्याओं की सूची है। समझाइए कि सिर्फ़ काम के मान लेने और उन्हें बदलने के लिए filter और map कैसे इस्तेमाल करेंगे।",

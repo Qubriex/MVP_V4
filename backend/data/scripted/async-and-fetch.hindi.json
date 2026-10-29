@@ -36,6 +36,34 @@
     "answer": "अच्छा सवाल। await के बिना data नहीं, promise मिलता है। data अभी आया नहीं है। await सिर्फ़ उस function को data आने तक रोकता है। समझ आया?",
     "captionEn": "Good question. Without await, you get a promise, not the data. The data is not there yet. await pauses only that function until the data arrives. Does that help?"
   },
+  "practice": {
+    "code": {
+      "prompt": "एक async function लिखिए जो /api/trains लोड करे, JSON पढ़े और विफलता संभाले।",
+      "starter": "async function loadTrains() {\n  \n}\n",
+      "checks": [
+        {
+          "label": "async function",
+          "re": "async\\s+(function|\\()",
+          "flags": ""
+        },
+        {
+          "label": "awaits fetch",
+          "re": "await\\s+fetch\\s*\\(",
+          "flags": ""
+        },
+        {
+          "label": "reads JSON",
+          "re": "\\.json\\s*\\(",
+          "flags": ""
+        },
+        {
+          "label": "handles errors",
+          "re": "catch\\s*[({]",
+          "flags": ""
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "एक {context} में data server से आना है। समझाइए कि fetch, async और await से उसे कैसे लाएँगे और errors कैसे संभालेंगे।",

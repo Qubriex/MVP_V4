@@ -36,6 +36,34 @@
     "answer": "अच्छा सवाल। git pull टीम के नए commits आपके computer पर लाता है। git push आपके commits उन्हें भेजता है। काम शुरू करने से पहले pull, खत्म करने पर push। समझ आया?",
     "captionEn": "Good question. git pull brings your team's new commits to your computer. git push sends your commits to them. Pull before you start work, push when you finish. Does that help?"
   },
+  "practice": {
+    "code": {
+      "prompt": "events-page नाम की branch बनाने, उस पर जाने, index.html को message के साथ सहेजने और साझा करने की commands लिखिए।",
+      "starter": "# your commands\n",
+      "checks": [
+        {
+          "label": "Creates or switches to the branch",
+          "re": "git\\s+(branch|switch\\s+-c|checkout\\s+-b)\\s+events-page",
+          "flags": "i"
+        },
+        {
+          "label": "Stages the file",
+          "re": "git\\s+add\\s+\\S*index\\.html",
+          "flags": "i"
+        },
+        {
+          "label": "Commits with a message",
+          "re": "git\\s+commit\\s+-m\\s+[\"']",
+          "flags": "i"
+        },
+        {
+          "label": "Pushes",
+          "re": "git\\s+push",
+          "flags": "i"
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "तीन दोस्त एक {context} पर काम कर रहे हैं। समझाइए कि Git branches और commits उन्हें एक-दूसरे का काम मिटाए बिना कैसे काम करने देते हैं।",

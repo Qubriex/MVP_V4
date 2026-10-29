@@ -36,6 +36,34 @@
     "answer": "Good question. An uncontrolled input keeps its own value in the page, and you read it only at submit. A controlled one keeps it in state, so you can check as the user types. Does that help?",
     "captionEn": null
   },
+  "practice": {
+    "code": {
+      "prompt": "Build a controlled name input; on submit, prevent the reload and refuse an empty name.",
+      "starter": "function Register() {\n  \n}\n",
+      "checks": [
+        {
+          "label": "Input value from state",
+          "re": "value\\s*=\\s*\\{",
+          "flags": ""
+        },
+        {
+          "label": "onChange updates state",
+          "re": "onChange\\s*=",
+          "flags": ""
+        },
+        {
+          "label": "onSubmit with preventDefault",
+          "re": "preventDefault\\s*\\(",
+          "flags": ""
+        },
+        {
+          "label": "Checks for empty",
+          "re": "(trim\\s*\\(\\)|!\\s*\\w+|===\\s*[\"']{2}|length)",
+          "flags": ""
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "On a {context}, a form must not submit when a field is empty. Explain how you would build this as a controlled form in React.",

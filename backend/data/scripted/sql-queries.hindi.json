@@ -36,6 +36,34 @@
     "answer": "अच्छा सवाल। WHERE समूह बनाने से पहले पंक्तियाँ छाँटता है। HAVING, GROUP BY के बाद समूह छाँटता है, जैसे 100 से ज़्यादा यात्रियों वाली ट्रेनें। समझ आया?",
     "captionEn": "Good doubt. WHERE filters rows before grouping. HAVING filters groups after GROUP BY, like trains with more than 100 passengers. Does that help?"
   },
+  "practice": {
+    "code": {
+      "prompt": "bookings table से 12 नवंबर 2026 की confirmed bookings नाम के क्रम में दिखाइए।",
+      "starter": "-- your query\n",
+      "checks": [
+        {
+          "label": "SELECT … FROM bookings",
+          "re": "select[\\s\\S]+from\\s+bookings",
+          "flags": "i"
+        },
+        {
+          "label": "Filters with WHERE",
+          "re": "where",
+          "flags": "i"
+        },
+        {
+          "label": "Only confirmed",
+          "re": "confirmed",
+          "flags": "i"
+        },
+        {
+          "label": "Sorted by name",
+          "re": "order\\s+by\\s+\\w*name",
+          "flags": "i"
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "एक {context} के लिए एक SQL query लिखिए या समझाइए जो शर्त से कुछ पंक्तियाँ ढूँढे और उन्हें क्रम में रखे। हर clause समझाइए।",

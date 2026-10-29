@@ -36,6 +36,34 @@
     "answer": "अच्छा सवाल। state variable को सीधे बदलें तो React को पता नहीं चलता और वह फिर से नहीं बनाता। हमेशा setBooked जैसा setter इस्तेमाल कीजिए। समझ आया?",
     "captionEn": "Good question. If you change a state variable directly, React does not know and does not redraw. Always use the setter, like setBooked. Does that help?"
   },
+  "practice": {
+    "code": {
+      "prompt": "SeatCounter लिखिए जो total को prop के रूप में ले, booked को state में रखे, और click पर एक जोड़े।",
+      "starter": "function SeatCounter({ total }) {\n  \n}\n",
+      "checks": [
+        {
+          "label": "Uses useState",
+          "re": "useState\\s*\\(",
+          "flags": ""
+        },
+        {
+          "label": "Updates with the setter",
+          "re": "set\\w+\\s*\\(",
+          "flags": ""
+        },
+        {
+          "label": "Handles a click",
+          "re": "onClick\\s*=",
+          "flags": ""
+        },
+        {
+          "label": "Shows total",
+          "re": "\\{\\s*total\\s*\\}",
+          "flags": ""
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "एक {context} में एक component एक गिनती दिखाता है जो user के click पर बदलती है। समझाइए कौन से मान props हैं, कौन से state, और क्यों।",

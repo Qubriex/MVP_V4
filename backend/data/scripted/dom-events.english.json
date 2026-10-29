@@ -36,6 +36,34 @@
     "answer": "Good doubt. preventDefault stops the browser's normal action, like reloading the page on form submit. Then your code can handle it instead. Does that help?",
     "captionEn": null
   },
+  "practice": {
+    "code": {
+      "prompt": "When the #add button is clicked, increase cartCount and show it in #badge.",
+      "starter": "let cartCount = 0;\n",
+      "checks": [
+        {
+          "label": "Finds the button",
+          "re": "querySelector\\s*\\(\\s*[\"']#add|getElementById\\s*\\(\\s*[\"']add",
+          "flags": ""
+        },
+        {
+          "label": "Listens for click",
+          "re": "addEventListener\\s*\\(\\s*[\"']click",
+          "flags": ""
+        },
+        {
+          "label": "Increases the count",
+          "re": "cartCount\\s*(\\+\\+|\\+=)",
+          "flags": ""
+        },
+        {
+          "label": "Updates the badge",
+          "re": "(textContent|innerText|innerHTML)\\s*=",
+          "flags": ""
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "On a {context}, a button should update a counter when clicked. Explain how you would use addEventListener to do this.",

@@ -36,6 +36,34 @@
     "answer": "अच्छा सवाल। \"5\" में 1 जोड़ने पर \"51\" आता है, क्योंकि string text जोड़ता है। 5 में 1 जोड़ने पर 6। इसलिए जोड़ने से पहले type देखिए। समझ आया?",
     "captionEn": "Good question. \"5\" plus 1 gives \"51\" because a string joins text. 5 plus 1 gives 6. So always check the type before adding. Does that help?"
   },
+  "practice": {
+    "code": {
+      "prompt": "दुकान का नाम (कभी नहीं बदलता), बिकी चीज़ें (बदलती संख्या) और दुकान खुली है या नहीं, declare कीजिए; फिर बिकी चीज़ों में एक जोड़िए।",
+      "starter": "// your code\n",
+      "checks": [
+        {
+          "label": "A const for the name",
+          "re": "const\\s+\\w+\\s*=\\s*[\"'`]",
+          "flags": ""
+        },
+        {
+          "label": "A let for the number",
+          "re": "let\\s+\\w+\\s*=\\s*\\d",
+          "flags": ""
+        },
+        {
+          "label": "A boolean",
+          "re": "=\\s*(true|false)",
+          "flags": ""
+        },
+        {
+          "label": "Increases the number",
+          "re": "(\\+\\+|\\+=\\s*1|=\\s*\\w+\\s*\\+\\s*1)",
+          "flags": ""
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "एक {context} में आप कौन से मान string, number और boolean के रूप में रखेंगे? let और const के साथ समझाइए।",

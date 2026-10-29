@@ -36,6 +36,34 @@
     "answer": "మంచి ప్రశ్న. justify-content ముఖ్య దిశలో పనిచేస్తుంది, అది మామూలుగా row. align-items దానికి అడ్డంగా పనిచేస్తుంది. flex-direction column పెడితే ఇవి మారిపోతాయి. ఇది సహాయపడిందా?",
     "captionEn": "Good question. justify-content works along the main direction, which is a row by default. align-items works across it. If you set flex-direction column, they swap. Does that help?"
   },
+  "practice": {
+    "code": {
+      "prompt": ".menu లోని items ఒకే వరుసలో, దూరంగా, నిలువుగా మధ్యలో, చిన్న screens లో wrap అయ్యేలా layout రాయండి.",
+      "starter": ".menu {\n  \n}\n",
+      "checks": [
+        {
+          "label": "display: flex",
+          "re": "display\\s*:\\s*flex",
+          "flags": "i"
+        },
+        {
+          "label": "Spreads items apart",
+          "re": "justify-content\\s*:\\s*space-(between|around|evenly)",
+          "flags": "i"
+        },
+        {
+          "label": "Centres vertically",
+          "re": "align-items\\s*:\\s*center",
+          "flags": "i"
+        },
+        {
+          "label": "Wraps",
+          "re": "flex-wrap\\s*:\\s*wrap",
+          "flags": "i"
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "ఒక {context} header లో logo, మూడు links, ఒక button ఉన్నాయి. వాటిని ఒకే వరుసలో సమాన దూరంతో పెట్టడానికి flexbox ఎలా వాడతారో వివరించండి.",

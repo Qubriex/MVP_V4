@@ -36,6 +36,34 @@
     "answer": "మంచి ప్రశ్న. git pull team కొత్త commits ని మీ computer కి తెస్తుంది. git push మీ commits ని వాళ్లకు పంపుతుంది. పని మొదలుపెట్టే ముందు pull, ముగించాక push. సహాయపడిందా?",
     "captionEn": "Good question. git pull brings your team's new commits to your computer. git push sends your commits to them. Pull before you start work, push when you finish. Does that help?"
   },
+  "practice": {
+    "code": {
+      "prompt": "events-page అనే branch చేసి, దానికి మారి, index.html ని message తో save చేసి, షేర్ చేసే commands రాయండి.",
+      "starter": "# your commands\n",
+      "checks": [
+        {
+          "label": "Creates or switches to the branch",
+          "re": "git\\s+(branch|switch\\s+-c|checkout\\s+-b)\\s+events-page",
+          "flags": "i"
+        },
+        {
+          "label": "Stages the file",
+          "re": "git\\s+add\\s+\\S*index\\.html",
+          "flags": "i"
+        },
+        {
+          "label": "Commits with a message",
+          "re": "git\\s+commit\\s+-m\\s+[\"']",
+          "flags": "i"
+        },
+        {
+          "label": "Pushes",
+          "re": "git\\s+push",
+          "flags": "i"
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "ముగ్గురు స్నేహితులు ఒక {context} మీద పనిచేస్తున్నారు. ఒకరి పని మరొకరు చెరిపేయకుండా Git branches, commits ఎలా సహాయపడతాయో వివరించండి.",

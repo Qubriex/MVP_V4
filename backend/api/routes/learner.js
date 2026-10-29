@@ -637,6 +637,9 @@ async function handleCheckResult({ req, res, session, node, result, learnerRespo
       pendingCheck.family_version || null, Math.round((session.active_minutes || 0) * 60000), now);
     await insertProvenance(db, evidenceId, gate.provenance);
     await insertAnswer(db, evidenceId, learnerResponse);
+    await db.prepare('UPDATE evidence_records SET feedback_json = ? WHERE id = ?').run(JSON.stringify({
+      good: evaluation.whatWasGood || '', missing: evaluation.whatWasMissing || '', next: evaluation.nextTime || ''
+    }), evidenceId);
 
     // Faculty review: decision stratum (persistence, borderline disagreement) or calibration sample (§7.8).
     review = await enqueueReview({ evidenceId, elId, nodeId: node.id, institutionId: node.institution_id, engagementId: req.user.engagement_id, decision: assessment.review });

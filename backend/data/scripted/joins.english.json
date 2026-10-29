@@ -36,6 +36,34 @@
     "answer": "Good doubt. Without ON, or with a wrong condition, every row joins with every row, giving a huge result. Always match on a key. Does that help?",
     "captionEn": null
   },
+  "practice": {
+    "code": {
+      "prompt": "Show each unreturned loan with the student's name, joining loans and students on the student id.",
+      "starter": "-- your query\n",
+      "checks": [
+        {
+          "label": "Joins two tables",
+          "re": "join\\s+\\w+",
+          "flags": "i"
+        },
+        {
+          "label": "Matches on the student id",
+          "re": "on\\s+[\\w.]*id\\s*=\\s*[\\w.]*student_id|on\\s+[\\w.]*student_id\\s*=\\s*[\\w.]*id",
+          "flags": "i"
+        },
+        {
+          "label": "Shows the name",
+          "re": "select[\\s\\S]*name",
+          "flags": "i"
+        },
+        {
+          "label": "Only unreturned",
+          "re": "returned",
+          "flags": "i"
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "In a {context}, data is in two tables linked by an id. Explain how you would join them to answer a question, and what ON does.",

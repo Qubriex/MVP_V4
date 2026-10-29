@@ -36,6 +36,34 @@
     "answer": "మంచి ప్రశ్న. PUT మొత్తం రికార్డును మార్చేస్తుంది, PATCH కొన్ని fields మాత్రమే మారుస్తుంది. phone number ఒక్కటే మార్చాలంటే PATCH సరైనది. సహాయపడిందా?",
     "captionEn": "Good question. PUT replaces the whole record, PATCH changes only some fields. To update just a phone number, PATCH is the better fit. Does that help?"
   },
+  "practice": {
+    "code": {
+      "prompt": "విద్యార్థుల రికార్డుల ఐదు endpoints (జాబితా, ఒకటి, జోడించు, మార్చు, తీసేయి) methods, status codes తో రాయండి.",
+      "starter": "# METHOD  /path   → status\n",
+      "checks": [
+        {
+          "label": "GET /students",
+          "re": "GET\\s+/students\\b",
+          "flags": ""
+        },
+        {
+          "label": "POST with 201",
+          "re": "POST\\s+/students[\\s\\S]*201",
+          "flags": ""
+        },
+        {
+          "label": "PUT or PATCH with an id",
+          "re": "(PUT|PATCH)\\s+/students/",
+          "flags": ""
+        },
+        {
+          "label": "DELETE with an id",
+          "re": "DELETE\\s+/students/",
+          "flags": ""
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "ఒక {context} కోసం REST endpoints design చేయండి: జాబితా, ఒకటి చదవడం, జోడించడం, మార్చడం, తీసేయడం. methods, status codes వివరించండి.",

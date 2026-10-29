@@ -36,6 +36,34 @@
     "answer": "अच्छा सवाल। uncontrolled input अपना मान पेज में ही रखता है, जिसे submit पर पढ़ते हैं। controlled में मान state में रहता है, तो user के टाइप करते-करते जाँच सकते हैं। समझ आया?",
     "captionEn": "Good question. An uncontrolled input keeps its own value in the page, and you read it only at submit. A controlled one keeps it in state, so you can check as the user types. Does that help?"
   },
+  "practice": {
+    "code": {
+      "prompt": "controlled name input बनाइए; submit पर reload रोकिए और ख़ाली नाम मना कीजिए।",
+      "starter": "function Register() {\n  \n}\n",
+      "checks": [
+        {
+          "label": "Input value from state",
+          "re": "value\\s*=\\s*\\{",
+          "flags": ""
+        },
+        {
+          "label": "onChange updates state",
+          "re": "onChange\\s*=",
+          "flags": ""
+        },
+        {
+          "label": "onSubmit with preventDefault",
+          "re": "preventDefault\\s*\\(",
+          "flags": ""
+        },
+        {
+          "label": "Checks for empty",
+          "re": "(trim\\s*\\(\\)|!\\s*\\w+|===\\s*[\"']{2}|length)",
+          "flags": ""
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "एक {context} में कोई field ख़ाली हो तो form submit नहीं होना चाहिए। समझाइए कि इसे React में controlled form के रूप में कैसे बनाएँगे।",

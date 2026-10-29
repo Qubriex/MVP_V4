@@ -36,6 +36,39 @@
     "answer": "Good doubt. Background colour fills content and padding, but not margin. So if you want coloured space, use padding. If you want empty space between boxes, use margin. Does that help?",
     "captionEn": null
   },
+  "practice": {
+    "code": {
+      "prompt": "Style a .card that is 200px wide in total, with 16px padding, a 2px border and 12px margin.",
+      "starter": ".card {\n  \n}\n",
+      "checks": [
+        {
+          "label": "Uses box-sizing: border-box",
+          "re": "box-sizing\\s*:\\s*border-box",
+          "flags": "i"
+        },
+        {
+          "label": "Width 200px",
+          "re": "width\\s*:\\s*200px",
+          "flags": "i"
+        },
+        {
+          "label": "Padding 16px",
+          "re": "padding\\s*:\\s*16px",
+          "flags": "i"
+        },
+        {
+          "label": "Border 2px",
+          "re": "border\\s*:\\s*2px",
+          "flags": "i"
+        },
+        {
+          "label": "Margin 12px",
+          "re": "margin\\s*:\\s*12px",
+          "flags": "i"
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "On a {context}, two cards are touching each other and their text touches the edges. Which box model properties would you change, and why?",

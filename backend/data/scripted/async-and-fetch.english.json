@@ -36,6 +36,34 @@
     "answer": "Good question. Without await, you get a promise, not the data. The data is not there yet. await pauses only that function until the data arrives. Does that help?",
     "captionEn": null
   },
+  "practice": {
+    "code": {
+      "prompt": "Write an async function that loads /api/trains, reads the JSON and handles a failure.",
+      "starter": "async function loadTrains() {\n  \n}\n",
+      "checks": [
+        {
+          "label": "async function",
+          "re": "async\\s+(function|\\()",
+          "flags": ""
+        },
+        {
+          "label": "awaits fetch",
+          "re": "await\\s+fetch\\s*\\(",
+          "flags": ""
+        },
+        {
+          "label": "reads JSON",
+          "re": "\\.json\\s*\\(",
+          "flags": ""
+        },
+        {
+          "label": "handles errors",
+          "re": "catch\\s*[({]",
+          "flags": ""
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "On a {context}, data must come from a server. Explain how you would load it with fetch, async and await, and handle errors.",

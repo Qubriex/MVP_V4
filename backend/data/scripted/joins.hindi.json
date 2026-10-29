@@ -36,6 +36,34 @@
     "answer": "अच्छा सवाल। ON न हो या ग़लत शर्त हो तो हर पंक्ति हर पंक्ति से जुड़ जाती है, बहुत बड़ा नतीजा आता है। हमेशा किसी key पर मिलाइए। समझ आया?",
     "captionEn": "Good doubt. Without ON, or with a wrong condition, every row joins with every row, giving a huge result. Always match on a key. Does that help?"
   },
+  "practice": {
+    "code": {
+      "prompt": "student id पर loans और students को join करके, हर न लौटाया loan छात्र के नाम के साथ दिखाइए।",
+      "starter": "-- your query\n",
+      "checks": [
+        {
+          "label": "Joins two tables",
+          "re": "join\\s+\\w+",
+          "flags": "i"
+        },
+        {
+          "label": "Matches on the student id",
+          "re": "on\\s+[\\w.]*id\\s*=\\s*[\\w.]*student_id|on\\s+[\\w.]*student_id\\s*=\\s*[\\w.]*id",
+          "flags": "i"
+        },
+        {
+          "label": "Shows the name",
+          "re": "select[\\s\\S]*name",
+          "flags": "i"
+        },
+        {
+          "label": "Only unreturned",
+          "re": "returned",
+          "flags": "i"
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "एक {context} में data दो tables में है जो एक id से जुड़ी हैं। समझाइए कि किसी सवाल का जवाब पाने के लिए उन्हें कैसे join करेंगे, और ON क्या करता है।",

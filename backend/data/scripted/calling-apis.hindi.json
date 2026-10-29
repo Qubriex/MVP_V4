@@ -36,6 +36,34 @@
     "answer": "अच्छा सवाल। fetch सिर्फ़ network की समस्या पर विफल होता है। 404 या 500 भी response ही होते हैं, इसलिए r.ok जाँचकर हम ख़ुद उन्हें error मानते हैं। समझ आया?",
     "captionEn": "Good doubt. fetch only fails on network problems. A 404 or 500 still counts as a response, so we check r.ok and treat it as an error ourselves. Does that help?"
   },
+  "practice": {
+    "code": {
+      "prompt": "एक component में loading, success और error states के साथ, r.ok जाँचते हुए /api/results लोड कीजिए।",
+      "starter": "function Results() {\n  \n}\n",
+      "checks": [
+        {
+          "label": "Fetches the API",
+          "re": "fetch\\s*\\(\\s*[\"'`]/api/results",
+          "flags": ""
+        },
+        {
+          "label": "Checks ok",
+          "re": "\\.ok\\b",
+          "flags": ""
+        },
+        {
+          "label": "Has a loading state",
+          "re": "loading",
+          "flags": "i"
+        },
+        {
+          "label": "Handles errors",
+          "re": "(catch|error)",
+          "flags": "i"
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "एक {context} में data API से आता है। समझाइए कि आपका React पेज कौन सी तीन states दिखाए, और हर एक को कैसे संभालेंगे।",

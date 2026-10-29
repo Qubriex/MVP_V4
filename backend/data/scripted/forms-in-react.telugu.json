@@ -36,6 +36,34 @@
     "answer": "మంచి ప్రశ్న. uncontrolled input తన విలువను పేజీలోనే ఉంచుకుంటుంది, submit అప్పుడే చదువుతాం. controlled అయితే state లో ఉంటుంది, user టైప్ చేస్తుండగానే చెక్ చేయొచ్చు. సహాయపడిందా?",
     "captionEn": "Good question. An uncontrolled input keeps its own value in the page, and you read it only at submit. A controlled one keeps it in state, so you can check as the user types. Does that help?"
   },
+  "practice": {
+    "code": {
+      "prompt": "controlled name input చేయండి; submit అయినప్పుడు reload ఆపి, ఖాళీ పేరు ఒప్పుకోకండి.",
+      "starter": "function Register() {\n  \n}\n",
+      "checks": [
+        {
+          "label": "Input value from state",
+          "re": "value\\s*=\\s*\\{",
+          "flags": ""
+        },
+        {
+          "label": "onChange updates state",
+          "re": "onChange\\s*=",
+          "flags": ""
+        },
+        {
+          "label": "onSubmit with preventDefault",
+          "re": "preventDefault\\s*\\(",
+          "flags": ""
+        },
+        {
+          "label": "Checks for empty",
+          "re": "(trim\\s*\\(\\)|!\\s*\\w+|===\\s*[\"']{2}|length)",
+          "flags": ""
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "ఒక {context} లో ఏదైనా field ఖాళీగా ఉంటే form submit కాకూడదు. దీన్ని React లో controlled form గా ఎలా చేస్తారో వివరించండి.",

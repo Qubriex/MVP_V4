@@ -36,6 +36,34 @@
     "answer": "Good doubt. WHERE filters rows before grouping. HAVING filters groups after GROUP BY, like trains with more than 100 passengers. Does that help?",
     "captionEn": null
   },
+  "practice": {
+    "code": {
+      "prompt": "List confirmed bookings for 12 November 2026 by name, from the bookings table.",
+      "starter": "-- your query\n",
+      "checks": [
+        {
+          "label": "SELECT … FROM bookings",
+          "re": "select[\\s\\S]+from\\s+bookings",
+          "flags": "i"
+        },
+        {
+          "label": "Filters with WHERE",
+          "re": "where",
+          "flags": "i"
+        },
+        {
+          "label": "Only confirmed",
+          "re": "confirmed",
+          "flags": "i"
+        },
+        {
+          "label": "Sorted by name",
+          "re": "order\\s+by\\s+\\w*name",
+          "flags": "i"
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "For a {context}, write or describe a SQL query that finds some rows with a condition and sorts them. Explain each clause.",

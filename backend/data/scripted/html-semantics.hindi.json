@@ -36,6 +36,34 @@
     "answer": "अच्छा सवाल है। div का कोई अर्थ नहीं होता, वह सिर्फ़ style के लिए एक डिब्बा है। जब हिस्से की साफ़ भूमिका हो, जैसे navigation या article, तब semantic tag इस्तेमाल कीजिए। जब कोई सही tag न मिले, तभी div। अब साफ़ है?",
     "captionEn": "Good question. A div has no meaning; it is only a box for styling. Use a semantic tag when the part has a clear role, like navigation or an article. Use a div only when no meaningful tag fits. Is that clearer now?"
   },
+  "practice": {
+    "code": {
+      "prompt": "कॉलेज फेस्ट site का पेज ढाँचा लिखिए: nav वाला header, एक article (heading और paragraph) वाला main, और एक footer।",
+      "starter": "<!-- your page here -->\n",
+      "checks": [
+        {
+          "label": "Has a header with a nav",
+          "re": "<header[\\s\\S]*<nav[\\s\\S]*</nav>[\\s\\S]*</header>",
+          "flags": "i"
+        },
+        {
+          "label": "Has a main with an article",
+          "re": "<main[\\s\\S]*<article[\\s\\S]*</article>[\\s\\S]*</main>",
+          "flags": "i"
+        },
+        {
+          "label": "The article has a heading",
+          "re": "<article[\\s\\S]*<h[1-6]",
+          "flags": "i"
+        },
+        {
+          "label": "Has a footer",
+          "re": "<footer",
+          "flags": "i"
+        }
+      ]
+    }
+  },
   "check": {
     "questions": [
       "एक {context} के बारे में सोचिए। उसके ऊपर के हिस्से, मुख्य सामग्री और नीचे के हिस्से के लिए आप कौन से semantic tags इस्तेमाल करेंगे, और वे क्यों मदद करते हैं?",
