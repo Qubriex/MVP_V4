@@ -1,0 +1,114 @@
+{
+  "node": "Express routes",
+  "language": "telugu",
+  "version": 1,
+  "diagnosis": {
+    "message": "నమస్కారం! ఈ రోజు Express routes నేర్చుకుందాం. website చిరునామా చివర /books అని టైప్ చేస్తే server కి ఏం పంపాలో ఎలా తెలుస్తుంది?",
+    "captionEn": "Hello! Today we learn Express routes. When you type a website address with /books at the end, how does the server know what to send?"
+  },
+  "turns": {
+    "explain": {
+      "message": "చాలా counters ఉన్న పెద్ద కాలేజీ ఆఫీసు ఊహించుకోండి: ఒకదగ్గర fees, ఇంకోదగ్గర certificates, మూడోదగ్గర library. మీ పనికి సరైన counter కి వెళ్తారు. Express routes ఆ counters. path తో app.get చదవడానికి, app.post జోడించడానికి. ప్రతి route కి ఒక handler ఉంటుంది, అది req అంటే request, res అంటే response తీసుకుంటుంది. req.params లో book id లాంటి path భాగాలు, req.body లో పంపిన data ఉంటాయి. handler status code తో JSON పంపుతుంది, పుస్తకం దొరకకపోతే 404 లాగా. library API చేద్దామా?",
+      "captionEn": "Think of a big college office with counters: fees at one, certificates at another, library at a third. You go to the right counter for your work. Express routes are those counters. app.get with a path handles reading, app.post handles adding. Each route has a handler that gets req, the request, and res, the response. req.params holds parts of the path like a book id, req.body holds sent data. The handler sends back JSON with a status code, like 404 when a book is not found. Shall we build a library API?",
+      "code": "const express = require(\"express\");\nconst app = express();\napp.use(express.json());\n\napp.get(\"/books/:id\", async (req, res) => {\n  const book = await findBook(req.params.id);\n  if (!book) return res.status(404).json({ error: \"Book not found\" });\n  res.json(book);\n});\n\napp.post(\"/books\", async (req, res) => {\n  const saved = await addBook(req.body);\n  res.status(201).json(saved);\n});",
+      "mermaid": "graph LR\n  req[GET /books/42] --> router{Express routes}\n  router -->|app.get /books/:id| handler[handler] --> res[res.json book]"
+    },
+    "example": {
+      "message": "library API లో /books/:id కోసం app.get ఉంది. handler req.params.id తో పుస్తకం వెతుకుతుంది. లేకపోతే error తో status 404 పంపుతుంది. దొరికితే res.json పంపుతుంది. /books మీద app.post req.body చదివి 201 Created ఇస్తుంది. post route కి express.json ఎందుకు కావాలి?",
+      "captionEn": "A library API has app.get for /books/:id. The handler finds the book with req.params.id. If it is missing, it sends status 404 with an error. If found, res.json sends it. app.post on /books reads req.body and returns 201 Created. Why do we need express.json for the post route?",
+      "code": "const express = require(\"express\");\nconst app = express();\napp.use(express.json());\n\napp.get(\"/books/:id\", async (req, res) => {\n  const book = await findBook(req.params.id);\n  if (!book) return res.status(404).json({ error: \"Book not found\" });\n  res.json(book);\n});\n\napp.post(\"/books\", async (req, res) => {\n  const saved = await addBook(req.body);\n  res.status(201).json(saved);\n});",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "ఇంకో విధంగా. రైల్వే స్టేషన్. ప్రతి platform సంఖ్య ఒక path, వచ్చే రైలా వెళ్లే రైలా అనేది method. ప్రయాణికుడు అంటే request సరైన platform కి వెళ్తాడు, station master అంటే handler అతన్ని పంపుతాడు. కొత్త data జోడించడానికి request method ఏది?",
+      "captionEn": "Another way: a railway station. Each platform number is a path, and the type of train, arriving or departing, is the method. A passenger, the request, goes to the right platform, and the station master, the handler, sends them on. What is the request method for adding new data?",
+      "code": null,
+      "mermaid": "graph LR\n  req[GET /books/42] --> router{Express routes}\n  router -->|app.get /books/:id| handler[handler] --> res[res.json book]"
+    },
+    "not_understood": {
+      "message": "అడుగు అడుగుగా. ఒకటి, express తో app చేయండి. రెండు, path, function తో app.get రాయండి. మూడు, లోపల req చదివి res తో పంపండి. నాలుగు, app.listen తో మొదలుపెట్టండి. జవాబు తిరిగి పంపడానికి ఏ object వాడతారు?",
+      "captionEn": "Step by step. One, create app with express. Two, write app.get with a path and a function. Three, inside, read req and send with res. Four, start with app.listen. What object do you use to send the answer back?",
+      "code": null,
+      "mermaid": "graph LR\n  req[GET /books/42] --> router{Express routes}\n  router -->|app.get /books/:id| handler[handler] --> res[res.json book]"
+    }
+  },
+  "doubt": {
+    "answer": "మంచి సందేహం. middleware మీ handler కంటే ముందు నడుస్తుంది, అన్ని requests కి లేదా కొన్నింటికి. express.json అనే middleware request body ని object గా మారుస్తుంది. సహాయపడిందా?",
+    "captionEn": "Good doubt. Middleware runs before your handler, for every request or some. express.json is middleware that turns the request body into an object. Does that help?"
+  },
+  "practice": {
+    "code": {
+      "prompt": "పుస్తకాన్ని పంపే, దొరకకపోతే 404 ఇచ్చే GET /books/:id route జోడించండి.",
+      "starter": "const app = express();\n",
+      "checks": [
+        {
+          "label": "GET route with an id",
+          "re": "app\\.get\\s*\\(\\s*[\"']/books/:id",
+          "flags": ""
+        },
+        {
+          "label": "Reads req.params",
+          "re": "req\\.params",
+          "flags": ""
+        },
+        {
+          "label": "Sends 404 when missing",
+          "re": "status\\s*\\(\\s*404",
+          "flags": ""
+        },
+        {
+          "label": "Sends JSON",
+          "re": "res\\.json\\s*\\(",
+          "flags": ""
+        }
+      ]
+    }
+  },
+  "check": {
+    "questions": [
+      "ఒక {context} కోసం రెండు Express routes design చేయండి, ఒకటి id తో item చదవడానికి, ఇంకోటి item జోడించడానికి. req, res, status codes వివరించండి.",
+      "{context} లో item లేనప్పుడు ఒక route ఖాళీ data తో 200 ఇస్తోంది. బదులుగా ఏం చేయాలో, ఎందుకో వివరించండి.",
+      "{context} నుంచి ఒక ఉదాహరణతో Express లో middleware అంటే ఏమిటో వివరించండి."
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "app.get",
+          "app.post",
+          "get",
+          "post",
+          "router",
+          "route"
+        ],
+        [
+          "req",
+          "request",
+          "params",
+          "body",
+          "query"
+        ],
+        [
+          "res",
+          "response",
+          "res.json",
+          "status",
+          "404",
+          "201"
+        ],
+        [
+          "middleware",
+          "express.json",
+          "handler",
+          "path",
+          "url"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "methods, paths ని handlers కి సరిగ్గా జత చేశారు.",
+      "missing": "సరైన status code తో సహా handler ఏం పంపుతుందో చెప్పండి.",
+      "next": "ప్రతి route కి: method, path, ఏం చదువుతుంది, ఏం పంపుతుంది."
+    }
+  }
+}

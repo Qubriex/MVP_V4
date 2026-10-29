@@ -1,0 +1,107 @@
+{
+  "node": "Forms in React",
+  "language": "telugu",
+  "version": 1,
+  "diagnosis": {
+    "message": "నమస్కారం! ఈ రోజు React లో forms నేర్చుకుందాం. registration form నింపి submit నొక్కినప్పుడు పేరు ఖాళీగా వదిలేస్తే ఏం జరగాలి?",
+    "captionEn": "Hello! Today we learn forms in React. When you fill a registration form and press submit, what should happen if you left the name empty?"
+  },
+  "turns": {
+    "explain": {
+      "message": "బ్యాంక్ లో మీరు చెప్పే ప్రతి మాటను వెంటనే రాసుకునే clerk ని ఊహించుకోండి. React state ఆ clerk. controlled input లో input state లోని విలువను చూపిస్తుంది, ప్రతి key press కి onChange పిలుస్తుంది, అది state ని మారుస్తుంది. కాబట్టి ఏం టైప్ చేశారో React కి ఎప్పుడూ తెలుసు. submit అయినప్పుడు preventDefault పిలుస్తాం, విలువలు చెక్ చేస్తాం, ఏదైనా లేకపోతే error చూపిస్తాం, తర్వాతే save చేస్తాం. ఫెస్ట్ registration form చేద్దామా?",
+      "captionEn": "Think of a bank form where a clerk writes down every word you say, live. React state is that clerk. In a controlled input, the input shows the value from state, and every key press calls onChange, which updates state. So React always knows what is typed. On submit, we call preventDefault, check the values, show an error if something is missing, and only then save. Shall we build a fest registration form?",
+      "code": "function Register() {\n  const [name, setName] = useState(\"\");\n  const onSubmit = (e) => {\n    e.preventDefault();\n    if (!name.trim()) return setError(\"Enter your name\");\n    save({ name });\n  };\n  return (\n    <form onSubmit={onSubmit}>\n      <input value={name} onChange={e => setName(e.target.value)} />\n      <button>Register</button>\n    </form>\n  );\n}",
+      "mermaid": "graph LR\n  type[User types] --> onChange --> state[(name)] --> input[input value]\n  submit[Submit] --> validate --> save"
+    },
+    "example": {
+      "message": "Register form పేరుని state లో ఉంచుతుంది. input value పేరు, onChange setName పిలుస్తుంది. submit అయినప్పుడు పేజీ reload ఆపుతాం, పేరు ఖాళీగా లేదని చెక్ చేస్తాం, ఖాళీ అయితే \"Enter your name\" చూపిస్తాం, లేకపోతే save చేస్తాం. screen reader కూడా వినేలా error ఎక్కడ చూపిస్తారు?",
+      "captionEn": "A Register form keeps name in state. The input's value is name and onChange calls setName. On submit we prevent the page reload, check that the name is not empty, show \"Enter your name\" if it is, otherwise save. Where would you show the error so a screen reader also hears it?",
+      "code": "function Register() {\n  const [name, setName] = useState(\"\");\n  const onSubmit = (e) => {\n    e.preventDefault();\n    if (!name.trim()) return setError(\"Enter your name\");\n    save({ name });\n  };\n  return (\n    <form onSubmit={onSubmit}>\n      <input value={name} onChange={e => setName(e.target.value)} />\n      <button>Register</button>\n    </form>\n  );\n}",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "ఇంకో విధంగా. హాజరు తీసుకునే టీచర్. ప్రతి విద్యార్థి జవాబు వెంటనే register లో రాస్తారు. చివర్లో submit చేసే ముందు లేని పేర్లు చూస్తారు. ప్రతి జవాబు రాసే handler ఏది?",
+      "captionEn": "Another way: a teacher taking attendance. Every student's answer is written in the register immediately. At the end, the teacher checks for missing names before submitting the register. Which handler writes each answer?",
+      "code": null,
+      "mermaid": "graph LR\n  type[User types] --> onChange --> state[(name)] --> input[input value]\n  submit[Submit] --> validate --> save"
+    },
+    "not_understood": {
+      "message": "అడుగు అడుగుగా. ఒకటి, ప్రతి field కి state చేయండి. రెండు, input value ని state నుంచి పెట్టండి. మూడు, onChange లో state మార్చండి. నాలుగు, submit అయినప్పుడు reload ఆపి, చెక్ చేసి, save చేయండి. ప్రతి key press కి ఏ event వస్తుంది?",
+      "captionEn": "Step by step. One, make state for each field. Two, set the input value from state. Three, update state in onChange. Four, on submit, prevent reload, check, then save. Which event fires on every key press?",
+      "code": null,
+      "mermaid": "graph LR\n  type[User types] --> onChange --> state[(name)] --> input[input value]\n  submit[Submit] --> validate --> save"
+    }
+  },
+  "doubt": {
+    "answer": "మంచి ప్రశ్న. uncontrolled input తన విలువను పేజీలోనే ఉంచుకుంటుంది, submit అప్పుడే చదువుతాం. controlled అయితే state లో ఉంటుంది, user టైప్ చేస్తుండగానే చెక్ చేయొచ్చు. సహాయపడిందా?",
+    "captionEn": "Good question. An uncontrolled input keeps its own value in the page, and you read it only at submit. A controlled one keeps it in state, so you can check as the user types. Does that help?"
+  },
+  "practice": {
+    "code": {
+      "prompt": "controlled name input చేయండి; submit అయినప్పుడు reload ఆపి, ఖాళీ పేరు ఒప్పుకోకండి.",
+      "starter": "function Register() {\n  \n}\n",
+      "checks": [
+        {
+          "label": "Input value from state",
+          "re": "value\\s*=\\s*\\{",
+          "flags": ""
+        },
+        {
+          "label": "onChange updates state",
+          "re": "onChange\\s*=",
+          "flags": ""
+        },
+        {
+          "label": "onSubmit with preventDefault",
+          "re": "preventDefault\\s*\\(",
+          "flags": ""
+        },
+        {
+          "label": "Checks for empty",
+          "re": "(trim\\s*\\(\\)|!\\s*\\w+|===\\s*[\"']{2}|length)",
+          "flags": ""
+        }
+      ]
+    }
+  },
+  "check": {
+    "questions": [
+      "ఒక {context} లో ఏదైనా field ఖాళీగా ఉంటే form submit కాకూడదు. దీన్ని React లో controlled form గా ఎలా చేస్తారో వివరించండి.",
+      "{context} లో controlled input అంటే ఏమిటో, onChange, state కలిసి ఎలా పనిచేస్తాయో వివరించండి.",
+      "{context} లో form submit చేయగానే పేజీ reload అవుతోంది. React submit ని ఎలా చూసుకుని దీన్ని ఆపుతుందో, data ని ఎలా చెక్ చేస్తుందో చెప్పండి."
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "controlled",
+          "value",
+          "useState",
+          "state"
+        ],
+        [
+          "onChange",
+          "onchange"
+        ],
+        [
+          "onSubmit",
+          "submit",
+          "preventDefault"
+        ],
+        [
+          "validat",
+          "error",
+          "check",
+          "ఖాళీ",
+          "ख़ाली",
+          "खाली"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "controlled inputs, submit ని చూసుకోవడం వివరించారు.",
+      "missing": "save చేసే ముందు ఎలా చెక్ చేస్తారో, error ఎలా చూపిస్తారో చెప్పండి.",
+      "next": "ఈ వరుసలో: state, value, onChange, submit, check, save."
+    }
+  }
+}

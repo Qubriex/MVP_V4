@@ -19,7 +19,8 @@ export const MISSING = {
   strong_pass: 'learn.evidenceText.missing.giveOneClearlyStrong',
   execution_evidence: 'learn.evidenceText.missing.passACheckWhere',
   freshness: 'learn.evidenceText.missing.yourReviewIsOverdue',
-  challenge_bound: 'learn.evidenceText.missing.passASpokenChallenge'
+  challenge_bound: 'learn.evidenceText.missing.passASpokenChallenge',
+  second_kind: 'learn.evidenceText.missing.secondKind'
 };
 // Freshness in words: Fresh (85%+), Ageing (60–84%), Needs refresh (under 60%).
 export const FRESH = { fresh: ['fresh.fresh', 'ln-tag-success'], ageing: ['fresh.ageing', 'ln-tag-warning'], stale: ['fresh.stale', 'ln-tag-danger'] };

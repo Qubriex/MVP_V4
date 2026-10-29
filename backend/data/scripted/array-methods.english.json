@@ -1,0 +1,98 @@
+{
+  "node": "Array methods",
+  "language": "english",
+  "version": 1,
+  "diagnosis": {
+    "message": "Hello! Today we learn array methods. If you have marks for a whole class, how would you find who passed?",
+    "captionEn": null
+  },
+  "turns": {
+    "explain": {
+      "message": "Think of a teacher with a stack of answer sheets. map is giving every sheet five grace marks: you get a new stack of the same size. filter is picking only the sheets that passed: a smaller stack. reduce is adding all the marks to get one class total. Each method takes a small function that runs for every item, and none of them change the original stack. Shall we try with real marks?",
+      "captionEn": null,
+      "code": "const marks = [72, 45, 88, 91, 38];\nconst passed = marks.filter(m => m >= 40);      // [72, 45, 88, 91]\nconst withGrace = marks.map(m => m + 5);         // [77, 50, 93, 96, 43]\nconst total = marks.reduce((sum, m) => sum + m, 0); // 334",
+      "mermaid": "graph LR\n  list[marks] -->|map| changed[each changed]\n  list -->|filter| some[only some]\n  list -->|reduce| one[one total]"
+    },
+    "example": {
+      "message": "Marks are 72, 45, 88, 91 and 38. filter with m greater than or equal to 40 keeps four marks. map adding five gives every student grace marks. reduce adding them all gives 334. Which method would you use to get the names of toppers?",
+      "captionEn": null,
+      "code": "const marks = [72, 45, 88, 91, 38];\nconst passed = marks.filter(m => m >= 40);      // [72, 45, 88, 91]\nconst withGrace = marks.map(m => m + 5);         // [77, 50, 93, 96, 43]\nconst total = marks.reduce((sum, m) => sum + m, 0); // 334",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "Another way: a sieve at home. filter is the sieve that keeps only the good grains. map is grinding every grain into flour, one for one. reduce is pouring everything into one bowl. Which one keeps the same number of items?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph LR\n  list[marks] -->|map| changed[each changed]\n  list -->|filter| some[only some]\n  list -->|reduce| one[one total]"
+    },
+    "not_understood": {
+      "message": "Step by step. An array is a list. map changes each item and gives a new list of the same length. filter keeps only items that pass a test. reduce turns the list into one value. Which one gives a shorter list?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph LR\n  list[marks] -->|map| changed[each changed]\n  list -->|filter| some[only some]\n  list -->|reduce| one[one total]"
+    }
+  },
+  "doubt": {
+    "answer": "Good question. forEach just runs code for each item and gives nothing back. map gives back a new array. Use map when you want the new list. Does that help?",
+    "captionEn": null
+  },
+  "practice": {
+    "code": {
+      "prompt": "From marks = [72, 45, 88, 91, 38], get the passing marks (40 and above) with filter, and their total with reduce.",
+      "starter": "const marks = [72, 45, 88, 91, 38];\n",
+      "checks": [
+        {
+          "label": "Uses filter",
+          "re": "\\.filter\\s*\\(",
+          "flags": ""
+        },
+        {
+          "label": "Keeps 40 and above",
+          "re": ">=\\s*40|>\\s*39",
+          "flags": ""
+        },
+        {
+          "label": "Uses reduce",
+          "re": "\\.reduce\\s*\\(",
+          "flags": ""
+        }
+      ]
+    }
+  },
+  "check": {
+    "questions": [
+      "In a {context}, you have a list of numbers. Explain how you would use filter and map to get only the useful values and change them.",
+      "Explain the difference between map, filter and reduce using an example from a {context}.",
+      "In a {context}, someone used forEach and pushed into a new array. Explain how map or filter would make this simpler."
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "map"
+        ],
+        [
+          "filter"
+        ],
+        [
+          "reduce",
+          "forEach",
+          "find"
+        ],
+        [
+          "new array",
+          "return",
+          "callback",
+          "each",
+          "ప్రతి",
+          "हर"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "You picked the right array method for each job.",
+      "missing": "Say what each method returns: a new array or one value.",
+      "next": "For each method, say what goes in and what comes out."
+    }
+  }
+}

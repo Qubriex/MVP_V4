@@ -1,0 +1,105 @@
+{
+  "node": "Hooks",
+  "language": "hindi",
+  "version": 1,
+  "diagnosis": {
+    "message": "नमस्ते! आज हम React hooks सीखेंगे। पेज खुलने पर कौन सा काम सिर्फ़ एक बार होना चाहिए, जैसे notices लोड करना?",
+    "captionEn": "Hello! Today we learn React hooks. When a page opens, what should happen only once, like loading the notices?"
+  },
+  "turns": {
+    "explain": {
+      "message": "दीवार पर switch board सोचिए। हर switch एक कमरे को बिजली की लाइन से जोड़ता है। hooks ऐसे switches हैं जो function component को React की सुविधाओं से जोड़ते हैं। useState उसे याददाश्त से जोड़ता है, ताकि वह मान याद रखे। useEffect उसे बाहरी दुनिया से जोड़ता है, जैसे पेज दिखने के बाद data लाना। dependency array बताता है कि useEffect दोबारा कब चले: ख़ाली मतलब सिर्फ़ एक बार। hooks हमेशा component के ऊपर बुलाए जाते हैं, if के अंदर नहीं। notices लाकर देखें?",
+      "captionEn": "Think of switches on a wall board. Each switch connects a room to a power line. Hooks are switches that connect a function component to React features. useState connects it to memory, so it remembers values. useEffect connects it to the outside world, like fetching data after the page shows. The dependency array tells useEffect when to run again: empty means only once. Hooks are always called at the top of the component, never inside if statements. Shall we load notices?",
+      "code": "function Notices() {\n  const [notices, setNotices] = useState([]);\n  useEffect(() => {\n    fetch(\"/api/notices\").then(r => r.json()).then(setNotices);\n  }, []); // run once, after the first render\n  return <ul>{notices.map(n => <li key={n.id}>{n.title}</li>)}</ul>;\n}",
+      "mermaid": "graph LR\n  render[First render] --> effect[useEffect runs] --> fetch[fetch notices] --> set[setNotices] --> rerender[Re-render]"
+    },
+    "example": {
+      "message": "Notices component notices को useState में रखता है। ख़ाली array वाला useEffect पहले render के बाद एक बार notices लाकर setNotices बुलाता है। React सूची के साथ फिर से render करता है। ख़ाली array भूल जाएँ तो क्या होगा?",
+      "captionEn": "A Notices component keeps notices in useState. useEffect with an empty array fetches the notices once after the first render, then calls setNotices. React re-renders with the list. What would happen if you left out the empty array?",
+      "code": "function Notices() {\n  const [notices, setNotices] = useState([]);\n  useEffect(() => {\n    fetch(\"/api/notices\").then(r => r.json()).then(setNotices);\n  }, []); // run once, after the first render\n  return <ul>{notices.map(n => <li key={n.id}>{n.title}</li>)}</ul>;\n}",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "दूसरे तरीके से। alarm घड़ी। useEffect मतलब पेज दिखने के बाद बजने वाला alarm लगाना। dependency array बताता है कि दोबारा कब बजे: कभी नहीं, या जब कोई मान बदले। renders के बीच मान कौन सा hook याद रखता है?",
+      "captionEn": "Another way: an alarm clock. useEffect is setting an alarm that rings after the page shows. The dependency array says when to ring again: never, or every time a certain value changes. Which hook remembers a value between renders?",
+      "code": null,
+      "mermaid": "graph LR\n  render[First render] --> effect[useEffect runs] --> fetch[fetch notices] --> set[setNotices] --> rerender[Re-render]"
+    },
+    "not_understood": {
+      "message": "कदम-दर-कदम। useState एक मान और एक setter देता है। useEffect render के बाद code चलाता है। useEffect को उन मानों का array दीजिए जिन पर वह निर्भर है। ख़ाली array मतलब एक बार। data लोड करने के लिए कौन सा hook?",
+      "captionEn": "Step by step. useState gives a value and a setter. useEffect runs code after rendering. Give useEffect an array of the values it depends on. Empty array means run once. Which hook would you use to load data?",
+      "code": null,
+      "mermaid": "graph LR\n  render[First render] --> effect[useEffect runs] --> fetch[fetch notices] --> set[setNotices] --> rerender[Re-render]"
+    }
+  },
+  "doubt": {
+    "answer": "अच्छा सवाल। हर render में hooks एक ही क्रम में चलने चाहिए, तभी React उन्हें मिला पाता है। इसलिए उन्हें if या loop के अंदर नहीं रखते। समझ आया?",
+    "captionEn": "Good doubt. Hooks must run in the same order every render, so React can match them up. That is why we never put them inside an if or a loop. Does that help?"
+  },
+  "practice": {
+    "code": {
+      "prompt": "component दिखते ही एक बार notices लोड कीजिए: useState और ख़ाली dependency array वाला useEffect।",
+      "starter": "function Notices() {\n  \n}\n",
+      "checks": [
+        {
+          "label": "useState",
+          "re": "useState\\s*\\(",
+          "flags": ""
+        },
+        {
+          "label": "useEffect",
+          "re": "useEffect\\s*\\(",
+          "flags": ""
+        },
+        {
+          "label": "Runs once",
+          "re": ",\\s*\\[\\s*\\]\\s*\\)",
+          "flags": ""
+        },
+        {
+          "label": "Fetches",
+          "re": "fetch\\s*\\(",
+          "flags": ""
+        }
+      ]
+    }
+  },
+  "check": {
+    "questions": [
+      "एक {context} में पेज खुलते ही data एक बार लोड होना है। समझाइए कि useState और useEffect इसके लिए साथ कैसे काम करते हैं।",
+      "{context} के उदाहरण से समझाइए कि useEffect में dependency array क्या करता है।",
+      "{context} में एक useEffect बार-बार चल रहा है। ऐसा क्यों हो सकता है और कैसे ठीक करें?"
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "useState"
+        ],
+        [
+          "useEffect",
+          "effect"
+        ],
+        [
+          "dependency",
+          "dependencies",
+          "[]",
+          "array",
+          "once",
+          "ఒక్కసారి",
+          "एक बार"
+        ],
+        [
+          "hook",
+          "top level",
+          "render"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "आपने useState और useEffect का साथ काम करना समझाया।",
+      "missing": "dependency array और effect दोबारा कब चलता है, समझाइए।",
+      "next": "बताइए हर hook किससे जोड़ता है, फिर वह कब चलता है।"
+    }
+  }
+}

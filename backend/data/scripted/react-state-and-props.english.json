@@ -1,0 +1,108 @@
+{
+  "node": "React state and props",
+  "language": "english",
+  "version": 1,
+  "diagnosis": {
+    "message": "Hello! Today we learn React state and props. On a bus booking page, what changes when you pick a seat?",
+    "captionEn": null
+  },
+  "turns": {
+    "explain": {
+      "message": "Think of a student in class. Their name and roll number are given by the school; the student does not change them. Those are like props, passed down from the parent and read-only. The student's mood or the page they are reading changes during the day. That is state, owned by the component itself. When state changes with its setter, React redraws the component. Shall we build a seat counter?",
+      "captionEn": null,
+      "code": "function SeatCounter({ total }) {          // total is a prop\n  const [booked, setBooked] = useState(0); // booked is state\n  return (\n    <button onClick={() => setBooked(booked + 1)}>\n      {booked} of {total} seats booked\n    </button>\n  );\n}",
+      "mermaid": "graph TD\n  Parent -->|props: total| SeatCounter\n  SeatCounter -->|setBooked| state[(booked)]\n  state -->|re-render| SeatCounter"
+    },
+    "example": {
+      "message": "A SeatCounter gets total seats as a prop from the page. It keeps booked seats in state with useState. Each click calls setBooked, React re-renders, and the button shows the new count. Can SeatCounter change total itself?",
+      "captionEn": null,
+      "code": "function SeatCounter({ total }) {          // total is a prop\n  const [booked, setBooked] = useState(0); // booked is state\n  return (\n    <button onClick={() => setBooked(booked + 1)}>\n      {booked} of {total} seats booked\n    </button>\n  );\n}",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "Another way: a TV. The channel list comes from the cable company; that is props. The volume you set with the remote is state. Pressing the remote updates the screen. Which one would you change from inside the component?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph TD\n  Parent -->|props: total| SeatCounter\n  SeatCounter -->|setBooked| state[(booked)]\n  state -->|re-render| SeatCounter"
+    },
+    "not_understood": {
+      "message": "Step by step. Props come in from outside, like function arguments. State lives inside, created with useState. To change state, call its setter function. Then React shows the new value. Which one is read-only?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph TD\n  Parent -->|props: total| SeatCounter\n  SeatCounter -->|setBooked| state[(booked)]\n  state -->|re-render| SeatCounter"
+    }
+  },
+  "doubt": {
+    "answer": "Good question. If you change a state variable directly, React does not know and does not redraw. Always use the setter, like setBooked. Does that help?",
+    "captionEn": null
+  },
+  "practice": {
+    "code": {
+      "prompt": "Write a SeatCounter that gets total as a prop, keeps booked in state, and adds one on click.",
+      "starter": "function SeatCounter({ total }) {\n  \n}\n",
+      "checks": [
+        {
+          "label": "Uses useState",
+          "re": "useState\\s*\\(",
+          "flags": ""
+        },
+        {
+          "label": "Updates with the setter",
+          "re": "set\\w+\\s*\\(",
+          "flags": ""
+        },
+        {
+          "label": "Handles a click",
+          "re": "onClick\\s*=",
+          "flags": ""
+        },
+        {
+          "label": "Shows total",
+          "re": "\\{\\s*total\\s*\\}",
+          "flags": ""
+        }
+      ]
+    }
+  },
+  "check": {
+    "questions": [
+      "On a {context}, a component shows a count that changes when the user clicks. Explain which values are props and which are state, and why.",
+      "Explain how a parent passes data to a child component on a {context}, and whether the child can change it.",
+      "In a {context}, someone changed a state variable directly and the screen did not update. Explain why and how to fix it."
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "props",
+          "prop"
+        ],
+        [
+          "state",
+          "useState"
+        ],
+        [
+          "setState",
+          "setBooked",
+          "set",
+          "re-render",
+          "render",
+          "update"
+        ],
+        [
+          "parent",
+          "child",
+          "change",
+          "read-only",
+          "మారదు",
+          "नहीं बदल"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "You separated props from state correctly.",
+      "missing": "Say how state is updated, with the setter, and that this re-renders.",
+      "next": "For each value, say who owns it and who can change it."
+    }
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "node": "REST design",
+  "language": "hindi",
+  "version": 1,
+  "diagnosis": {
+    "message": "नमस्ते! आज हम REST design सीखेंगे। छात्रों के रिकॉर्ड के लिए API बनाना हो तो आप कौन से पते बनाएँगे?",
+    "captionEn": "Hello! Today we learn REST design. If you were building an API for student records, what addresses would you create?"
+  },
+  "turns": {
+    "explain": {
+      "message": "लाइब्रेरी का register सोचिए। register एक ही चीज़ के बारे में है, किताबें। आप किताब देख सकते हैं, जोड़ सकते हैं, बदल सकते हैं या हटा सकते हैं। REST API को इसी तरह design करता है। URL चीज़ का नाम बताता है, /students जैसी संज्ञा, /getStudents जैसी क्रिया नहीं। HTTP method काम बताता है: GET पढ़ता है, POST बनाता है, PUT या PATCH बदलता है, DELETE हटाता है। status codes बताते हैं क्या हुआ: 200 ok, 201 created, 404 not found। हर request अपने साथ सब कुछ लाती है, server पिछली याद नहीं रखता। छात्रों के रिकॉर्ड design करें?",
+      "captionEn": "Think of a library register. The register is about one thing, books. You can look up books, add a book, update a book, or remove a book. REST designs an API the same way. The URL names the thing, a noun like /students, never a verb like /getStudents. The HTTP method says the action: GET reads, POST creates, PUT or PATCH updates, DELETE removes. Status codes say what happened: 200 ok, 201 created, 404 not found. Every request carries all it needs; the server does not remember earlier ones. Shall we design student records?",
+      "code": "GET    /students          list students\nGET    /students/42       one student\nPOST   /students          add a student      → 201\nPUT    /students/42       replace student 42\nPATCH  /students/42       change some fields\nDELETE /students/42       remove student 42  → 204",
+      "mermaid": "graph TD\n  R[/students resource/] --> G[GET read]\n  R --> P[POST create]\n  R --> U[PUT or PATCH update]\n  R --> D[DELETE remove]"
+    },
+    "example": {
+      "message": "छात्रों के रिकॉर्ड के लिए: GET /students सूची, GET /students/42 एक छात्र, POST /students एक जोड़कर 201 लौटाता है, PATCH /students/42 phone number बदलता है, DELETE /students/42 हटाकर 204 लौटाता है। /deleteStudent?id=42 ख़राब design क्यों है?",
+      "captionEn": "For student records: GET /students lists them, GET /students/42 gets one, POST /students adds one and returns 201, PATCH /students/42 changes a phone number, DELETE /students/42 removes one and returns 204. Why is /deleteStudent?id=42 a poor design?",
+      "code": "GET    /students          list students\nGET    /students/42       one student\nPOST   /students          add a student      → 201\nPUT    /students/42       replace student 42\nPATCH  /students/42       change some fields\nDELETE /students/42       remove student 42  → 204",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "दूसरे तरीके से। राशन दुकान का register। register परिवारों के लिए है। परिवार देखना, जोड़ना, card बदलना, card बंद करना। register वही रहता है, सिर्फ़ काम बदलता है। REST में request का कौन सा हिस्सा काम बताता है?",
+      "captionEn": "Another way: a ration shop register. The register is for families. Look up a family, add a family, change a family's card, close a card. The register stays the same; only the action changes. In REST, which part of the request carries the action?",
+      "code": null,
+      "mermaid": "graph TD\n  R[/students resource/] --> G[GET read]\n  R --> P[POST create]\n  R --> U[PUT or PATCH update]\n  R --> D[DELETE remove]"
+    },
+    "not_understood": {
+      "message": "कदम-दर-कदम। एक, संज्ञा चुनिए: students। दो, बहुवचन path, /students। तीन, एक item के लिए id, /students/42। चार, काम के लिए method चुनिए। पाँच, सही status लौटाइए। data पढ़ने वाला method कौन सा है?",
+      "captionEn": "Step by step. One, pick the noun: students. Two, use the plural path, /students. Three, add an id for one item, /students/42. Four, choose the method for the action. Five, return the right status. What method reads data?",
+      "code": null,
+      "mermaid": "graph TD\n  R[/students resource/] --> G[GET read]\n  R --> P[POST create]\n  R --> U[PUT or PATCH update]\n  R --> D[DELETE remove]"
+    }
+  },
+  "doubt": {
+    "answer": "अच्छा सवाल। PUT पूरा रिकॉर्ड बदल देता है, PATCH सिर्फ़ कुछ fields बदलता है। सिर्फ़ phone number बदलना हो तो PATCH बेहतर है। समझ आया?",
+    "captionEn": "Good question. PUT replaces the whole record, PATCH changes only some fields. To update just a phone number, PATCH is the better fit. Does that help?"
+  },
+  "practice": {
+    "code": {
+      "prompt": "छात्रों के रिकॉर्ड के पाँच endpoints (सूची, एक, जोड़ना, बदलना, हटाना) methods और status codes के साथ लिखिए।",
+      "starter": "# METHOD  /path   → status\n",
+      "checks": [
+        {
+          "label": "GET /students",
+          "re": "GET\\s+/students\\b",
+          "flags": ""
+        },
+        {
+          "label": "POST with 201",
+          "re": "POST\\s+/students[\\s\\S]*201",
+          "flags": ""
+        },
+        {
+          "label": "PUT or PATCH with an id",
+          "re": "(PUT|PATCH)\\s+/students/",
+          "flags": ""
+        },
+        {
+          "label": "DELETE with an id",
+          "re": "DELETE\\s+/students/",
+          "flags": ""
+        }
+      ]
+    }
+  },
+  "check": {
+    "questions": [
+      "एक {context} के लिए REST endpoints design कीजिए: सूची, एक पढ़ना, जोड़ना, बदलना और हटाना। methods और status codes समझाइए।",
+      "{context} की API में /getAll और /deleteItem जैसे URLs हैं। समझाइए क्या ग़लत है और REST इसे कैसे ठीक करेगा।",
+      "{context} के लिए PUT और PATCH का फ़र्क, और 201 व 404 कब इस्तेमाल करेंगे, समझाइए।"
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "resource",
+          "noun",
+          "/students",
+          "plural",
+          "url"
+        ],
+        [
+          "get",
+          "post",
+          "put",
+          "patch",
+          "delete",
+          "method",
+          "verb"
+        ],
+        [
+          "status",
+          "200",
+          "201",
+          "404",
+          "204",
+          "code"
+        ],
+        [
+          "stateless",
+          "json",
+          "consistent",
+          "id"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "आपने URLs के लिए संज्ञाएँ और कामों के लिए methods इस्तेमाल किए।",
+      "missing": "हर endpoint जो status codes लौटाता है, वे जोड़िए।",
+      "next": "हर endpoint के लिए: method, path, status code।"
+    }
+  }
+}

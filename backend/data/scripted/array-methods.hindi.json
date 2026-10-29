@@ -1,0 +1,98 @@
+{
+  "node": "Array methods",
+  "language": "hindi",
+  "version": 1,
+  "diagnosis": {
+    "message": "नमस्ते! आज हम array methods सीखेंगे। अगर पूरी कक्षा के अंक हों, तो आप कैसे पता करेंगे कि कौन pass हुआ?",
+    "captionEn": "Hello! Today we learn array methods. If you have marks for a whole class, how would you find who passed?"
+  },
+  "turns": {
+    "explain": {
+      "message": "एक शिक्षिका के पास उत्तर पुस्तिकाओं का ढेर सोचिए। map मतलब हर पुस्तिका में पाँच grace अंक देना: उतना ही बड़ा नया ढेर मिलता है। filter मतलब सिर्फ़ pass हुई पुस्तिकाएँ चुनना: छोटा ढेर। reduce मतलब सारे अंक जोड़कर कक्षा का एक कुल। हर method हर item के लिए चलने वाला एक छोटा function लेता है, और असली ढेर नहीं बदलता। असली अंकों से देखें?",
+      "captionEn": "Think of a teacher with a stack of answer sheets. map is giving every sheet five grace marks: you get a new stack of the same size. filter is picking only the sheets that passed: a smaller stack. reduce is adding all the marks to get one class total. Each method takes a small function that runs for every item, and none of them change the original stack. Shall we try with real marks?",
+      "code": "const marks = [72, 45, 88, 91, 38];\nconst passed = marks.filter(m => m >= 40);      // [72, 45, 88, 91]\nconst withGrace = marks.map(m => m + 5);         // [77, 50, 93, 96, 43]\nconst total = marks.reduce((sum, m) => sum + m, 0); // 334",
+      "mermaid": "graph LR\n  list[marks] -->|map| changed[each changed]\n  list -->|filter| some[only some]\n  list -->|reduce| one[one total]"
+    },
+    "example": {
+      "message": "अंक हैं 72, 45, 88, 91 और 38। 40 या उससे ज़्यादा वाला filter चार अंक रखता है। पाँच जोड़ने वाला map सबको grace अंक देता है। सब जोड़ने वाला reduce 334 देता है। toppers के नाम चाहिए हों तो कौन सा method इस्तेमाल करेंगे?",
+      "captionEn": "Marks are 72, 45, 88, 91 and 38. filter with m greater than or equal to 40 keeps four marks. map adding five gives every student grace marks. reduce adding them all gives 334. Which method would you use to get the names of toppers?",
+      "code": "const marks = [72, 45, 88, 91, 38];\nconst passed = marks.filter(m => m >= 40);      // [72, 45, 88, 91]\nconst withGrace = marks.map(m => m + 5);         // [77, 50, 93, 96, 43]\nconst total = marks.reduce((sum, m) => sum + m, 0); // 334",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "दूसरे तरीके से। घर की छलनी। filter वह छलनी है जो सिर्फ़ अच्छे दाने रखती है। map हर दाने को आटा बनाना है, एक के बदले एक। reduce सब कुछ एक कटोरे में डालना है। items की गिनती कौन वही रखता है?",
+      "captionEn": "Another way: a sieve at home. filter is the sieve that keeps only the good grains. map is grinding every grain into flour, one for one. reduce is pouring everything into one bowl. Which one keeps the same number of items?",
+      "code": null,
+      "mermaid": "graph LR\n  list[marks] -->|map| changed[each changed]\n  list -->|filter| some[only some]\n  list -->|reduce| one[one total]"
+    },
+    "not_understood": {
+      "message": "कदम-दर-कदम। array एक सूची है। map हर item बदलकर उतनी ही लंबी नई सूची देता है। filter सिर्फ़ जाँच में पास होने वाले items रखता है। reduce सूची को एक मान में बदल देता है। छोटी सूची कौन देता है?",
+      "captionEn": "Step by step. An array is a list. map changes each item and gives a new list of the same length. filter keeps only items that pass a test. reduce turns the list into one value. Which one gives a shorter list?",
+      "code": null,
+      "mermaid": "graph LR\n  list[marks] -->|map| changed[each changed]\n  list -->|filter| some[only some]\n  list -->|reduce| one[one total]"
+    }
+  },
+  "doubt": {
+    "answer": "अच्छा सवाल। forEach हर item के लिए code चलाता है, कुछ वापस नहीं देता। map नया array वापस देता है। नई सूची चाहिए तो map। समझ आया?",
+    "captionEn": "Good question. forEach just runs code for each item and gives nothing back. map gives back a new array. Use map when you want the new list. Does that help?"
+  },
+  "practice": {
+    "code": {
+      "prompt": "marks = [72, 45, 88, 91, 38] से filter से पास अंक (40 और ऊपर) और reduce से उनका जोड़ निकालिए।",
+      "starter": "const marks = [72, 45, 88, 91, 38];\n",
+      "checks": [
+        {
+          "label": "Uses filter",
+          "re": "\\.filter\\s*\\(",
+          "flags": ""
+        },
+        {
+          "label": "Keeps 40 and above",
+          "re": ">=\\s*40|>\\s*39",
+          "flags": ""
+        },
+        {
+          "label": "Uses reduce",
+          "re": "\\.reduce\\s*\\(",
+          "flags": ""
+        }
+      ]
+    }
+  },
+  "check": {
+    "questions": [
+      "एक {context} में संख्याओं की सूची है। समझाइए कि सिर्फ़ काम के मान लेने और उन्हें बदलने के लिए filter और map कैसे इस्तेमाल करेंगे।",
+      "{context} के एक उदाहरण से map, filter और reduce का फ़र्क समझाइए।",
+      "{context} में किसी ने forEach से नए array में push किया। समझाइए कि map या filter इसे कैसे आसान बनाते।"
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "map"
+        ],
+        [
+          "filter"
+        ],
+        [
+          "reduce",
+          "forEach",
+          "find"
+        ],
+        [
+          "new array",
+          "return",
+          "callback",
+          "each",
+          "ప్రతి",
+          "हर"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "आपने हर काम के लिए सही array method चुना।",
+      "missing": "बताइए हर method क्या लौटाता है: नया array या एक मान।",
+      "next": "हर method के लिए बताइए क्या अंदर जाता है और क्या बाहर आता है।"
+    }
+  }
+}

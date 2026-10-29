@@ -1,0 +1,104 @@
+{
+  "node": "CSS flexbox",
+  "language": "hindi",
+  "version": 1,
+  "diagnosis": {
+    "message": "नमस्ते! आज हम CSS flexbox सीखेंगे। क्या आपने कभी तीन buttons एक ही लाइन में रखने की कोशिश की है? कैसे किया?",
+    "captionEn": "Hello! Today we learn CSS flexbox. Have you ever tried to put three buttons in one line? How did you do it?"
+  },
+  "turns": {
+    "explain": {
+      "message": "टिकट खिड़की पर लाइन में खड़े लोगों को सोचिए। लाइन container है, लोग items हैं। display flex लगाने पर container अपने बच्चों को एक पंक्ति में खड़ा करता है। justify-content तय करता है कि वे लाइन में कैसे फैलें। align-items तय करता है कि ऊपर से नीचे कैसे सजें। जगह कम हो तो flex-wrap उन्हें अगली लाइन में भेजता है। एक menu bar बनाकर देखें?",
+      "captionEn": "Think of people standing in a queue at a ticket counter. The queue is the container, the people are the items. With display flex, the container lines up its children in a row. justify-content decides how they spread along the line. align-items decides how they line up from top to bottom. flex-wrap lets them move to the next line when space runs out. Shall we try a menu bar?",
+      "code": ".menu {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  gap: 12px;\n  flex-wrap: wrap;\n}",
+      "mermaid": "graph LR\n  container[display: flex] --> a[item] & b[item] & c[item]\n  container -. justify-content .-> mainaxis[main axis]\n  container -. align-items .-> crossaxis[cross axis]"
+    },
+    "example": {
+      "message": "एक दुकान के पेज पर logo, links और cart button वाला menu है। menu को display flex, justify-content space-between और align-items center दीजिए। logo बाईं ओर, cart दाईं ओर, और सब कुछ बीच में सीधा। phone पर flex-wrap wrap लगाएँ तो क्या होगा?",
+      "captionEn": "A shop page has a menu with a logo, links and a cart button. Give the menu display flex, justify-content space-between and align-items center. The logo goes left, the cart goes right, and everything is centred vertically. What would happen if you add flex-wrap wrap on a phone?",
+      "code": ".menu {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  gap: 12px;\n  flex-wrap: wrap;\n}",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "दूसरे तरीके से। लंबी खाने की मेज़ पर रखी प्लेटें सोचिए। display flex मतलब उन्हें एक पंक्ति में रखना। justify-content बताता है कि खाली जगह कैसे बँटे: शुरू में, बीच में या बराबर। align-items बताता है कि प्लेटें किनारे पर हों या बीच में। प्लेटों को बराबर फैलाने वाली property कौन सी है?",
+      "captionEn": "Another way: think of plates on a long dining table. display flex is laying them in one row. justify-content is how the gaps are shared: bunched at the start, centred, or spread evenly. align-items is whether they touch the table edge or sit in the middle. Which property spreads plates evenly?",
+      "code": null,
+      "mermaid": "graph LR\n  container[display: flex] --> a[item] & b[item] & c[item]\n  container -. justify-content .-> mainaxis[main axis]\n  container -. align-items .-> crossaxis[cross axis]"
+    },
+    "not_understood": {
+      "message": "कदम-दर-कदम चलते हैं। पहले, parent को display flex। अब बच्चे अगल-बगल आ जाते हैं। दूसरा, justify-content उन्हें बाएँ, दाएँ या दूर करता है। तीसरा, align-items ऊपर, नीचे या बीच में करता है। items को अगल-बगल कौन रखता है?",
+      "captionEn": "Let us go step by step. First, the parent gets display flex. Now its children sit side by side. Second, justify-content moves them left, right or apart. Third, align-items moves them up, down or to the middle. Which property puts items side by side?",
+      "code": null,
+      "mermaid": "graph LR\n  container[display: flex] --> a[item] & b[item] & c[item]\n  container -. justify-content .-> mainaxis[main axis]\n  container -. align-items .-> crossaxis[cross axis]"
+    }
+  },
+  "doubt": {
+    "answer": "अच्छा सवाल। justify-content मुख्य दिशा में काम करता है, जो आमतौर पर row है। align-items उसके आर-पार काम करता है। flex-direction column करने पर ये आपस में बदल जाते हैं। समझ आया?",
+    "captionEn": "Good question. justify-content works along the main direction, which is a row by default. align-items works across it. If you set flex-direction column, they swap. Does that help?"
+  },
+  "practice": {
+    "code": {
+      "prompt": ".menu को ऐसे सजाइए कि items एक पंक्ति में, दूर-दूर, बीच में सीधे हों और छोटी screen पर अगली लाइन में जाएँ।",
+      "starter": ".menu {\n  \n}\n",
+      "checks": [
+        {
+          "label": "display: flex",
+          "re": "display\\s*:\\s*flex",
+          "flags": "i"
+        },
+        {
+          "label": "Spreads items apart",
+          "re": "justify-content\\s*:\\s*space-(between|around|evenly)",
+          "flags": "i"
+        },
+        {
+          "label": "Centres vertically",
+          "re": "align-items\\s*:\\s*center",
+          "flags": "i"
+        },
+        {
+          "label": "Wraps",
+          "re": "flex-wrap\\s*:\\s*wrap",
+          "flags": "i"
+        }
+      ]
+    }
+  },
+  "check": {
+    "questions": [
+      "एक {context} के header में logo, तीन links और एक button है। उन्हें एक पंक्ति में बराबर दूरी पर रखने के लिए flexbox कैसे इस्तेमाल करेंगे, समझाइए।",
+      "phone पर {context} के cards स्क्रीन से बाहर जा रहे हैं। flexbox उन्हें अगली लाइन में कैसे ले जा सकता है? properties समझाइए।",
+      "{context} में justify-content और align-items का फ़र्क एक छोटे उदाहरण से समझाइए।"
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "display: flex",
+          "display:flex",
+          "flex"
+        ],
+        [
+          "justify-content",
+          "justify"
+        ],
+        [
+          "align-items",
+          "align"
+        ],
+        [
+          "wrap",
+          "gap",
+          "row",
+          "column",
+          "axis"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "आपने display flex को सही alignment properties के साथ इस्तेमाल किया।",
+      "missing": "बताइए कौन सी property पंक्ति की दिशा में और कौन सी आर-पार काम करती है।",
+      "next": "parent पर display flex से शुरू कीजिए, फिर हर property और उसका असर बताइए।"
+    }
+  }
+}

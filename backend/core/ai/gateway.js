@@ -24,11 +24,12 @@ import params from '../../config/params.js';
 import { logger } from '../logger.js';
 import * as gemini from './adapters/gemini.js';
 import * as mock from './adapters/mock.js';
-import { currentSandbox } from '../requestContext.js';
+import * as scripted from './adapters/scripted.js';
+import { currentSandbox, currentTutor } from '../requestContext.js';
 import { chargeDemoAi, DEMO_LIMIT_MESSAGE } from '../demo/budget.js';
 
-const ADAPTERS = { gemini, mock };
-const DEFAULT_MODEL = { gemini: process.env.GEMINI_MODEL || 'gemini-3.6-flash', mock: 'mock' };
+const ADAPTERS = { gemini, mock, scripted };
+const DEFAULT_MODEL = { gemini: process.env.GEMINI_MODEL || 'gemini-3.6-flash', mock: 'mock', scripted: 'scripted' };
 
 export class GatewayError extends Error {
   constructor(code, message, cause) {
@@ -40,19 +41,31 @@ export class GatewayError extends Error {
 }
 
 // Tests always use the deterministic mock. Elsewhere the default is gemini:
-// without a key its calls fail (503) and the frontend shows sample content,
-// rather than mock text reaching a learner. AI_ADAPTER=mock opts in explicitly.
+// without a key its calls fail (503) and the frontend shows sample content.
+// AI_ADAPTER=scripted runs the scripted tutor (core/ai/adapters/scripted.js).
+// The mock's placeholder text must never reach a learner, so outside tests
+// AI_ADAPTER=mock runs the scripted tutor instead.
 function defaultAdapter() {
-  if (process.env.AI_ADAPTER) return process.env.AI_ADAPTER;
-  return process.env.NODE_ENV === 'test' ? 'mock' : 'gemini';
+  const a = process.env.AI_ADAPTER || (process.env.NODE_ENV === 'test' ? 'mock' : 'gemini');
+  return a === 'mock' && process.env.NODE_ENV !== 'test' ? 'scripted' : a;
 }
+
+// The lesson and check tasks the scripted tutor covers. A request whose
+// context says tutor 'scripted' (a test learner, the demo) runs these on it
+// whatever the deployment's adapter.
+const TUTOR_TASKS = new Set(['TEACH.diagnosis', 'TEACH.instruction', 'TEACH.doubt', 'EVIDENCE.conceptItem', 'EVAL.mastery']);
+export const isTutorTask = (task) => TUTOR_TASKS.has(task);
 
 /** Task → { adapter, model, fallback? }. One adapter for every task until routes are split by cost (§8.11). */
 export function route(task) {
-  const adapter = defaultAdapter();
+  let adapter = defaultAdapter();
+  if (currentTutor() === 'scripted' && TUTOR_TASKS.has(task) && adapter !== 'mock') adapter = 'scripted';
   if (!ADAPTERS[adapter]) throw new GatewayError('unknown_task', `Unknown AI adapter "${adapter}"`);
   return { adapter, model: DEFAULT_MODEL[adapter], fallback: null, task };
 }
+
+/** The tutor this deployment runs by default: 'scripted' or 'live'. */
+export const deploymentTutor = () => (defaultAdapter() === 'scripted' ? 'scripted' : 'live');
 
 const withTimeout = (p, ms) => new Promise((resolve, reject) => {
   const t = setTimeout(() => reject(new GatewayError('timeout', `Model call timed out after ${ms} ms`)), ms);
@@ -111,9 +124,10 @@ export const aiUnavailableMessage = (err) => (isDemoLimit(err) ? DEMO_LIMIT_MESS
 
 export async function generate(req) {
   if (!req?.task) throw new GatewayError('unknown_task', 'generate() needs a task');
-  const sandbox = currentSandbox();
-  if (sandbox) await chargeDemoAi(sandbox, { calls: 1 }); // throws code 'demo_limit' past the demo budget
   const r = route(req.task);
+  const sandbox = currentSandbox();
+  // The scripted tutor costs nothing, so it never counts against the demo budget.
+  if (sandbox && r.adapter !== 'scripted') await chargeDemoAi(sandbox, { calls: 1 }); // throws code 'demo_limit' past the demo budget
   const started = Date.now();
   const base = { task: req.task, adapter: r.adapter, model: r.model, promptId: req.promptId, promptVersion: req.promptVersion, institutionId: req.institutionId };
   try {

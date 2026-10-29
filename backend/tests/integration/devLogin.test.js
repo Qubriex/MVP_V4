@@ -72,6 +72,16 @@ describe('passcode', () => {
     expect(JSON.stringify(rows)).not.toContain('wrong-');
   });
 
+  it('only wrong passcodes count: 10 correct unlocks in a row all work, and the 6th wrong try is blocked', async () => {
+    enable();
+    await dal.run('DELETE FROM dev_audit');
+    for (let i = 0; i < 10; i += 1) expect((await request(app).post('/api/dev/unlock').send({ passcode: SECRET })).status).toBe(200);
+    expect((await dal.all("SELECT 1 FROM dev_audit WHERE action = 'unlock'"))).toHaveLength(10);
+    for (let i = 0; i < 5; i += 1) expect((await request(app).post('/api/dev/unlock').send({ passcode: `wrong-${i}` })).status).toBe(401);
+    expect((await request(app).post('/api/dev/unlock').send({ passcode: 'wrong-again' })).status).toBe(429);
+    await dal.run('DELETE FROM dev_audit');
+  });
+
   it('accounts and login need the unlock cookie', async () => {
     enable();
     expect((await request(app).get('/api/dev/accounts')).status).toBe(401);
@@ -173,12 +183,12 @@ describe('tools', () => {
     expect((await dal.one("SELECT kyb_status FROM employers WHERE id = 'test-employer-0002'")).kyb_status).toBe('verified');
   }, 60000);
 
-  it('build info says mock or live AI', async () => {
+  it('build info says which AI (mock, scripted or live) and the test tutor', async () => {
     enable();
     const agent = await unlockedAgent();
     const r = await agent.get('/api/dev/build-info');
     expect(r.status).toBe(200);
-    expect(r.body).toMatchObject({ version: expect.any(String), environment: 'test', ai: 'mock' });
+    expect(r.body).toMatchObject({ version: expect.any(String), environment: 'test', ai: 'mock', test_tutor: 'scripted' });
   });
 });
 
@@ -208,7 +218,7 @@ describe('the test tenant stays apart from real data', () => {
     const r = await request(app).get(`/api/employer/roles/${realRole}/candidates`).set(bearer(realEmployer));
     const t = await request(app).get(`/api/employer/roles/${testRole}/candidates`).set(bearer(testEmployer.token));
     expect(r.body.candidates.map(c => c.college)).toEqual(['[Institution name] real']);
-    expect(t.body.candidates.map(c => c.college)).toEqual(['Qubirex Test Institution']);
+    expect([...new Set(t.body.candidates.map(c => c.college))]).toEqual(['Qubirex Test Institution']);
     const colleges = await request(app).get('/api/employer/colleges').set(bearer(realEmployer));
     expect(JSON.stringify(colleges.body)).not.toContain('test-inst');
   });

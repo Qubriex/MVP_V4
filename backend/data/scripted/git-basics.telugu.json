@@ -1,0 +1,104 @@
+{
+  "node": "Git basics",
+  "language": "telugu",
+  "version": 1,
+  "diagnosis": {
+    "message": "నమస్కారం! ఈ రోజు Git basics నేర్చుకుందాం. ఎప్పుడైనా ఫైల్ మారిపోయి మీ పని పోయిందా? ఏమైంది?",
+    "captionEn": "Hello! Today we learn Git basics. Have you ever lost work because a file got overwritten? What happened?"
+  },
+  "turns": {
+    "explain": {
+      "message": "కుటుంబ ఫోటో ఆల్బమ్ ఊహించుకోండి. ప్రతి ఫోటో ఒక క్షణాన్ని దాచుకుంటుంది, తర్వాత చూసుకోవచ్చు. Git code కి అదే చేస్తుంది. git add దాచాలనుకున్న మార్పులను ఎంచుకుంటుంది, ఫోటోలు ఎంచుకున్నట్టు. git commit వాటిని ఒక గమనికతో ఆల్బమ్ లో అతికిస్తుంది. branch అంటే అసలు ఆల్బమ్ పాడవకుండా కొత్తది ప్రయత్నించే వేరే ఆల్బమ్. git push మీ ఆల్బమ్ ని GitHub కి పంపుతుంది, team అంతా చూడగలదు. అడుగు అడుగుగా చూద్దామా?",
+      "captionEn": "Think of a family photo album. Each photo records a moment you can look back at. Git does the same for code. git add picks the changes you want to save, like choosing photos. git commit pastes them into the album with a note. A branch is a separate album for trying something new without spoiling the main one. git push sends your album to GitHub so the team can see it. Shall we walk through it?",
+      "code": "git init\ngit add index.html\ngit commit -m \"Add fest home page\"\ngit branch events-page\ngit switch events-page\ngit push origin events-page",
+      "mermaid": "graph LR\n  edit[Edit files] --> add[git add] --> commit[git commit] --> push[git push]"
+    },
+    "example": {
+      "message": "ముగ్గురు స్నేహితులు కాలేజీ ఫెస్ట్ site తయారు చేస్తున్నారు. ప్రతి ఒక్కరూ తమ పేజీ కోసం ఒక branch చేస్తారు. చిన్న మార్పులను స్పష్టమైన messages తో add, commit చేస్తారు. పేజీ సిద్ధమైతే branch ని main లో merge చేసి push చేస్తారు. events జాబితా జోడించిన తర్వాత commit message ఏం రాస్తారు?",
+      "captionEn": "Three friends build a college fest site. Each makes a branch for their page. They add and commit small changes with clear messages. When a page is ready, they merge the branch into main and push. What would you write as a commit message after adding the events list?",
+      "code": "git init\ngit add index.html\ngit commit -m \"Add fest home page\"\ngit branch events-page\ngit switch events-page\ngit push origin events-page",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "ఇంకో విధంగా. commit అంటే game లో checkpoint దగ్గర save చేయడం. తర్వాత ఓడిపోతే checkpoint కి తిరిగి వెళ్తారు. branch అంటే ముఖ్య కథను పాడుచేయకుండా side mission ఆడటం. checkpoint ని ఏ command సృష్టిస్తుంది?",
+      "captionEn": "Another way: a commit is like saving a game at a checkpoint. If you fail later, you return to the checkpoint. A branch is playing a side mission without affecting the main story. Which command creates a checkpoint?",
+      "code": null,
+      "mermaid": "graph LR\n  edit[Edit files] --> add[git add] --> commit[git commit] --> push[git push]"
+    },
+    "not_understood": {
+      "message": "అడుగు అడుగుగా. ఒకటి, ఫైల్ మార్చండి. రెండు, git add. మూడు, message తో git commit. అది ఒక save అయిన version. నాలుగు, పంచుకోవడానికి git push. version ని save చేసే అడుగు ఏది?",
+      "captionEn": "Step by step. One, change a file. Two, git add the file. Three, git commit with a message. That is one saved version. Four, git push to share it. Which step saves a version?",
+      "code": null,
+      "mermaid": "graph LR\n  edit[Edit files] --> add[git add] --> commit[git commit] --> push[git push]"
+    }
+  },
+  "doubt": {
+    "answer": "మంచి ప్రశ్న. git pull team కొత్త commits ని మీ computer కి తెస్తుంది. git push మీ commits ని వాళ్లకు పంపుతుంది. పని మొదలుపెట్టే ముందు pull, ముగించాక push. సహాయపడిందా?",
+    "captionEn": "Good question. git pull brings your team's new commits to your computer. git push sends your commits to them. Pull before you start work, push when you finish. Does that help?"
+  },
+  "practice": {
+    "code": {
+      "prompt": "events-page అనే branch చేసి, దానికి మారి, index.html ని message తో save చేసి, షేర్ చేసే commands రాయండి.",
+      "starter": "# your commands\n",
+      "checks": [
+        {
+          "label": "Creates or switches to the branch",
+          "re": "git\\s+(branch|switch\\s+-c|checkout\\s+-b)\\s+events-page",
+          "flags": "i"
+        },
+        {
+          "label": "Stages the file",
+          "re": "git\\s+add\\s+\\S*index\\.html",
+          "flags": "i"
+        },
+        {
+          "label": "Commits with a message",
+          "re": "git\\s+commit\\s+-m\\s+[\"']",
+          "flags": "i"
+        },
+        {
+          "label": "Pushes",
+          "re": "git\\s+push",
+          "flags": "i"
+        }
+      ]
+    }
+  },
+  "check": {
+    "questions": [
+      "ముగ్గురు స్నేహితులు ఒక {context} మీద పనిచేస్తున్నారు. ఒకరి పని మరొకరు చెరిపేయకుండా Git branches, commits ఎలా సహాయపడతాయో వివరించండి.",
+      "{context} లో మీరు రెండు ఫైళ్లు మార్చారు. ఈ మార్పులను save చేసి పంచుకునే commands, ప్రతి దాని పని వివరించండి.",
+      "{context} లో ఒక మార్పుకి మంచి commit message ఎలా ఉండాలి? history ఎందుకు ముఖ్యం?"
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "commit"
+        ],
+        [
+          "add",
+          "stage",
+          "staging"
+        ],
+        [
+          "branch",
+          "merge"
+        ],
+        [
+          "push",
+          "pull",
+          "history",
+          "version",
+          "చరిత్ర",
+          "इतिहास"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "add, commit, branches పనిని ఎలా సురక్షితంగా ఉంచుతాయో చెప్పారు.",
+      "missing": "push, pull లేదా merge తో పని ఎలా పంచుకుంటారో చెప్పండి.",
+      "next": "ఈ వరుసలో చెప్పండి: మార్పు, add, commit, push."
+    }
+  }
+}

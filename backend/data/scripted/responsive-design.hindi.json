@@ -1,0 +1,104 @@
+{
+  "node": "Responsive design",
+  "language": "hindi",
+  "version": 1,
+  "diagnosis": {
+    "message": "नमस्ते! आज हम responsive design सीखेंगे। phone पर website खोलने पर आमतौर पर क्या गड़बड़ होती है?",
+    "captionEn": "Hello! Today we learn responsive design. When you open a website on your phone, what usually goes wrong?"
+  },
+  "turns": {
+    "explain": {
+      "message": "साड़ी की दुकान सोचिए। वही साड़ी छोटे और लंबे दोनों लोगों पर ठीक लगती है, क्योंकि पहनने का तरीका बदलता है। responsive design web pages के लिए यही करता है। एक ही पेज phone, tablet और laptop के हिसाब से बदल जाता है। इसके लिए viewport meta tag, percent या fr जैसी लचीली चौड़ाई, और कुछ screen चौड़ाई पर layout बदलने वाली media queries इस्तेमाल करते हैं। layout बदलते देखें?",
+      "captionEn": "Think of a saree shop. The same saree looks right on a short or a tall person because it is draped to fit. Responsive design does the same for web pages. One page adjusts to a phone, a tablet and a laptop. We use the viewport meta tag, flexible widths in percent or fr, and media queries that change the layout at certain screen widths. Shall we see a layout change?",
+      "code": ".grid { display: grid; grid-template-columns: 1fr; }\n@media (min-width: 768px) {\n  .grid { grid-template-columns: repeat(3, 1fr); }\n}\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">",
+      "mermaid": "graph TD\n  screen{Screen width?} -->|under 768px| one[1 column]\n  screen -->|768px and up| three[3 columns]"
+    },
+    "example": {
+      "message": "एक दुकान के पेज पर product cards हैं। phone पर एक पंक्ति में एक card। 768 pixels पर media query से laptop पर एक पंक्ति में तीन cards। viewport tag phone को उसकी असली चौड़ाई इस्तेमाल करने देता है। बहुत चौड़ी screen के लिए क्या बदलेंगे?",
+      "captionEn": "A shop page shows product cards. On a phone we show one card per row. With a media query at 768 pixels, we show three per row on a laptop. The viewport tag makes the phone use its real width. What would you change for a very wide screen?",
+      "code": ".grid { display: grid; grid-template-columns: 1fr; }\n@media (min-width: 768px) {\n  .grid { grid-template-columns: repeat(3, 1fr); }\n}\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "दूसरे तरीके से। पानी गिलास का आकार ले लेता है। responsive पेज screen का आकार ले लेता है। media queries कहती हैं: गिलास चौड़ा हो तो तीन columns, पतला हो तो एक। किसी चौड़ाई पर layout बदलने का औज़ार कौन सा है?",
+      "captionEn": "Another way: water takes the shape of its glass. A responsive page takes the shape of the screen. Media queries are like saying: if the glass is wide, pour into three columns; if narrow, pour into one. Which tool lets you change the layout at a width?",
+      "code": null,
+      "mermaid": "graph TD\n  screen{Screen width?} -->|under 768px| one[1 column]\n  screen -->|768px and up| three[3 columns]"
+    },
+    "not_understood": {
+      "message": "कदम-दर-कदम। पहले viewport tag लगाइए ताकि phone zoom out न करे। दूसरा, fixed pixels की जगह percent जैसी लचीली चौड़ाई। तीसरा, बड़ी screens के लिए media queries से layout बदलिए। media query क्या जाँचती है?",
+      "captionEn": "Step by step. First, add the viewport tag so phones do not zoom out. Second, use widths that stretch, like percent, not fixed pixels. Third, use media queries to change the layout for bigger screens. What does a media query check?",
+      "code": null,
+      "mermaid": "graph TD\n  screen{Screen width?} -->|under 768px| one[1 column]\n  screen -->|768px and up| three[3 columns]"
+    }
+  },
+  "doubt": {
+    "answer": "अच्छा सवाल। mobile first मतलब पहले phone का layout लिखना, फिर बड़ी screens के लिए min-width वाली media queries जोड़ना। इससे phone तेज़ और सरल रहता है। समझ आया?",
+    "captionEn": "Good doubt. Mobile first means you write the phone layout first, then add media queries with min-width for bigger screens. It keeps phones fast and simple. Does that help?"
+  },
+  "practice": {
+    "code": {
+      "prompt": ".grid को phone पर एक column और 768px से ऊपर तीन columns बनाइए।",
+      "starter": ".grid {\n  display: grid;\n}\n",
+      "checks": [
+        {
+          "label": "One column by default",
+          "re": "grid-template-columns\\s*:\\s*(1fr|repeat\\(\\s*1\\s*,)",
+          "flags": "i"
+        },
+        {
+          "label": "A min-width media query at 768px",
+          "re": "@media[^{]*min-width\\s*:\\s*768px",
+          "flags": "i"
+        },
+        {
+          "label": "Three columns inside it",
+          "re": "repeat\\(\\s*3\\s*,\\s*1fr\\s*\\)|1fr\\s+1fr\\s+1fr",
+          "flags": "i"
+        }
+      ]
+    }
+  },
+  "check": {
+    "questions": [
+      "एक {context} laptop पर ठीक दिखता है पर phone पर कटा हुआ है। उसे responsive बनाने के लिए आप तीन क्या काम करेंगे, समझाइए।",
+      "{context} के लिए समझाइए कि media query layout को phone पर एक column से laptop पर तीन columns में कैसे बदलती है।",
+      "{context} में viewport meta tag क्या करता है, और उसके बिना क्या होता है, समझाइए।"
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "media quer",
+          "@media"
+        ],
+        [
+          "viewport"
+        ],
+        [
+          "phone",
+          "mobile",
+          "laptop",
+          "width",
+          "screen",
+          "ఫోన్",
+          "फ़ोन",
+          "फोन"
+        ],
+        [
+          "%",
+          "fr",
+          "flex",
+          "grid",
+          "rem",
+          "relative"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "आपने बताया कि layout screen की चौड़ाई के हिसाब से कैसे बदलता है।",
+      "missing": "media queries और viewport tag दोनों का ज़िक्र कीजिए।",
+      "next": "पहले phone, फिर बड़ी screen का बदलाव बताइए।"
+    }
+  }
+}

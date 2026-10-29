@@ -3,7 +3,7 @@
 // Sign facts, compute labels: the credential carries signed node facts
 // { nodeId, skillIds, theta, A_at_mastery, E, persistence, masteredAt, codeNode }
 // per skill, as SD-JWT disclosures. Labels are never signed or stored; they
-// are computed by qep:label_v1 from dated demonstrations whenever the passport
+// are computed by qep:label_v2 from dated demonstrations whenever the passport
 // is shown or verified. Journey metrics (loops, attempts, time) are never in it.
 //
 // Phase 0 (build step "Credential v1"): one SD-JWT with every skill disclosed
@@ -22,6 +22,7 @@ import { keyStatus } from './keyRegistry.js';
 import { signingKid, isDemoKid } from './signing.js';
 import { resolveTheta } from '../graph/theta.js';
 import { mapSeq } from '../util/seq.js';
+import { nowIsoFor } from '../requestContext.js';
 
 const LABEL_RANK = { none: 0, Foundational: 1, Partial: 2, Confirmed: 3 };
 const CODE_EVIDENCE = new Set(['sql_exec', 'python_exec']);
@@ -82,7 +83,7 @@ async function demonstrationsFor(elId, nodeId) {
 }
 
 /** Labels computed now (never stored). A skill shows its weakest node's label. */
-export async function skillLines(elId, skills, asOf = new Date().toISOString()) {
+export async function skillLines(elId, skills, asOf = nowIsoFor()) {
   const p = { confirmed: params.get('label.confirmed'), foundational: params.get('label.foundational'), retention: params.get('retention') };
   return await mapSeq(skills, async s => {
     const nodes = await mapSeq(s.nodes, async f => {
@@ -103,6 +104,19 @@ export async function skillLines(elId, skills, asOf = new Date().toISOString()) 
       nodes
     };
   });
+}
+
+/** One node's label right now, for the check result screen ("Partial → Confirmed"). */
+export async function nodeLabelNow(elId, nodeId, asOf = nowIsoFor()) {
+  const n = await dal.one(`SELECT nm.advanced_at, nm.theta, nm.evidence_level, nm.persistence, sn.mastery_threshold AS node_theta, sc.mastery_threshold AS cluster_theta, sc.evidence_type
+    FROM node_mastery nm JOIN skill_nodes sn ON sn.id = nm.skill_node_id JOIN skill_clusters sc ON sc.id = sn.cluster_id
+    WHERE nm.engagement_learner_id = ? AND nm.skill_node_id = ? AND nm.advanced_at IS NOT NULL`, elId, nodeId);
+  if (!n) return { label: 'none', missing_for_confirmed: ['mastery'] };
+  const f = { theta: n.theta ?? resolveTheta(n.node_theta, n.cluster_theta), E: n.evidence_level || 'L1', persistence: !!n.persistence, masteredAt: iso(n.advanced_at), codeNode: CODE_EVIDENCE.has(n.evidence_type) };
+  const p = { confirmed: params.get('label.confirmed'), foundational: params.get('label.foundational'), retention: params.get('retention') };
+  const demos = await demonstrationsFor(elId, nodeId);
+  const r = labelV1(f, demos, asOf, p);
+  return { label: r.label, kinds: r.kinds, missing_for_confirmed: missingForConfirmed(f, demos, asOf, p) };
 }
 
 export const activeCredential = async (where, arg) => await dal.one(`SELECT * FROM credentials WHERE ${where} AND active = 1 ORDER BY version DESC LIMIT 1`, arg);
@@ -161,6 +175,11 @@ export async function revokeCredential(evidenceId, reason = 'revoked') {
     await emit('CREDENTIAL_REVOKED', { aggregateType: 'credential', aggregateId: evidenceId, payload: { reason } });
   });
   return true;
+}
+
+/** Who viewed a Passport: the type of viewer and the date only, never who. */
+export async function recordView(evidenceId, viewerType) {
+  try { await dal.run('INSERT INTO passport_views (id, evidence_id, viewer_type, viewed_at) VALUES (?, ?, ?, ?)', ulid(), evidenceId, viewerType, dal.nowIso()); } catch { /* a view count never breaks verification */ }
 }
 
 export async function isPublic(evidenceId) {

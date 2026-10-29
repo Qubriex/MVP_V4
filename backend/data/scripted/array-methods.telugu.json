@@ -1,0 +1,98 @@
+{
+  "node": "Array methods",
+  "language": "telugu",
+  "version": 1,
+  "diagnosis": {
+    "message": "నమస్కారం! ఈ రోజు array methods నేర్చుకుందాం. మొత్తం తరగతి మార్కులు ఉంటే ఎవరు pass అయ్యారో ఎలా కనుక్కుంటారు?",
+    "captionEn": "Hello! Today we learn array methods. If you have marks for a whole class, how would you find who passed?"
+  },
+  "turns": {
+    "explain": {
+      "message": "ఒక టీచర్ దగ్గర జవాబు పత్రాల కట్ట ఊహించుకోండి. map అంటే ప్రతి పత్రానికి ఐదు grace marks ఇవ్వడం: అదే సైజు కొత్త కట్ట వస్తుంది. filter అంటే pass అయిన పత్రాలను మాత్రమే ఎంచుకోవడం: చిన్న కట్ట. reduce అంటే అన్ని మార్కులు కలిపి ఒక్క తరగతి మొత్తం చేయడం. ప్రతి method ప్రతి item కోసం నడిచే ఒక చిన్న function తీసుకుంటుంది, అసలు కట్టను మార్చదు. నిజమైన మార్కులతో చూద్దామా?",
+      "captionEn": "Think of a teacher with a stack of answer sheets. map is giving every sheet five grace marks: you get a new stack of the same size. filter is picking only the sheets that passed: a smaller stack. reduce is adding all the marks to get one class total. Each method takes a small function that runs for every item, and none of them change the original stack. Shall we try with real marks?",
+      "code": "const marks = [72, 45, 88, 91, 38];\nconst passed = marks.filter(m => m >= 40);      // [72, 45, 88, 91]\nconst withGrace = marks.map(m => m + 5);         // [77, 50, 93, 96, 43]\nconst total = marks.reduce((sum, m) => sum + m, 0); // 334",
+      "mermaid": "graph LR\n  list[marks] -->|map| changed[each changed]\n  list -->|filter| some[only some]\n  list -->|reduce| one[one total]"
+    },
+    "example": {
+      "message": "మార్కులు 72, 45, 88, 91, 38. 40 లేదా ఎక్కువ అనే filter నాలుగు మార్కులు ఉంచుతుంది. ఐదు కలిపే map అందరికీ grace marks ఇస్తుంది. అన్నీ కలిపే reduce 334 ఇస్తుంది. toppers పేర్లు కావాలంటే ఏ method వాడతారు?",
+      "captionEn": "Marks are 72, 45, 88, 91 and 38. filter with m greater than or equal to 40 keeps four marks. map adding five gives every student grace marks. reduce adding them all gives 334. Which method would you use to get the names of toppers?",
+      "code": "const marks = [72, 45, 88, 91, 38];\nconst passed = marks.filter(m => m >= 40);      // [72, 45, 88, 91]\nconst withGrace = marks.map(m => m + 5);         // [77, 50, 93, 96, 43]\nconst total = marks.reduce((sum, m) => sum + m, 0); // 334",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "ఇంకో విధంగా. ఇంట్లో జల్లెడ. filter మంచి గింజలను మాత్రమే ఉంచే జల్లెడ. map ప్రతి గింజను పిండిగా మార్చడం, ఒకదానికి ఒకటి. reduce అన్నింటినీ ఒక గిన్నెలో పోయడం. items సంఖ్య మారకుండా ఉంచేది ఏది?",
+      "captionEn": "Another way: a sieve at home. filter is the sieve that keeps only the good grains. map is grinding every grain into flour, one for one. reduce is pouring everything into one bowl. Which one keeps the same number of items?",
+      "code": null,
+      "mermaid": "graph LR\n  list[marks] -->|map| changed[each changed]\n  list -->|filter| some[only some]\n  list -->|reduce| one[one total]"
+    },
+    "not_understood": {
+      "message": "అడుగు అడుగుగా. array అంటే ఒక జాబితా. map ప్రతి item ని మార్చి అదే పొడవు కొత్త జాబితా ఇస్తుంది. filter ఒక పరీక్షలో నెగ్గిన items ని మాత్రమే ఉంచుతుంది. reduce జాబితాను ఒక్క విలువగా మారుస్తుంది. చిన్న జాబితా ఇచ్చేది ఏది?",
+      "captionEn": "Step by step. An array is a list. map changes each item and gives a new list of the same length. filter keeps only items that pass a test. reduce turns the list into one value. Which one gives a shorter list?",
+      "code": null,
+      "mermaid": "graph LR\n  list[marks] -->|map| changed[each changed]\n  list -->|filter| some[only some]\n  list -->|reduce| one[one total]"
+    }
+  },
+  "doubt": {
+    "answer": "మంచి ప్రశ్న. forEach ప్రతి item కోసం code నడుపుతుంది, ఏమీ తిరిగి ఇవ్వదు. map కొత్త array తిరిగి ఇస్తుంది. కొత్త జాబితా కావాలంటే map వాడండి. సహాయపడిందా?",
+    "captionEn": "Good question. forEach just runs code for each item and gives nothing back. map gives back a new array. Use map when you want the new list. Does that help?"
+  },
+  "practice": {
+    "code": {
+      "prompt": "marks = [72, 45, 88, 91, 38] నుంచి filter తో pass మార్కులు (40 లేదా ఎక్కువ), reduce తో వాటి మొత్తం తీయండి.",
+      "starter": "const marks = [72, 45, 88, 91, 38];\n",
+      "checks": [
+        {
+          "label": "Uses filter",
+          "re": "\\.filter\\s*\\(",
+          "flags": ""
+        },
+        {
+          "label": "Keeps 40 and above",
+          "re": ">=\\s*40|>\\s*39",
+          "flags": ""
+        },
+        {
+          "label": "Uses reduce",
+          "re": "\\.reduce\\s*\\(",
+          "flags": ""
+        }
+      ]
+    }
+  },
+  "check": {
+    "questions": [
+      "ఒక {context} లో సంఖ్యల జాబితా ఉంది. ఉపయోగపడే విలువలను మాత్రమే తీసుకుని, వాటిని మార్చడానికి filter, map ఎలా వాడతారో వివరించండి.",
+      "{context} నుంచి ఒక ఉదాహరణతో map, filter, reduce మధ్య తేడా చెప్పండి.",
+      "{context} లో ఎవరో forEach వాడి కొత్త array లోకి push చేశారు. map లేదా filter దీన్ని ఎలా సులభం చేస్తాయో వివరించండి."
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "map"
+        ],
+        [
+          "filter"
+        ],
+        [
+          "reduce",
+          "forEach",
+          "find"
+        ],
+        [
+          "new array",
+          "return",
+          "callback",
+          "each",
+          "ప్రతి",
+          "हर"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "ప్రతి పనికి సరైన array method ఎంచుకున్నారు.",
+      "missing": "ప్రతి method ఏం తిరిగి ఇస్తుందో చెప్పండి: కొత్త array లేదా ఒక విలువ.",
+      "next": "ప్రతి method కి ఏది లోపలికి వెళ్తుంది, ఏది బయటకు వస్తుంది చెప్పండి."
+    }
+  }
+}

@@ -13,6 +13,7 @@ frontend/build/
 secure-config/
 
 # Development signing keys (generated on first use; production keys live in secure-config)
-backend/data/
+backend/data/*
+!backend/data/scripted/
 .vercel
 backend/config/build-info.json

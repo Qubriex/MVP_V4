@@ -1,0 +1,108 @@
+{
+  "node": "Joins",
+  "language": "telugu",
+  "version": 1,
+  "diagnosis": {
+    "message": "నమస్కారం! ఈ రోజు SQL joins నేర్చుకుందాం. విద్యార్థుల పేర్లు ఒక register లో, పుస్తకాల loans ఇంకో register లో ఉంటే, ఏ విద్యార్థి దగ్గర ఏ పుస్తకం ఉందో ఎలా కనుక్కుంటారు?",
+    "captionEn": "Hello! Today we learn SQL joins. If student names are in one register and book loans in another, how would you find which student has which book?"
+  },
+  "turns": {
+    "explain": {
+      "message": "కాలేజీ లైబ్రరీలో రెండు registers ఊహించుకోండి. ఒకదాంట్లో విద్యార్థులు, వాళ్ల roll numbers. ఇంకోదాంట్లో loans: roll number, పుస్తకం, due date. ఎవరి దగ్గర ఏ పుస్తకం ఉందో చెప్పాలంటే రెండు registers లో roll numbers ని జత చేస్తారు. అదే JOIN. ఏ columns జత కావాలో ON చెబుతుంది, సాధారణంగా student_id లాంటి foreign key ని విద్యార్థి id తో. INNER JOIN జత అయినవే ఉంచుతుంది. LEFT JOIN ఎడమ table లోని ప్రతి వరుసనూ ఉంచుతుంది, జత లేకపోయినా, మిగతావి NULL తో నింపుతుంది. overdue పుస్తకాలు కనుక్కుందామా?",
+      "captionEn": "Think of two registers in a college library. One lists students with their roll numbers. The other lists loans: roll number, book and due date. To answer who has which book, you match the roll numbers across both registers. That is a JOIN. ON says which columns must match, usually a foreign key like student_id to the student's id. INNER JOIN keeps only matches. LEFT JOIN keeps every row from the left table, even with no match, filling the rest with NULL. Shall we find overdue books?",
+      "code": "SELECT s.name, b.title, l.due_date\nFROM loans l\nJOIN students s ON s.id = l.student_id\nJOIN books b    ON b.id = l.book_id\nWHERE l.returned = false;\n\n-- every student, even with no loans\nSELECT s.name, COUNT(l.id) FROM students s\nLEFT JOIN loans l ON l.student_id = s.id GROUP BY s.name;",
+      "mermaid": "erDiagram\n  STUDENTS ||--o{ LOANS : borrows\n  BOOKS ||--o{ LOANS : \"is lent in\""
+    },
+    "example": {
+      "message": "loans నుంచి, students.id సమానం loans.student_id ON తో students ని JOIN చేసి, books.id సమానం loans.book_id ON తో books ని JOIN చేయండి. WHERE returned false అయితే తిరిగి ఇవ్వని ప్రతి పుస్తకం విద్యార్థి పేరుతో వస్తుంది. loans లేని విద్యార్థులతో సహా అందరినీ చూపాలంటే students LEFT JOIN loans చేసి లెక్కించండి. ఇక్కడ INNER JOIN కొందరు విద్యార్థులను ఎందుకు వదిలేస్తుంది?",
+      "captionEn": "From loans, JOIN students ON students.id equals loans.student_id, and JOIN books ON books.id equals loans.book_id. WHERE returned is false gives every unreturned book with the student's name. To list every student, even those with no loans, use students LEFT JOIN loans and count. Why would an INNER JOIN miss some students here?",
+      "code": "SELECT s.name, b.title, l.due_date\nFROM loans l\nJOIN students s ON s.id = l.student_id\nJOIN books b    ON b.id = l.book_id\nWHERE l.returned = false;\n\n-- every student, even with no loans\nSELECT s.name, COUNT(l.id) FROM students s\nLEFT JOIN loans l ON l.student_id = s.id GROUP BY s.name;",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "ఇంకో విధంగా. పెళ్లి seating జాబితా. ఒక జాబితాలో అతిథుల పేర్లు, table numbers. ఇంకోదాంట్లో table numbers, వడ్డించే భోజనం. table number తో జత చేస్తే ప్రతి అతిథి ఏం తింటారో తెలుస్తుంది. table లేని అతిథులు INNER JOIN లో పోతారు. వాళ్లని ఉంచేది ఏ join?",
+      "captionEn": "Another way: a wedding seating list. One list has guest names and table numbers, another has table numbers and the food served. Matching on table number tells you what each guest eats. Guests without a table would drop out with an INNER JOIN. Which join keeps them?",
+      "code": null,
+      "mermaid": "erDiagram\n  STUDENTS ||--o{ LOANS : borrows\n  BOOKS ||--o{ LOANS : \"is lent in\""
+    },
+    "not_understood": {
+      "message": "అడుగు అడుగుగా. ఒకటి, మొదటి table FROM లో. రెండు, JOIN, రెండో table రాయండి. మూడు, జత అయ్యే columns తో ON రాయండి. ఇప్పుడు ప్రతి వరుసలో రెండు tables columns ఉంటాయి. నాలుగు, జత లేని వరుసలు కూడా కావాలంటే LEFT JOIN. వరుసలు ఎలా జత కావాలో చెప్పే keyword ఏది?",
+      "captionEn": "Step by step. One, start FROM the first table. Two, write JOIN and the second table. Three, write ON with the matching columns. Now each row has both tables' columns. Four, use LEFT JOIN if you must keep unmatched rows. Which keyword says how rows match?",
+      "code": null,
+      "mermaid": "erDiagram\n  STUDENTS ||--o{ LOANS : borrows\n  BOOKS ||--o{ LOANS : \"is lent in\""
+    }
+  },
+  "doubt": {
+    "answer": "మంచి సందేహం. ON లేకపోతే లేదా తప్పు షరతు ఉంటే ప్రతి వరుస ప్రతి వరుసతో జత అవుతుంది, చాలా పెద్ద ఫలితం వస్తుంది. ఎప్పుడూ ఒక key మీద జత చేయండి. సహాయపడిందా?",
+    "captionEn": "Good doubt. Without ON, or with a wrong condition, every row joins with every row, giving a huge result. Always match on a key. Does that help?"
+  },
+  "practice": {
+    "code": {
+      "prompt": "student id మీద loans, students ని join చేసి, తిరిగి ఇవ్వని ప్రతి loan ని విద్యార్థి పేరుతో చూపించండి.",
+      "starter": "-- your query\n",
+      "checks": [
+        {
+          "label": "Joins two tables",
+          "re": "join\\s+\\w+",
+          "flags": "i"
+        },
+        {
+          "label": "Matches on the student id",
+          "re": "on\\s+[\\w.]*id\\s*=\\s*[\\w.]*student_id|on\\s+[\\w.]*student_id\\s*=\\s*[\\w.]*id",
+          "flags": "i"
+        },
+        {
+          "label": "Shows the name",
+          "re": "select[\\s\\S]*name",
+          "flags": "i"
+        },
+        {
+          "label": "Only unreturned",
+          "re": "returned",
+          "flags": "i"
+        }
+      ]
+    }
+  },
+  "check": {
+    "questions": [
+      "ఒక {context} లో data ఒక id తో కలిసిన రెండు tables లో ఉంది. ఒక ప్రశ్నకు జవాబు కోసం వాటిని ఎలా join చేస్తారో, ON ఏం చేస్తుందో వివరించండి.",
+      "{context} నుంచి ఉదాహరణతో INNER JOIN కి LEFT JOIN కి తేడా వివరించండి.",
+      "{context} మీద ఒక join చాలా ఎక్కువ వరుసలు ఇస్తోంది. బహుశా జరిగిన తప్పు, ఎలా సరిచేయాలో చెప్పండి."
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "join"
+        ],
+        [
+          "on",
+          "foreign key",
+          "key",
+          "id",
+          "match"
+        ],
+        [
+          "inner",
+          "left",
+          "right",
+          "outer"
+        ],
+        [
+          "table",
+          "combine",
+          "both",
+          "null",
+          "కలిపి",
+          "जोड़"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "tables ని సరైన key మీద జత చేశారు.",
+      "missing": "ప్రతి join రకం ఏ వరుసలు ఉంచుతుందో, ముఖ్యంగా LEFT JOIN, వివరించండి.",
+      "next": "రెండు tables, జత అయ్యే columns, తర్వాత join రకం చెప్పండి."
+    }
+  }
+}

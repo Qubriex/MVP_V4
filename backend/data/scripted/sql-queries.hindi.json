@@ -1,0 +1,105 @@
+{
+  "node": "SQL queries",
+  "language": "hindi",
+  "version": 1,
+  "diagnosis": {
+    "message": "नमस्ते! आज हम SQL queries सीखेंगे। ट्रेन bookings का बड़ा register हो तो कल यात्रा करने वाले सभी लोगों को कैसे ढूँढेंगे?",
+    "captionEn": "Hello! Today we learn SQL queries. If you had a big register of train bookings, how would you find everyone travelling tomorrow?"
+  },
+  "turns": {
+    "explain": {
+      "message": "database table रेलवे reservation chart जैसी है: पंक्तियाँ यात्री हैं, columns नाम, ट्रेन नंबर, तारीख़ और status। SQL से हम chart से सवाल पूछते हैं। SELECT ज़रूरी columns चुनता है। FROM table का नाम बताता है। WHERE सिर्फ़ शर्त से मेल खाती पंक्तियाँ रखता है, जैसे तारीख़। ORDER BY नतीजे को क्रम में रखता है, LIMIT पहली कुछ रखता है। GROUP BY के साथ COUNT कुल देता है, जैसे हर ट्रेन के यात्री। chart से एक सवाल पूछें?",
+      "captionEn": "A database table is like a railway reservation chart: rows are passengers, columns are name, train number, date and status. SQL is how we ask the chart questions. SELECT picks the columns you want. FROM names the table. WHERE keeps only the rows that match, like a date. ORDER BY sorts the result, LIMIT keeps the first few. GROUP BY with COUNT gives totals, like passengers per train. Shall we ask the chart a question?",
+      "code": "SELECT name, train_no, journey_date\nFROM bookings\nWHERE journey_date = '2026-11-12' AND status = 'confirmed'\nORDER BY name\nLIMIT 20;\n\nSELECT train_no, COUNT(*) AS passengers\nFROM bookings\nGROUP BY train_no;",
+      "mermaid": "graph LR\n  FROM[FROM bookings] --> WHERE[WHERE filter rows] --> GROUP[GROUP BY] --> SELECT[SELECT columns] --> ORDER[ORDER BY] --> LIMIT"
+    },
+    "example": {
+      "message": "12 नवंबर के confirmed यात्री नाम के क्रम में चाहिए: bookings से नाम, ट्रेन नंबर और तारीख़ SELECT कीजिए, WHERE तारीख़ मेल खाए AND status confirmed हो, ORDER BY नाम। हर ट्रेन के यात्री गिनने हों तो ट्रेन नंबर से GROUP BY और COUNT। सिर्फ़ sleeper class की bookings कैसे ढूँढेंगे?",
+      "captionEn": "To list confirmed passengers on 12 November, sorted by name: SELECT name, train number and date FROM bookings WHERE the date matches AND status is confirmed, ORDER BY name. To count passengers per train, GROUP BY train number with COUNT. How would you find only bookings in sleeper class?",
+      "code": "SELECT name, train_no, journey_date\nFROM bookings\nWHERE journey_date = '2026-11-12' AND status = 'confirmed'\nORDER BY name\nLIMIT 20;\n\nSELECT train_no, COUNT(*) AS passengers\nFROM bookings\nGROUP BY train_no;",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "दूसरे तरीके से। लाइब्रेरियन से पूछना। कौन से columns चाहिए, वह SELECT। कौन सी अलमारी, FROM। लेखक प्रेमचंद जैसी शर्तें WHERE। किताबें किस क्रम में दें, ORDER BY। सिर्फ़ मेल खाती पंक्तियाँ कौन सा clause रखता है?",
+      "captionEn": "Another way: asking a librarian. Which columns you want is SELECT. Which shelf is FROM. Your conditions, like author is Premchand, are WHERE. In what order to hand you the books is ORDER BY. Which clause keeps only matching rows?",
+      "code": null,
+      "mermaid": "graph LR\n  FROM[FROM bookings] --> WHERE[WHERE filter rows] --> GROUP[GROUP BY] --> SELECT[SELECT columns] --> ORDER[ORDER BY] --> LIMIT"
+    },
+    "not_understood": {
+      "message": "कदम-दर-कदम। एक, columns SELECT कीजिए। दो, table FROM में। तीन, शर्तों के लिए WHERE। सिर्फ़ इतने से कई सवालों के जवाब मिल जाते हैं। फिर क्रम के लिए ORDER BY। table का नाम कौन सा clause बताता है?",
+      "captionEn": "Step by step. One, SELECT the columns. Two, FROM the table. Three, add WHERE for conditions. That alone answers many questions. Then ORDER BY to sort. Which clause names the table?",
+      "code": null,
+      "mermaid": "graph LR\n  FROM[FROM bookings] --> WHERE[WHERE filter rows] --> GROUP[GROUP BY] --> SELECT[SELECT columns] --> ORDER[ORDER BY] --> LIMIT"
+    }
+  },
+  "doubt": {
+    "answer": "अच्छा सवाल। WHERE समूह बनाने से पहले पंक्तियाँ छाँटता है। HAVING, GROUP BY के बाद समूह छाँटता है, जैसे 100 से ज़्यादा यात्रियों वाली ट्रेनें। समझ आया?",
+    "captionEn": "Good doubt. WHERE filters rows before grouping. HAVING filters groups after GROUP BY, like trains with more than 100 passengers. Does that help?"
+  },
+  "practice": {
+    "code": {
+      "prompt": "bookings table से 12 नवंबर 2026 की confirmed bookings नाम के क्रम में दिखाइए।",
+      "starter": "-- your query\n",
+      "checks": [
+        {
+          "label": "SELECT … FROM bookings",
+          "re": "select[\\s\\S]+from\\s+bookings",
+          "flags": "i"
+        },
+        {
+          "label": "Filters with WHERE",
+          "re": "where",
+          "flags": "i"
+        },
+        {
+          "label": "Only confirmed",
+          "re": "confirmed",
+          "flags": "i"
+        },
+        {
+          "label": "Sorted by name",
+          "re": "order\\s+by\\s+\\w*name",
+          "flags": "i"
+        }
+      ]
+    }
+  },
+  "check": {
+    "questions": [
+      "एक {context} के लिए एक SQL query लिखिए या समझाइए जो शर्त से कुछ पंक्तियाँ ढूँढे और उन्हें क्रम में रखे। हर clause समझाइए।",
+      "{context} में GROUP BY से हर समूह की पंक्तियाँ कैसे गिनेंगे, और WHERE अलग क्या करता है, समझाइए।",
+      "{context} पर एक query कुछ की जगह सभी पंक्तियाँ लौटाती है। समझाइए क्या छूटा है और कैसे ठीक करें।"
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "select"
+        ],
+        [
+          "from",
+          "table"
+        ],
+        [
+          "where",
+          "filter"
+        ],
+        [
+          "order by",
+          "group by",
+          "count",
+          "limit",
+          "insert",
+          "update",
+          "column",
+          "row"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "आपने SELECT, FROM और WHERE सही इस्तेमाल किए।",
+      "missing": "ORDER BY या GROUP BY से क्रम या समूह, और हर clause का काम बताइए।",
+      "next": "अपनी query को clause-दर-clause पढ़कर हर एक का काम बताइए।"
+    }
+  }
+}

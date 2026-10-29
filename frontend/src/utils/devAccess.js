@@ -16,7 +16,50 @@ export const DEV_CARDS = [
   { key: 'employer_pending', label: 'devx.card.employerPending', home: '/employer/home' },
   { key: 'admin', label: 'devx.card.admin', home: '/admin/overview' }
 ];
+// One test learner at each stage of the learning journey (backend
+// core/journey/accounts.js). The /dev page lists them from GET /dev/journey.
+export const JOURNEY_KEYS = ['s0', 's1', 's2', 's3', 's4', 's5', 's6', 's7', 's8', 's9', 's10', 's11', 's12', 's1-hi', 's3-hi', 's7-hi']
+  .map(k => ({ key: `journey_${k.replace('-', '_')}`, journey: k, stage: k.split('-')[0].toUpperCase(), hindi: k.endsWith('-hi') }));
 export const cardFor = (key) => DEV_CARDS.find(c => c.key === key) || null;
+export const journeyFor = (key) => JOURNEY_KEYS.find(j => j.key === key) || null;
+export const isDevLearner = (key) => key === 'learner_te' || key === 'learner_hi' || key === 'learner_new' || !!journeyFor(key);
+
+// The learner path, step by step, for /dev/journey: which stage account to
+// open and where. `invite` opens a fresh invite link instead of signing in.
+export const JOURNEY_STEPS = [
+  { id: 'invite', account: 'journey_s0', invite: true },
+  { id: 'signin', account: 'journey_s0', invite: true },
+  { id: 'welcome', account: 'journey_s1', to: '/learn/welcome' },
+  { id: 'baseline', account: 'journey_s1', to: '/learn/baseline' },
+  { id: 'lesson', account: 'journey_s2', to: '/learn/session' },
+  { id: 'check', account: 'journey_s3', to: '/learn/session' },
+  { id: 'result', account: 'journey_s4', to: '/learn/session' },
+  { id: 'review', account: 'journey_s3', to: '/learn/reviews' },
+  { id: 'certificate', account: 'journey_s5', to: '/learn/record' },
+  { id: 'readiness', account: 'journey_s6', to: '/learn/readiness' },
+  { id: 'bridge', account: 'journey_s3', to: '/learn/assigned' },
+  { id: 'passport', account: 'journey_s7', to: '/learn/passport' },
+  { id: 'share', account: 'journey_s7', to: '/learn/passport' },
+  { id: 'request', account: 'journey_s8', to: '/learn/jobs' },
+  { id: 'dayone', account: 'journey_s9', to: '/learn/dayone' },
+  { id: 'apply', account: 'journey_s7', to: '/learn/jobs' },
+  { id: 'offer', account: 'journey_s10', to: '/learn/jobs' },
+  { id: 'hired', account: 'journey_s11', to: '/learn/passport' },
+  { id: 'renewal', account: 'journey_s12', to: '/learn/passport' }
+];
+
+/** A fresh invite link for the S0 learner (who has never signed in). */
+export async function openInviteLink({ logout, navigate, token }) {
+  const { data } = await api.post('/dev/journey/invite', {});
+  if (token) logout();
+  navigate(data.path);
+}
+
+/** Run one /dev time-or-state control on the signed-in test learner. */
+export async function journeyControl(body) {
+  const { data } = await api.post('/dev/journey/control', body);
+  return data;
+}
 
 /** Sign in as one test account and go to its home (or to `to`). */
 export async function openDevAccount(key, { login, navigate }, to = null) {
@@ -31,6 +74,19 @@ export const ALL_PAGES = [
   { side: 'devx.pages.public', account: null, paths: ['/', '/pricing', '/learners', '/colleges', '/employers', '/demo', '/signin', '/legal/privacy', '/legal/terms', '/legal/dpdp', '/legal/grievance', '/developers', '/verify', '/verify/:evidence_id', '/login', '/learner-login', '/employer/login', '/employer/register', '/admin/login'] },
   { side: 'devx.pages.learner', account: 'learner_te', paths: ['/learn/dashboard', '/learn/session', '/learn/record', '/learn/reviews', '/learn/passport', '/learn/jobs', '/learn/market', '/learn/market/:job_id', '/learn/market/:job_id/interview', '/learn/topics', '/learn/profile', '/learn/resume', '/learn/settings'] },
   { side: 'devx.pages.learnerNew', account: 'learner_new', paths: ['/learn/welcome'] },
+  // The learner side again, by journey stage: each page opened as the stage that shows it best.
+  { side: 'devx.pages.byStage.s1', account: 'journey_s1', paths: ['/learn/welcome', '/learn/baseline'] },
+  { side: 'devx.pages.byStage.s2', account: 'journey_s2', paths: ['/learn/dashboard', '/learn/session', '/learn/skill/test-node-1-3'] },
+  { side: 'devx.pages.byStage.s3', account: 'journey_s3', paths: ['/learn/dashboard', '/learn/reviews', '/learn/assigned', '/learn/history', '/learn/skill/test-node-2-2'] },
+  { side: 'devx.pages.byStage.s4', account: 'journey_s4', paths: ['/learn/session', '/learn/skill/test-node-2-3', '/learn/history'] },
+  { side: 'devx.pages.byStage.s5', account: 'journey_s5', paths: ['/learn/record', '/learn/passport'] },
+  { side: 'devx.pages.byStage.s6', account: 'journey_s6', paths: ['/learn/readiness', '/learn/jobs', '/learn/resume'] },
+  { side: 'devx.pages.byStage.s7', account: 'journey_s7', paths: ['/learn/passport', '/learn/jobs', '/learn/apply/test-role-0002', '/learn/notifications'] },
+  { side: 'devx.pages.byStage.s8', account: 'journey_s8', paths: ['/learn/jobs', '/learn/requests/test-j-s8-pipe'] },
+  { side: 'devx.pages.byStage.s9', account: 'journey_s9', paths: ['/learn/dayone', '/learn/jobs'] },
+  { side: 'devx.pages.byStage.s10', account: 'journey_s10', paths: ['/learn/jobs'] },
+  { side: 'devx.pages.byStage.s11', account: 'journey_s11', paths: ['/learn/passport', '/learn/jobs'] },
+  { side: 'devx.pages.byStage.s12', account: 'journey_s12', paths: ['/learn/passport', '/learn/reviews', '/learn/dashboard'] },
   { side: 'devx.pages.college', account: 'college_admin', paths: ['/institution/home', '/institution/welcome', '/institution/team', '/institution/students', '/institution/students/add', '/institution/cohorts', '/institution/cohorts/new', '/institution/cohorts/:engagement_id', '/institution/cohorts/:engagement_id/live', '/institution/cohorts/:engagement_id/report', '/institution/curriculum', '/institution/benchmark', '/institution/review', '/institution/bridges', '/institution/bridges/:bridge_id', '/institution/placements', '/institution/board-report', '/institution/profile', '/institution/mastery-log/:mastery_log_id'] },
   { side: 'devx.pages.professor', account: 'professor', paths: ['/institution/home', '/institution/review', '/institution/cohorts/:engagement_id'] },
   { side: 'devx.pages.employer', account: 'employer_verified', paths: ['/employer/home', '/employer/company', '/employer/team', '/employer/api-keys', '/employer/roles', '/employer/roles/:role_id', '/employer/pipeline', '/employer/candidates/:candidate_id', '/employer/sponsor', '/employer/colleges', '/employer/verify-bulk', '/employer/templates', '/employer/billing'] },

@@ -30,8 +30,10 @@ const EXPLANATION_APPROACHES = [
 // fallback and logging. systemInstruction and userMessage stay separate:
 // callers assemble RAG context into userMessage; system holds the persona and
 // response-format rules. `task` names the gateway route (spec §8.11).
-async function callAI({ system, userMessage, maxTokens = 1024, temperature = 0.7, task = 'LEGACY.callAI', thinking }) {
-  const { text } = await generate({ task, system, input: userMessage, maxTokens, temperature, thinking });
+// `meta` carries plain facts (skill, language, the learner's last words) for
+// the scripted tutor; model adapters ignore it.
+async function callAI({ system, userMessage, maxTokens = 1024, temperature = 0.7, task = 'LEGACY.callAI', thinking, meta }) {
+  const { text } = await generate({ task, system, input: userMessage, maxTokens, temperature, thinking, meta });
   return text;
 }
 

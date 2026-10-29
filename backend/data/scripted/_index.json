@@ -1,0 +1,22 @@
+{
+  "HTML semantics": "html-semantics",
+  "CSS box model": "css-box-model",
+  "CSS flexbox": "css-flexbox",
+  "Responsive design": "responsive-design",
+  "Git basics": "git-basics",
+  "Variables and types": "variables-and-types",
+  "Functions and scope": "functions-and-scope",
+  "Array methods": "array-methods",
+  "DOM events": "dom-events",
+  "Async and fetch": "async-and-fetch",
+  "React components": "react-components",
+  "React state and props": "react-state-and-props",
+  "Hooks": "hooks",
+  "Forms in React": "forms-in-react",
+  "Calling APIs": "calling-apis",
+  "Node.js basics": "node-js-basics",
+  "Express routes": "express-routes",
+  "REST design": "rest-design",
+  "SQL queries": "sql-queries",
+  "Joins": "joins"
+}

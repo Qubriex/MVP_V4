@@ -1,0 +1,104 @@
+{
+  "node": "Responsive design",
+  "language": "english",
+  "version": 1,
+  "diagnosis": {
+    "message": "Hello! Today we learn responsive design. When you open a website on your phone, what usually goes wrong?",
+    "captionEn": null
+  },
+  "turns": {
+    "explain": {
+      "message": "Think of a saree shop. The same saree looks right on a short or a tall person because it is draped to fit. Responsive design does the same for web pages. One page adjusts to a phone, a tablet and a laptop. We use the viewport meta tag, flexible widths in percent or fr, and media queries that change the layout at certain screen widths. Shall we see a layout change?",
+      "captionEn": null,
+      "code": ".grid { display: grid; grid-template-columns: 1fr; }\n@media (min-width: 768px) {\n  .grid { grid-template-columns: repeat(3, 1fr); }\n}\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">",
+      "mermaid": "graph TD\n  screen{Screen width?} -->|under 768px| one[1 column]\n  screen -->|768px and up| three[3 columns]"
+    },
+    "example": {
+      "message": "A shop page shows product cards. On a phone we show one card per row. With a media query at 768 pixels, we show three per row on a laptop. The viewport tag makes the phone use its real width. What would you change for a very wide screen?",
+      "captionEn": null,
+      "code": ".grid { display: grid; grid-template-columns: 1fr; }\n@media (min-width: 768px) {\n  .grid { grid-template-columns: repeat(3, 1fr); }\n}\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "Another way: water takes the shape of its glass. A responsive page takes the shape of the screen. Media queries are like saying: if the glass is wide, pour into three columns; if narrow, pour into one. Which tool lets you change the layout at a width?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph TD\n  screen{Screen width?} -->|under 768px| one[1 column]\n  screen -->|768px and up| three[3 columns]"
+    },
+    "not_understood": {
+      "message": "Step by step. First, add the viewport tag so phones do not zoom out. Second, use widths that stretch, like percent, not fixed pixels. Third, use media queries to change the layout for bigger screens. What does a media query check?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph TD\n  screen{Screen width?} -->|under 768px| one[1 column]\n  screen -->|768px and up| three[3 columns]"
+    }
+  },
+  "doubt": {
+    "answer": "Good doubt. Mobile first means you write the phone layout first, then add media queries with min-width for bigger screens. It keeps phones fast and simple. Does that help?",
+    "captionEn": null
+  },
+  "practice": {
+    "code": {
+      "prompt": "Make .grid one column on phones and three columns from 768px up.",
+      "starter": ".grid {\n  display: grid;\n}\n",
+      "checks": [
+        {
+          "label": "One column by default",
+          "re": "grid-template-columns\\s*:\\s*(1fr|repeat\\(\\s*1\\s*,)",
+          "flags": "i"
+        },
+        {
+          "label": "A min-width media query at 768px",
+          "re": "@media[^{]*min-width\\s*:\\s*768px",
+          "flags": "i"
+        },
+        {
+          "label": "Three columns inside it",
+          "re": "repeat\\(\\s*3\\s*,\\s*1fr\\s*\\)|1fr\\s+1fr\\s+1fr",
+          "flags": "i"
+        }
+      ]
+    }
+  },
+  "check": {
+    "questions": [
+      "A {context} looks fine on a laptop but is cut off on a phone. Explain three things you would do to make it responsive.",
+      "For a {context}, explain how a media query can change the layout from one column on a phone to three columns on a laptop.",
+      "Explain what the viewport meta tag does on a {context}, and what happens without it."
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "media quer",
+          "@media"
+        ],
+        [
+          "viewport"
+        ],
+        [
+          "phone",
+          "mobile",
+          "laptop",
+          "width",
+          "screen",
+          "ఫోన్",
+          "फ़ोन",
+          "फोन"
+        ],
+        [
+          "%",
+          "fr",
+          "flex",
+          "grid",
+          "rem",
+          "relative"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "You explained how the layout adapts to screen width.",
+      "missing": "Mention media queries and the viewport tag together.",
+      "next": "Say phone first, then the bigger-screen change."
+    }
+  }
+}

@@ -1,5 +1,6 @@
-// label_v1 (v4.3 §9.1, §11): Confirmed only when every condition holds; each
+// label_v2 (v4.3 §9.1, §11): Confirmed only when every condition holds; each
 // removed alone downgrades to Partial; persistence with < 2 passes → Foundational.
+// v2: Confirmed also needs passes of two kinds of evidence (never checks alone).
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
 import { labelV1, freshness, impliedInterval, missingForConfirmed } from '../../core/qep/labelFn.js';
@@ -11,7 +12,7 @@ const demo = (day, passed, score, assurance = 'A1', kind = 'review', level = 'L1
 const confirmedDemos = [demo(0, true, 0.82, 'A1', 'mastery'), demo(3, true, 0.8), demo(10, true, 0.85, 'A2'), demo(17, true, 0.9, 'A3', 'dayone')];
 const asOf = D(18);
 
-describe('label_v1', () => {
+describe('label_v2', () => {
   it('Confirmed with ≥ 3 passes, span ≥ 14 d, Cq ≥ 0.75, best ≥ θ + 0.10, fresh ≥ 0.85, A2+', () => {
     const r = labelV1(facts, confirmedDemos, asOf);
     expect(r.label).toBe('Confirmed');
@@ -46,8 +47,17 @@ describe('label_v1', () => {
 
   it('old failures age out of the 6-demonstration window', () => {
     const demos = [demo(0, true, 0.82, 'A1', 'mastery'), demo(3, false, 0.5), demo(4, false, 0.5),
-      demo(10, true, 0.85, 'A2'), demo(20, true, 0.85), demo(30, true, 0.85), demo(40, true, 0.9), demo(50, true, 0.9), demo(60, true, 0.9)];
+      demo(10, true, 0.85, 'A2'), demo(20, true, 0.85, 'A1', 'practice'), demo(30, true, 0.85), demo(40, true, 0.9), demo(50, true, 0.9), demo(60, true, 0.9)];
     expect(labelV1(facts, demos, D(61)).label).toBe('Confirmed');
+  });
+
+  it('never Confirmed from checks alone: a second kind of evidence is needed', () => {
+    const checksOnly = confirmedDemos.map(d => ({ ...d, kind: d.kind === 'dayone' ? 'review' : d.kind }));
+    expect(labelV1(facts, checksOnly, asOf).label).toBe('Partial');
+    expect(missingForConfirmed(facts, checksOnly, asOf)).toEqual(['second_kind']);
+    const withTask = checksOnly.map((d, i) => (i === 1 ? { ...d, kind: 'task' } : d));
+    expect(labelV1(facts, withTask, asOf).label).toBe('Confirmed');
+    expect(labelV1(facts, withTask, asOf).kinds.sort()).toEqual(['check', 'task']);
   });
 
   it('not mastered → none', () => {

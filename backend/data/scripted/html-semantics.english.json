@@ -1,0 +1,108 @@
+{
+  "node": "HTML semantics",
+  "language": "english",
+  "version": 1,
+  "diagnosis": {
+    "message": "Hello! Today we learn HTML semantics. Have you ever built a web page? Which tags did you use?",
+    "captionEn": null
+  },
+  "turns": {
+    "explain": {
+      "message": "Think of a wedding invitation card. The family name is at the top, the event details in the middle, and the address at the bottom. Each part has a clear place. HTML semantics works the same way. Tags like header, main, article and footer tell the browser what each part of the page means. Screen readers and search engines then understand the page. Shall we look at an example?",
+      "captionEn": null,
+      "code": "<header>\n  <nav>…</nav>\n</header>\n<main>\n  <article>\n    <h1>College Fest 2026</h1>\n    <p>Events, dates and venues.</p>\n  </article>\n</main>\n<footer>Contact the fest team</footer>",
+      "mermaid": "graph TD\n  Page --> header\n  Page --> main\n  Page --> footer\n  main --> article\n  article --> h1\n  article --> p"
+    },
+    "example": {
+      "message": "Take a college fest page. The logo and menu go inside header. The event list goes inside main, and each event is an article. Contact details go inside footer. Can you tell me where the fest dates should go?",
+      "captionEn": null,
+      "code": "<header>\n  <nav>…</nav>\n</header>\n<main>\n  <article>\n    <h1>College Fest 2026</h1>\n    <p>Events, dates and venues.</p>\n  </article>\n</main>\n<footer>Contact the fest team</footer>",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "Let us try another way. A div is like an unlabelled box at home. You must open it to know what is inside. A semantic tag is a labelled box: kitchen, books, clothes. Anyone can find things fast. Which labelled box would you use for a page menu?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph TD\n  Page --> header\n  Page --> main\n  Page --> footer\n  main --> article\n  article --> h1\n  article --> p"
+    },
+    "not_understood": {
+      "message": "No problem, let us go slowly. A web page has parts, like a letter has a greeting, a body and a signature. HTML semantics just means naming each part correctly. The top part is header. The main content is main. The bottom part is footer. Which part comes first on a page?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph TD\n  Page --> header\n  Page --> main\n  Page --> footer\n  main --> article\n  article --> h1\n  article --> p"
+    }
+  },
+  "doubt": {
+    "answer": "Good question. A div has no meaning; it is only a box for styling. Use a semantic tag when the part has a clear role, like navigation or an article. Use a div only when no meaningful tag fits. Is that clearer now?",
+    "captionEn": null
+  },
+  "practice": {
+    "code": {
+      "prompt": "Write the page skeleton for a college fest site: a header with a nav, a main with one article (heading and paragraph), and a footer.",
+      "starter": "<!-- your page here -->\n",
+      "checks": [
+        {
+          "label": "Has a header with a nav",
+          "re": "<header[\\s\\S]*<nav[\\s\\S]*</nav>[\\s\\S]*</header>",
+          "flags": "i"
+        },
+        {
+          "label": "Has a main with an article",
+          "re": "<main[\\s\\S]*<article[\\s\\S]*</article>[\\s\\S]*</main>",
+          "flags": "i"
+        },
+        {
+          "label": "The article has a heading",
+          "re": "<article[\\s\\S]*<h[1-6]",
+          "flags": "i"
+        },
+        {
+          "label": "Has a footer",
+          "re": "<footer",
+          "flags": "i"
+        }
+      ]
+    }
+  },
+  "check": {
+    "questions": [
+      "Think of a {context}. Which semantic tags would you use for its top area, main content and bottom area, and why do they help?",
+      "A friend built a {context} using only div tags. What problems can this cause, and how would semantic tags fix them?",
+      "For a {context}, explain the difference between using article and using div for each item, with one small example."
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "header",
+          "footer",
+          "nav",
+          "main",
+          "article",
+          "section"
+        ],
+        [
+          "meaning",
+          "semantic",
+          "అర్థం",
+          "अर्थ",
+          "मतलब"
+        ],
+        [
+          "screen reader",
+          "accessib",
+          "search engine",
+          "seo",
+          "google",
+          "అందరికీ",
+          "सबके लिए"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "You used the right semantic tags for each part of the page.",
+      "missing": "Say why semantic tags help, for example screen readers and search engines.",
+      "next": "Name the tag, then say the reason in one line."
+    }
+  }
+}

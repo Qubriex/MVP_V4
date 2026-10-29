@@ -1,0 +1,102 @@
+{
+  "node": "React components",
+  "language": "telugu",
+  "version": 1,
+  "diagnosis": {
+    "message": "నమస్కారం! ఈ రోజు React components నేర్చుకుందాం. ఒకేలా కనిపించే ఇరవై event cards చేయాల్సి వస్తే ఎలా చేస్తారు?",
+    "captionEn": "Hello! Today we learn React components. If you had to make twenty event cards that look the same, how would you do it?"
+  },
+  "turns": {
+    "explain": {
+      "message": "అరలు ఉన్న టిఫిన్ బాక్స్ ఊహించుకోండి. ప్రతి అర ఒక్కసారి తయారై అన్నం, కూర, స్వీట్ ని ఉంచుతుంది. React component అంటే పేజీలో మళ్లీ వాడగల ఒక భాగం. అది HTML లాగా కనిపించే JSX ని return చేసే ఒక function. event card లాంటి చిన్న components చేసి, వాటిని కలిపి పేజీ లాంటి పెద్దవి చేస్తారు. ఒకసారి రాసి, వేర్వేరు data తో చాలాసార్లు వాడతారు. event card తయారు చేద్దామా?",
+      "captionEn": "Think of a tiffin box with compartments. Each compartment is made once and holds rice, curry or sweets. A React component is a reusable piece of the page. It is a function that returns JSX, which looks like HTML. You build small components, like an event card, and put them together into bigger ones, like a page. Write once, use many times with different data. Shall we build an event card?",
+      "code": "function EventCard({ title, date }) {\n  return (\n    <article className=\"card\">\n      <h3>{title}</h3>\n      <p>{date}</p>\n    </article>\n  );\n}\n\n<EventCard title=\"Dance night\" date=\"12 Nov\" />",
+      "mermaid": "graph TD\n  App --> Header\n  App --> EventList\n  EventList --> EventCard1[EventCard]\n  EventList --> EventCard2[EventCard]"
+    },
+    "example": {
+      "message": "EventCard component ఒక title, date తీసుకుని heading, paragraph ఉన్న article ని return చేస్తుంది. ఫెస్ట్ పేజీలో EventCard ని చాలాసార్లు వాడతాం, ప్రతిసారి వేరే title తో. card design మారితే ఒక్క చోటే మారుస్తాం. ఫెస్ట్ పేజీలో ఇంకా ఏ భాగం component కావచ్చు?",
+      "captionEn": "An EventCard component takes a title and a date and returns an article with a heading and a paragraph. On the fest page we use EventCard many times, each with a different title. If the card design changes, we edit one place. What other part of a fest page could be a component?",
+      "code": "function EventCard({ title, date }) {\n  return (\n    <article className=\"card\">\n      <h3>{title}</h3>\n      <p>{date}</p>\n    </article>\n  );\n}\n\n<EventCard title=\"Dance night\" date=\"12 Nov\" />",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "ఇంకో విధంగా. రబ్బర్ స్టాంప్. ఒక్కసారి స్టాంప్ చేసి చాలా పేజీల మీద వేస్తారు. ప్రతిసారి వేరే ink వాడొచ్చు. స్టాంప్ component, ink data. component కి పంపే data ని ఏమంటారు?",
+      "captionEn": "Another way: a rubber stamp. You make the stamp once, then press it on many pages. Each time you can use different ink. The stamp is the component, the ink is the data. What do we call the data passed into a component?",
+      "code": null,
+      "mermaid": "graph TD\n  App --> Header\n  App --> EventList\n  EventList --> EventCard1[EventCard]\n  EventList --> EventCard2[EventCard]"
+    },
+    "not_understood": {
+      "message": "అడుగు అడుగుగా. ఒకటి, పెద్ద అక్షరంతో పేరు ఉన్న function రాయండి. రెండు, కొంత JSX return చేయండి. మూడు, angle brackets తో tag లాగా వాడండి. అదే component. Header అనే component ని ఎలా వాడతారు?",
+      "captionEn": "Step by step. One, write a function with a capital letter name. Two, return some JSX. Three, use it like a tag, with angle brackets. That is a component. How do you use a component named Header?",
+      "code": null,
+      "mermaid": "graph TD\n  App --> Header\n  App --> EventList\n  EventList --> EventCard1[EventCard]\n  EventList --> EventCard2[EventCard]"
+    }
+  },
+  "doubt": {
+    "answer": "మంచి ప్రశ్న. component పేర్లు పెద్ద అక్షరంతో మొదలవుతాయి, అప్పుడే React వాటిని మామూలు HTML tags కాదు, components అని గుర్తిస్తుంది. సహాయపడిందా?",
+    "captionEn": "Good question. Component names start with a capital letter so React knows they are components, not plain HTML tags. Does that help?"
+  },
+  "practice": {
+    "code": {
+      "prompt": "పంపిన title, date చూపించే EventCard component రాసి ఒకసారి వాడండి.",
+      "starter": "function EventCard(props) {\n  \n}\n",
+      "checks": [
+        {
+          "label": "A component named EventCard",
+          "re": "(function\\s+EventCard|const\\s+EventCard\\s*=)",
+          "flags": ""
+        },
+        {
+          "label": "Returns JSX",
+          "re": "return\\s*\\(?\\s*<",
+          "flags": ""
+        },
+        {
+          "label": "Shows the title",
+          "re": "\\{\\s*(props\\.)?title\\s*\\}",
+          "flags": ""
+        },
+        {
+          "label": "Is used as a tag",
+          "re": "<EventCard\\b",
+          "flags": ""
+        }
+      ]
+    }
+  },
+  "check": {
+    "questions": [
+      "ఒక {context} లో చాలా items ఒకేలా ఉంటాయి. ఒక item కోసం React component ఎలా చేసి మళ్లీ వాడతారో వివరించండి.",
+      "ఒక {context} ని components గా ఎలా విభజిస్తారో, అది ఎందుకు ఉపయోగమో వివరించండి.",
+      "{context} తో, component ఏం return చేస్తుందో, JSX HTML కంటే ఎలా వేరో వివరించండి."
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "component",
+          "function"
+        ],
+        [
+          "jsx",
+          "return",
+          "<"
+        ],
+        [
+          "reuse",
+          "props",
+          "again",
+          "many",
+          "మళ్లీ",
+          "दोबारा",
+          "बार-बार"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "మళ్లీ వాడగల component, దాన్ని ఎలా వాడతారో చెప్పారు.",
+      "missing": "component ఏం return చేస్తుందో, అంటే JSX, ప్రతి copy ని data ఎలా మారుస్తుందో చెప్పండి.",
+      "next": "component పేరు, అది ఏం చూపిస్తుంది, ఎక్కడ మళ్లీ వాడతారు చెప్పండి."
+    }
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "node": "Joins",
+  "language": "english",
+  "version": 1,
+  "diagnosis": {
+    "message": "Hello! Today we learn SQL joins. If student names are in one register and book loans in another, how would you find which student has which book?",
+    "captionEn": null
+  },
+  "turns": {
+    "explain": {
+      "message": "Think of two registers in a college library. One lists students with their roll numbers. The other lists loans: roll number, book and due date. To answer who has which book, you match the roll numbers across both registers. That is a JOIN. ON says which columns must match, usually a foreign key like student_id to the student's id. INNER JOIN keeps only matches. LEFT JOIN keeps every row from the left table, even with no match, filling the rest with NULL. Shall we find overdue books?",
+      "captionEn": null,
+      "code": "SELECT s.name, b.title, l.due_date\nFROM loans l\nJOIN students s ON s.id = l.student_id\nJOIN books b    ON b.id = l.book_id\nWHERE l.returned = false;\n\n-- every student, even with no loans\nSELECT s.name, COUNT(l.id) FROM students s\nLEFT JOIN loans l ON l.student_id = s.id GROUP BY s.name;",
+      "mermaid": "erDiagram\n  STUDENTS ||--o{ LOANS : borrows\n  BOOKS ||--o{ LOANS : \"is lent in\""
+    },
+    "example": {
+      "message": "From loans, JOIN students ON students.id equals loans.student_id, and JOIN books ON books.id equals loans.book_id. WHERE returned is false gives every unreturned book with the student's name. To list every student, even those with no loans, use students LEFT JOIN loans and count. Why would an INNER JOIN miss some students here?",
+      "captionEn": null,
+      "code": "SELECT s.name, b.title, l.due_date\nFROM loans l\nJOIN students s ON s.id = l.student_id\nJOIN books b    ON b.id = l.book_id\nWHERE l.returned = false;\n\n-- every student, even with no loans\nSELECT s.name, COUNT(l.id) FROM students s\nLEFT JOIN loans l ON l.student_id = s.id GROUP BY s.name;",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "Another way: a wedding seating list. One list has guest names and table numbers, another has table numbers and the food served. Matching on table number tells you what each guest eats. Guests without a table would drop out with an INNER JOIN. Which join keeps them?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "erDiagram\n  STUDENTS ||--o{ LOANS : borrows\n  BOOKS ||--o{ LOANS : \"is lent in\""
+    },
+    "not_understood": {
+      "message": "Step by step. One, start FROM the first table. Two, write JOIN and the second table. Three, write ON with the matching columns. Now each row has both tables' columns. Four, use LEFT JOIN if you must keep unmatched rows. Which keyword says how rows match?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "erDiagram\n  STUDENTS ||--o{ LOANS : borrows\n  BOOKS ||--o{ LOANS : \"is lent in\""
+    }
+  },
+  "doubt": {
+    "answer": "Good doubt. Without ON, or with a wrong condition, every row joins with every row, giving a huge result. Always match on a key. Does that help?",
+    "captionEn": null
+  },
+  "practice": {
+    "code": {
+      "prompt": "Show each unreturned loan with the student's name, joining loans and students on the student id.",
+      "starter": "-- your query\n",
+      "checks": [
+        {
+          "label": "Joins two tables",
+          "re": "join\\s+\\w+",
+          "flags": "i"
+        },
+        {
+          "label": "Matches on the student id",
+          "re": "on\\s+[\\w.]*id\\s*=\\s*[\\w.]*student_id|on\\s+[\\w.]*student_id\\s*=\\s*[\\w.]*id",
+          "flags": "i"
+        },
+        {
+          "label": "Shows the name",
+          "re": "select[\\s\\S]*name",
+          "flags": "i"
+        },
+        {
+          "label": "Only unreturned",
+          "re": "returned",
+          "flags": "i"
+        }
+      ]
+    }
+  },
+  "check": {
+    "questions": [
+      "In a {context}, data is in two tables linked by an id. Explain how you would join them to answer a question, and what ON does.",
+      "Explain the difference between INNER JOIN and LEFT JOIN with an example from a {context}.",
+      "A join on a {context} returns far too many rows. Explain the likely mistake and how to fix it."
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "join"
+        ],
+        [
+          "on",
+          "foreign key",
+          "key",
+          "id",
+          "match"
+        ],
+        [
+          "inner",
+          "left",
+          "right",
+          "outer"
+        ],
+        [
+          "table",
+          "combine",
+          "both",
+          "null",
+          "కలిపి",
+          "जोड़"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "You matched the tables on the right key.",
+      "missing": "Explain which rows each join type keeps, especially LEFT JOIN.",
+      "next": "Name both tables, the matching columns, then the join type."
+    }
+  }
+}

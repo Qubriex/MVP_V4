@@ -1,0 +1,108 @@
+{
+  "node": "Calling APIs",
+  "language": "telugu",
+  "version": 1,
+  "diagnosis": {
+    "message": "నమస్కారం! ఈ రోజు React పేజీ నుంచి APIs పిలవడం నేర్చుకుందాం. website లో పరీక్ష ఫలితాలు లోడ్ అవుతున్నప్పుడు screen మీద ఏం కనిపిస్తుంది?",
+    "captionEn": "Hello! Today we learn calling APIs from a React page. When exam results are loading on a website, what do you see on the screen?"
+  },
+  "turns": {
+    "explain": {
+      "message": "రైల్వే enquiry counter దగ్గర ఎదురుచూడటం ఊహించుకోండి. మూడు క్షణాలు ఉంటాయి: మీరు ఎదురుచూస్తున్నారు, జవాబు వచ్చింది, లేదా system పనిచేయడం లేదని చెప్పారు. API పిలిచే React పేజీకి కూడా అవే మూడు states: loading, success, error. useEffect లో fetch తో మొదలుపెడతాం, loading సందేశం చూపిస్తాం, r.ok చెక్ చేస్తాం ఎందుకంటే 404 network failure కాదు, JSON చదివి state లో దాచుతాం. ఏదైనా విఫలమైతే try again button తో స్పష్టమైన error చూపిస్తాం. పరీక్ష ఫలితాలు తెద్దామా?",
+      "captionEn": "Think of waiting at a railway enquiry counter. There are three moments: you are waiting, you get the answer, or the counter says the system is down. A React page calling an API has the same three states: loading, success and error. We start the call in useEffect with fetch, show a loading message, check r.ok because a 404 is not a network failure, read the JSON, and store it in state. If anything fails, we show a clear error with a try again button. Shall we load exam results?",
+      "code": "function Results() {\n  const [state, setState] = useState({ loading: true, data: null, error: \"\" });\n  useEffect(() => {\n    fetch(\"/api/results\")\n      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })\n      .then(data => setState({ loading: false, data, error: \"\" }))\n      .catch(() => setState({ loading: false, data: null, error: \"Could not load results\" }));\n  }, []);\n}",
+      "mermaid": "stateDiagram-v2\n  [*] --> Loading\n  Loading --> Success: 200 OK\n  Loading --> Error: network or 4xx/5xx\n  Error --> Loading: Try again"
+    },
+    "example": {
+      "message": "Results పేజీ loading true తో మొదలవుతుంది. fetch ఫలితాలు తెస్తుంది. response ok కాకపోతే error throw చేస్తాం. success అయితే data save చేసి loading false చేస్తాం. failure అయితే \"Could not load results\", try again button చూపిస్తాం. server నెమ్మదిగా ఉంటే విద్యార్థి ఏం చూడాలి?",
+      "captionEn": "A Results page starts with loading true. fetch gets the results. If the response is not ok, we throw an error. On success we save the data and loading becomes false. On failure we show \"Could not load results\" and a try again button. What should a student see if the server is slow?",
+      "code": "function Results() {\n  const [state, setState] = useState({ loading: true, data: null, error: \"\" });\n  useEffect(() => {\n    fetch(\"/api/results\")\n      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })\n      .then(data => setState({ loading: false, data, error: \"\" }))\n      .catch(() => setState({ loading: false, data: null, error: \"Could not load results\" }));\n  }, []);\n}",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "ఇంకో విధంగా. online లో parcel order. order అయింది, దారిలో ఉంది అంటే loading. చేరింది అంటే success. చిరునామా దొరకలేదు అంటే error, మళ్లీ ప్రయత్నించే అవకాశంతో. మంచి పేజీ మూడింటినీ స్పష్టంగా చూపిస్తుంది. మొదట వచ్చే state ఏది?",
+      "captionEn": "Another way: ordering a parcel online. Ordered and on the way is loading. Delivered is success. Address not found is error, with an option to try again. A good page shows all three clearly. Which state comes first?",
+      "code": null,
+      "mermaid": "stateDiagram-v2\n  [*] --> Loading\n  Loading --> Success: 200 OK\n  Loading --> Error: network or 4xx/5xx\n  Error --> Loading: Try again"
+    },
+    "not_understood": {
+      "message": "అడుగు అడుగుగా. ఒకటి, loading, data, error ని state లో ఉంచండి. రెండు, useEffect లోపల fetch పిలవండి. మూడు, success అయితే data save చేయండి. నాలుగు, failure అయితే error సందేశం save చేయండి. ఐదు, ప్రతి state కి సరైనది చూపించండి. ఎదురుచూస్తున్నప్పుడు ఏ state చూపిస్తారు?",
+      "captionEn": "Step by step. One, keep loading, data and error in state. Two, call fetch inside useEffect. Three, on success, save data. Four, on failure, save an error message. Five, show the right thing for each state. Which state do you show while waiting?",
+      "code": null,
+      "mermaid": "stateDiagram-v2\n  [*] --> Loading\n  Loading --> Success: 200 OK\n  Loading --> Error: network or 4xx/5xx\n  Error --> Loading: Try again"
+    }
+  },
+  "doubt": {
+    "answer": "మంచి సందేహం. fetch network సమస్యలప్పుడు మాత్రమే fail అవుతుంది. 404, 500 కూడా response గానే వస్తాయి, అందుకే r.ok చెక్ చేసి మనమే error గా చూసుకుంటాం. సహాయపడిందా?",
+    "captionEn": "Good doubt. fetch only fails on network problems. A 404 or 500 still counts as a response, so we check r.ok and treat it as an error ourselves. Does that help?"
+  },
+  "practice": {
+    "code": {
+      "prompt": "ఒక component లో loading, success, error states తో, r.ok చెక్ చేస్తూ /api/results లోడ్ చేయండి.",
+      "starter": "function Results() {\n  \n}\n",
+      "checks": [
+        {
+          "label": "Fetches the API",
+          "re": "fetch\\s*\\(\\s*[\"'`]/api/results",
+          "flags": ""
+        },
+        {
+          "label": "Checks ok",
+          "re": "\\.ok\\b",
+          "flags": ""
+        },
+        {
+          "label": "Has a loading state",
+          "re": "loading",
+          "flags": "i"
+        },
+        {
+          "label": "Handles errors",
+          "re": "(catch|error)",
+          "flags": "i"
+        }
+      ]
+    }
+  },
+  "check": {
+    "questions": [
+      "ఒక {context} లో data API నుంచి వస్తుంది. మీ React పేజీ చూపించాల్సిన మూడు states, ప్రతి దాన్ని ఎలా చూసుకుంటారో వివరించండి.",
+      "{context} లో API 500 ఇస్తోంది కానీ పేజీ ఏమీ చూపించడం లేదు. ఎందుకో, సరిగ్గా ఎలా చూసుకోవాలో చెప్పండి.",
+      "{context} కోసం React component లో API ని ఎక్కడ పిలుస్తారో, data screen కి ఎలా చేరుతుందో వివరించండి."
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "fetch",
+          "axios",
+          "api"
+        ],
+        [
+          "loading",
+          "spinner",
+          "wait"
+        ],
+        [
+          "error",
+          "catch",
+          "ok",
+          "status",
+          "retry",
+          "try again"
+        ],
+        [
+          "json",
+          "response",
+          "useEffect",
+          "state"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "loading, success, error మూడూ చెప్పారు.",
+      "missing": "r.ok చెక్ చేయడం లాంటి error response ని ఎలా గుర్తిస్తారో, user ఏం చూస్తారో చెప్పండి.",
+      "next": "మూడు states చెప్పి, ప్రతి దాన్ని ఏది మొదలుపెడుతుందో చెప్పండి."
+    }
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "node": "REST design",
+  "language": "english",
+  "version": 1,
+  "diagnosis": {
+    "message": "Hello! Today we learn REST design. If you were building an API for student records, what addresses would you create?",
+    "captionEn": null
+  },
+  "turns": {
+    "explain": {
+      "message": "Think of a library register. The register is about one thing, books. You can look up books, add a book, update a book, or remove a book. REST designs an API the same way. The URL names the thing, a noun like /students, never a verb like /getStudents. The HTTP method says the action: GET reads, POST creates, PUT or PATCH updates, DELETE removes. Status codes say what happened: 200 ok, 201 created, 404 not found. Every request carries all it needs; the server does not remember earlier ones. Shall we design student records?",
+      "captionEn": null,
+      "code": "GET    /students          list students\nGET    /students/42       one student\nPOST   /students          add a student      → 201\nPUT    /students/42       replace student 42\nPATCH  /students/42       change some fields\nDELETE /students/42       remove student 42  → 204",
+      "mermaid": "graph TD\n  R[/students resource/] --> G[GET read]\n  R --> P[POST create]\n  R --> U[PUT or PATCH update]\n  R --> D[DELETE remove]"
+    },
+    "example": {
+      "message": "For student records: GET /students lists them, GET /students/42 gets one, POST /students adds one and returns 201, PATCH /students/42 changes a phone number, DELETE /students/42 removes one and returns 204. Why is /deleteStudent?id=42 a poor design?",
+      "captionEn": null,
+      "code": "GET    /students          list students\nGET    /students/42       one student\nPOST   /students          add a student      → 201\nPUT    /students/42       replace student 42\nPATCH  /students/42       change some fields\nDELETE /students/42       remove student 42  → 204",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "Another way: a ration shop register. The register is for families. Look up a family, add a family, change a family's card, close a card. The register stays the same; only the action changes. In REST, which part of the request carries the action?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph TD\n  R[/students resource/] --> G[GET read]\n  R --> P[POST create]\n  R --> U[PUT or PATCH update]\n  R --> D[DELETE remove]"
+    },
+    "not_understood": {
+      "message": "Step by step. One, pick the noun: students. Two, use the plural path, /students. Three, add an id for one item, /students/42. Four, choose the method for the action. Five, return the right status. What method reads data?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph TD\n  R[/students resource/] --> G[GET read]\n  R --> P[POST create]\n  R --> U[PUT or PATCH update]\n  R --> D[DELETE remove]"
+    }
+  },
+  "doubt": {
+    "answer": "Good question. PUT replaces the whole record, PATCH changes only some fields. To update just a phone number, PATCH is the better fit. Does that help?",
+    "captionEn": null
+  },
+  "practice": {
+    "code": {
+      "prompt": "List the five endpoints for student records (list, one, add, update, delete) with their methods and status codes.",
+      "starter": "# METHOD  /path   → status\n",
+      "checks": [
+        {
+          "label": "GET /students",
+          "re": "GET\\s+/students\\b",
+          "flags": ""
+        },
+        {
+          "label": "POST with 201",
+          "re": "POST\\s+/students[\\s\\S]*201",
+          "flags": ""
+        },
+        {
+          "label": "PUT or PATCH with an id",
+          "re": "(PUT|PATCH)\\s+/students/",
+          "flags": ""
+        },
+        {
+          "label": "DELETE with an id",
+          "re": "DELETE\\s+/students/",
+          "flags": ""
+        }
+      ]
+    }
+  },
+  "check": {
+    "questions": [
+      "Design REST endpoints for a {context}: list, read one, add, update and delete. Explain the methods and status codes.",
+      "An API for a {context} has URLs like /getAll and /deleteItem. Explain what is wrong and how REST would fix it.",
+      "Explain the difference between PUT and PATCH, and when you would use 201 and 404, for a {context}."
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "resource",
+          "noun",
+          "/students",
+          "plural",
+          "url"
+        ],
+        [
+          "get",
+          "post",
+          "put",
+          "patch",
+          "delete",
+          "method",
+          "verb"
+        ],
+        [
+          "status",
+          "200",
+          "201",
+          "404",
+          "204",
+          "code"
+        ],
+        [
+          "stateless",
+          "json",
+          "consistent",
+          "id"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "You used nouns for URLs and methods for actions.",
+      "missing": "Add the status codes each endpoint returns.",
+      "next": "For each endpoint: method, path, status code."
+    }
+  }
+}

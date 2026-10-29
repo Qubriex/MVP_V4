@@ -5,6 +5,7 @@
 // the next review date, the faculty sample and outbox events — one transaction.
 import crypto from 'crypto';
 import * as dal from '../db/dal.js';
+import { nowIsoFor } from '../requestContext.js';
 import { ulid } from '../db/ulid.js';
 import { emit } from '../events/outbox.js';
 import { authenticityGate } from './assurance.js';
@@ -12,6 +13,7 @@ import { assessConcept, resolveTheta } from './assess.js';
 import { enqueueReview } from './calibration.js';
 import { reschedule } from '../retention/schedule.js';
 import { recordAttempt as recordVocabulary } from '../learner/vocabulary.js';
+import { forcedResult, forcedAssessment } from '../journey/forced.js';
 
 const sha256 = (t) => crypto.createHash('sha256').update(String(t)).digest('hex');
 const KIND = { review: 'review', check: 'review', renewal: 'renewal' };
@@ -29,7 +31,8 @@ export async function answerInstance({ instanceId, elId, learnerId, language, en
   const text = String(answer || '').trim();
   if (!text) throw Object.assign(new Error('Answer required'), { status: 400 });
 
-  const gate = authenticityGate(provenance || null, text);
+  const forced = await forcedResult(elId, text);
+  const gate = forced ? { assurance: 'A1', reason: null, provenance: { mode: 'typed', answer_chars: text.length } } : authenticityGate(provenance || null, text);
   const record = async (fields) => {
     const id = ulid();
     await dal.run(`INSERT INTO evidence_records (id, el_id, node_id, family_id, instance_id, purpose, answer_hash, per_point_json, r_c, fused_score, passed, level,
@@ -50,13 +53,14 @@ export async function answerInstance({ instanceId, elId, learnerId, language, en
     return { result: 'hold', reason: gate.reason };
   }
 
-  const a = await assessConcept({ nodeLabel: node.node_label, language, question: inst.question_text, answer: text, theta, loops: 0 });
+  const a = forced ? forcedAssessment(forced, theta) : await assessConcept({ nodeLabel: node.node_label, language, question: inst.question_text, answer: text, theta, loops: 0 });
   // Persistence is a mastery-check rule only; reviews and renewals are judged at θ.
   const passed = a.persistence ? false : a.passed;
-  const now = dal.nowIso();
+  const now = nowIsoFor(); // a test learner's shifted clock (/dev), the real one otherwise
   const out = await dal.tx(async () => {
     const evidenceId = await record({ r: a.r_c, passed: passed ? 1 : 0, level: passed ? 'L1' : null, flags: a.flags.filter(f => f !== 'persistence'),
       provisional: a.provisional, rubric: a.evaluation.rubricVersion || 'default', perPoint: JSON.stringify({ gaps: a.evaluation.understandingGaps || [] }) });
+    await dal.run('UPDATE evidence_records SET feedback_json = ? WHERE id = ?', JSON.stringify({ good: a.evaluation.whatWasGood || '', missing: a.evaluation.whatWasMissing || '', next: a.evaluation.nextTime || '' }), evidenceId);
     const kind = KIND[inst.purpose];
     await dal.run(`INSERT INTO demonstrations (id, el_id, node_id, kind, date, passed, score, level, assurance, evidence_id, created_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, 'L1', ?, ?, ?)`, ulid(), elId, inst.node_id, kind, now, passed ? 1 : 0, a.r_c, gate.assurance, evidenceId, now);
@@ -70,6 +74,7 @@ export async function answerInstance({ instanceId, elId, learnerId, language, en
   });
   return {
     result: passed ? 'passed' : 'not_yet', passed, provisional: a.provisional, purpose: inst.purpose,
-    feedback: a.evaluation.feedbackForLearner || null, next_review_at: out.next.due, review_pending: !!(out.review && out.review.stratum === 'decision')
+    feedback: a.evaluation.feedbackForLearner || null, next_review_at: out.next.due,
+    feedback_parts: { good: a.evaluation.whatWasGood || '', missing: a.evaluation.whatWasMissing || '', next: a.evaluation.nextTime || '' }, review_pending: !!(out.review && out.review.stratum === 'decision')
   };
 }

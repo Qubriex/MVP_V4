@@ -160,7 +160,8 @@ export function authenticate({ errors = 'legacy', optional = false } = {}) {
     req.session = session;
     req.tenant = tenantFor(session, payload);
     req.authVia = viaCookie ? 'cookie' : 'bearer';
-    if (session.sandbox_id) return withContext({ sandboxId: session.sandbox_id }, next);
+    // The demo teaches with the scripted tutor (instant and free) unless DEMO_TUTOR=live.
+    if (session.sandbox_id) return withContext({ sandboxId: session.sandbox_id, tutor: process.env.DEMO_TUTOR === 'live' ? null : 'scripted' }, next);
     next();
   };
 }
@@ -218,7 +219,10 @@ export function requireTenant(...kinds) {
 export async function requireActiveLearner(req, res, next) {
   if (req.user.role !== 'learner') return next();
   const row = await dal.one(`
-    SELECT el.access_status, el.engagement_id, l.is_active, l.age_status FROM engagement_learners el JOIN learners l ON l.id = el.learner_id
+    SELECT el.access_status, el.engagement_id, l.is_active, l.age_status, i.is_test, c.tutor, c.time_offset_days
+    FROM engagement_learners el JOIN learners l ON l.id = el.learner_id
+    JOIN engagements e ON e.id = el.engagement_id JOIN institutions i ON i.id = e.institution_id
+    LEFT JOIN test_learner_controls c ON c.el_id = el.id AND i.is_test = 1
     WHERE el.id = ? AND l.id = ?
   `, req.user.el_id, req.user.id);
   if (!row || row.access_status === 'removed' || !row.is_active) {
@@ -228,5 +232,11 @@ export async function requireActiveLearner(req, res, next) {
     return res.status(401).json({ error: 'You were moved to another cohort. Sign in again with its join code.' });
   }
   req.learnerAgeStatus = row.age_status || 'unknown';
+  // A test-tenant learner: the /dev journey controls (tutor, clock offset)
+  // apply to everything this request does. Real learners never read them.
+  if (row.is_test) {
+    const tutor = row.tutor || (process.env.TEST_TUTOR === 'live' ? null : 'scripted');
+    return withContext({ testLearner: true, tutor: tutor === 'live' ? null : tutor, clockOffsetDays: Number(row.time_offset_days) || 0 }, next);
+  }
   next();
 }

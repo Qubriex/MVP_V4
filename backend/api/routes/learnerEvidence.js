@@ -23,6 +23,7 @@ import { learningCurve } from '../../core/readiness/learningCurve.js';
 import { eachSeq, mapSeq } from '../../core/util/seq.js';
 import { waitUntil } from '@vercel/functions';
 import { aiNotConfigured, aiUnavailableMessage } from '../../core/ai/gateway.js';
+import { nowIsoFor } from '../../core/requestContext.js';
 
 const router = express.Router();
 router.use(authenticateToken, requireRole('learner'), requireActiveLearner);
@@ -70,7 +71,7 @@ router.get('/reviews/due', async (req, res) => {
     dal.all(`SELECT nm.skill_node_id AS node_id, sn.node_label, sc.cluster_label FROM node_mastery nm JOIN skill_nodes sn ON sn.id = nm.skill_node_id
       JOIN skill_clusters sc ON sc.id = sn.cluster_id WHERE nm.engagement_learner_id = ? AND nm.recheck_required = 1`, elId),
     dal.all(`SELECT r.node_id, r.due_at, sn.node_label FROM node_retention r JOIN skill_nodes sn ON sn.id = r.node_id
-      WHERE r.el_id = ? AND r.due_at > ? ORDER BY r.due_at LIMIT 5`, elId, dal.nowIso()),
+      WHERE r.el_id = ? AND r.due_at > ? ORDER BY r.due_at LIMIT 5`, elId, nowIsoFor()),
     openInstances(elId)
   ]);
   const reviews = due.map(r => ({ ...r, kind: 'review', open_instance: open.get(`${r.node_id}|review`) || null }));
@@ -83,7 +84,7 @@ router.get('/reviews/due', async (req, res) => {
 router.post('/reviews/:nodeId/start', async (req, res) => {
   const elId = req.user.el_id;
   const recheck = !!await dal.one('SELECT 1 FROM node_mastery WHERE engagement_learner_id = ? AND skill_node_id = ? AND recheck_required = 1', elId, req.params.nodeId);
-  const due = await dal.one('SELECT 1 FROM node_retention WHERE el_id = ? AND node_id = ? AND due_at <= ?', elId, req.params.nodeId, dal.nowIso());
+  const due = await dal.one('SELECT 1 FROM node_retention WHERE el_id = ? AND node_id = ? AND due_at <= ?', elId, req.params.nodeId, nowIsoFor());
   if (!recheck && !due) return res.status(409).json({ error: 'This review is not due yet.' });
   const purpose = recheck ? 'check' : 'review';
   // One review per due date (§7.12): reuse the open instance until it is answered.
@@ -118,6 +119,25 @@ router.post('/reviews/instances/:id/answer', async (req, res) => {
 router.get('/learning-curve', async (req, res) => res.json(await learningCurve(req.user.el_id)));
 
 // ─── Passport ────────────────────────────────────────────────────────────────
+// What the learner sees around the labels: since when it is shared, whether
+// labels changed after sharing (the link always shows today's labels), who
+// viewed it (type and date only), and whether renewal is due.
+async function passportExtras(elId, c) {
+  const share = await dal.one('SELECT is_public, created_at FROM passport_shares WHERE evidence_id = ? ORDER BY created_at DESC, seq DESC LIMIT 1', c.evidence_id);
+  const sharedSince = share?.is_public ? share.created_at : null;
+  const changed = sharedSince ? !!await dal.one('SELECT 1 FROM demonstrations WHERE el_id = ? AND date > ?', elId, sharedSince) : false;
+  const views = await dal.all(`SELECT viewer_type, COUNT(*) AS n, MAX(viewed_at) AS last FROM passport_views WHERE evidence_id = ? AND viewed_at >= ?
+    GROUP BY viewer_type ORDER BY viewer_type`, c.evidence_id, new Date(Date.now() - 90 * 86400000).toISOString());
+  const recent = await dal.all('SELECT viewer_type, viewed_at FROM passport_views WHERE evidence_id = ? ORDER BY viewed_at DESC LIMIT 10', c.evidence_id);
+  const now = nowIsoFor();
+  const expiresSoon = c.valid_until <= new Date(Date.parse(now) + 60 * 86400000).toISOString();
+  return {
+    shared_since: sharedSince, labels_changed_since_share: changed,
+    views: { last_90_days: views.map(v => ({ type: v.viewer_type, count: Number(v.n), last: v.last })), recent: recent.map(v => ({ type: v.viewer_type, at: v.viewed_at })) },
+    renewal_due: expiresSoon, expires_soon: expiresSoon
+  };
+}
+
 async function passportView(elId) {
   const c = await activeCredential('el_id = ?', elId);
   if (!c) {
@@ -130,7 +150,7 @@ async function passportView(elId) {
   const run = await dal.one("SELECT * FROM renewal_runs WHERE el_id = ? AND status = 'open' ORDER BY created_at DESC LIMIT 1", elId);
   return {
     issued: true, evidence_id: c.evidence_id, version: c.version, valid_from: c.valid_from, valid_until: c.valid_until,
-    status: revoked ? 'revoked' : c.valid_until < dal.nowIso() ? 'expired' : 'valid',
+    status: revoked ? 'revoked' : c.valid_until < nowIsoFor() ? 'expired' : 'valid',
     public: await isPublic(c.evidence_id), verify_url: `${publicBase()}/verify/${c.evidence_id}`,
     skills: await skillLines(elId, skills),
     renewal: run ? {
@@ -141,7 +161,8 @@ async function passportView(elId) {
       }))
     } : null,
     // Journey metrics (loops, attempts, time) are never part of the passport.
-    note: 'Labels are computed today from signed, dated facts. They change as skills are shown again or go stale.'
+    note: 'Labels are computed today from signed, dated facts. They change as skills are shown again or go stale.',
+    ...(await passportExtras(elId, c))
   };
 }
 

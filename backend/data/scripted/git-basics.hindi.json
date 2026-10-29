@@ -1,0 +1,104 @@
+{
+  "node": "Git basics",
+  "language": "hindi",
+  "version": 1,
+  "diagnosis": {
+    "message": "नमस्ते! आज हम Git basics सीखेंगे। क्या कभी किसी फ़ाइल के बदल जाने से आपका काम खो गया? क्या हुआ था?",
+    "captionEn": "Hello! Today we learn Git basics. Have you ever lost work because a file got overwritten? What happened?"
+  },
+  "turns": {
+    "explain": {
+      "message": "परिवार का फ़ोटो एल्बम सोचिए। हर फ़ोटो एक पल को सहेजती है, जिसे बाद में देख सकते हैं। Git code के लिए यही करता है। git add वे बदलाव चुनता है जो सहेजने हैं, जैसे फ़ोटो चुनना। git commit उन्हें एक नोट के साथ एल्बम में चिपका देता है। branch एक अलग एल्बम है, जिसमें मुख्य एल्बम बिगाड़े बिना कुछ नया आज़मा सकते हैं। git push आपका एल्बम GitHub पर भेजता है ताकि टीम देख सके। कदम-दर-कदम देखें?",
+      "captionEn": "Think of a family photo album. Each photo records a moment you can look back at. Git does the same for code. git add picks the changes you want to save, like choosing photos. git commit pastes them into the album with a note. A branch is a separate album for trying something new without spoiling the main one. git push sends your album to GitHub so the team can see it. Shall we walk through it?",
+      "code": "git init\ngit add index.html\ngit commit -m \"Add fest home page\"\ngit branch events-page\ngit switch events-page\ngit push origin events-page",
+      "mermaid": "graph LR\n  edit[Edit files] --> add[git add] --> commit[git commit] --> push[git push]"
+    },
+    "example": {
+      "message": "तीन दोस्त कॉलेज फेस्ट की site बना रहे हैं। हर कोई अपने पेज के लिए branch बनाता है। छोटे बदलावों को साफ़ messages के साथ add और commit करते हैं। पेज तैयार होने पर branch को main में merge करके push करते हैं। events की सूची जोड़ने के बाद आप commit message क्या लिखेंगे?",
+      "captionEn": "Three friends build a college fest site. Each makes a branch for their page. They add and commit small changes with clear messages. When a page is ready, they merge the branch into main and push. What would you write as a commit message after adding the events list?",
+      "code": "git init\ngit add index.html\ngit commit -m \"Add fest home page\"\ngit branch events-page\ngit switch events-page\ngit push origin events-page",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "दूसरे तरीके से। commit game में checkpoint पर save करने जैसा है। बाद में हार गए तो checkpoint पर लौट आइए। branch मुख्य कहानी पर असर डाले बिना side mission खेलने जैसा है। checkpoint कौन सी command बनाती है?",
+      "captionEn": "Another way: a commit is like saving a game at a checkpoint. If you fail later, you return to the checkpoint. A branch is playing a side mission without affecting the main story. Which command creates a checkpoint?",
+      "code": null,
+      "mermaid": "graph LR\n  edit[Edit files] --> add[git add] --> commit[git commit] --> push[git push]"
+    },
+    "not_understood": {
+      "message": "कदम-दर-कदम। एक, फ़ाइल बदलिए। दो, git add। तीन, message के साथ git commit। यही एक सहेजा हुआ version है। चार, साझा करने के लिए git push। version सहेजने वाला कदम कौन सा है?",
+      "captionEn": "Step by step. One, change a file. Two, git add the file. Three, git commit with a message. That is one saved version. Four, git push to share it. Which step saves a version?",
+      "code": null,
+      "mermaid": "graph LR\n  edit[Edit files] --> add[git add] --> commit[git commit] --> push[git push]"
+    }
+  },
+  "doubt": {
+    "answer": "अच्छा सवाल। git pull टीम के नए commits आपके computer पर लाता है। git push आपके commits उन्हें भेजता है। काम शुरू करने से पहले pull, खत्म करने पर push। समझ आया?",
+    "captionEn": "Good question. git pull brings your team's new commits to your computer. git push sends your commits to them. Pull before you start work, push when you finish. Does that help?"
+  },
+  "practice": {
+    "code": {
+      "prompt": "events-page नाम की branch बनाने, उस पर जाने, index.html को message के साथ सहेजने और साझा करने की commands लिखिए।",
+      "starter": "# your commands\n",
+      "checks": [
+        {
+          "label": "Creates or switches to the branch",
+          "re": "git\\s+(branch|switch\\s+-c|checkout\\s+-b)\\s+events-page",
+          "flags": "i"
+        },
+        {
+          "label": "Stages the file",
+          "re": "git\\s+add\\s+\\S*index\\.html",
+          "flags": "i"
+        },
+        {
+          "label": "Commits with a message",
+          "re": "git\\s+commit\\s+-m\\s+[\"']",
+          "flags": "i"
+        },
+        {
+          "label": "Pushes",
+          "re": "git\\s+push",
+          "flags": "i"
+        }
+      ]
+    }
+  },
+  "check": {
+    "questions": [
+      "तीन दोस्त एक {context} पर काम कर रहे हैं। समझाइए कि Git branches और commits उन्हें एक-दूसरे का काम मिटाए बिना कैसे काम करने देते हैं।",
+      "आपने {context} में दो फ़ाइलें बदलीं। इन बदलावों को सहेजने और साझा करने की commands, और हर एक का काम समझाइए।",
+      "{context} में किसी बदलाव के लिए अच्छा commit message कैसा होता है, और history क्यों ज़रूरी है?"
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "commit"
+        ],
+        [
+          "add",
+          "stage",
+          "staging"
+        ],
+        [
+          "branch",
+          "merge"
+        ],
+        [
+          "push",
+          "pull",
+          "history",
+          "version",
+          "చరిత్ర",
+          "इतिहास"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "आपने बताया कि add, commit और branches काम को सुरक्षित कैसे रखते हैं।",
+      "missing": "बताइए कि काम push, pull या merge से कैसे साझा होता है।",
+      "next": "इस क्रम में बताइए: बदलाव, add, commit, push।"
+    }
+  }
+}

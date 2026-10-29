@@ -13,6 +13,7 @@ import { generate, aiNotConfigured, aiUnavailableMessage } from './ai/gateway.js
 import { cohortReadiness, summarise, BAND_LABEL, BANDS } from './readiness/cohort.js';
 import { liveStatus } from './institutionActivity.js';
 import { mapSeq } from './util/seq.js';
+import { journeyStage } from './journey/stage.js';
 
 export const GLOSSARY = {
   A0: 'Authorship A0 — not checked yet.',
@@ -42,8 +43,11 @@ async function learnerFacts(req) {
     WHERE ls.engagement_learner_id = ? AND NOT EXISTS (SELECT 1 FROM node_mastery nm WHERE nm.engagement_learner_id = ls.engagement_learner_id AND nm.skill_node_id = ls.skill_node_id AND nm.advanced_at IS NOT NULL)
     GROUP BY sn.node_label ORDER BY loops DESC LIMIT 1`, el.id);
   const me = (await cohortReadiness({ id: el.engagement_id, capability_target_id: el.capability_target_id, institution_id: el.institution_id })).find(r => r.el_id === el.id);
+  const j = await journeyStage(el.id);
   return {
     facts: {
+      journey_stage: j ? `${j.stage} ${j.stage_name}` : null, next_step: j ? { what: j.next.key, link: j.next.href } : null,
+      employer_requests_waiting: j?.facts.requested.length || 0, passport_issued: !!j?.facts.passport,
       programme: el.title, skills_mastered: `${mastered} of ${total}`, current_skill: el.overall_status === 'completed' ? 'programme complete' : el.current_node,
       reviews_due: Number(due), weakest_skill: weakest?.loops > 0 ? weakest.node_label : null,
       readiness: me ? { score: me.readiness, band: BAND_LABEL[me.band], best_role: me.role, skills_missing_for_role: me.below_requirements } : null
@@ -51,7 +55,9 @@ async function learnerFacts(req) {
     links: [
       { label: 'Continue learning', href: '/learn/session' }, { label: 'Skill path', href: '/learn/record' },
       { label: 'Reviews', href: '/learn/reviews' }, { label: 'My Passport', href: '/learn/passport' },
-      { label: 'Jobs & applications', href: '/learn/jobs' }, { label: 'Job market', href: '/learn/market' }, { label: 'Settings', href: '/learn/settings' }
+      { label: 'Jobs & applications', href: '/learn/jobs' }, { label: 'Job market', href: '/learn/market' }, { label: 'Settings', href: '/learn/settings' },
+      { label: 'Readiness for a role', href: '/learn/readiness' }, { label: 'Attempt history', href: '/learn/history' }, { label: 'Assigned by your college', href: '/learn/assigned' },
+      ...(j ? [{ label: 'Your next step', href: j.next.href }] : [])
     ]
   };
 }
@@ -126,7 +132,10 @@ function quickAnswer(q, facts, links) {
     if (/bridge/.test(s)) return { answer: 'Open Bridge programmes, choose the cohort or students and the skills to strengthen, and set a date for the re-test. Qubirex shows afterwards whether it worked.', links: [{ label: 'Bridge programmes', href: '/institution/bridges' }] };
   }
   if (facts.skills_mastered) {
-    if (/next|start|today|weak/.test(s)) return { answer: `You have mastered ${facts.skills_mastered} skills. Next: ${facts.current_skill || 'your next skill'}.${facts.weakest_skill ? ` The skill to strengthen first is ${facts.weakest_skill}.` : ''}${facts.reviews_due ? ` ${facts.reviews_due} short reviews are due.` : ''}`, links: links.slice(0, 3) };
+    const next = links.find(l => l.label === 'Your next step');
+    if (/request|employer|asked|అభ్యర్థన|अनुरोध/.test(s)) return { answer: facts.employer_requests_waiting ? `${facts.employer_requests_waiting} employer request${facts.employer_requests_waiting === 1 ? ' is' : 's are'} waiting for your answer. You choose what to share.` : 'No employer requests are waiting.', links: [{ label: 'Jobs & applications', href: '/learn/jobs' }] };
+    if (/passport|confirmed|label/.test(s)) return { answer: facts.passport_issued ? 'Your Capability Passport is issued. Open it to see each skill\'s label and what is missing for Confirmed.' : 'Your Passport is issued after your first skill group is done.', links: [{ label: 'My Passport', href: '/learn/passport' }] };
+    if (/next|start|today|weak|ఏం చేయాలి|क्या करूँ/.test(s)) return { answer: `You have mastered ${facts.skills_mastered} skills. Next: ${facts.current_skill || 'your next skill'}.${facts.weakest_skill ? ` The skill to strengthen first is ${facts.weakest_skill}.` : ''}${facts.reviews_due ? ` ${facts.reviews_due} short reviews are due.` : ''}`, links: next ? [next, ...links.slice(0, 2)] : links.slice(0, 3) };
     if (/ready|job|role/.test(s) && facts.readiness) return { answer: `Your readiness is ${facts.readiness.score} (${facts.readiness.band}) for ${facts.readiness.best_role || 'your target roles'}.${facts.readiness.skills_missing_for_role?.length ? ` Still to prove: ${facts.readiness.skills_missing_for_role.join(', ')}.` : ''}`, links: [links[0], links[4]] };
   }
   return null;

@@ -62,7 +62,7 @@ describe('search and consent (E3, L5)', () => {
     expect(r.status).toBe(200);
   });
 
-  it('the student sees the request and says yes to skills only; the employer then sees the name and evidence, not contact', async () => {
+  it('the student sees the request and says yes to skills only; the employer then sees the evidence, not the name or contact (both off unless shared)', async () => {
     const hub = await learner.agent.get('/api/learner/jobs-hub').set(auth(learner));
     expect(hub.body.requests[0]).toMatchObject({ employer: 'Acme Analytics', stage: 'requested', interview_promised: true, asked: ['skills', 'contact'] });
     expect(hub.body.roles[0]).toMatchObject({ title: 'Data analyst', interview_promise: true, stage: 'requested' });
@@ -70,7 +70,7 @@ describe('search and consent (E3, L5)', () => {
     expect((await learner.agent.post(`/api/learner/requests/${pid}/respond`).set(auth(learner)).send({ yes: true, items: [] })).status).toBe(400);
     await learner.agent.post(`/api/learner/requests/${pid}/respond`).set(auth(learner)).send({ yes: true, items: ['skills', 'resume'] }).expect(200);
     const c = await owner.agent.get(`/api/employer/candidates/${pid}`).set(emp(owner));
-    expect(c.body).toMatchObject({ name: 'Learner', stage: 'access_granted', shared: ['skills'], contact: null });
+    expect(c.body).toMatchObject({ name: null, stage: 'access_granted', shared: ['skills'], contact: null });
     expect(await dal.one('SELECT level FROM consents WHERE learner_id = ? AND level = 4 AND withdrawn_at IS NULL', A.learnerId)).toBeTruthy();
     const home = await owner.agent.get('/api/employer/home').set(emp(owner));
     expect(home.body.waiting).toBe(1);

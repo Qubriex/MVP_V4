@@ -1,0 +1,108 @@
+{
+  "node": "Node.js basics",
+  "language": "english",
+  "version": 1,
+  "diagnosis": {
+    "message": "Hello! Today we learn Node.js basics. You know JavaScript runs in the browser. Where else do you think it could run?",
+    "captionEn": null
+  },
+  "turns": {
+    "explain": {
+      "message": "Think of a canteen kitchen. Until now, JavaScript only worked at the counter, the browser. Node.js lets JavaScript work in the kitchen too, on the server. It can read files, talk to databases and answer requests from many browsers. Node is non-blocking: like a good cook who puts rice on the stove and chops vegetables while it cooks, it does not wait idle. We use require or import to bring in modules, and npm to install packages. Shall we start a tiny server?",
+      "captionEn": null,
+      "code": "// server.js\nconst http = require(\"http\");\nconst fs = require(\"fs/promises\");\n\nhttp.createServer(async (req, res) => {\n  const menu = await fs.readFile(\"menu.json\", \"utf8\");\n  res.writeHead(200, { \"Content-Type\": \"application/json\" });\n  res.end(menu);\n}).listen(3000);",
+      "mermaid": "graph LR\n  browser[Browser] -->|request| node[Node.js server] -->|reads| file[menu.json]\n  node -->|response| browser"
+    },
+    "example": {
+      "message": "A canteen menu server uses the http module to create a server on port 3000. When a request comes, it reads menu.json without blocking and sends it back as JSON. Many students can ask at once. What command would you run to start it?",
+      "captionEn": null,
+      "code": "// server.js\nconst http = require(\"http\");\nconst fs = require(\"fs/promises\");\n\nhttp.createServer(async (req, res) => {\n  const menu = await fs.readFile(\"menu.json\", \"utf8\");\n  res.writeHead(200, { \"Content-Type\": \"application/json\" });\n  res.end(menu);\n}).listen(3000);",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "Another way: a post office. Letters are requests. The clerk takes each one, starts the work, and moves to the next while waiting, never standing idle. That clerk is the event loop. What does Node use to bring in other code?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph LR\n  browser[Browser] -->|request| node[Node.js server] -->|reads| file[menu.json]\n  node -->|response| browser"
+    },
+    "not_understood": {
+      "message": "Step by step. One, Node runs JavaScript outside the browser. Two, modules add features, like http or fs. Three, a server listens on a port. Four, for each request it sends a response. What does listen 3000 mean?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph LR\n  browser[Browser] -->|request| node[Node.js server] -->|reads| file[menu.json]\n  node -->|response| browser"
+    }
+  },
+  "doubt": {
+    "answer": "Good question. package.json lists your project's packages and scripts. npm install reads it and downloads them, so anyone can run your project. Does that help?",
+    "captionEn": null
+  },
+  "practice": {
+    "code": {
+      "prompt": "Start an HTTP server on port 3000 that answers every request with JSON.",
+      "starter": "// server.js\n",
+      "checks": [
+        {
+          "label": "Loads http (or express)",
+          "re": "require\\s*\\(\\s*[\"'](http|express)|import\\s+.*from\\s+[\"'](http|express)",
+          "flags": ""
+        },
+        {
+          "label": "Creates a server",
+          "re": "createServer\\s*\\(|express\\s*\\(\\s*\\)",
+          "flags": ""
+        },
+        {
+          "label": "Sends JSON",
+          "re": "application/json|res\\.json\\s*\\(|JSON\\.stringify",
+          "flags": ""
+        },
+        {
+          "label": "Listens on 3000",
+          "re": "listen\\s*\\(\\s*3000",
+          "flags": ""
+        }
+      ]
+    }
+  },
+  "check": {
+    "questions": [
+      "For a {context}, explain how a small Node.js server would answer a request and send back data.",
+      "Explain what non-blocking means in Node.js, with an example from a {context}.",
+      "Explain the role of modules, npm and package.json when building the server for a {context}."
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "node"
+        ],
+        [
+          "server",
+          "http",
+          "listen",
+          "port"
+        ],
+        [
+          "require",
+          "import",
+          "module",
+          "npm",
+          "package"
+        ],
+        [
+          "async",
+          "non-blocking",
+          "event loop",
+          "file",
+          "fs",
+          "javascript"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "You explained Node running JavaScript on the server.",
+      "missing": "Mention how requests are handled, and that Node does not block while waiting.",
+      "next": "Say: request comes in, server works, response goes out."
+    }
+  }
+}

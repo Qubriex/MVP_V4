@@ -157,6 +157,8 @@ async function processMessage(params) {
         learnerContext, culturalExamples, nodeSpec,
         learnerRequestedCheck: !!sessionState.learnerRequestedCheck
       });
+      // The learner asked for the check: it is given, whatever the model decided.
+      if (sessionState.learnerRequestedCheck) instruction.decision = 'CHECK';
 
       await _writeTurn(learnerId, engagementLearnerId, nodeId, sessionState.clusterId, learnerMessage, instruction.message, {
         decision: instruction.decision, approachUsed: approach, behaviourSignal: instruction.behaviourSignal

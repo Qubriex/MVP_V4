@@ -1,0 +1,108 @@
+{
+  "node": "Calling APIs",
+  "language": "english",
+  "version": 1,
+  "diagnosis": {
+    "message": "Hello! Today we learn calling APIs from a React page. When exam results are loading on a website, what do you see on the screen?",
+    "captionEn": null
+  },
+  "turns": {
+    "explain": {
+      "message": "Think of waiting at a railway enquiry counter. There are three moments: you are waiting, you get the answer, or the counter says the system is down. A React page calling an API has the same three states: loading, success and error. We start the call in useEffect with fetch, show a loading message, check r.ok because a 404 is not a network failure, read the JSON, and store it in state. If anything fails, we show a clear error with a try again button. Shall we load exam results?",
+      "captionEn": null,
+      "code": "function Results() {\n  const [state, setState] = useState({ loading: true, data: null, error: \"\" });\n  useEffect(() => {\n    fetch(\"/api/results\")\n      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })\n      .then(data => setState({ loading: false, data, error: \"\" }))\n      .catch(() => setState({ loading: false, data: null, error: \"Could not load results\" }));\n  }, []);\n}",
+      "mermaid": "stateDiagram-v2\n  [*] --> Loading\n  Loading --> Success: 200 OK\n  Loading --> Error: network or 4xx/5xx\n  Error --> Loading: Try again"
+    },
+    "example": {
+      "message": "A Results page starts with loading true. fetch gets the results. If the response is not ok, we throw an error. On success we save the data and loading becomes false. On failure we show \"Could not load results\" and a try again button. What should a student see if the server is slow?",
+      "captionEn": null,
+      "code": "function Results() {\n  const [state, setState] = useState({ loading: true, data: null, error: \"\" });\n  useEffect(() => {\n    fetch(\"/api/results\")\n      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })\n      .then(data => setState({ loading: false, data, error: \"\" }))\n      .catch(() => setState({ loading: false, data: null, error: \"Could not load results\" }));\n  }, []);\n}",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "Another way: ordering a parcel online. Ordered and on the way is loading. Delivered is success. Address not found is error, with an option to try again. A good page shows all three clearly. Which state comes first?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "stateDiagram-v2\n  [*] --> Loading\n  Loading --> Success: 200 OK\n  Loading --> Error: network or 4xx/5xx\n  Error --> Loading: Try again"
+    },
+    "not_understood": {
+      "message": "Step by step. One, keep loading, data and error in state. Two, call fetch inside useEffect. Three, on success, save data. Four, on failure, save an error message. Five, show the right thing for each state. Which state do you show while waiting?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "stateDiagram-v2\n  [*] --> Loading\n  Loading --> Success: 200 OK\n  Loading --> Error: network or 4xx/5xx\n  Error --> Loading: Try again"
+    }
+  },
+  "doubt": {
+    "answer": "Good doubt. fetch only fails on network problems. A 404 or 500 still counts as a response, so we check r.ok and treat it as an error ourselves. Does that help?",
+    "captionEn": null
+  },
+  "practice": {
+    "code": {
+      "prompt": "In a component, load /api/results with loading, success and error states, checking r.ok.",
+      "starter": "function Results() {\n  \n}\n",
+      "checks": [
+        {
+          "label": "Fetches the API",
+          "re": "fetch\\s*\\(\\s*[\"'`]/api/results",
+          "flags": ""
+        },
+        {
+          "label": "Checks ok",
+          "re": "\\.ok\\b",
+          "flags": ""
+        },
+        {
+          "label": "Has a loading state",
+          "re": "loading",
+          "flags": "i"
+        },
+        {
+          "label": "Handles errors",
+          "re": "(catch|error)",
+          "flags": "i"
+        }
+      ]
+    }
+  },
+  "check": {
+    "questions": [
+      "On a {context}, data comes from an API. Explain the three states your React page should show, and how you handle each one.",
+      "In a {context}, the API returns 500 but the page shows nothing. Explain why and how to handle this properly.",
+      "Explain where you would call the API in a React component for a {context}, and how the data reaches the screen."
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "fetch",
+          "axios",
+          "api"
+        ],
+        [
+          "loading",
+          "spinner",
+          "wait"
+        ],
+        [
+          "error",
+          "catch",
+          "ok",
+          "status",
+          "retry",
+          "try again"
+        ],
+        [
+          "json",
+          "response",
+          "useEffect",
+          "state"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "You covered loading, success and error.",
+      "missing": "Say how you detect an error response, like checking r.ok, and what the user sees.",
+      "next": "Describe the three states, then what triggers each one."
+    }
+  }
+}

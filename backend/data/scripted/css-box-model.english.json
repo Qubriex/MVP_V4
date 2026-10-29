@@ -1,0 +1,107 @@
+{
+  "node": "CSS box model",
+  "language": "english",
+  "version": 1,
+  "diagnosis": {
+    "message": "Hello! Today we learn the CSS box model. When you put space around a button, how do you usually do it?",
+    "captionEn": null
+  },
+  "turns": {
+    "explain": {
+      "message": "Think of a framed photo on a wall. The photo is the content. The white mount around it is padding. The wooden frame is the border. The gap between two frames on the wall is margin. Every element on a web page is a box like this. Padding is space inside the border, margin is space outside it. Shall we see it in code?",
+      "captionEn": null,
+      "code": ".card {\n  width: 200px;\n  padding: 16px;\n  border: 2px solid #ccc;\n  margin: 12px;\n  box-sizing: border-box;\n}",
+      "mermaid": "graph LR\n  margin --> border --> padding --> content"
+    },
+    "example": {
+      "message": "A product card is 200 pixels wide with 16 pixels of padding and a 2 pixel border. With box-sizing border-box, the whole card stays 200 pixels, and the content area shrinks. The 12 pixel margin keeps cards apart. What would change if you removed box-sizing?",
+      "captionEn": null,
+      "code": ".card {\n  width: 200px;\n  padding: 16px;\n  border: 2px solid #ccc;\n  margin: 12px;\n  box-sizing: border-box;\n}",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "Another way: think of a parcel. The item is the content, bubble wrap is padding, the cardboard is the border, and the space between parcels on a shelf is margin. Which layer would you increase to keep two parcels apart?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph LR\n  margin --> border --> padding --> content"
+    },
+    "not_understood": {
+      "message": "Let us slow down. Every element is a box with four layers. From inside to outside: content, padding, border, margin. Padding is inside the border. Margin is outside. Which one adds space between two boxes?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph LR\n  margin --> border --> padding --> content"
+    }
+  },
+  "doubt": {
+    "answer": "Good doubt. Background colour fills content and padding, but not margin. So if you want coloured space, use padding. If you want empty space between boxes, use margin. Does that help?",
+    "captionEn": null
+  },
+  "practice": {
+    "code": {
+      "prompt": "Style a .card that is 200px wide in total, with 16px padding, a 2px border and 12px margin.",
+      "starter": ".card {\n  \n}\n",
+      "checks": [
+        {
+          "label": "Uses box-sizing: border-box",
+          "re": "box-sizing\\s*:\\s*border-box",
+          "flags": "i"
+        },
+        {
+          "label": "Width 200px",
+          "re": "width\\s*:\\s*200px",
+          "flags": "i"
+        },
+        {
+          "label": "Padding 16px",
+          "re": "padding\\s*:\\s*16px",
+          "flags": "i"
+        },
+        {
+          "label": "Border 2px",
+          "re": "border\\s*:\\s*2px",
+          "flags": "i"
+        },
+        {
+          "label": "Margin 12px",
+          "re": "margin\\s*:\\s*12px",
+          "flags": "i"
+        }
+      ]
+    }
+  },
+  "check": {
+    "questions": [
+      "On a {context}, two cards are touching each other and their text touches the edges. Which box model properties would you change, and why?",
+      "For a {context}, explain the four layers of the CSS box model using one element as an example.",
+      "A card on a {context} is set to width 300px but shows wider than expected. Explain why, and how box-sizing fixes it."
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "margin",
+          "బయట",
+          "बाहर"
+        ],
+        [
+          "padding",
+          "లోపల",
+          "अंदर"
+        ],
+        [
+          "border"
+        ],
+        [
+          "content",
+          "width",
+          "box-sizing"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "You named the box layers and what each one does.",
+      "missing": "Say clearly which space is inside the border, padding, and which is outside, margin.",
+      "next": "Go from inside to outside: content, padding, border, margin."
+    }
+  }
+}

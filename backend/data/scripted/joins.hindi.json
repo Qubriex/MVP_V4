@@ -1,0 +1,108 @@
+{
+  "node": "Joins",
+  "language": "hindi",
+  "version": 1,
+  "diagnosis": {
+    "message": "नमस्ते! आज हम SQL joins सीखेंगे। अगर छात्रों के नाम एक register में और किताबों के loans दूसरे में हों, तो कैसे पता करेंगे कि किस छात्र के पास कौन सी किताब है?",
+    "captionEn": "Hello! Today we learn SQL joins. If student names are in one register and book loans in another, how would you find which student has which book?"
+  },
+  "turns": {
+    "explain": {
+      "message": "कॉलेज लाइब्रेरी के दो registers सोचिए। एक में छात्र और उनके roll numbers हैं। दूसरे में loans: roll number, किताब और due date। किसके पास कौन सी किताब है, यह जानने के लिए दोनों registers में roll numbers मिलाते हैं। यही JOIN है। ON बताता है कौन से columns मेल खाएँ, आमतौर पर student_id जैसी foreign key को छात्र की id से। INNER JOIN सिर्फ़ मेल वाली पंक्तियाँ रखता है। LEFT JOIN बाईं table की हर पंक्ति रखता है, मेल न हो तब भी, बाक़ी NULL से भरता है। overdue किताबें ढूँढें?",
+      "captionEn": "Think of two registers in a college library. One lists students with their roll numbers. The other lists loans: roll number, book and due date. To answer who has which book, you match the roll numbers across both registers. That is a JOIN. ON says which columns must match, usually a foreign key like student_id to the student's id. INNER JOIN keeps only matches. LEFT JOIN keeps every row from the left table, even with no match, filling the rest with NULL. Shall we find overdue books?",
+      "code": "SELECT s.name, b.title, l.due_date\nFROM loans l\nJOIN students s ON s.id = l.student_id\nJOIN books b    ON b.id = l.book_id\nWHERE l.returned = false;\n\n-- every student, even with no loans\nSELECT s.name, COUNT(l.id) FROM students s\nLEFT JOIN loans l ON l.student_id = s.id GROUP BY s.name;",
+      "mermaid": "erDiagram\n  STUDENTS ||--o{ LOANS : borrows\n  BOOKS ||--o{ LOANS : \"is lent in\""
+    },
+    "example": {
+      "message": "loans से, students.id बराबर loans.student_id ON के साथ students को JOIN कीजिए, और books.id बराबर loans.book_id ON के साथ books को JOIN कीजिए। WHERE returned false से हर न लौटाई किताब छात्र के नाम के साथ मिलती है। बिना loans वाले छात्रों सहित सबको दिखाना हो तो students LEFT JOIN loans करके गिनिए। यहाँ INNER JOIN कुछ छात्रों को क्यों छोड़ देगा?",
+      "captionEn": "From loans, JOIN students ON students.id equals loans.student_id, and JOIN books ON books.id equals loans.book_id. WHERE returned is false gives every unreturned book with the student's name. To list every student, even those with no loans, use students LEFT JOIN loans and count. Why would an INNER JOIN miss some students here?",
+      "code": "SELECT s.name, b.title, l.due_date\nFROM loans l\nJOIN students s ON s.id = l.student_id\nJOIN books b    ON b.id = l.book_id\nWHERE l.returned = false;\n\n-- every student, even with no loans\nSELECT s.name, COUNT(l.id) FROM students s\nLEFT JOIN loans l ON l.student_id = s.id GROUP BY s.name;",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "दूसरे तरीके से। शादी की seating सूची। एक सूची में मेहमानों के नाम और table numbers, दूसरी में table numbers और परोसा जाने वाला खाना। table number से मिलाने पर पता चलता है कि हर मेहमान क्या खाएगा। बिना table वाले मेहमान INNER JOIN में छूट जाएँगे। उन्हें कौन सा join रखता है?",
+      "captionEn": "Another way: a wedding seating list. One list has guest names and table numbers, another has table numbers and the food served. Matching on table number tells you what each guest eats. Guests without a table would drop out with an INNER JOIN. Which join keeps them?",
+      "code": null,
+      "mermaid": "erDiagram\n  STUDENTS ||--o{ LOANS : borrows\n  BOOKS ||--o{ LOANS : \"is lent in\""
+    },
+    "not_understood": {
+      "message": "कदम-दर-कदम। एक, पहली table FROM में। दो, JOIN और दूसरी table लिखिए। तीन, मेल खाते columns के साथ ON लिखिए। अब हर पंक्ति में दोनों tables के columns हैं। चार, बिना मेल वाली पंक्तियाँ भी चाहिए तो LEFT JOIN। पंक्तियाँ कैसे मिलें, यह कौन सा keyword बताता है?",
+      "captionEn": "Step by step. One, start FROM the first table. Two, write JOIN and the second table. Three, write ON with the matching columns. Now each row has both tables' columns. Four, use LEFT JOIN if you must keep unmatched rows. Which keyword says how rows match?",
+      "code": null,
+      "mermaid": "erDiagram\n  STUDENTS ||--o{ LOANS : borrows\n  BOOKS ||--o{ LOANS : \"is lent in\""
+    }
+  },
+  "doubt": {
+    "answer": "अच्छा सवाल। ON न हो या ग़लत शर्त हो तो हर पंक्ति हर पंक्ति से जुड़ जाती है, बहुत बड़ा नतीजा आता है। हमेशा किसी key पर मिलाइए। समझ आया?",
+    "captionEn": "Good doubt. Without ON, or with a wrong condition, every row joins with every row, giving a huge result. Always match on a key. Does that help?"
+  },
+  "practice": {
+    "code": {
+      "prompt": "student id पर loans और students को join करके, हर न लौटाया loan छात्र के नाम के साथ दिखाइए।",
+      "starter": "-- your query\n",
+      "checks": [
+        {
+          "label": "Joins two tables",
+          "re": "join\\s+\\w+",
+          "flags": "i"
+        },
+        {
+          "label": "Matches on the student id",
+          "re": "on\\s+[\\w.]*id\\s*=\\s*[\\w.]*student_id|on\\s+[\\w.]*student_id\\s*=\\s*[\\w.]*id",
+          "flags": "i"
+        },
+        {
+          "label": "Shows the name",
+          "re": "select[\\s\\S]*name",
+          "flags": "i"
+        },
+        {
+          "label": "Only unreturned",
+          "re": "returned",
+          "flags": "i"
+        }
+      ]
+    }
+  },
+  "check": {
+    "questions": [
+      "एक {context} में data दो tables में है जो एक id से जुड़ी हैं। समझाइए कि किसी सवाल का जवाब पाने के लिए उन्हें कैसे join करेंगे, और ON क्या करता है।",
+      "{context} के उदाहरण से INNER JOIN और LEFT JOIN का फ़र्क समझाइए।",
+      "{context} पर एक join बहुत ज़्यादा पंक्तियाँ लौटाता है। संभावित ग़लती और उसका सुधार समझाइए।"
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "join"
+        ],
+        [
+          "on",
+          "foreign key",
+          "key",
+          "id",
+          "match"
+        ],
+        [
+          "inner",
+          "left",
+          "right",
+          "outer"
+        ],
+        [
+          "table",
+          "combine",
+          "both",
+          "null",
+          "కలిపి",
+          "जोड़"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "आपने tables को सही key पर मिलाया।",
+      "missing": "समझाइए हर join प्रकार कौन सी पंक्तियाँ रखता है, ख़ासकर LEFT JOIN।",
+      "next": "दोनों tables, मेल खाते columns, फिर join का प्रकार बताइए।"
+    }
+  }
+}

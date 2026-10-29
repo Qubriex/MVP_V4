@@ -5,7 +5,7 @@
 // 640px a bottom tab bar (Home · Learn · Passport · Jobs · Me) is always in reach.
 import React, { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Mic, Route as RouteIcon, Briefcase, TrendingUp, User, FileText, Settings, LogOut, Menu, X, RotateCcw, BadgeCheck, Handshake } from 'lucide-react';
+import { Home, Mic, Route as RouteIcon, Briefcase, TrendingUp, User, FileText, Settings, LogOut, Menu, X, RotateCcw, BadgeCheck, Handshake, History as HistoryIcon, Target, School, Bell } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useUiLang, UI_LANGS } from '../../context/UiLangContext';
 import BrandLogo from '../BrandLogo';
@@ -15,11 +15,11 @@ import TopActions from '../shared/TopActions';
 
 // Bottom tabs on phones; each lights up for the pages it stands for.
 const TABS = [
-  { to: '/learn/dashboard', label: 'nav.home', icon: Home, match: ['/learn/dashboard', '/learn/welcome'] },
-  { to: '/learn/session', label: 'nav.learn', icon: Mic, match: ['/learn/session', '/learn/record', '/learn/reviews'] },
+  { to: '/learn/dashboard', label: 'nav.home', icon: Home, match: ['/learn/dashboard', '/learn/welcome', '/learn/baseline'] },
+  { to: '/learn/record', label: 'nav.learn', icon: Mic, match: ['/learn/session', '/learn/record', '/learn/reviews', '/learn/skill', '/learn/history', '/learn/assigned'] },
   { to: '/learn/passport', label: 'nav.tabPassport', icon: BadgeCheck, match: ['/learn/passport'] },
-  { to: '/learn/jobs', label: 'nav.tabJobs', icon: Handshake, match: ['/learn/jobs', '/learn/market', '/learn/topics'] },
-  { to: '/learn/profile', label: 'nav.me', icon: User, match: ['/learn/profile', '/learn/resume', '/learn/settings'] }
+  { to: '/learn/jobs', label: 'nav.tabJobs', icon: Handshake, match: ['/learn/jobs', '/learn/market', '/learn/topics', '/learn/readiness', '/learn/apply', '/learn/requests', '/learn/dayone'] },
+  { to: '/learn/profile', label: 'nav.me', icon: User, match: ['/learn/profile', '/learn/resume', '/learn/settings', '/learn/notifications'] }
 ];
 
 const GROUPS = [
@@ -28,16 +28,20 @@ const GROUPS = [
     { to: '/learn/session', label: 'nav.session', icon: Mic },
     { to: '/learn/record', label: 'nav.path', icon: RouteIcon },
     { to: '/learn/reviews', label: 'nav.reviews', icon: RotateCcw },
+    { to: '/learn/assigned', label: 'nav.assigned', icon: School },
+    { to: '/learn/history', label: 'nav.history', icon: HistoryIcon },
     { to: '/learn/passport', label: 'nav.passport', icon: BadgeCheck }
   ] },
   { label: 'nav.career', items: [
     { to: '/learn/jobs', label: 'nav.jobs', icon: Handshake },
+    { to: '/learn/readiness', label: 'nav.readiness', icon: Target },
     { to: '/learn/market', label: 'nav.market', icon: Briefcase },
     { to: '/learn/topics', label: 'nav.topics', icon: TrendingUp }
   ] },
   { label: 'nav.me', items: [
     { to: '/learn/profile', label: 'nav.profile', icon: User, end: true },
-    { to: '/learn/resume', label: 'nav.resume', icon: FileText }
+    { to: '/learn/resume', label: 'nav.resume', icon: FileText },
+    { to: '/learn/notifications', label: 'nav.notifications', icon: Bell }
   ] }
 ];
 

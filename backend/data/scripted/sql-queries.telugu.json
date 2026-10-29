@@ -1,0 +1,105 @@
+{
+  "node": "SQL queries",
+  "language": "telugu",
+  "version": 1,
+  "diagnosis": {
+    "message": "నమస్కారం! ఈ రోజు SQL queries నేర్చుకుందాం. రైలు bookings పెద్ద register ఉంటే రేపు ప్రయాణించే వాళ్లందరినీ ఎలా కనుక్కుంటారు?",
+    "captionEn": "Hello! Today we learn SQL queries. If you had a big register of train bookings, how would you find everyone travelling tomorrow?"
+  },
+  "turns": {
+    "explain": {
+      "message": "database table అంటే రైల్వే reservation chart లాంటిది: వరుసలు ప్రయాణికులు, columns పేరు, రైలు సంఖ్య, తేదీ, status. SQL తో chart ని ప్రశ్నలు అడుగుతాం. SELECT కావలసిన columns ఎంచుకుంటుంది. FROM table పేరు చెబుతుంది. WHERE తేదీ లాంటి షరతుకు సరిపోయే వరుసలనే ఉంచుతుంది. ORDER BY ఫలితాన్ని క్రమంలో పెడుతుంది, LIMIT మొదటి కొన్ని మాత్రమే ఉంచుతుంది. GROUP BY తో COUNT మొత్తాలు ఇస్తుంది, ప్రతి రైలుకు ప్రయాణికుల్లా. chart ని ఒక ప్రశ్న అడుగుదామా?",
+      "captionEn": "A database table is like a railway reservation chart: rows are passengers, columns are name, train number, date and status. SQL is how we ask the chart questions. SELECT picks the columns you want. FROM names the table. WHERE keeps only the rows that match, like a date. ORDER BY sorts the result, LIMIT keeps the first few. GROUP BY with COUNT gives totals, like passengers per train. Shall we ask the chart a question?",
+      "code": "SELECT name, train_no, journey_date\nFROM bookings\nWHERE journey_date = '2026-11-12' AND status = 'confirmed'\nORDER BY name\nLIMIT 20;\n\nSELECT train_no, COUNT(*) AS passengers\nFROM bookings\nGROUP BY train_no;",
+      "mermaid": "graph LR\n  FROM[FROM bookings] --> WHERE[WHERE filter rows] --> GROUP[GROUP BY] --> SELECT[SELECT columns] --> ORDER[ORDER BY] --> LIMIT"
+    },
+    "example": {
+      "message": "నవంబర్ 12 న confirmed ప్రయాణికులను పేరు క్రమంలో చూడాలంటే: bookings నుంచి పేరు, రైలు సంఖ్య, తేదీ SELECT చేసి, WHERE తేదీ సరిపోవాలి AND status confirmed, ORDER BY పేరు. ప్రతి రైలుకు ప్రయాణికులు లెక్కించాలంటే రైలు సంఖ్యతో GROUP BY, COUNT. sleeper class bookings మాత్రమే ఎలా కనుక్కుంటారు?",
+      "captionEn": "To list confirmed passengers on 12 November, sorted by name: SELECT name, train number and date FROM bookings WHERE the date matches AND status is confirmed, ORDER BY name. To count passengers per train, GROUP BY train number with COUNT. How would you find only bookings in sleeper class?",
+      "code": "SELECT name, train_no, journey_date\nFROM bookings\nWHERE journey_date = '2026-11-12' AND status = 'confirmed'\nORDER BY name\nLIMIT 20;\n\nSELECT train_no, COUNT(*) AS passengers\nFROM bookings\nGROUP BY train_no;",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "ఇంకో విధంగా. లైబ్రేరియన్ ని అడగటం. ఏ columns కావాలో SELECT. ఏ అల్మారా FROM. రచయిత ప్రేమ్ చంద్ లాంటి షరతులు WHERE. పుస్తకాలు ఏ క్రమంలో ఇవ్వాలో ORDER BY. సరిపోయే వరుసలనే ఉంచేది ఏ clause?",
+      "captionEn": "Another way: asking a librarian. Which columns you want is SELECT. Which shelf is FROM. Your conditions, like author is Premchand, are WHERE. In what order to hand you the books is ORDER BY. Which clause keeps only matching rows?",
+      "code": null,
+      "mermaid": "graph LR\n  FROM[FROM bookings] --> WHERE[WHERE filter rows] --> GROUP[GROUP BY] --> SELECT[SELECT columns] --> ORDER[ORDER BY] --> LIMIT"
+    },
+    "not_understood": {
+      "message": "అడుగు అడుగుగా. ఒకటి, columns ని SELECT చేయండి. రెండు, table ని FROM లో. మూడు, షరతులకు WHERE. దీనితోనే చాలా ప్రశ్నలకు జవాబు వస్తుంది. తర్వాత క్రమంలో పెట్టడానికి ORDER BY. table పేరు చెప్పే clause ఏది?",
+      "captionEn": "Step by step. One, SELECT the columns. Two, FROM the table. Three, add WHERE for conditions. That alone answers many questions. Then ORDER BY to sort. Which clause names the table?",
+      "code": null,
+      "mermaid": "graph LR\n  FROM[FROM bookings] --> WHERE[WHERE filter rows] --> GROUP[GROUP BY] --> SELECT[SELECT columns] --> ORDER[ORDER BY] --> LIMIT"
+    }
+  },
+  "doubt": {
+    "answer": "మంచి సందేహం. WHERE గుంపులు చేసే ముందు వరుసలను వడపోస్తుంది. HAVING GROUP BY తర్వాత గుంపులను వడపోస్తుంది, 100 కంటే ఎక్కువ ప్రయాణికులు ఉన్న రైళ్లలా. సహాయపడిందా?",
+    "captionEn": "Good doubt. WHERE filters rows before grouping. HAVING filters groups after GROUP BY, like trains with more than 100 passengers. Does that help?"
+  },
+  "practice": {
+    "code": {
+      "prompt": "bookings table నుంచి 12 నవంబర్ 2026 confirmed bookings ని పేరు క్రమంలో చూపించండి.",
+      "starter": "-- your query\n",
+      "checks": [
+        {
+          "label": "SELECT … FROM bookings",
+          "re": "select[\\s\\S]+from\\s+bookings",
+          "flags": "i"
+        },
+        {
+          "label": "Filters with WHERE",
+          "re": "where",
+          "flags": "i"
+        },
+        {
+          "label": "Only confirmed",
+          "re": "confirmed",
+          "flags": "i"
+        },
+        {
+          "label": "Sorted by name",
+          "re": "order\\s+by\\s+\\w*name",
+          "flags": "i"
+        }
+      ]
+    }
+  },
+  "check": {
+    "questions": [
+      "ఒక {context} కోసం ఒక షరతుతో కొన్ని వరుసలు కనుక్కుని క్రమంలో పెట్టే SQL query రాయండి లేదా వివరించండి. ప్రతి clause వివరించండి.",
+      "{context} లో GROUP BY తో ప్రతి గుంపుకు వరుసలు ఎలా లెక్కిస్తారో, WHERE వేరుగా ఏం చేస్తుందో వివరించండి.",
+      "{context} మీద ఒక query కొన్ని కాకుండా అన్ని వరుసలు ఇస్తోంది. ఏం లేదో, ఎలా సరిచేయాలో చెప్పండి."
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "select"
+        ],
+        [
+          "from",
+          "table"
+        ],
+        [
+          "where",
+          "filter"
+        ],
+        [
+          "order by",
+          "group by",
+          "count",
+          "limit",
+          "insert",
+          "update",
+          "column",
+          "row"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "SELECT, FROM, WHERE ని సరిగ్గా వాడారు.",
+      "missing": "ORDER BY లేదా GROUP BY తో క్రమం లేదా గుంపులు, ప్రతి clause పని చెప్పండి.",
+      "next": "మీ query ని clause by clause బిగ్గరగా చదివి ప్రతి దాని పని చెప్పండి."
+    }
+  }
+}

@@ -139,6 +139,7 @@ export async function issueInstance({ elId, learnerId, nodeId, language, purpose
     const r = await generate({
       task: 'EVIDENCE.conceptItem', promptId: 'EVIDENCE.conceptItem', promptVersion: 'v1', institutionId,
       temperature: 0.4, maxTokens: 1024, schema: { required: ['question'] },
+      meta: { nodeLabel: node.node_label, language, context: params.context, variant: params.variant, attemptNo },
       system: `You write one assessment question for a skills check. Write it in ${langName}; English technical terms stay in Latin script.
 The question must make the learner USE the concept in the given everyday scenario, not recall a definition. It must be answerable in 3-6 sentences or a short code snippet.
 Set the question naturally inside the scenario's context. Do not invent arbitrary numbers, counts or limits unless the concept itself needs them.
@@ -154,7 +155,7 @@ Purpose: ${purpose}
 Previous questions (do not repeat): ${previous.join(' | ') || 'none'}`
     });
     const q = String(r.json?.question || '').trim();
-    if (q && !q.startsWith('mock-question-')) { question = q; generator = 'model'; }
+    if (q && !q.startsWith('mock-question-')) { question = q; generator = r.adapter === 'scripted' ? 'scripted' : 'model'; }
   } catch (err) {
     logger.warn('evidence.item_generation_failed', { nodeId, error: err.message });
   }

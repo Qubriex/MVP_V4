@@ -1,0 +1,114 @@
+{
+  "node": "Express routes",
+  "language": "english",
+  "version": 1,
+  "diagnosis": {
+    "message": "Hello! Today we learn Express routes. When you type a website address with /books at the end, how does the server know what to send?",
+    "captionEn": null
+  },
+  "turns": {
+    "explain": {
+      "message": "Think of a big college office with counters: fees at one, certificates at another, library at a third. You go to the right counter for your work. Express routes are those counters. app.get with a path handles reading, app.post handles adding. Each route has a handler that gets req, the request, and res, the response. req.params holds parts of the path like a book id, req.body holds sent data. The handler sends back JSON with a status code, like 404 when a book is not found. Shall we build a library API?",
+      "captionEn": null,
+      "code": "const express = require(\"express\");\nconst app = express();\napp.use(express.json());\n\napp.get(\"/books/:id\", async (req, res) => {\n  const book = await findBook(req.params.id);\n  if (!book) return res.status(404).json({ error: \"Book not found\" });\n  res.json(book);\n});\n\napp.post(\"/books\", async (req, res) => {\n  const saved = await addBook(req.body);\n  res.status(201).json(saved);\n});",
+      "mermaid": "graph LR\n  req[GET /books/42] --> router{Express routes}\n  router -->|app.get /books/:id| handler[handler] --> res[res.json book]"
+    },
+    "example": {
+      "message": "A library API has app.get for /books/:id. The handler finds the book with req.params.id. If it is missing, it sends status 404 with an error. If found, res.json sends it. app.post on /books reads req.body and returns 201 Created. Why do we need express.json for the post route?",
+      "captionEn": null,
+      "code": "const express = require(\"express\");\nconst app = express();\napp.use(express.json());\n\napp.get(\"/books/:id\", async (req, res) => {\n  const book = await findBook(req.params.id);\n  if (!book) return res.status(404).json({ error: \"Book not found\" });\n  res.json(book);\n});\n\napp.post(\"/books\", async (req, res) => {\n  const saved = await addBook(req.body);\n  res.status(201).json(saved);\n});",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "Another way: a railway station. Each platform number is a path, and the type of train, arriving or departing, is the method. A passenger, the request, goes to the right platform, and the station master, the handler, sends them on. What is the request method for adding new data?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph LR\n  req[GET /books/42] --> router{Express routes}\n  router -->|app.get /books/:id| handler[handler] --> res[res.json book]"
+    },
+    "not_understood": {
+      "message": "Step by step. One, create app with express. Two, write app.get with a path and a function. Three, inside, read req and send with res. Four, start with app.listen. What object do you use to send the answer back?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph LR\n  req[GET /books/42] --> router{Express routes}\n  router -->|app.get /books/:id| handler[handler] --> res[res.json book]"
+    }
+  },
+  "doubt": {
+    "answer": "Good doubt. Middleware runs before your handler, for every request or some. express.json is middleware that turns the request body into an object. Does that help?",
+    "captionEn": null
+  },
+  "practice": {
+    "code": {
+      "prompt": "Add a GET /books/:id route that sends the book, or 404 when it is not found.",
+      "starter": "const app = express();\n",
+      "checks": [
+        {
+          "label": "GET route with an id",
+          "re": "app\\.get\\s*\\(\\s*[\"']/books/:id",
+          "flags": ""
+        },
+        {
+          "label": "Reads req.params",
+          "re": "req\\.params",
+          "flags": ""
+        },
+        {
+          "label": "Sends 404 when missing",
+          "re": "status\\s*\\(\\s*404",
+          "flags": ""
+        },
+        {
+          "label": "Sends JSON",
+          "re": "res\\.json\\s*\\(",
+          "flags": ""
+        }
+      ]
+    }
+  },
+  "check": {
+    "questions": [
+      "For a {context}, design two Express routes, one to read an item by id and one to add an item. Explain req, res and status codes.",
+      "In a {context}, a route returns 200 with empty data when the item does not exist. Explain what it should do instead and why.",
+      "Explain what middleware is in Express, with one example from a {context}."
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "app.get",
+          "app.post",
+          "get",
+          "post",
+          "router",
+          "route"
+        ],
+        [
+          "req",
+          "request",
+          "params",
+          "body",
+          "query"
+        ],
+        [
+          "res",
+          "response",
+          "res.json",
+          "status",
+          "404",
+          "201"
+        ],
+        [
+          "middleware",
+          "express.json",
+          "handler",
+          "path",
+          "url"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "You matched methods and paths to handlers correctly.",
+      "missing": "Say what the handler sends back, including the right status code.",
+      "next": "For each route: method, path, what it reads, what it sends."
+    }
+  }
+}
