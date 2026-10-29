@@ -14,7 +14,8 @@
 // Append-only tables (consents, credentials, demonstrations, faculty reviews,
 // access events) refuse deletes, except inside this transaction, which sets
 // qbx.demo_cleanup locally (migration 0008). This file is the only place
-// allowed to set it (tests/structural/demoCleanup.test.js).
+// allowed to set it (tests/structural/demoCleanup.test.js). The same closure
+// also rebuilds the test tenant's journey learners (deleteJourneyLearners).
 import * as dal from '../db/dal.js';
 import { logger } from '../logger.js';
 
@@ -63,6 +64,16 @@ const q = (name) => `"${name.replace(/"/g, '')}"`;
  * @param {string} sbx
  */
 export async function collectSandbox(sbx) {
+  return collectFrom([
+    ['institutions', 'sandbox_id = ? AND is_demo = 1', [sbx]],
+    ['employers', 'sandbox_id = ? AND is_demo = 1', [sbx]],
+    ['auth_sessions', 'sandbox_id = ?', [sbx]],
+    ['outbound_messages', 'sandbox_id = ?', [sbx]]
+  ]);
+}
+
+/** Every row reachable, parent to child, from the root rows. Read-only. */
+async function collectFrom(roots) {
   const E = await edges();
   const parentCols = new Map(); // table -> Set(referenced columns)
   E.forEach(([, , pt, pc]) => { if (!parentCols.has(pt)) parentCols.set(pt, new Set()); parentCols.get(pt).add(pc); });
@@ -82,10 +93,7 @@ export async function collectSandbox(sbx) {
     if (fresh.length) frontier.push([table, fresh]);
   }
 
-  await take('institutions', 'sandbox_id = ? AND is_demo = 1', [sbx]);
-  await take('employers', 'sandbox_id = ? AND is_demo = 1', [sbx]);
-  await take('auth_sessions', 'sandbox_id = ?', [sbx]);
-  await take('outbound_messages', 'sandbox_id = ?', [sbx]);
+  for (const [table, where, args] of roots) await take(table, where, args);
 
   while (frontier.length) {
     const level = frontier; frontier = [];
@@ -135,6 +143,36 @@ export async function deleteSandbox(sbx) {
     await dal.run('UPDATE demo_sandboxes SET deleted_at = COALESCE(deleted_at, ?) WHERE id = ?', dal.nowIso(), sbx);
   });
   logger.info('demo.sandbox_deleted', { sandbox: sbx, rows: total, tables: tableCount });
+  return { rows: total, tables: tableCount };
+}
+
+// The journey learners (scripts/journeyData.js) are rebuilt on every "Reset
+// test data", including their append-only evidence, so each stage comes back
+// exactly. Only learners with a journey id in the test institution are
+// accepted; everything else is refused before anything is read.
+const JOURNEY_ID = /^test-j-[a-z0-9-]+$/;
+export async function deleteJourneyLearners(learnerIds, testInstitutionId) {
+  const ids = [...new Set(learnerIds)];
+  if (!ids.length) return { rows: 0, tables: 0 };
+  if (!ids.every(id => JOURNEY_ID.test(id))) throw new Error('Not a journey learner id');
+  const ok = await dal.all(`SELECT l.id FROM learners l JOIN institutions i ON i.id = l.institution_id
+    WHERE l.id = ANY(?::text[]) AND l.institution_id = ? AND i.is_test = 1`, ids, testInstitutionId);
+  const present = new Set(ok.map(r => r.id));
+  const existing = (await dal.all('SELECT id FROM learners WHERE id = ANY(?::text[])', ids)).map(r => r.id);
+  if (existing.some(id => !present.has(id))) throw new Error('A journey learner is outside the test tenant');
+  if (!existing.length) return { rows: 0, tables: 0 };
+  let total = 0; let tableCount = 0;
+  await dal.tx(async () => {
+    await dal.run("UPDATE auth_sessions SET revoked_at = ? WHERE actor_type = 'learner' AND actor_id = ANY(?::text[]) AND revoked_at IS NULL", dal.nowIso(), existing);
+    const rows = await collectFrom([['learners', 'id = ANY(?::text[])', [existing]]]);
+    const tables = [...rows.keys()].filter(t => rows.get(t).size);
+    await dal.one("SELECT set_config('qbx.demo_cleanup', 'on', true) AS on");
+    for (const t of await deleteOrder(tables)) {
+      const r = await dal.run(`DELETE FROM ${q(t)} WHERE ctid = ANY(?::tid[])`, [...rows.get(t)]);
+      total += r.changes; tableCount += 1;
+    }
+    await dal.one("SELECT set_config('qbx.demo_cleanup', 'off', true) AS off");
+  });
   return { rows: total, tables: tableCount };
 }
 

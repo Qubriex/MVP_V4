@@ -23,6 +23,9 @@ import { enqueueReview } from '../../core/evidence/calibration.js';
 import { recordAttempt as recordVocabulary, vocabularyLevel } from '../../core/learner/vocabulary.js';
 import { heartbeat } from '../../core/learner/activeTime.js';
 import { scheduleFirstReview } from '../../core/retention/schedule.js';
+import { isTestLearner, nowIsoFor } from '../../core/requestContext.js';
+import { forcedResult, forcedAssessment } from '../../core/journey/forced.js';
+import { nodeLabelNow } from '../../core/return/credentialEngine.js';
 
 const sha256 = (t) => crypto.createHash('sha256').update(String(t)).digest('hex');
 import { transcribeAudio } from '../../core/portfolio.js';
@@ -408,6 +411,9 @@ async function pendingCheckFor(db, sessionId) {
   `).get(sessionId);
 }
 
+/** pass, partial (close) or fail, for the result screen; scores themselves are never shown. */
+const resultBand = (passed, score) => (passed ? 'pass' : score >= 0.5 ? 'partial' : 'fail');
+
 async function handleSessionMessage(req, res) {
   const requestCheck = req.body.request_check === true || req.body.request_check === 'true';
   const inputMode = ['voice', 'text'].includes(req.body.input_mode) ? req.body.input_mode : 'text';
@@ -445,9 +451,11 @@ async function handleSessionMessage(req, res) {
   `).run(uuidv4(), session.id, content, inputMode);
   db.close();
 
+  // "I'm ready for the check" always leads to a check, even straight after
+  // the opening question (it then runs as a learner message, not a diagnosis answer).
   let requestType;
   if (pendingCheck && lastAiMsg && ['mastery_check', 'feedback'].includes(lastAiMsg.message_type)) requestType = 'CHECK_RESPONSE';
-  else if (!lastAiMsg || lastAiMsg.message_type === 'diagnosis') requestType = 'DIAGNOSIS_RESPONSE';
+  else if (!requestCheck && (!lastAiMsg || lastAiMsg.message_type === 'diagnosis')) requestType = 'DIAGNOSIS_RESPONSE';
   else requestType = 'LEARNER_MESSAGE';
 
   const sessionState = {
@@ -462,6 +470,11 @@ async function handleSessionMessage(req, res) {
     let gate = null;
     let assessment = null;
     if (requestType === 'CHECK_RESPONSE') {
+      const forced = await forcedResult(req.user.el_id, content);
+      if (forced) {
+        gate = { assurance: 'A1', reason: null, provenance: { mode: 'typed', answer_chars: content.length } };
+        assessment = forcedAssessment(forced, resolveTheta(node.mastery_threshold, node.cluster_threshold));
+      } else {
       // 1. Authenticity gate (v4.3 §7.11): A0 stops, never a demonstration.
       gate = authenticityGate(req.body.provenance || null, content);
       if (gate.assurance === 'A0') return await holdForAuthenticity({ req, res, session, node, pendingCheck, gate, answer: content });
@@ -470,6 +483,7 @@ async function handleSessionMessage(req, res) {
         nodeLabel: node.node_label, language: req.user.language, question: pendingCheck.question_text, answer: content,
         theta: resolveTheta(node.mastery_threshold, node.cluster_threshold), loops: session.loop_count
       });
+      }
       sessionState.evaluation = {
         ...assessment.evaluation, passed: assessment.passed, score: assessment.r_c
       };
@@ -575,8 +589,9 @@ async function handleCheckResult({ req, res, session, node, result, learnerRespo
   const db = getDb();
   const evaluation = result.evaluation;
   const passed = assessment.passed;
-  const now = new Date().toISOString();
+  const now = nowIsoFor(); // a test learner's shifted clock (/dev "Move time forward"); the real clock otherwise
   const elId = session.engagement_learner_id;
+  const labelBefore = await nodeLabelNow(session.engagement_learner_id, node.id, now);
   const vocabGap = evaluation.loopApproachIfFailed === 'vocabulary_barrier'
     || (evaluation.understandingGaps || []).some(g => /vocabulary_barrier/i.test(String(g)));
   let advanceTo = null;
@@ -689,10 +704,17 @@ async function handleCheckResult({ req, res, session, node, result, learnerRespo
   db.close();
 
   // Scores are never shown to the learner (v4.3 §2A.2); a provisional pass says so.
+  // The result screen gets the band, the three feedback lines and the label change.
+  const labelAfter = await nodeLabelNow(elId, node.id, now);
+  const attempts = (await dal.one('SELECT COUNT(*) AS n FROM mastery_checks WHERE engagement_learner_id = ? AND skill_node_id = ? AND passed IS NOT NULL', elId, node.id)).n;
   const common = {
     session_id: session.id, feedback: evaluation.feedbackForLearner, message: result.message, caption_en: result.captionEn || null,
     mermaid: result.mermaid || null, code: result.code || null, provisional: assessment.provisional,
-    review_pending: !!(review && review.stratum === 'decision')
+    review_pending: !!(review && review.stratum === 'decision'),
+    result_band: resultBand(passed, assessment.r_c),
+    feedback_parts: { good: evaluation.whatWasGood || '', missing: evaluation.whatWasMissing || '', next: evaluation.nextTime || '' },
+    label_change: { from: labelBefore.label, to: labelAfter.label, missing_for_confirmed: labelAfter.missing_for_confirmed },
+    node: { id: node.id, label: node.node_label }, attempt_no: Number(attempts) || 1, forced: (assessment.flags || []).includes('forced_test')
   };
   if (passed) {
     return res.json({
@@ -759,9 +781,12 @@ router.post('/voice-metrics', async (req, res) => {
 });
 
 router.post('/session/voice', upload.single('audio'), async (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'audio file required (multipart field "audio")' });
-  let transcript;
-  try {
+  // Test learners may send typed text as "speech" (field typed_text), so the
+  // voice path is testable without a microphone.
+  const typedSpeech = isTestLearner() && typeof req.body.typed_text === 'string' && req.body.typed_text.trim() ? req.body.typed_text.trim() : null;
+  if (!req.file && !typedSpeech) return res.status(400).json({ error: 'audio file required (multipart field "audio")' });
+  let transcript = typedSpeech;
+  if (!transcript) try {
     transcript = await transcribeAudio({
       audioBase64: req.file.buffer.toString('base64'),
       mimeType: req.file.mimetype || 'audio/webm',

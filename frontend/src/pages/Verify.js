@@ -21,7 +21,7 @@ const useFmtDate = () => { const { lang } = useUiLang(); return (iso) => (iso ? 
 // The sample Passport from the Home page and the live demo (never on the server).
 const DEMO_ID = 'QBX-DEMO-0000';
 const DEMO = {
-  status: 'valid', sample: true, evidence_id: DEMO_ID, issuer: 'did:web:qubirex.in', version: 2, valid_until: '2028-03-14T00:00:00Z', label_function: 'qep:label_v1',
+  status: 'valid', sample: true, evidence_id: DEMO_ID, issuer: 'did:web:qubirex.in', version: 2, valid_until: '2028-03-14T00:00:00Z', label_function: 'qep:label_v2',
   target: { title: 'Python + SQL for Data Roles', version: 2, language: 'telugu', commissionedBy: '[Institution name]' },
   skills_public: true,
   skills: [

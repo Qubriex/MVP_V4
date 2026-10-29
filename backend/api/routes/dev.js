@@ -6,7 +6,7 @@
 //      characters, and the IP is allowed when DEV_LOGIN_ALLOWED_IPS is set).
 //      Otherwise every path here falls through to the ordinary 404.
 //   2. POST /unlock checks the passcode on the server in constant time,
-//      5 tries per 15 minutes per IP (counted in dev_audit, so every
+//      5 wrong tries per 15 minutes per IP (counted in dev_audit, so every
 //      instance shares the count), and sets an 8-hour httpOnly unlock cookie.
 //   3. Everything else needs that cookie. /login takes only an account_key
 //      from core/testTenant.js DEV_ACCOUNTS and re-checks that the row is in
@@ -30,6 +30,9 @@ import {
 import {
   DEV_ACCOUNTS, TEST_INSTITUTION_ID, TEST_INSTITUTION_IDS, TEST_EMPLOYER_IDS, TEST_ADMIN_ID, TEST_ADMIN_EMAIL
 } from '../../core/testTenant.js';
+import { JOURNEY, STAGE_NAMES } from '../../core/journey/accounts.js';
+import { runControl, controlsFor, testLearner } from '../../core/journey/controls.js';
+import { createLearnerInvite } from '../../core/access.js';
 
 const router = express.Router();
 const UNLOCK_TRIES = 5;
@@ -78,7 +81,7 @@ router.get('/status', (req, res) => {
 router.post('/unlock', async (req, res) => {
   const ip = clientIp(req);
   const since = new Date(Date.now() - UNLOCK_WINDOW_MS).toISOString();
-  const tries = Number((await dal.one("SELECT COUNT(*) AS n FROM dev_audit WHERE ip = ? AND action IN ('unlock', 'unlock_failed') AND created_at >= ?", ip, since)).n);
+  const tries = Number((await dal.one("SELECT COUNT(*) AS n FROM dev_audit WHERE ip = ? AND action = 'unlock_failed' AND created_at >= ?", ip, since)).n);
   if (tries >= UNLOCK_TRIES) {
     res.set('Retry-After', String(UNLOCK_WINDOW_MS / 1000));
     return v2(res, 429, 'rate_limited', 'Too many tries. Wait 15 minutes and try again.');
@@ -113,7 +116,7 @@ const LOADERS = {
 };
 
 router.get('/accounts', requireUnlock, async (req, res) => {
-  const accounts = await Promise.all(Object.entries(DEV_ACCOUNTS).map(async ([key, a]) => {
+  const accounts = await Promise.all(Object.entries(DEV_ACCOUNTS).filter(([, a]) => !a.journey).map(async ([key, a]) => {
     const row = await LOADERS[a.actor](a);
     return {
       key, actor: a.actor, home: a.home, ready: !!row,
@@ -214,6 +217,58 @@ router.post('/skip-waits', requireUnlock, async (req, res) => {
   res.json({ ok: true, done });
 });
 
+// ─── Learner journey: one test learner per stage, and the time/state controls ──
+router.get('/journey', requireUnlock, async (req, res) => {
+  const present = new Set((await dal.all('SELECT id FROM learners WHERE id = ANY(?::text[]) AND institution_id = ?', JOURNEY.map(j => j.learnerId), TEST_INSTITUTION_ID)).map(r => r.id));
+  res.json({
+    stages: JOURNEY.map(j => ({
+      key: j.key, account_key: j.accountKey, stage: j.stage, stage_name: STAGE_NAMES[j.stage], language: j.language, name: j.name, note: j.note,
+      learner_ref: j.ref, ready: present.has(j.learnerId), home: DEV_ACCOUNTS[j.accountKey].home, invite_only: j.stage === 'S0'
+    }))
+  });
+});
+
+// S0 has never signed in: a fresh invite link (the token exists only in this answer).
+router.post('/journey/invite', requireUnlock, async (req, res) => {
+  const j = JOURNEY.find(x => x.stage === 'S0');
+  try { await testLearner(j.elId); } catch { return v2(res, 404, 'not_seeded', 'Use “Reset test data” first.'); }
+  const db = dal.legacyHandle();
+  const token = await createLearnerInvite(db, { learnerId: j.learnerId, elId: j.elId, staffId: null });
+  await audit(req, 'journey_invite', { accountKey: j.accountKey, role: 'learner' });
+  res.json({ path: `/learner-invite/${token}` });
+});
+
+// The controls act on the test learner this developer session is signed in as.
+async function devLearner(req, res, next) {
+  if (!req.session?.is_dev || req.session.actor_type !== 'learner') return v2(res, 409, 'not_learner', 'Sign in as a test learner first.');
+  try { await testLearner(req.user.el_id); } catch (e) { return v2(res, 403, 'not_test', e.message); }
+  next();
+}
+
+router.get('/journey/me', requireUnlock, current, devLearner, async (req, res) => {
+  const j = JOURNEY.find(x => x.elId === req.user.el_id);
+  res.json({ controls: await controlsFor(req.user.el_id), journey: j ? { key: j.key, stage: j.stage, account_key: j.accountKey } : null });
+});
+
+router.post('/journey/control', requireUnlock, current, devLearner, async (req, res) => {
+  const action = String(req.body?.action || '');
+  try {
+    if (action === 'reset') {
+      const j = JOURNEY.find(x => x.elId === req.user.el_id);
+      if (!j) return v2(res, 409, 'not_journey', 'Only journey learners reset one by one. Use “Reset test data” for the others.');
+      const { seedJourney } = await import('../../scripts/journeyData.js');
+      await seedJourney({ only: [j.key] });
+      await audit(req, 'journey_reset', { accountKey: j.accountKey, role: 'learner' });
+      return res.json({ ok: true, relogin: j.accountKey, message: `${j.name} is back at ${j.stage}.` });
+    }
+    const out = await runControl(req.user.el_id, { action, days: req.body?.days, result: req.body?.result, mode: req.body?.mode });
+    await audit(req, `journey_${action}`, { role: 'learner', sessionId: req.session.id, detail: JSON.stringify({ days: req.body?.days ?? null, result: req.body?.result ?? null, mode: req.body?.mode ?? null }) });
+    res.json(out);
+  } catch (e) {
+    v2(res, e.status || 500, 'control_failed', e.status ? e.message : 'That control did not work.');
+  }
+});
+
 // ─── All pages: the ids behind the pages that need one ─────────────────────────
 router.get('/route-ids', requireUnlock, async (req, res) => {
   const one = async (sql, ...a) => (await dal.one(sql, ...a)) || {};
@@ -239,6 +294,7 @@ router.get('/build-info', requireUnlock, (req, res) => {
   const b = buildFile();
   const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
   const adapter = process.env.AI_ADAPTER || (process.env.NODE_ENV === 'test' ? 'mock' : 'gemini');
+  const testTutor = process.env.TEST_TUTOR === 'live' ? 'live' : 'scripted';
   res.json({
     version: pkg.version,
     commit: (process.env.VERCEL_GIT_COMMIT_SHA || b.commit || '').slice(0, 12) || null,
@@ -247,7 +303,8 @@ router.get('/build-info', requireUnlock, (req, res) => {
     instance_started_at: STARTED_AT,
     environment: process.env.VERCEL_ENV || process.env.NODE_ENV || 'development',
     region: process.env.VERCEL_REGION || null,
-    ai: adapter === 'mock' ? 'mock' : process.env.GEMINI_API_KEY ? 'live' : 'live (no key set: AI answers 503)'
+    ai: adapter === 'mock' && process.env.NODE_ENV === 'test' ? 'mock' : ['mock', 'scripted'].includes(adapter) ? 'scripted tutor (no model)' : process.env.GEMINI_API_KEY ? 'live' : 'live (no key set: AI answers 503)',
+    test_tutor: testTutor
   });
 });
 

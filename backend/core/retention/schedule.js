@@ -7,6 +7,7 @@
 // Every review, pass or fail, is a demonstration; the label is re-derived.
 import * as dal from '../db/dal.js';
 import params from '../../config/params.js';
+import { nowIsoFor } from '../requestContext.js';
 
 const DAY = 86400000;
 
@@ -53,7 +54,8 @@ async function consolidationCapDays(h, elId, atIso) {
 }
 
 /** Reviews due now for an enrolment, oldest first. */
-export async function dueReviews(elId, { limit = 50, asOf = new Date().toISOString() } = {}) {
+// asOf defaults to the request's clock: a test learner's shifted clock (/dev), the real one otherwise.
+export async function dueReviews(elId, { limit = 50, asOf = nowIsoFor() } = {}) {
   return await dal.all(`SELECT r.node_id, r.due_at, r.interval_days, r.last_result, sn.node_label, sc.cluster_label
     FROM node_retention r JOIN skill_nodes sn ON sn.id = r.node_id JOIN skill_clusters sc ON sc.id = sn.cluster_id
     WHERE r.el_id = ? AND r.due_at <= ? ORDER BY r.due_at LIMIT ?`, elId, asOf, limit);

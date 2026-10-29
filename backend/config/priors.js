@@ -89,7 +89,7 @@ export const PRIORS = {
     consolidationGapDays: 14
   },
   label: {
-    confirmed: { window: 6, minPasses: 3, minSpanDays: 14, minCq: 0.75, thetaMargin: 0.10, minFreshness: 0.85, minAssurance: 'A2', codeMinEvidence: 'L2' },
+    confirmed: { window: 6, minPasses: 3, minSpanDays: 14, minCq: 0.75, thetaMargin: 0.10, minFreshness: 0.85, minAssurance: 'A2', codeMinEvidence: 'L2', minEvidenceKinds: 2 },
     foundational: { maxCq: 0.50, persistenceMinPasses: 2 },
     crossNodeMinWeight: 0.25
   },

@@ -10,6 +10,7 @@
 //      real employers never find test learners, test numbers never reach
 //      real analytics, and a test or developer session never sees real people.
 import * as dal from './db/dal.js';
+import { JOURNEY } from './journey/accounts.js';
 
 export const TEST_INSTITUTION_ID = 'test-inst-0001';
 export const TEST_PEER_INSTITUTION_IDS = ['test-peer-inst-1', 'test-peer-inst-2', 'test-peer-inst-3'];
@@ -27,7 +28,12 @@ export const DEV_ACCOUNTS = {
   professor: { actor: 'staff', email: 'test.professor@qubirex.local', home: '/institution/home' },
   employer_verified: { actor: 'employer', employerId: 'test-employer-0002', userId: 'test-employer-user-0002', home: '/employer/home' },
   employer_pending: { actor: 'employer', employerId: 'test-employer-0001', userId: 'test-employer-user-0001', home: '/employer/home' },
-  admin: { actor: 'admin', home: '/admin/overview' }
+  admin: { actor: 'admin', home: '/admin/overview' },
+  // One learner at each journey stage (core/journey/accounts.js).
+  ...Object.fromEntries(JOURNEY.map(j => [j.accountKey, {
+    actor: 'learner', learnerId: j.learnerId, elId: j.elId, lang: j.language, stage: j.stage, journey: j.key,
+    home: j.stage === 'S1' ? '/learn/welcome' : '/learn/dashboard'
+  }]))
 };
 
 /** Whether an institution / employer is in the test tenant (fixed IDs, then the flag). */

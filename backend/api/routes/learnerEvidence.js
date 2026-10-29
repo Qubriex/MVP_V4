@@ -23,6 +23,7 @@ import { learningCurve } from '../../core/readiness/learningCurve.js';
 import { eachSeq, mapSeq } from '../../core/util/seq.js';
 import { waitUntil } from '@vercel/functions';
 import { aiNotConfigured, aiUnavailableMessage } from '../../core/ai/gateway.js';
+import { nowIsoFor } from '../../core/requestContext.js';
 
 const router = express.Router();
 router.use(authenticateToken, requireRole('learner'), requireActiveLearner);
@@ -70,7 +71,7 @@ router.get('/reviews/due', async (req, res) => {
     dal.all(`SELECT nm.skill_node_id AS node_id, sn.node_label, sc.cluster_label FROM node_mastery nm JOIN skill_nodes sn ON sn.id = nm.skill_node_id
       JOIN skill_clusters sc ON sc.id = sn.cluster_id WHERE nm.engagement_learner_id = ? AND nm.recheck_required = 1`, elId),
     dal.all(`SELECT r.node_id, r.due_at, sn.node_label FROM node_retention r JOIN skill_nodes sn ON sn.id = r.node_id
-      WHERE r.el_id = ? AND r.due_at > ? ORDER BY r.due_at LIMIT 5`, elId, dal.nowIso()),
+      WHERE r.el_id = ? AND r.due_at > ? ORDER BY r.due_at LIMIT 5`, elId, nowIsoFor()),
     openInstances(elId)
   ]);
   const reviews = due.map(r => ({ ...r, kind: 'review', open_instance: open.get(`${r.node_id}|review`) || null }));
@@ -83,7 +84,7 @@ router.get('/reviews/due', async (req, res) => {
 router.post('/reviews/:nodeId/start', async (req, res) => {
   const elId = req.user.el_id;
   const recheck = !!await dal.one('SELECT 1 FROM node_mastery WHERE engagement_learner_id = ? AND skill_node_id = ? AND recheck_required = 1', elId, req.params.nodeId);
-  const due = await dal.one('SELECT 1 FROM node_retention WHERE el_id = ? AND node_id = ? AND due_at <= ?', elId, req.params.nodeId, dal.nowIso());
+  const due = await dal.one('SELECT 1 FROM node_retention WHERE el_id = ? AND node_id = ? AND due_at <= ?', elId, req.params.nodeId, nowIsoFor());
   if (!recheck && !due) return res.status(409).json({ error: 'This review is not due yet.' });
   const purpose = recheck ? 'check' : 'review';
   // One review per due date (§7.12): reuse the open instance until it is answered.
@@ -130,7 +131,7 @@ async function passportView(elId) {
   const run = await dal.one("SELECT * FROM renewal_runs WHERE el_id = ? AND status = 'open' ORDER BY created_at DESC LIMIT 1", elId);
   return {
     issued: true, evidence_id: c.evidence_id, version: c.version, valid_from: c.valid_from, valid_until: c.valid_until,
-    status: revoked ? 'revoked' : c.valid_until < dal.nowIso() ? 'expired' : 'valid',
+    status: revoked ? 'revoked' : c.valid_until < nowIsoFor() ? 'expired' : 'valid',
     public: await isPublic(c.evidence_id), verify_url: `${publicBase()}/verify/${c.evidence_id}`,
     skills: await skillLines(elId, skills),
     renewal: run ? {

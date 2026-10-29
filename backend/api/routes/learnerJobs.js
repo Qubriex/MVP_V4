@@ -21,6 +21,7 @@ import { learnerRequests, respond, withdrawFrom, applyToRole, matchedRoles } fro
 import { BANDS } from '../../core/readiness/cohort.js';
 import { mapSeq } from '../../core/util/seq.js';
 import { learnerBridges } from '../../core/collegeLoop.js';
+import { nowIsoFor } from '../../core/requestContext.js';
 
 const router = express.Router();
 router.use(authenticateToken, requireRole('learner'), requireActiveLearner);
@@ -58,7 +59,7 @@ router.get('/today', async (req, res) => {
   const [bridges, waiting, due, started] = await Promise.all([
     learnerBridges(req.user.el_id),
     dal.one("SELECT COUNT(*) AS n FROM employer_pipeline WHERE learner_id = ? AND stage = 'requested'", req.user.id),
-    dal.one("SELECT COUNT(*) AS n FROM node_retention WHERE el_id = ? AND due_at <= ?", req.user.el_id, dal.nowIso()),
+    dal.one("SELECT COUNT(*) AS n FROM node_retention WHERE el_id = ? AND due_at <= ?", req.user.el_id, nowIsoFor()),
     dal.one('SELECT COUNT(*) AS n FROM learning_sessions WHERE engagement_learner_id = ?', req.user.el_id)
   ]);
   const me = await dal.one('SELECT is_discoverable FROM learners WHERE id = ?', req.user.id);

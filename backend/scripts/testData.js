@@ -350,6 +350,10 @@ export async function seedTestData({ log = console.log } = {}) {
     VALUES ('test-bridge-0001-a1', 'test-bridge-0001', ?, 40, '[]', ?)`).run(EL_ID, now);
   await db.prepare("DELETE FROM login_failures WHERE account_key IN (?, ?, ?, ?, ?)").run(INSTITUTION.email, PROFESSOR.email, EMPLOYER.email, EMPLOYER_VERIFIED.email, 'test.admin@qubirex.local');
 
+  // One learner at every stage of the journey (S0 … S12), rebuilt exactly.
+  const { seedJourney } = await import('./journeyData.js');
+  await seedJourney();
+
   log('\nTest accounts ready.\n');
   log('  Institution  http://localhost:3000/login');
   log(`    Email:     ${INSTITUTION.email}`);
@@ -368,5 +372,6 @@ export async function seedTestData({ log = console.log } = {}) {
   log(`    Learner reference: ${LEARNER.ref}`);
   log(`    Join code:         ${JOIN_CODE}   (or Engagement ID ${ENGAGEMENT_ID})`);
   log(`    PIN:               ${LEARNER.pin}`);
-  log(`    Also: ${HINDI.ref} (Hindi, join code ${HINDI.joinCode}) and ${FIRST_TIME.ref} (first time, ${JOIN_CODE}), same PIN\n`);
+  log(`    Also: ${HINDI.ref} (Hindi, join code ${HINDI.joinCode}) and ${FIRST_TIME.ref} (first time, ${JOIN_CODE}), same PIN`);
+  log(`    Journey stages S0–S12: TEST-J-S1 … TEST-J-S12 (Telugu, ${JOIN_CODE}), TEST-J-S1-HI, -S3-HI, -S7-HI (Hindi, ${HINDI.joinCode}), same PIN\n`);
 }

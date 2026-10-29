@@ -1,4 +1,4 @@
-// core/qep/labelFn.js — qep:label_v1 (v4.3 §9.1), the published label function.
+// core/qep/labelFn.js — qep:label_v2 (v4.3 §9.1), the published label function.
 //
 // PURE: no imports, no I/O, no clock. The same file is the reference verifier:
 // given signed node facts, dated demonstrations and a reference time, anyone
@@ -11,14 +11,26 @@
 //   not passed                                         → none
 //   Cq < 0.50 or (persistence and passes(post) < 2)     → Foundational
 //   passes ≥ 3, span ≥ 14, Cq ≥ 0.75, best ≥ θ + 0.10,
-//   (code node → E ≥ L2), fresh ≥ 0.85, max A ≥ A2      → Confirmed
+//   (code node → E ≥ L2), fresh ≥ 0.85, max A ≥ A2,
+//   passes of ≥ 2 kinds of evidence                     → Confirmed
 //   else                                                → Partial
+//
+// v2 adds the last rule: a skill is never Confirmed from checks alone. Kinds
+// are check (mastery, review, renewal, spoken challenge), practice (a written
+// or code practice item, a college practical), work task, Day-One Simulation,
+// and a faculty or employer attestation. Quick questions are never a demonstration.
 
-export const LABEL_FUNCTION = 'qep:label_v1';
+export const LABEL_FUNCTION = 'qep:label_v2';
+
+/** The kind of evidence a demonstration is, for the "two kinds" rule. */
+export const EVIDENCE_KIND = Object.freeze({
+  mastery: 'check', review: 'check', renewal: 'check', challenge: 'check',
+  practice: 'practice', practical: 'practice', task: 'task', dayone: 'dayone', faculty: 'attestation', employer: 'attestation'
+});
 
 // Prior values (v4.3 Appendix A). Deployments pass their calibrated params.
 export const DEFAULTS = Object.freeze({
-  confirmed: { window: 6, minPasses: 3, minSpanDays: 14, minCq: 0.75, thetaMargin: 0.10, minFreshness: 0.85, minAssurance: 'A2', codeMinEvidence: 'L2' },
+  confirmed: { window: 6, minPasses: 3, minSpanDays: 14, minCq: 0.75, thetaMargin: 0.10, minFreshness: 0.85, minAssurance: 'A2', codeMinEvidence: 'L2', minEvidenceKinds: 2 },
   foundational: { maxCq: 0.50, persistenceMinPasses: 2 },
   retention: { initialIntervalDays: 3, strongMargin: 0.10, strongFactor: 2.5, marginalFactor: 1.8, maxIntervalDays: 120, failIntervalDays: 1,
     freshness: { floorOverdue: 0.7, overdueSlope: 0.3, staleMonths: 18, stale: 0.5 } }
@@ -70,7 +82,7 @@ export function freshness(lastPassDate, intervalDays, asOf, params) {
 export function labelV1(facts, demos, asOf, params) {
   const p = merge(params);
   const c = p.confirmed;
-  const empty = { label: 'none', cq: null, spanDays: 0, freshness: 0, best: null, evidence: null, assurance: null, lastDemonstrated: null, passes: 0, count: 0 };
+  const empty = { label: 'none', cq: null, spanDays: 0, freshness: 0, best: null, evidence: null, assurance: null, lastDemonstrated: null, passes: 0, count: 0, kinds: [] };
   if (!facts || !facts.masteredAt) return empty;
   const mastered = t(facts.masteredAt);
   const now = t(asOf);
@@ -85,7 +97,8 @@ export function labelV1(facts, demos, asOf, params) {
   const levels = [...passes.map(d => d.level).filter(Boolean), facts.E].filter(Boolean);
   const evidence = levels.sort((a, b) => LEVEL[b] - LEVEL[a])[0] || null;
   const assurance = passes.map(d => d.assurance).filter(a => a in ASSURANCE).sort((a, b) => ASSURANCE[b] - ASSURANCE[a])[0] || null;
-  const out = { cq, spanDays, freshness: fresh, best, evidence, assurance, lastDemonstrated: lastPass ? lastPass.date : null, passes: passes.length, count: post.length };
+  const kinds = new Set(since.filter(d => !!d.passed).map(d => EVIDENCE_KIND[d.kind]).filter(Boolean));
+  const out = { cq, spanDays, freshness: fresh, best, evidence, assurance, lastDemonstrated: lastPass ? lastPass.date : null, passes: passes.length, count: post.length, kinds: [...kinds] };
 
   if (cq < p.foundational.maxCq || (facts.persistence && passes.length < p.foundational.persistenceMinPasses)) return { ...out, label: 'Foundational' };
   const confirmed = passes.length >= c.minPasses
@@ -94,7 +107,8 @@ export function labelV1(facts, demos, asOf, params) {
     && best != null && best >= facts.theta + c.thetaMargin
     && (!facts.codeNode || (evidence && LEVEL[evidence] >= LEVEL[c.codeMinEvidence]))
     && fresh >= c.minFreshness
-    && assurance != null && ASSURANCE[assurance] >= ASSURANCE[c.minAssurance];
+    && assurance != null && ASSURANCE[assurance] >= ASSURANCE[c.minAssurance]
+    && kinds.size >= c.minEvidenceKinds;
   return { ...out, label: confirmed ? 'Confirmed' : 'Partial' };
 }
 
@@ -111,5 +125,6 @@ export function missingForConfirmed(facts, demos, asOf, params) {
   if (facts.codeNode && !(r.evidence && LEVEL[r.evidence] >= LEVEL[c.codeMinEvidence])) miss.push('execution_evidence');
   if (r.freshness < c.minFreshness) miss.push('freshness');
   if (!r.assurance || ASSURANCE[r.assurance] < ASSURANCE[c.minAssurance]) miss.push('challenge_bound');
+  if (r.kinds.length < c.minEvidenceKinds) miss.push('second_kind');
   return miss;
 }
