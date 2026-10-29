@@ -11,7 +11,7 @@ import { ToastProvider, TableLabels } from './components/shared/ui';
 // Pages
 import PublicHome from './pages/public/Home';
 import Pricing from './pages/public/Pricing';
-import Demo, { DemoSide } from './pages/public/Demo';
+import Demo from './pages/public/Demo';
 import Audience from './pages/public/Audience';
 import SignIn from './pages/public/SignIn';
 import Legal from './pages/public/Legal';
@@ -70,6 +70,7 @@ import AdminMessages from './pages/admin/Messages';
 import Developers from './pages/public/Developers';
 import DevAccess from './pages/public/DevAccess';
 import DevBar from './components/DevBar';
+import DemoBar from './components/DemoBar';
 import AdminLayout from './pages/admin/Layout';
 import AdminOverview from './pages/admin/Overview';
 import AdminEmployers from './pages/admin/Employers';
@@ -107,7 +108,7 @@ export default function App() {
               <Route path="/colleges" element={<Audience side="colleges" />} />
               <Route path="/employers" element={<Audience side="employers" />} />
               <Route path="/demo" element={<Demo />} />
-              <Route path="/demo/:side" element={<DemoSide />} />
+              <Route path="/demo/:side" element={<Navigate to="/demo" replace />} />
               <Route path="/signin" element={<SignIn />} />
               <Route path="/legal/:page" element={<Legal />} />
               <Route path="/developers" element={<Developers />} />
@@ -224,6 +225,7 @@ export default function App() {
             </Routes>
           </PageTransition>
           <DevBar />
+          <DemoBar />
         </BrowserRouter>
         </ToastProvider>
       </AuthProvider>

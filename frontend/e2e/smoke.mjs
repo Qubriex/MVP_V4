@@ -25,7 +25,7 @@ const BASE = process.env.BASE || 'http://localhost:3000';
 const OUT = process.argv.includes('--out') ? process.argv[process.argv.indexOf('--out') + 1] : null;
 const PASSWORD = 'QubirexTest2026!';
 
-const PUBLIC = ['/', '/pricing', '/learners', '/colleges', '/employers', '/demo', '/demo/learner', '/demo/college', '/demo/employer', '/signin',
+const PUBLIC = ['/', '/pricing', '/learners', '/colleges', '/employers', '/demo', '/signin',
   '/legal/privacy', '/legal/terms', '/legal/dpdp', '/legal/grievance', '/developers', '/dev', '/login', '/learner-login', '/employer/login', '/employer/register', '/admin/login', '/verify', '/verify/QBX-DEMO-0000'];
 const ROLES = {
   learner: { login: async (p) => { await p.goto(`${BASE}/learner-login`); await p.fill('#lref', 'TEST-LRNR-001'); await p.fill('#leng', 'QX-FSD-T01'); await p.fill('#lpin', '410585'); await p.click('form button[type=submit]'); await p.waitForURL(/\/learn\//); },
@@ -38,7 +38,7 @@ const ROLES = {
   admin: { login: async (p) => { await p.goto(`${BASE}/admin/login`); await p.fill('#em', 'test.admin@qubirex.local'); await p.fill('#pw', PASSWORD); await p.click('form button[type=submit]'); await p.waitForURL(/\/admin\/(?!login)/); },
     routes: ['/admin/overview', '/admin/employers', '/admin/ontology', '/admin/quality', '/admin/messages'] }
 };
-const AXE_PAGES = new Set(['/', '/learn/dashboard', '/institution/home', '/employer/home', '/verify']);
+const AXE_PAGES = new Set(['/', '/demo', '/dev', '/learn/dashboard', '/institution/home', '/employer/home', '/verify']);
 
 const results = [];
 const titles = new Map();

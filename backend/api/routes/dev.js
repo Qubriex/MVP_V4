@@ -214,6 +214,21 @@ router.post('/skip-waits', requireUnlock, async (req, res) => {
   res.json({ ok: true, done });
 });
 
+// ─── All pages: the ids behind the pages that need one ─────────────────────────
+router.get('/route-ids', requireUnlock, async (req, res) => {
+  const one = async (sql, ...a) => (await dal.one(sql, ...a)) || {};
+  const el = DEV_ACCOUNTS.learner_te.elId;
+  res.json({
+    engagement_id: (await one('SELECT engagement_id AS id FROM engagement_learners WHERE id = ?', el)).id || null,
+    bridge_id: (await one("SELECT id FROM bridge_programmes WHERE institution_id = ? ORDER BY created_at LIMIT 1", TEST_INSTITUTION_ID)).id || null,
+    mastery_log_id: (await one('SELECT id FROM mastery_logs WHERE learner_id = ? ORDER BY produced_at DESC LIMIT 1', DEV_ACCOUNTS.learner_te.learnerId)).id || null,
+    role_id: (await one('SELECT id FROM employer_roles WHERE employer_id = ? ORDER BY created_at LIMIT 1', DEV_ACCOUNTS.employer_verified.employerId)).id || null,
+    candidate_id: (await one('SELECT id FROM employer_pipeline WHERE employer_id = ? ORDER BY created_at LIMIT 1', DEV_ACCOUNTS.employer_verified.employerId)).id || null,
+    evidence_id: (await one('SELECT evidence_id AS id FROM credentials WHERE learner_id = ? AND active = 1 ORDER BY created_at DESC LIMIT 1', DEV_ACCOUNTS.learner_te.learnerId)).id || null,
+    job_id: 'job-001'
+  });
+});
+
 // ─── Build info ────────────────────────────────────────────────────────────────
 function buildFile() {
   try { return JSON.parse(fs.readFileSync(path.join(ROOT, 'config/build-info.json'), 'utf8')); } catch { return {}; }

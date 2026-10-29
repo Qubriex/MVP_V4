@@ -1,220 +1,118 @@
-// src/pages/public/Demo.js — /demo (launcher) and /demo/learner,
-// /demo/college, /demo/employer. Sample data only; nothing calls the server
-// or is saved. Every demo page has the demo banner (Exit demo) and
-// "← Back to home". The learner demo speaks and listens in the selected
-// language using the browser's own voice and speech recognition.
+// src/pages/public/Demo.js — /demo, "Try Qubirex as…": the working demo.
+// The visitor picks a sample person and gets a private sandbox (a small sample
+// college with students and employers, backend api/routes/demo.js) where every
+// feature really works: real API, real data, real AI within limits. Nothing is
+// sent anywhere and it deletes itself after a few hours. The old screen-only
+// demo pages (/demo/learner, /demo/college, /demo/employer) redirect here.
 import React, { useEffect, useRef, useState } from 'react';
-import { Link, Navigate, useParams } from 'react-router-dom';
-import { Mic, Square, Volume2, CheckCircle2, Circle, Send } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Play, Loader2, CheckCircle2, Info } from 'lucide-react';
 import PublicShell, { BackHome } from '../../components/public/PublicShell';
-import DemoTour from '../../components/public/DemoTour';
-import Drawer from '../../components/shared/Drawer';
-import { Bar } from '../../components/learn/ui';
-import { useUiLang, UI_LANGS, LANG_CODE } from '../../context/UiLangContext';
-import { useSpeechInput } from '../../utils/voice';
-import { demoSpeak, demoStop } from '../../utils/demoVoice';
-import { BandPill, BandBar } from '../../components/shared/ui';
-import { Select } from '../../components/shared/ui';
+import { useAuth } from '../../context/AuthContext';
+import { useUiLang } from '../../context/UiLangContext';
+import api from '../../utils/api';
+import { PERSONAS, startDemo } from '../../utils/demoAccess';
 
-const COHORT = { ready: 9, nearly: 14, building: 21 };
-const CANDIDATES = [[1, 86, 'ready'], [2, 82, 'ready'], [3, 74, 'nearly'], [4, 66, 'nearly']];
+const SETUP_STEPS = ['demo2.setup1', 'demo2.setup2', 'demo2.setup3', 'demo2.setup4'];
+const TURNSTILE_KEY = process.env.REACT_APP_TURNSTILE_SITE_KEY || '';
 
-// Answer check for the sample lesson: any of these words counts as right.
-const KEYWORDS = /match|both|same|common|రెండు|సరిపో|ఒకే|दोनों|मेल|समान|एक ही/i;
-
-function LearnerDemo() {
-  const { t, lang } = useUiLang();
-  const bcp47 = (UI_LANGS.find(l => l.id === lang) || UI_LANGS[2]).bcp47;
-  const [step, setStep] = useState('start'); // start | lesson | answered
-  const [chat, setChat] = useState([]);
-  const [typed, setTyped] = useState('');
-  const [note, setNote] = useState('');
-  const [speaking, setSpeaking] = useState(false);
-  const [done, setDone] = useState(false);
-  const say = async (text) => {
-    setNote(''); setSpeaking(true);
-    const r = await demoSpeak(text, bcp47);
-    setSpeaking(false);
-    if (r === 'novoice') setNote(t('demo.noVoice'));
-    if (r === 'unsupported') setNote(t('demo.noSpeech'));
-  };
-  const reply = (answer, heard = true) => {
-    const ok = heard && KEYWORDS.test(answer);
-    const text = !heard ? t('demo.l.heardAudio') : ok ? t('demo.l.correct') : t('demo.l.hint');
-    setChat(c => [...c, { who: 'you', text: answer }, { who: 'q', text }]);
-    if (ok || !heard) { setDone(true); setStep('answered'); }
-    say(text);
-  };
-  const mic = useSpeechInput({
-    lang: bcp47,
-    onFinal: (text) => reply(text),
-    // Browsers without speech recognition record audio instead; the demo
-    // cannot turn that into text without the server, so it says so kindly.
-    onAudio: () => reply(t('demo.l.voiceNote'), false)
-  });
-  useEffect(() => () => demoStop(), []);
-  // Language changed: restart the lesson in the new language.
-  useEffect(() => { demoStop(); setChat([]); setStep('start'); setDone(false); setNote(''); }, [lang]);
-  const micError = mic.error ? (/blocked/i.test(mic.error) ? t('demo.micBlocked') : /not available/i.test(mic.error) ? t('demo.micNone') : t('demo.micRetry')) : '';
-  const start = () => { setStep('lesson'); setChat([{ who: 'q', text: t('demo.l.lesson') }, { who: 'q', text: t('demo.l.question') }]); say(`${t('demo.l.lesson')} ${t('demo.l.question')}`); };
-  return (
-    <div className="ln-grid ln-g-2" style={{ gap: 20, alignItems: 'start' }}>
-      <section className="pb-phone ln-col" style={{ gap: 10 }} aria-label={t('demo.learnerTitle')} data-tour="lesson">
-        <b style={{ fontSize: 'var(--fs-h3)' }}>{t('demo.l.hello')}</b>
-        <span className="ln-small">{t('demo.l.today')}</span>
-        {step === 'start' && <button type="button" className="ln-btn ln-btn-primary ln-btn-lg" onClick={start}><Volume2 size={18} aria-hidden="true" />{t('demo.l.start')}</button>}
-        {chat.map((m, i) => (
-          <div key={i} className={`demo-msg ${m.who === 'you' ? 'is-you' : ''}`}>{m.text}</div>
-        ))}
-        {step === 'lesson' && (
-          <div className="ln-col" style={{ gap: 8 }}>
-            <div className="ln-row ln-wrap" style={{ gap: 8 }}>
-              <button type="button" className={`ln-btn ${mic.listening ? 'ln-btn-primary' : 'ln-btn-secondary'}`} onClick={() => (mic.listening ? mic.stop() : (demoStop(), mic.start()))} aria-pressed={mic.listening} disabled={!mic.supported}>
-                {mic.listening ? <><Square size={16} aria-hidden="true" />{t('demo.l.stopMic')}</> : <><Mic size={16} aria-hidden="true" />{t('demo.l.speak')}</>}
-              </button>
-              <button type="button" className="ln-btn" onClick={() => say(t('pub.demo.whichRowsDoesAn'))} disabled={speaking}><Volume2 size={16} aria-hidden="true" />{t('demo.l.replay')}</button>
-            </div>
-            {mic.listening && <span className="ln-small ln-muted" aria-live="polite">{mic.interim || t('demo.l.listening')}</span>}
-            {!mic.supported && <span className="ln-small" role="alert">{t('demo.micNone')}</span>}
-            <form data-tour="answer" className="ln-row" style={{ gap: 6 }} onSubmit={e => { e.preventDefault(); if (typed.trim()) { reply(typed.trim()); setTyped(''); } }}>
-              <label htmlFor="demo-answer" className="ln-sr">{t('demo.l.typeLabel')}</label>
-              <input id="demo-answer" className="ln-input" value={typed} onChange={e => setTyped(e.target.value)} placeholder={t('demo.l.typeLabel')} />
-              <button type="submit" className="ln-btn ln-btn-sm" aria-label={t('demo.l.send')}><Send size={16} aria-hidden="true" /></button>
-            </form>
-          </div>
-        )}
-        {(note || micError) && <span className="ln-small" role="alert" style={{ color: 'var(--warn)' }}>{micError || note}</span>}
-        {step === 'answered' && <button type="button" className="ln-btn ln-btn-sm" onClick={start}>{t('demo.l.again')}</button>}
-      </section>
-      <section className="ln-card" style={{ gap: 8 }} data-tour="record">
-        <b>{t('demo.l.passport')}</b>
-        {[['demo.l.skill1', true], ['demo.l.skill2', done], ['demo.l.skill3', false]].map(([k, ok]) => <span key={k} className="ln-row ln-small" style={{ gap: 8 }}>{ok ? <CheckCircle2 size={16} style={{ color: 'var(--ok)' }} aria-label={t('common.done')} /> : <Circle size={16} aria-label={t('common.notDone')} />}{t(k)}</span>)}
-        <span className="ln-xs ln-muted">{t('demo.l.passportNote')}</span>
-      </section>
-    </div>
-  );
+// Cloudflare Turnstile, only when the site key is set at build time.
+function useTurnstile(ref) {
+  const [token, setToken] = useState('');
+  useEffect(() => {
+    if (!TURNSTILE_KEY || !ref.current) return undefined;
+    let id = null;
+    const render = () => { if (window.turnstile && ref.current) id = window.turnstile.render(ref.current, { sitekey: TURNSTILE_KEY, callback: setToken }); };
+    if (window.turnstile) render();
+    else {
+      const s = document.createElement('script');
+      s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js'; s.async = true; s.onload = render;
+      document.head.appendChild(s);
+    }
+    return () => { try { if (id != null) window.turnstile.remove(id); } catch { /* gone */ } };
+  }, [ref]);
+  return token;
 }
 
-const inDays = (n) => new Date(Date.now() + n * 86400000).toISOString().slice(0, 10);
-function CollegeDemo() {
-  const { t, lang } = useUiLang();
-  const total = COHORT.ready + COHORT.nearly + COHORT.building;
-  const [open, setOpen] = useState(false);
-  const [list, setList] = useState([]);
-  const [msg, setMsg] = useState('');
-  const [f, setF] = useState({ skill: 'demo.c.skill1', cohort: 'CSE 2026', due: inDays(14), retest: true });
-  const submit = (e) => {
-    e.preventDefault();
-    setList(l => [...l, { ...f, id: Date.now() }]);
-    setOpen(false);
-    setMsg(t('demo.c.saved'));
-  };
-  return (
-    <div className="ln-col" style={{ gap: 16 }}>
-      <div className="ln-grid ln-g-2" style={{ gap: 20, alignItems: 'start' }}>
-        <section className="ln-card" style={{ gap: 10 }} data-tour="bands">
-          <span className="ln-kicker">{t('demo.c.cohort')}</span>
-          <BandBar counts={COHORT} />
-        </section>
-        <section className="ln-card ln-card-warm" style={{ gap: 8 }} data-tour="bridge">
-          <b>{t('demo.c.nearly', { n: COHORT.nearly })}</b>
-          <button type="button" className="ln-btn ln-btn-primary ln-btn-sm" style={{ alignSelf: 'flex-start' }} onClick={() => setOpen(true)}>{t('demo.c.start')}</button>
-          {msg && <span className="ln-small" role="status">{msg}</span>}
-        </section>
-      </div>
-      <section className="ln-card" style={{ gap: 8 }} aria-live="polite" data-tour="result">
-        <b>{t('demo.c.listTitle')}</b>
-        {list.length === 0 ? <span className="ln-small ln-muted">{t('demo.c.empty')}</span> : list.map(b => (
-          <div key={b.id} className="ln-between ln-wrap ln-small" style={{ gap: 8 }}>
-            <span><b>{t(b.skill)}</b> · {b.cohort}</span>
-            <span className="ln-muted">{t('demo.c.due', { date: new Date(b.due).toLocaleDateString(`${LANG_CODE[lang]}-IN`, { day: 'numeric', month: 'short' }) })}{b.retest ? ` · ${t('demo.c.retestOn')}` : ''}</span>
-            <span className="ln-tag ln-tag-neutral">{t('demo.c.demoOnly')}</span>
-          </div>
-        ))}
-      </section>
-      {open && (
-        <Drawer title={t('demo.c.start')} onClose={() => setOpen(false)}>
-          <form className="ln-col" style={{ gap: 12 }} onSubmit={submit}>
-            <div className="ln-field"><label className="ln-label" htmlFor="db-skill">{t('demo.c.skill')}</label>
-              <Select id="db-skill" value={f.skill} onChange={e => setF(x => ({ ...x, skill: e.target.value }))}>
-                {['demo.c.skill1', 'demo.c.skill2', 'demo.c.skill3'].map(k => <option key={k} value={k}>{t(k)}</option>)}
-              </Select></div>
-            <div className="ln-field"><label className="ln-label" htmlFor="db-cohort">{t('demo.c.cohortLabel')}</label>
-              <Select id="db-cohort" value={f.cohort} onChange={e => setF(x => ({ ...x, cohort: e.target.value }))}>{['CSE 2026', 'ECE 2026'].map(c => <option key={c}>{c}</option>)}</Select></div>
-            <div className="ln-field"><label className="ln-label" htmlFor="db-due">{t('demo.c.dueLabel')}</label>
-              <input id="db-due" type="date" className="ln-input" value={f.due} min={inDays(1)} onChange={e => setF(x => ({ ...x, due: e.target.value }))} required /></div>
-            <label className="ln-check"><input type="checkbox" checked={f.retest} onChange={e => setF(x => ({ ...x, retest: e.target.checked }))} />{t('demo.c.retest')}</label>
-            <div className="ln-note" role="note">{t('demo.c.demoNote')}</div>
-            <div className="ln-row" style={{ gap: 8 }}><button type="submit" className="ln-btn ln-btn-primary">{t('demo.c.create')}</button><button type="button" className="ln-btn" onClick={() => setOpen(false)}>{t('common.cancel')}</button></div>
-          </form>
-        </Drawer>
-      )}
-    </div>
-  );
-}
-
-function EmployerDemo() {
+function Setup() {
   const { t } = useUiLang();
-  const [asked, setAsked] = useState({});
+  const [i, setI] = useState(0);
+  useEffect(() => { const id = setInterval(() => setI(x => Math.min(x + 1, SETUP_STEPS.length - 1)), 450); return () => clearInterval(id); }, []);
   return (
-    <section className="ln-card" style={{ gap: 10 }}>
-      <span className="ln-kicker">{t('demo.e.role')}</span>
-      <div className="ln-tablewrap" data-tour="readiness"><table className="ln-table"><thead><tr><th>{t('demo.e.candidate')}</th><th>{t('demo.e.readiness')}</th><th><span className="ln-sr">{t('demo.e.action')}</span></th></tr></thead>
-        <tbody>{CANDIDATES.map(([n, r, band]) => (
-          <tr key={n}><td>{t('demo.e.cand', { n })}<span className="ln-xs ln-muted" style={{ display: 'block' }}>{t('demo.e.college')}</span></td>
-            <td><BandPill band={band} score={r} /></td>
-            <td data-tour={n === CANDIDATES[0][0] ? 'ask' : undefined}>{asked[n] ? <span className="ln-small ln-muted" role="status">{t('demo.e.asked')}</span> : <button type="button" className="ln-btn ln-btn-sm" onClick={() => setAsked(a => ({ ...a, [n]: true }))}>{t('demo.e.request')}</button>}</td></tr>
-        ))}</tbody></table></div>
-      <span className="ln-xs ln-muted" data-tour="privacy">{t('demo.e.note')}</span>
-    </section>
-  );
-}
-
-const SIDES = { learner: ['demo.learnerKicker', 'demo.learnerTitle', 'demo.learnerText', LearnerDemo], college: ['demo.collegeKicker', 'demo.collegeTitle', 'demo.collegeText', CollegeDemo], employer: ['demo.employerKicker', 'demo.employerTitle', 'demo.employerText', EmployerDemo] };
-
-export function DemoSide() {
-  const { t } = useUiLang();
-  const { side } = useParams();
-  if (!SIDES[side]) return <Navigate to="/demo" replace />;
-  const [kicker, title, text, Comp] = SIDES[side];
-  return (
-    <PublicShell demo>
-      <div className="ln-row ln-wrap" style={{ gap: 18 }}><BackHome /><Link to="/demo" className="ln-link pb-back">{t('demo.allDemos')}</Link></div>
-      <header className="ln-col" style={{ gap: 6 }}>
-        <span className="pb-kicker">{t(kicker)}</span>
-        <h1 className="ln-title">{t(title)}</h1>
-        <span className="ln-sub">{t(text)}</span>
-      </header>
-      <DemoTour side={side} />
-      <Comp />
-      <p className="ln-xs ln-muted">{t('demo.footer')}</p>
-    </PublicShell>
+    <div className="dm-setup" role="status" aria-live="polite">
+      <Loader2 size={28} className="dm-spin" aria-hidden="true" />
+      <b style={{ fontSize: 'var(--fs-h3)' }}>{t('demo2.settingUp')}</b>
+      <ul className="ln-col" style={{ gap: 6, margin: 0, padding: 0, listStyle: 'none' }}>
+        {SETUP_STEPS.map((k, n) => (
+          <li key={k} className="ln-row ln-small" style={{ gap: 8, opacity: n <= i ? 1 : 0.45 }}>
+            {n < i ? <CheckCircle2 size={16} aria-hidden="true" /> : <span className="dm-dot" aria-hidden="true" />}{t(k)}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
 export default function Demo() {
   const { t } = useUiLang();
+  const { login, logout } = useAuth();
+  const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const [status, setStatus] = useState(null);
+  const [busy, setBusy] = useState('');
+  const [error, setError] = useState('');
+  const box = useRef(null);
+  const turnstile = useTurnstile(box);
+
+  useEffect(() => { api.get('/demo/status').then(r => setStatus(r.data)).catch(() => setStatus({ enabled: false })); }, []);
+
+  const start = async (persona) => {
+    setBusy(persona); setError('');
+    try { await startDemo(persona, { login, logout, navigate }, turnstile ? { turnstile } : {}); } catch (e) {
+      const msg = e?.response?.data?.error?.message;
+      setError(msg || t('demo2.startFailed')); setBusy('');
+    }
+  };
+
   return (
-    <PublicShell demo>
+    <PublicShell>
       <BackHome />
       <header className="ln-col" style={{ gap: 8 }}>
         <span className="pb-kicker">{t('nav.demo')}</span>
-        <h1 className="ln-title">{t('demo.title')}</h1>
-        <span className="ln-sub">{t('demo.sub')}</span>
+        <h1 className="ln-title">{t('demo2.title')}</h1>
+        <span className="ln-sub">{t('demo2.sub')}</span>
       </header>
-      <section className="ln-grid ln-g-3" style={{ gap: 16 }}>
-        {Object.entries(SIDES).map(([id, [kicker, title, text]]) => (
-          <article key={id} className="ln-card" style={{ gap: 8 }}>
-            <span className="pb-kicker">{t(kicker)}</span><b style={{ fontSize: 'var(--fs-h3)' }}>{t(title)}</b><span className="ln-small ln-muted">{t(text)}</span>
-            <Link to={`/demo/${id}`} className="ln-btn ln-btn-primary ln-btn-sm" style={{ alignSelf: 'flex-start', marginTop: 'auto' }}>{t(`demo.open.${id}`)}</Link>
-          </article>
-        ))}
+      {params.get('ended') && <p className="ln-card ln-small" role="status" style={{ margin: 0 }}>{t('demo2.ended')}</p>}
+      {status && !status.enabled && <p className="ln-card ln-small" role="status" style={{ margin: 0 }}>{t('demo2.off')}</p>}
+      {error && <p className="ln-small" role="alert" style={{ color: 'var(--color-danger)', margin: 0 }}>{error}</p>}
+      {busy ? <Setup /> : (
+        <section className="dm-personas" aria-label={t('demo2.peopleLabel')}>
+          {PERSONAS.map(p => (
+            <article key={p.key} className="ln-card dm-persona" style={{ gap: 8 }}>
+              <div className="ln-row" style={{ gap: 12 }}>
+                <span className={`dm-avatar dm-tone-${p.tone}`} aria-hidden="true">{p.initials}</span>
+                <div className="ln-col" style={{ gap: 2 }}>
+                  <b style={{ fontSize: 'var(--fs-h3)' }}>{t(`demo2.p.${p.key}.name`)}</b>
+                  <span className="ln-small ln-muted">{t(`demo2.p.${p.key}.role`)}</span>
+                </div>
+              </div>
+              <span className="pb-kicker">{t(`demo2.side.${p.side}`)}</span>
+              <span className="ln-small">{t(`demo2.p.${p.key}.try`)}</span>
+              <button type="button" className="ln-btn ln-btn-primary" style={{ marginTop: 'auto' }} disabled={!status?.enabled || (TURNSTILE_KEY && !turnstile)} onClick={() => start(p.key)}>
+                <Play size={16} aria-hidden="true" />{t('demo2.start')}
+              </button>
+            </article>
+          ))}
+        </section>
+      )}
+      {TURNSTILE_KEY && <div ref={box} />}
+      <section className="ln-card" style={{ gap: 8 }} aria-labelledby="dm-real">
+        <b id="dm-real" className="ln-row" style={{ gap: 8 }}><Info size={18} aria-hidden="true" />{t('demo2.realTitle')}</b>
+        <ul className="ln-small" style={{ margin: 0, paddingLeft: 18, display: 'grid', gap: 4 }}>
+          {['demo2.real1', 'demo2.real2', 'demo2.real3', 'demo2.real4', 'demo2.real5'].map(k => <li key={k}>{t(k)}</li>)}
+        </ul>
+        {status?.ai_mode && status.ai_mode !== 'live' && <span className="ln-xs ln-muted">{t(status.ai_mode === 'cached_no_key' ? 'demo2.cachedNoKey' : 'demo2.cachedDaily')}</span>}
       </section>
-      <section className="ln-card ln-between ln-wrap" style={{ gap: 10 }}>
-        <span className="ln-small"><b>{t('demo.verifyTitle')}</b> {t('demo.verifyText')}</span>
-        <Link to="/verify/QBX-DEMO-0000" className="ln-btn ln-btn-secondary ln-btn-sm">{t('demo.verifyCta')}</Link>
-      </section>
-      <p className="ln-xs ln-muted">{t('demo.footer')}</p>
     </PublicShell>
   );
 }

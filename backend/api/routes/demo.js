@@ -180,17 +180,41 @@ router.post('/switch', requireSandbox, async (req, res) => {
   res.json({ ...await personaSession(req, res, req.sandbox, persona), persona, ends_at: endsAt(req.sandbox) });
 });
 
+// Guided-story steps done, read from what the visitor actually did in the
+// sandbox (plus any marked by hand).
+async function storyProgress(sb) {
+  const ids = idsFor(sb.id);
+  const e1 = ids.employer('e1');
+  const stages = (await dal.all('SELECT stage FROM employer_pipeline WHERE employer_id = ?', e1)).map(r => r.stage);
+  const after = (list) => stages.some(st => list.includes(st));
+  const roles = Number((await dal.one('SELECT COUNT(*) AS n FROM employer_roles WHERE employer_id = ?', e1)).n);
+  const lesson = await dal.one('SELECT 1 FROM learning_sessions WHERE engagement_learner_id = ? AND started_at >= ?', ids.el('l01'), sb.created_at.replace('T', ' ').slice(0, 19));
+  const bridge = await dal.one('SELECT 1 FROM bridge_programmes WHERE institution_id = ?', ids.institution);
+  const done = new Set();
+  if (roles > 2) done.add('jd');
+  if (stages.length) { done.add('search'); done.add('request'); }
+  if (after(['access_granted', 'interview', 'dayone', 'offer', 'hired'])) done.add('approve');
+  if (after(['interview', 'dayone', 'offer', 'hired'])) done.add('unlocked');
+  if (after(['dayone', 'offer', 'hired'])) done.add('dayone');
+  if (lesson) done.add('lesson');
+  if (bridge) done.add('bridge');
+  let marked = [];
+  try { marked = JSON.parse(sb.story_json || '[]'); } catch { marked = []; }
+  marked.forEach(m => done.add(m));
+  return STORY_STEPS.filter(st => done.has(st));
+}
+
 router.get('/me', requireSandbox, async (req, res) => {
   const sb = req.sandbox;
   const ids = idsFor(sb.id);
   const unread = Number((await dal.one('SELECT COUNT(*) AS n FROM outbound_messages WHERE sandbox_id = ?', sb.id)).n);
   const ev = await dal.one('SELECT evidence_id FROM credentials WHERE learner_id = ? AND active = 1', ids.learner('l01'));
-  let story = [];
-  try { story = JSON.parse(sb.story_json || '[]'); } catch { story = []; }
+  const story = await storyProgress(sb);
   res.set('Cache-Control', 'no-store');
   res.json({
     persona: sb.persona, ends_at: endsAt(sb), started_at: sb.created_at, story, steps: STORY_STEPS, inbox_count: unread,
-    ai: await demoAiState(sb.id), limits: demoLimits(), sample_jd: SAMPLE_JD, lakshmi_evidence_id: ev?.evidence_id || null
+    ai: await demoAiState(sb.id), limits: demoLimits(), sample_jd: SAMPLE_JD, lakshmi_evidence_id: ev?.evidence_id || null,
+    sample_role_id: `${ids.employer('e1')}-r1`, lakshmi_ref: ids.el('l01')
   });
 });
 

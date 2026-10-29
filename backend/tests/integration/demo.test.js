@@ -11,6 +11,9 @@ import { benchmarks } from '../../core/benchmarks.js';
 import { idsFor } from '../../core/demo/world.js';
 import { deleteExpired } from '../../core/demo/cleanup.js';
 import { freshDb, makeApp, seedInstitution, seedAdmin, login, PIN, PASSWORD } from '../helpers/setup.js';
+import { setResponder } from '../../core/ai/adapters/mock.js';
+import { createWorker } from '../../core/events/worker.js';
+import { registerHandlers } from '../../core/events/handlers.js';
 
 let app; let real;
 const bearer = (t) => ({ Authorization: `Bearer ${t}` });
@@ -221,6 +224,37 @@ describe('the cross-side loop, inbox and story', () => {
     await request(app).post('/api/institution/team/invite').set(as(v)).send({ email: 'new.prof@example.com', name: 'New Prof', role: 'professor', cohort_ids: [ids.engTe] });
     const rows = await dal.all('SELECT status, sandbox_id FROM outbound_messages WHERE to_email = ?', 'new.prof@example.com');
     rows.forEach(r => expect(r).toMatchObject({ status: 'demo_inbox', sandbox_id: v.sbx }));
+  });
+});
+
+describe('Lakshmi learns in the demo', () => {
+  it('lesson → check → the skill is mastered and her demo Passport updates (still demo-signed)', async () => {
+    registerHandlers();
+    const restore = setResponder((req) => {
+      if (req.task === 'EVAL.mastery') return { passed: true, score: 0.92, evaluation: 'ok', feedbackForLearner: 'Well done', loopApproachIfFailed: 'concept_not_understood', understandingGaps: [] };
+      if (req.task === 'EVIDENCE.conceptItem') return { question: 'How would you build a small form in React?' };
+      return { message: 'lesson', captionEn: 'caption', decision: 'CHECK', behaviourSignal: 'engaged' };
+    });
+    try {
+      const v = await visitor('lakshmi');
+      const before = (await request(app).get('/api/learner/passport').set(as(v))).body;
+      expect(before).toMatchObject({ issued: true, version: 1 });
+      const start = await request(app).post('/api/learner/session/start').set(as(v)).send({});
+      expect(start.status).toBe(200);
+      const check = await request(app).post('/api/learner/session/message').set(as(v)).send({ content: 'I know a bit', session_id: start.body.session_id });
+      expect(check.body.decision).toBe('CHECK');
+      const answer = await request(app).post('/api/learner/session/message').set(as(v)).send({ content: 'A controlled input keeps its value in state and updates it on change.', session_id: start.body.session_id,
+        provenance: { mode: 'typed', pasted_chars: 0, paste_events: 0, largest_paste: 0 } });
+      expect(answer.body).toMatchObject({ result: 'advance', passed: true });
+      await createWorker().tick();
+      const after = (await request(app).get('/api/learner/passport').set(as(v))).body;
+      expect(after.version).toBe(2);
+      expect(after.evidence_id).toBe(before.evidence_id);
+      const nodes = (p) => p.skills.reduce((n, sk) => n + (sk.nodes?.length || 0), 0);
+      expect(nodes(after)).toBeGreaterThan(nodes(before));
+      expect((await request(app).get(`/api/verify/${after.evidence_id}`)).body).toMatchObject({ demo: true, version: 2 });
+      expect((await v.agent.get('/api/demo/me')).body.story).toContain('lesson');
+    } finally { restore(); }
   });
 });
 

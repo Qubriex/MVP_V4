@@ -115,7 +115,7 @@ export function BridgeList() {
       <header className="ln-pagehead">
         <div className="ln-col" style={{ gap: 4 }}><h1 className="ln-title">{t('inst.bridges.bridgeProgrammes')}</h1>
           <span className="ln-sub">{t('inst.bridges.shortExtraPracticeSkills')}</span></div>
-        {canEdit && !creating && <button type="button" className="ln-btn ln-btn-primary" onClick={() => setParams({ new: '1' })}><Plus size={16} aria-hidden="true" />{t('inst.bridges.newBridgeProgramme')}</button>}
+        {canEdit && !creating && <button type="button" data-demo="bridge" className="ln-btn ln-btn-primary" onClick={() => setParams({ new: '1' })}><Plus size={16} aria-hidden="true" />{t('inst.bridges.newBridgeProgramme')}</button>}
       </header>
       {creating && canEdit && <NewBridge onCreated={(id) => { dropCached('/institution/bridges'); navigate(`/institution/bridges/${id}`); }} onCancel={() => setParams({})} />}
       {error && !data && <div className="ln-error">{errMsg(error, t('inst.bridges.couldnTLoadBridge'))}</div>}

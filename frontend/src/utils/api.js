@@ -28,9 +28,12 @@ api.interceptors.response.use(
   err => {
     // The developer page's own calls (/dev/*) answer 401 while it is locked;
     // that says nothing about the signed-in session.
-    const devCall = /^\/dev\//.test(String(err.config?.url || '').replace(/^https?:\/\/[^/]+/, '').replace(/^\/api/, ''));
+    // The same for the demo's own calls (/demo/*).
+    const devCall = /^\/(dev|demo)\//.test(String(err.config?.url || '').replace(/^https?:\/\/[^/]+/, '').replace(/^\/api/, ''));
     if (err.response?.status === 401 && !devCall) {
       const wasDev = !!localStorage.getItem('qubirex_dev');
+      const wasDemo = !!localStorage.getItem('qubirex_demo');
+      localStorage.removeItem('qubirex_demo');
       const role = localStorage.getItem('qubirex_role');
       // Signed out because the account was used on another device: say so on the sign-in page.
       const e = err.response?.data?.error;
@@ -41,7 +44,8 @@ api.interceptors.response.use(
       localStorage.removeItem('qubirex_role');
       localStorage.removeItem('qubirex_dev');
       // A developer session that ended goes back to /dev, not a sign-in form.
-      const home = wasDev ? '/dev' : { learner: '/learner-login', employer: '/employer/login', admin: '/admin/login' }[role] || '/login';
+      // A demo that ended (4 hours, or 2 idle) goes back to /demo to start again.
+      const home = wasDemo ? '/demo?ended=1' : wasDev ? '/dev' : { learner: '/learner-login', employer: '/employer/login', admin: '/admin/login' }[role] || '/login';
       // Only pages inside a portal send you to sign in. Public pages (home,
       // demo, pricing, verify, Talk to us, sign-in screens) stay where they are.
       const inPortal = /^\/(learn|institution|employer|admin)\//.test(window.location.pathname)
