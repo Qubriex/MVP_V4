@@ -8,11 +8,14 @@ const require = createRequire(import.meta.url);
 let chromium;
 try { ({ chromium } = require('playwright')); } catch { ({ chromium } = require(path.join(process.env.NODE_PATH || '/opt/node22/lib/node_modules', 'playwright'))); }
 const BASE = process.env.BASE || 'http://localhost:3000';
+// A Vercel deployment behind Deployment Protection: VERCEL_BYPASS is the
+// project's "Protection Bypass for Automation" secret (never committed).
+const BYPASS = process.env.VERCEL_BYPASS ? { extraHTTPHeaders: { 'x-vercel-protection-bypass': process.env.VERCEL_BYPASS, 'x-vercel-set-bypass-cookie': 'true' } } : {};
 const results = [];
 const check = (point, ok, detail = '') => { results.push([point, ok, detail]); console.log(`${ok ? '✓' : '✗'} ${point}${detail ? ` — ${detail}` : ''}`); };
 
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM || undefined, args: ['--autoplay-policy=no-user-gesture-required'] });
-const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+const ctx = await browser.newContext({ ...BYPASS, viewport: { width: 1280, height: 900 } });
 const page = await ctx.newPage();
 // Record real playback: every audio element that actually starts playing.
 await page.addInitScript(() => {

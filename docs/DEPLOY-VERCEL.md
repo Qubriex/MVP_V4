@@ -172,6 +172,68 @@ testing is done. Never set `QBX_SEED_TEST_DATA` on a production database
 that real users depend on without first agreeing to the public test
 passwords it creates.
 
+## Working demo (/demo)
+
+`/demo` ("Try Qubirex as…") lets any visitor pick a sample person and use the
+real product on a private sample college: their **sandbox**. It is created
+in well under 2 seconds and deleted after 2 hours idle, or 4 hours at most.
+It is off unless the deployment sets `DEMO_ENABLED=true`.
+
+| Name | Default | What it does |
+|---|---|---|
+| `DEMO_ENABLED` | off | `true` turns the working demo on |
+| `DEMO_AI_DAILY_LIMIT` | `1500` | AI calls a day, for all demos together. Past it the demo uses ready-made sample content. |
+| `DEMO_AI_PER_SANDBOX` | `25` | AI text calls per visitor |
+| `DEMO_VOICE_SECONDS` | `480` | Seconds of spoken voice per visitor (8 minutes) |
+| `DEMO_MAX_ACTIVE` | `300` | Sandboxes alive at once; above it, new starts are asked to wait |
+| `DEMO_STARTS_PER_HOUR` | `5` | New demos per visitor IP per hour |
+| `TURNSTILE_SECRET_KEY` + `REACT_APP_TURNSTILE_SITE_KEY` | not set | Optional Cloudflare Turnstile bot check on Start (both needed) |
+
+Nothing else is needed:
+- The demo signing key is generated once and kept in the database, apart
+  from the real key. It is never published in the JWKS, so demo Passports
+  can't pass as real ones.
+- Expired sandboxes are deleted on each new demo start and by the daily cron.
+- To change a limit, edit the variable in Vercel → Settings → Environment
+  Variables and redeploy. **Admin → `/api/admin/demo`** shows active
+  sandboxes and today's AI use.
+
+What a sandbox can never do:
+- It can't see or be seen by real users, the test tenant or another sandbox.
+- It never sends email, WhatsApp or SMS: messages go to the visitor's Demo
+  inbox.
+- It never takes payments.
+- It can't reach `/admin` or `/dev`.
+
+## Staging (a test copy with a link that never changes)
+
+Use staging for the developer login and for checking a change before it
+reaches the live site.
+
+1. **Branch:** push a `staging` branch. Vercel deploys it as a Preview.
+2. **Database:** Vercel → Storage → Create Database → Neon, region **Asia
+   Pacific (Mumbai) aws-ap-south-1**. Connect it to **Preview** only, so the
+   live site keeps its own database.
+3. **Variables, Preview only:**
+   - `DEV_LOGIN_ENABLED=true`;
+   - `QBX_SEED_TEST_DATA=1`;
+   - `DEMO_ENABLED=true`;
+   - `DEV_LOGIN_SECRET`, made by you (see "Developer login").
+4. **A fixed link:** Vercel → Settings → Domains → Add
+   `staging-<your-project>.vercel.app` (or `staging.<your-domain>`) and set
+   its Git branch to `staging`. Every deploy of `staging` then appears at
+   that same link.
+5. **Who can open it:** keep Settings → Deployment Protection → Vercel
+   Authentication **on for Preview**, so only people signed in to your
+   Vercel team can reach staging. The `/dev` passcode is a second lock. For
+   testers outside the team:
+   - **Shareable link:** open the deployment → Share → "Anyone with the
+     link". This is simplest; revoke it when testing ends.
+   - **Protection bypass for automation:** Settings → Deployment Protection
+     → Protection Bypass for Automation → generate a secret. Scripts send it
+     as the `x-vercel-protection-bypass` header. This is for Playwright and
+     CI, not people.
+
 ## Before a real launch
 
 The quick start keeps secrets in the database. Anyone who can read the

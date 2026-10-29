@@ -22,6 +22,9 @@ try { ({ chromium } = require('playwright')); } catch { ({ chromium } = require(
 const here = path.dirname(fileURLToPath(import.meta.url));
 const AXE = fs.readFileSync(require.resolve('axe-core/axe.min.js', { paths: [path.join(here, '..')] }), 'utf8');
 const BASE = process.env.BASE || 'http://localhost:3000';
+// A Vercel deployment behind Deployment Protection: VERCEL_BYPASS is the
+// project's "Protection Bypass for Automation" secret (never committed).
+const BYPASS = process.env.VERCEL_BYPASS ? { extraHTTPHeaders: { 'x-vercel-protection-bypass': process.env.VERCEL_BYPASS, 'x-vercel-set-bypass-cookie': 'true' } } : {};
 const OUT = process.argv.includes('--out') ? process.argv[process.argv.indexOf('--out') + 1] : null;
 const PASSWORD = 'QubirexTest2026!';
 
@@ -103,11 +106,11 @@ async function checkRoute(context, route, role) {
 
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM || undefined });
 try {
-  const pub = await browser.newContext();
+  const pub = await browser.newContext({ ...BYPASS });
   for (const route of PUBLIC) await checkRoute(pub, route, 'public');
   await pub.close();
   for (const [role, cfg] of Object.entries(ROLES)) {
-    const ctx = await browser.newContext();
+    const ctx = await browser.newContext({ ...BYPASS });
     const p = await ctx.newPage();
     await cfg.login(p);
     let routes = [...cfg.routes];

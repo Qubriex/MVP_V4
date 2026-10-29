@@ -17,6 +17,9 @@ const require = createRequire(import.meta.url);
 let chromium;
 try { ({ chromium } = require('playwright')); } catch { ({ chromium } = require(path.join(process.env.NODE_PATH || '/opt/node22/lib/node_modules', 'playwright'))); }
 const BASE = process.env.BASE || 'http://localhost:3000';
+// A Vercel deployment behind Deployment Protection: VERCEL_BYPASS is the
+// project's "Protection Bypass for Automation" secret (never committed).
+const BYPASS = process.env.VERCEL_BYPASS ? { extraHTTPHeaders: { 'x-vercel-protection-bypass': process.env.VERCEL_BYPASS, 'x-vercel-set-bypass-cookie': 'true' } } : {};
 const results = [];
 const check = (name, ok, detail = '') => { results.push(ok); console.log(`${ok ? '✓' : '✗'} ${name}${detail ? ` — ${detail}` : ''}`); };
 const PERSONAS = [['lakshmi', 'Lakshmi Prasanna', '/learn/dashboard'], ['arjun', 'Arjun Verma', '/learn/welcome'], ['placement', 'Sunita Reddy', '/institution/home'],
@@ -54,7 +57,7 @@ try {
   // ── Every persona ────────────────────────────────────────────────────────────
   const timings = [];
   for (const [key, name, home] of PERSONAS) {
-    const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const ctx = await browser.newContext({ ...BYPASS, viewport: { width: 1440, height: 900 } });
     const page = await ctx.newPage();
     const errors = errorsOf(page);
     const ms = await start(page, name);
@@ -81,7 +84,7 @@ try {
     'Meera Iyer': ['/employer/home', '/employer/company', '/employer/team', '/employer/roles', '/employer/pipeline', '/employer/sponsor', '/employer/colleges', '/employer/verify-bulk', '/employer/templates', '/employer/billing']
   };
   for (const [name, paths] of Object.entries(SWEEP)) {
-    const sctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const sctx = await browser.newContext({ ...BYPASS, viewport: { width: 1440, height: 900 } });
     const sp = await sctx.newPage();
     const sErrors = errorsOf(sp);
     await start(sp, name);
@@ -101,7 +104,7 @@ try {
   }
 
   // ── The cross-side loop, through the UI ──────────────────────────────────────
-  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  const ctx = await browser.newContext({ ...BYPASS, viewport: { width: 1440, height: 900 } });
   const page = await ctx.newPage();
   const errors = errorsOf(page);
   await start(page, 'Meera Iyer');
