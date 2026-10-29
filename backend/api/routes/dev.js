@@ -14,6 +14,7 @@
 //   4. Every unlock, login, reset, skipped wait and end is written to
 //      dev_audit (who, role, when, IP); the passcode never is.
 import express from 'express';
+import jwt from 'jsonwebtoken';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -43,8 +44,15 @@ async function audit(req, action, { accountKey = null, role = null, sessionId = 
   logger.warn('dev_login.' + action, { accountKey, role, ip: clientIp(req) });
 }
 
-// 1. Disabled, misconfigured or not on the allowlist: as if this router did not exist.
-router.use((req, res, next) => (devLoginAvailable(clientIp(req)) ? next() : next('router')));
+// A demo visitor's session token never reaches the developer login.
+const demoToken = (req) => {
+  const h = req.headers.authorization || '';
+  if (!h.startsWith('Bearer ')) return false;
+  try { return !!jwt.decode(h.slice(7))?.demo; } catch { return false; }
+};
+
+// 1. Disabled, misconfigured, not on the allowlist, or a demo session: as if this router did not exist.
+router.use((req, res, next) => (devLoginAvailable(clientIp(req)) && !demoToken(req) ? next() : next('router')));
 
 function unlockCookie(res, token) {
   res.cookie(DEV_UNLOCK_COOKIE, token, {

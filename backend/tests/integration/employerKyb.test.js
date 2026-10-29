@@ -83,7 +83,7 @@ describe('API keys', () => {
     expect(k.body.key).toMatch(/^qbx_[a-z0-9]{8}_/);
     const row = await dal.one('SELECT key_hash, prefix FROM employer_api_keys WHERE id = ?', k.body.id);
     expect(row.key_hash).toMatch(/^\$2[aby]\$/);
-    expect(row.key_hash).not.toContain(k.body.key.split('_')[2]);
+    expect(row.key_hash).not.toContain(k.body.key.split('_').slice(2).join('_')); // the secret may itself contain '_'
     const list = await owner.agent.get('/api/employer/api-keys').expect(200);
     expect(JSON.stringify(list.body)).not.toContain(k.body.key);
     const me = await request(app).get('/api/employer/me').set('X-QBX-API-Key', k.body.key).expect(200);

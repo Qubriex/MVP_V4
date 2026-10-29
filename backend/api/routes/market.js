@@ -11,7 +11,7 @@ import { authenticateToken, requireRole, requireActiveLearner } from '../middlew
 import * as market from '../../core/market/sampleMarket.js';
 import { getLearnerSkillState, classifySkill, scoreJob } from '../../core/market/skillGap.js';
 import { explainJobAloud, explainTopicAloud, interviewTurn } from '../../core/portfolio.js';
-import { aiNotConfigured, AI_NOT_CONFIGURED } from '../../core/ai/gateway.js';
+import { aiNotConfigured, aiUnavailableMessage } from '../../core/ai/gateway.js';
 import { mapSeq } from '../../core/util/seq.js';
 
 const router = express.Router();
@@ -167,7 +167,7 @@ router.get('/jobs/:id/gap', async (req, res) => {
 // tap asks again.
 const readAloudCache = new Map();
 const aiFailure = (res, err, what) => {
-  if (aiNotConfigured(err)) return res.status(503).json({ error: AI_NOT_CONFIGURED });
+  if (aiNotConfigured(err)) return res.status(503).json({ error: aiUnavailableMessage(err) });
   return res.status(502).json({ error: `${what} Please try again.` });
 };
 router.post('/jobs/:id/read-aloud', async (req, res) => {

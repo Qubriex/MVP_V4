@@ -28,7 +28,7 @@ const sha256 = (t) => crypto.createHash('sha256').update(String(t)).digest('hex'
 import { transcribeAudio } from '../../core/portfolio.js';
 import { isValidPin, hashPin, logEvent } from '../../core/access.js';
 import { eachSeq, mapSeq } from '../../core/util/seq.js';
-import { aiNotConfigured, AI_NOT_CONFIGURED, synthesize, recordVoiceMetric } from '../../core/ai/gateway.js';
+import { aiNotConfigured, aiUnavailableMessage, synthesize, recordVoiceMetric } from '../../core/ai/gateway.js';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
@@ -375,7 +375,7 @@ router.post('/session/start', async (req, res) => {
       history: [{ role: 'ai', content: result.message, message_type: 'diagnosis', caption_en: result.captionEn || null }]
     });
   } catch (err) {
-    if (aiNotConfigured(err)) return res.status(503).json({ error: AI_NOT_CONFIGURED });
+    if (aiNotConfigured(err)) return res.status(503).json({ error: aiUnavailableMessage(err) });
     res.status(500).json({ error: 'Failed to start session', detail: err.message });
   }
 });
@@ -486,7 +486,7 @@ async function handleSessionMessage(req, res) {
     }
     return await handleInstructionResult({ req, res, session, node, result });
   } catch (err) {
-    if (aiNotConfigured(err)) return res.status(503).json({ error: AI_NOT_CONFIGURED });
+    if (aiNotConfigured(err)) return res.status(503).json({ error: aiUnavailableMessage(err) });
     req.log?.error('session.message_failed', { error: err });
     res.status(500).json({ error: 'Something went wrong. Please try again.' });
   }
@@ -736,7 +736,7 @@ router.post('/tts', async (req, res) => {
     res.set('X-Voice-Engine', String(out.engine || ''));
     res.send(out.audio);
   } catch (err) {
-    if (aiNotConfigured(err)) return res.status(503).json({ error: AI_NOT_CONFIGURED });
+    if (aiNotConfigured(err)) return res.status(503).json({ error: aiUnavailableMessage(err) });
     const cause = err.cause || err;
     req.log?.warn('tts.failed', { status: cause.status, error: cause.message });
     if (cause.status === 429) {

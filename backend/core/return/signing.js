@@ -59,6 +59,34 @@ function load() {
 
 const b64u = (buf) => Buffer.from(buf).toString('base64url');
 
+// ─── Demo key (public demo sandboxes, migration 0008) ────────────────────────
+// Passports and Mastery Logs made inside a demo sandbox are signed with a
+// separate key, generated once and kept in system_secrets. Its public half is
+// recorded with status 'demo': verifiable, but never in the published JWKS,
+// so no demo credential can pass as a real one.
+let demoCache = null;
+async function loadDemoKey() {
+  if (demoCache) return demoCache;
+  let row = await dal.one("SELECT value FROM system_secrets WHERE name = 'demo_signing_key'");
+  if (!row) {
+    const { privateKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
+    const kid = `demo-${new Date().toISOString().slice(0, 10)}-${crypto.randomBytes(3).toString('hex')}`;
+    await dal.run("INSERT INTO system_secrets (name, value, created_at) VALUES ('demo_signing_key', ?, ?) ON CONFLICT (name) DO NOTHING",
+      JSON.stringify({ kid, pem: privateKey.export({ type: 'pkcs8', format: 'pem' }) }), dal.nowIso());
+    row = await dal.one("SELECT value FROM system_secrets WHERE name = 'demo_signing_key'");
+  }
+  const { kid, pem } = JSON.parse(row.value);
+  const privateKey = crypto.createPrivateKey(pem);
+  const publicKey = crypto.createPublicKey(privateKey);
+  if (!await dal.one('SELECT 1 FROM signing_keys WHERE kid = ?', kid)) {
+    await dal.run("INSERT INTO signing_keys (kid, public_jwk_json, status, created_at) VALUES (?, ?, 'demo', ?) ON CONFLICT (kid) DO NOTHING",
+      kid, JSON.stringify({ ...publicKey.export({ format: 'jwk' }), kid, alg: 'RS256', use: 'sig' }), dal.nowIso());
+  }
+  demoCache = { kid, privateKey };
+  return demoCache;
+}
+export const isDemoKid = (kid) => /^demo-/.test(String(kid || ''));
+
 /** Record the active public key in signing_keys (idempotent) and return its kid. */
 export async function activeKid() {
   const { kid, publicKey } = load();
@@ -69,19 +97,30 @@ export async function activeKid() {
   return kid;
 }
 
-/** Compact JWS (RS256) over a JSON payload. */
-export async function signJws(payload, header = {}) {
-  const kid = await activeKid();
+/** The key to sign with: the real one, or the demo one for a sandbox. */
+async function keyFor(demo) {
+  if (demo) return loadDemoKey();
+  return { kid: await activeKid(), privateKey: load().privateKey };
+}
+
+/** Compact JWS (RS256) over a JSON payload. { demo: true } signs with the demo key. */
+export async function signJws(payload, header = {}, { demo = false } = {}) {
+  const { kid, privateKey } = await keyFor(demo);
   const h = { alg: 'RS256', kid, ...header };
   const input = `${b64u(JSON.stringify(h))}.${b64u(JSON.stringify(payload))}`;
-  const sig = crypto.sign('RSA-SHA256', Buffer.from(input), load().privateKey);
+  const sig = crypto.sign('RSA-SHA256', Buffer.from(input), privateKey);
   return `${input}.${b64u(sig)}`;
 }
 
 /** Detached RS256 signature over canonical bytes (Mastery Log integrity). */
-export async function signBytes(bytes) {
-  const kid = await activeKid();
-  return { kid, alg: 'RS256', signature: b64u(crypto.sign('RSA-SHA256', bytes, load().privateKey)) };
+export async function signBytes(bytes, { demo = false } = {}) {
+  const { kid, privateKey } = await keyFor(demo);
+  return { kid, alg: 'RS256', signature: b64u(crypto.sign('RSA-SHA256', bytes, privateKey)) };
+}
+
+/** The kid new credentials are signed with (the demo kid for a sandbox). */
+export async function signingKid({ demo = false } = {}) {
+  return (await keyFor(demo)).kid;
 }
 
 /**
@@ -118,4 +157,4 @@ export function signingKeyConfigured() {
 }
 
 /** For tests: forget the loaded key. */
-export function resetSigningCache() { cache = null; }
+export function resetSigningCache() { cache = null; demoCache = null; }

@@ -22,9 +22,9 @@ export function makeDisclosure(name, value) {
  * @param {object} payload       always-visible claims
  * @param {Array<[string, any]>} selective  [name, value] pairs issued as disclosures
  */
-export async function issueSdJwt(payload, selective) {
+export async function issueSdJwt(payload, selective, { demo = false } = {}) {
   const disclosures = selective.map(([n, v]) => makeDisclosure(n, v));
-  const jwt = await signJws({ ...payload, _sd: disclosures.map(d => d.digest).sort(), _sd_alg: 'sha-256' }, { typ: 'vc+sd-jwt' });
+  const jwt = await signJws({ ...payload, _sd: disclosures.map(d => d.digest).sort(), _sd_alg: 'sha-256' }, { typ: 'vc+sd-jwt' }, { demo });
   return { compact: `${jwt}~${disclosures.map(d => d.disclosure).join('~')}~`, disclosures };
 }
 

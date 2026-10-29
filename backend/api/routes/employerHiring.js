@@ -24,6 +24,7 @@ import { skillLines, skillFacts, activeCredential, verify } from '../../core/ret
 import { listFor } from '../../core/notify.js';
 import { mapSeq } from '../../core/util/seq.js';
 import * as market from '../../core/market/sampleMarket.js';
+import { employerWorld } from '../../core/testTenant.js';
 
 const router = express.Router();
 const session = employerAuth({ sessionOnly: true });
@@ -126,8 +127,12 @@ router.post('/verify/bulk', session, rateLimit({ name: 'employer:bulk-verify', l
   const ids = [...new Set((Array.isArray(req.body?.ids) ? req.body.ids : []).map(s => String(s).trim()).filter(Boolean))];
   if (!ids.length) return v2(res, 400, 'invalid', 'Add at least one Evidence ID.');
   if (ids.length > 200) return v2(res, 400, 'invalid', 'Up to 200 Evidence IDs at a time.');
+  // Demo Passports (demo key, DEMO banner) are refused unless this company is
+  // in the same demo sandbox: they can never pass as real ones.
+  const mine = (await employerWorld(req.employer.id)).sandbox;
   const results = await mapSeq(ids, async (id) => {
-    const r = await verify(id);
+    let r = await verify(id);
+    if (r.demo && r.sandbox !== mine) r = { status: 'demo_not_accepted', evidence_id: r.evidence_id };
     return { input: id, status: r.status, evidence_id: r.evidence_id || null, valid_until: r.valid_until || null, skills_public: r.skills_public ?? null, skills: (r.skills || []).map(s => ({ name: s.name, label: s.label, last_demonstrated: s.last_demonstrated })) };
   });
   res.json({ results, counts: results.reduce((a, r) => ({ ...a, [r.status]: (a[r.status] || 0) + 1 }), {}) });

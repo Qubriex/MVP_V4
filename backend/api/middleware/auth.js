@@ -25,6 +25,9 @@ import { ulid } from '../../core/db/ulid.js';
 import params from '../../config/params.js';
 import { clientIp } from './rateLimit.js';
 import { DEV_HOURS } from '../../core/devLogin.js';
+import { withContext } from '../../core/requestContext.js';
+
+export const DEMO_IDLE_MS = 2 * 3600000;
 
 export const SESSION_COOKIE = 'qbx_session';
 export const CSRF_COOKIE = 'qbx_csrf';
@@ -61,19 +64,23 @@ function cookieOptions(maxAgeMs, httpOnly) {
  *          employerId?: string|null, claims?: object, req?: import('express').Request, dev?: boolean}} s
  *   dev: a developer session from /dev (api/routes/dev.js) — fixed 8 hours,
  *   marked is_dev in the database and actor "developer", dev: true in the token.
+ *   demo: { sandboxId, expiresAt } for a /demo persona (api/routes/demo.js) —
+ *   ends with its sandbox (4 hours at most, 2 hours idle), demo: true in the token.
  * @returns {{token: string, csrfToken: string, sessionId: string, expiresAt: string}}
  */
-export async function issueSession(res, { actorType, actorId, institutionId = null, employerId = null, claims = {}, req = null, dev = false }) {
-  const hours = dev ? DEV_HOURS : params.get(`security.session.${actorType}Hours`);
+export async function issueSession(res, { actorType, actorId, institutionId = null, employerId = null, claims = {}, req = null, dev = false, demo = null }) {
+  const now = new Date();
+  const hours = demo ? Math.max(1 / 60, (new Date(demo.expiresAt).getTime() - now.getTime()) / 3600000)
+    : dev ? DEV_HOURS : params.get(`security.session.${actorType}Hours`);
   const sid = ulid();
   const csrfToken = crypto.randomBytes(32).toString('base64url');
-  const now = new Date();
   const expiresAt = new Date(now.getTime() + hours * 3600000).toISOString();
-  await dal.run(`INSERT INTO auth_sessions (id, actor_type, actor_id, institution_id, employer_id, csrf_hash, ip, created_at, expires_at, is_dev)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, sid, actorType, actorId, institutionId, employerId, sha256(csrfToken),
-  req ? clientIp(req) : null, now.toISOString(), expiresAt, dev ? 1 : 0);
-  const who = dev ? { actor: 'developer', actor_type: actorType, dev: true } : { actor: actorType };
-  const token = jwt.sign({ ...claims, role: ROLE_OF[actorType], ...who, sid }, secret(), { expiresIn: `${hours}h` });
+  await dal.run(`INSERT INTO auth_sessions (id, actor_type, actor_id, institution_id, employer_id, csrf_hash, ip, created_at, expires_at, is_dev, is_demo, sandbox_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, sid, actorType, actorId, institutionId, employerId, sha256(csrfToken),
+  req ? clientIp(req) : null, now.toISOString(), expiresAt, dev ? 1 : 0, demo ? 1 : 0, demo?.sandboxId || null);
+  const who = dev ? { actor: 'developer', actor_type: actorType, dev: true }
+    : demo ? { actor: actorType, demo: true, sandbox: demo.sandboxId } : { actor: actorType };
+  const token = jwt.sign({ ...claims, role: ROLE_OF[actorType], ...who, sid }, secret(), { expiresIn: Math.max(60, Math.floor(hours * 3600)) });
   res.cookie(SESSION_COOKIE, token, cookieOptions(hours * 3600000, true));
   res.cookie(CSRF_COOKIE, csrfToken, cookieOptions(hours * 3600000, false));
   return { token, csrfToken, sessionId: sid, expiresAt };
@@ -140,10 +147,20 @@ export function authenticate({ errors = 'legacy', optional = false } = {}) {
         return fail(res, 403, 'csrf_failed', 'Security check failed. Refresh the page and try again.');
       }
     }
+    // A demo session lives only as long as its sandbox, and ends after 2 hours idle.
+    if (session.is_demo) {
+      const sb = await dal.one('SELECT last_active_at, expires_at, deleted_at FROM demo_sandboxes WHERE id = ?', session.sandbox_id);
+      const nowIso = dal.nowIso();
+      if (!sb || sb.deleted_at || sb.expires_at <= nowIso || new Date(sb.last_active_at).getTime() < Date.now() - DEMO_IDLE_MS) {
+        return fail(res, 401, 'demo_ended', 'This demo has ended. Start a new one at /demo.');
+      }
+      if (Date.now() - new Date(sb.last_active_at).getTime() > 60000) await dal.run('UPDATE demo_sandboxes SET last_active_at = ? WHERE id = ?', nowIso, session.sandbox_id);
+    }
     req.user = payload;
     req.session = session;
     req.tenant = tenantFor(session, payload);
     req.authVia = viaCookie ? 'cookie' : 'bearer';
+    if (session.sandbox_id) return withContext({ sandboxId: session.sandbox_id }, next);
     next();
   };
 }

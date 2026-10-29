@@ -31,6 +31,8 @@ import { didDocument } from '../core/return/keyRegistry.js';
 import { issuerHost } from '../core/return/credentialEngine.js';
 import adminRoutes from './routes/admin.js';
 import devRoutes from './routes/dev.js';
+import demoRoutes from './routes/demo.js';
+import { deleteExpired } from '../core/demo/cleanup.js';
 
 // Mount table; scripts/openapi.js reads it to generate openapi.json.
 export const MOUNTS = [
@@ -53,11 +55,12 @@ export const MOUNTS = [
   ['/api/employer', employerHiringRoutes],           // roles, candidates, pipeline, sponsor, colleges, bulk verify
   ['/api/verify', verifyRoutes],                    // public verifier (v4.3 §10)
   ['/api/admin', adminRoutes],
-  ['/api/dev', devRoutes]                           // developer login: 404 unless DEV_LOGIN_ENABLED (routes/dev.js)
+  ['/api/dev', devRoutes],                          // developer login: 404 unless DEV_LOGIN_ENABLED (routes/dev.js)
+  ['/api/demo', demoRoutes]                         // public working demo: sandboxes (routes/demo.js)
 ];
 
 // Routes answering in the v4.3.1 error shape {error: {code, message}}.
-const V2_PREFIXES = ['/api/employer', '/api/verify', '/api/practical', '/api/dev'];
+const V2_PREFIXES = ['/api/employer', '/api/verify', '/api/practical', '/api/dev', '/api/demo'];
 
 /**
  * @param {{ drainOutbox?: () => Promise<object> }} [opts] drainOutbox runs the
@@ -91,7 +94,9 @@ export function createApp({ drainOutbox = null } = {}) {
   app.get('/api/cron/outbox', async (req, res) => {
     if (!process.env.CRON_SECRET || req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) return res.status(401).json({ error: 'Unauthorized' });
     if (!drainOutbox) return res.status(404).json({ error: 'Not available: the server runs its own outbox worker' });
-    res.json({ ok: true, ...(await drainOutbox()) });
+    // Backstop for demo sandboxes past their time (each new demo start also cleans a few).
+    const demosDeleted = await deleteExpired({ limit: 100 }).catch(() => 0);
+    res.json({ ok: true, ...(await drainOutbox()), demos_deleted: demosDeleted });
   });
 
   // ?deep=1 also checks the database round trip.

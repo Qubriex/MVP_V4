@@ -6,7 +6,9 @@ import crypto from 'crypto';
 import * as dal from '../db/dal.js';
 
 export async function jwks() {
-  return { keys: (await dal.all("SELECT public_jwk_json FROM signing_keys ORDER BY created_at")).map(r => JSON.parse(r.public_jwk_json)) };
+  // The demo key (status 'demo') is never published: demo Passports verify
+  // only on this site's Verify page, under a DEMO banner.
+  return { keys: (await dal.all("SELECT public_jwk_json FROM signing_keys WHERE status != 'demo' ORDER BY created_at")).map(r => JSON.parse(r.public_jwk_json)) };
 }
 
 export async function keyStatus(kid) {

@@ -24,6 +24,8 @@ import params from '../../config/params.js';
 import { logger } from '../logger.js';
 import * as gemini from './adapters/gemini.js';
 import * as mock from './adapters/mock.js';
+import { currentSandbox } from '../requestContext.js';
+import { chargeDemoAi, DEMO_LIMIT_MESSAGE } from '../demo/budget.js';
 
 const ADAPTERS = { gemini, mock };
 const DEFAULT_MODEL = { gemini: process.env.GEMINI_MODEL || 'gemini-3.6-flash', mock: 'mock' };
@@ -99,11 +101,18 @@ async function callWithRetry(r, req) {
 }
 
 /** True when a model call failed only because no model key is configured. */
-export const aiNotConfigured = (err) => /GEMINI_API_KEY is not set/.test(err?.cause?.message || err?.message || '');
+// A demo sandbox past its AI budget (core/demo/budget.js) is answered the same
+// way, so every page falls back to its sample content.
+const isDemoLimit = (err) => err?.code === 'demo_limit' || err?.cause?.code === 'demo_limit';
+export const aiNotConfigured = (err) => isDemoLimit(err) || /GEMINI_API_KEY is not set/.test(err?.cause?.message || err?.message || '');
 export const AI_NOT_CONFIGURED = 'The AI tutor is not set up on this deployment yet (GEMINI_API_KEY). Everything else works.';
+/** The visitor-facing reason an AI feature is unavailable. */
+export const aiUnavailableMessage = (err) => (isDemoLimit(err) ? DEMO_LIMIT_MESSAGE : AI_NOT_CONFIGURED);
 
 export async function generate(req) {
   if (!req?.task) throw new GatewayError('unknown_task', 'generate() needs a task');
+  const sandbox = currentSandbox();
+  if (sandbox) await chargeDemoAi(sandbox, { calls: 1 }); // throws code 'demo_limit' past the demo budget
   const r = route(req.task);
   const started = Date.now();
   const base = { task: req.task, adapter: r.adapter, model: r.model, promptId: req.promptId, promptVersion: req.promptVersion, institutionId: req.institutionId };
@@ -153,6 +162,9 @@ export async function synthesize({ text, language = 'telugu', institutionId = nu
   const key = `${r.adapter}|${voice}|${language}|${text}`;
   const hit = ttsCache.get(key);
   if (hit) return { ...hit, cached: true };
+  // About 14 spoken characters a second, for the demo's voice budget.
+  const sandbox = currentSandbox();
+  if (sandbox) await chargeDemoAi(sandbox, { voiceSeconds: Math.max(1, Math.ceil(String(text).length / 14)) });
   const started = Date.now();
   const model = r.adapter === 'mock' ? 'mock' : TTS_MODEL();
   try {

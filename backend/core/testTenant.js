@@ -46,6 +46,24 @@ export async function employerIsTest(employerId) {
   return !!r?.is_test;
 }
 
+// ─── Worlds ───────────────────────────────────────────────────────────────────
+// Every college and company lives in exactly one world: real, the test tenant,
+// or one demo sandbox (migration 0008). A world is { isTest: 0|1, sandbox: ''|id }
+// and cross-tenant queries compare both parts, so no world ever sees another.
+export const REAL_WORLD = Object.freeze({ isTest: 0, sandbox: '' });
+const worldRow = (r) => (r ? { isTest: r.is_test ? 1 : 0, sandbox: r.sandbox_id || '' } : REAL_WORLD);
+export async function institutionWorld(institutionId) {
+  if (!institutionId) return REAL_WORLD;
+  return worldRow(await dal.one('SELECT is_test, sandbox_id FROM institutions WHERE id = ?', institutionId));
+}
+export async function employerWorld(employerId) {
+  if (!employerId) return REAL_WORLD;
+  return worldRow(await dal.one('SELECT is_test, sandbox_id FROM employers WHERE id = ?', employerId));
+}
+/** SQL condition: the row aliased `a` (institutions or employers) is in the world given by worldArgs(w). */
+export const worldSql = (a) => `COALESCE(${a}.is_test, 0) = ? AND COALESCE(${a}.sandbox_id, '') = ?`;
+export const worldArgs = (w) => [w.isTest, w.sandbox];
+
 /**
  * Which side of the wall a signed-in request is on: 1 for the test tenant
  * (any developer session, or any session of a test account), 0 for real.

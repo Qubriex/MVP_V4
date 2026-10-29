@@ -22,7 +22,7 @@ import { grant, withdraw, LEVELS } from './consent/levels.js';
 import { notify } from './notify.js';
 import { mapSeq } from './util/seq.js';
 import { bandOf, BAND_LABEL } from './readiness/cohort.js';
-import { employerIsTest, institutionIsTest } from './testTenant.js';
+import { employerWorld, institutionWorld, worldSql, worldArgs } from './testTenant.js';
 
 export const MIN_GROUP = 5;
 export const SHARE_ITEMS = Object.freeze(['skills', 'resume', 'contact']);
@@ -89,18 +89,18 @@ export async function updateRole(employerId, roleId, b) {
 export const roleView = (r) => ({ id: r.id, title: r.title, city: r.city, bar: r.bar, status: r.status, published: !!r.published, interview_promise: !!r.interview_promise, created_at: r.created_at, skills: barVsMarket(parse(r.skills_json, [])) });
 
 // ─── Who can be found ──────────────────────────────────────────────────────────
-// Only students on the employer's side of the test-tenant wall: a real
-// employer never finds a test learner, and a test employer finds only test
-// learners (core/testTenant.js).
-const sideOf = async (employerId) => ((await employerIsTest(employerId)) ? 1 : 0);
-const learnerSide = async (user) => ((await institutionIsTest((await dal.one('SELECT institution_id FROM engagements WHERE id = ?', user.engagement_id))?.institution_id)) ? 1 : 0);
+// Only students in the employer's own world (core/testTenant.js): a real
+// employer never finds a test or demo learner, a test employer only test
+// learners, and a demo employer only the students of its own sandbox.
+const worldOfEmployer = (employerId) => employerWorld(employerId);
+const worldOfLearner = async (user) => institutionWorld((await dal.one('SELECT institution_id FROM engagements WHERE id = ?', user.engagement_id))?.institution_id);
 
-async function discoverable(isTest) {
+async function discoverable(world) {
   return dal.all(`SELECT el.id AS el_id, el.engagement_id, l.id AS learner_id, l.name, l.city, l.availability, e.capability_target_id, e.institution_id,
       i.name AS college, i.city AS college_city
     FROM learners l JOIN engagement_learners el ON el.learner_id = l.id JOIN engagements e ON e.id = el.engagement_id JOIN institutions i ON i.id = e.institution_id
-    WHERE l.is_discoverable = 1 AND COALESCE(l.is_active, 1) = 1 AND COALESCE(el.access_status, 'active') = 'active' AND COALESCE(i.is_test, 0) = ?
-      AND EXISTS (SELECT 1 FROM consents c WHERE c.learner_id = l.id AND c.level = ? AND c.withdrawn_at IS NULL)`, isTest, LEVELS.DISCOVERABLE);
+    WHERE l.is_discoverable = 1 AND COALESCE(l.is_active, 1) = 1 AND COALESCE(el.access_status, 'active') = 'active' AND ${worldSql('i')}
+      AND EXISTS (SELECT 1 FROM consents c WHERE c.learner_id = l.id AND c.level = ? AND c.withdrawn_at IS NULL)`, ...worldArgs(world), LEVELS.DISCOVERABLE);
 }
 
 async function masteredByEl(elIds) {
@@ -126,7 +126,7 @@ async function scoreAll(students, skills) {
 // ─── Find candidates (E3) ──────────────────────────────────────────────────────
 export async function findCandidates(employerId, role, { city = '', band = '' } = {}) {
   const skills = parse(role.skills_json, []);
-  const scored = (await scoreAll(await discoverable(await sideOf(employerId)), skills))
+  const scored = (await scoreAll(await discoverable(await worldOfEmployer(employerId)), skills))
     .filter(s => !city || s.city === city || s.college_city === city)
     .filter(s => !band || s.band === band)
     .sort((a, b) => b.readiness - a.readiness);
@@ -151,7 +151,7 @@ async function pipelineRow(employerId, roleId, elId) {
 
 /** Watch (private bookmark) or Request (asks the student). */
 export async function watchOrRequest(employer, role, elId, kind, { items = SHARE_ITEMS, note = null } = {}) {
-  const s = (await discoverable(await sideOf(employer.id))).find(x => x.el_id === elId);
+  const s = (await discoverable(await worldOfEmployer(employer.id))).find(x => x.el_id === elId);
   if (!s) throw err(404, 'This student is not open to employers any more.');
   if (kind === 'request' && employer.kyb_status !== 'verified') throw err(403, 'Requests open once your company is verified. You can still watch candidates.');
   const now = dal.nowIso();
@@ -306,7 +306,7 @@ export async function withdrawFrom(user, pipelineId) {
 
 /** Apply to an employer's published role: shares skills, résumé and contact. */
 export async function applyToRole(user, roleId) {
-  const role = await dal.one("SELECT r.*, em.name AS employer FROM employer_roles r JOIN employers em ON em.id = r.employer_id WHERE r.id = ? AND r.published = 1 AND r.status = 'open' AND COALESCE(em.is_test, 0) = ?", roleId, await learnerSide(user));
+  const role = await dal.one(`SELECT r.*, em.name AS employer FROM employer_roles r JOIN employers em ON em.id = r.employer_id WHERE r.id = ? AND r.published = 1 AND r.status = 'open' AND ${worldSql('em')}`, roleId, ...worldArgs(await worldOfLearner(user)));
   if (!role) throw err(404, 'This job is no longer open.');
   const institution = (await dal.one('SELECT institution_id FROM engagements WHERE id = ?', user.engagement_id))?.institution_id;
   const consentId = await grant({ learnerId: user.id, institutionId: institution, level: LEVELS.EMPLOYER_ACCESS, purpose: `Apply to ${role.title} at ${role.employer}`, textVersion: TEXT_VERSION, scope: { employer_id: role.employer_id, role_id: role.id, items: SHARE_ITEMS } });
@@ -325,7 +325,7 @@ export async function applyToRole(user, roleId) {
 /** Jobs that fit: employers' published roles, with readiness, points short of their bar, and the interview promise. */
 export async function matchedRoles(user, { city = '' } = {}) {
   const roles = await dal.all(`SELECT r.*, em.name AS employer FROM employer_roles r JOIN employers em ON em.id = r.employer_id
-    WHERE r.published = 1 AND r.status = 'open' AND em.kyb_status = 'verified' AND COALESCE(em.is_test, 0) = ? ${city ? 'AND (r.city = ? OR r.city IS NULL)' : ''} ORDER BY r.created_at DESC LIMIT 50`, await learnerSide(user), ...(city ? [city] : []));
+    WHERE r.published = 1 AND r.status = 'open' AND em.kyb_status = 'verified' AND ${worldSql('em')} ${city ? 'AND (r.city = ? OR r.city IS NULL)' : ''} ORDER BY r.created_at DESC LIMIT 50`, ...worldArgs(await worldOfLearner(user)), ...(city ? [city] : []));
   if (!roles.length) return [];
   const e = await dal.one('SELECT capability_target_id FROM engagements WHERE id = ?', user.engagement_id);
   const mastered = (await masteredByEl([user.el_id])).get(user.el_id) || new Set();
@@ -342,7 +342,7 @@ export async function matchedRoles(user, { city = '' } = {}) {
 
 // ─── Sponsor a cohort (E7) ─────────────────────────────────────────────────────
 export async function sponsor(employer, b) {
-  const inst = await dal.one('SELECT id, name FROM institutions WHERE id = ? AND COALESCE(is_test, 0) = ?', b.institution_id, await sideOf(employer.id));
+  const inst = await dal.one(`SELECT id, name FROM institutions i WHERE id = ? AND ${worldSql('i')}`, b.institution_id, ...worldArgs(await worldOfEmployer(employer.id)));
   if (!inst) throw err(404, 'College not found.');
   const seats = Math.round(Number(b.seats));
   if (!(seats >= 1 && seats <= 500)) throw err(400, 'Seats must be between 1 and 500.');
@@ -356,7 +356,7 @@ export async function sponsor(employer, b) {
 
 // ─── Colleges & insights (E10) ─────────────────────────────────────────────────
 export async function collegeInsights(employerId, roles) {
-  const students = await discoverable(await sideOf(employerId));
+  const students = await discoverable(await worldOfEmployer(employerId));
   const skills = roles.length ? [...new Map(roles.flatMap(r => parse(r.skills_json, [])).map(s => [s.key, s])).values()] : market.JOBS[0].skills.map(s => ({ key: s.key, name: s.name, required: s.required }));
   const scored = await scoreAll(students, skills);
   const groups = new Map();
