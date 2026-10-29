@@ -1,0 +1,79 @@
+{
+  "node": "Forms in React",
+  "language": "hindi",
+  "version": 1,
+  "diagnosis": {
+    "message": "नमस्ते! आज हम React में forms सीखेंगे। registration form भरकर submit दबाने पर, अगर नाम ख़ाली छोड़ दिया तो क्या होना चाहिए?",
+    "captionEn": "Hello! Today we learn forms in React. When you fill a registration form and press submit, what should happen if you left the name empty?"
+  },
+  "turns": {
+    "explain": {
+      "message": "बैंक में एक clerk सोचिए जो आपकी हर बात तुरंत लिखता जाता है। React state वही clerk है। controlled input में input state का मान दिखाता है, और हर key press पर onChange बुलता है, जो state बदलता है। इसलिए React को हमेशा पता रहता है कि क्या टाइप हुआ। submit पर preventDefault बुलाते हैं, मान जाँचते हैं, कुछ छूटा हो तो error दिखाते हैं, फिर ही save करते हैं। फेस्ट registration form बनाएँ?",
+      "captionEn": "Think of a bank form where a clerk writes down every word you say, live. React state is that clerk. In a controlled input, the input shows the value from state, and every key press calls onChange, which updates state. So React always knows what is typed. On submit, we call preventDefault, check the values, show an error if something is missing, and only then save. Shall we build a fest registration form?",
+      "code": "function Register() {\n  const [name, setName] = useState(\"\");\n  const onSubmit = (e) => {\n    e.preventDefault();\n    if (!name.trim()) return setError(\"Enter your name\");\n    save({ name });\n  };\n  return (\n    <form onSubmit={onSubmit}>\n      <input value={name} onChange={e => setName(e.target.value)} />\n      <button>Register</button>\n    </form>\n  );\n}",
+      "mermaid": "graph LR\n  type[User types] --> onChange --> state[(name)] --> input[input value]\n  submit[Submit] --> validate --> save"
+    },
+    "example": {
+      "message": "Register form नाम को state में रखता है। input का value नाम है और onChange setName बुलाता है। submit पर पेज reload रोकते हैं, जाँचते हैं कि नाम ख़ाली नहीं है, ख़ाली हो तो \"Enter your name\" दिखाते हैं, नहीं तो save करते हैं। error कहाँ दिखाएँगे ताकि screen reader भी सुने?",
+      "captionEn": "A Register form keeps name in state. The input's value is name and onChange calls setName. On submit we prevent the page reload, check that the name is not empty, show \"Enter your name\" if it is, otherwise save. Where would you show the error so a screen reader also hears it?",
+      "code": "function Register() {\n  const [name, setName] = useState(\"\");\n  const onSubmit = (e) => {\n    e.preventDefault();\n    if (!name.trim()) return setError(\"Enter your name\");\n    save({ name });\n  };\n  return (\n    <form onSubmit={onSubmit}>\n      <input value={name} onChange={e => setName(e.target.value)} />\n      <button>Register</button>\n    </form>\n  );\n}",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "दूसरे तरीके से। हाज़िरी लेती शिक्षिका। हर छात्र का जवाब तुरंत register में लिखा जाता है। आख़िर में submit से पहले छूटे नाम जाँचती हैं। हर जवाब लिखने वाला handler कौन सा है?",
+      "captionEn": "Another way: a teacher taking attendance. Every student's answer is written in the register immediately. At the end, the teacher checks for missing names before submitting the register. Which handler writes each answer?",
+      "code": null,
+      "mermaid": "graph LR\n  type[User types] --> onChange --> state[(name)] --> input[input value]\n  submit[Submit] --> validate --> save"
+    },
+    "not_understood": {
+      "message": "कदम-दर-कदम। एक, हर field के लिए state बनाइए। दो, input का value state से रखिए। तीन, onChange में state बदलिए। चार, submit पर reload रोकिए, जाँचिए, फिर save कीजिए। हर key press पर कौन सा event आता है?",
+      "captionEn": "Step by step. One, make state for each field. Two, set the input value from state. Three, update state in onChange. Four, on submit, prevent reload, check, then save. Which event fires on every key press?",
+      "code": null,
+      "mermaid": "graph LR\n  type[User types] --> onChange --> state[(name)] --> input[input value]\n  submit[Submit] --> validate --> save"
+    }
+  },
+  "doubt": {
+    "answer": "अच्छा सवाल। uncontrolled input अपना मान पेज में ही रखता है, जिसे submit पर पढ़ते हैं। controlled में मान state में रहता है, तो user के टाइप करते-करते जाँच सकते हैं। समझ आया?",
+    "captionEn": "Good question. An uncontrolled input keeps its own value in the page, and you read it only at submit. A controlled one keeps it in state, so you can check as the user types. Does that help?"
+  },
+  "check": {
+    "questions": [
+      "एक {context} में कोई field ख़ाली हो तो form submit नहीं होना चाहिए। समझाइए कि इसे React में controlled form के रूप में कैसे बनाएँगे।",
+      "{context} में समझाइए कि controlled input क्या है और onChange व state साथ कैसे काम करते हैं।",
+      "{context} में form submit करते ही पेज reload होता है। समझाइए कि React submit को कैसे संभालकर इसे रोकता है और data जाँचता है।"
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "controlled",
+          "value",
+          "useState",
+          "state"
+        ],
+        [
+          "onChange",
+          "onchange"
+        ],
+        [
+          "onSubmit",
+          "submit",
+          "preventDefault"
+        ],
+        [
+          "validat",
+          "error",
+          "check",
+          "ఖాళీ",
+          "ख़ाली",
+          "खाली"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "आपने controlled inputs और submit संभालना समझाया।",
+      "missing": "बताइए save से पहले कैसे जाँचते हैं और error कैसे दिखाते हैं।",
+      "next": "इस क्रम में: state, value, onChange, submit, जाँच, save।"
+    }
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "node": "Async and fetch",
+  "language": "telugu",
+  "version": 1,
+  "diagnosis": {
+    "message": "నమస్కారం! ఈ రోజు async, fetch నేర్చుకుందాం. app లో భోజనం order చేసినప్పుడు అది వచ్చేవరకు screen నే చూస్తారా, వేరే పనులు చేస్తారా?",
+    "captionEn": "Hello! Today we learn async and fetch. When you order food on an app, do you stare at the screen until it arrives, or do other things?"
+  },
+  "turns": {
+    "explain": {
+      "message": "చాకలికి బట్టలు ఇచ్చినప్పుడు రోజంతా అతని దుకాణం దగ్గర నిలబడరు. ఒక token తీసుకుని తర్వాత వస్తారు. ఆ token నే promise. fetch server నుంచి data అడుగుతుంది, వెంటనే ఒక promise ఇస్తుంది. పేజీ పని చేస్తూనే ఉంటుంది. async, await తో మీ function పేజీని ఆపకుండా జవాబు కోసం ఎదురుచూస్తుంది. res.json జవాబుని data గా మారుస్తుంది. network పనిచేయకపోతే try, catch చూసుకుంటాయి. రైళ్ల జాబితా తెద్దామా?",
+      "captionEn": "When you give clothes to the dhobi, you do not stand at his shop all day. You get a token and come back. That token is a promise. fetch asks a server for data and returns a promise straight away. The page keeps working. With async and await, your function waits for the answer without freezing the page. res.json turns the reply into data. try and catch handle the case when the network fails. Shall we load a train list?",
+      "code": "async function loadTrains() {\n  try {\n    const res = await fetch(\"/api/trains?from=HYB\");\n    const trains = await res.json();\n    render(trains);\n  } catch (err) {\n    showError(\"Could not load trains\");\n  }\n}",
+      "mermaid": "sequenceDiagram\n  Page->>Server: fetch /api/trains\n  Note over Page: page keeps working\n  Server-->>Page: JSON response\n  Page->>Page: render(trains)"
+    },
+    "example": {
+      "message": "ఒక booking పేజీ trains API మీద fetch పిలుస్తుంది. await జవాబు కోసం ఆగుతుంది, తర్వాత await res.json జాబితా ఇస్తుంది, మనం దాన్ని చూపిస్తాం. network పోతే catch మంచి error సందేశం చూపిస్తుంది. ఎదురుచూస్తున్నప్పుడు పేజీ ఏం చూపించాలి?",
+      "captionEn": "A booking page calls fetch on the trains API. await waits for the response, then await res.json gives the list, and we render it. If the network fails, catch shows a friendly error. What should the page show while it is waiting?",
+      "code": "async function loadTrains() {\n  try {\n    const res = await fetch(\"/api/trains?from=HYB\");\n    const trains = await res.json();\n    render(trains);\n  } catch (err) {\n    showError(\"Could not load trains\");\n  }\n}",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "ఇంకో విధంగా. హోటల్ లో order ఇవ్వడం. order ఇస్తారు, waiter token ఇస్తాడు, మీరు స్నేహితులతో మాట్లాడుతూనే ఉంటారు. భోజనం సిద్ధమైతే మీ దగ్గరకు వస్తుంది. await అంటే మాటలు ఆపకుండా భోజనం కోసం ఎదురుచూడటం. JavaScript లో ఆ token పేరు ఏమిటి?",
+      "captionEn": "Another way: ordering at a restaurant. You give the order, the waiter gives you a token, you keep talking with friends. When the food is ready, it comes to you. await is waiting for your food without stopping the conversation. What is the token in JavaScript called?",
+      "code": null,
+      "mermaid": "sequenceDiagram\n  Page->>Server: fetch /api/trains\n  Note over Page: page keeps working\n  Server-->>Page: JSON response\n  Page->>Page: render(trains)"
+    },
+    "not_understood": {
+      "message": "అడుగు అడుగుగా. ఒకటి, function కి async పెట్టండి. రెండు, URL తో await fetch రాయండి. మూడు, data చదవడానికి await res.json. నాలుగు, errors కోసం try, catch లో పెట్టండి. await ఏం చేస్తుంది?",
+      "captionEn": "Step by step. One, mark the function async. Two, write await fetch with the URL. Three, write await res.json to read the data. Four, wrap it in try and catch for errors. What does await do?",
+      "code": null,
+      "mermaid": "sequenceDiagram\n  Page->>Server: fetch /api/trains\n  Note over Page: page keeps working\n  Server-->>Page: JSON response\n  Page->>Page: render(trains)"
+    }
+  },
+  "doubt": {
+    "answer": "మంచి ప్రశ్న. await లేకపోతే data కాదు, promise వస్తుంది. data ఇంకా రాలేదు. data వచ్చేవరకు await ఆ ఒక్క function నే ఆపుతుంది. సహాయపడిందా?",
+    "captionEn": "Good question. Without await, you get a promise, not the data. The data is not there yet. await pauses only that function until the data arrives. Does that help?"
+  },
+  "check": {
+    "questions": [
+      "ఒక {context} లో data server నుంచి రావాలి. fetch, async, await తో దాన్ని ఎలా తెస్తారో, errors ఎలా చూసుకుంటారో వివరించండి.",
+      "server కోసం ఎదురుచూస్తున్నప్పుడు {context} ఎందుకు ఆగిపోకూడదో promises ఆలోచనతో వివరించండి.",
+      "{context} లో ఎవరో await లేకుండా fetch రాసి data కి బదులు promise పొందారు. ఎందుకో, ఎలా సరిచేయాలో చెప్పండి."
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "async",
+          "await",
+          "promise",
+          "then"
+        ],
+        [
+          "fetch"
+        ],
+        [
+          "json",
+          "response",
+          "server",
+          "api"
+        ],
+        [
+          "wait",
+          "try",
+          "catch",
+          "error",
+          "block",
+          "ఆగ",
+          "इंतज़ार",
+          "रुक"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "fetch, await, జవాబు చదవడం వివరించారు.",
+      "missing": "try, catch తో errors ఎలా చూసుకుంటారో, పేజీ పనిచేస్తూనే ఉంటుందని చెప్పండి.",
+      "next": "ఈ వరుసలో: అడగడం, ఆగడం, data చదవడం, చూపించడం, errors చూసుకోవడం."
+    }
+  }
+}

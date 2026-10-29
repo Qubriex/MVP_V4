@@ -1,0 +1,74 @@
+{
+  "node": "React components",
+  "language": "english",
+  "version": 1,
+  "diagnosis": {
+    "message": "Hello! Today we learn React components. If you had to make twenty event cards that look the same, how would you do it?",
+    "captionEn": null
+  },
+  "turns": {
+    "explain": {
+      "message": "Think of a tiffin box with compartments. Each compartment is made once and holds rice, curry or sweets. A React component is a reusable piece of the page. It is a function that returns JSX, which looks like HTML. You build small components, like an event card, and put them together into bigger ones, like a page. Write once, use many times with different data. Shall we build an event card?",
+      "captionEn": null,
+      "code": "function EventCard({ title, date }) {\n  return (\n    <article className=\"card\">\n      <h3>{title}</h3>\n      <p>{date}</p>\n    </article>\n  );\n}\n\n<EventCard title=\"Dance night\" date=\"12 Nov\" />",
+      "mermaid": "graph TD\n  App --> Header\n  App --> EventList\n  EventList --> EventCard1[EventCard]\n  EventList --> EventCard2[EventCard]"
+    },
+    "example": {
+      "message": "An EventCard component takes a title and a date and returns an article with a heading and a paragraph. On the fest page we use EventCard many times, each with a different title. If the card design changes, we edit one place. What other part of a fest page could be a component?",
+      "captionEn": null,
+      "code": "function EventCard({ title, date }) {\n  return (\n    <article className=\"card\">\n      <h3>{title}</h3>\n      <p>{date}</p>\n    </article>\n  );\n}\n\n<EventCard title=\"Dance night\" date=\"12 Nov\" />",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "Another way: a rubber stamp. You make the stamp once, then press it on many pages. Each time you can use different ink. The stamp is the component, the ink is the data. What do we call the data passed into a component?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph TD\n  App --> Header\n  App --> EventList\n  EventList --> EventCard1[EventCard]\n  EventList --> EventCard2[EventCard]"
+    },
+    "not_understood": {
+      "message": "Step by step. One, write a function with a capital letter name. Two, return some JSX. Three, use it like a tag, with angle brackets. That is a component. How do you use a component named Header?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph TD\n  App --> Header\n  App --> EventList\n  EventList --> EventCard1[EventCard]\n  EventList --> EventCard2[EventCard]"
+    }
+  },
+  "doubt": {
+    "answer": "Good question. Component names start with a capital letter so React knows they are components, not plain HTML tags. Does that help?",
+    "captionEn": null
+  },
+  "check": {
+    "questions": [
+      "On a {context}, many items look the same. Explain how you would build a React component for one item and reuse it.",
+      "Explain how you would split a {context} into components, and why this helps.",
+      "Explain what a component returns and how JSX is different from HTML, using a {context}."
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "component",
+          "function"
+        ],
+        [
+          "jsx",
+          "return",
+          "<"
+        ],
+        [
+          "reuse",
+          "props",
+          "again",
+          "many",
+          "మళ్లీ",
+          "दोबारा",
+          "बार-बार"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "You described a reusable component and how it is used.",
+      "missing": "Say what the component returns, JSX, and how data changes each copy.",
+      "next": "Name the component, say what it shows, then where it is reused."
+    }
+  }
+}

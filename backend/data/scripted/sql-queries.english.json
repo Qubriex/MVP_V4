@@ -1,0 +1,77 @@
+{
+  "node": "SQL queries",
+  "language": "english",
+  "version": 1,
+  "diagnosis": {
+    "message": "Hello! Today we learn SQL queries. If you had a big register of train bookings, how would you find everyone travelling tomorrow?",
+    "captionEn": null
+  },
+  "turns": {
+    "explain": {
+      "message": "A database table is like a railway reservation chart: rows are passengers, columns are name, train number, date and status. SQL is how we ask the chart questions. SELECT picks the columns you want. FROM names the table. WHERE keeps only the rows that match, like a date. ORDER BY sorts the result, LIMIT keeps the first few. GROUP BY with COUNT gives totals, like passengers per train. Shall we ask the chart a question?",
+      "captionEn": null,
+      "code": "SELECT name, train_no, journey_date\nFROM bookings\nWHERE journey_date = '2026-11-12' AND status = 'confirmed'\nORDER BY name\nLIMIT 20;\n\nSELECT train_no, COUNT(*) AS passengers\nFROM bookings\nGROUP BY train_no;",
+      "mermaid": "graph LR\n  FROM[FROM bookings] --> WHERE[WHERE filter rows] --> GROUP[GROUP BY] --> SELECT[SELECT columns] --> ORDER[ORDER BY] --> LIMIT"
+    },
+    "example": {
+      "message": "To list confirmed passengers on 12 November, sorted by name: SELECT name, train number and date FROM bookings WHERE the date matches AND status is confirmed, ORDER BY name. To count passengers per train, GROUP BY train number with COUNT. How would you find only bookings in sleeper class?",
+      "captionEn": null,
+      "code": "SELECT name, train_no, journey_date\nFROM bookings\nWHERE journey_date = '2026-11-12' AND status = 'confirmed'\nORDER BY name\nLIMIT 20;\n\nSELECT train_no, COUNT(*) AS passengers\nFROM bookings\nGROUP BY train_no;",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "Another way: asking a librarian. Which columns you want is SELECT. Which shelf is FROM. Your conditions, like author is Premchand, are WHERE. In what order to hand you the books is ORDER BY. Which clause keeps only matching rows?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph LR\n  FROM[FROM bookings] --> WHERE[WHERE filter rows] --> GROUP[GROUP BY] --> SELECT[SELECT columns] --> ORDER[ORDER BY] --> LIMIT"
+    },
+    "not_understood": {
+      "message": "Step by step. One, SELECT the columns. Two, FROM the table. Three, add WHERE for conditions. That alone answers many questions. Then ORDER BY to sort. Which clause names the table?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph LR\n  FROM[FROM bookings] --> WHERE[WHERE filter rows] --> GROUP[GROUP BY] --> SELECT[SELECT columns] --> ORDER[ORDER BY] --> LIMIT"
+    }
+  },
+  "doubt": {
+    "answer": "Good doubt. WHERE filters rows before grouping. HAVING filters groups after GROUP BY, like trains with more than 100 passengers. Does that help?",
+    "captionEn": null
+  },
+  "check": {
+    "questions": [
+      "For a {context}, write or describe a SQL query that finds some rows with a condition and sorts them. Explain each clause.",
+      "Explain how you would count rows per group in a {context} using GROUP BY, and what WHERE does differently.",
+      "A query on a {context} returns every row instead of a few. Explain what is missing and how to fix it."
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "select"
+        ],
+        [
+          "from",
+          "table"
+        ],
+        [
+          "where",
+          "filter"
+        ],
+        [
+          "order by",
+          "group by",
+          "count",
+          "limit",
+          "insert",
+          "update",
+          "column",
+          "row"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "You used SELECT, FROM and WHERE correctly.",
+      "missing": "Explain sorting or grouping, ORDER BY or GROUP BY, and what each clause does.",
+      "next": "Read your query aloud clause by clause and say what each one does."
+    }
+  }
+}

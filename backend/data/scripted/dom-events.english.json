@@ -1,0 +1,77 @@
+{
+  "node": "DOM events",
+  "language": "english",
+  "version": 1,
+  "diagnosis": {
+    "message": "Hello! Today we learn DOM events. When you press a doorbell, what happens inside the house?",
+    "captionEn": null
+  },
+  "turns": {
+    "explain": {
+      "message": "A doorbell is a good picture. Someone presses it, that is the event. The bell rings, someone hears it and opens the door, that is the listener doing its job. In a web page, a click, a key press or a form submit is an event. addEventListener tells an element: when this event happens, run this function. The function can then update the page. Shall we wire up an add to cart button?",
+      "captionEn": null,
+      "code": "const btn = document.querySelector(\"#add-to-cart\");\nbtn.addEventListener(\"click\", (event) => {\n  cartCount += 1;\n  badge.textContent = cartCount;\n});",
+      "mermaid": "graph LR\n  user[User clicks] --> event[click event] --> listener[addEventListener callback] --> update[Page updates]"
+    },
+    "example": {
+      "message": "On a shop page, we find the add to cart button with querySelector. We add a click listener. Each click increases cartCount and updates the badge number. For a form, we listen for submit and call preventDefault so the page does not reload. Which event would you use for a search box that updates as you type?",
+      "captionEn": null,
+      "code": "const btn = document.querySelector(\"#add-to-cart\");\nbtn.addEventListener(\"click\", (event) => {\n  cartCount += 1;\n  badge.textContent = cartCount;\n});",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "Another way: think of a school bell. The bell is the event. Students who hear it and stand up are the listeners. Different bells mean different actions: lunch bell, last bell. In code, click and submit are different bells. Which bell does a form send?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph LR\n  user[User clicks] --> event[click event] --> listener[addEventListener callback] --> update[Page updates]"
+    },
+    "not_understood": {
+      "message": "Step by step. One, find the element with querySelector. Two, call addEventListener with the event name, like click. Three, give it a function to run. When the user clicks, the function runs. What is the event name for a mouse press?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph LR\n  user[User clicks] --> event[click event] --> listener[addEventListener callback] --> update[Page updates]"
+    }
+  },
+  "doubt": {
+    "answer": "Good doubt. preventDefault stops the browser's normal action, like reloading the page on form submit. Then your code can handle it instead. Does that help?",
+    "captionEn": null
+  },
+  "check": {
+    "questions": [
+      "On a {context}, a button should update a counter when clicked. Explain how you would use addEventListener to do this.",
+      "A form on a {context} reloads the page when submitted and the data is lost. Explain why, and how events fix it.",
+      "Explain what an event listener is, using one example from a {context}."
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "addEventListener",
+          "onclick",
+          "listener",
+          "handler"
+        ],
+        [
+          "click",
+          "submit",
+          "input",
+          "keydown",
+          "event"
+        ],
+        [
+          "callback",
+          "function",
+          "querySelector",
+          "element",
+          "update",
+          "preventDefault"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "You connected the event, the listener and the page update.",
+      "missing": "Name the event type and say what the callback function does.",
+      "next": "Say: which element, which event, which function, what changes."
+    }
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "node": "CSS flexbox",
+  "language": "english",
+  "version": 1,
+  "diagnosis": {
+    "message": "Hello! Today we learn CSS flexbox. Have you ever tried to put three buttons in one line? How did you do it?",
+    "captionEn": null
+  },
+  "turns": {
+    "explain": {
+      "message": "Think of people standing in a queue at a ticket counter. The queue is the container, the people are the items. With display flex, the container lines up its children in a row. justify-content decides how they spread along the line. align-items decides how they line up from top to bottom. flex-wrap lets them move to the next line when space runs out. Shall we try a menu bar?",
+      "captionEn": null,
+      "code": ".menu {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  gap: 12px;\n  flex-wrap: wrap;\n}",
+      "mermaid": "graph LR\n  container[display: flex] --> a[item] & b[item] & c[item]\n  container -. justify-content .-> mainaxis[main axis]\n  container -. align-items .-> crossaxis[cross axis]"
+    },
+    "example": {
+      "message": "A shop page has a menu with a logo, links and a cart button. Give the menu display flex, justify-content space-between and align-items center. The logo goes left, the cart goes right, and everything is centred vertically. What would happen if you add flex-wrap wrap on a phone?",
+      "captionEn": null,
+      "code": ".menu {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  gap: 12px;\n  flex-wrap: wrap;\n}",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "Another way: think of plates on a long dining table. display flex is laying them in one row. justify-content is how the gaps are shared: bunched at the start, centred, or spread evenly. align-items is whether they touch the table edge or sit in the middle. Which property spreads plates evenly?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph LR\n  container[display: flex] --> a[item] & b[item] & c[item]\n  container -. justify-content .-> mainaxis[main axis]\n  container -. align-items .-> crossaxis[cross axis]"
+    },
+    "not_understood": {
+      "message": "Let us go step by step. First, the parent gets display flex. Now its children sit side by side. Second, justify-content moves them left, right or apart. Third, align-items moves them up, down or to the middle. Which property puts items side by side?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph LR\n  container[display: flex] --> a[item] & b[item] & c[item]\n  container -. justify-content .-> mainaxis[main axis]\n  container -. align-items .-> crossaxis[cross axis]"
+    }
+  },
+  "doubt": {
+    "answer": "Good question. justify-content works along the main direction, which is a row by default. align-items works across it. If you set flex-direction column, they swap. Does that help?",
+    "captionEn": null
+  },
+  "check": {
+    "questions": [
+      "On a {context}, the header has a logo, three links and a button. Explain how you would use flexbox to place them in one row with even spacing.",
+      "Cards on a {context} overflow the screen on a phone. How can flexbox make them move to the next line? Explain the properties you use.",
+      "On a {context}, explain the difference between justify-content and align-items with one small example."
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "display: flex",
+          "display:flex",
+          "flex"
+        ],
+        [
+          "justify-content",
+          "justify"
+        ],
+        [
+          "align-items",
+          "align"
+        ],
+        [
+          "wrap",
+          "gap",
+          "row",
+          "column",
+          "axis"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "You used display flex with the right alignment properties.",
+      "missing": "Explain which property works along the row and which works across it.",
+      "next": "Start with display flex on the parent, then name each property and its effect."
+    }
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "node": "Variables and types",
+  "language": "english",
+  "version": 1,
+  "diagnosis": {
+    "message": "Hello! Today we learn variables and types in JavaScript. Where do you store a number when you do a calculation in your head?",
+    "captionEn": null
+  },
+  "turns": {
+    "explain": {
+      "message": "Think of labelled jars in a kitchen: rice, dal, sugar. A variable is a labelled jar that holds a value. let makes a jar whose contents can change. const makes a jar you fill once. The type tells you what kind of thing is inside: a string is text, a number is a count or price, a boolean is true or false. typeof tells you the type. Shall we see a kirana shop example?",
+      "captionEn": null,
+      "code": "const shopName = \"Sri Lakshmi Kirana\"; // string\nlet itemsSold = 12;                     // number\nlet isOpen = true;                      // boolean\nitemsSold = itemsSold + 1;\nconsole.log(typeof itemsSold);          // \"number\"",
+      "mermaid": "graph TD\n  value --> string\n  value --> number\n  value --> boolean\n  value --> object\n  value --> undefined"
+    },
+    "example": {
+      "message": "A kirana shop program keeps shopName as a string, itemsSold as a number and isOpen as a boolean. When a customer buys, we increase itemsSold by one. Since the shop name never changes, we use const for it. Which one would you use for today's total bill?",
+      "captionEn": null,
+      "code": "const shopName = \"Sri Lakshmi Kirana\"; // string\nlet itemsSold = 12;                     // number\nlet isOpen = true;                      // boolean\nitemsSold = itemsSold + 1;\nconsole.log(typeof itemsSold);          // \"number\"",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "Another way: a variable is a name tag on a seat in class. The tag stays, the student sitting there can change if it is let. With const, the same student always sits there. What type is the student's name?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph TD\n  value --> string\n  value --> number\n  value --> boolean\n  value --> object\n  value --> undefined"
+    },
+    "not_understood": {
+      "message": "Step by step. A variable has a name and a value. let x equals five means the name x holds five. Five is a number. \"five\" in quotes is a string. Which one is a number: 5 or \"5\"?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph TD\n  value --> string\n  value --> number\n  value --> boolean\n  value --> object\n  value --> undefined"
+    }
+  },
+  "doubt": {
+    "answer": "Good question. \"5\" plus 1 gives \"51\" because a string joins text. 5 plus 1 gives 6. So always check the type before adding. Does that help?",
+    "captionEn": null
+  },
+  "check": {
+    "questions": [
+      "In a {context}, which values would you store as strings, numbers and booleans? Explain with let and const.",
+      "In a {context}, a total shows \"51\" instead of 6. Explain why this happens and how to fix it.",
+      "Explain when you would use const and when let in a {context}, with one example of each."
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "let",
+          "const",
+          "var"
+        ],
+        [
+          "string",
+          "number",
+          "boolean",
+          "type",
+          "typeof",
+          "రకం",
+          "प्रकार"
+        ],
+        [
+          "value",
+          "store",
+          "change",
+          "reassign",
+          "విలువ",
+          "मान"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "You chose sensible types and used let and const correctly.",
+      "missing": "Explain the difference between a string and a number, and when a value can change.",
+      "next": "For each value, say its type and whether it changes."
+    }
+  }
+}

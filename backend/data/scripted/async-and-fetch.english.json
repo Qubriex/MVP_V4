@@ -1,0 +1,81 @@
+{
+  "node": "Async and fetch",
+  "language": "english",
+  "version": 1,
+  "diagnosis": {
+    "message": "Hello! Today we learn async and fetch. When you order food on an app, do you stare at the screen until it arrives, or do other things?",
+    "captionEn": null
+  },
+  "turns": {
+    "explain": {
+      "message": "When you give clothes to the dhobi, you do not stand at his shop all day. You get a token and come back. That token is a promise. fetch asks a server for data and returns a promise straight away. The page keeps working. With async and await, your function waits for the answer without freezing the page. res.json turns the reply into data. try and catch handle the case when the network fails. Shall we load a train list?",
+      "captionEn": null,
+      "code": "async function loadTrains() {\n  try {\n    const res = await fetch(\"/api/trains?from=HYB\");\n    const trains = await res.json();\n    render(trains);\n  } catch (err) {\n    showError(\"Could not load trains\");\n  }\n}",
+      "mermaid": "sequenceDiagram\n  Page->>Server: fetch /api/trains\n  Note over Page: page keeps working\n  Server-->>Page: JSON response\n  Page->>Page: render(trains)"
+    },
+    "example": {
+      "message": "A booking page calls fetch on the trains API. await waits for the response, then await res.json gives the list, and we render it. If the network fails, catch shows a friendly error. What should the page show while it is waiting?",
+      "captionEn": null,
+      "code": "async function loadTrains() {\n  try {\n    const res = await fetch(\"/api/trains?from=HYB\");\n    const trains = await res.json();\n    render(trains);\n  } catch (err) {\n    showError(\"Could not load trains\");\n  }\n}",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "Another way: ordering at a restaurant. You give the order, the waiter gives you a token, you keep talking with friends. When the food is ready, it comes to you. await is waiting for your food without stopping the conversation. What is the token in JavaScript called?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "sequenceDiagram\n  Page->>Server: fetch /api/trains\n  Note over Page: page keeps working\n  Server-->>Page: JSON response\n  Page->>Page: render(trains)"
+    },
+    "not_understood": {
+      "message": "Step by step. One, mark the function async. Two, write await fetch with the URL. Three, write await res.json to read the data. Four, wrap it in try and catch for errors. What does await do?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "sequenceDiagram\n  Page->>Server: fetch /api/trains\n  Note over Page: page keeps working\n  Server-->>Page: JSON response\n  Page->>Page: render(trains)"
+    }
+  },
+  "doubt": {
+    "answer": "Good question. Without await, you get a promise, not the data. The data is not there yet. await pauses only that function until the data arrives. Does that help?",
+    "captionEn": null
+  },
+  "check": {
+    "questions": [
+      "On a {context}, data must come from a server. Explain how you would load it with fetch, async and await, and handle errors.",
+      "Explain why a {context} should not freeze while waiting for the server, using the idea of promises.",
+      "In a {context}, someone wrote fetch without await and got a promise instead of data. Explain why and how to fix it."
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "async",
+          "await",
+          "promise",
+          "then"
+        ],
+        [
+          "fetch"
+        ],
+        [
+          "json",
+          "response",
+          "server",
+          "api"
+        ],
+        [
+          "wait",
+          "try",
+          "catch",
+          "error",
+          "block",
+          "ఆగ",
+          "इंतज़ार",
+          "रुक"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "You explained fetch, await and reading the response.",
+      "missing": "Say how errors are handled, with try and catch, and that the page keeps working.",
+      "next": "Order it: ask, wait, read the data, show it, handle errors."
+    }
+  }
+}

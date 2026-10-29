@@ -1,0 +1,76 @@
+{
+  "node": "Git basics",
+  "language": "english",
+  "version": 1,
+  "diagnosis": {
+    "message": "Hello! Today we learn Git basics. Have you ever lost work because a file got overwritten? What happened?",
+    "captionEn": null
+  },
+  "turns": {
+    "explain": {
+      "message": "Think of a family photo album. Each photo records a moment you can look back at. Git does the same for code. git add picks the changes you want to save, like choosing photos. git commit pastes them into the album with a note. A branch is a separate album for trying something new without spoiling the main one. git push sends your album to GitHub so the team can see it. Shall we walk through it?",
+      "captionEn": null,
+      "code": "git init\ngit add index.html\ngit commit -m \"Add fest home page\"\ngit branch events-page\ngit switch events-page\ngit push origin events-page",
+      "mermaid": "graph LR\n  edit[Edit files] --> add[git add] --> commit[git commit] --> push[git push]"
+    },
+    "example": {
+      "message": "Three friends build a college fest site. Each makes a branch for their page. They add and commit small changes with clear messages. When a page is ready, they merge the branch into main and push. What would you write as a commit message after adding the events list?",
+      "captionEn": null,
+      "code": "git init\ngit add index.html\ngit commit -m \"Add fest home page\"\ngit branch events-page\ngit switch events-page\ngit push origin events-page",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "Another way: a commit is like saving a game at a checkpoint. If you fail later, you return to the checkpoint. A branch is playing a side mission without affecting the main story. Which command creates a checkpoint?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph LR\n  edit[Edit files] --> add[git add] --> commit[git commit] --> push[git push]"
+    },
+    "not_understood": {
+      "message": "Step by step. One, change a file. Two, git add the file. Three, git commit with a message. That is one saved version. Four, git push to share it. Which step saves a version?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph LR\n  edit[Edit files] --> add[git add] --> commit[git commit] --> push[git push]"
+    }
+  },
+  "doubt": {
+    "answer": "Good question. git pull brings your team's new commits to your computer. git push sends your commits to them. Pull before you start work, push when you finish. Does that help?",
+    "captionEn": null
+  },
+  "check": {
+    "questions": [
+      "Three friends work on a {context}. Explain how Git branches and commits help them work without overwriting each other.",
+      "You changed two files in a {context}. Explain the commands to save and share these changes, and what each does.",
+      "Explain what a good commit message looks like for a change in a {context}, and why history matters."
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "commit"
+        ],
+        [
+          "add",
+          "stage",
+          "staging"
+        ],
+        [
+          "branch",
+          "merge"
+        ],
+        [
+          "push",
+          "pull",
+          "history",
+          "version",
+          "చరిత్ర",
+          "इतिहास"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "You explained how add, commit and branches keep work safe.",
+      "missing": "Say how the work is shared, with push and pull or merge.",
+      "next": "Follow the order: change, add, commit, push."
+    }
+  }
+}

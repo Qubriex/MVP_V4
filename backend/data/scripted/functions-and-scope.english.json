@@ -1,0 +1,76 @@
+{
+  "node": "Functions and scope",
+  "language": "english",
+  "version": 1,
+  "diagnosis": {
+    "message": "Hello! Today we learn functions and scope. When you make tea every morning, do you repeat the same steps? Which ones?",
+    "captionEn": null
+  },
+  "turns": {
+    "explain": {
+      "message": "Making tea is a recipe: you give it water, milk and tea powder, and it gives back a cup of tea. A function is a recipe in code. It takes inputs called parameters and gives back a result with return. You write it once and use it many times. Scope means where a variable can be seen. A variable made inside a function stays inside it, like ingredients that stay in your kitchen. Shall we write one?",
+      "captionEn": null,
+      "code": "function billTotal(prices) {\n  let total = 0;          // only inside the function\n  for (const p of prices) total += p;\n  return total;\n}\nconsole.log(billTotal([40, 25, 60])); // 125",
+      "mermaid": "graph LR\n  input[prices] --> fn[billTotal] --> output[total]"
+    },
+    "example": {
+      "message": "A kirana bill function takes a list of prices and returns the total. Inside, it keeps a total variable that starts at zero and adds each price. Outside the function, total does not exist. If you call billTotal with 40, 25 and 60, what do you get back?",
+      "captionEn": null,
+      "code": "function billTotal(prices) {\n  let total = 0;          // only inside the function\n  for (const p of prices) total += p;\n  return total;\n}\nconsole.log(billTotal([40, 25, 60])); // 125",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "Another way: a function is like a juice machine at a shop. You put in fruit, press a button and get juice. You never see the inside parts; that is scope. What would be the parameter for a juice machine?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph LR\n  input[prices] --> fn[billTotal] --> output[total]"
+    },
+    "not_understood": {
+      "message": "Step by step. One, give the function a name. Two, list what it needs in brackets, the parameters. Three, do the work inside curly braces. Four, return the answer. What does return do?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph LR\n  input[prices] --> fn[billTotal] --> output[total]"
+    }
+  },
+  "doubt": {
+    "answer": "Good doubt. A variable declared with let inside a function or a block cannot be used outside. If you need it outside, return it from the function. Does that help?",
+    "captionEn": null
+  },
+  "check": {
+    "questions": [
+      "For a {context}, write or describe a function that takes some values and returns a result. Explain its parameters and return value.",
+      "In a {context}, a variable declared inside a function is undefined outside it. Explain why, using the idea of scope.",
+      "Explain why writing a function is better than repeating the same code in a {context}."
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "function",
+          "=>",
+          "arrow"
+        ],
+        [
+          "parameter",
+          "argument",
+          "input",
+          "return"
+        ],
+        [
+          "scope",
+          "inside",
+          "local",
+          "global",
+          "block",
+          "లోపల",
+          "अंदर"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "You described inputs, the work and the return value clearly.",
+      "missing": "Explain scope: what can be seen inside versus outside the function.",
+      "next": "Say what goes in, what comes out, and what stays inside."
+    }
+  }
+}

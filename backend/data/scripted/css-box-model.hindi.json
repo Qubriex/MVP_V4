@@ -1,0 +1,74 @@
+{
+  "node": "CSS box model",
+  "language": "hindi",
+  "version": 1,
+  "diagnosis": {
+    "message": "नमस्ते! आज हम CSS box model सीखेंगे। किसी button के चारों ओर जगह चाहिए हो तो आप आमतौर पर क्या करते हैं?",
+    "captionEn": "Hello! Today we learn the CSS box model. When you put space around a button, how do you usually do it?"
+  },
+  "turns": {
+    "explain": {
+      "message": "दीवार पर फ्रेम में लगी फ़ोटो सोचिए। फ़ोटो content है। उसके चारों ओर का सफ़ेद हिस्सा padding है। लकड़ी का फ्रेम border है। दीवार पर दो फ्रेम के बीच की जगह margin है। web page का हर element ऐसा ही एक box है। padding border के अंदर की जगह है, margin बाहर की। code में देखें?",
+      "captionEn": "Think of a framed photo on a wall. The photo is the content. The white mount around it is padding. The wooden frame is the border. The gap between two frames on the wall is margin. Every element on a web page is a box like this. Padding is space inside the border, margin is space outside it. Shall we see it in code?",
+      "code": ".card {\n  width: 200px;\n  padding: 16px;\n  border: 2px solid #ccc;\n  margin: 12px;\n  box-sizing: border-box;\n}",
+      "mermaid": "graph LR\n  margin --> border --> padding --> content"
+    },
+    "example": {
+      "message": "एक product card 200 pixels चौड़ा है, padding 16 pixels और border 2 pixels। box-sizing border-box लगाने पर पूरा card 200 pixels ही रहता है, अंदर का content थोड़ा छोटा हो जाता है। 12 pixels का margin cards को अलग रखता है। box-sizing हटा दें तो क्या बदलेगा?",
+      "captionEn": "A product card is 200 pixels wide with 16 pixels of padding and a 2 pixel border. With box-sizing border-box, the whole card stays 200 pixels, and the content area shrinks. The 12 pixel margin keeps cards apart. What would change if you removed box-sizing?",
+      "code": ".card {\n  width: 200px;\n  padding: 16px;\n  border: 2px solid #ccc;\n  margin: 12px;\n  box-sizing: border-box;\n}",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "दूसरे तरीके से देखते हैं। एक पार्सल सोचिए। सामान content है, bubble wrap padding, गत्ते का डिब्बा border, और शेल्फ़ पर पार्सलों के बीच की जगह margin। दो पार्सलों को दूर रखना हो तो कौन सी परत बढ़ाएँगे?",
+      "captionEn": "Another way: think of a parcel. The item is the content, bubble wrap is padding, the cardboard is the border, and the space between parcels on a shelf is margin. Which layer would you increase to keep two parcels apart?",
+      "code": null,
+      "mermaid": "graph LR\n  margin --> border --> padding --> content"
+    },
+    "not_understood": {
+      "message": "धीरे चलते हैं। हर element की चार परतें होती हैं। अंदर से बाहर: content, padding, border, margin। padding border के अंदर है। margin बाहर है। दो boxes के बीच जगह कौन देता है?",
+      "captionEn": "Let us slow down. Every element is a box with four layers. From inside to outside: content, padding, border, margin. Padding is inside the border. Margin is outside. Which one adds space between two boxes?",
+      "code": null,
+      "mermaid": "graph LR\n  margin --> border --> padding --> content"
+    }
+  },
+  "doubt": {
+    "answer": "अच्छा सवाल। background का रंग content और padding में भरता है, margin में नहीं। रंगीन जगह चाहिए तो padding, boxes के बीच खाली जगह चाहिए तो margin। समझ आया?",
+    "captionEn": "Good doubt. Background colour fills content and padding, but not margin. So if you want coloured space, use padding. If you want empty space between boxes, use margin. Does that help?"
+  },
+  "check": {
+    "questions": [
+      "एक {context} में दो cards आपस में चिपके हैं और text किनारों को छू रहा है। कौन सी box model properties बदलेंगे, और क्यों?",
+      "{context} के एक element को उदाहरण लेकर CSS box model की चारों परतें समझाइए।",
+      "{context} में एक card को width 300px दी गई है, फिर भी वह ज़्यादा चौड़ा दिखता है। क्यों, और box-sizing इसे कैसे ठीक करता है?"
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "margin",
+          "బయట",
+          "बाहर"
+        ],
+        [
+          "padding",
+          "లోపల",
+          "अंदर"
+        ],
+        [
+          "border"
+        ],
+        [
+          "content",
+          "width",
+          "box-sizing"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "आपने box की परतों के नाम और उनका काम बताया।",
+      "missing": "साफ़ बताइए कि border के अंदर की जगह padding है और बाहर की margin।",
+      "next": "अंदर से बाहर बोलिए: content, padding, border, margin।"
+    }
+  }
+}

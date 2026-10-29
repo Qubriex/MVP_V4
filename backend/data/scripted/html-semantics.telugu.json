@@ -1,0 +1,80 @@
+{
+  "node": "HTML semantics",
+  "language": "telugu",
+  "version": 1,
+  "diagnosis": {
+    "message": "నమస్కారం! ఈ రోజు మనం HTML semantics నేర్చుకుందాం. మీరు ఎప్పుడైనా web page తయారు చేశారా? ఏ tags వాడారు?",
+    "captionEn": "Hello! Today we learn HTML semantics. Have you ever built a web page? Which tags did you use?"
+  },
+  "turns": {
+    "explain": {
+      "message": "ఒక పెళ్లి పత్రిక గుర్తు చేసుకోండి. పైన కుటుంబం పేరు, మధ్యలో కార్యక్రమం వివరాలు, కింద చిరునామా ఉంటాయి. ప్రతి భాగానికి ఒక స్పష్టమైన స్థానం ఉంటుంది. HTML semantics కూడా అంతే. header, main, article, footer లాంటి tags ప్రతి భాగం అర్థం ఏమిటో browser కి చెబుతాయి. అప్పుడు screen readers, search engines పేజీని సరిగ్గా అర్థం చేసుకుంటాయి. ఒక ఉదాహరణ చూద్దామా?",
+      "captionEn": "Think of a wedding invitation card. The family name is at the top, the event details in the middle, and the address at the bottom. Each part has a clear place. HTML semantics works the same way. Tags like header, main, article and footer tell the browser what each part of the page means. Screen readers and search engines then understand the page. Shall we look at an example?",
+      "code": "<header>\n  <nav>…</nav>\n</header>\n<main>\n  <article>\n    <h1>College Fest 2026</h1>\n    <p>Events, dates and venues.</p>\n  </article>\n</main>\n<footer>Contact the fest team</footer>",
+      "mermaid": "graph TD\n  Page --> header\n  Page --> main\n  Page --> footer\n  main --> article\n  article --> h1\n  article --> p"
+    },
+    "example": {
+      "message": "ఒక కాలేజీ ఫెస్ట్ పేజీ తీసుకోండి. logo, menu header లోపల ఉంటాయి. ఈవెంట్ల జాబితా main లోపల ఉంటుంది, ప్రతి ఈవెంట్ ఒక article. సంప్రదింపు వివరాలు footer లో ఉంటాయి. ఫెస్ట్ తేదీలు ఎక్కడ పెడతారో చెప్పగలరా?",
+      "captionEn": "Take a college fest page. The logo and menu go inside header. The event list goes inside main, and each event is an article. Contact details go inside footer. Can you tell me where the fest dates should go?",
+      "code": "<header>\n  <nav>…</nav>\n</header>\n<main>\n  <article>\n    <h1>College Fest 2026</h1>\n    <p>Events, dates and venues.</p>\n  </article>\n</main>\n<footer>Contact the fest team</footer>",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "ఇంకో విధంగా చూద్దాం. div అంటే ఇంట్లో పేరు లేని పెట్టె లాంటిది. లోపల ఏముందో తెరిచి చూడాలి. semantic tag అంటే పేరు రాసిన పెట్టె. వంటగది, పుస్తకాలు, బట్టలు. ఎవరైనా త్వరగా కనుక్కోగలరు. పేజీ menu కోసం ఏ పేరు ఉన్న పెట్టె వాడతారు?",
+      "captionEn": "Let us try another way. A div is like an unlabelled box at home. You must open it to know what is inside. A semantic tag is a labelled box: kitchen, books, clothes. Anyone can find things fast. Which labelled box would you use for a page menu?",
+      "code": null,
+      "mermaid": "graph TD\n  Page --> header\n  Page --> main\n  Page --> footer\n  main --> article\n  article --> h1\n  article --> p"
+    },
+    "not_understood": {
+      "message": "పర్వాలేదు, నెమ్మదిగా చూద్దాం. ఉత్తరానికి మొదలు, మధ్య భాగం, సంతకం ఉన్నట్టే web page కి కూడా భాగాలు ఉంటాయి. HTML semantics అంటే ప్రతి భాగానికి సరైన పేరు పెట్టడం. పై భాగం header. ముఖ్య విషయం main. కింది భాగం footer. పేజీలో మొదట ఏ భాగం వస్తుంది?",
+      "captionEn": "No problem, let us go slowly. A web page has parts, like a letter has a greeting, a body and a signature. HTML semantics just means naming each part correctly. The top part is header. The main content is main. The bottom part is footer. Which part comes first on a page?",
+      "code": null,
+      "mermaid": "graph TD\n  Page --> header\n  Page --> main\n  Page --> footer\n  main --> article\n  article --> h1\n  article --> p"
+    }
+  },
+  "doubt": {
+    "answer": "మంచి ప్రశ్న. div కి అర్థం ఉండదు. అది style కోసం ఒక పెట్టె మాత్రమే. navigation లేదా article లాంటి స్పష్టమైన పాత్ర ఉన్నప్పుడు semantic tag వాడండి. సరిపోయే tag లేనప్పుడే div వాడండి. ఇప్పుడు స్పష్టంగా ఉందా?",
+    "captionEn": "Good question. A div has no meaning; it is only a box for styling. Use a semantic tag when the part has a clear role, like navigation or an article. Use a div only when no meaningful tag fits. Is that clearer now?"
+  },
+  "check": {
+    "questions": [
+      "ఒక {context} గురించి ఆలోచించండి. దాని పై భాగం, ముఖ్య విషయం, కింది భాగం కోసం ఏ semantic tags వాడతారు? అవి ఎందుకు ఉపయోగపడతాయి?",
+      "ఒక స్నేహితుడు {context} ని కేవలం div tags తో తయారు చేశాడు. దీని వల్ల ఏ సమస్యలు వస్తాయి? semantic tags వాటిని ఎలా సరిచేస్తాయి?",
+      "{context} లో ప్రతి అంశానికి article వాడటానికి, div వాడటానికి తేడా ఏమిటో ఒక చిన్న ఉదాహరణతో వివరించండి."
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "header",
+          "footer",
+          "nav",
+          "main",
+          "article",
+          "section"
+        ],
+        [
+          "meaning",
+          "semantic",
+          "అర్థం",
+          "अर्थ",
+          "मतलब"
+        ],
+        [
+          "screen reader",
+          "accessib",
+          "search engine",
+          "seo",
+          "google",
+          "అందరికీ",
+          "सबके लिए"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "పేజీలోని ప్రతి భాగానికి సరైన semantic tag వాడారు.",
+      "missing": "semantic tags ఎందుకు ఉపయోగపడతాయో చెప్పండి, ఉదాహరణకు screen readers, search engines.",
+      "next": "ముందు tag పేరు చెప్పండి, తర్వాత ఒక వాక్యంలో కారణం చెప్పండి."
+    }
+  }
+}

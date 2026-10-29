@@ -1,0 +1,80 @@
+{
+  "node": "Node.js basics",
+  "language": "hindi",
+  "version": 1,
+  "diagnosis": {
+    "message": "नमस्ते! आज हम Node.js basics सीखेंगे। आप जानते हैं कि JavaScript browser में चलता है। आपके हिसाब से और कहाँ चल सकता है?",
+    "captionEn": "Hello! Today we learn Node.js basics. You know JavaScript runs in the browser. Where else do you think it could run?"
+  },
+  "turns": {
+    "explain": {
+      "message": "कैंटीन की रसोई सोचिए। अब तक JavaScript सिर्फ़ counter पर, यानी browser में काम करता था। Node.js, JavaScript को रसोई में, यानी server पर भी चलाता है। वह फ़ाइलें पढ़ सकता है, databases से बात कर सकता है और कई browsers की requests का जवाब दे सकता है। Node non-blocking है: जैसे अच्छा रसोइया चावल चूल्हे पर रखकर पकने तक सब्ज़ी काटता है, ख़ाली नहीं बैठता। modules लाने के लिए require या import, packages install करने के लिए npm। एक छोटा server शुरू करें?",
+      "captionEn": "Think of a canteen kitchen. Until now, JavaScript only worked at the counter, the browser. Node.js lets JavaScript work in the kitchen too, on the server. It can read files, talk to databases and answer requests from many browsers. Node is non-blocking: like a good cook who puts rice on the stove and chops vegetables while it cooks, it does not wait idle. We use require or import to bring in modules, and npm to install packages. Shall we start a tiny server?",
+      "code": "// server.js\nconst http = require(\"http\");\nconst fs = require(\"fs/promises\");\n\nhttp.createServer(async (req, res) => {\n  const menu = await fs.readFile(\"menu.json\", \"utf8\");\n  res.writeHead(200, { \"Content-Type\": \"application/json\" });\n  res.end(menu);\n}).listen(3000);",
+      "mermaid": "graph LR\n  browser[Browser] -->|request| node[Node.js server] -->|reads| file[menu.json]\n  node -->|response| browser"
+    },
+    "example": {
+      "message": "कैंटीन menu server http module से port 3000 पर server बनाता है। request आने पर वह menu.json बिना रुके पढ़कर JSON के रूप में भेजता है। कई छात्र एक साथ पूछ सकते हैं। उसे शुरू करने के लिए कौन सी command चलाएँगे?",
+      "captionEn": "A canteen menu server uses the http module to create a server on port 3000. When a request comes, it reads menu.json without blocking and sends it back as JSON. Many students can ask at once. What command would you run to start it?",
+      "code": "// server.js\nconst http = require(\"http\");\nconst fs = require(\"fs/promises\");\n\nhttp.createServer(async (req, res) => {\n  const menu = await fs.readFile(\"menu.json\", \"utf8\");\n  res.writeHead(200, { \"Content-Type\": \"application/json\" });\n  res.end(menu);\n}).listen(3000);",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "दूसरे तरीके से। डाकघर। चिट्ठियाँ requests हैं। clerk हर एक लेकर काम शुरू करता है, और इंतज़ार के दौरान अगली की ओर बढ़ता है, कभी ख़ाली नहीं। वही clerk event loop है। Node दूसरा code लाने के लिए क्या इस्तेमाल करता है?",
+      "captionEn": "Another way: a post office. Letters are requests. The clerk takes each one, starts the work, and moves to the next while waiting, never standing idle. That clerk is the event loop. What does Node use to bring in other code?",
+      "code": null,
+      "mermaid": "graph LR\n  browser[Browser] -->|request| node[Node.js server] -->|reads| file[menu.json]\n  node -->|response| browser"
+    },
+    "not_understood": {
+      "message": "कदम-दर-कदम। एक, Node browser के बाहर JavaScript चलाता है। दो, modules http या fs जैसी सुविधाएँ देते हैं। तीन, server एक port पर सुनता है। चार, हर request पर response भेजता है। listen 3000 का मतलब क्या है?",
+      "captionEn": "Step by step. One, Node runs JavaScript outside the browser. Two, modules add features, like http or fs. Three, a server listens on a port. Four, for each request it sends a response. What does listen 3000 mean?",
+      "code": null,
+      "mermaid": "graph LR\n  browser[Browser] -->|request| node[Node.js server] -->|reads| file[menu.json]\n  node -->|response| browser"
+    }
+  },
+  "doubt": {
+    "answer": "अच्छा सवाल। package.json आपके project के packages और scripts की सूची है। npm install उसे पढ़कर उन्हें download करता है, ताकि कोई भी आपका project चला सके। समझ आया?",
+    "captionEn": "Good question. package.json lists your project's packages and scripts. npm install reads it and downloads them, so anyone can run your project. Does that help?"
+  },
+  "check": {
+    "questions": [
+      "एक {context} के लिए समझाइए कि छोटा Node.js server request का जवाब कैसे देगा और data कैसे भेजेगा।",
+      "{context} के उदाहरण से समझाइए कि Node.js में non-blocking का मतलब क्या है।",
+      "{context} का server बनाते समय modules, npm और package.json की भूमिका समझाइए।"
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "node"
+        ],
+        [
+          "server",
+          "http",
+          "listen",
+          "port"
+        ],
+        [
+          "require",
+          "import",
+          "module",
+          "npm",
+          "package"
+        ],
+        [
+          "async",
+          "non-blocking",
+          "event loop",
+          "file",
+          "fs",
+          "javascript"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "आपने server पर JavaScript चलाने वाला Node समझाया।",
+      "missing": "बताइए requests कैसे संभलती हैं, और इंतज़ार में Node रुकता नहीं।",
+      "next": "बताइए: request आती है, server काम करता है, response जाता है।"
+    }
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "node": "Forms in React",
+  "language": "english",
+  "version": 1,
+  "diagnosis": {
+    "message": "Hello! Today we learn forms in React. When you fill a registration form and press submit, what should happen if you left the name empty?",
+    "captionEn": null
+  },
+  "turns": {
+    "explain": {
+      "message": "Think of a bank form where a clerk writes down every word you say, live. React state is that clerk. In a controlled input, the input shows the value from state, and every key press calls onChange, which updates state. So React always knows what is typed. On submit, we call preventDefault, check the values, show an error if something is missing, and only then save. Shall we build a fest registration form?",
+      "captionEn": null,
+      "code": "function Register() {\n  const [name, setName] = useState(\"\");\n  const onSubmit = (e) => {\n    e.preventDefault();\n    if (!name.trim()) return setError(\"Enter your name\");\n    save({ name });\n  };\n  return (\n    <form onSubmit={onSubmit}>\n      <input value={name} onChange={e => setName(e.target.value)} />\n      <button>Register</button>\n    </form>\n  );\n}",
+      "mermaid": "graph LR\n  type[User types] --> onChange --> state[(name)] --> input[input value]\n  submit[Submit] --> validate --> save"
+    },
+    "example": {
+      "message": "A Register form keeps name in state. The input's value is name and onChange calls setName. On submit we prevent the page reload, check that the name is not empty, show \"Enter your name\" if it is, otherwise save. Where would you show the error so a screen reader also hears it?",
+      "captionEn": null,
+      "code": "function Register() {\n  const [name, setName] = useState(\"\");\n  const onSubmit = (e) => {\n    e.preventDefault();\n    if (!name.trim()) return setError(\"Enter your name\");\n    save({ name });\n  };\n  return (\n    <form onSubmit={onSubmit}>\n      <input value={name} onChange={e => setName(e.target.value)} />\n      <button>Register</button>\n    </form>\n  );\n}",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "Another way: a teacher taking attendance. Every student's answer is written in the register immediately. At the end, the teacher checks for missing names before submitting the register. Which handler writes each answer?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph LR\n  type[User types] --> onChange --> state[(name)] --> input[input value]\n  submit[Submit] --> validate --> save"
+    },
+    "not_understood": {
+      "message": "Step by step. One, make state for each field. Two, set the input value from state. Three, update state in onChange. Four, on submit, prevent reload, check, then save. Which event fires on every key press?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph LR\n  type[User types] --> onChange --> state[(name)] --> input[input value]\n  submit[Submit] --> validate --> save"
+    }
+  },
+  "doubt": {
+    "answer": "Good question. An uncontrolled input keeps its own value in the page, and you read it only at submit. A controlled one keeps it in state, so you can check as the user types. Does that help?",
+    "captionEn": null
+  },
+  "check": {
+    "questions": [
+      "On a {context}, a form must not submit when a field is empty. Explain how you would build this as a controlled form in React.",
+      "Explain what a controlled input is and how onChange and state work together on a {context}.",
+      "A form on a {context} reloads the page when submitted. Explain how React handles submit to prevent this and validate the data."
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "controlled",
+          "value",
+          "useState",
+          "state"
+        ],
+        [
+          "onChange",
+          "onchange"
+        ],
+        [
+          "onSubmit",
+          "submit",
+          "preventDefault"
+        ],
+        [
+          "validat",
+          "error",
+          "check",
+          "ఖాళీ",
+          "ख़ाली",
+          "खाली"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "You explained controlled inputs and submit handling.",
+      "missing": "Say how you validate before saving and how the error is shown.",
+      "next": "Go in order: state, value, onChange, submit, check, save."
+    }
+  }
+}

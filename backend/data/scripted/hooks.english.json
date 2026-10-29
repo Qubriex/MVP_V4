@@ -1,0 +1,77 @@
+{
+  "node": "Hooks",
+  "language": "english",
+  "version": 1,
+  "diagnosis": {
+    "message": "Hello! Today we learn React hooks. When a page opens, what should happen only once, like loading the notices?",
+    "captionEn": null
+  },
+  "turns": {
+    "explain": {
+      "message": "Think of switches on a wall board. Each switch connects a room to a power line. Hooks are switches that connect a function component to React features. useState connects it to memory, so it remembers values. useEffect connects it to the outside world, like fetching data after the page shows. The dependency array tells useEffect when to run again: empty means only once. Hooks are always called at the top of the component, never inside if statements. Shall we load notices?",
+      "captionEn": null,
+      "code": "function Notices() {\n  const [notices, setNotices] = useState([]);\n  useEffect(() => {\n    fetch(\"/api/notices\").then(r => r.json()).then(setNotices);\n  }, []); // run once, after the first render\n  return <ul>{notices.map(n => <li key={n.id}>{n.title}</li>)}</ul>;\n}",
+      "mermaid": "graph LR\n  render[First render] --> effect[useEffect runs] --> fetch[fetch notices] --> set[setNotices] --> rerender[Re-render]"
+    },
+    "example": {
+      "message": "A Notices component keeps notices in useState. useEffect with an empty array fetches the notices once after the first render, then calls setNotices. React re-renders with the list. What would happen if you left out the empty array?",
+      "captionEn": null,
+      "code": "function Notices() {\n  const [notices, setNotices] = useState([]);\n  useEffect(() => {\n    fetch(\"/api/notices\").then(r => r.json()).then(setNotices);\n  }, []); // run once, after the first render\n  return <ul>{notices.map(n => <li key={n.id}>{n.title}</li>)}</ul>;\n}",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "Another way: an alarm clock. useEffect is setting an alarm that rings after the page shows. The dependency array says when to ring again: never, or every time a certain value changes. Which hook remembers a value between renders?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph LR\n  render[First render] --> effect[useEffect runs] --> fetch[fetch notices] --> set[setNotices] --> rerender[Re-render]"
+    },
+    "not_understood": {
+      "message": "Step by step. useState gives a value and a setter. useEffect runs code after rendering. Give useEffect an array of the values it depends on. Empty array means run once. Which hook would you use to load data?",
+      "captionEn": null,
+      "code": null,
+      "mermaid": "graph LR\n  render[First render] --> effect[useEffect runs] --> fetch[fetch notices] --> set[setNotices] --> rerender[Re-render]"
+    }
+  },
+  "doubt": {
+    "answer": "Good doubt. Hooks must run in the same order every render, so React can match them up. That is why we never put them inside an if or a loop. Does that help?",
+    "captionEn": null
+  },
+  "check": {
+    "questions": [
+      "On a {context}, data must load once when the page opens. Explain how useState and useEffect work together for this.",
+      "Explain what the dependency array in useEffect does, using an example from a {context}.",
+      "In a {context}, a useEffect keeps running again and again. Explain why this can happen and how to fix it."
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "useState"
+        ],
+        [
+          "useEffect",
+          "effect"
+        ],
+        [
+          "dependency",
+          "dependencies",
+          "[]",
+          "array",
+          "once",
+          "ఒక్కసారి",
+          "एक बार"
+        ],
+        [
+          "hook",
+          "top level",
+          "render"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "You explained useState and useEffect working together.",
+      "missing": "Explain the dependency array and when the effect runs again.",
+      "next": "Say what each hook connects to, then when it runs."
+    }
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "node": "CSS box model",
+  "language": "telugu",
+  "version": 1,
+  "diagnosis": {
+    "message": "నమస్కారం! ఈ రోజు CSS box model నేర్చుకుందాం. ఒక button చుట్టూ ఖాళీ కావాలంటే మీరు సాధారణంగా ఏం చేస్తారు?",
+    "captionEn": "Hello! Today we learn the CSS box model. When you put space around a button, how do you usually do it?"
+  },
+  "turns": {
+    "explain": {
+      "message": "గోడ మీద ఫ్రేమ్ వేసిన ఫోటో ఊహించుకోండి. ఫోటో content. దాని చుట్టూ తెల్లటి అంచు padding. చెక్క ఫ్రేమ్ border. గోడ మీద రెండు ఫ్రేముల మధ్య ఖాళీ margin. web page లో ప్రతి element ఇలాంటి ఒక box. padding border లోపలి ఖాళీ, margin border బయటి ఖాళీ. code లో చూద్దామా?",
+      "captionEn": "Think of a framed photo on a wall. The photo is the content. The white mount around it is padding. The wooden frame is the border. The gap between two frames on the wall is margin. Every element on a web page is a box like this. Padding is space inside the border, margin is space outside it. Shall we see it in code?",
+      "code": ".card {\n  width: 200px;\n  padding: 16px;\n  border: 2px solid #ccc;\n  margin: 12px;\n  box-sizing: border-box;\n}",
+      "mermaid": "graph LR\n  margin --> border --> padding --> content"
+    },
+    "example": {
+      "message": "ఒక product card వెడల్పు 200 pixels, padding 16 pixels, border 2 pixels. box-sizing border-box పెడితే card మొత్తం 200 pixels గానే ఉంటుంది, లోపలి content కొంచెం చిన్నదవుతుంది. 12 pixels margin cards ని దూరంగా ఉంచుతుంది. box-sizing తీసేస్తే ఏమవుతుంది?",
+      "captionEn": "A product card is 200 pixels wide with 16 pixels of padding and a 2 pixel border. With box-sizing border-box, the whole card stays 200 pixels, and the content area shrinks. The 12 pixel margin keeps cards apart. What would change if you removed box-sizing?",
+      "code": ".card {\n  width: 200px;\n  padding: 16px;\n  border: 2px solid #ccc;\n  margin: 12px;\n  box-sizing: border-box;\n}",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "ఇంకో విధంగా చూద్దాం. ఒక పార్సిల్ ఊహించుకోండి. వస్తువు content, bubble wrap padding, అట్టపెట్టె border, అల్మారాలో పార్సిళ్ల మధ్య ఖాళీ margin. రెండు పార్సిళ్లను దూరంగా ఉంచాలంటే ఏ పొర పెంచుతారు?",
+      "captionEn": "Another way: think of a parcel. The item is the content, bubble wrap is padding, the cardboard is the border, and the space between parcels on a shelf is margin. Which layer would you increase to keep two parcels apart?",
+      "code": null,
+      "mermaid": "graph LR\n  margin --> border --> padding --> content"
+    },
+    "not_understood": {
+      "message": "నెమ్మదిగా చూద్దాం. ప్రతి element కి నాలుగు పొరలు ఉంటాయి. లోపలి నుంచి బయటకు: content, padding, border, margin. padding border లోపల ఉంటుంది. margin బయట ఉంటుంది. రెండు boxes మధ్య ఖాళీ ఏది ఇస్తుంది?",
+      "captionEn": "Let us slow down. Every element is a box with four layers. From inside to outside: content, padding, border, margin. Padding is inside the border. Margin is outside. Which one adds space between two boxes?",
+      "code": null,
+      "mermaid": "graph LR\n  margin --> border --> padding --> content"
+    }
+  },
+  "doubt": {
+    "answer": "మంచి సందేహం. background రంగు content, padding లో నిండుతుంది, margin లో కాదు. రంగు ఉన్న ఖాళీ కావాలంటే padding. boxes మధ్య ఖాళీ కావాలంటే margin. ఇది సహాయపడిందా?",
+    "captionEn": "Good doubt. Background colour fills content and padding, but not margin. So if you want coloured space, use padding. If you want empty space between boxes, use margin. Does that help?"
+  },
+  "check": {
+    "questions": [
+      "ఒక {context} లో రెండు cards ఒకదానికొకటి తగులుతున్నాయి, text అంచులకు తగులుతోంది. ఏ box model properties మారుస్తారు? ఎందుకు?",
+      "{context} లోని ఒక element ని ఉదాహరణగా తీసుకుని CSS box model లోని నాలుగు పొరలను వివరించండి.",
+      "{context} లో ఒక card కి width 300px ఇచ్చారు, కానీ అది ఇంకా వెడల్పుగా కనిపిస్తోంది. ఎందుకో, box-sizing దాన్ని ఎలా సరిచేస్తుందో చెప్పండి."
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "margin",
+          "బయట",
+          "बाहर"
+        ],
+        [
+          "padding",
+          "లోపల",
+          "अंदर"
+        ],
+        [
+          "border"
+        ],
+        [
+          "content",
+          "width",
+          "box-sizing"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "box లోని పొరల పేర్లు, ప్రతి దాని పని చెప్పారు.",
+      "missing": "border లోపలి ఖాళీ padding, బయటి ఖాళీ margin అని స్పష్టంగా చెప్పండి.",
+      "next": "లోపలి నుంచి బయటకు చెప్పండి: content, padding, border, margin."
+    }
+  }
+}

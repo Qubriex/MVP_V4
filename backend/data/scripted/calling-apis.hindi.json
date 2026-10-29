@@ -1,0 +1,80 @@
+{
+  "node": "Calling APIs",
+  "language": "hindi",
+  "version": 1,
+  "diagnosis": {
+    "message": "नमस्ते! आज हम React पेज से APIs बुलाना सीखेंगे। website पर परीक्षा के नतीजे लोड होते समय screen पर क्या दिखता है?",
+    "captionEn": "Hello! Today we learn calling APIs from a React page. When exam results are loading on a website, what do you see on the screen?"
+  },
+  "turns": {
+    "explain": {
+      "message": "रेलवे पूछताछ खिड़की पर इंतज़ार सोचिए। तीन पल होते हैं: आप इंतज़ार कर रहे हैं, जवाब मिल गया, या बताया गया कि system बंद है। API बुलाने वाले React पेज की भी यही तीन states हैं: loading, success और error। useEffect में fetch से शुरू करते हैं, loading संदेश दिखाते हैं, r.ok जाँचते हैं क्योंकि 404 network की विफलता नहीं है, JSON पढ़कर state में रखते हैं। कुछ भी विफल हो तो try again button के साथ साफ़ error दिखाते हैं। परीक्षा के नतीजे लाकर देखें?",
+      "captionEn": "Think of waiting at a railway enquiry counter. There are three moments: you are waiting, you get the answer, or the counter says the system is down. A React page calling an API has the same three states: loading, success and error. We start the call in useEffect with fetch, show a loading message, check r.ok because a 404 is not a network failure, read the JSON, and store it in state. If anything fails, we show a clear error with a try again button. Shall we load exam results?",
+      "code": "function Results() {\n  const [state, setState] = useState({ loading: true, data: null, error: \"\" });\n  useEffect(() => {\n    fetch(\"/api/results\")\n      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })\n      .then(data => setState({ loading: false, data, error: \"\" }))\n      .catch(() => setState({ loading: false, data: null, error: \"Could not load results\" }));\n  }, []);\n}",
+      "mermaid": "stateDiagram-v2\n  [*] --> Loading\n  Loading --> Success: 200 OK\n  Loading --> Error: network or 4xx/5xx\n  Error --> Loading: Try again"
+    },
+    "example": {
+      "message": "Results पेज loading true से शुरू होता है। fetch नतीजे लाता है। response ok न हो तो error throw करते हैं। success पर data रखते हैं और loading false हो जाता है। विफल होने पर \"Could not load results\" और try again button दिखाते हैं। server धीमा हो तो छात्र को क्या दिखना चाहिए?",
+      "captionEn": "A Results page starts with loading true. fetch gets the results. If the response is not ok, we throw an error. On success we save the data and loading becomes false. On failure we show \"Could not load results\" and a try again button. What should a student see if the server is slow?",
+      "code": "function Results() {\n  const [state, setState] = useState({ loading: true, data: null, error: \"\" });\n  useEffect(() => {\n    fetch(\"/api/results\")\n      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })\n      .then(data => setState({ loading: false, data, error: \"\" }))\n      .catch(() => setState({ loading: false, data: null, error: \"Could not load results\" }));\n  }, []);\n}",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "दूसरे तरीके से। online parcel order। order हुआ, रास्ते में है मतलब loading। पहुँच गया मतलब success। पता नहीं मिला मतलब error, दोबारा कोशिश के विकल्प के साथ। अच्छा पेज तीनों साफ़ दिखाता है। सबसे पहले कौन सी state आती है?",
+      "captionEn": "Another way: ordering a parcel online. Ordered and on the way is loading. Delivered is success. Address not found is error, with an option to try again. A good page shows all three clearly. Which state comes first?",
+      "code": null,
+      "mermaid": "stateDiagram-v2\n  [*] --> Loading\n  Loading --> Success: 200 OK\n  Loading --> Error: network or 4xx/5xx\n  Error --> Loading: Try again"
+    },
+    "not_understood": {
+      "message": "कदम-दर-कदम। एक, loading, data और error को state में रखिए। दो, useEffect के अंदर fetch बुलाइए। तीन, success पर data रखिए। चार, विफलता पर error संदेश रखिए। पाँच, हर state के लिए सही चीज़ दिखाइए। इंतज़ार के दौरान कौन सी state दिखाएँगे?",
+      "captionEn": "Step by step. One, keep loading, data and error in state. Two, call fetch inside useEffect. Three, on success, save data. Four, on failure, save an error message. Five, show the right thing for each state. Which state do you show while waiting?",
+      "code": null,
+      "mermaid": "stateDiagram-v2\n  [*] --> Loading\n  Loading --> Success: 200 OK\n  Loading --> Error: network or 4xx/5xx\n  Error --> Loading: Try again"
+    }
+  },
+  "doubt": {
+    "answer": "अच्छा सवाल। fetch सिर्फ़ network की समस्या पर विफल होता है। 404 या 500 भी response ही होते हैं, इसलिए r.ok जाँचकर हम ख़ुद उन्हें error मानते हैं। समझ आया?",
+    "captionEn": "Good doubt. fetch only fails on network problems. A 404 or 500 still counts as a response, so we check r.ok and treat it as an error ourselves. Does that help?"
+  },
+  "check": {
+    "questions": [
+      "एक {context} में data API से आता है। समझाइए कि आपका React पेज कौन सी तीन states दिखाए, और हर एक को कैसे संभालेंगे।",
+      "{context} में API 500 लौटा रहा है पर पेज कुछ नहीं दिखाता। ऐसा क्यों है और इसे ठीक से कैसे संभालें?",
+      "{context} के लिए समझाइए कि React component में API कहाँ बुलाएँगे और data screen तक कैसे पहुँचता है।"
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "fetch",
+          "axios",
+          "api"
+        ],
+        [
+          "loading",
+          "spinner",
+          "wait"
+        ],
+        [
+          "error",
+          "catch",
+          "ok",
+          "status",
+          "retry",
+          "try again"
+        ],
+        [
+          "json",
+          "response",
+          "useEffect",
+          "state"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "आपने loading, success और error तीनों बताए।",
+      "missing": "बताइए error response कैसे पहचानते हैं, जैसे r.ok जाँचना, और user क्या देखता है।",
+      "next": "तीनों states बताइए, फिर हर एक किससे शुरू होती है।"
+    }
+  }
+}

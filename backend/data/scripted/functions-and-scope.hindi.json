@@ -1,0 +1,76 @@
+{
+  "node": "Functions and scope",
+  "language": "hindi",
+  "version": 1,
+  "diagnosis": {
+    "message": "नमस्ते! आज हम functions और scope सीखेंगे। हर सुबह चाय बनाते समय क्या आप वही कदम दोहराते हैं? कौन से?",
+    "captionEn": "Hello! Today we learn functions and scope. When you make tea every morning, do you repeat the same steps? Which ones?"
+  },
+  "turns": {
+    "explain": {
+      "message": "चाय बनाना एक नुस्खा है: पानी, दूध और चायपत्ती दीजिए, वह एक कप चाय देता है। function code में एक नुस्खा है। वह parameters नाम के inputs लेता है और return से नतीजा देता है। एक बार लिखिए, कई बार इस्तेमाल कीजिए। scope मतलब कोई variable कहाँ दिखता है। function के अंदर बना variable अंदर ही रहता है, जैसे आपकी रसोई का सामान रसोई में रहता है। एक लिखकर देखें?",
+      "captionEn": "Making tea is a recipe: you give it water, milk and tea powder, and it gives back a cup of tea. A function is a recipe in code. It takes inputs called parameters and gives back a result with return. You write it once and use it many times. Scope means where a variable can be seen. A variable made inside a function stays inside it, like ingredients that stay in your kitchen. Shall we write one?",
+      "code": "function billTotal(prices) {\n  let total = 0;          // only inside the function\n  for (const p of prices) total += p;\n  return total;\n}\nconsole.log(billTotal([40, 25, 60])); // 125",
+      "mermaid": "graph LR\n  input[prices] --> fn[billTotal] --> output[total]"
+    },
+    "example": {
+      "message": "किराना बिल का function कीमतों की सूची लेता है और कुल return करता है। अंदर total नाम का variable शून्य से शुरू होकर हर कीमत जोड़ता है। function के बाहर total मौजूद नहीं है। billTotal को 40, 25 और 60 दें तो क्या वापस मिलेगा?",
+      "captionEn": "A kirana bill function takes a list of prices and returns the total. Inside, it keeps a total variable that starts at zero and adds each price. Outside the function, total does not exist. If you call billTotal with 40, 25 and 60, what do you get back?",
+      "code": "function billTotal(prices) {\n  let total = 0;          // only inside the function\n  for (const p of prices) total += p;\n  return total;\n}\nconsole.log(billTotal([40, 25, 60])); // 125",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "दूसरे तरीके से। function दुकान की juice machine जैसा है। फल डालिए, button दबाइए, juice मिलता है। अंदर के पुर्ज़े आपको नहीं दिखते, यही scope है। juice machine का parameter क्या होगा?",
+      "captionEn": "Another way: a function is like a juice machine at a shop. You put in fruit, press a button and get juice. You never see the inside parts; that is scope. What would be the parameter for a juice machine?",
+      "code": null,
+      "mermaid": "graph LR\n  input[prices] --> fn[billTotal] --> output[total]"
+    },
+    "not_understood": {
+      "message": "कदम-दर-कदम। एक, function को नाम दीजिए। दो, उसे जो चाहिए वह brackets में लिखिए, यही parameters हैं। तीन, curly braces के अंदर काम कीजिए। चार, जवाब return कीजिए। return क्या करता है?",
+      "captionEn": "Step by step. One, give the function a name. Two, list what it needs in brackets, the parameters. Three, do the work inside curly braces. Four, return the answer. What does return do?",
+      "code": null,
+      "mermaid": "graph LR\n  input[prices] --> fn[billTotal] --> output[total]"
+    }
+  },
+  "doubt": {
+    "answer": "अच्छा सवाल। function या block के अंदर let से बना variable बाहर इस्तेमाल नहीं हो सकता। बाहर चाहिए तो function से return कीजिए। समझ आया?",
+    "captionEn": "Good doubt. A variable declared with let inside a function or a block cannot be used outside. If you need it outside, return it from the function. Does that help?"
+  },
+  "check": {
+    "questions": [
+      "एक {context} के लिए एक function लिखिए या समझाइए जो कुछ मान लेकर नतीजा return करे। उसके parameters और return मान बताइए।",
+      "{context} में function के अंदर बना variable बाहर undefined आ रहा है। scope की मदद से समझाइए क्यों।",
+      "{context} में वही code बार-बार लिखने से function लिखना बेहतर क्यों है, समझाइए।"
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "function",
+          "=>",
+          "arrow"
+        ],
+        [
+          "parameter",
+          "argument",
+          "input",
+          "return"
+        ],
+        [
+          "scope",
+          "inside",
+          "local",
+          "global",
+          "block",
+          "లోపల",
+          "अंदर"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "आपने inputs, काम और return मान साफ़ बताए।",
+      "missing": "scope समझाइए: function के अंदर क्या दिखता है और बाहर क्या।",
+      "next": "बताइए क्या अंदर जाता है, क्या बाहर आता है, और क्या अंदर ही रहता है।"
+    }
+  }
+}

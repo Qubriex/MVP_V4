@@ -1,0 +1,22 @@
+{
+  "language": "english",
+  "ready": "Good. You have the core idea. Now a short check: answer it in your own words.",
+  "advance": "Well done. You have this skill. Let us move on to the next one.",
+  "loop": "Good try. Let us look at it from another angle.",
+  "generic": {
+    "diag": "Hello! Today we learn {skill}. What do you already know about it?",
+    "explain": "Let us learn {skill} step by step. First the idea, then a small example, then you try. Tell me when you are ready for the check.",
+    "example": "Here is a small example of {skill} from a real project. What do you notice?",
+    "another": "Let us try another way to see {skill}. Think of something you do every day that works the same way.",
+    "confused": "No problem. Let us go slowly with {skill}, one idea at a time.",
+    "doubt": "Good question about {skill}. Think about what goes in, what happens, and what comes out.",
+    "q": [
+      "Think of a {context}. In your own words, explain how {skill} works there, with one small example.",
+      "Imagine using {skill} for a {context}. Predict what happens, and explain why.",
+      "Think of a {context}. Describe one common mistake people make with {skill} there, and how you would fix it."
+    ],
+    "good": "You explained the idea in your own words.",
+    "missing": "Add one concrete example from the scenario.",
+    "next": "Say the idea, then show it on the example."
+  }
+}

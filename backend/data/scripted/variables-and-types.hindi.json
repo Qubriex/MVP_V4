@@ -1,0 +1,78 @@
+{
+  "node": "Variables and types",
+  "language": "hindi",
+  "version": 1,
+  "diagnosis": {
+    "message": "नमस्ते! आज हम JavaScript में variables और types सीखेंगे। मन में हिसाब लगाते समय आप कोई संख्या कहाँ याद रखते हैं?",
+    "captionEn": "Hello! Today we learn variables and types in JavaScript. Where do you store a number when you do a calculation in your head?"
+  },
+  "turns": {
+    "explain": {
+      "message": "रसोई में नाम लिखे डिब्बे सोचिए: चावल, दाल, चीनी। variable एक नाम लिखा डिब्बा है जिसमें एक मान रहता है। let वाले डिब्बे का मान बदल सकता है। const वाला डिब्बा एक बार भरते हैं। type बताता है कि अंदर किस तरह की चीज़ है: string मतलब text, number मतलब गिनती या कीमत, boolean मतलब true या false। typeof type बताता है। किराना दुकान का उदाहरण देखें?",
+      "captionEn": "Think of labelled jars in a kitchen: rice, dal, sugar. A variable is a labelled jar that holds a value. let makes a jar whose contents can change. const makes a jar you fill once. The type tells you what kind of thing is inside: a string is text, a number is a count or price, a boolean is true or false. typeof tells you the type. Shall we see a kirana shop example?",
+      "code": "const shopName = \"Sri Lakshmi Kirana\"; // string\nlet itemsSold = 12;                     // number\nlet isOpen = true;                      // boolean\nitemsSold = itemsSold + 1;\nconsole.log(typeof itemsSold);          // \"number\"",
+      "mermaid": "graph TD\n  value --> string\n  value --> number\n  value --> boolean\n  value --> object\n  value --> undefined"
+    },
+    "example": {
+      "message": "किराना दुकान के program में shopName एक string, itemsSold एक number और isOpen एक boolean है। ग्राहक खरीदता है तो itemsSold एक बढ़ाते हैं। दुकान का नाम नहीं बदलता, इसलिए उसके लिए const। आज के कुल बिल के लिए आप क्या इस्तेमाल करेंगे?",
+      "captionEn": "A kirana shop program keeps shopName as a string, itemsSold as a number and isOpen as a boolean. When a customer buys, we increase itemsSold by one. Since the shop name never changes, we use const for it. Which one would you use for today's total bill?",
+      "code": "const shopName = \"Sri Lakshmi Kirana\"; // string\nlet itemsSold = 12;                     // number\nlet isOpen = true;                      // boolean\nitemsSold = itemsSold + 1;\nconsole.log(typeof itemsSold);          // \"number\"",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "दूसरे तरीके से। variable कक्षा में बेंच पर लगी नाम की पट्टी है। पट्टी वही रहती है, let हो तो बैठने वाला छात्र बदल सकता है। const हो तो हमेशा वही छात्र। छात्र का नाम किस type का है?",
+      "captionEn": "Another way: a variable is a name tag on a seat in class. The tag stays, the student sitting there can change if it is let. With const, the same student always sits there. What type is the student's name?",
+      "code": null,
+      "mermaid": "graph TD\n  value --> string\n  value --> number\n  value --> boolean\n  value --> object\n  value --> undefined"
+    },
+    "not_understood": {
+      "message": "कदम-दर-कदम। variable का एक नाम और एक मान होता है। let x = 5 मतलब x नाम में पाँच रखा है। 5 एक number है। quotes में \"5\" एक string है। 5 और \"5\" में number कौन सा है?",
+      "captionEn": "Step by step. A variable has a name and a value. let x equals five means the name x holds five. Five is a number. \"five\" in quotes is a string. Which one is a number: 5 or \"5\"?",
+      "code": null,
+      "mermaid": "graph TD\n  value --> string\n  value --> number\n  value --> boolean\n  value --> object\n  value --> undefined"
+    }
+  },
+  "doubt": {
+    "answer": "अच्छा सवाल। \"5\" में 1 जोड़ने पर \"51\" आता है, क्योंकि string text जोड़ता है। 5 में 1 जोड़ने पर 6। इसलिए जोड़ने से पहले type देखिए। समझ आया?",
+    "captionEn": "Good question. \"5\" plus 1 gives \"51\" because a string joins text. 5 plus 1 gives 6. So always check the type before adding. Does that help?"
+  },
+  "check": {
+    "questions": [
+      "एक {context} में आप कौन से मान string, number और boolean के रूप में रखेंगे? let और const के साथ समझाइए।",
+      "{context} में कुल 6 की जगह \"51\" दिख रहा है। ऐसा क्यों होता है, और इसे कैसे ठीक करेंगे?",
+      "{context} में const कब और let कब इस्तेमाल करेंगे, एक-एक उदाहरण के साथ बताइए।"
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "let",
+          "const",
+          "var"
+        ],
+        [
+          "string",
+          "number",
+          "boolean",
+          "type",
+          "typeof",
+          "రకం",
+          "प्रकार"
+        ],
+        [
+          "value",
+          "store",
+          "change",
+          "reassign",
+          "విలువ",
+          "मान"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "आपने सही types चुने और let व const का सही इस्तेमाल किया।",
+      "missing": "string और number का फ़र्क, और मान कब बदल सकता है, बताइए।",
+      "next": "हर मान के लिए उसका type और वह बदलता है या नहीं, बताइए।"
+    }
+  }
+}

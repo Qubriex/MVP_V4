@@ -1,0 +1,80 @@
+{
+  "node": "React state and props",
+  "language": "hindi",
+  "version": 1,
+  "diagnosis": {
+    "message": "नमस्ते! आज हम React state और props सीखेंगे। bus booking पेज पर seat चुनने पर क्या बदलता है?",
+    "captionEn": "Hello! Today we learn React state and props. On a bus booking page, what changes when you pick a seat?"
+  },
+  "turns": {
+    "explain": {
+      "message": "कक्षा के एक छात्र को सोचिए। उसका नाम और roll number स्कूल देता है, छात्र उन्हें नहीं बदलता। ये props जैसे हैं, parent से आते हैं और बदले नहीं जाते। छात्र का मूड या जो पेज वह पढ़ रहा है, दिन भर बदलता है। यही state है, component की अपनी। setter से state बदलती है तो React component को फिर से बनाता है। seat counter बनाएँ?",
+      "captionEn": "Think of a student in class. Their name and roll number are given by the school; the student does not change them. Those are like props, passed down from the parent and read-only. The student's mood or the page they are reading changes during the day. That is state, owned by the component itself. When state changes with its setter, React redraws the component. Shall we build a seat counter?",
+      "code": "function SeatCounter({ total }) {          // total is a prop\n  const [booked, setBooked] = useState(0); // booked is state\n  return (\n    <button onClick={() => setBooked(booked + 1)}>\n      {booked} of {total} seats booked\n    </button>\n  );\n}",
+      "mermaid": "graph TD\n  Parent -->|props: total| SeatCounter\n  SeatCounter -->|setBooked| state[(booked)]\n  state -->|re-render| SeatCounter"
+    },
+    "example": {
+      "message": "SeatCounter पेज से कुल seats prop के रूप में लेता है। booked seats को useState से state में रखता है। हर click पर setBooked बुलाते हैं, React re-render करता है, और button नई गिनती दिखाता है। क्या SeatCounter ख़ुद total बदल सकता है?",
+      "captionEn": "A SeatCounter gets total seats as a prop from the page. It keeps booked seats in state with useState. Each click calls setBooked, React re-renders, and the button shows the new count. Can SeatCounter change total itself?",
+      "code": "function SeatCounter({ total }) {          // total is a prop\n  const [booked, setBooked] = useState(0); // booked is state\n  return (\n    <button onClick={() => setBooked(booked + 1)}>\n      {booked} of {total} seats booked\n    </button>\n  );\n}",
+      "mermaid": null
+    },
+    "another_way": {
+      "message": "दूसरे तरीके से। TV। channels की सूची cable company से आती है, वह props है। remote से रखी volume state है। remote दबाने पर screen बदलती है। component के अंदर से आप किसे बदलेंगे?",
+      "captionEn": "Another way: a TV. The channel list comes from the cable company; that is props. The volume you set with the remote is state. Pressing the remote updates the screen. Which one would you change from inside the component?",
+      "code": null,
+      "mermaid": "graph TD\n  Parent -->|props: total| SeatCounter\n  SeatCounter -->|setBooked| state[(booked)]\n  state -->|re-render| SeatCounter"
+    },
+    "not_understood": {
+      "message": "कदम-दर-कदम। props बाहर से आते हैं, function arguments की तरह। state अंदर रहती है, useState से बनती है। state बदलने के लिए उसका setter function बुलाइए। फिर React नया मान दिखाता है। कौन सा बदला नहीं जा सकता?",
+      "captionEn": "Step by step. Props come in from outside, like function arguments. State lives inside, created with useState. To change state, call its setter function. Then React shows the new value. Which one is read-only?",
+      "code": null,
+      "mermaid": "graph TD\n  Parent -->|props: total| SeatCounter\n  SeatCounter -->|setBooked| state[(booked)]\n  state -->|re-render| SeatCounter"
+    }
+  },
+  "doubt": {
+    "answer": "अच्छा सवाल। state variable को सीधे बदलें तो React को पता नहीं चलता और वह फिर से नहीं बनाता। हमेशा setBooked जैसा setter इस्तेमाल कीजिए। समझ आया?",
+    "captionEn": "Good question. If you change a state variable directly, React does not know and does not redraw. Always use the setter, like setBooked. Does that help?"
+  },
+  "check": {
+    "questions": [
+      "एक {context} में एक component एक गिनती दिखाता है जो user के click पर बदलती है। समझाइए कौन से मान props हैं, कौन से state, और क्यों।",
+      "समझाइए कि {context} में parent, child component को data कैसे भेजता है, और क्या child उसे बदल सकता है।",
+      "{context} में किसी ने state variable सीधे बदला और screen नहीं बदली। ऐसा क्यों हुआ और कैसे ठीक करें?"
+    ],
+    "rubric": {
+      "groups": [
+        [
+          "props",
+          "prop"
+        ],
+        [
+          "state",
+          "useState"
+        ],
+        [
+          "setState",
+          "setBooked",
+          "set",
+          "re-render",
+          "render",
+          "update"
+        ],
+        [
+          "parent",
+          "child",
+          "change",
+          "read-only",
+          "మారదు",
+          "नहीं बदल"
+        ]
+      ],
+      "minChars": 40
+    },
+    "feedback": {
+      "good": "आपने props और state को सही अलग किया।",
+      "missing": "बताइए state setter से कैसे बदलती है, और इससे re-render होता है।",
+      "next": "हर मान के लिए बताइए उसका मालिक कौन है और कौन उसे बदल सकता है।"
+    }
+  }
+}
