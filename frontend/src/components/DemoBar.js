@@ -13,6 +13,7 @@ import { useUiLang } from '../context/UiLangContext';
 import Drawer from './shared/Drawer';
 import api from '../utils/api';
 import { PERSONAS, STORY, readDemo, switchPersona, resetDemo, exitDemo, forgetDemo } from '../utils/demoAccess';
+import { useBarHeight } from '../utils/barHeight';
 
 const left = (iso) => Math.max(0, new Date(iso).getTime() - Date.now());
 
@@ -68,6 +69,7 @@ export default function DemoBar() {
     document.body.classList.toggle('has-demobar', !!(marker && me));
     return () => document.body.classList.remove('has-demobar');
   }, [marker, me]);
+  useBarHeight('.dm-bar', '--dm-bar-h', !!(marker && me));
   useEffect(() => { if (panel === 'inbox') api.get('/demo/inbox').then(r => setInbox(r.data.messages)).catch(() => {}); }, [panel, me]);
 
   if (!marker || !me) return null;

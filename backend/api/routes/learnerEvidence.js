@@ -64,6 +64,18 @@ function prepareAhead(req, items) {
   try { waitUntil(job); } catch { /* not on Vercel: the promise just runs */ }
 }
 
+// Days in a row, up to today on this learner's clock, with at least one
+// review done. Yesterday still counts, so the streak holds until today ends.
+async function reviewStreak(elId) {
+  const rows = await dal.all("SELECT DISTINCT substr(date, 1, 10) AS d FROM demonstrations WHERE el_id = ? AND kind = 'review' ORDER BY d DESC LIMIT 400", elId);
+  const days = new Set(rows.map(r => r.d));
+  const day = (n) => new Date(Date.parse(nowIsoFor()) - n * 86400000).toISOString().slice(0, 10);
+  let n = 0;
+  let i = days.has(day(0)) ? 0 : 1;
+  while (days.has(day(i))) { n += 1; i += 1; }
+  return { days: n, today: days.has(day(0)) };
+}
+
 router.get('/reviews/due', async (req, res) => {
   const elId = req.user.el_id;
   const [due, rechecksRaw, upcoming, open] = await Promise.all([
@@ -77,7 +89,7 @@ router.get('/reviews/due', async (req, res) => {
   const reviews = due.map(r => ({ ...r, kind: 'review', open_instance: open.get(`${r.node_id}|review`) || null }));
   const rechecks = rechecksRaw.map(r => ({ ...r, kind: 'recheck', open_instance: open.get(`${r.node_id}|check`) || null }));
   const list = [...rechecks, ...reviews];
-  res.json({ due: list, upcoming, warmups: reviews.slice(0, 2).map(r => r.node_id) });
+  res.json({ due: list, upcoming, warmups: reviews.slice(0, 2).map(r => r.node_id), streak: await reviewStreak(elId) });
   prepareAhead(req, list);
 });
 

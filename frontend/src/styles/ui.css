@@ -147,7 +147,7 @@ button.ui-stat { text-align: left; cursor: pointer; font: inherit; color: inheri
 .ln-login-main > form, .ln-login-main > .ln-login-form { margin: auto 0; }
 
 /* Evidence / authorship tag: plain words; the code is in the popover. */
-.sk-codetag { cursor: help; border-style: dashed; font: inherit; font-size: var(--fs-caption); }
+.sk-codetag { cursor: help; border-style: solid; font: inherit; font-size: var(--fs-caption); }
 .sk-codetag:focus-visible { outline: 3px solid var(--accent-400); outline-offset: 2px; }
 
 /* Ask Qubirex box: Search jobs folds to an icon on phones. */
@@ -421,3 +421,12 @@ body.has-demobar .ln-session { height: calc(100vh - var(--dm-bar-h)); }
 .dx-controls-label { font-size: var(--fs-caption); opacity: 0.85; }
 .dx-controls-state, .dx-controls-note { font-size: var(--fs-caption); white-space: normal; }
 .dx-controls-note { color: var(--dx-accent); }
+/* Sticky save rows stay above whichever bottom bar is showing. */
+.ln-savebar { position: sticky; bottom: 0; z-index: 2; }
+body.has-devbar .ln-savebar { bottom: var(--dx-bar-h); }
+body.has-demobar .ln-savebar { bottom: var(--dm-bar-h); }
+@media (max-width: 639px) {
+  .ln-shell:has(.ln-tabbar) .ln-savebar { bottom: calc(62px + env(safe-area-inset-bottom)); }
+  body.has-devbar .ln-shell:has(.ln-tabbar) .ln-savebar { bottom: calc(62px + var(--dx-bar-h) + env(safe-area-inset-bottom)); }
+  body.has-demobar .ln-shell:has(.ln-tabbar) .ln-savebar { bottom: calc(62px + var(--dm-bar-h) + env(safe-area-inset-bottom)); }
+}

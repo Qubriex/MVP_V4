@@ -406,3 +406,8 @@
 .lj-type-toggle { min-height: 44px; background: var(--stage-surface); color: var(--stage-text); border-color: var(--stage-muted); }
 .lj-session-result .ln-card { background: var(--color-surface); }
 .lj-start { border-left: 4px solid var(--accent-700); }
+/* Passport status line and notes */
+.lj-statusline { margin: 0; font-size: var(--fs-small); color: var(--color-text); }
+.lj-note { padding: 10px 14px; border-radius: var(--radius-md); background: var(--color-surface-2, var(--color-surface)); border: 1px solid var(--color-border); font-size: var(--fs-small); }
+.lj-note.is-warn { border-color: var(--warn, var(--color-border-strong)); }
+.lj-proves summary { cursor: pointer; min-height: 32px; display: flex; align-items: center; }

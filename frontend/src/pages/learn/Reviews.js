@@ -6,7 +6,8 @@
 // session warm-ups (up to 2 due reviews) and then returns to the lesson.
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { RotateCcw, CalendarClock, CheckCircle2 } from 'lucide-react';
+import { RotateCcw, CalendarClock, CheckCircle2, Flame, Timer } from 'lucide-react';
+import { WhyThis } from '../../components/shared/Popover';
 import api from '../../utils/api';
 import { errMsg } from '../../utils/errors';
 import AnswerBox from '../../components/learn/AnswerBox';
@@ -67,6 +68,14 @@ export default function Reviews() {
         {warmup && <button type="button" className="ln-btn ln-btn-primary" onClick={() => navigate('/learn/session')}>{warmupsLeft ? t('learn.reviews.skipLesson') : t('learn.reviews.continueLesson')}</button>}
       </header>
       {error && <div className="ln-error" role="alert">{error}</div>}
+      {!warmup && data && (
+        <div className="ln-card ln-card-sm ln-row ln-wrap" style={{ gap: 14 }} data-review-facts>
+          <span className="ln-row ln-small" style={{ gap: 6 }}><Timer size={16} aria-hidden="true" />{t('lj.reviews.time')}</span>
+          <span className="ln-row ln-small" style={{ gap: 6 }}><Flame size={16} aria-hidden="true" />{data.streak?.days ? t('lj.reviews.streak', { n: data.streak.days }) : t('lj.reviews.noStreak')}</span>
+          <WhyThis title={t('lj.reviews.whyTitle')}>{t('lj.reviews.why')}</WhyThis>
+          <WhyThis title={t('lj.reviews.skipTitle')} label={t('lj.reviews.skipTitle')}>{t('lj.reviews.skip')}</WhyThis>
+        </div>
+      )}
 
       {outcome && (
         <div className={`ln-card ${outcome.kind === 'pass' ? 'ln-card-warm' : ''}`} role="status" style={{ gap: 6 }}>

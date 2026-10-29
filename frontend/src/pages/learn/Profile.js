@@ -10,7 +10,7 @@ import { Bar, initials } from '../../components/learn/ui';
 import { errMsg } from '../../utils/errors';
 import {
   useProfileDraft, Section, PersonalSection, EducationSection, ExperienceSection, ProjectsSection,
-  SkillsSection, CertificationsSection, GoalsSection
+  SkillsSection, CertificationsSection, GoalsSection, VoiceSection
 } from '../../components/learn/ProfileSections';
 
 import { useUiLang } from '../../context/UiLangContext';
@@ -18,7 +18,7 @@ import { LoadingRows } from '../../components/shared/EmptyState';
 const NAV = [
   ['personal', 'learn.profile.nav.personalInfo', 'personal'], ['education', 'learn.profile.nav.education', 'education'], ['experience', 'learn.profile.nav.experience', null],
   ['projects', 'learn.profile.nav.projects', 'projects'], ['skills', 'learn.profile.nav.skills', 'skills'], ['certifications', 'learn.profile.nav.certifications', null],
-  ['goals', 'learn.profile.nav.careerGoals', 'goals'], ['account', 'learn.profile.nav.accountSharing', undefined]
+  ['goals', 'learn.profile.nav.careerGoals', 'goals'], ['preferences', 'lj.profile.voice', undefined], ['account', 'learn.profile.nav.accountSharing', undefined]
 ];
 const MISSING_LABEL = { personal: 'learn.profile.missingLabel.yourDetails', education: 'learn.dashboard.sectionNames.education', projects: 'learn.profile.missingLabel.projects', skills: 'learn.dashboard.sectionNames.skills', goals: 'learn.profile.missingLabel.goals' };
 
@@ -56,6 +56,14 @@ export default function Profile() {
         <Link to="/learn/resume" className="ln-btn ln-btn-primary">{t('learn.profile.buildResume')}</Link>
       </section>
 
+      <nav className="ln-row ln-wrap" style={{ gap: 8 }} aria-label={t('lj.profile.more')}>
+        <Link className="ln-btn ln-btn-sm" to="/learn/resume">{t('nav.resume')}</Link>
+        <Link className="ln-btn ln-btn-sm" to="/learn/passport">{t('nav.passport')}</Link>
+        <Link className="ln-btn ln-btn-sm" to="/learn/notifications">{t('lj.profile.notifications')}</Link>
+        <Link className="ln-btn ln-btn-sm" to="/learn/settings">{t('learn.profile.settings')}</Link>
+        <Link className="ln-btn ln-btn-sm ln-btn-ghost" to="/learn/welcome">{t('lj.profile.welcomeAgain')}</Link>
+      </nav>
+
       {form.offline && <div className="ln-note">{t('learn.profile.showingSampleProfileData')}</div>}
 
       <div className="ln-grid ln-g-side">
@@ -80,6 +88,7 @@ export default function Profile() {
           <SkillsSection form={form} />
           <CertificationsSection form={form} />
           <GoalsSection form={form} />
+          <VoiceSection form={form} />
           <Section id="account" title={t('learn.profile.accountPinSharing')}>
             <span className="ln-small">{t('learn.profile.signLearnerReferenceCohort')}{' '} <Link to="/learn/settings" className="ln-link">{t('learn.profile.settings')}</Link>.</span>
             <label className="ln-toggle-row" style={{ alignItems: 'flex-start' }}>
@@ -90,7 +99,7 @@ export default function Profile() {
             <button type="button" className="ln-btn" style={{ alignSelf: 'flex-start' }} onClick={() => { logout(); navigate('/learner-login'); }}>{t('learn.profile.signOutDevice')}</button>
           </Section>
 
-          <div className="ln-row ln-wrap" style={{ justifyContent: 'flex-end', gap: 10, position: 'sticky', bottom: 0, padding: '12px 0', background: 'var(--color-bg)' }}>
+          <div className="ln-row ln-wrap ln-savebar" style={{ justifyContent: 'flex-end', gap: 10, padding: '12px 0', background: 'var(--color-bg)' }}>
             {form.status === 'saved' && <span className="ln-small" style={{ color: 'var(--status-success)' }} role="status">{t('learn.profile.saved')}</span>}
             {form.status && form.status !== 'saved' && <span className="ln-small" style={{ color: 'var(--status-danger)' }} role="alert">{form.status}</span>}
             <button type="button" className="ln-btn" style={{ minHeight: 48, fontSize: 'var(--fs-body)' }} onClick={form.discard} disabled={!form.dirty || form.saving}>{t('learn.profile.discard')}</button>

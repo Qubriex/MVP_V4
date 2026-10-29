@@ -14,10 +14,12 @@ import { Tooltip, Switch, Select, useToast } from '../../components/shared/ui';
 import { useAuth } from '../../context/AuthContext';
 import { downloadShareCard } from '../../utils/shareCard';
 import AnswerBox from '../../components/learn/AnswerBox';
-import { LABEL, LEVEL, ASSURANCE, MISSING, FRESH, freshBand, fmtDate } from '../../components/learn/evidenceText';
+import { LABEL, LEVEL, ASSURANCE, FRESH, freshBand, fmtDate } from '../../components/learn/evidenceText';
+import { ConfirmedSteps } from '../../components/learn/journey';
+
 
 import { useUiLang } from '../../context/UiLangContext';
-import { CodeTag } from '../../components/shared/Popover';
+import { CodeTag, WhyThis } from '../../components/shared/Popover';
 import { LoadingRows } from '../../components/shared/EmptyState';
 function SkillLine({ s }) {
   const { t } = useUiLang();
@@ -48,8 +50,9 @@ function SkillLine({ s }) {
             <div key={n.node_id} className="ln-tile ln-col" style={{ gap: 6 }}>
               <div className="ln-between ln-wrap"><span style={{ fontWeight: 600 }}>{n.node}</span><span className={`ln-tag ${(LABEL[n.label] || LABEL.none).cls}`}>{t((LABEL[n.label] || LABEL.none).text)}</span></div>
               {n.missing_for_confirmed?.length > 0
-                ? <ul className="ln-small" style={{ margin: 0, paddingLeft: 18 }}>{n.missing_for_confirmed.map(m => <li key={m}>{MISSING[m] ? t(MISSING[m]) : m}</li>)}</ul>
+                ? <ConfirmedSteps missing={n.missing_for_confirmed} nodeId={n.node_id} />
                 : <span className="ln-small ln-muted">{t('learn.passport.everythingConfirmedNeedsPlace')}</span>}
+              <Link className="ln-link ln-small" to={`/learn/skill/${n.node_id}`}>{t('lj.passport.openSkill')}</Link>
             </div>
           ))}
         </div>
@@ -68,6 +71,54 @@ const SORTS = {
   name: (a, b) => a.name.localeCompare(b.name)
 };
 const SEEN_KEY = 'qubirex_seen_confirmed';
+const isPhone = () => { try { return window.matchMedia('(max-width: 640px)').matches; } catch { return false; } };
+
+// One line that says where the Passport stands: counts, shared or not, valid until.
+function StatusLine({ p }) {
+  const { t } = useUiLang();
+  const conf = p.skills.filter(s => s.label === 'Confirmed').length;
+  const part = p.skills.filter(s => s.label === 'Partial').length;
+  return (
+    <p className="lj-statusline" data-passport-status>
+      <b>{t('lj.passport.status', { conf, part })}</b>
+      {' · '}{p.issued ? (p.public ? t('lj.passport.sharedOn', { date: fmtDate(p.shared_since) }) : t('lj.passport.notShared')) : t('learn.passport.notIssuedYet')}
+      {p.issued && <>{' · '}{t('lj.passport.validUntil', { date: fmtDate(p.valid_until) })}</>}
+    </p>
+  );
+}
+
+// What a Passport proves, and what it does not: plain words, no codes.
+function ProvesCard() {
+  const { t } = useUiLang();
+  return (
+    <details className="ln-card lj-proves in-no-print">
+      <summary><b>{t('lj.passport.provesTitle')}</b></summary>
+      <div className="ln-grid ln-g-2" style={{ gap: 12, marginTop: 8 }}>
+        <div className="ln-col" style={{ gap: 4 }}><b className="ln-small">{t('lj.passport.proves')}</b>
+          <ul className="lj-steps">{['1', '2', '3'].map(k => <li key={k}>{t(`lj.passport.proves${k}`)}</li>)}</ul></div>
+        <div className="ln-col" style={{ gap: 4 }}><b className="ln-small">{t('lj.passport.doesNot')}</b>
+          <ul className="lj-steps">{['1', '2', '3'].map(k => <li key={k}>{t(`lj.passport.doesNot${k}`)}</li>)}</ul></div>
+      </div>
+    </details>
+  );
+}
+
+// Who looked at the Passport in the last 90 days, by kind of viewer.
+function WhoViewed({ views }) {
+  const { t } = useUiLang();
+  const rows = views?.last_90_days || [];
+  return (
+    <section className="ln-card in-no-print" style={{ gap: 8 }} aria-label={t('lj.passport.viewsTitle')}>
+      <div className="ln-between ln-wrap" style={{ gap: 8 }}>
+        <strong>{t('lj.passport.viewsTitle')}</strong>
+        <WhyThis title={t('lj.passport.viewsTitle')}>{t('lj.passport.viewsWhy')}</WhyThis>
+      </div>
+      {rows.length === 0
+        ? <span className="ln-small ln-muted">{t('lj.passport.noViews')}</span>
+        : <ul className="lj-steps">{rows.map(v => <li key={v.type}>{t(`lj.passport.viewer.${v.type}`, { n: v.count })} · {t('lj.passport.lastView', { date: fmtDate(v.last) })}</li>)}</ul>}
+    </section>
+  );
+}
 
 function SkillCell({ s }) {
   const { t } = useUiLang();
@@ -94,7 +145,7 @@ export default function Passport() {
   const [renewItem, setRenewItem] = useState(null);
   const [filter, setFilter] = useState('all');
   const [sort, setSort] = useState('label');
-  const [view, setView] = useState(() => { try { return localStorage.getItem('qubirex_passport_view') || 'list'; } catch { return 'list'; } });
+  const [view, setView] = useState(() => { try { return localStorage.getItem('qubirex_passport_view') || (isPhone() ? 'grid' : 'list'); } catch { return isPhone() ? 'grid' : 'list'; } });
   const [celebrate, setCelebrate] = useState([]);
   const toast = useToast();
   const { user } = useAuth();
@@ -156,6 +207,18 @@ export default function Passport() {
         </div>}
       </header>
       {error && <div className="ln-error" role="alert">{error}</div>}
+      <StatusLine p={p} />
+      {p.issued && p.public && (
+        <div className={`lj-note ${p.labels_changed_since_share ? 'is-warn' : ''} in-no-print`} role="note">
+          {p.labels_changed_since_share ? t('lj.passport.changedSinceShare', { date: fmtDate(p.shared_since) }) : t('lj.passport.todayLabels')}
+        </div>
+      )}
+      {p.issued && p.renewal_due && !p.renewal && (
+        <div className="lj-note is-warn in-no-print" role="note">
+          {t('lj.passport.renewSoon', { date: fmtDate(p.valid_until) })}{' '}
+          <button type="button" className="ln-link" onClick={renew} disabled={busy}>{t('learn.passport.startRenewal')}</button>
+        </div>
+      )}
 
       {!p.issued ? (
         <div className="ln-card" style={{ gap: 8 }}>
@@ -220,8 +283,11 @@ export default function Passport() {
         <p className="ln-small ln-muted">{p.note || t('learn.passport.labelsComputedFromDated')} {' '}{t('learn.passport.reviewsKeepSkillsFresh')}{' '} <Link className="ln-link" to="/learn/reviews">{t('learn.passport.seeReviewsDue')}</Link>.</p>
       </section>
 
+      <ProvesCard />
+      {p.issued && <WhoViewed views={p.views} />}
+
       {p.issued && (
-        <section className="ln-card in-no-print" style={{ gap: 12 }}>
+        <section className="ln-card in-no-print" style={{ gap: 12 }} id="renewal">
           <div className="ln-between ln-wrap" style={{ gap: 10 }}>
             <div className="ln-col" style={{ gap: 4 }}><strong>{t('learn.passport.renewal')}</strong><span className="ln-small ln-muted">{t('learn.passport.shortTestOneQuestion')}</span></div>
             {!p.renewal && <button type="button" className="ln-btn ln-btn-outline-accent" onClick={renew} disabled={busy}><RefreshCw size={16} aria-hidden="true" />{t('learn.passport.startRenewal')}</button>}

@@ -9,6 +9,7 @@ import api, { getOr } from '../../utils/api';
 import { MOCK_JOBS, MOCK_TRENDS } from '../../utils/learnerMockData';
 import { MatchRing, SampleBadge, SkillChip, StatusTag, salary, posted } from '../../components/learn/ui';
 import { Select } from '../../components/shared/ui';
+import { SourceLine, AddToPlan } from '../../components/learn/journey';
 
 import { useUiLang, uiLocale } from '../../context/UiLangContext';
 const SALARY_STEPS = [0, 3, 4, 5, 6];
@@ -66,7 +67,7 @@ export default function JobMarket() {
         </div>
         <div className="ln-row ln-wrap" style={{ gap: 10 }}>
           <SampleBadge />
-          <span className="ln-small ln-muted">{t('learn.jobMarket.source')}{' '} {jobs?.source || t('learn.jobMarket.sampleFeed')}</span>
+          <SourceLine source={jobs?.source} date={jobs?.updated_at} />
         </div>
       </header>
 
@@ -129,9 +130,11 @@ export default function JobMarket() {
               <div className="ln-bar"><span style={{ width: `${a.pct}%` }} /></div>
               <span style={{ fontWeight: 600, textAlign: 'right' }}>{a.pct}%</span>
               <StatusTag status={a.status} />
+              {a.status !== 'mastered' && <span style={{ gridColumn: '1 / -1' }}><AddToPlan skill={a.name} source="market" /></span>}
             </div>
           ))}
           <span className="ln-xs ln-muted">{t('learn.jobMarket.shareOpenJdsFilter')}</span>
+          <SourceLine source={trends?.source} date={trends?.updated_at} />
         </section>
       </div>
 

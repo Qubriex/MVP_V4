@@ -30,6 +30,28 @@ function orderBy(list, order) {
   });
 }
 
+// What the résumé claims, checked against what Qubirex has seen proven.
+function ClaimsCard() {
+  const { t } = useUiLang();
+  const [d, setD] = useState(null);
+  const [text, setText] = useState('');
+  const [busy, setBusy] = useState(false);
+  useEffect(() => { api.get('/learner/resume/claims').then(r => setD(r.data)).catch(() => setD({ claims: [], proven: [], not_on_resume: [] })); }, []);
+  const check = async () => { setBusy(true); try { setD((await api.post('/learner/resume/claims', { text })).data); } catch { /* keep the last result */ } setBusy(false); };
+  return (
+    <section className="ln-card" style={{ padding: 20, borderRadius: 'var(--radius-lg)', gap: 8 }} aria-label={t('lj.resume.claimsTitle')} data-claims>
+      <h2 className="ln-h2" style={{ fontSize: 15 }}>{t('lj.resume.claimsTitle')}</h2>
+      <span className="ln-xs ln-muted">{t('lj.resume.claimsHow')}</span>
+      <textarea className="ln-textarea" rows={3} value={text} onChange={e => setText(e.target.value)} aria-label={t('lj.resume.claimsPaste')} placeholder={t('lj.resume.claimsPaste')} />
+      <button type="button" className="ln-btn ln-btn-sm" style={{ alignSelf: 'flex-start' }} onClick={check} disabled={busy || !text.trim()}>{t('lj.resume.claimsCheck')}</button>
+      {d?.claims?.length > 0 && (
+        <ul className="lj-steps">{d.claims.map(c => <li key={c.skill}><b>{c.skill}</b> · {c.proven ? <span className="ln-tag ln-tag-success">{t('lj.resume.proven', { label: t(`label.${c.proven.toLowerCase()}`) })}</span> : <span className="ln-tag ln-tag-neutral">{t('lj.resume.notProven')}</span>}</li>)}</ul>
+      )}
+      {d?.not_on_resume?.length > 0 && <span className="ln-small">{t('lj.resume.missingOnResume', { list: d.not_on_resume.join(', ') })}</span>}
+    </section>
+  );
+}
+
 export default function Resume() {
   const { t } = useUiLang();
   const { user } = useAuth();
@@ -154,7 +176,7 @@ export default function Resume() {
     skills: (verified.length + declared.length > 0) && (
       <div className="ln-col" style={{ gap: 6 }}><H>{t('learn.resume.h.skills')}</H>
         <div style={{ display: 'grid', gridTemplateColumns: '110px minmax(0, 1fr)', gap: '4px 12px', fontSize: template === 'compact' ? 10.5 : 11.5, lineHeight: 1.5 }}>
-          {verified.length > 0 && <><b>{t('learn.resume.verified')}</b><span>{verified.join(', ')}</span></>}
+          {verified.length > 0 && <><b>{t('lj.resume.provenOnQubirex')}</b><span>{verified.join(', ')}</span></>}
           {(p.learning_skills || []).length > 0 && <><b>{t('learn.resume.learning')}</b><span>{p.learning_skills.join(', ')}</span></>}
           {declared.length > 0 && <><b>{t('learn.resume.also')}</b><span>{declared.join(', ')}</span></>}
         </div>
@@ -237,6 +259,8 @@ export default function Resume() {
               </>
             )}
           </section>
+
+          <ClaimsCard />
 
           <section className="ln-card" style={{ padding: 20, borderRadius: 'var(--radius-lg)', gap: 4 }}>
             <div className="ln-between" style={{ paddingBottom: 8 }}><h2 className="ln-h2" style={{ fontSize: 15 }}>{t('learn.resume.sections')}</h2><span className="ln-xs ln-muted">{t('learn.resume.useArrowsReorder')}</span></div>
