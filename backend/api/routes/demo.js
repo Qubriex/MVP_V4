@@ -21,7 +21,7 @@
 //   POST /switch  { persona }       another person, same sandbox
 //   GET  /me                        the visitor's sandbox: persona, ends, story, AI use
 //   GET  /inbox                     messages that would have been sent
-//   POST /story   { step }          mark a guided-story step done
+//   POST /story   { step }          mark a guided-story step done (either story)
 //   POST /reset                     a fresh sandbox, same person
 //   POST /exit                      delete the sandbox and sign out
 import express from 'express';
@@ -42,6 +42,8 @@ const router = express.Router();
 export const DEMO_COOKIE = 'qbx_demo';
 const HARD_MS = 4 * 3600000;
 export const STORY_STEPS = ['jd', 'search', 'request', 'approve', 'unlocked', 'dayone', 'lesson', 'bridge'];
+// The second guided story: one learner's journey, step by step, with the scripted tutor.
+export const LEARNER_STEPS = ['lj_home', 'lj_lesson', 'lj_skill', 'lj_passport', 'lj_readiness', 'lj_jobs'];
 
 const v2 = (res, status, code, message) => res.status(status).json({ error: { code, message } });
 const num = (v, d) => (Number.isFinite(Number(v)) && Number(v) > 0 ? Number(v) : d);
@@ -210,11 +212,15 @@ router.get('/me', requireSandbox, async (req, res) => {
   const unread = Number((await dal.one('SELECT COUNT(*) AS n FROM outbound_messages WHERE sandbox_id = ?', sb.id)).n);
   const ev = await dal.one('SELECT evidence_id FROM credentials WHERE learner_id = ? AND active = 1', ids.learner('l01'));
   const story = await storyProgress(sb);
+  let marked = [];
+  try { marked = JSON.parse(sb.story_json || '[]'); } catch { marked = []; }
+  const node = await dal.one('SELECT current_node_id FROM engagement_learners WHERE id = ?', ids.el('l01'));
   res.set('Cache-Control', 'no-store');
   res.json({
     persona: sb.persona, ends_at: endsAt(sb), started_at: sb.created_at, story, steps: STORY_STEPS, inbox_count: unread,
     ai: await demoAiState(sb.id), limits: demoLimits(), sample_jd: SAMPLE_JD, lakshmi_evidence_id: ev?.evidence_id || null,
-    sample_role_id: `${ids.employer('e1')}-r1`, lakshmi_ref: ids.el('l01')
+    sample_role_id: `${ids.employer('e1')}-r1`, lakshmi_ref: ids.el('l01'),
+    learner_story: LEARNER_STEPS.filter(st => marked.includes(st)), learner_steps: LEARNER_STEPS, lakshmi_node_id: node?.current_node_id || null
   });
 });
 
@@ -227,7 +233,7 @@ router.get('/inbox', requireSandbox, async (req, res) => {
 
 router.post('/story', requireSandbox, async (req, res) => {
   const step = String(req.body?.step || '');
-  if (!STORY_STEPS.includes(step)) return v2(res, 400, 'step', 'Unknown step.');
+  if (!STORY_STEPS.includes(step) && !LEARNER_STEPS.includes(step)) return v2(res, 400, 'step', 'Unknown step.');
   let story = [];
   try { story = JSON.parse(req.sandbox.story_json || '[]'); } catch { story = []; }
   if (!story.includes(step)) story.push(step);

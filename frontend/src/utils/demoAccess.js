@@ -32,6 +32,16 @@ export const STORY = [
   { step: 'bridge', who: 'placement', to: () => '/institution/bridges', mark: 'bridge' }
 ];
 
+// The learner journey story: Lakshmi's side only, lessons use the scripted tutor.
+export const LEARNER_STORY = [
+  { step: 'lj_home', who: 'lakshmi', to: () => '/learn/dashboard', mark: () => '[data-start-here]' },
+  { step: 'lj_lesson', who: 'lakshmi', to: () => '/learn/session?mode=voice', mark: null },
+  { step: 'lj_skill', who: 'lakshmi', to: (me) => (me.lakshmi_node_id ? `/learn/skill/${me.lakshmi_node_id}` : '/learn/path'), mark: null },
+  { step: 'lj_passport', who: 'lakshmi', to: () => '/learn/passport', mark: null },
+  { step: 'lj_readiness', who: 'lakshmi', to: () => '/learn/readiness', mark: null },
+  { step: 'lj_jobs', who: 'lakshmi', to: () => '/learn/jobs', mark: null }
+];
+
 export function readDemo() {
   try { return JSON.parse(localStorage.getItem(DEMO_KEY) || 'null'); } catch { return null; }
 }

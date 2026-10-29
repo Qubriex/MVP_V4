@@ -12,7 +12,7 @@ import { useAuth } from '../context/AuthContext';
 import { useUiLang } from '../context/UiLangContext';
 import Drawer from './shared/Drawer';
 import api from '../utils/api';
-import { PERSONAS, STORY, readDemo, switchPersona, resetDemo, exitDemo, forgetDemo } from '../utils/demoAccess';
+import { PERSONAS, STORY, LEARNER_STORY, readDemo, switchPersona, resetDemo, exitDemo, forgetDemo } from '../utils/demoAccess';
 import { useBarHeight } from '../utils/barHeight';
 
 const left = (iso) => Math.max(0, new Date(iso).getTime() - Date.now());
@@ -49,6 +49,7 @@ export default function DemoBar() {
   const [marker, setMarker] = useState(readDemo);
   const [me, setMe] = useState(null);
   const [panel, setPanel] = useState(null); // story | inbox
+  const [track, setTrack] = useState('hiring'); // hiring | learner
   const [inbox, setInbox] = useState([]);
   const [busy, setBusy] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
@@ -80,8 +81,11 @@ export default function DemoBar() {
     if (me.persona !== s.who) await switchPersona(s.who, ctx);
     navigate(s.to(me));
     highlight(typeof s.mark === 'function' ? s.mark(me) : s.mark && `[data-demo="${s.mark}"]`);
+    // Learner-journey steps count as done once visited.
+    if (s.step.startsWith('lj_')) await api.post('/demo/story', { step: s.step }).catch(() => {});
   });
-  const done = new Set(me.story || []);
+  const done = new Set([...(me.story || []), ...(me.learner_story || [])]);
+  const steps = track === 'learner' ? LEARNER_STORY : STORY;
 
   return (
     <>
@@ -91,7 +95,7 @@ export default function DemoBar() {
         <select value={me.persona} disabled={busy} onChange={e => act(() => switchPersona(e.target.value, ctx))} aria-label={t('demo2.bar.switch')} title={t('demo2.bar.switch')}>
           {PERSONAS.map(p => <option key={p.key} value={p.key}>{t('demo2.bar.as', { name: t(`demo2.p.${p.key}.name`) })}</option>)}
         </select>
-        <button type="button" onClick={() => setPanel('story')}><ListChecks size={14} aria-hidden="true" />{t('demo2.bar.story', { done: done.size, total: STORY.length })}</button>
+        <button type="button" onClick={() => setPanel('story')}><ListChecks size={14} aria-hidden="true" />{t('demo2.bar.story', { done: (me.story || []).length, total: STORY.length })}</button>
         <button type="button" onClick={() => setPanel('inbox')}><Inbox size={14} aria-hidden="true" />{t('demo2.bar.inbox', { n: me.inbox_count })}</button>
         {confirmReset ? (
           <span className="ln-row" style={{ gap: 6 }}>
@@ -105,21 +109,25 @@ export default function DemoBar() {
 
       {panel === 'story' && (
         <Drawer title={t('demo2.story.title')} onClose={() => setPanel(null)}>
-          <p className="ln-small ln-muted" style={{ margin: 0 }}>{t('demo2.story.sub')}</p>
+          <div className="ln-pilltabs" role="tablist" aria-label={t('demo2.story.title')}>
+            <button type="button" role="tab" className="ln-pilltab" aria-selected={track === 'hiring'} onClick={() => setTrack('hiring')}>{t('lj.demo.hiring')}</button>
+            <button type="button" role="tab" className="ln-pilltab" aria-selected={track === 'learner'} onClick={() => setTrack('learner')} data-track="learner">{t('lj.demo.learner')}</button>
+          </div>
+          <p className="ln-small ln-muted" style={{ margin: 0 }}>{track === 'learner' ? t('lj.demo.learnerSub') : t('demo2.story.sub')}</p>
           <ol className="dm-story">
-            {STORY.map((s, i) => (
+            {steps.map((s, i) => (
               <li key={s.step} className={done.has(s.step) ? 'is-done' : ''}>
                 <span className="dm-story-mark" aria-hidden="true">{done.has(s.step) ? <CheckCircle2 size={18} /> : <Circle size={18} />}</span>
                 <div className="ln-col" style={{ gap: 2, flex: 1 }}>
-                  <b className="ln-small">{i + 1}. {t(`demo2.story.${s.step}`)}</b>
-                  <span className="ln-xs ln-muted">{t(`demo2.story.${s.step}Text`)} · {t('demo2.story.as', { name: t(`demo2.p.${s.who}.name`) })}</span>
+                  <b className="ln-small">{i + 1}. {t(track === 'learner' ? `lj.demo.${s.step}` : `demo2.story.${s.step}`)}</b>
+                  <span className="ln-xs ln-muted">{t(track === 'learner' ? `lj.demo.${s.step}Text` : `demo2.story.${s.step}Text`)} · {t('demo2.story.as', { name: t(`demo2.p.${s.who}.name`) })}</span>
                   {done.has(s.step) && <span className="ln-xs" style={{ color: 'var(--ok)' }}>{t('demo2.story.doneLabel')}</span>}
                 </div>
                 <button type="button" className="ln-btn ln-btn-sm" onClick={() => showMe(s)} disabled={busy}><Eye size={14} aria-hidden="true" />{t('demo2.story.showMe')}</button>
               </li>
             ))}
           </ol>
-          {me.sample_jd && <details className="ln-small"><summary>{t('demo2.story.sampleJd')}</summary><pre className="dm-jd">{me.sample_jd}</pre></details>}
+          {track === 'hiring' && me.sample_jd && <details className="ln-small"><summary>{t('demo2.story.sampleJd')}</summary><pre className="dm-jd">{me.sample_jd}</pre></details>}
         </Drawer>
       )}
 

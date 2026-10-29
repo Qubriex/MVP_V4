@@ -44,6 +44,8 @@ const TEXT_VERSION = 'employer-access-v1';
 const candidateCode = (employerId, elId) => `C-${crypto.createHash('sha256').update(`${employerId}|${elId}`).digest('hex').slice(0, 6).toUpperCase()}`;
 const parse = (s, d) => { try { return JSON.parse(s || ''); } catch { return d; } };
 const err = (status, message) => Object.assign(new Error(message), { status });
+// How a scored Day-One run was supervised: camera on (self-attested) and time away from the tab.
+const supervisionOf = (json) => { const sv = parse(json, {}).supervision; return { camera_on: !!sv?.camera_on, away_seconds: Math.round((Number(sv?.tab_hidden_ms) || 0) / 1000) }; };
 
 // ─── Roles from a JD (E2) ──────────────────────────────────────────────────────
 const OPTIONAL_HINT = /nice to have|good to have|bonus|preferred|plus\b|optional/i;
@@ -239,7 +241,8 @@ export async function pipeline(employerId, roleId = null) {
       id: r.id, role_id: r.role_id, role_title: r.role_title, el_id: r.el_id, code: candidateCode(employerId, r.el_id),
       name: open ? r.name : null, college: r.college, city: r.city, stage: r.stage, stage_label: STAGE_LABEL[r.stage],
       readiness, band_label: BAND_LABEL[bandOf(readiness)], interview_promised: !!r.interview_promised, nudged_at: r.nudged_at,
-      waiting_days: Math.floor((Date.now() - new Date(r.updated_at).getTime()) / 86400000), created_at: r.created_at, updated_at: r.updated_at
+      waiting_days: Math.floor((Date.now() - new Date(r.updated_at).getTime()) / 86400000), created_at: r.created_at, updated_at: r.updated_at,
+      source: r.source || 'request', shared: open ? (parse(r.share_json, {}).granted || (r.stage === 'applied' ? SHARE_ITEMS : [])) : []
     };
   });
   const counts = Object.fromEntries(Object.keys(STAGE_LABEL).map(k => [k, out.filter(r => r.stage === k).length]));
@@ -283,12 +286,19 @@ export async function candidate(employerId, pipelineId, { skillLines, skillFacts
   const lines = granted.includes('skills') ? (await skillLines(p.el_id, await skillFacts(p.el_id))).map(({ nodes, ...s }) => (granted.includes('labels')
     ? { ...s, nodes: nodes.map(n => ({ node: n.node, last_demonstrated: n.last_demonstrated, freshness: n.freshness })) }
     : { skill_id: s.skill_id, name: s.name, nodes: nodes.map(n => ({ node: n.node })) })) : [];
-  const runs = granted.includes('dayone') ? await dal.all("SELECT role_title, status, passed, scored_at FROM dayone_runs WHERE el_id = ? AND status = 'scored' ORDER BY scored_at DESC", p.el_id) : [];
+  const runs = granted.includes('dayone') ? await dal.all("SELECT role_title, status, passed, score, checks_json, scored_at FROM dayone_runs WHERE el_id = ? AND status = 'scored' ORDER BY scored_at DESC", p.el_id) : [];
+  // With labels shared: which kinds of evidence were passed, and whose answer it
+  // was (authorship). Failed tries and time taken are never shown.
+  const summary = granted.includes('labels') ? {
+    kinds: (await dal.all('SELECT kind, COUNT(*) AS n, MAX(date) AS last FROM demonstrations WHERE el_id = ? AND passed = 1 GROUP BY kind ORDER BY kind', p.el_id)).map(r => ({ kind: r.kind, count: Number(r.n), last: r.last })),
+    authorship: Object.fromEntries((await dal.all('SELECT assurance, COUNT(*) AS n FROM demonstrations WHERE el_id = ? AND passed = 1 AND assurance IS NOT NULL GROUP BY assurance', p.el_id)).map(r => [r.assurance, Number(r.n)]))
+  } : null;
   const resume = granted.includes('resume') && (p.headline || p.about) ? { headline: p.headline, summary: p.about } : null;
   return {
     ...base, name: granted.includes('name') || p.source === 'apply' ? p.name : null, evidence_id: granted.includes('skills') ? cred?.evidence_id || null : null, evidence: lines,
     resume: resume || null, contact: granted.includes('contact') ? { email: p.email || null, phone: p.phone || null } : null,
-    dayone: { status: runs.length ? 'scored' : p.stage === 'dayone' ? 'invited' : 'not_scheduled', results: runs.map(r => ({ role: r.role_title, passed: !!r.passed, date: r.scored_at })) }
+    evidence_summary: summary,
+    dayone: { status: runs.length ? 'scored' : p.stage === 'dayone' ? 'invited' : 'not_scheduled', results: runs.map(r => ({ role: r.role_title, passed: !!r.passed, score: r.score != null ? Math.round(r.score * 100) : null, date: r.scored_at, supervision: supervisionOf(r.checks_json) })) }
   };
 }
 

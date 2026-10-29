@@ -21,12 +21,13 @@ import { Select } from '../../components/shared/ui';
 
 import { useUiLang, uiLocale } from '../../context/UiLangContext';
 import { LoadingRows } from '../../components/shared/EmptyState';
+import { StageTag, StageCounts, StuckList } from '../../components/inst/Journey';
 // Tab ids (also used in ?tab=) and their translated labels.
 const TABS = ['Overview', 'Readiness', 'Students', 'Pathway', 'Mastery logs', 'Settings'];
 const TAB_KEY = { Overview: 'inst.cohort.tabs.overview', Readiness: 'inst.cohort.tabs.readiness', Students: 'inst.cohort.tabs.students', Pathway: 'inst.cohort.tabs.pathway', 'Mastery logs': 'inst.cohort.tabs.masteryLogs', Settings: 'inst.cohort.tabs.settings' };
 const date = (t) => (t ? new Date(t.replace(' ', 'T') + (/[Z+]/.test(t) ? '' : 'Z')).toLocaleDateString(uiLocale(), { day: 'numeric', month: 'short', year: 'numeric' }) : '—');
 
-function Overview({ c, requests }) {
+function Overview({ c, requests, stages }) {
   const { t } = useUiLang();
   const max = Math.max(1, ...c.clusters.map(x => x.students_here));
   return (
@@ -60,6 +61,10 @@ function Overview({ c, requests }) {
           )}
           <span className="ln-xs ln-muted">{t('inst.cohort.onlyCountsLoopsShown')}</span>
         </section>
+      </div>
+      <div className="ln-grid ln-g-2">
+        <section className="ln-card"><StageCounts counts={stages?.stage_counts} />{!stages?.stage_counts && <span className="ln-small ln-muted">{t('inst.students.loading')}</span>}</section>
+        <StuckList engagementId={c.id} />
       </div>
       <ActivityYear cohortId={c.id} />
       {requests.length > 0 && (
@@ -223,6 +228,7 @@ export default function Cohort() {
   const [params, setParams] = useSearchParams();
   const { role } = useStaff();
   const { data: c, error: loadError, reload } = useCachedGet(`/institution/engagements/${id}`);
+  const { data: stages } = useCachedGet(`/institution/students?engagement_id=${id}`);
   const tab = TABS.includes(params.get('tab')) ? params.get('tab') : t('inst.cohort.tabs.overview');
   const setTab = (t) => { const p = new URLSearchParams(params); p.set('tab', t); setParams(p, { replace: true }); };
   const studentId = params.get('student') || '';
@@ -279,7 +285,7 @@ export default function Cohort() {
         {TABS.filter(tb => tb !== 'Settings' || role === 'admin').map(tb => <button key={tb} type="button" role="tab" className="ln-tab" aria-selected={tab === tb} onClick={() => setTab(tb)}>{t(TAB_KEY[tb])}</button>)}
       </div>
 
-      {tab === 'Overview' && <Overview c={c} requests={requests} />}
+      {tab === 'Overview' && <Overview c={c} requests={requests} stages={stages} />}
       {tab === 'Readiness' && <CohortGrid c={c} canBridge={role !== 'viewer'} />}
       {tab === 'Students' && (
         <section className="ln-card" style={{ padding: 0, overflow: 'hidden' }}>
@@ -293,12 +299,12 @@ export default function Cohort() {
             </div>
           </div>
           <div className="ln-tablewrap"><table className="ln-table" style={{ margin: '0 18px', width: 'calc(100% - 36px)' }}>
-            <thead><tr><th>{t('inst.cohort.student')}</th><th>{t('inst.cohort.language')}</th><th>{t('inst.cohort.currentNode')}</th><th>{t('inst.cohort.mastered2')}</th><th>{t('inst.cohort.access')}</th><th /></tr></thead>
+            <thead><tr><th>{t('inst.cohort.student')}</th><th>{t('inst.cohort.language')}</th><th>{t('inst.cohort.currentNode')}</th><th>{t('inst.cohort.mastered2')}</th><th>{t('lj.inst.stage')}</th><th>{t('inst.cohort.access')}</th><th /></tr></thead>
             <tbody>{c.learners.map(l => (
               <tr key={l.el_id}><td><b style={{ fontWeight: 600 }}>{l.name}</b> <span className="ln-xs ln-muted">{l.learner_ref}</span></td>
                 <td className="ln-small ln-indic">{l.language === 'hindi' ? 'हिंदी' : 'తెలుగు'}</td>
                 <td className="ln-small">{l.overall_status === 'completed' ? t('inst.cohort.completed') : l.current_node_label || '—'}</td>
-                <td>{l.nodes_mastered} / {c.total_nodes}</td><td><AccessTag state={l.access} /></td>
+                <td>{l.nodes_mastered} / {c.total_nodes}</td><td><StageTag stage={stages?.rows?.find(r => r.el_id === l.el_id)?.stage} /></td><td><AccessTag state={l.access} /></td>
                 <td><div className="ln-row" style={{ gap: 6 }}>
                   <button type="button" className="ln-btn ln-btn-sm" onClick={() => { const p = new URLSearchParams(params); p.set('tab', 'Pathway'); p.set('student', l.el_id); setParams(p); }}>{t('inst.cohort.pathway')}</button>
                   <button type="button" className="ln-btn ln-btn-sm" onClick={() => setDownload([l.el_id])} aria-label={t('inst.cohort.downloadDataName', { name: l.name })}><Download size={14} aria-hidden="true" /></button>

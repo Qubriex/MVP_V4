@@ -16,7 +16,7 @@ import { BandPill } from '../../components/shared/ui';
 
 import { useUiLang, uiLocale } from '../../context/UiLangContext';
 const BAND_OF = { Ready: 'ready', 'Nearly ready': 'nearly', Building: 'building' };
-const STAGE_TAG = { watching: 'ln-tag-neutral', requested: 'ln-tag-warning', access_granted: 'ln-tag-success', applied: 'ln-tag-success', interview: 'ln-tag-info', dayone: 'ln-tag-info', offer: 'ln-tag-success', hired: 'ln-tag-success', hold: 'ln-tag-neutral', not_now: 'ln-tag-neutral', declined: 'ln-tag-neutral', withdrawn: 'ln-tag-neutral' };
+const STAGE_TAG = { watching: 'ln-tag-neutral', requested: 'ln-tag-warning', access_granted: 'ln-tag-success', applied: 'ln-tag-success', shortlisted: 'ln-tag-info', interview: 'ln-tag-info', dayone: 'ln-tag-info', offer: 'ln-tag-success', hired: 'ln-tag-success', hold: 'ln-tag-neutral', not_now: 'ln-tag-neutral', declined: 'ln-tag-neutral', withdrawn: 'ln-tag-neutral' };
 const FILTERS = [['', 'emp.pipeline.filters.everyone'], ['decide', 'emp.pipeline.filters.waitingForYou'], ['requested', 'emp.pipeline.filters.asked'], ['interview', 'emp.pipeline.filters.interview'], ['offer', 'emp.pipeline.filters.offer'], ['hold', 'emp.pipeline.filters.onHold']];
 const day = (s) => (s ? new Date(s).toLocaleDateString(uiLocale(), { day: 'numeric', month: 'short', year: 'numeric' }) : '—');
 
@@ -59,11 +59,11 @@ export function PipelinePage() {
               <td>{r.name ? <Link to={`/employer/candidates/${r.id}`} className="ln-link">{r.name}</Link> : <Link to={`/employer/candidates/${r.id}`} className="ln-link in-code">{r.code}</Link>}<span className="ln-xs ln-muted" style={{ display: 'block' }}>{r.college}</span></td>
               <td className="ln-small">{r.role_title}{r.interview_promised && <span className="ln-xs ln-muted" style={{ display: 'block' }}>{t('emp.pipeline.interviewPromised')}</span>}</td>
               <td><BandPill band={BAND_OF[r.band_label] || 'none'} score={r.readiness} /></td>
-              <td><span className={`ln-tag ${STAGE_TAG[r.stage]}`}>{r.stage_label}</span></td>
+              <td><span className={`ln-tag ${STAGE_TAG[r.stage]}`}>{r.stage_label}</span>{r.source === 'apply' && <span className="ln-xs ln-muted" style={{ display: 'block' }} data-apply-arrival>{t('lj.emp.sourceApply')}{r.shared.length ? ` · ${t('lj.emp.sharedItems', { list: r.shared.map(k => t(`lj.share.${k}`)).join(', ') })}` : ''}</span>}</td>
               <td className="ln-small">{r.waiting_days ? (r.waiting_days === 1 ? t('emp.common.oneDay') : t('emp.common.nDays', { n: r.waiting_days })) : t('emp.pipeline.today')}</td>
               <td><div className="ln-row" style={{ gap: 6 }}>
                 {r.stage === 'requested' && <button type="button" className="ln-btn ln-btn-sm" onClick={() => act(() => api.post(`/employer/pipeline/${r.id}/nudge`), t('emp.pipeline.reminderSent'))}><BellRing size={13} aria-hidden="true" />{t('emp.pipeline.nudge')}</button>}
-                {['access_granted', 'applied', 'interview'].includes(r.stage) && <button type="button" className="ln-btn ln-btn-sm" onClick={() => act(() => api.post(`/employer/pipeline/${r.id}/stage`, { stage: 'hold' }), t('emp.pipeline.putOnHold'))}>{t('emp.pipeline.hold')}</button>}
+                {['access_granted', 'applied', 'shortlisted', 'interview'].includes(r.stage) && <button type="button" className="ln-btn ln-btn-sm" onClick={() => act(() => api.post(`/employer/pipeline/${r.id}/stage`, { stage: 'hold' }), t('emp.pipeline.putOnHold'))}>{t('emp.pipeline.hold')}</button>}
               </div></td>
             </tr>
           ))}</tbody></table></div>
@@ -77,20 +77,24 @@ export function CandidatePage() {
   const { id } = useParams();
   const { data: c, error, reload } = useCachedGet(`/employer/candidates/${id}`);
   const [msg, setMsg] = useState('');
+  const [when, setWhen] = useState('');
   if (error && !c) return <div className="ln-error">{errMsg(error, t('emp.pipeline.couldnTLoadCandidate'))}</div>;
   if (!c) return <LoadingRows rows={5} />;
-  const stage = async (s, ok) => { setMsg(''); try { await api.post(`/employer/pipeline/${id}/stage`, { stage: s }); setMsg(ok); dropCached('/employer/'); reload(); } catch (e) { setMsg(errMsg(e)); } };
+  const stage = async (s, ok, extra = {}) => { setMsg(''); try { await api.post(`/employer/pipeline/${id}/stage`, { stage: s, ...extra }); setMsg(ok); dropCached('/employer/'); reload(); } catch (e) { setMsg(errMsg(e)); } };
   return (
     <>
       <Crumbs items={[{ label: 'Pipeline', to: '/employer/pipeline' }, { label: c.name || c.code }]} />
       <header className="ln-pagehead">
         <div className="ln-col" style={{ gap: 4 }}>
           <h1 className="ln-title" style={{ fontSize: 'var(--fs-h1)' }}>{c.name || <span className="in-code">{c.code}</span>}</h1>
-          <span className="ln-sub">{c.role.title} · {c.college} · {c.city || '—'} · <span className="ln-tag ln-tag-info">{c.stage_label}</span></span>
+          <span className="ln-sub">{c.role.title} · {c.college} · {c.city || '—'} · <span className="ln-tag ln-tag-info">{c.stage_label}</span> · <span className="ln-tag ln-tag-neutral" data-source={c.source}>{c.source === 'apply' ? t('lj.emp.sourceApply') : t('lj.emp.sourceRequest')}</span></span>
+          {c.interview_at && <span className="ln-small">{t('lj.emp.interviewOn', { date: day(c.interview_at) })}</span>}
         </div>
         {c.open && (
           <div className="ln-row ln-wrap" style={{ gap: 8 }}>
-            <button type="button" className="ln-btn ln-btn-primary" onClick={() => stage('interview', t('emp.pipeline.interviewInvitationSent'))}>{t('emp.pipeline.interview')}</button>
+            {['access_granted', 'applied'].includes(c.stage) && <button type="button" className="ln-btn" onClick={() => stage('shortlisted', t('lj.emp.shortlistedDone'))} data-shortlist>{t('lj.emp.shortlist')}</button>}
+            <label className="ln-row" style={{ gap: 6 }}><span className="ln-small">{t('lj.emp.interviewDate')}</span><input type="datetime-local" className="ln-input" value={when} onChange={e => setWhen(e.target.value)} style={{ minHeight: 40 }} /></label>
+            <button type="button" className="ln-btn ln-btn-primary" onClick={() => stage('interview', t('emp.pipeline.interviewInvitationSent'), when ? { interview_at: new Date(when).toISOString() } : {})}>{t('emp.pipeline.interview')}</button>
             <button type="button" className="ln-btn" onClick={() => stage('hold', t('emp.pipeline.onHold'))}>{t('emp.pipeline.hold')}</button>
             <button type="button" className="ln-btn" onClick={() => { if (window.confirm(t('emp.pipeline.tellTheStudentYou'))) stage('not_now', t('emp.pipeline.theStudentHasBeen')); }}>{t('emp.pipeline.notNow')}</button>
           </div>
@@ -126,12 +130,35 @@ export function CandidatePage() {
             )}
           </section>
           <div className="ln-grid ln-g-2" style={{ gap: 16 }}>
+            <section className="ln-card" style={{ gap: 6 }} data-evidence-summary>
+              <h2 className="ln-h2" style={{ fontSize: 'var(--fs-h3)' }}>{t('lj.emp.howShown')}</h2>
+              {c.evidence_summary ? (
+                <>
+                  <ul className="lj-steps">{c.evidence_summary.kinds.map(k => <li key={k.kind}>{t(`lj.emp.kind.${k.kind}`)}: <b>{k.count}</b> · {t('lj.emp.last', { date: day(k.last) })}</li>)}</ul>
+                  <span className="ln-small"><b>{t('lj.emp.authorship')}</b> {['A3', 'A2', 'A1'].filter(a => c.evidence_summary.authorship[a]).map(a => `${t(`lj.emp.auth.${a}`)} · ${c.evidence_summary.authorship[a]}`).join(' — ') || '—'}</span>
+                  <span className="ln-xs ln-muted">{t('lj.emp.noTries')}</span>
+                </>
+              ) : <span className="ln-small ln-muted">{t('lj.emp.labelsNotShared')}</span>}
+            </section>
+            <section className="ln-card" style={{ gap: 6 }} data-dayone-results>
+              <h2 className="ln-h2" style={{ fontSize: 'var(--fs-h3)' }}>{t('lj.emp.dayoneTitle')}</h2>
+              {!c.shared.includes('dayone') ? <span className="ln-small ln-muted">{t('emp.pipeline.notShared2')}</span>
+                : !c.dayone?.results?.length ? <span className="ln-small ln-muted">{t('lj.emp.dayoneNone')}</span>
+                : c.dayone.results.map(r => (
+                  <span key={r.date} className="ln-small">
+                    <b>{r.passed ? t('lj.emp.dayonePassed') : t('lj.emp.dayoneNotPassed')}</b>{r.score != null ? ` · ${r.score}%` : ''} · {r.role || '—'} · {day(r.date)}
+                    <span className="ln-xs ln-muted" style={{ display: 'block' }}>{r.supervision?.camera_on ? t('lj.emp.cameraOn', { s: r.supervision.away_seconds }) : t('lj.emp.cameraOff')}</span>
+                  </span>
+                ))}
+            </section>
+          </div>
+          <div className="ln-grid ln-g-2" style={{ gap: 16 }}>
             <section className="ln-card" style={{ gap: 6 }}><h2 className="ln-h2" style={{ fontSize: 'var(--fs-h3)' }}>{t('emp.pipeline.rSum')}</h2>
               {c.resume ? <><b>{c.resume.headline}</b><span className="ln-small">{c.resume.summary}</span></> : <span className="ln-small ln-muted">{c.shared.includes('resume') ? t('emp.pipeline.notFilledYet') : t('emp.pipeline.notShared2')}</span>}</section>
             <section className="ln-card" style={{ gap: 6 }}><h2 className="ln-h2" style={{ fontSize: 'var(--fs-h3)' }}>{t('emp.pipeline.contact')}</h2>
               {c.contact ? <span className="ln-small">{[c.contact.email, c.contact.phone].filter(Boolean).join(' · ') || t('emp.pipeline.noContactDetailsFile')}</span> : <span className="ln-small ln-muted">{t('emp.pipeline.notSharedUseInterview')}</span>}</section>
           </div>
-          {['interview', 'dayone'].includes(c.stage) && (
+          {['shortlisted', 'interview', 'dayone'].includes(c.stage) && (
             <div className="ln-row ln-wrap" style={{ gap: 8 }}>
               <button type="button" className="ln-btn ln-btn-primary" onClick={() => stage('offer', t('emp.pipeline.offerRecordedTheirCollege'))}>{t('emp.pipeline.recordOffer')}</button>
             </div>

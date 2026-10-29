@@ -3670,6 +3670,69 @@
         ]
       }
     },
+    "/api/institution/help-requests": {
+      "get": {
+        "tags": [
+          "institution"
+        ],
+        "operationId": "get_institution_help_requests",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/api/institution/help-requests/{id}/answer": {
+      "post": {
+        "tags": [
+          "institution"
+        ],
+        "operationId": "post_institution_help_requests_id_answer",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CsrfToken"
+          }
+        ]
+      }
+    },
     "/api/institution/insights/benchmarks": {
       "get": {
         "tags": [
@@ -4317,6 +4380,31 @@
           "institution"
         ],
         "operationId": "get_institution_students_pool",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/api/institution/students-stuck": {
+      "get": {
+        "tags": [
+          "institution"
+        ],
+        "operationId": "get_institution_students_stuck",
         "responses": {
           "200": {
             "description": "OK"
