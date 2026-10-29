@@ -7,10 +7,13 @@ import { createWorker } from './core/events/worker.js';
 import { registerHandlers } from './core/events/handlers.js';
 import { createApp } from './api/app.js';
 import { logger } from './core/logger.js';
+import { devLoginConfigError } from './core/devLogin.js';
 
 const PORT = process.env.PORT || 3001;
 
 params.load(); // fails fast in production without secure-config/
+const devErr = devLoginConfigError();
+if (devErr) { console.error(`Refusing to start: ${devErr}.`); process.exit(1); }
 await migrate();
 registerHandlers();
 const worker = createWorker();

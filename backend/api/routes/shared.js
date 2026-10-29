@@ -17,6 +17,7 @@ import { listFor, markAllRead, setChannels } from '../../core/notify.js';
 import { ask, GLOSSARY } from '../../core/assist.js';
 import { aiNotConfigured, AI_NOT_CONFIGURED, synthesize } from '../../core/ai/gateway.js';
 import { hit, clientIp } from '../middleware/rateLimit.js';
+import { SAMPLE_LESSON } from '../../core/sampleLesson.js';
 
 const router = express.Router();
 const signedIn = authenticate();
@@ -49,6 +50,7 @@ router.post('/assist/ask', signedIn, withStaff, askLimit, async (req, res) => {
   }
 });
 
+const REPLY_RE = /^([^\s@]+@[^\s@]+\.[^\s@]+|\+?[\d\s-]{7,20})$/;
 const contactLimit = rateLimit({ name: 'help:contact', limit: 10, windowMs: 3600000 });
 // Sign-in is optional: a stale token from an old visit must not block (or
 // redirect) a visitor who only wants to send a message.
@@ -57,10 +59,14 @@ router.post('/help/contact', contactLimit, maybeSignedIn, async (req, res) => {
   const message = String(req.body?.message || '').trim().slice(0, 4000);
   if (message.length < 5) return res.status(400).json({ error: 'Please write a little more so we can help.' });
   const s = req.session;
+  // A visitor who is not signed in must leave a way to reply: an email
+  // address or a phone / WhatsApp number.
+  const replyTo = String(req.body?.reply_to || '').trim();
+  if ((replyTo || !s) && !REPLY_RE.test(replyTo)) return res.status(400).json({ error: 'Enter an email address or a WhatsApp number so we can reply.' });
   await dal.run(`INSERT INTO help_requests (id, actor_type, actor_id, institution_id, employer_id, type, message, reply_to, created_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, ulid(), s?.actor_type || 'public', s?.actor_id || null, s?.institution_id || null, s?.employer_id || null,
-  type, message, String(req.body?.reply_to || '').slice(0, 200) || null, dal.nowIso());
-  res.status(201).json({ message: 'Thanks — we reply on WhatsApp or email within 1 working day.' });
+  type, message, replyTo.slice(0, 200) || null, dal.nowIso());
+  res.status(201).json({ message: 'Thanks, we\'ll get back to you within 1 working day.' });
 });
 
 router.get('/help/status', async (req, res) => {
@@ -76,10 +82,7 @@ router.get('/glossary', (req, res) => res.json(GLOSSARY));
 // on every device (most browsers have no Telugu or Hindi voice of their own).
 // The text is fixed here — visitors cannot make it say anything else — and
 // each language is made once, then served from memory.
-export const SAMPLE_LESSON = {
-  telugu: 'React లో component అంటే ఒక చిన్న భాగం. ఒక బటన్ గురించి ఆలోచించండి — ఒకసారి రాస్తే, ఎక్కడైనా వాడొచ్చు. ఇప్పుడు మీరే ఒకటి రాయండి.',
-  hindi: 'React में component एक छोटा हिस्सा है। एक बटन के बारे में सोचिए — एक बार लिखो, कहीं भी इस्तेमाल करो। अब आप ख़ुद एक लिखिए।'
-};
+export { SAMPLE_LESSON };
 const sampleAudio = new Map();
 router.get('/sample-lesson', async (req, res) => {
   const language = req.query.lang === 'hindi' ? 'hindi' : 'telugu';

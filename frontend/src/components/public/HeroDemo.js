@@ -1,8 +1,8 @@
 // src/components/public/HeroDemo.js — the home-page hero sample: tap Play to
-// hear Professor Qubirex explain a skill (the server's teaching voice, so it
-// plays on every device), with a waveform and captions that follow the audio;
-// then watch the sample Passport turn the skills it just practised to
-// Confirmed. Play / Pause / Replay, a loading state, and a clear message —
+// hear Professor Qubirex explain a skill (a recording of the server's teaching
+// voice shipped with the site, else the live voice, so it plays on every
+// device), with a waveform and captions that follow the audio; then watch
+// the sample Passport turn the skills it just practised to Confirmed. Play / Pause / Replay, a loading state, and a clear message —
 // never silence — if the voice can't play. Under prefers-reduced-motion the
 // bars stay still and the Passport changes at once.
 import React, { useEffect, useRef, useState } from 'react';
@@ -73,7 +73,11 @@ export default function HeroDemo() {
     if (audio.current) { audio.current.currentTime = 0; await audio.current.play().catch(() => {}); setState('playing'); return; }
     setState('loading');
     try {
-      const r = await fetch(`${process.env.REACT_APP_API_BASE_URL || '/api'}/sample-lesson?lang=${language}`);
+      // The recording shipped with the site first (scripts/record-sample-lesson.js),
+      // then the server's live voice.
+      const shipped = await fetch('/audio/sample-lesson.json').then(x => (x.ok ? x.json() : null)).catch(() => null);
+      let r = shipped?.[language] ? await fetch(shipped[language]).catch(() => null) : null;
+      if (!r?.ok || !/^audio\//.test(r.headers.get('content-type') || '')) r = await fetch(`${process.env.REACT_APP_API_BASE_URL || '/api'}/sample-lesson?lang=${language}`);
       if (!r.ok) throw new Error(String(r.status));
       const a = new Audio(URL.createObjectURL(await r.blob()));
       a.addEventListener('timeupdate', () => { if (a.duration) setLine(lineAt(lines, a.currentTime / a.duration)); });

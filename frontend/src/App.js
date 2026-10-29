@@ -4,7 +4,6 @@ import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { UiLangProvider } from './context/UiLangContext';
-import DevNav from './components/DevNav';
 import PageTransition from './components/PageTransition';
 import { RouteTitle } from './hooks/usePageTitle';
 import { ToastProvider, TableLabels } from './components/shared/ui';
@@ -69,6 +68,8 @@ import { BulkVerify, Templates, Billing } from './pages/employer/Tools';
 import AdminLogin from './pages/admin/Login';
 import AdminMessages from './pages/admin/Messages';
 import Developers from './pages/public/Developers';
+import DevAccess from './pages/public/DevAccess';
+import DevBar from './components/DevBar';
 import AdminLayout from './pages/admin/Layout';
 import AdminOverview from './pages/admin/Overview';
 import AdminEmployers from './pages/admin/Employers';
@@ -110,6 +111,7 @@ export default function App() {
               <Route path="/signin" element={<SignIn />} />
               <Route path="/legal/:page" element={<Legal />} />
               <Route path="/developers" element={<Developers />} />
+              <Route path="/dev" element={<DevAccess />} />
               <Route path="/login" element={<StaffLogin />} />
               <Route path="/institution/invite/:token" element={<StaffInvite />} />
               <Route path="/learner-login" element={<LearnerLogin />} />
@@ -221,7 +223,7 @@ export default function App() {
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </PageTransition>
-          <DevNav />
+          <DevBar />
         </BrowserRouter>
         </ToastProvider>
       </AuthProvider>

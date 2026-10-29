@@ -26,7 +26,11 @@ const noteSaved = (res) => {
 api.interceptors.response.use(
   res => { noteSaved(res); return res; },
   err => {
-    if (err.response?.status === 401) {
+    // The developer page's own calls (/dev/*) answer 401 while it is locked;
+    // that says nothing about the signed-in session.
+    const devCall = /^\/dev\//.test(String(err.config?.url || '').replace(/^https?:\/\/[^/]+/, '').replace(/^\/api/, ''));
+    if (err.response?.status === 401 && !devCall) {
+      const wasDev = !!localStorage.getItem('qubirex_dev');
       const role = localStorage.getItem('qubirex_role');
       // Signed out because the account was used on another device: say so on the sign-in page.
       const e = err.response?.data?.error;
@@ -35,7 +39,9 @@ api.interceptors.response.use(
       localStorage.removeItem('qubirex_token');
       localStorage.removeItem('qubirex_user');
       localStorage.removeItem('qubirex_role');
-      const home = { learner: '/learner-login', employer: '/employer/login', admin: '/admin/login' }[role] || '/login';
+      localStorage.removeItem('qubirex_dev');
+      // A developer session that ended goes back to /dev, not a sign-in form.
+      const home = wasDev ? '/dev' : { learner: '/learner-login', employer: '/employer/login', admin: '/admin/login' }[role] || '/login';
       // Only pages inside a portal send you to sign in. Public pages (home,
       // demo, pricing, verify, Talk to us, sign-in screens) stay where they are.
       const inPortal = /^\/(learn|institution|employer|admin)\//.test(window.location.pathname)

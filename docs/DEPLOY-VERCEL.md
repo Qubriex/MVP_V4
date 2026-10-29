@@ -87,6 +87,91 @@ cd backend && npm install
 DATABASE_URL='<connection string>' QBX_SEED_REMOTE=1 npm run seed:test
 ```
 
+## Developer login (/dev)
+
+A one-click way for the founder and the testing team to open any side of the
+site (learner, college admin, professor, employer, admin) as the seeded test
+accounts, and switch between them. It is **off unless you turn it on**, and it
+can only ever open the fixed test accounts in "Qubirex Test Institution" and
+"[Company name] (test)". Real learners, colleges and employers are never
+shown in a developer session.
+
+### Turn it on
+
+In Vercel → **mvp-v4 → Settings → Environment Variables**, add (names only;
+choose the environment as described below, and mark the secret Sensitive):
+
+| Name | Value |
+|---|---|
+| `DEV_LOGIN_ENABLED` | `true` |
+| `DEV_LOGIN_SECRET` | a passcode of **32 characters or more** |
+| `DEV_LOGIN_ALLOWED_IPS` | optional: comma-separated IPs allowed to use it |
+| `QBX_SEED_TEST_DATA` | `1`, so the test accounts exist (or use Reset test data on /dev) |
+
+Make a strong passcode on your own computer and paste it straight into Vercel:
+
+```bash
+openssl rand -base64 48
+```
+
+Never put it in the code, a `REACT_APP_*` variable, a chat or a document.
+Share it with testers through a password manager. Redeploy, then open
+`https://<your-deployment>/dev`.
+
+If `DEV_LOGIN_ENABLED=true` is set with a passcode shorter than 32 characters,
+the deployment refuses to start and `/api/*` answers 503, naming
+`DEV_LOGIN_SECRET` (never its value).
+
+### Turn it off
+
+Delete `DEV_LOGIN_ENABLED` (or set it to anything but `true`) and redeploy.
+`/api/dev/*` then answers 404 as if it never existed, and `/dev` goes to the
+home page. Changing `DEV_LOGIN_SECRET` ends every unlocked browser at once.
+
+### What protects it
+
+- The passcode is checked only on the server, in constant time. Each IP gets
+  5 tries per 15 minutes, counted in the database so every instance shares
+  the count.
+- A correct passcode gives an 8-hour unlock (an httpOnly cookie). Opening a
+  role card gives a **real** server session for that test account, marked
+  `dev: true` and `actor: "developer"`, which lasts 8 hours.
+- The browser only sends a card name (`learner_te`, `college_admin` …). The
+  server maps it to a fixed test account and checks that account is still in
+  the test tenant by fixed ID. Any other value answers 404.
+- Every unlock, failed try, sign-in, switch, reset, skipped wait and end is in
+  the `dev_audit` table: when, which role, which session and IP. The
+  passcode is never stored.
+- Test and real data never mix:
+  - Test colleges and companies are flagged `is_test`.
+  - Real employers never find test learners, and test learners never see real
+    jobs.
+  - Test colleges never count in a real college's benchmark.
+  - A real admin's numbers leave test data out.
+  - The test admin, and any developer session, sees only test data and cannot
+    change shared reference data.
+
+### Where to run it
+
+**Recommended: a separate staging deployment.**
+
+1. In Vercel → Storage, create a second Neon database (or a Neon branch of
+   the production one) and connect it to the **Preview** environment only.
+2. Push a `staging` branch. Vercel deploys it as a Preview.
+3. Add `DEV_LOGIN_ENABLED`, `DEV_LOGIN_SECRET` and `QBX_SEED_TEST_DATA` for
+   **Preview** only. Production never has them.
+4. Seed or refresh the staging database from your computer, against
+   **staging only**:
+   `cd backend && DATABASE_URL='<staging connection string>' QBX_SEED_REMOTE=1 npm run seed:test`
+5. Test on the staging URL, then merge to `main` to promote.
+
+**If it must also run on production**, the rules above still hold: it can only
+open the test accounts, and their data stays walled off from real users. Set
+the variables for Production too, use the IP allowlist, and turn it off when
+testing is done. Never set `QBX_SEED_TEST_DATA` on a production database
+that real users depend on without first agreeing to the public test
+passwords it creates.
+
 ## Before a real launch
 
 The quick start keeps secrets in the database. Anyone who can read the

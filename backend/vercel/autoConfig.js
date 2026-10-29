@@ -12,6 +12,7 @@
 //   5. Staging defaults: prior parameters and on-screen employer codes, unless
 //      SECURE_CONFIG_PARAMS_JSON / QBX_ECHO_EMAIL_CODES say otherwise.
 //   6. QBX_SEED_TEST_DATA=1: the test accounts from docs/README.md, once.
+//   7. TRUST_PROXY=1 on Vercel, so the API sees each visitor's real IP.
 // Anything set in the environment wins. QBX_REQUIRE_SECRETS=1 turns steps 4-6
 // off, so a real launch fails loudly instead of generating its own.
 import crypto from 'crypto';
@@ -38,6 +39,11 @@ export async function autoConfigure(env = process.env) {
   const url = findDatabaseUrl(env);
   if (url && !env.DATABASE_URL) env.DATABASE_URL = url;
 
+  // Vercel's edge overwrites X-Forwarded-For with the caller's IP, so one
+  // proxy hop is trusted: rate limits, lockouts and DEV_LOGIN_ALLOWED_IPS
+  // then see each visitor's own IP instead of the platform's.
+  if (env.VERCEL && env.TRUST_PROXY === undefined) env.TRUST_PROXY = '1';
+
   const host = env.VERCEL_PROJECT_PRODUCTION_URL || env.VERCEL_URL;
   if (host) {
     if (!env.PUBLIC_HOST) env.PUBLIC_HOST = host;
@@ -49,9 +55,12 @@ export async function autoConfigure(env = process.env) {
   await migrate();
   if (env.QBX_REQUIRE_SECRETS === '1') return { secrets: 'environment', generated: [] };
 
-  const generated = [];
-  for (const name of GENERATED) {
-    if (!env[name]) { env[name] = await secret(name); generated.push(name); }
+  // One read for every secret the environment does not set; a write only
+  // for one that does not exist yet (the first start).
+  const generated = GENERATED.filter(name => !env[name]);
+  if (generated.length) {
+    const kept = new Map((await dal.all(`SELECT name, value FROM system_secrets WHERE name IN (${generated.map(() => '?').join(', ')})`, ...generated)).map(r => [r.name, r.value]));
+    for (const name of generated) env[name] = kept.get(name) || await secret(name);
   }
   if ((await ensureSigningKey()) === 'database') generated.push('signing key');
   if (!env.SECURE_CONFIG_PARAMS_JSON && env.QBX_ALLOW_PRIORS === undefined) env.QBX_ALLOW_PRIORS = '1';

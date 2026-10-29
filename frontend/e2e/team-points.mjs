@@ -14,6 +14,13 @@ const check = (point, ok, detail = '') => { results.push([point, ok, detail]); c
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM || undefined, args: ['--autoplay-policy=no-user-gesture-required'] });
 const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
 const page = await ctx.newPage();
+// Record real playback: every audio element that actually starts playing.
+await page.addInitScript(() => {
+  window.__played = [];
+  document.addEventListener('playing', e => window.__played.push(e.target.currentSrc || e.target.src), true);
+  const play = HTMLMediaElement.prototype.play;
+  HTMLMediaElement.prototype.play = function () { this.addEventListener('playing', () => window.__played.push(this.src), { once: true }); return play.call(this); };
+});
 const errors = [];
 page.on('pageerror', e => errors.push(e.message));
 
@@ -21,13 +28,15 @@ page.on('pageerror', e => errors.push(e.message));
 await page.goto(BASE + '/');
 await page.evaluate(() => localStorage.setItem('qubirex_ui_lang', 'english'));
 await page.reload();
-const audioReq = page.waitForResponse(r => r.url().includes('/api/sample-lesson'), { timeout: 15000 }).catch(() => null);
+// The shipped recording (/audio/sample-lesson-*.wav) when the build made one, else the API.
+const audioReq = page.waitForResponse(r => /\/api\/sample-lesson|\/audio\/sample-lesson-/.test(r.url()), { timeout: 15000 }).catch(() => null);
 await page.click('.pb-play');
 const audioRes = await audioReq;
 await page.waitForFunction(() => /Pause|again|tap play/i.test(document.querySelector('.pb-play')?.getAttribute('aria-label') || '') || /ready/i.test(document.body.innerText), null, { timeout: 15000 }).catch(() => {});
 const label = await page.getAttribute('.pb-play', 'aria-label');
 const caption = await page.textContent('.pb-captions');
-check('4 Sample lesson plays', !!audioRes && audioRes.status() === 200 && /Pause|again|tap/i.test(label || ''), `audio ${audioRes?.status()} ${audioRes?.headers()['content-type']}, button "${label}", caption "${caption.trim().slice(0, 40)}"`);
+const played = await page.waitForFunction(() => window.__played.length > 0, null, { timeout: 10000 }).then(() => true).catch(() => false);
+check('4 Sample lesson plays', !!audioRes && audioRes.status() === 200 && played && /Pause|again|Replay|tap/i.test(label || ''), `${audioRes?.url().replace(BASE, '')} ${audioRes?.status()} ${audioRes?.headers()['content-type']}, audio playing: ${played}, button "${label}", caption "${caption.trim().slice(0, 40)}"`);
 
 // 1 — the brand line under the headline is only in the selected language.
 const hero = await page.textContent('.pb-hero');
@@ -36,6 +45,10 @@ await page.evaluate(() => localStorage.setItem('qubirex_ui_lang', 'telugu'));
 await page.reload();
 const heroTe = await page.textContent('.pb-hero h1 + p');
 check('1 Telugu only after choosing Telugu', /[ఀ-౿]/.test(heroTe) && !/[A-Za-z]{4}/.test(heroTe), heroTe.trim());
+await page.evaluate(() => localStorage.setItem('qubirex_ui_lang', 'hindi'));
+await page.reload();
+const heroHi = await page.textContent('.pb-hero h1 + p');
+check('1 Hindi only after choosing Hindi', /[ऀ-ॿ]/.test(heroHi) && !/[ఀ-౿]/.test(heroHi) && !/[A-Za-z]{4}/.test(heroHi), heroHi.trim());
 await page.evaluate(() => localStorage.setItem('qubirex_ui_lang', 'english'));
 await page.reload();
 
@@ -46,14 +59,15 @@ check('5 No sign-in boxes on the home page', signInLinks.length === 0, `${signIn
 // 6 — screenshots open a larger view.
 await page.click('.pb-screen-btn >> nth=1');
 const dlg = await page.waitForSelector('[role="dialog"] .pb-screen-full', { timeout: 5000 }).catch(() => null);
+const alts = await page.$$eval('.pb-screen-btn img', imgs => imgs.map(i => i.alt));
 const next = dlg && await page.click('[role="dialog"] button:has-text("Next")').then(() => page.getAttribute('.pb-screen-full', 'src'));
 await page.keyboard.press('Escape');
 const closed = !(await page.$('[role="dialog"]'));
-check('6 Screenshots open larger', !!dlg && /college-home/.test(next || '') && closed, `opened, next → ${next}, Esc closes: ${closed}`);
+check('6 Screenshots open larger', !!dlg && /college-home/.test(next || '') && closed && alts.every(Boolean), `opened, next → ${next}, Esc closes: ${closed}, alt text: ${alts.join(' / ')}`);
 
 // 7 — learners wording no longer ties learning to the phone.
 const body = await page.textContent('main');
-check('7 "Learn on your phone" replaced', !/Learn on your phone/i.test(body) && /at your own pace/i.test(body));
+check('7 "Learn on your phone" replaced', !/Learn on your phone/i.test(body) && /at your own pace/i.test(body) && /Works on your phone and laptop/.test(body));
 
 // 2, 3 — header logo without the tagline; footer shows the tagline as text.
 const headerLogo = await page.getAttribute('header .brand-logo-light', 'src');
@@ -71,7 +85,7 @@ await page.fill('#tk-msg', 'We would like a demo for 300 students.');
 await page.click('form button[type=submit]:has-text("Send")');
 await page.waitForTimeout(1500);
 const url = page.url();
-const thanks = await page.$('[role="status"] >> text=/Thanks|thank/i');
+const thanks = await page.$('[role="status"] >> text=/within 1 working day/i');
 check('8 Talk to us stays and confirms', url === BASE + '/' && !!thanks, `url ${url.replace(BASE, '')}, thanks shown: ${!!thanks}`);
 
 // 9 — Check name gives Match / Unclear / No match, and explains a one-word name.

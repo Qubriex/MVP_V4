@@ -37,7 +37,7 @@ function ScreenStrip() {
         {SCREENS.map(([file, key], i) => (
           <figure key={file} className="pb-screen" role="listitem">
             <button type="button" className="pb-screen-btn" onClick={() => setOpen(i)} aria-label={t('home.screenOpen', { name: t(key) })}>
-              <img src={`/screens/${file}.png`} alt="" loading="lazy" width="640" height="400" />
+              <img src={`/screens/${file}.png`} alt={t(key)} loading="lazy" width="640" height="400" />
               <span className="pb-screen-zoom" aria-hidden="true"><Maximize2 size={16} /></span>
             </button>
             <figcaption className="ln-small">{t(key)}</figcaption>
@@ -103,6 +103,7 @@ export default function Home() {
           <article key={id} className="ln-card" style={{ gap: 10 }}>
             <span className="pb-kicker"><Icon size={14} aria-hidden="true" />{t(`nav.${id}`)}</span>
             <b style={{ fontSize: 'var(--fs-h2)' }}>{t(`${id}.title`)}</b>
+            {id === 'learners' && <span className="ln-small ln-muted">{t('learners.devices')}</span>}
             <ul className="ln-small" style={{ margin: 0, paddingLeft: 18, display: 'grid', gap: 6 }}>{[1, 2, 3].map(i => <li key={i}>{t(`${id}.b${i}`)}</li>)}</ul>
             <Link to={`/${id}`} className="ln-link" style={{ marginTop: 'auto' }}>{t('home.learnMore')} →</Link>
           </article>

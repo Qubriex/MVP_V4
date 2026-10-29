@@ -40,6 +40,12 @@ export function resetRateLimits() {
   buckets.clear();
 }
 
+/** Forget the counters for these keys in every limiter (test accounts only: api/routes/dev.js). */
+export function resetRateLimitKeys(keys) {
+  const set = new Set(keys.map(k => String(k).toLowerCase()));
+  for (const bucket of buckets.values()) for (const k of bucket.keys()) if (set.has(k.toLowerCase())) bucket.delete(k);
+}
+
 export function rateLimit({ name, limit, windowMs, key = clientIp, message = 'Too many requests. Please wait and try again.', legacyErrors = true }) {
   return (req, res, next) => {
     const k = key(req);

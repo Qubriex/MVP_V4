@@ -24,8 +24,22 @@ export async function loadMigrations(dir = MIGRATIONS_DIR) {
   return out;
 }
 
+// Fast path for every cold start after the first: one query, no lock and no
+// migration modules loaded, when every file in migrations/ is already
+// recorded (a migration's id is its file name without .js).
+async function upToDate(dir) {
+  const files = fs.readdirSync(dir).filter(f => /^\d{4}_.+\.js$/.test(f)).map(f => f.slice(0, -3));
+  try {
+    const done = new Set((await dal.all('SELECT id FROM schema_migrations')).map(r => r.id));
+    return files.every(f => done.has(f));
+  } catch {
+    return false; // no schema_migrations table yet: a fresh database
+  }
+}
+
 /** @returns {Promise<string[]>} ids applied by this call */
 export async function migrate({ dir } = {}) {
+  if (await upToDate(dir || MIGRATIONS_DIR)) return [];
   const applied = [];
   await dal.tx(async () => {
     await dal.exec(`SELECT pg_advisory_xact_lock(${LOCK_KEY})`);

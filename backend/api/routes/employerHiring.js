@@ -119,7 +119,7 @@ router.post('/sponsorships', session, writer, async (req, res) => {
 
 router.get('/colleges', session, async (req, res) => {
   const roles = await dal.all("SELECT * FROM employer_roles WHERE employer_id = ? AND status = 'open'", req.employer.id);
-  res.json(await collegeInsights(roles));
+  res.json(await collegeInsights(req.employer.id, roles));
 });
 
 router.post('/verify/bulk', session, rateLimit({ name: 'employer:bulk-verify', limit: 20, windowMs: 3600000, key: (req) => req.employer.id, legacyErrors: false }), async (req, res) => {

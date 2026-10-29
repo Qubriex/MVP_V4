@@ -79,8 +79,12 @@ describe('help and glossary', () => {
     expect((await learner.agent.post('/api/help/contact').set(auth(learner)).send({ type: 'problem', message: 'The cohort list is not loading.' })).status).toBe(201);
     expect((await request(app).post('/api/help/contact').send({ type: 'question', message: 'How much does it cost?', reply_to: 'a@b.in' })).status).toBe(201);
     expect((await request(app).post('/api/help/contact').send({ message: 'hi' })).status).toBe(400);
+    // A visitor must leave an email or a WhatsApp number to reply to.
+    expect((await request(app).post('/api/help/contact').send({ message: 'How much does it cost?' })).status).toBe(400);
+    expect((await request(app).post('/api/help/contact').send({ message: 'How much does it cost?', reply_to: 'not a contact' })).status).toBe(400);
+    expect((await request(app).post('/api/help/contact').send({ message: 'How much does it cost?', reply_to: '+91 98765 43210' })).status).toBe(201);
     const rows = await dal.all('SELECT actor_type, type FROM help_requests ORDER BY created_at');
-    expect(rows.map(r => r.actor_type)).toEqual(['learner', 'public']);
+    expect(rows.map(r => r.actor_type)).toEqual(['learner', 'public', 'public']);
     const st = await request(app).get('/api/help/status');
     expect(st.body.ok).toBe(true);
     expect((await request(app).get('/api/glossary')).body.A3).toMatch(/supervision/);

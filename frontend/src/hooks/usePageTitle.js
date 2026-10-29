@@ -10,7 +10,7 @@ import { useUiLang } from '../context/UiLangContext';
 const TITLES = [
   ['/', 'title.home'], ['/pricing', 'title.pricing'], ['/learners', 'title.learners'], ['/colleges', 'title.colleges'], ['/employers', 'title.employers'],
   ['/demo', 'title.demo'], ['/demo/learner', 'title.demoLearner'], ['/demo/college', 'title.demoCollege'], ['/demo/employer', 'title.demoEmployer'],
-  ['/signin', 'title.signin'], ['/legal/privacy', 'title.privacy'], ['/legal/terms', 'title.terms'], ['/legal/dpdp', 'title.dpdp'], ['/legal/grievance', 'title.grievance'], ['/developers', 'title.developers'],
+  ['/signin', 'title.signin'], ['/legal/privacy', 'title.privacy'], ['/legal/terms', 'title.terms'], ['/legal/dpdp', 'title.dpdp'], ['/legal/grievance', 'title.grievance'], ['/developers', 'title.developers'], ['/dev', 'title.devAccess'],
   ['/login', 'title.staffLogin'], ['/institution/invite/:token', 'title.staffInvite'], ['/learner-login', 'title.learnerLogin'], ['/learner-invite/:token', 'title.learnerInvite'],
   ['/verify', 'title.verify'], ['/verify/:id', 'title.verifyResult'],
   ['/employer/login', 'title.employerLogin'], ['/employer/register', 'title.employerRegister'], ['/employer/invite/:token', 'title.employerInvite'], ['/admin/login', 'title.adminLogin'],
