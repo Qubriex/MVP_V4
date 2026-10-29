@@ -25,12 +25,18 @@ router.use(requireRole('admin'));
 // leave the test tenant out; the test admin (and any developer session)
 // sees only the test tenant and cannot change shared reference data.
 router.use(async (req, res, next) => { req.side = await testScope(req); next(); });
-const INST_SIDE = 'IN (SELECT id FROM institutions WHERE COALESCE(is_test, 0) = ?)';
+// Never a demo session (there is no demo admin; this is a second lock).
+router.use((req, res, next) => (req.session?.is_demo ? res.status(403).json({ error: 'Not available in the demo' }) : next()));
+// Demo sandboxes (is_demo) are never part of either side: admins see them
+// only as the counts in GET /admin/demo.
+const INST_SIDE = 'IN (SELECT id FROM institutions WHERE COALESCE(is_test, 0) = ? AND sandbox_id IS NULL)';
 const EL_SIDE = `IN (SELECT el.id FROM engagement_learners el JOIN engagements e ON e.id = el.engagement_id
-  JOIN institutions i ON i.id = e.institution_id WHERE COALESCE(i.is_test, 0) = ?)`;
+  JOIN institutions i ON i.id = e.institution_id WHERE COALESCE(i.is_test, 0) = ? AND i.sandbox_id IS NULL)`;
 const HELP_SIDE = `(CASE WHEN COALESCE((SELECT is_test FROM institutions WHERE id = h.institution_id), 0) = 1
   OR COALESCE((SELECT is_test FROM employers WHERE id = h.employer_id), 0) = 1
-  OR (h.actor_type = 'admin' AND COALESCE((SELECT is_test FROM admin_users WHERE id = h.actor_id), 0) = 1) THEN 1 ELSE 0 END) = ?`;
+  OR (h.actor_type = 'admin' AND COALESCE((SELECT is_test FROM admin_users WHERE id = h.actor_id), 0) = 1) THEN 1 ELSE 0 END) = ?
+  AND NOT EXISTS (SELECT 1 FROM institutions di WHERE di.id = h.institution_id AND di.sandbox_id IS NOT NULL)
+  AND NOT EXISTS (SELECT 1 FROM employers de WHERE de.id = h.employer_id AND de.sandbox_id IS NOT NULL)`;
 const realAdminOnly = (req, res, next) => (req.side ? res.status(403).json({ error: 'Not available in a test or developer session: this changes data every college shares.' }) : next());
 
 // ─── Dashboard stats ──────────────────────────────────────────────────────────
@@ -38,7 +44,7 @@ router.get('/stats', async (req, res) => {
   const db = getDb();
   const s = req.side;
   const stats = {
-    institutions: (await db.prepare('SELECT COUNT(*) as cnt FROM institutions WHERE COALESCE(is_test, 0) = ?').get(s)).cnt,
+    institutions: (await db.prepare('SELECT COUNT(*) as cnt FROM institutions WHERE COALESCE(is_test, 0) = ? AND sandbox_id IS NULL').get(s)).cnt,
     learners: (await db.prepare(`SELECT COUNT(*) as cnt FROM learners WHERE institution_id ${INST_SIDE}`).get(s)).cnt,
     engagements: (await db.prepare(`SELECT COUNT(*) as cnt FROM engagements WHERE institution_id ${INST_SIDE}`).get(s)).cnt,
     active_engagements: (await db.prepare(`SELECT COUNT(*) as cnt FROM engagements WHERE status = 'active' AND institution_id ${INST_SIDE}`).get(s)).cnt,
@@ -61,7 +67,7 @@ router.get('/institutions', async (req, res) => {
     FROM institutions i
     LEFT JOIN engagements e ON e.institution_id = i.id
     LEFT JOIN learners l ON l.institution_id = i.id
-    WHERE COALESCE(i.is_test, 0) = ?
+    WHERE COALESCE(i.is_test, 0) = ? AND i.sandbox_id IS NULL
     GROUP BY i.id ORDER BY i.created_at DESC
   `).all(req.side);
   db.close();
@@ -193,13 +199,13 @@ router.get('/employers', async (req, res) => {
   const status = ['pending', 'verified', 'rejected', 'suspended'].includes(req.query.status) ? req.query.status : null;
   const rows = await dal.all(`SELECT e.*, (SELECT COUNT(*) FROM employer_users u WHERE u.employer_id = e.id) AS users,
       (SELECT email FROM employer_users u WHERE u.employer_id = e.id AND u.role = 'owner' ORDER BY created_at LIMIT 1) AS owner_email
-    FROM employers e WHERE COALESCE(e.is_test, 0) = ? ${status ? 'AND e.kyb_status = ?' : ''} ORDER BY e.created_at DESC LIMIT 200`, req.side, ...(status ? [status] : []));
-  const counts = Object.fromEntries((await dal.all('SELECT kyb_status, COUNT(*) n FROM employers WHERE COALESCE(is_test, 0) = ? GROUP BY kyb_status', req.side)).map(r => [r.kyb_status, r.n]));
+    FROM employers e WHERE COALESCE(e.is_test, 0) = ? AND e.sandbox_id IS NULL ${status ? 'AND e.kyb_status = ?' : ''} ORDER BY e.created_at DESC LIMIT 200`, req.side, ...(status ? [status] : []));
+  const counts = Object.fromEntries((await dal.all('SELECT kyb_status, COUNT(*) n FROM employers WHERE COALESCE(is_test, 0) = ? AND sandbox_id IS NULL GROUP BY kyb_status', req.side)).map(r => [r.kyb_status, r.n]));
   res.json({ employers: rows, counts });
 });
 
 router.post('/employers/:id/kyb', async (req, res) => {
-  const e = await dal.one('SELECT * FROM employers WHERE id = ? AND COALESCE(is_test, 0) = ?', req.params.id, req.side);
+  const e = await dal.one('SELECT * FROM employers WHERE id = ? AND COALESCE(is_test, 0) = ? AND sandbox_id IS NULL', req.params.id, req.side);
   if (!e) return res.status(404).json({ error: 'Not found' });
   const decision = req.body.decision;
   const allowed = { pending: ['verified', 'rejected'], verified: ['suspended'], suspended: ['verified'], rejected: ['pending'] };
@@ -211,6 +217,16 @@ router.post('/employers/:id/kyb', async (req, res) => {
     await dal.run(`UPDATE auth_sessions SET revoked_at = ? WHERE actor_type = 'employer' AND employer_id = ? AND revoked_at IS NULL`, dal.nowIso(), e.id);
   }
   res.json({ ok: true, kyb_status: decision });
+});
+
+// ─── Public demo: how many sandboxes and how much AI (real admins only) ──────
+router.get('/demo', realAdminOnly, async (req, res) => {
+  const now = dal.nowIso(); const day = now.slice(0, 10);
+  const active = await dal.one('SELECT COUNT(*) AS n FROM demo_sandboxes WHERE deleted_at IS NULL AND expires_at > ?', now);
+  const today = await dal.one('SELECT COUNT(*) AS n, COALESCE(SUM(ai_calls), 0) AS calls, COALESCE(SUM(voice_seconds), 0) AS voice FROM demo_sandboxes WHERE created_at >= ?', `${day}T00:00:00`);
+  const usage = await dal.one('SELECT calls, voice_seconds FROM demo_ai_usage WHERE day = ?', day);
+  const byPersona = await dal.all('SELECT persona, COUNT(*) AS n FROM demo_sandboxes WHERE created_at >= ? GROUP BY persona', `${day}T00:00:00`);
+  res.json({ active: Number(active.n), started_today: Number(today.n), ai_calls_today: Number(usage?.calls || 0), voice_seconds_today: Number(usage?.voice_seconds || 0), by_persona: byPersona });
 });
 
 // ─── Messages from Talk to us / Help → Contact ────────────────────────────────

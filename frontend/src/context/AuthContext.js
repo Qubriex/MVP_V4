@@ -46,12 +46,13 @@ export function AuthProvider({ children }) {
     else { localStorage.setItem('qubirex_session_only', '1'); sessionStorage.setItem('qubirex_alive', '1'); }
   };
 
-  const logout = () => {
+  // quiet: the server has already ended the session (a demo switch or exit).
+  const logout = ({ quiet = false } = {}) => {
     // End the session on the server too, so the token stops working at once.
     // The header is passed explicitly: localStorage is cleared below before
     // the request interceptor runs.
     const current = localStorage.getItem('qubirex_token');
-    if (current) {
+    if (current && !quiet) {
       api.post('/auth/logout', null, { headers: { Authorization: `Bearer ${current}` } }).catch(() => {});
     }
     setSession({ token: null, user: null, role: null, dev: null });

@@ -6,10 +6,11 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Upload, KeyRound, Plug } from 'lucide-react';
 import api from '../../utils/api';
+import { isDemoSession } from '../../utils/demoAccess';
 import { errMsg } from '../../utils/errors';
 
 import { useUiLang, uiLocale } from '../../context/UiLangContext';
-const STATUS = { valid: ['emp.tools.status.valid', 'ln-tag-success'], revoked: ['emp.tools.status.revoked', 'ln-tag-warning'], expired: ['emp.tools.status.expired', 'ln-tag-warning'], not_found: ['emp.tools.status.notFound', 'ln-tag-neutral'], malformed: ['emp.tools.status.notAnEvidenceId', 'ln-tag-neutral'], signature_invalid: ['emp.tools.status.signatureDoesNotMatch', 'ln-tag-warning'] };
+const STATUS = { valid: ['emp.tools.status.valid', 'ln-tag-success'], revoked: ['emp.tools.status.revoked', 'ln-tag-warning'], expired: ['emp.tools.status.expired', 'ln-tag-warning'], not_found: ['emp.tools.status.notFound', 'ln-tag-neutral'], malformed: ['emp.tools.status.notAnEvidenceId', 'ln-tag-neutral'], signature_invalid: ['emp.tools.status.signatureDoesNotMatch', 'ln-tag-warning'], demo_not_accepted: ['emp.tools.status.demoNotAccepted', 'ln-tag-danger'] };
 
 export function BulkVerify() {
   const { t } = useUiLang();
@@ -96,6 +97,15 @@ const PLANS = [
 export function Billing() {
   const { t } = useUiLang();
   const [asked, setAsked] = useState(null);
+  // The working demo never takes payment (backend api/routes/demo.js).
+  if (isDemoSession()) {
+    return (
+      <>
+        <header className="ln-pagehead"><h1 className="ln-title">{t('emp.tools.planBilling')}</h1></header>
+        <p className="ln-card ln-small" role="status" style={{ margin: 0 }}>{t('demo2.notInDemo')}</p>
+      </>
+    );
+  }
   return (
     <>
       <header className="ln-pagehead"><div className="ln-col" style={{ gap: 4 }}><h1 className="ln-title">{t('emp.tools.planBilling')}</h1><span className="ln-sub">{t('emp.tools.pricesShownBeforeGst')}</span></div></header>

@@ -17,7 +17,7 @@ import { legacyHandle as getDb } from '../../core/db/dal.js';
 import { authenticateToken, requireRole } from '../middleware/auth.js';
 import { staffMiddleware, findScopedEngagement, requireStaffRole } from '../middleware/staff.js';
 import { extractCurriculumText, MAX_UPLOAD_BYTES } from '../../core/curriculumText.js';
-import { aiNotConfigured, AI_NOT_CONFIGURED } from '../../core/ai/gateway.js';
+import { aiNotConfigured, aiUnavailableMessage } from '../../core/ai/gateway.js';
 import { logEvent } from '../../core/access.js';
 import { eachSeq } from '../../core/util/seq.js';
 import { liveStatus, activitySummary, activityDays, studentPathway, evidenceReport, dayRange } from '../../core/institutionActivity.js';
@@ -118,7 +118,7 @@ router.post('/curriculum/upload', requireStaffRole('admin'), (req, res, next) =>
     const out = await extractCurriculumText({ buffer: req.file.buffer, filename: req.file.originalname, mimeType: req.file.mimetype, institutionId: req.user.id });
     res.json({ filename: req.file.originalname, ...out });
   } catch (err) {
-    if (aiNotConfigured(err)) return res.status(503).json({ error: `Reading PDFs needs the AI model. ${AI_NOT_CONFIGURED} Upload a .docx or .txt file, or paste the text.` });
+    if (aiNotConfigured(err)) return res.status(503).json({ error: `Reading PDFs needs the AI model. ${aiUnavailableMessage(err)} Upload a .docx or .txt file, or paste the text.` });
     res.status(err.status && err.status < 500 ? err.status : 502).json({ error: err.status && err.status < 500 ? err.message : 'Couldn’t read that file. Try a .docx or .txt file, or paste the text.' });
   }
 });

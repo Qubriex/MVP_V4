@@ -14,6 +14,7 @@
 //   4. Every unlock, login, reset, skipped wait and end is written to
 //      dev_audit (who, role, when, IP); the passcode never is.
 import express from 'express';
+import jwt from 'jsonwebtoken';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -43,8 +44,15 @@ async function audit(req, action, { accountKey = null, role = null, sessionId = 
   logger.warn('dev_login.' + action, { accountKey, role, ip: clientIp(req) });
 }
 
-// 1. Disabled, misconfigured or not on the allowlist: as if this router did not exist.
-router.use((req, res, next) => (devLoginAvailable(clientIp(req)) ? next() : next('router')));
+// A demo visitor's session token never reaches the developer login.
+const demoToken = (req) => {
+  const h = req.headers.authorization || '';
+  if (!h.startsWith('Bearer ')) return false;
+  try { return !!jwt.decode(h.slice(7))?.demo; } catch { return false; }
+};
+
+// 1. Disabled, misconfigured, not on the allowlist, or a demo session: as if this router did not exist.
+router.use((req, res, next) => (devLoginAvailable(clientIp(req)) && !demoToken(req) ? next() : next('router')));
 
 function unlockCookie(res, token) {
   res.cookie(DEV_UNLOCK_COOKIE, token, {
@@ -204,6 +212,21 @@ router.post('/skip-waits', requireUnlock, async (req, res) => {
   });
   await audit(req, 'skip_waits', { detail: JSON.stringify(done) });
   res.json({ ok: true, done });
+});
+
+// ─── All pages: the ids behind the pages that need one ─────────────────────────
+router.get('/route-ids', requireUnlock, async (req, res) => {
+  const one = async (sql, ...a) => (await dal.one(sql, ...a)) || {};
+  const el = DEV_ACCOUNTS.learner_te.elId;
+  res.json({
+    engagement_id: (await one('SELECT engagement_id AS id FROM engagement_learners WHERE id = ?', el)).id || null,
+    bridge_id: (await one("SELECT id FROM bridge_programmes WHERE institution_id = ? ORDER BY created_at LIMIT 1", TEST_INSTITUTION_ID)).id || null,
+    mastery_log_id: (await one('SELECT id FROM mastery_logs WHERE learner_id = ? ORDER BY produced_at DESC LIMIT 1', DEV_ACCOUNTS.learner_te.learnerId)).id || null,
+    role_id: (await one('SELECT id FROM employer_roles WHERE employer_id = ? ORDER BY created_at LIMIT 1', DEV_ACCOUNTS.employer_verified.employerId)).id || null,
+    candidate_id: (await one('SELECT id FROM employer_pipeline WHERE employer_id = ? ORDER BY created_at LIMIT 1', DEV_ACCOUNTS.employer_verified.employerId)).id || null,
+    evidence_id: (await one('SELECT evidence_id AS id FROM credentials WHERE learner_id = ? AND active = 1 ORDER BY created_at DESC LIMIT 1', DEV_ACCOUNTS.learner_te.learnerId)).id || null,
+    job_id: 'job-001'
+  });
 });
 
 // ─── Build info ────────────────────────────────────────────────────────────────

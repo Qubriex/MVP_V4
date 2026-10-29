@@ -134,6 +134,12 @@ export default function Verify() {
         )}
         {!loading && result?.status === 'valid' && (
           <>
+            {result.demo && (
+              <div className="dm-verify-banner" role="alert">
+                <strong>{t('verify.demoBanner')}</strong>
+                <span className="ln-small">{t('verify.demoBannerText')}</span>
+              </div>
+            )}
             <section className="ln-card" style={{ gap: 10 }}>
               <div className="ln-between ln-wrap" style={{ gap: 10 }}>
                 <strong className="ln-row" style={{ gap: 8, fontSize: 'var(--fs-h3)' }}><ShieldCheck size={20} aria-hidden="true" color="var(--status-success)" />{t('verify.authentic')}</strong>

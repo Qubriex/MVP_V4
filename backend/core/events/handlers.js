@@ -18,6 +18,18 @@ export function registerHandlers() {
     if (r) logger.info('passport.issued', { evidenceId: r.evidence_id, version: r.version });
   });
 
+  // NODE_ADVANCED in a demo sandbox → reissue that learner's demo Passport, so
+  // a visitor sees "lesson → check → Passport updates" within the demo. Real
+  // and test Passports keep reissuing only with a new Mastery Log.
+  subscribe('NODE_ADVANCED', 'DEMO.passportRefresh', async (event) => {
+    const elId = event.aggregate_id || event.aggregateId;
+    const demo = await dal.one(`SELECT 1 FROM engagement_learners el JOIN engagements e ON e.id = el.engagement_id JOIN institutions i ON i.id = e.institution_id
+      WHERE el.id = ? AND i.sandbox_id IS NOT NULL AND EXISTS (SELECT 1 FROM credentials c WHERE c.el_id = el.id AND c.active = 1)`, elId);
+    if (!demo) return;
+    const r = await issueCredential(elId, { reason: 'demo_mastery' });
+    if (r) logger.info('passport.demo_reissued', { evidenceId: r.evidence_id, version: r.version });
+  });
+
   // CONSENT_WITHDRAWN → MATCH.dropLearner: nothing to drop until search exists (Phase 1).
   subscribe('CONSENT_WITHDRAWN', 'MATCH.dropLearner', () => {});
 

@@ -164,7 +164,7 @@ async function produceLearnerMasteryLog(engagementId, learnerId) {
 async function saveMasteryLog(engagementId, learnerId, logData) {
   const db = getDb();
 
-  const engagement = await db.prepare('SELECT capability_target_id FROM engagements WHERE id = ?').get(engagementId);
+  const engagement = await db.prepare('SELECT e.capability_target_id, i.sandbox_id FROM engagements e JOIN institutions i ON i.id = e.institution_id WHERE e.id = ?').get(engagementId);
   const ct = await db.prepare('SELECT title, version FROM capability_targets WHERE id = ?').get(engagement.capability_target_id);
 
   // Integrity (v4.3 §9): an Evidence ID and the SHA-256 of the canonical
@@ -173,7 +173,7 @@ async function saveMasteryLog(engagementId, learnerId, logData) {
   const evidenceId = previous?.evidence_id || newEvidenceId();
   const bytes = canonicalBytes({ ...logData, evidence_id: evidenceId });
   const sha256 = crypto.createHash('sha256').update(bytes).digest('hex');
-  const signature = await signBytes(bytes);
+  const signature = await signBytes(bytes, { demo: !!engagement.sandbox_id }); // demo sandboxes sign with the demo key
   const el = await db.prepare('SELECT id FROM engagement_learners WHERE engagement_id = ? AND learner_id = ?').get(engagementId, learnerId);
 
   // One current log per learner per engagement: producing again replaces it.

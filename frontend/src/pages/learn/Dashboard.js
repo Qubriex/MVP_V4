@@ -151,7 +151,7 @@ export default function Dashboard() {
               <Link to="/learn/record" className="ln-btn ln-btn-primary ln-btn-lg">{t('learn.dashboard.seeCapabilityRecord')}</Link>
             ) : (
               <>
-                <Link to="/learn/session?mode=voice" className="ln-btn ln-btn-primary ln-btn-lg ln-indic"><Mic size={20} aria-hidden="true" />{t('dash.startVoice')}</Link>
+                <Link to="/learn/session?mode=voice" data-demo="lesson" className="ln-btn ln-btn-primary ln-btn-lg ln-indic"><Mic size={20} aria-hidden="true" />{t('dash.startVoice')}</Link>
                 <Link to="/learn/session?mode=type" className="ln-btn ln-btn-ghost-dark ln-indic"><Keyboard size={20} aria-hidden="true" />{t('dash.typeInstead')}</Link>
               </>
             )}

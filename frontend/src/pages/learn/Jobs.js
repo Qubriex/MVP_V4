@@ -52,7 +52,7 @@ function RequestCard({ r, onDone }) {
           ))}
           {r.interview_promised && <span className="ln-xs ln-muted">{t('learn.jobs.ifSayYesMeet')}</span>}
           <div className="ln-row ln-wrap" style={{ gap: 8 }}>
-            <button type="button" className="ln-btn ln-btn-primary" disabled={!items.size} onClick={() => answer(true)}>{t('learn.jobs.yesShareSizeItem', { size: items.size })}</button>
+            <button type="button" data-demo="approve" className="ln-btn ln-btn-primary" disabled={!items.size} onClick={() => answer(true)}>{t('learn.jobs.yesShareSizeItem', { size: items.size })}</button>
             <button type="button" className="ln-btn" onClick={() => answer(false)}>{t('learn.jobs.noThanks')}</button>
           </div>
         </>

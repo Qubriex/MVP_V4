@@ -12,6 +12,9 @@ const require = createRequire(import.meta.url);
 let chromium;
 try { ({ chromium } = require('playwright')); } catch { ({ chromium } = require(path.join(process.env.NODE_PATH || '/opt/node22/lib/node_modules', 'playwright'))); }
 const BASE = process.env.BASE || 'http://localhost:3000';
+// A Vercel deployment behind Deployment Protection: VERCEL_BYPASS is the
+// project's "Protection Bypass for Automation" secret (never committed).
+const BYPASS = process.env.VERCEL_BYPASS ? { extraHTTPHeaders: { 'x-vercel-protection-bypass': process.env.VERCEL_BYPASS, 'x-vercel-set-bypass-cookie': 'true' } } : {};
 const PASS = process.env.DEV_PASS;
 if (!PASS) { console.error('Set DEV_PASS to the deployment\'s DEV_LOGIN_SECRET.'); process.exit(2); }
 
@@ -29,7 +32,7 @@ const results = [];
 const check = (name, ok, detail = '') => { results.push(ok); console.log(`${ok ? '✓' : '✗'} ${name}${detail ? ` — ${detail}` : ''}`); };
 
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM || undefined });
-const ctx = await browser.newContext({ viewport: { width: 1280, height: 860 } });
+const ctx = await browser.newContext({ ...BYPASS, viewport: { width: 1280, height: 860 } });
 const page = await ctx.newPage();
 let errors = [];
 page.on('console', m => { if (m.type() === 'error' && !/401|Failed to load resource/.test(m.text())) errors.push(m.text().slice(0, 160)); });
@@ -94,6 +97,28 @@ try {
   });
   check('On a phone the bar sits above the tab bar', geo.tabsTop != null && geo.barBottom <= geo.tabsTop + 1 && geo.over <= 1, JSON.stringify(geo));
   await page.setViewportSize({ width: 1280, height: 860 });
+
+  // All pages: every route listed, ids filled from the seed; one click opens a
+  // deep page signed in as the right test account.
+  await page.goto(`${BASE}/dev`); await page.waitForSelector('.dx-pages');
+  await page.waitForFunction(() => !document.querySelector('.dx-page-list button code')?.textContent.includes(':'), null, { timeout: 8000 }).catch(() => {});
+  const listed = await page.$$eval('.dx-page-list button', bs => bs.map(b => ({ text: b.textContent, disabled: b.disabled })));
+  check('All pages lists every route with ids filled in', listed.length >= 75 && listed.every(b => !b.disabled && !/:/.test(b.text)), `${listed.length} links, ${listed.filter(b => b.disabled).length} without an id`);
+  errors = [];
+  const deep = page.locator('.dx-page-list button', { hasText: /^\/institution\/bridges\/./ }).first();
+  const deepPath = (await deep.textContent()).trim();
+  await deep.click();
+  await page.waitForURL(`**${deepPath}`, { timeout: 15000 }).catch(() => {});
+  await settle();
+  check('A deep link opens signed in as the right account', new URL(page.url()).pathname === deepPath && (await page.textContent('.dx-bar')).includes('College admin') && !errors.length, deepPath);
+  errors = [];
+  await page.goto(`${BASE}/dev`); await page.waitForSelector('.dx-pages');
+  const cand = page.locator('.dx-page-list button', { hasText: /^\/employer\/candidates\/./ }).first();
+  const candPath = (await cand.textContent()).trim();
+  await cand.click();
+  await page.waitForURL(`**${candPath}`, { timeout: 15000 }).catch(() => {});
+  await settle();
+  check('…and switches account when the page needs another side', (await page.textContent('.dx-bar')).includes('Employer, verified') && !errors.length, candPath);
 
   // Skip waits from /dev.
   await page.goto(`${BASE}/dev`); await page.waitForSelector('.dx-tools');

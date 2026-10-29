@@ -5,6 +5,7 @@
 import * as dal from './db/dal.js';
 import params from '../config/params.js';
 import { eachSeq, mapSeq } from './util/seq.js';
+import { worldSql } from './testTenant.js';
 
 const median = (xs) => {
   const s = xs.filter(x => x != null).sort((a, b) => a - b);
@@ -47,15 +48,15 @@ export async function cohortMetrics(engagementId) {
 }
 
 export async function benchmarks(institutionId, engagementId) {
-  // Peers are taken from the same side of the test-tenant wall (core/testTenant.js):
-  // test colleges never count in a real college's regional median, and back.
-  const inst = await dal.one('SELECT city, is_test FROM institutions WHERE id = ?', institutionId);
+  // Peers come from the same world (core/testTenant.js): test and demo
+  // colleges never count in a real college's regional median, and back.
+  const inst = await dal.one('SELECT city, is_test, sandbox_id FROM institutions WHERE id = ?', institutionId);
   const ours = await cohortMetrics(engagementId);
   const cohorts = (await mapSeq(await dal.all('SELECT id, title FROM engagements WHERE institution_id = ? AND id != ? ORDER BY created_at DESC', institutionId, engagementId), async e => ({ id: e.id, title: e.title, ...await cohortMetrics(e.id) }))).filter(c => c.learners > 0);
 
   const region = inst?.city || null;
   const others = region ? await dal.all(`SELECT i.id, e.id AS eid FROM institutions i JOIN engagements e ON e.institution_id = i.id
-    WHERE i.id != ? AND lower(COALESCE(i.city, '')) = lower(?) AND COALESCE(i.is_test, 0) = ?`, institutionId, region, inst.is_test ? 1 : 0) : [];
+    WHERE i.id != ? AND lower(COALESCE(i.city, '')) = lower(?) AND ${worldSql('i')}`, institutionId, region, inst.is_test ? 1 : 0, inst.sandbox_id || '') : [];
   const byInst = new Map();
   await eachSeq(others, async o => { const m = await cohortMetrics(o.eid); if (m.learners > 0) { if (!byInst.has(o.id)) byInst.set(o.id, []); byInst.get(o.id).push(m); } });
   const minInst = params.get('institution.benchmarkMinInstitutions');

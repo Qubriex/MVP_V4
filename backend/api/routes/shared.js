@@ -15,7 +15,7 @@ import { loadStaff } from '../middleware/staff.js';
 import { rateLimit } from '../middleware/rateLimit.js';
 import { listFor, markAllRead, setChannels } from '../../core/notify.js';
 import { ask, GLOSSARY } from '../../core/assist.js';
-import { aiNotConfigured, AI_NOT_CONFIGURED, synthesize } from '../../core/ai/gateway.js';
+import { aiNotConfigured, aiUnavailableMessage, synthesize } from '../../core/ai/gateway.js';
 import { hit, clientIp } from '../middleware/rateLimit.js';
 import { SAMPLE_LESSON } from '../../core/sampleLesson.js';
 
@@ -44,7 +44,7 @@ router.post('/assist/ask', signedIn, withStaff, askLimit, async (req, res) => {
   try {
     res.json(await ask(req, { question, lang: req.body?.lang }));
   } catch (err) {
-    if (aiNotConfigured(err)) return res.status(503).json({ error: AI_NOT_CONFIGURED });
+    if (aiNotConfigured(err)) return res.status(503).json({ error: aiUnavailableMessage(err) });
     req.log?.warn?.('assist.failed', { error: err.message });
     res.status(502).json({ error: 'Ask Qubirex could not answer right now. Please try again.' });
   }
@@ -92,7 +92,7 @@ router.get('/sample-lesson', async (req, res) => {
       const out = await synthesize({ text: SAMPLE_LESSON[language], language, institutionId: null });
       sampleAudio.set(language, out);
     } catch (err) {
-      if (aiNotConfigured(err)) return res.status(503).json({ error: AI_NOT_CONFIGURED });
+      if (aiNotConfigured(err)) return res.status(503).json({ error: aiUnavailableMessage(err) });
       req.log?.warn?.('sample_lesson.failed', { error: (err.cause || err).message });
       return res.status(502).json({ error: 'The sample voice is unavailable right now.' });
     }

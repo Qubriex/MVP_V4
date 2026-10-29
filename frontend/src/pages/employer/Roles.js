@@ -60,7 +60,7 @@ function NewRole({ onDone }) {
         <div className="ln-field"><label className="ln-label" htmlFor="r-city">{t('emp.roles.city')}</label><input id="r-city" className="ln-input" value={f.city} onChange={set('city')} placeholder={t('emp.roles.hyderabad')} /></div>
       </div>
       <div className="ln-field"><label className="ln-label" htmlFor="r-jd">{t('emp.roles.jobDescription')}</label>
-        <textarea id="r-jd" className="ln-input" rows={7} value={f.jd_text} onChange={set('jd_text')} placeholder={t('emp.roles.pasteJobDescriptionLines')} /></div>
+        <textarea id="r-jd" data-demo="jd" className="ln-input" rows={7} value={f.jd_text} onChange={set('jd_text')} placeholder={t('emp.roles.pasteJobDescriptionLines')} /></div>
       <div className="ln-row ln-wrap" style={{ gap: 10 }}>
         <button type="button" className="ln-btn" onClick={parse} disabled={f.jd_text.trim().length < 20} aria-describedby={f.jd_text.trim().length < 20 ? 'r-jd-why' : undefined}>{t('emp.roles.pickOutSkills')}</button>
         {f.jd_text.trim().length < 20 && <span id="r-jd-why" className="ln-xs ln-muted">{t('emp.roles.pickWhyDisabled')}</span>}
@@ -158,7 +158,7 @@ export function RoleSearch() {
             <div className="ln-tablewrap"><table className="ln-table">
               <thead><tr><th>{t('emp.roles.candidate')}</th><th>{t('emp.roles.readiness')}</th><th>{t('emp.roles.verified')}</th><th>{t('emp.roles.stillMissing')}</th><th /></tr></thead>
               <tbody>{data.candidates.map(c => (
-                <tr key={c.ref}>
+                <tr key={c.ref} data-ref={c.ref}>
                   <td><b className="in-code">{c.code}</b><span className="ln-xs ln-muted" style={{ display: 'block' }}>{c.college} · {c.city || '—'}</span></td>
                   <td><BandPill band={c.band} score={c.readiness} />{!c.meets_bar && <span className="ln-xs ln-muted" style={{ display: 'block' }}>{t('emp.roles.pointsShortShortBar', { points_short: c.points_short })}</span>}</td>
                   <td className="ln-small">{c.verified.join(', ') || '—'}</td>
@@ -166,7 +166,7 @@ export function RoleSearch() {
                   <td>{c.stage ? <span className="ln-tag ln-tag-neutral">{c.stage === 'watching' ? t('emp.roles.watching') : c.stage === 'requested' ? t('emp.roles.asked') : t('emp.roles.inPipeline')}</span> : (
                     <div className="ln-row" style={{ gap: 6 }}>
                       <button type="button" className="ln-btn ln-btn-sm" onClick={() => act(c.ref, 'watch')}><Eye size={13} aria-hidden="true" />{t('emp.roles.watch')}</button>
-                      <button type="button" className="ln-btn ln-btn-sm ln-btn-primary" disabled={!verified} onClick={() => act(c.ref, 'request')}><Send size={13} aria-hidden="true" />{t('emp.roles.request')}</button>
+                      <button type="button" data-demo="request" className="ln-btn ln-btn-sm ln-btn-primary" disabled={!verified} onClick={() => act(c.ref, 'request')}><Send size={13} aria-hidden="true" />{t('emp.roles.request')}</button>
                     </div>
                   )}{c.stage === 'watching' && <button type="button" className="ln-btn ln-btn-sm ln-btn-primary" style={{ marginLeft: 6 }} disabled={!verified} onClick={() => act(c.ref, 'request')}>{t('emp.roles.request')}</button>}</td>
                 </tr>

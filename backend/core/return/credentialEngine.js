@@ -19,7 +19,7 @@ import { issueSdJwt, verifySdJwt } from '../qep/sdjwt.js';
 import { LABEL_FUNCTION, labelV1, missingForConfirmed } from '../qep/labelFn.js';
 import * as statusList from '../qep/statusList.js';
 import { keyStatus } from './keyRegistry.js';
-import { activeKid } from './signing.js';
+import { signingKid, isDemoKid } from './signing.js';
 import { resolveTheta } from '../graph/theta.js';
 import { mapSeq } from '../util/seq.js';
 
@@ -28,6 +28,8 @@ const CODE_EVIDENCE = new Set(['sql_exec', 'python_exec']);
 
 export const issuerHost = () => process.env.PUBLIC_HOST || 'qubirex.in';
 export const issuerDid = () => `did:web:${issuerHost()}`;
+// Demo sandboxes (migration 0008) issue under their own issuer and key.
+export const demoIssuerDid = () => `did:web:${issuerHost()}:demo`;
 export const publicBase = () => (process.env.PUBLIC_URL || process.env.FRONTEND_URL || 'http://localhost:3000').replace(/\/$/, '');
 
 function subjectSecret() {
@@ -115,6 +117,8 @@ export async function issueCredential(elId, { reason = 'issue' } = {}) {
     FROM engagement_learners el JOIN engagements e ON e.id = el.engagement_id JOIN capability_targets ct ON ct.id = e.capability_target_id
     JOIN institutions i ON i.id = e.institution_id WHERE el.id = ?`, elId);
   if (!el) throw Object.assign(new Error('Unknown enrolment'), { status: 404 });
+  const demo = !!(await dal.one('SELECT sandbox_id FROM institutions WHERE id = ?', el.institution_id))?.sandbox_id;
+  const iss = demo ? demoIssuerDid() : issuerDid();
   const skills = await skillFacts(elId);
   if (!skills.length) return null;
 
@@ -127,19 +131,19 @@ export async function issueCredential(elId, { reason = 'issue' } = {}) {
     const { listId, index } = await statusList.allocate('revocation');
     const credentialId = ulid();
     const subject = subjectId(el.learner_id);
-    const kid = await activeKid();
+    const kid = await signingKid({ demo });
     const payload = {
-      iss: issuerDid(), iat: Math.floor(now.getTime() / 1000), vct: 'QubirexCapabilityPassport',
+      iss, iat: Math.floor(now.getTime() / 1000), vct: 'QubirexCapabilityPassport',
       vc: {
         '@context': ['https://www.w3.org/ns/credentials/v2', 'https://qubirex.in/qep/v1'],
-        type: ['VerifiableCredential', 'QubirexCapabilityPassport'],
-        id: `urn:qbx:${evidenceId}`, issuer: issuerDid(), version,
+        type: ['VerifiableCredential', 'QubirexCapabilityPassport', ...(demo ? ['DemoCredential'] : [])],
+        id: `urn:qbx:${evidenceId}`, issuer: iss, version, ...(demo ? { demo: 'DEMO — not a real credential' } : {}),
         validFrom: now.toISOString(), validUntil: until.toISOString(),
         credentialStatus: { type: 'BitstringStatusListEntry', statusPurpose: 'revocation', statusListIndex: String(index), statusListCredential: `${publicBase()}/api/verify/status/${listId}` },
         credentialSubject: { id: subject, target: { title: el.title, version: el.ct_version, commissionedBy: el.institution, language: el.language }, labelFunction: LABEL_FUNCTION }
       }
     };
-    const { compact } = await issueSdJwt(payload, skills.map(s => [`skill:${s.skillId}`, s]));
+    const { compact } = await issueSdJwt(payload, skills.map(s => [`skill:${s.skillId}`, s]), { demo });
     if (previous) await dal.run('UPDATE credentials SET active = 0 WHERE credential_id = ?', previous.credential_id);
     await dal.run(`INSERT INTO credentials (credential_id, evidence_id, version, el_id, learner_id, target_id, sd_jwt, kid, subject_id, valid_from, valid_until, status_list_id, status_index, active, created_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)`, credentialId, evidenceId, version, elId, el.learner_id, el.capability_target_id,
@@ -184,8 +188,13 @@ export async function verify(rawId, asOf = new Date().toISOString()) {
   if (await keyStatus(checked.header.kid) === 'compromised') return { status: 'signature_invalid', reissue_required: true, evidence_id: evidenceId };
 
   const vc = checked.payload.vc;
+  // A demo Passport (sandbox key and issuer) verifies, but is always flagged;
+  // `sandbox` lets employer bulk verify refuse it outside its own sandbox.
+  const sandbox = (await dal.one(`SELECT i.sandbox_id FROM engagement_learners el JOIN engagements e ON e.id = el.engagement_id
+    JOIN institutions i ON i.id = e.institution_id WHERE el.id = ?`, c.el_id))?.sandbox_id || null;
+  const demo = !!sandbox || isDemoKid(checked.header.kid) || vc.issuer === demoIssuerDid();
   const base = {
-    status: 'valid', proof: 'authentic_and_unaltered', evidence_id: evidenceId, issuer: vc.issuer,
+    status: 'valid', proof: 'authentic_and_unaltered', evidence_id: evidenceId, issuer: vc.issuer, demo, sandbox,
     version: vc.version, valid_from: vc.validFrom, valid_until: vc.validUntil, target: vc.credentialSubject.target,
     label_function: vc.credentialSubject.labelFunction, key_id: checked.header.kid
   };

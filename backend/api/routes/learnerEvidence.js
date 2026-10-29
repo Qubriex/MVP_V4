@@ -22,7 +22,7 @@ import { ulid } from '../../core/db/ulid.js';
 import { learningCurve } from '../../core/readiness/learningCurve.js';
 import { eachSeq, mapSeq } from '../../core/util/seq.js';
 import { waitUntil } from '@vercel/functions';
-import { aiNotConfigured, AI_NOT_CONFIGURED } from '../../core/ai/gateway.js';
+import { aiNotConfigured, aiUnavailableMessage } from '../../core/ai/gateway.js';
 
 const router = express.Router();
 router.use(authenticateToken, requireRole('learner'), requireActiveLearner);
@@ -109,7 +109,7 @@ router.post('/reviews/instances/:id/answer', async (req, res) => {
     }
     res.json(out);
   } catch (err) {
-    if (aiNotConfigured(err)) return res.status(503).json({ error: AI_NOT_CONFIGURED });
+    if (aiNotConfigured(err)) return res.status(503).json({ error: aiUnavailableMessage(err) });
     res.status(err.status || 500).json({ error: err.status ? err.message : 'Could not save your answer. Try again.' });
   }
 });

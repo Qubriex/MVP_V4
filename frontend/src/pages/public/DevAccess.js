@@ -5,12 +5,12 @@
 // you home like any unknown address.
 import React, { useCallback, useEffect, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { GraduationCap, Building2, BookOpen, Briefcase, ShieldCheck, Globe, RotateCcw, FastForward, BadgeCheck, Info, LogIn, KeyRound } from 'lucide-react';
+import { GraduationCap, Building2, BookOpen, Briefcase, ShieldCheck, Globe, RotateCcw, FastForward, BadgeCheck, Info, LogIn, KeyRound, LayoutList } from 'lucide-react';
 import BrandLogo from '../../components/BrandLogo';
 import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import { useUiLang } from '../../context/UiLangContext';
-import { DEV_CARDS, openDevAccount } from '../../utils/devAccess';
+import { DEV_CARDS, ALL_PAGES, fillPath, openDevAccount } from '../../utils/devAccess';
 
 const ICONS = { learner_te: GraduationCap, learner_hi: GraduationCap, learner_new: GraduationCap, college_admin: Building2, professor: BookOpen, employer_verified: Briefcase, employer_pending: Briefcase, admin: ShieldCheck };
 const errText = (e, fallback) => e?.response?.data?.error?.message || fallback;
@@ -101,6 +101,50 @@ function Tools({ sampleEvidenceId, onChanged }) {
   );
 }
 
+// Every page, grouped by side: one click signs in as the right test account
+// (only if a different one is open) and opens the page.
+function AllPages() {
+  const { t } = useUiLang();
+  const { login, dev } = useAuth();
+  const navigate = useNavigate();
+  const [ids, setIds] = useState(null);
+  const [busy, setBusy] = useState('');
+  const [error, setError] = useState('');
+  useEffect(() => { api.get('/dev/route-ids').then(r => setIds(r.data)).catch(() => setIds({})); }, []);
+  const go = async (account, to) => {
+    setError('');
+    if (!account || dev?.account_key === account) { navigate(to); return; }
+    setBusy(to);
+    try { await openDevAccount(account, { login, navigate }, to); } catch (e) { setError(errText(e, t('devx.openFailed'))); setBusy(''); }
+  };
+  return (
+    <section className="ln-col" style={{ gap: 12 }} aria-labelledby="dev-pages">
+      <h2 id="dev-pages" className="ln-h2 ln-row" style={{ gap: 8 }}><LayoutList size={20} aria-hidden="true" />{t('devx.pages.title')}</h2>
+      <p className="ln-small ln-muted" style={{ margin: 0 }}>{t('devx.pages.sub')}</p>
+      {error && <p className="ln-small" role="alert" style={{ color: 'var(--color-danger)', margin: 0 }}>{error}</p>}
+      <div className="dx-pages">
+        {ALL_PAGES.map(g => (
+          <div key={g.side} className="ln-card ln-col" style={{ gap: 6 }}>
+            <b className="ln-small">{t(g.side)}</b>
+            <ul className="dx-page-list">
+              {g.paths.map(p => {
+                const to = ids ? fillPath(p, ids) : null;
+                return (
+                  <li key={p}>
+                    <button type="button" className="ln-link" onClick={() => to && go(g.account, to)} disabled={!to || !!busy}>
+                      <code>{to || p}</code>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default function DevAccess() {
   const { t, setLang, fmtDate } = useUiLang();
   const { login, logout, token } = useAuth();
@@ -174,6 +218,7 @@ export default function DevAccess() {
               </article>
             </section>
             <Tools sampleEvidenceId={data.sample_evidence_id} onChanged={load} />
+            <AllPages />
           </>
         )}
       </main>

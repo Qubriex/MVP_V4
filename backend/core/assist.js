@@ -9,7 +9,7 @@
 // The model may only link to pages listed in the facts. Without a model the
 // common questions are still answered from the same facts.
 import * as dal from './db/dal.js';
-import { generate, aiNotConfigured } from './ai/gateway.js';
+import { generate, aiNotConfigured, aiUnavailableMessage } from './ai/gateway.js';
 import { cohortReadiness, summarise, BAND_LABEL, BANDS } from './readiness/cohort.js';
 import { liveStatus } from './institutionActivity.js';
 import { mapSeq } from './util/seq.js';
@@ -159,6 +159,7 @@ GLOSSARY: ${JSON.stringify(GLOSSARY)}`,
   } catch (err) {
     const quick = quickAnswer(q, facts, links);
     if (quick) return { ...quick, source: 'facts' };
+    if (err?.code === 'demo_limit') return { answer: aiUnavailableMessage(err), links: [], source: 'facts' };
     if (aiNotConfigured(err)) return { answer: 'Ask Qubirex needs the AI model, which is not set up on this deployment yet. Try Help for common questions.', links: [], source: 'facts' };
     throw err;
   }

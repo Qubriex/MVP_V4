@@ -334,6 +334,20 @@ export async function seedTestData({ log = console.log } = {}) {
       VALUES (?, ?, ?, '', ?, 'owner', 'active', ?, ?)`).run(emp.userId, emp.id, emp.email, emp.userName, now, now);
     await db.prepare("UPDATE employer_users SET password_hash = ?, status = 'active', updated_at = ? WHERE id = ?").run(empHash, now, emp.userId);
   });
+  // A role and one candidate for the verified test company, and a bridge
+  // programme for the test cohort, so every page with an id (role,
+  // candidate, bridge) has something to open from /dev → All pages.
+  await db.prepare(`INSERT OR IGNORE INTO employer_roles (id, employer_id, title, city, jd_text, skills_json, bar, status, published, interview_promise, created_by, created_at)
+    VALUES ('test-role-0001', ?, 'Frontend developer (test)', 'Hyderabad', 'Test role: HTML, CSS, JavaScript, React.', ?, 70, 'open', 1, 1, ?, ?)`)
+    .run(EMPLOYER_VERIFIED.id, JSON.stringify([{ key: 'html_css', name: 'HTML & CSS', required: true }, { key: 'javascript', name: 'JavaScript', required: true }, { key: 'react', name: 'React', required: true }]), EMPLOYER_VERIFIED.userId, now);
+  await db.prepare(`INSERT OR IGNORE INTO employer_pipeline (id, employer_id, role_id, el_id, learner_id, stage, share_json, interview_promised, created_at, updated_at)
+    VALUES ('test-pipe-0001', ?, 'test-role-0001', ?, ?, 'access_granted', ?, 1, ?, ?)`)
+    .run(EMPLOYER_VERIFIED.id, EL_ID, LEARNER.id, JSON.stringify({ asked: ['skills', 'resume', 'contact'], granted: ['skills', 'resume'] }), now, now);
+  await db.prepare(`INSERT OR IGNORE INTO bridge_programmes (id, institution_id, engagement_id, title, node_ids_json, scope, note, retest_at, status, created_by, created_at)
+    VALUES ('test-bridge-0001', ?, ?, 'JavaScript events refresher (test)', '["test-node-2-4"]', 'cohort', 'Seeded for review', ?, 'open', 'test-staff-admin-0001', ?)`)
+    .run(INSTITUTION.id, ENGAGEMENT_ID, new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10), now);
+  await db.prepare(`INSERT OR IGNORE INTO bridge_assignments (id, bridge_id, el_id, baseline_readiness, baseline_mastered_json, assigned_at)
+    VALUES ('test-bridge-0001-a1', 'test-bridge-0001', ?, 40, '[]', ?)`).run(EL_ID, now);
   await db.prepare("DELETE FROM login_failures WHERE account_key IN (?, ?, ?, ?, ?)").run(INSTITUTION.email, PROFESSOR.email, EMPLOYER.email, EMPLOYER_VERIFIED.email, 'test.admin@qubirex.local');
 
   log('\nTest accounts ready.\n');

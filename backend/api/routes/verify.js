@@ -50,7 +50,8 @@ router.get('/:evidenceId', async (req, res) => {
     return res.status(404).json({ status: 'not_found' });
   }
   res.set('Cache-Control', 'no-store');
-  return res.json(result);
+  const { sandbox, ...shown } = result; // which sandbox a demo Passport is from stays internal
+  return res.json(shown);
 });
 
 // Names match when every typed word is the holder's word or its initial,
