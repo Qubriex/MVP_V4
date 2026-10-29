@@ -26,7 +26,7 @@ const OUT = process.argv.includes('--out') ? process.argv[process.argv.indexOf('
 const PASSWORD = 'QubirexTest2026!';
 
 const PUBLIC = ['/', '/pricing', '/learners', '/colleges', '/employers', '/demo', '/demo/learner', '/demo/college', '/demo/employer', '/signin',
-  '/legal/privacy', '/legal/terms', '/legal/dpdp', '/legal/grievance', '/developers', '/login', '/learner-login', '/employer/login', '/employer/register', '/admin/login', '/verify', '/verify/QBX-DEMO-0000'];
+  '/legal/privacy', '/legal/terms', '/legal/dpdp', '/legal/grievance', '/developers', '/dev', '/login', '/learner-login', '/employer/login', '/employer/register', '/admin/login', '/verify', '/verify/QBX-DEMO-0000'];
 const ROLES = {
   learner: { login: async (p) => { await p.goto(`${BASE}/learner-login`); await p.fill('#lref', 'TEST-LRNR-001'); await p.fill('#leng', 'QX-FSD-T01'); await p.fill('#lpin', '410585'); await p.click('form button[type=submit]'); await p.waitForURL(/\/learn\//); },
     routes: ['/learn/dashboard', '/learn/record', '/learn/reviews', '/learn/passport', '/learn/jobs', '/learn/market', '/learn/topics', '/learn/profile', '/learn/resume', '/learn/settings', '/learn/session'] },

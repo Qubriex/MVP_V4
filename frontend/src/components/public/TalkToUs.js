@@ -8,6 +8,8 @@ import { useUiLang } from '../../context/UiLangContext';
 import { CONTACT } from '../../config/contact';
 import { Select } from '../shared/ui';
 
+// An email address, or a phone / WhatsApp number (digits, spaces, +, -).
+const REPLY_RE = /^([^\s@]+@[^\s@]+\.[^\s@]+|\+?[\d\s-]{7,20})$/;
 const ROLES = ['talk.roleLearner', 'talk.roleCollege', 'talk.roleEmployer', 'talk.roleOther'];
 
 export default function TalkToUs({ onClose }) {
@@ -17,9 +19,11 @@ export default function TalkToUs({ onClose }) {
   const [err, setErr] = useState('');
   const set = (k) => (e) => setF(x => ({ ...x, [k]: e.target.value }));
   const send = async (e) => {
-    e.preventDefault(); setErr(''); setState('sending');
+    e.preventDefault(); setErr('');
+    if (!REPLY_RE.test(f.reply_to.trim())) { setErr(t('talk.badReply')); return; }
+    setState('sending');
     try {
-      await api.post('/help/contact', { type: 'question', reply_to: f.reply_to, message: `[${t(f.role)}] ${f.name}: ${f.message}` });
+      await api.post('/help/contact', { type: 'question', reply_to: f.reply_to.trim(), message: `[${t(f.role)}] ${f.name}: ${f.message}` });
       setState('sent');
     } catch (x) { setErr(x.response?.data?.error && typeof x.response.data.error === 'string' ? x.response.data.error : t('talk.failed')); setState(''); }
   };

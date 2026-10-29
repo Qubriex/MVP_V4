@@ -24,6 +24,7 @@ import * as dal from '../../core/db/dal.js';
 import { ulid } from '../../core/db/ulid.js';
 import params from '../../config/params.js';
 import { clientIp } from './rateLimit.js';
+import { DEV_HOURS } from '../../core/devLogin.js';
 
 export const SESSION_COOKIE = 'qbx_session';
 export const CSRF_COOKIE = 'qbx_csrf';
@@ -57,21 +58,25 @@ function cookieOptions(maxAgeMs, httpOnly) {
  * Create a session for a signed-in actor and set its cookies.
  * @param {import('express').Response} res
  * @param {{actorType: 'staff'|'learner'|'employer'|'admin', actorId: string, institutionId?: string|null,
- *          employerId?: string|null, claims?: object, req?: import('express').Request}} s
- * @returns {{token: string, csrfToken: string, sessionId: string}}
+ *          employerId?: string|null, claims?: object, req?: import('express').Request, dev?: boolean}} s
+ *   dev: a developer session from /dev (api/routes/dev.js) — fixed 8 hours,
+ *   marked is_dev in the database and actor "developer", dev: true in the token.
+ * @returns {{token: string, csrfToken: string, sessionId: string, expiresAt: string}}
  */
-export async function issueSession(res, { actorType, actorId, institutionId = null, employerId = null, claims = {}, req = null }) {
-  const hours = params.get(`security.session.${actorType}Hours`);
+export async function issueSession(res, { actorType, actorId, institutionId = null, employerId = null, claims = {}, req = null, dev = false }) {
+  const hours = dev ? DEV_HOURS : params.get(`security.session.${actorType}Hours`);
   const sid = ulid();
   const csrfToken = crypto.randomBytes(32).toString('base64url');
   const now = new Date();
-  await dal.run(`INSERT INTO auth_sessions (id, actor_type, actor_id, institution_id, employer_id, csrf_hash, ip, created_at, expires_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, sid, actorType, actorId, institutionId, employerId, sha256(csrfToken),
-  req ? clientIp(req) : null, now.toISOString(), new Date(now.getTime() + hours * 3600000).toISOString());
-  const token = jwt.sign({ ...claims, role: ROLE_OF[actorType], actor: actorType, sid }, secret(), { expiresIn: `${hours}h` });
+  const expiresAt = new Date(now.getTime() + hours * 3600000).toISOString();
+  await dal.run(`INSERT INTO auth_sessions (id, actor_type, actor_id, institution_id, employer_id, csrf_hash, ip, created_at, expires_at, is_dev)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, sid, actorType, actorId, institutionId, employerId, sha256(csrfToken),
+  req ? clientIp(req) : null, now.toISOString(), expiresAt, dev ? 1 : 0);
+  const who = dev ? { actor: 'developer', actor_type: actorType, dev: true } : { actor: actorType };
+  const token = jwt.sign({ ...claims, role: ROLE_OF[actorType], ...who, sid }, secret(), { expiresIn: `${hours}h` });
   res.cookie(SESSION_COOKIE, token, cookieOptions(hours * 3600000, true));
   res.cookie(CSRF_COOKIE, csrfToken, cookieOptions(hours * 3600000, false));
-  return { token, csrfToken, sessionId: sid };
+  return { token, csrfToken, sessionId: sid, expiresAt };
 }
 
 export async function revokeSession(sid) {

@@ -259,8 +259,17 @@ npm run seed:test      # safe to re-run; resets the passwords and PIN below
 | Institution admin | http://localhost:3000/login | Email `test.institution@qubirex.local` · Password `QubirexTest2026!` |
 | Professor (sees only the test cohort) | http://localhost:3000/login | Email `test.professor@qubirex.local` · Password `QubirexTest2026!` |
 | Learner | http://localhost:3000/learner-login | Learner reference `TEST-LRNR-001` · Join code `QX-FSD-T01` (the old Engagement ID `4a4c13c4-989e-4c03-b636-3bdba7fd1025` also works) · PIN `410585` |
+| Learner (Hindi cohort) | http://localhost:3000/learner-login | `TEST-LRNR-HI1` · Join code `QX-FSD-T02` · PIN `410585` |
+| Learner, first time (sees the welcome steps) | http://localhost:3000/learner-login | `TEST-LRNR-NEW` · Join code `QX-FSD-T01` · PIN `410585` |
 | Employer owner (company verification pending) | http://localhost:3000/employer/login | Email `test.employer@qubirex.local` · Password `QubirexTest2026!` |
+| Employer recruiter (company already verified) | http://localhost:3000/employer/login | Email `test.employer.verified@qubirex.local` · Password `QubirexTest2026!` |
 | Qubirex admin (employer KYB, skills ontology, evaluator quality) | http://localhost:3000/admin/login | Email `test.admin@qubirex.local` · Password `QubirexTest2026!` |
+
+All of these are the **test tenant**: they never appear to real employers,
+colleges or admins, and real data never appears to them. The fastest way in
+is the developer login: run the backend with `DEV_LOGIN_ENABLED=true` and a
+32+ character `DEV_LOGIN_SECRET`, then open http://localhost:3000/dev
+(docs/DEPLOY-VERCEL.md, "Developer login").
 
 The seed also gives the test learner an issued Capability Passport (open it
 under Capability Passport, then check its Evidence ID at

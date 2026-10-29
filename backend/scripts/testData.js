@@ -18,6 +18,13 @@ const EL_ID = 'test-el-0001';
 const JOIN_CODE = 'QX-FSD-T01';
 const PROFESSOR = { id: 'test-staff-prof-0001', email: 'test.professor@qubirex.local', name: 'Lakshmi Rao' };
 const EMPLOYER = { id: 'test-employer-0001', userId: 'test-employer-user-0001', name: '[Company name] (test)', domain: 'qubirex.local', email: 'test.employer@qubirex.local', userName: 'Test Hiring Lead' };
+// A second test company whose verification (KYB) is already approved, so the
+// verified employer screens can be tried without waiting.
+const EMPLOYER_VERIFIED = { id: 'test-employer-0002', userId: 'test-employer-user-0002', name: '[Company name] verified (test)', domain: 'qubirex.local', email: 'test.employer.verified@qubirex.local', userName: 'Test Recruiter' };
+// A Hindi cohort with one learner, and a learner who has not been through
+// the first-run welcome yet (both sign in with the same public PIN).
+const HINDI = { engagementId: 'test-eng-hindi-0001', joinCode: 'QX-FSD-T02', learnerId: 'test-learner-hi01', elId: 'test-el-hi01', ref: 'TEST-LRNR-HI1', name: 'Test Learner (Hindi)' };
+const FIRST_TIME = { learnerId: 'test-learner-new1', elId: 'test-el-new1', ref: 'TEST-LRNR-NEW', name: 'Test Learner (first time)' };
 
 // Classmates in different access states, so Students & access has something
 // to show. None of them can sign in with a known PIN.
@@ -111,6 +118,7 @@ async function seedPeers() {
     const inst = `test-peer-inst-${p + 1}`; const ct = `test-peer-ct-${p + 1}`; const eng = `test-peer-eng-${p + 1}`;
     await db.prepare(`INSERT OR IGNORE INTO institutions (id, name, type, contact_name, contact_email, city, password_hash) VALUES (?, ?, 'coding_bootcamp', 'Peer', ?, 'Hyderabad', ?)`)
       .run(inst, `${name} (benchmark sample)`, `peer${p + 1}@peer.test`, hash);
+    await db.prepare('UPDATE institutions SET is_test = 1 WHERE id = ?').run(inst);
     await db.prepare(`INSERT OR IGNORE INTO capability_targets (id, institution_id, version, title, path, domain, raw_input, confirmed, confirmed_at, status)
       VALUES (?, ?, '1.0', 'Web Developer Track', 'A', 'software', 'benchmark sample', 1, datetime('now'), 'active')`).run(ct, inst);
     const nodes = [];
@@ -151,6 +159,7 @@ export async function seedTestData({ log = console.log } = {}) {
       VALUES (?, ?, 'coding_bootcamp', 'Test Coordinator', ?, 'Hyderabad', ?)
       ON CONFLICT(id) DO UPDATE SET contact_email = excluded.contact_email, password_hash = excluded.password_hash, is_active = 1
     `).run(INSTITUTION.id, INSTITUTION.name, INSTITUTION.email, pwHash);
+    await db.prepare('UPDATE institutions SET is_test = 1 WHERE id = ?').run(INSTITUTION.id);
 
     // ── Confirmed capability target + pathway ────────────────────────────────
     await db.prepare(`
@@ -256,6 +265,35 @@ export async function seedTestData({ log = console.log } = {}) {
       INSERT OR IGNORE INTO streaks (id, engagement_learner_id, current_streak, longest_streak, total_session_days, last_session_date)
       VALUES ('test-streak-0001', ?, 3, 5, 9, to_char(now() - interval '1 day', 'YYYY-MM-DD'))
     `).run(EL_ID);
+
+    // ── Hindi cohort and learner; a first-time learner in the Telugu cohort ──
+    await db.prepare(`
+      INSERT OR IGNORE INTO engagements (id, institution_id, capability_target_id, title, language, status, started_at, join_code)
+      VALUES (?, ?, ?, 'Full-Stack Developer Programme — Hindi Test Batch', 'hindi', 'active', datetime('now'), ?)
+    `).run(HINDI.engagementId, INSTITUTION.id, CT_ID, HINDI.joinCode);
+    const firstLabels = Object.keys(nodeIds);
+    await eachSeq([[HINDI, HINDI.engagementId, 'hindi', 4], [FIRST_TIME, ENGAGEMENT_ID, 'telugu', 0]], async ([who, engId, language, mastered]) => {
+      await db.prepare(`
+        INSERT INTO learners (id, institution_id, name, learner_ref, pin_hash, language, profile_type)
+        VALUES (?, ?, ?, ?, ?, ?, 'college_student')
+        ON CONFLICT(id) DO UPDATE SET pin_hash = excluded.pin_hash, is_active = 1
+      `).run(who.learnerId, INSTITUTION.id, who.name, who.ref, pinHash, language);
+      await db.prepare('UPDATE learners SET pin_must_change = 0 WHERE id = ?').run(who.learnerId);
+      const cur = nodeIds[firstLabels[mastered]];
+      await db.prepare(`INSERT OR IGNORE INTO engagement_learners (id, engagement_id, learner_id, current_node_id, current_cluster_id) VALUES (?, ?, ?, ?, ?)`)
+        .run(who.elId, engId, who.learnerId, cur.id, cur.clusterId);
+      await db.prepare("UPDATE engagement_learners SET access_status = 'active', locked_at = NULL, failed_pin_attempts = 0, engagement_id = ? WHERE id = ?").run(engId, who.elId);
+      await eachSeq(firstLabels.slice(0, mastered), async (label, k) => {
+        await db.prepare(`INSERT OR IGNORE INTO node_mastery (id, engagement_learner_id, skill_node_id, mastery_attainment, attempt_count, time_to_mastery_minutes, advanced_at)
+          VALUES (?, ?, ?, ?, ?, ?, datetime('now', ?))`).run(`test-nm-${who.elId}-${k}`, who.elId, nodeIds[label].id, 0.84, 1, 22, `-${8 - k} days`);
+        await seedFacts(who.elId, nodeIds[label].id, `${who.elId}-${k}`, 1, 0.84, 8 - k);
+      });
+    });
+    // The Telugu and Hindi learners have finished the welcome; the first-time
+    // learner never has, so every reset brings them back to it.
+    await db.prepare(`INSERT INTO learner_profiles (learner_id, ui_language) VALUES (?, 'telugu'), (?, 'hindi')
+      ON CONFLICT(learner_id) DO NOTHING`).run(LEARNER.id, HINDI.learnerId);
+    await db.prepare('DELETE FROM learner_profiles WHERE learner_id = ?').run(FIRST_TIME.learnerId);
   });
   await seed();
   // Map the programme's nodes onto the Capability Graph (v4.3 §3).
@@ -279,18 +317,24 @@ export async function seedTestData({ log = console.log } = {}) {
   }
 
   // ── Admin (Qubirex platform staff; password reset on every run) ───────────
-  await db.prepare(`INSERT INTO admin_users (id, email, password_hash, name) VALUES ('test-admin-0001', 'test.admin@qubirex.local', ?, 'Test Admin')
-    ON CONFLICT(email) DO UPDATE SET password_hash = excluded.password_hash`).run(bcrypt.hashSync(INSTITUTION.password, 10));
+  // A test admin sees only the test tenant (core/testTenant.js testScope).
+  await db.prepare(`INSERT INTO admin_users (id, email, password_hash, name, is_test) VALUES ('test-admin-0001', 'test.admin@qubirex.local', ?, 'Test Admin', 1)
+    ON CONFLICT(email) DO UPDATE SET password_hash = excluded.password_hash, is_test = 1`).run(bcrypt.hashSync(INSTITUTION.password, 10));
 
-  // ── Employer (password reset on every run) ────────────────────────────────
+  // ── Employers (password reset on every run): one pending, one verified ───
+  // Every run puts them back in those states, so "pending" stays testable.
   const now = new Date().toISOString();
-  await db.prepare(`INSERT OR IGNORE INTO employers (id, name, domain, kyb_status, created_at, updated_at) VALUES (?, ?, ?, 'pending', ?, ?)`)
-    .run(EMPLOYER.id, EMPLOYER.name, EMPLOYER.domain, now, now);
-  await db.prepare(`INSERT OR IGNORE INTO employer_users (id, employer_id, email, password_hash, name, role, status, created_at, updated_at)
-    VALUES (?, ?, ?, '', ?, 'owner', 'active', ?, ?)`).run(EMPLOYER.userId, EMPLOYER.id, EMPLOYER.email, EMPLOYER.userName, now, now);
-  await db.prepare("UPDATE employer_users SET password_hash = ?, status = 'active', updated_at = ? WHERE id = ?")
-    .run(bcrypt.hashSync(INSTITUTION.password, 10), now, EMPLOYER.userId);
-  await db.prepare("DELETE FROM login_failures WHERE account_key IN (?, ?, ?, ?)").run(INSTITUTION.email, PROFESSOR.email, EMPLOYER.email, 'test.admin@qubirex.local');
+  const empHash = bcrypt.hashSync(INSTITUTION.password, 10);
+  await eachSeq([[EMPLOYER, 'pending'], [EMPLOYER_VERIFIED, 'verified']], async ([emp, kyb]) => {
+    await db.prepare(`INSERT OR IGNORE INTO employers (id, name, domain, kyb_status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`)
+      .run(emp.id, emp.name, emp.domain, kyb, now, now);
+    await db.prepare('UPDATE employers SET kyb_status = ?, domain_verified_at = ?, is_test = 1, updated_at = ? WHERE id = ?')
+      .run(kyb, kyb === 'verified' ? now : null, now, emp.id);
+    await db.prepare(`INSERT OR IGNORE INTO employer_users (id, employer_id, email, password_hash, name, role, status, created_at, updated_at)
+      VALUES (?, ?, ?, '', ?, 'owner', 'active', ?, ?)`).run(emp.userId, emp.id, emp.email, emp.userName, now, now);
+    await db.prepare("UPDATE employer_users SET password_hash = ?, status = 'active', updated_at = ? WHERE id = ?").run(empHash, now, emp.userId);
+  });
+  await db.prepare("DELETE FROM login_failures WHERE account_key IN (?, ?, ?, ?, ?)").run(INSTITUTION.email, PROFESSOR.email, EMPLOYER.email, EMPLOYER_VERIFIED.email, 'test.admin@qubirex.local');
 
   log('\nTest accounts ready.\n');
   log('  Institution  http://localhost:3000/login');
@@ -301,12 +345,14 @@ export async function seedTestData({ log = console.log } = {}) {
   log(`    Password:  ${INSTITUTION.password}\n`);
   log('  Employer     http://localhost:3000/employer/login');
   log(`    Email:     ${EMPLOYER.email}`);
-  log(`    Password:  ${INSTITUTION.password}   (company verification pending)\n`);
+  log(`    Password:  ${INSTITUTION.password}   (company verification pending)`);
+  log(`    Verified:  ${EMPLOYER_VERIFIED.email} (same password)\n`);
   log('  Admin        http://localhost:3000/admin/login');
   log(`    Email:     test.admin@qubirex.local`);
   log(`    Password:  ${INSTITUTION.password}\n`);
   log('  Learner      http://localhost:3000/learner-login');
   log(`    Learner reference: ${LEARNER.ref}`);
   log(`    Join code:         ${JOIN_CODE}   (or Engagement ID ${ENGAGEMENT_ID})`);
-  log(`    PIN:               ${LEARNER.pin}\n`);
+  log(`    PIN:               ${LEARNER.pin}`);
+  log(`    Also: ${HINDI.ref} (Hindi, join code ${HINDI.joinCode}) and ${FIRST_TIME.ref} (first time, ${JOIN_CODE}), same PIN\n`);
 }

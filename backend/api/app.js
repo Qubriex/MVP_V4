@@ -30,6 +30,7 @@ import verifyRoutes from './routes/verify.js';
 import { didDocument } from '../core/return/keyRegistry.js';
 import { issuerHost } from '../core/return/credentialEngine.js';
 import adminRoutes from './routes/admin.js';
+import devRoutes from './routes/dev.js';
 
 // Mount table; scripts/openapi.js reads it to generate openapi.json.
 export const MOUNTS = [
@@ -51,11 +52,12 @@ export const MOUNTS = [
   ['/api/employer', employerRoutes],
   ['/api/employer', employerHiringRoutes],           // roles, candidates, pipeline, sponsor, colleges, bulk verify
   ['/api/verify', verifyRoutes],                    // public verifier (v4.3 §10)
-  ['/api/admin', adminRoutes]
+  ['/api/admin', adminRoutes],
+  ['/api/dev', devRoutes]                           // developer login: 404 unless DEV_LOGIN_ENABLED (routes/dev.js)
 ];
 
 // Routes answering in the v4.3.1 error shape {error: {code, message}}.
-const V2_PREFIXES = ['/api/employer', '/api/verify', '/api/practical'];
+const V2_PREFIXES = ['/api/employer', '/api/verify', '/api/practical', '/api/dev'];
 
 /**
  * @param {{ drainOutbox?: () => Promise<object> }} [opts] drainOutbox runs the

@@ -8,6 +8,7 @@ import * as dal from '../../core/db/dal.js';
 import { listSkills, addAlias, createSkill, getSkill, addPrereq } from '../../core/graph/ontology.js';
 import { mapPathway } from '../../core/graph/coverage.js';
 import { eachSeq, mapSeq, reduceSeq } from '../../core/util/seq.js';
+import { testScope } from '../../core/testTenant.js';
 
 const router = express.Router();
 
@@ -20,20 +21,33 @@ const router = express.Router();
 router.use(authenticateToken);
 router.use(requireRole('admin'));
 
+// Test-tenant wall (core/testTenant.js): a real admin's numbers and lists
+// leave the test tenant out; the test admin (and any developer session)
+// sees only the test tenant and cannot change shared reference data.
+router.use(async (req, res, next) => { req.side = await testScope(req); next(); });
+const INST_SIDE = 'IN (SELECT id FROM institutions WHERE COALESCE(is_test, 0) = ?)';
+const EL_SIDE = `IN (SELECT el.id FROM engagement_learners el JOIN engagements e ON e.id = el.engagement_id
+  JOIN institutions i ON i.id = e.institution_id WHERE COALESCE(i.is_test, 0) = ?)`;
+const HELP_SIDE = `(CASE WHEN COALESCE((SELECT is_test FROM institutions WHERE id = h.institution_id), 0) = 1
+  OR COALESCE((SELECT is_test FROM employers WHERE id = h.employer_id), 0) = 1
+  OR (h.actor_type = 'admin' AND COALESCE((SELECT is_test FROM admin_users WHERE id = h.actor_id), 0) = 1) THEN 1 ELSE 0 END) = ?`;
+const realAdminOnly = (req, res, next) => (req.side ? res.status(403).json({ error: 'Not available in a test or developer session: this changes data every college shares.' }) : next());
+
 // ─── Dashboard stats ──────────────────────────────────────────────────────────
 router.get('/stats', async (req, res) => {
   const db = getDb();
+  const s = req.side;
   const stats = {
-    institutions: (await db.prepare('SELECT COUNT(*) as cnt FROM institutions').get()).cnt,
-    learners: (await db.prepare('SELECT COUNT(*) as cnt FROM learners').get()).cnt,
-    engagements: (await db.prepare('SELECT COUNT(*) as cnt FROM engagements').get()).cnt,
-    active_engagements: (await db.prepare("SELECT COUNT(*) as cnt FROM engagements WHERE status = 'active'").get()).cnt,
-    mastery_logs_produced: (await db.prepare('SELECT COUNT(*) as cnt FROM mastery_logs').get()).cnt,
-    sessions_total: (await db.prepare('SELECT COUNT(*) as cnt FROM learning_sessions').get()).cnt,
-    checks_passed: (await db.prepare("SELECT COUNT(*) as cnt FROM mastery_checks WHERE passed = 1").get()).cnt,
-    checks_failed: (await db.prepare("SELECT COUNT(*) as cnt FROM mastery_checks WHERE passed = 0").get()).cnt,
-    avg_mastery: (await db.prepare('SELECT AVG(mastery_attainment) as avg FROM node_mastery WHERE mastery_attainment IS NOT NULL').get()).avg,
-    avg_loops: (await db.prepare('SELECT AVG(loop_count) as avg FROM learning_sessions').get()).avg
+    institutions: (await db.prepare('SELECT COUNT(*) as cnt FROM institutions WHERE COALESCE(is_test, 0) = ?').get(s)).cnt,
+    learners: (await db.prepare(`SELECT COUNT(*) as cnt FROM learners WHERE institution_id ${INST_SIDE}`).get(s)).cnt,
+    engagements: (await db.prepare(`SELECT COUNT(*) as cnt FROM engagements WHERE institution_id ${INST_SIDE}`).get(s)).cnt,
+    active_engagements: (await db.prepare(`SELECT COUNT(*) as cnt FROM engagements WHERE status = 'active' AND institution_id ${INST_SIDE}`).get(s)).cnt,
+    mastery_logs_produced: (await db.prepare(`SELECT COUNT(*) as cnt FROM mastery_logs WHERE engagement_id IN (SELECT id FROM engagements WHERE institution_id ${INST_SIDE})`).get(s)).cnt,
+    sessions_total: (await db.prepare(`SELECT COUNT(*) as cnt FROM learning_sessions WHERE engagement_learner_id ${EL_SIDE}`).get(s)).cnt,
+    checks_passed: (await db.prepare(`SELECT COUNT(*) as cnt FROM mastery_checks WHERE passed = 1 AND engagement_learner_id ${EL_SIDE}`).get(s)).cnt,
+    checks_failed: (await db.prepare(`SELECT COUNT(*) as cnt FROM mastery_checks WHERE passed = 0 AND engagement_learner_id ${EL_SIDE}`).get(s)).cnt,
+    avg_mastery: (await db.prepare(`SELECT AVG(mastery_attainment) as avg FROM node_mastery WHERE mastery_attainment IS NOT NULL AND engagement_learner_id ${EL_SIDE}`).get(s)).avg,
+    avg_loops: (await db.prepare(`SELECT AVG(loop_count) as avg FROM learning_sessions WHERE engagement_learner_id ${EL_SIDE}`).get(s)).avg
   };
   db.close();
   res.json(stats);
@@ -47,15 +61,17 @@ router.get('/institutions', async (req, res) => {
     FROM institutions i
     LEFT JOIN engagements e ON e.institution_id = i.id
     LEFT JOIN learners l ON l.institution_id = i.id
+    WHERE COALESCE(i.is_test, 0) = ?
     GROUP BY i.id ORDER BY i.created_at DESC
-  `).all();
+  `).all(req.side);
   db.close();
   res.json(rows);
 });
 
 // ─── Get a Mastery Log ────────────────────────────────────────────────────────
 router.get('/mastery-logs/:id', async (req, res) => {
-  const log = await getMasteryLog(req.params.id);
+  const ok = await dal.one(`SELECT 1 FROM mastery_logs WHERE id = ? AND engagement_id IN (SELECT id FROM engagements WHERE institution_id ${INST_SIDE})`, req.params.id, req.side);
+  const log = ok ? await getMasteryLog(req.params.id) : null;
   if (!log) return res.status(404).json({ error: 'Not found' });
   res.json(log);
 });
@@ -72,11 +88,12 @@ router.get('/quality-report', async (req, res) => {
     FROM node_mastery nm
     JOIN skill_nodes sn ON sn.id = nm.skill_node_id
     JOIN skill_clusters sc ON sc.id = sn.cluster_id
+    WHERE nm.engagement_learner_id ${EL_SIDE}
     GROUP BY nm.skill_node_id, sn.node_label, sc.cluster_label
     ORDER BY avg_attempts DESC
-  `).all(), async row => {
+  `).all(req.side), async row => {
     // Confidence is computed from the checks, never stored.
-    const els = await db.prepare('SELECT engagement_learner_id FROM node_mastery WHERE skill_node_id = ?').all(row.skill_node_id);
+    const els = await db.prepare(`SELECT engagement_learner_id FROM node_mastery WHERE skill_node_id = ? AND engagement_learner_id ${EL_SIDE}`).all(row.skill_node_id, req.side);
     const avg = await reduceSeq(els, async (sum, r) => sum + await nodeConfidence(db, r.engagement_learner_id, row.skill_node_id), 0) / (els.length || 1);
     return { ...row, avg_confidence: avg };
   });
@@ -84,8 +101,8 @@ router.get('/quality-report', async (req, res) => {
   const loopStats = await db.prepare(`
     SELECT current_approach, COUNT(*) as usage_count,
       AVG(loop_count) as avg_loops
-    FROM learning_sessions GROUP BY current_approach
-  `).all();
+    FROM learning_sessions WHERE engagement_learner_id ${EL_SIDE} GROUP BY current_approach
+  `).all(req.side);
 
   // Speed and failures of every AI task and of her voice, last 7 days
   // (v4.3 speed targets: first audio within 2 s, a whole voice turn within 4 s).
@@ -121,8 +138,13 @@ router.get('/skills', async (req, res) => {
 
 router.get('/ontology-review', async (req, res) => {
   const status = ['pending', 'aliased', 'created', 'rejected'].includes(req.query.status) ? req.query.status : 'pending';
-  const items = (await dal.all('SELECT * FROM ontology_review_queue WHERE status = ? ORDER BY occurrences DESC, created_at LIMIT 200', status))
+  let items = (await dal.all('SELECT * FROM ontology_review_queue WHERE status = ? ORDER BY occurrences DESC, created_at LIMIT 200', status))
     .map(r => ({ ...r, context: r.context_json ? JSON.parse(r.context_json) : null, context_json: undefined }));
+  // A test or developer session sees only items raised by test pathways.
+  if (req.side) {
+    const testTargets = new Set((await dal.all(`SELECT id FROM capability_targets WHERE institution_id ${INST_SIDE}`, 1)).map(r => r.id));
+    items = items.filter(i => testTargets.has(i.context?.capabilityTargetId));
+  }
   const counts = Object.fromEntries((await dal.all('SELECT status, COUNT(*) n FROM ontology_review_queue GROUP BY status')).map(r => [r.status, r.n]));
   res.json({ items, counts });
 });
@@ -130,7 +152,7 @@ router.get('/ontology-review', async (req, res) => {
 // Resolve one queued text: make it an alias of an existing skill, create a
 // new skill (optionally under a parent), or reject it. Approved text becomes
 // a permanent part of the ontology, and unmapped pathway nodes are re-mapped.
-router.post('/ontology-review/:id', async (req, res) => {
+router.post('/ontology-review/:id', realAdminOnly, async (req, res) => {
   const item = await dal.one('SELECT * FROM ontology_review_queue WHERE id = ?', req.params.id);
   if (!item) return res.status(404).json({ error: 'Not found' });
   if (item.status !== 'pending') return res.status(409).json({ error: 'Already resolved' });
@@ -171,13 +193,13 @@ router.get('/employers', async (req, res) => {
   const status = ['pending', 'verified', 'rejected', 'suspended'].includes(req.query.status) ? req.query.status : null;
   const rows = await dal.all(`SELECT e.*, (SELECT COUNT(*) FROM employer_users u WHERE u.employer_id = e.id) AS users,
       (SELECT email FROM employer_users u WHERE u.employer_id = e.id AND u.role = 'owner' ORDER BY created_at LIMIT 1) AS owner_email
-    FROM employers e ${status ? 'WHERE e.kyb_status = ?' : ''} ORDER BY e.created_at DESC LIMIT 200`, ...(status ? [status] : []));
-  const counts = Object.fromEntries((await dal.all('SELECT kyb_status, COUNT(*) n FROM employers GROUP BY kyb_status')).map(r => [r.kyb_status, r.n]));
+    FROM employers e WHERE COALESCE(e.is_test, 0) = ? ${status ? 'AND e.kyb_status = ?' : ''} ORDER BY e.created_at DESC LIMIT 200`, req.side, ...(status ? [status] : []));
+  const counts = Object.fromEntries((await dal.all('SELECT kyb_status, COUNT(*) n FROM employers WHERE COALESCE(is_test, 0) = ? GROUP BY kyb_status', req.side)).map(r => [r.kyb_status, r.n]));
   res.json({ employers: rows, counts });
 });
 
 router.post('/employers/:id/kyb', async (req, res) => {
-  const e = await dal.one('SELECT * FROM employers WHERE id = ?', req.params.id);
+  const e = await dal.one('SELECT * FROM employers WHERE id = ? AND COALESCE(is_test, 0) = ?', req.params.id, req.side);
   if (!e) return res.status(404).json({ error: 'Not found' });
   const decision = req.body.decision;
   const allowed = { pending: ['verified', 'rejected'], verified: ['suspended'], suspended: ['verified'], rejected: ['pending'] };
@@ -194,9 +216,9 @@ router.post('/employers/:id/kyb', async (req, res) => {
 // ─── Messages from Talk to us / Help → Contact ────────────────────────────────
 router.get('/help-requests', async (req, res) => {
   const status = ['open', 'answered', 'closed'].includes(req.query.status) ? req.query.status : 'open';
-  const rows = await dal.all(`SELECT id, actor_type, type, message, reply_to, status, created_at FROM help_requests
-    WHERE status = ? ORDER BY created_at DESC LIMIT 200`, status);
-  const counts = Object.fromEntries((await dal.all('SELECT status, COUNT(*) n FROM help_requests GROUP BY status')).map(r => [r.status, Number(r.n)]));
+  const rows = await dal.all(`SELECT id, actor_type, type, message, reply_to, status, created_at FROM help_requests h
+    WHERE status = ? AND ${HELP_SIDE} ORDER BY created_at DESC LIMIT 200`, status, req.side);
+  const counts = Object.fromEntries((await dal.all(`SELECT status, COUNT(*) n FROM help_requests h WHERE ${HELP_SIDE} GROUP BY status`, req.side)).map(r => [r.status, Number(r.n)]));
   res.set('Cache-Control', 'no-store');
   res.json({ requests: rows, counts });
 });
@@ -204,7 +226,7 @@ router.get('/help-requests', async (req, res) => {
 router.post('/help-requests/:id', async (req, res) => {
   const status = req.body?.status;
   if (!['open', 'answered', 'closed'].includes(status)) return res.status(400).json({ error: 'Status must be open, answered or closed.' });
-  const r = await dal.one('SELECT id FROM help_requests WHERE id = ?', req.params.id);
+  const r = await dal.one(`SELECT id FROM help_requests h WHERE id = ? AND ${HELP_SIDE}`, req.params.id, req.side);
   if (!r) return res.status(404).json({ error: 'Not found' });
   await dal.run('UPDATE help_requests SET status = ? WHERE id = ?', status, r.id);
   res.json({ ok: true, status });

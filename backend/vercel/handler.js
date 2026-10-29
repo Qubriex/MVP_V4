@@ -13,6 +13,7 @@
 import { waitUntil } from '@vercel/functions';
 import { signingKeyConfigured, SIGNING_ENV } from '../core/return/signing.js';
 import { autoConfigure } from './autoConfig.js';
+import { devLoginConfigError } from '../core/devLogin.js';
 
 // What a production deployment cannot run without. Names only are reported,
 // never values. GEMINI_API_KEY is left out: without it AI features answer 503
@@ -44,6 +45,9 @@ async function init() {
       : missingEnv();
     if (missing.length) throw Object.assign(new Error(`Missing environment variables: ${missing.join(', ')}`), { missing });
   }
+  // Developer login switched on with a weak or missing passcode: refuse to start.
+  const devErr = devLoginConfigError();
+  if (devErr) throw Object.assign(new Error(devErr), { missing: ['DEV_LOGIN_SECRET (32+ characters)'] });
   const { default: params } = await import('../config/params.js');
   params.load();
   ({ logger } = await import('../core/logger.js'));

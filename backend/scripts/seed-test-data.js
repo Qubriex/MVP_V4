@@ -14,6 +14,7 @@
 //   Employer     http://localhost:3000/employer/login
 //     Email:     test.employer@qubirex.local
 //     Password:  QubirexTest2026!     (company verification: pending)
+//     Email:     test.employer.verified@qubirex.local   (verified; same password)
 //
 //   Admin        http://localhost:3000/admin/login   (Qubirex platform staff)
 //     Email:     test.admin@qubirex.local
@@ -24,6 +25,12 @@
 //     Join code:         QX-FSD-T01   (the old Engagement ID below also works)
 //     Engagement ID:     4a4c13c4-989e-4c03-b636-3bdba7fd1025
 //     PIN:               410585
+//     Also TEST-LRNR-HI1 (Hindi cohort, join code QX-FSD-T02) and
+//     TEST-LRNR-NEW (first time, QX-FSD-T01), same PIN.
+//
+// All of it is the test tenant (backend/core/testTenant.js): flagged is_test,
+// never shown to real users and never counted with real data. /dev opens
+// these accounts in one click when DEV_LOGIN_ENABLED=true.
 //
 // Safe to run repeatedly: rows use fixed IDs, and the password and PIN are
 // reset to the values above on every run. Refuses to run with
