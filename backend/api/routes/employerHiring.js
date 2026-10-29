@@ -7,7 +7,7 @@
 //   POST /roles/:id/candidates/:elId/watch | /request
 //   GET  /pipeline · GET /pipeline.csv  E6: funnel, weeks to decide
 //   GET  /candidates/:id              E4: evidence per skill after a yes
-//   POST /pipeline/:id/stage          { stage: interview|dayone|offer|hired|hold|not_now }
+//   POST /pipeline/:id/stage          { stage: shortlisted|interview|dayone|offer|hired|hold|not_now, interview_at? }
 //   POST /pipeline/:id/nudge
 //   GET  /sponsorships · POST /sponsorships   E7
 //   GET  /colleges                    E10: colleges & insights (groups under 5 hidden)
@@ -101,7 +101,7 @@ router.get('/candidates/:id', session, async (req, res) => {
 });
 router.post('/pipeline/:id/stage', session, writer, async (req, res) => {
   try {
-    const ok = await setStage(req.employer, req.params.id, String(req.body?.stage || ''), req.body?.note ? String(req.body.note).slice(0, 500) : null);
+    const ok = await setStage(req.employer, req.params.id, String(req.body?.stage || ''), req.body?.note ? String(req.body.note).slice(0, 500) : null, { interviewAt: req.body?.interview_at || null });
     if (!ok) return v2(res, 404, 'not_found', 'Not found.');
     res.json({ ok: true });
   } catch (e) { fail(res, e); }

@@ -12,7 +12,7 @@
 import express from 'express';
 import params from '../../config/params.js';
 import { hit, peek, clientIp } from '../middleware/rateLimit.js';
-import { verify, activeCredential } from '../../core/return/credentialEngine.js';
+import { verify, activeCredential, recordView } from '../../core/return/credentialEngine.js';
 import { normaliseEvidenceId } from '../../core/qep/evidenceId.js';
 import * as dal from '../../core/db/dal.js';
 import { jwks } from '../../core/return/keyRegistry.js';
@@ -50,6 +50,7 @@ router.get('/:evidenceId', async (req, res) => {
     return res.status(404).json({ status: 'not_found' });
   }
   res.set('Cache-Control', 'no-store');
+  if (result.status === 'valid') await recordView(result.evidence_id, 'public');
   const { sandbox, ...shown } = result; // which sandbox a demo Passport is from stays internal
   return res.json(shown);
 });

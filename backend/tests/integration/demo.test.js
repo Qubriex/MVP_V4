@@ -198,7 +198,7 @@ describe('the cross-side loop, inbox and story', () => {
     await v.switch('lakshmi');
     const reqs = (await request(app).get('/api/learner/jobs-hub').set(as(v))).body.requests;
     expect(reqs).toHaveLength(1);
-    expect((await request(app).post(`/api/learner/requests/${reqs[0].id}/respond`).set(as(v)).send({ yes: true, items: ['skills', 'resume', 'contact'] })).status).toBe(200);
+    expect((await request(app).post(`/api/learner/requests/${reqs[0].id}/respond`).set(as(v)).send({ yes: true, items: ['skills', 'resume', 'name', 'contact'] })).status).toBe(200);
 
     await v.switch('recruiter');
     const pipe = (await request(app).get('/api/employer/pipeline').set(as(v))).body.rows.find(r => r.learner_id === ids.learner('l01') || r.code === lakshmi.code);

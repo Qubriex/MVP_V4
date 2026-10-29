@@ -58,7 +58,7 @@ async function sendRequest(l) {
   const free = ROLES.find(r => !rows.some(p => p.role_id === r));
   const role = free || ROLES[0];
   const cur = rows.find(p => p.role_id === role);
-  const share = JSON.stringify({ asked: ['skills', 'resume', 'contact'] });
+  const share = JSON.stringify({ asked: ['skills', 'labels', 'dayone', 'resume', 'name', 'contact'] });
   const history = JSON.stringify([{ stage: 'requested', at: now }]);
   if (cur) await dal.run("UPDATE employer_pipeline SET stage = 'requested', share_json = ?, history_json = ?, interview_promised = 1, source = 'request', updated_at = ? WHERE id = ?", share, history, now, cur.id);
   else {

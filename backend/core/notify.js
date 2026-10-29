@@ -22,13 +22,20 @@ async function recipientLabel(to) {
  */
 export async function notify({ to, kind, title, body = null, href = null }) {
   if (!to?.id) return null;
+  // A learner's notification preferences (per event and channel); required ones always arrive.
+  let whatsapp = true;
+  if (to.type === 'learner') {
+    const { channelOn } = await import('./journey/notifyPrefs.js');
+    if (!await channelOn(to.id, kind, 'in_app')) return null;
+    whatsapp = await channelOn(to.id, kind, 'whatsapp');
+  }
   const id = ulid();
   await dal.run('INSERT INTO notifications (id, actor_type, actor_id, kind, title, body, href, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
     id, to.type, to.id, kind, String(title).slice(0, 200), body ? String(body).slice(0, 500) : null, href, dal.nowIso());
   // In a demo sandbox, also show the WhatsApp message the person would get,
   // in the Demo inbox. Nothing is sent.
   const sandbox = currentSandbox();
-  if (sandbox) {
+  if (sandbox && whatsapp) {
     await dal.run(`INSERT INTO outbound_messages (id, institution_id, to_email, subject, body, kind, status, sandbox_id, channel, created_at)
       VALUES (?, NULL, ?, ?, ?, ?, 'demo_inbox', ?, 'whatsapp', ?)`, ulid(), await recipientLabel(to), String(title).slice(0, 200), body ? String(body).slice(0, 500) : '', kind, sandbox, dal.nowIso());
   }

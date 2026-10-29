@@ -25,9 +25,19 @@ import { bandOf, BAND_LABEL } from './readiness/cohort.js';
 import { employerWorld, institutionWorld, worldSql, worldArgs } from './testTenant.js';
 
 export const MIN_GROUP = 5;
-export const SHARE_ITEMS = Object.freeze(['skills', 'resume', 'contact']);
-// Stages after the student said yes (or applied): the employer may see who they are.
-export const OPEN_STAGES = Object.freeze(['access_granted', 'applied', 'interview', 'dayone', 'offer', 'hired', 'hold', 'not_now']);
+// What a learner can share, item by item. Name and contact are off by default
+// when answering a request; an application shares everything listed.
+export const SHARE_ITEMS = Object.freeze(['skills', 'labels', 'dayone', 'resume', 'name', 'contact']);
+export const DEFAULT_ON = Object.freeze(['skills', 'labels', 'dayone', 'resume']);
+// Stages after the student said yes (or applied): the employer may see what they shared.
+export const OPEN_STAGES = Object.freeze(['access_granted', 'applied', 'shortlisted', 'interview', 'dayone', 'offer', 'hired', 'hold', 'not_now']);
+const EXPIRY_DAYS = [30, 60, 90];
+const expired = (share) => !!share.expires_at && share.expires_at < dal.nowIso();
+const withHistory = (json, stage, extra = {}) => JSON.stringify([...parse(json, []), { stage, at: dal.nowIso(), ...extra }]);
+async function decision(pipelineId, learnerId, kind, { granted = null, expiresAt = null, note = null } = {}) {
+  await dal.run('INSERT INTO share_decisions (id, pipeline_id, learner_id, decision, granted_json, expires_at, note, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    ulid(), pipelineId, learnerId, kind, granted ? JSON.stringify(granted) : null, expiresAt, note ? String(note).slice(0, 500) : null, dal.nowIso());
+}
 const DECIDED = ['interview', 'dayone', 'offer', 'hired', 'not_now'];
 const TEXT_VERSION = 'employer-access-v1';
 
@@ -173,14 +183,20 @@ export async function watchOrRequest(employer, role, elId, kind, { items = SHARE
 }
 
 const PLACEMENT_STAGE = { offer: 'offer', hired: 'placed' };
-export async function setStage(employer, pipelineId, stage, note = null) {
+export async function setStage(employer, pipelineId, stage, note = null, { interviewAt = null } = {}) {
   const p = await dal.one('SELECT * FROM employer_pipeline WHERE id = ? AND employer_id = ?', pipelineId, employer.id);
   if (!p) return null;
-  if (!['interview', 'dayone', 'offer', 'hired', 'hold', 'not_now', 'watching'].includes(stage)) throw err(400, 'Unknown stage.');
+  if (!['shortlisted', 'interview', 'dayone', 'offer', 'hired', 'hold', 'not_now', 'watching'].includes(stage)) throw err(400, 'Unknown stage.');
   if (stage !== 'watching' && !OPEN_STAGES.includes(p.stage)) throw err(409, 'The student has not said yes yet.');
-  await dal.run('UPDATE employer_pipeline SET stage = ?, note = COALESCE(?, note), updated_at = ? WHERE id = ?', stage, note, dal.nowIso(), p.id);
+  const when = stage === 'interview' && interviewAt ? String(interviewAt).slice(0, 30) : null;
+  await dal.run('UPDATE employer_pipeline SET stage = ?, note = COALESCE(?, note), interview_at = COALESCE(?, interview_at), history_json = ?, updated_at = ? WHERE id = ?',
+    stage, note, when, withHistory(p.history_json, stage, when ? { interview_at: when } : {}), dal.nowIso(), p.id);
+  if (stage === 'dayone' && !await dal.one("SELECT 1 FROM dayone_runs WHERE pipeline_id = ? AND status != 'scored'", p.id)) {
+    const r = await dal.one('SELECT title FROM employer_roles WHERE id = ?', p.role_id);
+    await dal.run("INSERT INTO dayone_runs (id, el_id, pipeline_id, role_title, status, created_at) VALUES (?, ?, ?, ?, 'assigned', ?)", ulid(), p.el_id, p.id, r?.title || null, dal.nowIso());
+  }
   const role = await dal.one('SELECT title FROM employer_roles WHERE id = ?', p.role_id);
-  const msg = { interview: 'invited you to an interview', dayone: 'invited you to a Day-One practice run', offer: 'made you an offer', not_now: 'decided not to go ahead for now', hold: null, hired: null, watching: null }[stage];
+  const msg = { shortlisted: 'shortlisted you', interview: 'invited you to an interview', dayone: 'invited you to a Day-One Simulation', offer: 'made you an offer', not_now: 'decided not to go ahead for now', hold: null, hired: null, watching: null }[stage];
   if (msg) await notify({ to: { type: 'learner', id: p.learner_id }, kind: `employer_${stage}`, title: `${employer.name} ${msg}`, body: role?.title || '', href: '/learn/jobs' });
   // Offers and hires reach the college's Placements page.
   if (PLACEMENT_STAGE[stage]) {
@@ -205,7 +221,7 @@ export async function nudge(employer, pipelineId) {
   return true;
 }
 
-const STAGE_LABEL = { watching: 'Watching', requested: 'Asked', declined: 'Said no', access_granted: 'Said yes', applied: 'Applied', interview: 'Interview', dayone: 'Day-One', offer: 'Offer', hired: 'Hired', hold: 'On hold', not_now: 'Not now', withdrawn: 'Withdrew' };
+const STAGE_LABEL = { watching: 'Watching', requested: 'Asked', declined: 'Said no', access_granted: 'Said yes', applied: 'Applied', shortlisted: 'Shortlisted', interview: 'Interview', dayone: 'Day-One', offer: 'Offer', hired: 'Hired', hold: 'On hold', not_now: 'Not now', withdrawn: 'Withdrew' };
 
 /** Pipeline rows for an employer: names only where the student said yes. */
 export async function pipeline(employerId, roleId = null) {
@@ -250,45 +266,57 @@ export async function candidate(employerId, pipelineId, { skillLines, skillFacts
   const skills = parse(p.skills_json, []);
   const have = await verifiedKeys(p.capability_target_id, (await masteredByEl([p.el_id])).get(p.el_id) || new Set(), skills.map(s => s.key));
   const readiness = Math.round(jobMatch({ skills }, k => have.has(k)) * 100);
-  const open = OPEN_STAGES.includes(p.stage);
   const share = parse(p.share_json, {});
-  const granted = share.granted || (p.stage === 'applied' ? SHARE_ITEMS : []);
+  const lapsed = expired(share);
+  const open = OPEN_STAGES.includes(p.stage) && !lapsed;
+  const granted = lapsed ? [] : share.granted || (p.stage === 'applied' ? SHARE_ITEMS : []);
   const base = {
     id: p.id, code: candidateCode(employerId, p.el_id), role: { id: p.role_id, title: p.role_title, bar: p.bar }, stage: p.stage, stage_label: STAGE_LABEL[p.stage],
     college: p.college, city: p.city, readiness, band_label: BAND_LABEL[bandOf(readiness)], interview_promised: !!p.interview_promised,
-    skills: skills.map(s => ({ name: s.name, required: s.required, verified: have.has(s.key) })), open, shared: granted, asked: share.asked || SHARE_ITEMS
+    skills: skills.map(s => ({ name: s.name, required: s.required, verified: have.has(s.key) })), open, shared: granted, asked: share.asked || SHARE_ITEMS,
+    expires_at: share.expires_at || null, access_expired: lapsed, source: p.source || 'request', interview_at: p.interview_at || null, history: parse(p.history_json, [])
   };
   if (!open) return base;
   const cred = await activeCredential('el_id = ?', p.el_id);
-  const lines = granted.includes('skills') ? (await skillLines(p.el_id, await skillFacts(p.el_id))).map(({ nodes, ...s }) => ({ ...s, nodes: nodes.map(n => ({ node: n.node, last_demonstrated: n.last_demonstrated, freshness: n.freshness })) })) : [];
+  if (cred && granted.includes('skills')) await dal.run('INSERT INTO passport_views (id, evidence_id, viewer_type, viewed_at) VALUES (?, ?, ?, ?)', ulid(), cred.evidence_id, 'employer', dal.nowIso()).catch(() => {});
+  // Skills without "labels" show which skills are proven, not their labels.
+  const lines = granted.includes('skills') ? (await skillLines(p.el_id, await skillFacts(p.el_id))).map(({ nodes, ...s }) => (granted.includes('labels')
+    ? { ...s, nodes: nodes.map(n => ({ node: n.node, last_demonstrated: n.last_demonstrated, freshness: n.freshness })) }
+    : { skill_id: s.skill_id, name: s.name, nodes: nodes.map(n => ({ node: n.node })) })) : [];
+  const runs = granted.includes('dayone') ? await dal.all("SELECT role_title, status, passed, scored_at FROM dayone_runs WHERE el_id = ? AND status = 'scored' ORDER BY scored_at DESC", p.el_id) : [];
   const resume = granted.includes('resume') && (p.headline || p.about) ? { headline: p.headline, summary: p.about } : null;
   return {
-    ...base, name: p.name, evidence_id: granted.includes('skills') ? cred?.evidence_id || null : null, evidence: lines,
+    ...base, name: granted.includes('name') || p.source === 'apply' ? p.name : null, evidence_id: granted.includes('skills') ? cred?.evidence_id || null : null, evidence: lines,
     resume: resume || null, contact: granted.includes('contact') ? { email: p.email || null, phone: p.phone || null } : null,
-    dayone: { status: p.stage === 'dayone' ? 'invited' : 'not_scheduled' }
+    dayone: { status: runs.length ? 'scored' : p.stage === 'dayone' ? 'invited' : 'not_scheduled', results: runs.map(r => ({ role: r.role_title, passed: !!r.passed, date: r.scored_at })) }
   };
 }
 
 // ─── The student's side (L5, L8) ───────────────────────────────────────────────
 export async function learnerRequests(learnerId) {
-  const rows = await dal.all(`SELECT p.id, p.stage, p.share_json, p.interview_promised, p.created_at, p.updated_at, r.title AS role_title, r.city, em.name AS employer
+  const rows = await dal.all(`SELECT p.id, p.stage, p.share_json, p.interview_promised, p.created_at, p.updated_at, p.source, p.history_json, p.interview_at, p.role_id, r.title AS role_title, r.city, em.name AS employer
     FROM employer_pipeline p JOIN employer_roles r ON r.id = p.role_id JOIN employers em ON em.id = p.employer_id
     WHERE p.learner_id = ? AND p.stage != 'watching' ORDER BY p.updated_at DESC`, learnerId);
-  return rows.map(r => { const s = parse(r.share_json, {}); return { id: r.id, employer: r.employer, role_title: r.role_title, city: r.city, stage: r.stage, stage_label: STAGE_LABEL[r.stage], interview_promised: !!r.interview_promised, asked: s.asked || SHARE_ITEMS, shared: s.granted || [], created_at: r.created_at, updated_at: r.updated_at }; });
+  return rows.map(r => { const s = parse(r.share_json, {}); return { id: r.id, employer: r.employer, role_title: r.role_title, city: r.city, stage: r.stage, stage_label: STAGE_LABEL[r.stage], interview_promised: !!r.interview_promised, asked: s.asked || SHARE_ITEMS, shared: s.granted || [], expires_at: s.expires_at || null, access_expired: expired(s),
+    source: r.source || 'request', role_id: r.role_id, interview_at: r.interview_at || null, history: parse(r.history_json, []), created_at: r.created_at, updated_at: r.updated_at }; });
 }
 
 /** Yes or no, per item. A yes is a level-4 consent scoped to this employer and role. */
-export async function respond(user, pipelineId, { yes, items = [] }) {
+export async function respond(user, pipelineId, { yes, items = [], expiresDays = 90 }) {
   const p = await dal.one('SELECT p.*, em.name AS employer FROM employer_pipeline p JOIN employers em ON em.id = p.employer_id WHERE p.id = ? AND p.learner_id = ?', pipelineId, user.id);
   if (!p) return null;
   if (p.stage !== 'requested') throw err(409, 'This request was already answered.');
   const share = parse(p.share_json, {});
   const granted = yes ? SHARE_ITEMS.filter(k => items.includes(k) && (share.asked || SHARE_ITEMS).includes(k)) : [];
   if (yes && !granted.length) throw err(400, 'Choose at least one thing to share, or say no.');
+  const days = EXPIRY_DAYS.includes(Number(expiresDays)) ? Number(expiresDays) : 90;
+  const expiresAt = yes ? new Date(Date.now() + days * 86400000).toISOString() : null;
   const institution = (await dal.one('SELECT institution_id FROM engagements WHERE id = ?', user.engagement_id))?.institution_id;
   let consentId = null;
   if (yes) consentId = await grant({ learnerId: user.id, institutionId: institution, level: LEVELS.EMPLOYER_ACCESS, purpose: `Share ${granted.join(', ')} with ${p.employer}`, textVersion: TEXT_VERSION, scope: { employer_id: p.employer_id, role_id: p.role_id, items: granted } });
-  await dal.run('UPDATE employer_pipeline SET stage = ?, share_json = ?, updated_at = ? WHERE id = ?', yes ? 'access_granted' : 'declined', JSON.stringify({ ...share, granted, consent_id: consentId }), dal.nowIso(), p.id);
+  await dal.run('UPDATE employer_pipeline SET stage = ?, share_json = ?, history_json = ?, updated_at = ? WHERE id = ?', yes ? 'access_granted' : 'declined',
+    JSON.stringify({ ...share, granted, consent_id: consentId, expires_at: expiresAt }), withHistory(p.history_json, yes ? 'access_granted' : 'declined'), dal.nowIso(), p.id);
+  await decision(p.id, user.id, yes ? 'approved' : 'declined', { granted, expiresAt });
   await notify({ to: { type: 'employer', id: p.employer_id }, kind: yes ? 'candidate_yes' : 'candidate_no', title: yes ? 'A candidate said yes' : 'A candidate said no thanks', body: yes ? `Shared: ${granted.join(', ')}.` : '', href: yes ? `/employer/candidates/${p.id}` : '/employer/pipeline' });
   return true;
 }
@@ -299,7 +327,8 @@ export async function withdrawFrom(user, pipelineId) {
   if (!p) return null;
   const share = parse(p.share_json, {});
   if (share.consent_id) await withdraw(share.consent_id);
-  await dal.run("UPDATE employer_pipeline SET stage = 'withdrawn', updated_at = ? WHERE id = ?", dal.nowIso(), p.id);
+  await dal.run("UPDATE employer_pipeline SET stage = 'withdrawn', history_json = ?, updated_at = ? WHERE id = ?", withHistory(p.history_json, 'withdrawn'), dal.nowIso(), p.id);
+  await decision(p.id, user.id, 'withdrawn');
   await notify({ to: { type: 'employer', id: p.employer_id }, kind: 'candidate_withdrew', title: 'A candidate withdrew', body: 'Their details are no longer visible to you.', href: '/employer/pipeline' });
   return true;
 }
@@ -313,11 +342,13 @@ export async function applyToRole(user, roleId) {
   const now = dal.nowIso();
   const cur = await dal.one('SELECT id FROM employer_pipeline WHERE role_id = ? AND el_id = ?', role.id, user.el_id);
   const share = JSON.stringify({ asked: SHARE_ITEMS, granted: SHARE_ITEMS, consent_id: consentId });
-  if (cur) await dal.run("UPDATE employer_pipeline SET stage = 'applied', share_json = ?, updated_at = ? WHERE id = ?", share, now, cur.id);
+  const history = JSON.stringify([{ stage: 'applied', at: now }]);
+  if (cur) await dal.run("UPDATE employer_pipeline SET stage = 'applied', share_json = ?, source = 'apply', history_json = ?, updated_at = ? WHERE id = ?", share, history, now, cur.id);
   else {
-    await dal.run(`INSERT INTO employer_pipeline (id, employer_id, role_id, el_id, learner_id, stage, share_json, interview_promised, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, 'applied', ?, ?, ?, ?)`, ulid(), role.employer_id, role.id, user.el_id, user.id, share, role.interview_promise ? 1 : 0, now, now);
+    await dal.run(`INSERT INTO employer_pipeline (id, employer_id, role_id, el_id, learner_id, stage, share_json, interview_promised, created_at, updated_at, source, history_json)
+      VALUES (?, ?, ?, ?, ?, 'applied', ?, ?, ?, ?, 'apply', ?)`, ulid(), role.employer_id, role.id, user.el_id, user.id, share, role.interview_promise ? 1 : 0, now, now, history);
   }
+  await decision(cur?.id || (await dal.one('SELECT id FROM employer_pipeline WHERE role_id = ? AND el_id = ?', role.id, user.el_id)).id, user.id, 'approved', { granted: [...SHARE_ITEMS] });
   await notify({ to: { type: 'employer', id: role.employer_id }, kind: 'candidate_applied', title: `New application for ${role.title}`, href: '/employer/pipeline' });
   return true;
 }
@@ -371,6 +402,28 @@ export async function collegeInsights(employerId, roles) {
     .sort((a, b) => (b.ready || 0) - (a.ready || 0));
   const skillSupply = skills.map(s => ({ name: s.name, verified: scored.filter(x => x.verified.includes(s.name)).length, market_share: shareOf.get(s.key) ?? null }));
   return { colleges, skills: scored.length >= MIN_GROUP ? skillSupply : [], total: scored.length, roles_used: roles.map(r => r.title) };
+}
+
+/** One request or application, for the learner's detail screen. */
+export async function learnerRequest(user, pipelineId) {
+  const r = (await learnerRequests(user.id)).find(x => x.id === pipelineId);
+  if (!r) return null;
+  const p = await dal.one(`SELECT em.kyb_status, em.domain, r.interview_promise, r.bar FROM employer_pipeline p JOIN employers em ON em.id = p.employer_id
+    JOIN employer_roles r ON r.id = p.role_id WHERE p.id = ?`, pipelineId);
+  const decisions = await dal.all('SELECT decision, granted_json, expires_at, note, created_at FROM share_decisions WHERE pipeline_id = ? ORDER BY created_at DESC', pipelineId);
+  return { ...r, employer_verified: p?.kyb_status === 'verified', default_on: DEFAULT_ON, expiry_days: EXPIRY_DAYS,
+    decisions: decisions.map(d => ({ decision: d.decision, granted: parse(d.granted_json, []), expires_at: d.expires_at, note: d.note, at: d.created_at })) };
+}
+
+/** "Ask a question" before deciding: the employer gets it; the request stays open. */
+export async function askEmployer(user, pipelineId, note) {
+  const p = await dal.one("SELECT * FROM employer_pipeline WHERE id = ? AND learner_id = ? AND stage = 'requested'", pipelineId, user.id);
+  if (!p) throw err(409, 'You can ask a question only while the request is open.');
+  const text = String(note || '').trim().slice(0, 500);
+  if (text.length < 3) throw err(400, 'Write your question.');
+  await decision(p.id, user.id, 'question', { note: text });
+  await notify({ to: { type: 'employer', id: p.employer_id }, kind: 'candidate_question', title: 'A candidate asked a question about your request', body: text, href: '/employer/pipeline' });
+  return true;
 }
 
 export { candidateCode, STAGE_LABEL };

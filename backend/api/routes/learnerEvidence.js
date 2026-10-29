@@ -119,6 +119,25 @@ router.post('/reviews/instances/:id/answer', async (req, res) => {
 router.get('/learning-curve', async (req, res) => res.json(await learningCurve(req.user.el_id)));
 
 // ─── Passport ────────────────────────────────────────────────────────────────
+// What the learner sees around the labels: since when it is shared, whether
+// labels changed after sharing (the link always shows today's labels), who
+// viewed it (type and date only), and whether renewal is due.
+async function passportExtras(elId, c) {
+  const share = await dal.one('SELECT is_public, created_at FROM passport_shares WHERE evidence_id = ? ORDER BY created_at DESC, seq DESC LIMIT 1', c.evidence_id);
+  const sharedSince = share?.is_public ? share.created_at : null;
+  const changed = sharedSince ? !!await dal.one('SELECT 1 FROM demonstrations WHERE el_id = ? AND date > ?', elId, sharedSince) : false;
+  const views = await dal.all(`SELECT viewer_type, COUNT(*) AS n, MAX(viewed_at) AS last FROM passport_views WHERE evidence_id = ? AND viewed_at >= ?
+    GROUP BY viewer_type ORDER BY viewer_type`, c.evidence_id, new Date(Date.now() - 90 * 86400000).toISOString());
+  const recent = await dal.all('SELECT viewer_type, viewed_at FROM passport_views WHERE evidence_id = ? ORDER BY viewed_at DESC LIMIT 10', c.evidence_id);
+  const now = nowIsoFor();
+  const expiresSoon = c.valid_until <= new Date(Date.parse(now) + 60 * 86400000).toISOString();
+  return {
+    shared_since: sharedSince, labels_changed_since_share: changed,
+    views: { last_90_days: views.map(v => ({ type: v.viewer_type, count: Number(v.n), last: v.last })), recent: recent.map(v => ({ type: v.viewer_type, at: v.viewed_at })) },
+    renewal_due: expiresSoon, expires_soon: expiresSoon
+  };
+}
+
 async function passportView(elId) {
   const c = await activeCredential('el_id = ?', elId);
   if (!c) {
@@ -142,7 +161,8 @@ async function passportView(elId) {
       }))
     } : null,
     // Journey metrics (loops, attempts, time) are never part of the passport.
-    note: 'Labels are computed today from signed, dated facts. They change as skills are shown again or go stale.'
+    note: 'Labels are computed today from signed, dated facts. They change as skills are shown again or go stale.',
+    ...(await passportExtras(elId, c))
   };
 }
 

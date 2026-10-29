@@ -177,6 +177,11 @@ export async function revokeCredential(evidenceId, reason = 'revoked') {
   return true;
 }
 
+/** Who viewed a Passport: the type of viewer and the date only, never who. */
+export async function recordView(evidenceId, viewerType) {
+  try { await dal.run('INSERT INTO passport_views (id, evidence_id, viewer_type, viewed_at) VALUES (?, ?, ?, ?)', ulid(), evidenceId, viewerType, dal.nowIso()); } catch { /* a view count never breaks verification */ }
+}
+
 export async function isPublic(evidenceId) {
   return !!(await dal.one('SELECT is_public FROM passport_shares WHERE evidence_id = ? ORDER BY created_at DESC, seq DESC LIMIT 1', evidenceId))?.is_public;
 }

@@ -99,7 +99,7 @@ function build(j, b) {
   const n = NODE_IDS;
   const pipe = (stage, extra = {}) => b.add('employer_pipeline',
     ['id', 'employer_id', 'role_id', 'el_id', 'learner_id', 'stage', 'share_json', 'interview_promised', 'note', 'created_at', 'updated_at', 'source', 'history_json', 'interview_at'],
-    [`${j.learnerId}-pipe`, EMPLOYER, extra.role || ROLE_FE, j.elId, j.learnerId, stage, JSON.stringify(extra.share || { asked: ['skills', 'resume', 'contact'], granted: [] }),
+    [`${j.learnerId}-pipe`, EMPLOYER, extra.role || ROLE_FE, j.elId, j.learnerId, stage, JSON.stringify(extra.share || { asked: ['skills', 'labels', 'dayone', 'resume', 'name', 'contact'], granted: [] }),
       1, null, at(extra.createdDaysAgo ?? 2), at(0.1), extra.source || 'request', JSON.stringify(extra.history || []), extra.interviewAt || null]);
 
   if (s === 'S2') {

@@ -23,6 +23,7 @@ import marketRoutes from './routes/market.js';
 import employerRoutes from './routes/employer.js';
 import employerHiringRoutes from './routes/employerHiring.js';
 import learnerJobsRoutes from './routes/learnerJobs.js';
+import learnerJourneyRoutes from './routes/learnerJourney.js';
 import learnerEvidenceRoutes from './routes/learnerEvidence.js';
 import learnerSettingsRoutes from './routes/learnerSettings.js';
 import sharedRoutes from './routes/shared.js';
@@ -50,6 +51,7 @@ export const MOUNTS = [
   ['/api/learner', learnerEvidenceRoutes],          // reviews, rechecks, passport, renewal
   ['/api/learner', learnerSettingsRoutes],          // settings: devices, consent, my data
   ['/api/learner', learnerJobsRoutes],              // jobs & applications, employer requests
+  ['/api/learner', learnerJourneyRoutes],           // journey: baseline, skill tabs, readiness, Day-One, apply, requests
   ['/api/market', marketRoutes],                    // job market, JD gap, emerging topics
   ['/api/employer', employerRoutes],
   ['/api/employer', employerHiringRoutes],           // roles, candidates, pipeline, sponsor, colleges, bulk verify
@@ -96,7 +98,10 @@ export function createApp({ drainOutbox = null } = {}) {
     if (!drainOutbox) return res.status(404).json({ error: 'Not available: the server runs its own outbox worker' });
     // Backstop for demo sandboxes past their time (each new demo start also cleans a few).
     const demosDeleted = await deleteExpired({ limit: 100 }).catch(() => 0);
-    res.json({ ok: true, ...(await drainOutbox()), demos_deleted: demosDeleted });
+    // Accounts whose deletion grace period has ended (core/journey/extras.js).
+    const { purgeDueDeletions } = await import('../core/journey/extras.js');
+    const accountsDeleted = await purgeDueDeletions().catch(() => 0);
+    res.json({ ok: true, ...(await drainOutbox()), demos_deleted: demosDeleted, accounts_deleted: accountsDeleted });
   });
 
   // ?deep=1 also checks the database round trip.
