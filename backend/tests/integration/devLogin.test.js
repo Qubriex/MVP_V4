@@ -251,3 +251,15 @@ describe('the test tenant stays apart from real data', () => {
     expect((await request(app).post('/api/admin/ontology-review/x').set(bearer(testAdmin.token)).send({ action: 'reject' })).status).toBe(403);
   });
 });
+
+describe('learner journey on /dev', () => {
+  it('S0 opens by invite link until its PIN is set, then like the other stages', async () => {
+    enable();
+    await seedTestData({ log: () => {} });
+    const agent = await unlockedAgent();
+    const s0 = async () => (await agent.get('/api/dev/journey')).body.stages.find(s => s.key === 's0');
+    expect((await s0()).invite_only).toBe(true);
+    await dal.run("UPDATE learners SET pin_hash = 'set' WHERE id = 'test-j-s0'");
+    expect((await s0()).invite_only).toBe(false);
+  });
+});

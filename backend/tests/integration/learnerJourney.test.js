@@ -276,3 +276,16 @@ describe('the journey on the college and employer side', () => {
     expect(r.body.streak).toMatchObject({ days: expect.any(Number), today: expect.any(Boolean) });
   });
 });
+
+describe('developer controls', () => {
+  it('Make me Ready gives every skill and Confirmed labels, and the learner is at S7', async () => {
+    const { runControl } = await import('../../core/journey/controls.js');
+    const { skillLines, skillFacts } = await import('../../core/return/credentialEngine.js');
+    const out = await runControl('test-jel-s5', { action: 'ready' });
+    expect(out.message).toMatch(/Ready/);
+    const lines = await skillLines('test-jel-s5', await skillFacts('test-jel-s5'));
+    expect(lines.length).toBeGreaterThan(0);
+    expect(lines.filter(l => l.label !== 'Confirmed').map(l => l.name)).toEqual([]);
+    expect(stageOf(await journeyFacts('test-jel-s5'))).toBe('S7');
+  });
+});

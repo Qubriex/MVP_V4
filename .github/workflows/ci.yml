@@ -3,6 +3,9 @@ name: CI
 on:
   push:
   pull_request:
+  # Nightly, 02:47 India time: the whole suite, including the learner journey in a browser.
+  schedule:
+    - cron: '17 21 * * *'
 
 jobs:
   backend:
@@ -23,3 +26,83 @@ jobs:
       # Structural guarantees run first and fail the build on their own.
       - run: npm run test:structural
       - run: npm run test:rest
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run i18n:check
+      - run: CI=true npx react-scripts test --watchAll=false
+      - run: CI=true npm run build
+
+  # The learner journey S0 → S11 (Telugu), a Hindi run, a phone run and every
+  # learner page at 360 and 1440 px, in a real browser against a local copy:
+  # in-process database, the test data, the scripted tutor, developer login on
+  # with a passcode made for this run only. Then the developer login and demo suites.
+  e2e:
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    timeout-minutes: 25
+    env:
+      AI_ADAPTER: scripted
+      DEV_LOGIN_ENABLED: 'true'
+      DEMO_ENABLED: 'true'
+      DEMO_STARTS_PER_HOUR: '100'
+      BASE: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+      - name: Throwaway secrets for this run
+        run: |
+          for name in JWT_SECRET DEV_LOGIN_SECRET; do
+            value=$(openssl rand -hex 32)
+            echo "::add-mask::$value"
+            echo "$name=$value" >> "$GITHUB_ENV"
+          done
+          echo "DB_PATH=$RUNNER_TEMP/e2edb" >> "$GITHUB_ENV"
+      - run: npm ci
+        working-directory: backend
+      - run: npm ci
+        working-directory: frontend
+      - run: CI=true npm run build
+        working-directory: frontend
+      - name: Database and test data
+        working-directory: backend
+        run: node scripts/migrate.js && node scripts/seed-test-data.js > /dev/null
+      - name: Start the backend and the site
+        run: |
+          (cd backend && node server.js > "$RUNNER_TEMP/backend.log" 2>&1 &)
+          (cd frontend && node e2e/serve.mjs > "$RUNNER_TEMP/serve.log" 2>&1 &)
+          for i in $(seq 1 60); do curl -sf http://localhost:3000/api/health > /dev/null && break; sleep 1; done
+          curl -sf http://localhost:3000/api/health > /dev/null
+      - name: Browser
+        run: |
+          npm install -g playwright@1.48.2
+          npx -y playwright@1.48.2 install --with-deps chromium
+      - name: Learner journey
+        working-directory: frontend
+        run: NODE_PATH="$(npm root -g)" DEV_PASS="$DEV_LOGIN_SECRET" node e2e/learner-journey.mjs
+      - name: Developer login
+        working-directory: frontend
+        run: NODE_PATH="$(npm root -g)" DEV_PASS="$DEV_LOGIN_SECRET" node e2e/dev-login.mjs
+      - name: Working demo
+        working-directory: frontend
+        run: NODE_PATH="$(npm root -g)" node e2e/demo.mjs
+      - name: Backend log on failure
+        if: failure()
+        run: tail -n 80 "$RUNNER_TEMP/backend.log"

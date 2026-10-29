@@ -160,10 +160,10 @@ export function CandidatePage() {
           </div>
           {['shortlisted', 'interview', 'dayone'].includes(c.stage) && (
             <div className="ln-row ln-wrap" style={{ gap: 8 }}>
-              <button type="button" className="ln-btn ln-btn-primary" onClick={() => stage('offer', t('emp.pipeline.offerRecordedTheirCollege'))}>{t('emp.pipeline.recordOffer')}</button>
+              <button type="button" className="ln-btn ln-btn-primary" onClick={() => stage('offer', t('emp.pipeline.offerRecordedTheirCollege'))} data-stage-action="offer">{t('emp.pipeline.recordOffer')}</button>
             </div>
           )}
-          {c.stage === 'offer' && <button type="button" className="ln-btn ln-btn-primary" style={{ alignSelf: 'flex-start' }} onClick={() => stage('hired', t('emp.pipeline.markedAsHired'))}>{t('emp.pipeline.markAsHired')}</button>}
+          {c.stage === 'offer' && <button type="button" className="ln-btn ln-btn-primary" style={{ alignSelf: 'flex-start' }} onClick={() => stage('hired', t('emp.pipeline.markedAsHired'))} data-stage-action="hired">{t('emp.pipeline.markAsHired')}</button>}
         </>
       )}
     </>

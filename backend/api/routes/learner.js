@@ -32,6 +32,7 @@ import { transcribeAudio } from '../../core/portfolio.js';
 import { isValidPin, hashPin, logEvent } from '../../core/access.js';
 import { eachSeq, mapSeq } from '../../core/util/seq.js';
 import { aiNotConfigured, aiUnavailableMessage, synthesize, recordVoiceMetric } from '../../core/ai/gateway.js';
+import { asksForCheck } from '../../core/ai/intent.js';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
@@ -426,7 +427,8 @@ async function pendingCheckFor(db, sessionId) {
 const resultBand = (passed, score) => (passed ? 'pass' : score >= 0.5 ? 'partial' : 'fail');
 
 async function handleSessionMessage(req, res) {
-  const requestCheck = req.body.request_check === true || req.body.request_check === 'true';
+  const typedAsk = asksForCheck(req.body.content);
+  const requestCheck = req.body.request_check === true || req.body.request_check === 'true' || typedAsk;
   const inputMode = ['voice', 'text'].includes(req.body.input_mode) ? req.body.input_mode : 'text';
   const content = (req.body.content || '').trim() || (requestCheck ? "I'm ready for the mastery check." : '');
   let { session_id } = req.body;

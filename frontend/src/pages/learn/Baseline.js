@@ -86,15 +86,15 @@ export default function Baseline() {
         </section>
         {error && <div className="ln-error" role="alert">{error}</div>}
         <div className="ln-row ln-wrap" style={{ gap: 10 }}>
-          <button type="button" className="ln-btn ln-btn-primary" onClick={start} disabled={busy}><Play size={16} aria-hidden="true" />{t('lj.baseline.start')}</button>
-          <button type="button" className="ln-btn" onClick={() => setConfirmSkip(true)} disabled={busy}><SkipForward size={16} aria-hidden="true" />{t('lj.baseline.skip')}</button>
+          <button type="button" className="ln-btn ln-btn-primary" onClick={start} disabled={busy} data-baseline-start><Play size={16} aria-hidden="true" />{t('lj.baseline.start')}</button>
+          <button type="button" className="ln-btn" onClick={() => setConfirmSkip(true)} disabled={busy} data-baseline-skip><SkipForward size={16} aria-hidden="true" />{t('lj.baseline.skip')}</button>
         </div>
         {confirmSkip && (
           <section className="ln-card ln-col" style={{ gap: 8 }} role="alertdialog" aria-label={t('lj.baseline.skip')}>
             <b>{t('lj.baseline.skipTitle')}</b>
             <span className="ln-small">{t('lj.baseline.skipConsequence')}</span>
             <div className="ln-row ln-wrap" style={{ gap: 8 }}>
-              <button type="button" className="ln-btn ln-btn-primary" onClick={skip} disabled={busy}>{t('lj.baseline.skipConfirm')}</button>
+              <button type="button" className="ln-btn ln-btn-primary" onClick={skip} disabled={busy} data-baseline-skip-confirm>{t('lj.baseline.skipConfirm')}</button>
               <button type="button" className="ln-btn" onClick={() => setConfirmSkip(false)}>{t('lj.baseline.takeIt')}</button>
             </div>
           </section>

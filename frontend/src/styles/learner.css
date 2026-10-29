@@ -190,7 +190,7 @@
 
 /* ---- Job market ------------------------------------------------------------------------------ */
 .ln-jobcard { display: grid; grid-template-columns: 76px minmax(0, 1fr) 200px; gap: 20px; align-items: center; padding: 20px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
-@media (max-width: 760px) { .ln-jobcard { grid-template-columns: 64px minmax(0, 1fr); } .ln-jobcard > :last-child { grid-column: 1 / -1; flex-direction: row !important; } .ln-jobcard > :last-child > * { flex: 1; } }
+@media (max-width: 760px) { .ln-jobcard { grid-template-columns: 64px minmax(0, 1fr); } .ln-jobcard > :last-child { grid-column: 1 / -1; flex-direction: row !important; flex-wrap: wrap; } .ln-jobcard > :last-child > * { flex: 1 1 140px; min-width: 0; } }
 .ln-chart { display: flex; gap: 10px; height: 240px; }
 .ln-chart-axis { display: flex; flex-direction: column; justify-content: space-between; font-size: var(--fs-caption); color: var(--color-text-muted); padding-bottom: 26px; text-align: right; width: 40px; flex-shrink: 0; }
 .ln-chart-plot { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
