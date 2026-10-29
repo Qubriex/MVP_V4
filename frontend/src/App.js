@@ -53,6 +53,15 @@ import Reviews from './pages/learn/Reviews';
 import LearnerSettings from './pages/learn/Settings';
 import Passport from './pages/learn/Passport';
 import LearnerJobs from './pages/learn/Jobs';
+import Baseline from './pages/learn/Baseline';
+import SkillPage from './pages/learn/Skill';
+import AttemptHistory from './pages/learn/History';
+import Readiness from './pages/learn/Readiness';
+import Assigned from './pages/learn/Assigned';
+import DayOne from './pages/learn/DayOne';
+import ApplyRole from './pages/learn/Apply';
+import RequestDetail from './pages/learn/RequestDetail';
+import NotificationPrefs from './pages/learn/NotificationPrefs';
 import Verify from './pages/Verify';
 import EmployerLogin from './pages/employer/Login';
 import EmployerInvite from './pages/employer/Invite';
@@ -217,6 +226,15 @@ export default function App() {
                       <Route path="resume" element={<ResumeBuilder />} />
                       <Route path="reviews" element={<Reviews />} />
                       <Route path="passport" element={<Passport />} />
+                      <Route path="baseline" element={<Baseline />} />
+                      <Route path="skill/:nodeId" element={<SkillPage />} />
+                      <Route path="history" element={<AttemptHistory />} />
+                      <Route path="readiness" element={<Readiness />} />
+                      <Route path="assigned" element={<Assigned />} />
+                      <Route path="dayone" element={<DayOne />} />
+                      <Route path="apply/:roleId" element={<ApplyRole />} />
+                      <Route path="requests/:id" element={<RequestDetail />} />
+                      <Route path="notifications" element={<NotificationPrefs />} />
                       <Route path="*" element={<Navigate to="/learn/dashboard" replace />} />
                     </Route>
                   </Routes>
