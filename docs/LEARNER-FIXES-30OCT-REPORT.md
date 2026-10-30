@@ -1,59 +1,129 @@
-# Learner fixes — 30 Oct report
+# Learner fixes and learn-by-topic — 30 Oct report
 
-Branch `claude/learner-side-updates-vthycg`. Everything below is on that branch; nothing is deployed to staging yet (see Voice).
+Branch `claude/learner-side-updates-vthycg` (PR #20). Everything below is on this branch. Staging still runs an older build, so none of it is live there yet (see Voice).
 
-## Team points
+## 1. Team points
 
 | # | What was wrong | Cause | Fix | How verified | Status |
 |---|---|---|---|---|---|
-| 1 | No health signal for voice; failures were silent | Voice was never checked | `/api/health?deep=1` reports `voice: server \| browser-fallback \| off` and names what is missing | `health.test.js` | Done |
-| 2 | Telugu/Hindi fell back to a robotic browser voice without saying so | Silent fallback in `voice.js` | No silent fallback; a notice instead. Browser voice only via Settings → "Use my phone's voice" | Unit + e2e | Done |
-| 3 | Resuming a lesson replayed the opening | Session start re-sent the first turn | Resume sends a varied "welcome back" line; a new skill gets a fresh opening | `scriptedTutor.test.js` | Done |
-| 4 | "I'm ready for the check" sometimes kept teaching | The orchestrator decided | `request_check` always gives a CHECK from the assessment system, with an "early" note when little was taught | `scriptedTutor.test.js` | Done |
-| 5 | Repeated audio was synthesised every time | No cache | Speech cache (memory + `tts_cache`, max 5000 rows); speeds 0.8 / 1.0 / 1.2 | Integration tests | Done |
-| 6 | Learning language could not be changed; some screens ignored it | Language came only from the cohort | Learning language (telugu / hindi / english / telugu_en / hindi_en): cohort default, picker in Settings and on lesson, course, skill, session, Reviews and Emerging topics; every learner request follows it; "Available in X only for now" instead of a silent switch | API test + e2e (lesson English ↔ Telugu, Settings) | Done |
-| 7 | English sessions crashed | Tutor had no English profile | English tutor profile added | `scriptedTutor.test.js` | Done |
-| 8 | No Back button on many learner pages | No shared back bar | Back + breadcrumb on every /learn page except Home; history, then `from`, then the logical parent | e2e: 16 routes + "back to the course it came from" | Done |
-| 9 | Job market shown to every learner | No switch | Hidden behind `FEATURE_LEARNER_JOBS` (default off); Home is learning-only; market links go Home | e2e | Done |
-| 10 | Job search missed typos and short forms | Exact substring match | Tolerant search (typos, swapped letters, js / front end / reactjs…), related roles, "Add to my topics", Naukri / LinkedIn / Indeed links with role and city only | `marketSearch.test.js` (5 searches + links) | Done (visible only with the flag on) |
-| 11 | No structured courses | — | Course → Module → Lesson, teach-first lessons (Learn → See the code → Practise → Check), runners (Python via Pyodide, JS, SQL; Java structure check), test-out, module test + project → Passport skill group | `courses.test.js` (13), e2e | Done |
-| 12 | No Python / Java content | — | Python 8 modules / 28 lessons, Java 9 modules / 22 lessons, all ten parts in en, te, hi | `topics:check` + `topics:code` in CI | Done |
-| 13 | Colleges could not see or review topics | — | College Topics page, review per language, "Reviewed by [college] faculty" badge, Students → Extra topics (with consent), public "See our topics" + free sample, demo story step | API tests + e2e | Done |
-| 14 | No test account for "learner with topics known" | — | Journey account "Learner with 2 topics known" on /dev | `learnerJourney.test.js`, `courses.test.js` | Done |
+| 1 | The same opening speech played every time a voice session started | `/session/start` returned the history and the page replayed the first AI message | Resuming plays a short, varied "welcome back" line with where you stopped; old messages stay in the transcript with Replay; a new skill gets its own fresh opening | `scriptedTutor.test.js` (start → leave → start does not replay) | Done |
+| 2 | "I'm ready for the check" did nothing | TEACH decided and returned CONTINUE | The server always starts a check (fresh question from the assessment system), with "you can try now; we'll explain again if needed" when little was taught | `scriptedTutor.test.js` (`request_check` and typed "I'm ready for the test" always give CHECK) | Done |
+| 3 | Robotic voice ("ration-shop announcement") | The server voice failed on staging and the app silently fell back to the browser voice | Chain: Cloud TTS Chirp3-HD (female) → Gemini TTS, same voice. No silent fallback for Telugu or Hindi: a notice plus text and captions; the phone voice only if chosen in Settings. Speeds 0.8 / 1.0 / 1.2; repeated lines cached. `/api/health?deep=1` reports `voice` | `health.test.js`; browser checks | Done in code. **On staging: needs the founder's step below** |
+| 4 | No Back button on most learner pages | No shared back bar | Back plus breadcrumb on every /learn page except Home; ← icon with a label on phones | e2e: 16 routes, each to its parent | Done |
+| 5 | Concept, Practice and Reviews always in Telugu | Content used the cohort language only | A learning language (Telugu / Hindi / English / Telugu+English / Hindi+English): cohort default, picker in Settings and on every learning screen; every learner request follows it | API and e2e (lesson English ↔ Telugu, Settings) | Done |
+| 6 | Back from a lesson went to Home | The session ignored where it was opened from | `from` is passed from Skill path, a skill page, Reviews and Home; Back and End session return there | e2e (skill page → lesson → Back = skill page; course → lesson → Back = course) | Done |
+| 7 | Emerging topics intro audio in Telugu only | Same cause as 5 | Follows the learning language. That page is hidden for now (point 8) | Code path shared with 5 | Done |
+| 8 | Job market search failed; job market shown before learning | Exact-text search; no switch | Job market and Emerging topics hidden behind `FEATURE_LEARNER_JOBS` (off). With it on: search tolerates typos and short forms, shows related roles (never an empty page), each role lists the topics it needs with "Add to my topics", and Naukri / LinkedIn / Indeed links carry the role and city only | `marketSearch.test.js` (5 searches, links); e2e (jobs hidden) | Done |
+| 9 | The content language could not be changed | No setting | See 5; the English caption toggle stays on Telugu/Hindi content | as 5 | Done |
+| 10 | No Back on Career and Me pages | as 4 | as 4 (Jobs, Profile, Résumé, Settings, Notifications included) | e2e | Done |
+| 11 | Ask Qubirex always answered in English | The Ask box started in English whatever the learner chose | Answers follow the learning language; an "Answer in" picker re-answers the same question; Telugu typed in English letters ("loop ante enti?") is understood; with no AI key, study questions are answered from the matching lesson | API + e2e ("loop ante enti?" → Telugu, then English) | Done |
+| 12 | Reviews → Continue always in Telugu | Questions were made in the cohort language | Made in the learning language; switching while a question is open shows the **same** question (same instance and values) in the new language, with no new attempt and no change to scoring | API + e2e (Telugu → Hindi, same instance, attempt count unchanged) | Done |
 
-## Voice
+### Every content endpoint and its language (Part 2 root cause)
 
-- **Running on staging:** browser fallback. The last deep health check showed the server voice failing: Gemini TTS returned 404 for `gemini-2.5-flash-tts`, and Cloud TTS also failed. Staging is still on migration 0008, so it runs an older build than this branch.
-- **What the founder must do (names only, no values):**
-  1. On the Google Cloud project that owns `GEMINI_API_KEY`, enable the **Cloud Text-to-Speech API**.
-  2. If that project cannot use the default TTS model, set `GEMINI_TTS_MODEL` in Vercel (staging) to a TTS model the key can use. `/api/health?deep=1` lists the models it found.
-  3. Deploy this branch to staging (it brings migration 0010).
-  4. Then open `/api/health?deep=1` and check that it says `voice: server`.
-- **iPhone:** not verified. No device was available here. To check: Safari on an iPhone, open a Telugu lesson, tap Listen. It should either play the server voice or show the notice, never the robotic voice.
+Signed-in learner requests now carry the learning language (`api/middleware/auth.js`). The cohort language is only the default. Each endpoint below uses it:
 
-## Topic catalog
+| Endpoint | Content | Language now |
+|---|---|---|
+| `POST /learner/session/start`, `/session/message`, `/session/voice` | Lesson (voice), check, welcome back | Learning language (English tutor profile added) |
+| `POST /learner/tts` | Spoken lines | The requested language, else the learning language |
+| `GET /learner/skill/:node`, `POST …/practice`, `…/task`, `…/challenge`, `/challenge/:id/answer`, `…/help` | Concept, practice, task, spoken challenge | Learning language |
+| `GET /learner/reviews/due`, `POST /reviews/:node/start`, `POST /reviews/instances/:id/answer` | Review questions | Learning language; an open question comes back in the current language |
+| `GET /learner/reviews/instances/:id/question` (new) | The same open question in another language | The chosen language, same instance |
+| `POST /assist/ask` | Ask Qubirex | Learning language, or the "Answer in" choice |
+| `GET /learner/lessons/:id`, `…/ask`, `…/check`, `…/testout`, `/modules/:id/test` | Course lessons, questions, checks | Learning language; "Available in X only" when a language is missing |
+| `POST /market/topics/:id/intro` | Emerging topics intro audio | Learning language |
+| `POST /learner/baseline/*`, `GET /learner/dayone` | Starting check, Day-One | Learning language |
+| `GET /catalog/sample/:lesson?language=` | Public free sample | The visitor's choice |
 
-- **Live:** Python Programming (8 modules, 28 lessons) and Java Programming (9 modules, 22 lessons). Both are complete in English, Telugu and Hindi: every lesson has all ten parts plus a check, and every module has a test and a project.
-- **Drafts:** JavaScript, SQL & Databases, C, DSA, Web Basics, React, Data Analysis and AI Basics. These are module outlines only (en / te / hi), marked "Draft — needs faculty review".
-- **Completeness checks:**
-  - `npm run topics:check` fails CI if Python or Java has any gap.
-  - `npm run topics:code` runs every exercise: solutions must pass, starters must fail, and Java examples must compile and print their stored output.
-- **Test-out:** "I already know this" on any lesson asks that lesson's check questions. Passing marks the lesson Known (evidence kind `testout`); not passing leaves it open, with no penalty.
-- **Review:** College Topics (`/institution/topics`) lets a professor or admin:
-  - read any lesson in en / te / hi;
-  - mark it Reviewed per language, or suggest an edit;
-  - see learner 👍 / 👎 feedback.
-  Learners of that college then see "Reviewed by [college] faculty".
-- **Where to see it:**
-  - `/learn/courses` (learner)
-  - `/institution/topics` (college)
-  - `/topics` (public; one free sample lesson per course)
-  - /dev → "Learner with 2 topics known"
+None of these hard-codes English prompts. Code, skill names and technical words stay in English inside Telugu and Hindi text.
 
-## Open items
+## 2. Voice
 
-1. **Voice on staging:** the founder steps above; then confirm on an iPhone.
-2. **Java runner:** a server sandbox is pending. Java answers are checked by structure, and the example shows its known output. The UI says "Java runner pending".
-3. **Draft courses:** need lessons and faculty review before they can be marked complete.
-4. **College programme builder:** colleges pick modules through a new cohort's brief for now. There is no drag-and-drop builder yet.
-5. **`/learn/jobs` stays visible:** it holds employer requests and the demo's approve step, so it is not behind the flag. The market and emerging topics are.
+- **Running on staging now:** the browser fallback. The last deep health check on staging showed:
+  - Gemini TTS returning 404 for its model;
+  - Cloud TTS failing;
+  - staging running an older build (migration 0008).
+- **What the founder must do (names only):**
+  1. Enable the **Cloud Text-to-Speech API** on the Google Cloud project that owns `GEMINI_API_KEY`. That gives the Chirp3-HD voice.
+  2. If needed, set `GEMINI_TTS_MODEL` in Vercel (staging) to a TTS model that key can use. `/api/health?deep=1` lists the models it found.
+  3. Deploy this branch to staging (migrations 0010 and 0011).
+  4. Check that `/api/health?deep=1` shows `voice: "server"`.
+- **iPhone:** not tested; no device here. To check: in iPhone Safari, open a Telugu lesson and tap Listen. You should hear the natural voice, or see the "high-quality voice is not available" notice, never the robotic voice.
+- **Same cause in the team-points test:** the public "sample lesson plays" check fails locally (`/api/sample-lesson` 503) because there is no voice key here. It will pass once the server voice works.
+
+## 3. Topic catalog
+
+- **Live and complete in English, Telugu and Hindi**, in the brief's exact order:
+  - **Python Programming:** 8 modules, 28 lessons.
+    - 1 Fundamentals: Introduction · Variables and data types · Operators · Input and output
+    - 2 Control Flow: If / else · For loops · While loops · Break, continue and nested loops
+    - 3 Functions: Defining functions · Parameters and arguments · Return values · Scope and recursion
+    - 4 Data Structures: Lists · Tuples · Sets · Dictionaries · Strings in depth
+    - 5 Files and Errors: Reading and writing files · Exceptions (try / except)
+    - 6 OOP: Classes and objects · Inheritance · Polymorphism · Encapsulation
+    - 7 Modules and Libraries: Import and your own modules · pip and packages · First look at NumPy and pandas
+    - 8 Project: Planning a program · Testing your code, plus the Student results app
+  - **Java Programming:** 9 modules, 30 lessons.
+    - 1 Fundamentals: Introduction, JDK and JVM · Variables · Operators · Input and output (Scanner)
+    - 2 Control Flow: If / else and switch · For loops · While and do-while
+    - 3 Methods: Defining methods · Parameters · Return values · Overloading and recursion
+    - 4 Arrays and Strings: Arrays · 2D arrays · Strings and StringBuilder
+    - 5 OOP: Classes and objects · Constructors · Inheritance · Polymorphism · Abstraction and interfaces · Encapsulation
+    - 6 Exceptions and Files: Exceptions · File reading and writing
+    - 7 Collections and Generics: ArrayList · HashMap · HashSet · Generics
+    - 8 Lambdas and Streams: Lambdas · Streams
+    - 9 Project: Designing with classes · Testing with JUnit, plus the Student results app
+  - Every module ends with a module test and a small project. Passing both puts the skill group on the Passport, grouped by topic.
+- **Drafts ("Draft — needs faculty review"):** JavaScript, SQL, C, DSA, Web basics, React, Data analysis and AI basics. These are module outlines in three languages, with no lessons yet.
+- **Completeness checks, both in CI:**
+  - `npm run topics:check` passes for Python and Java in all three languages: all 10 parts, the check, the module test and the project.
+  - `npm run topics:code` runs every exercise:
+    - Python solutions pass their tests, and every Python example prints its stored output;
+    - Java examples and solutions compile with javac and print their stored output;
+    - every starter fails at least one test.
+- **Running code:**
+  - Python runs in the browser (Pyodide). NumPy and pandas load on demand when the code imports them.
+  - JavaScript runs in a worker, SQL in sql.js.
+  - Java answers are checked by their structure until a server sandbox exists (**"Java runner pending"**); the example shows its known output.
+- **Test-out ("I already know this"):** a small link on every lesson.
+  - It asks that lesson's check questions.
+  - Passing marks the lesson **Known**, and the evidence counts like any check.
+  - Not passing leaves the lesson open to learn, with no penalty.
+- **Professor review:** in the college portal, **Topics** (`/institution/topics`) lets a professor or admin:
+  - read any lesson in English, Telugu or Hindi;
+  - mark it **Reviewed** per language, or suggest an edit;
+  - see 👍 / 👎 feedback from learners.
+
+  Learners of that college then see **"Reviewed by [college] faculty"**. Students → a student → **Extra topics** shows self-chosen courses, only with the student's consent.
+- **Where colleges and visitors can see the topics:**
+  - `/topics` (public "See our topics", one free sample lesson per course in all three languages, no sign-in, in the top menu);
+  - the college demo story ("Review a lesson");
+  - `/institution/topics`;
+  - learners at `/learn/courses`;
+  - /dev → "Learner with 2 topics known".
+
+## 4. Tests
+
+All results below are local runs against this branch.
+
+- **Backend:**
+  - structural: 24 passed;
+  - REST and integration: 305 passed, including the new `learningLanguage.test.js`, `marketSearch.test.js` and courses tests.
+- **Frontend:** 20 unit tests passed; `i18n:check` OK (4078 keys).
+- **Browser (Playwright):**
+  - learner-topics: 66/66;
+  - learner journey: 35/35;
+  - dev login: 20/20;
+  - demo: 20/20;
+  - smoke: passed (no console errors, no sideways scroll, no duplicate titles);
+  - team points: 12/13, failing only the voice check above.
+
+## 5. Open items
+
+1. **Telugu and Hindi lesson text needs a native speaker's review** before colleges rely on it. The professor review flow is ready for this.
+2. **Voice on staging:** the founder steps above, then an iPhone check.
+3. **Java server sandbox:** until it exists, Java answers are checked by structure.
+4. **Draft courses need lessons next.** SQL and JavaScript first: they appear in most roles, and their in-browser runners already work.
+5. **College programme builder:** colleges currently pick modules through a cohort brief. A pick-modules screen would make this clearer.
+6. **NumPy / pandas lesson:** the first run loads about 15 MB in the browser. On slow phones it can take a minute, and the runner allows that.
