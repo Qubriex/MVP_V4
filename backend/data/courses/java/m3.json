@@ -8,9 +8,9 @@
   "hi": "Methods"
  },
  "summary": {
-  "en": "Group code into methods with parameters, return results, and overload method names.",
-  "te": "Parameters ఉన్న methods లో code ని కలపడం, ఫలితాలు return చేయడం, method పేర్లు overload చేయడం.",
-  "hi": "Parameters वाले methods में code रखना, result return करना और method नाम overload करना।"
+  "en": "Define methods, pass parameters, return values, overload names and use recursion.",
+  "te": "Methods నిర్వచించడం, parameters పంపడం, values return చేయడం, పేర్లు overload చేయడం, recursion.",
+  "hi": "Methods बनाना, parameters भेजना, values return करना, नाम overload करना और recursion।"
  },
  "lessons": [
   {
@@ -18,9 +18,298 @@
    "n": 1,
    "minutes": 20,
    "title": {
-    "en": "Methods and parameters",
-    "te": "Methods, parameters",
-    "hi": "Methods और parameters"
+    "en": "Defining methods",
+    "te": "Methods నిర్వచించడం",
+    "hi": "Methods बनाना"
+   },
+   "oneLine": {
+    "en": "A method is a named block of code; you define it once with static void name() and call it as many times as you need.",
+    "te": "Method అంటే పేరున్న code block; static void name() తో ఒకసారి నిర్వచించి, ఎన్నిసార్లు కావాలంటే అన్నిసార్లు call చేయవచ్చు.",
+    "hi": "Method नाम वाला code block है; static void name() से एक बार बनाइए और जितनी बार चाहें call कीजिए।"
+   },
+   "useCase": {
+    "en": "A college app has printHeader() for the college name and address, and calls it at the top of every report.",
+    "te": "College app కి college పేరు, చిరునామా కోసం printHeader() ఉంటుంది; ప్రతి report పైన దాన్ని call చేస్తుంది.",
+    "hi": "College app में college के नाम और पते के लिए printHeader() है, जिसे हर report के ऊपर call किया जाता है।"
+   },
+   "explain": {
+    "en": [
+     "When the same lines appear in many places, put them in a method.",
+     "static void printHeader() { ... } defines a method: static (no object needed for now), void (gives nothing back), a name, and ( ).",
+     "Call it by its name with brackets: printHeader();",
+     "Methods live inside the class but outside main.",
+     "Name methods with a verb in camelCase: printHeader, showMenu, calculateFee."
+    ],
+    "te": [
+     "అవే lines చాలా చోట్ల వస్తే వాటిని method లో పెట్టండి.",
+     "static void printHeader() { ... } method ని నిర్వచిస్తుంది: static (ఇప్పటికి object అవసరం లేదు), void (ఏమీ తిరిగి ఇవ్వదు), పేరు, ( ).",
+     "పేరు, brackets తో call చేయండి: printHeader();",
+     "Methods class లోపల, main బయట ఉంటాయి.",
+     "Methods కి camelCase లో క్రియతో పేరు పెట్టండి: printHeader, showMenu, calculateFee."
+    ],
+    "hi": [
+     "जब वही lines कई जगह आएँ, उन्हें method में रखिए।",
+     "static void printHeader() { ... } एक method बनाता है: static (अभी object नहीं चाहिए), void (कुछ वापस नहीं देता), नाम, और ( )।",
+     "नाम और brackets से call कीजिए: printHeader();",
+     "Methods class के अंदर पर main के बाहर रहते हैं।",
+     "Methods को camelCase में क्रिया वाला नाम दीजिए: printHeader, showMenu, calculateFee।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "A method is a recipe with a name; calling it cooks the recipe."
+    ],
+    "te": [
+     "Method అంటే పేరున్న వంటకం; call చేస్తే వంట జరుగుతుంది."
+    ],
+    "hi": [
+     "Method नाम वाली recipe है; call करने पर recipe बनती है।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "A quiz app: showRules() is called before every round."
+    ],
+    "te": [
+     "Quiz app: ప్రతి round ముందు showRules() call అవుతుంది."
+    ],
+    "hi": [
+     "Quiz app: हर round से पहले showRules() call होता है।"
+    ]
+   },
+   "picture": "flowchart LR\n  M[\"main\"] -->|\"printHeader()\"| H[\"printHeader\"]\n  H -->|\"back\"| M\n  M -->|\"printHeader()\"| H",
+   "code": {
+    "source": "public class Main {\n    static void printHeader() {\n        System.out.println(\"Govt Degree College, Warangal\");\n        System.out.println(\"----------------------------\");\n    }\n\n    public static void main(String[] args) {\n        printHeader();\n        System.out.println(\"Attendance report\");\n        printHeader();\n        System.out.println(\"Fee report\");\n    }\n}",
+    "output": "Govt Degree College, Warangal\n----------------------------\nAttendance report\nGovt Degree College, Warangal\n----------------------------\nFee report",
+    "notes": [
+     {
+      "line": 2,
+      "note": {
+       "en": "Define the method: static void, a name, empty brackets.",
+       "te": "Method నిర్వచించండి: static void, పేరు, ఖాళీ brackets.",
+       "hi": "Method बनाइए: static void, नाम, ख़ाली brackets।"
+      }
+     },
+     {
+      "line": 3,
+      "note": {
+       "en": "Its body: the lines to reuse.",
+       "te": "దాని body: మళ్లీ వాడే lines.",
+       "hi": "उसका body: दोबारा इस्तेमाल होने वाली lines।"
+      }
+     },
+     {
+      "line": 8,
+      "note": {
+       "en": "Call it: Java runs the body, then comes back here.",
+       "te": "Call చేయండి: Java body నడిపి ఇక్కడికి తిరిగి వస్తుంది.",
+       "hi": "Call कीजिए: Java body चलाकर यहाँ लौटता है।"
+      }
+     },
+     {
+      "line": 10,
+      "note": {
+       "en": "Call it again for the second report.",
+       "te": "రెండో report కోసం మళ్లీ call చేయండి.",
+       "hi": "दूसरी report के लिए फिर call कीजिए।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "public static void main(String[] args) {\n    static void greet() { }\n}",
+     "fix": {
+      "en": "A method cannot be inside another method. Put greet outside main, inside the class.",
+      "te": "Method మరో method లోపల ఉండకూడదు. greet ని main బయట, class లోపల పెట్టండి.",
+      "hi": "Method दूसरे method के अंदर नहीं हो सकता। greet को main के बाहर, class के अंदर रखिए।"
+     }
+    },
+    {
+     "wrong": "printHeader;",
+     "fix": {
+      "en": "Calling needs brackets: printHeader();",
+      "te": "Call చేయడానికి brackets కావాలి: printHeader();",
+      "hi": "Call करने के लिए brackets चाहिए: printHeader();"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "void means the method…",
+      "te": "void అంటే method…",
+      "hi": "void मतलब method…"
+     },
+     "options": [
+      {
+       "en": "returns nothing",
+       "te": "ఏమీ return చేయదు",
+       "hi": "कुछ return नहीं करता"
+      },
+      {
+       "en": "is empty",
+       "te": "ఖాళీ",
+       "hi": "ख़ाली है"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "No value back.",
+      "te": "Value తిరిగి రాదు.",
+      "hi": "कोई value वापस नहीं।"
+     }
+    },
+    {
+     "q": {
+      "en": "Where do methods go?",
+      "te": "Methods ఎక్కడ ఉంటాయి?",
+      "hi": "Methods कहाँ रहते हैं?"
+     },
+     "options": [
+      {
+       "en": "inside the class, outside main",
+       "te": "Class లోపల, main బయట",
+       "hi": "class के अंदर, main के बाहर"
+      },
+      {
+       "en": "inside main",
+       "te": "main లోపల",
+       "hi": "main के अंदर"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Not nested.",
+      "te": "లోపల లోపల కాదు.",
+      "hi": "एक के अंदर एक नहीं।"
+     }
+    },
+    {
+     "q": {
+      "en": "How do you call showMenu?",
+      "te": "showMenu ని ఎలా call చేస్తారు?",
+      "hi": "showMenu को कैसे call करें?"
+     },
+     "options": [
+      "showMenu;",
+      "showMenu();",
+      "call showMenu"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Name and brackets.",
+      "te": "పేరు, brackets.",
+      "hi": "नाम और brackets।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write static void printLine() that prints 20 dashes, and call it before and after printing \"Results\" in main.",
+     "te": "20 dashes print చేసే static void printLine() రాసి, main లో \"Results\" print చేసే ముందు, తర్వాత call చేయండి.",
+     "hi": "static void printLine() लिखिए जो 20 dashes print करे, और main में \"Results\" print करने से पहले और बाद में call कीजिए।"
+    },
+    "starter": "public class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Results\");\n    }\n}\n",
+    "tests": [
+     {
+      "name": "defines printLine",
+      "pattern": "static\\s+void\\s+printLine\\s*\\(\\s*\\)"
+     },
+     {
+      "name": "calls it twice",
+      "pattern": "(printLine\\s*\\(\\s*\\)\\s*;[\\s\\S]*){2}",
+      "expected": "printLine(); twice"
+     },
+     {
+      "name": "prints dashes",
+      "pattern": "\"-{20}\"|repeat\\s*\\(\\s*20\\s*\\)",
+      "expected": "\"--------------------\"",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "static void printLine() { System.out.println(\"--------------------\"); }",
+      "te": "static void printLine() { System.out.println(\"--------------------\"); }",
+      "hi": "static void printLine() { System.out.println(\"--------------------\"); }"
+     },
+     {
+      "en": "Put it inside the class, outside main.",
+      "te": "దాన్ని class లోపల, main బయట పెట్టండి.",
+      "hi": "इसे class के अंदर, main के बाहर रखिए।"
+     },
+     {
+      "en": "In main: printLine(); println(\"Results\"); printLine();",
+      "te": "main లో: printLine(); println(\"Results\"); printLine();",
+      "hi": "main में: printLine(); println(\"Results\"); printLine();"
+     }
+    ],
+    "solution": "public class Main {\n    static void printLine() {\n        System.out.println(\"--------------------\");\n    }\n\n    public static void main(String[] args) {\n        printLine();\n        System.out.println(\"Results\");\n        printLine();\n    }\n}",
+    "output": "--------------------\nResults\n--------------------"
+   },
+   "cheat": {
+    "en": [
+     "static void name() { ... } inside the class",
+     "Call: name();",
+     "Names: verbs in camelCase."
+    ],
+    "te": [
+     "class లోపల static void name() { ... }",
+     "Call: name();",
+     "పేర్లు: camelCase లో క్రియలు."
+    ],
+    "hi": [
+     "class के अंदर static void name() { ... }",
+     "Call: name();",
+     "नाम: camelCase में क्रियाएँ।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A college prints its name and address on every report. Explain how a method avoids repeating those lines.",
+      "te": "College ప్రతి report పై తన పేరు, చిరునామా print చేస్తుంది. Method ఆ lines ని మళ్లీ రాయకుండా ఎలా చేస్తుందో వివరించండి.",
+      "hi": "College हर report पर अपना नाम और पता print करता है। Method उन lines को दोहराने से कैसे बचाता है, समझाइए।"
+     },
+     {
+      "en": "Explain each word in static void printHeader().",
+      "te": "static void printHeader() లో ప్రతి పదాన్ని వివరించండి.",
+      "hi": "static void printHeader() के हर शब्द को समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "method"
+     ],
+     [
+      "void",
+      "static",
+      "call"
+     ],
+     [
+      "repeat",
+      "reuse",
+      "once",
+      "మళ్లీ",
+      "दोहरा"
+     ]
+    ],
+    "challenge": {
+     "en": "Say what happens when main calls a method.",
+     "te": "main ఒక method ని call చేసినప్పుడు ఏమవుతుందో చెప్పండి.",
+     "hi": "main किसी method को call करे तो क्या होता है, बताइए।"
+    }
+   }
+  },
+  {
+   "id": "jv-m3-l2",
+   "n": 2,
+   "minutes": 20,
+   "title": {
+    "en": "Parameters",
+    "te": "Parameters",
+    "hi": "Parameters"
    },
    "oneLine": {
     "en": "A method is a named block of code you can call again and again, giving it different values through parameters.",
@@ -308,45 +597,45 @@
    }
   },
   {
-   "id": "jv-m3-l2",
-   "n": 2,
+   "id": "jv-m3-l3",
+   "n": 3,
    "minutes": 20,
    "title": {
-    "en": "Return values and overloading",
-    "te": "Return values, overloading",
-    "hi": "Return values और overloading"
+    "en": "Return values",
+    "te": "Return values",
+    "hi": "Return values"
    },
    "oneLine": {
-    "en": "A method can return a result to its caller, and overloading lets several methods share a name when their parameters differ.",
-    "te": "Method తనను call చేసినవారికి ఫలితం return చేయగలదు; parameters వేరుగా ఉంటే overloading తో చాలా methods ఒకే పేరు పంచుకోగలవు.",
-    "hi": "Method call करने वाले को result return कर सकता है, और overloading से कई methods एक नाम रख सकते हैं जब उनके parameters अलग हों।"
+    "en": "A method can send a result back with return; you write the result's type before the name instead of void.",
+    "te": "Method return తో ఫలితాన్ని తిరిగి పంపగలదు; పేరు ముందు void బదులు ఫలితం type రాస్తారు.",
+    "hi": "Method return से result वापस भेज सकता है; नाम से पहले void की जगह result का type लिखते हैं।"
    },
    "useCase": {
-    "en": "A GST calculator has withGst(price) returning the price with 18% tax, so the bill, the receipt and the report can all use the same number.",
+    "en": "A GST calculator has withGst(price) returning the price with 18% tax, so the bill, the receipt and the report all use the same number.",
     "te": "GST calculator కి 18% tax తో ధర return చేసే withGst(price) ఉంటుంది; bill, receipt, report అన్నీ అదే number వాడతాయి.",
-    "hi": "GST calculator में withGst(price) 18% tax के साथ दाम return करता है, ताकि bill, receipt और report सब वही number इस्तेमाल करें।"
+    "hi": "GST calculator में withGst(price) 18% tax के साथ दाम return करता है, ताकि bill, receipt और report सब वही number लें।"
    },
    "explain": {
     "en": [
      "Instead of void, write the type of the answer: static double withGst(double price).",
-     "return price * 1.18; sends the value back and ends the method.",
-     "The caller can store it: double total = withGst(100);",
-     "Overloading: area(int side) and area(int length, int width) can both exist; Java picks one by the arguments.",
-     "Prefer return to println inside a method, so the result can be reused."
+     "return price * 1.18; sends the value back and ends the method at once.",
+     "The caller stores or uses it: double total = withGst(100);",
+     "Every path through the method must return a value of that type.",
+     "Prefer return over println inside a method, so the result can be reused anywhere."
     ],
     "te": [
      "void బదులు జవాబు type రాయండి: static double withGst(double price).",
-     "return price * 1.18; value ని తిరిగి పంపి method ముగిస్తుంది.",
-     "Call చేసినవారు దాన్ని దాయవచ్చు: double total = withGst(100);",
-     "Overloading: area(int side), area(int length, int width) రెండూ ఉండవచ్చు; arguments బట్టి Java ఒకటి ఎంచుకుంటుంది.",
-     "Method లోపల println కంటే return మంచిది, ఫలితం మళ్లీ వాడుకోవచ్చు."
+     "return price * 1.18; value ని తిరిగి పంపి method ని వెంటనే ముగిస్తుంది.",
+     "Call చేసినవారు దాన్ని దాస్తారు లేదా వాడతారు: double total = withGst(100);",
+     "Method లోని ప్రతి దారి ఆ type value ని return చేయాలి.",
+     "Method లోపల println కంటే return మంచిది, ఫలితం ఎక్కడైనా మళ్లీ వాడవచ్చు."
     ],
     "hi": [
      "void की जगह जवाब का type लिखिए: static double withGst(double price)।",
-     "return price * 1.18; value वापस भेजता है और method ख़त्म करता है।",
-     "Call करने वाला उसे रख सकता है: double total = withGst(100);",
-     "Overloading: area(int side) और area(int length, int width) दोनों हो सकते हैं; Java arguments देखकर एक चुनता है।",
-     "Method के अंदर println से बेहतर return है, ताकि result दोबारा इस्तेमाल हो।"
+     "return price * 1.18; value वापस भेजता है और method तुरंत ख़त्म करता है।",
+     "Call करने वाला उसे रखता या इस्तेमाल करता है: double total = withGst(100);",
+     "Method के हर रास्ते को उस type की value return करनी होगी।",
+     "Method के अंदर println से बेहतर return है, ताकि result कहीं भी दोबारा इस्तेमाल हो।"
     ]
    },
    "simpler": {
@@ -373,15 +662,15 @@
    },
    "picture": "flowchart LR\n  C[\"total = withGst(100)\"] -->|100| M[\"withGst(price)\"] -->|\"return 118.0\"| C",
    "code": {
-    "source": "public class Main {\n    static double withGst(double price) {\n        return price * 1.18;\n    }\n\n    static int area(int side) {\n        return side * side;\n    }\n\n    static int area(int length, int width) {\n        return length * width;\n    }\n\n    public static void main(String[] args) {\n        double total = withGst(100);\n        System.out.println(total);\n        System.out.println(area(5) + \" \" + area(4, 6));\n    }\n}",
-    "output": "118.0\n25 24",
+    "source": "public class Main {\n    static double withGst(double price) {\n        return price * 1.18;\n    }\n\n    static int max(int a, int b) {\n        if (a > b) {\n            return a;\n        }\n        return b;\n    }\n\n    public static void main(String[] args) {\n        double total = withGst(100);\n        System.out.println(total);\n        System.out.println(max(70, 85));\n    }\n}",
+    "output": "118.0\n85",
     "notes": [
      {
       "line": 2,
       "note": {
-       "en": "double before the name: this method returns a double.",
-       "te": "పేరు ముందు double: ఈ method double return చేస్తుంది.",
-       "hi": "नाम से पहले double: यह method double return करता है।"
+       "en": "double before the name: it returns a double.",
+       "te": "పేరు ముందు double: ఇది double return చేస్తుంది.",
+       "hi": "नाम से पहले double: यह double return करता है।"
       }
      },
      {
@@ -393,35 +682,27 @@
       }
      },
      {
-      "line": 6,
+      "line": 8,
       "note": {
-       "en": "area with one parameter: a square.",
-       "te": "ఒక parameter ఉన్న area: చతురస్రం.",
-       "hi": "एक parameter वाला area: वर्ग।"
+       "en": "Returning a ends the method here.",
+       "te": "a ని return చేస్తే method ఇక్కడే ముగుస్తుంది.",
+       "hi": "a return करने पर method यहीं ख़त्म होता है।"
       }
      },
      {
       "line": 10,
       "note": {
-       "en": "Same name, two parameters: a rectangle. This is overloading.",
-       "te": "అదే పేరు, రెండు parameters: దీర్ఘచతురస్రం. ఇదే overloading.",
-       "hi": "वही नाम, दो parameters: आयत। यही overloading है।"
+       "en": "Every path returns something.",
+       "te": "ప్రతి దారి ఏదో return చేస్తుంది.",
+       "hi": "हर रास्ता कुछ return करता है।"
       }
      },
      {
-      "line": 15,
+      "line": 14,
       "note": {
        "en": "The returned value is stored in total.",
        "te": "Return అయిన value total లో దాయబడుతుంది.",
        "hi": "Return हुई value total में रखी जाती है।"
-      }
-     },
-     {
-      "line": 17,
-      "note": {
-       "en": "Java picks the right area by the number of arguments.",
-       "te": "Arguments సంఖ్య బట్టి Java సరైన area ఎంచుకుంటుంది.",
-       "hi": "Arguments की संख्या देखकर Java सही area चुनता है।"
       }
      }
     ]
@@ -432,7 +713,7 @@
      "fix": {
       "en": "A non-void method must return: add return s;",
       "te": "void కాని method return చేయాలి: return s; జోడించండి.",
-      "hi": "void नहीं है तो return करना ज़रूरी है: return s; जोड़िए।"
+      "hi": "void नहीं है तो return ज़रूरी है: return s; जोड़िए।"
      }
     },
     {
@@ -490,6 +771,262 @@
     },
     {
      "q": {
+      "en": "Why return instead of println?",
+      "te": "println బదులు return ఎందుకు?",
+      "hi": "println की जगह return क्यों?"
+     },
+     "options": [
+      {
+       "en": "The result can be reused",
+       "te": "ఫలితం మళ్లీ వాడవచ్చు",
+       "hi": "result दोबारा इस्तेमाल हो सकता है"
+      },
+      {
+       "en": "It is faster to type",
+       "te": "Type చేయడం వేగం",
+       "hi": "लिखना तेज़ है"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Reuse.",
+      "te": "మళ్లీ వాడకం.",
+      "hi": "दोबारा इस्तेमाल।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write static double average(int a, int b, int c) that returns the average of three marks as a double. Print average(70, 85, 90) from main.",
+     "te": "మూడు marks సగటును double గా return చేసే static double average(int a, int b, int c) రాయండి. main నుంచి average(70, 85, 90) print చేయండి.",
+     "hi": "static double average(int a, int b, int c) लिखिए जो तीन marks का औसत double में return करे। main से average(70, 85, 90) print कीजिए।"
+    },
+    "starter": "public class Main {\n    static double average(int a, int b, int c) {\n        return (a + b + c) / 3;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(average(70, 85, 90));\n    }\n}\n",
+    "tests": [
+     {
+      "name": "returns a double",
+      "pattern": "static\\s+double\\s+average\\s*\\(\\s*int\\s+\\w+\\s*,\\s*int\\s+\\w+\\s*,\\s*int\\s+\\w+\\s*\\)"
+     },
+     {
+      "name": "divides by a double",
+      "pattern": "/\\s*3\\.0|\\(double\\)",
+      "expected": "/ 3.0"
+     },
+     {
+      "name": "uses return",
+      "pattern": "return\\s+\\(",
+      "expected": "return (a + b + c) / 3.0;",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "(a + b + c) / 3 drops decimals.",
+      "te": "(a + b + c) / 3 decimals వదిలేస్తుంది.",
+      "hi": "(a + b + c) / 3 decimals हटाता है।"
+     },
+     {
+      "en": "Divide by 3.0 to keep them.",
+      "te": "వాటిని ఉంచడానికి 3.0 తో భాగించండి.",
+      "hi": "उन्हें रखने के लिए 3.0 से भाग दीजिए।"
+     },
+     {
+      "en": "return (a + b + c) / 3.0;",
+      "te": "return (a + b + c) / 3.0;",
+      "hi": "return (a + b + c) / 3.0;"
+     }
+    ],
+    "solution": "public class Main {\n    static double average(int a, int b, int c) {\n        return (a + b + c) / 3.0;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(average(70, 85, 90));\n    }\n}",
+    "output": "81.66666666666667"
+   },
+   "cheat": {
+    "en": [
+     "static Type name(params) { return value; }",
+     "void = no return · return ends the method",
+     "Every path returns · store it: Type x = name(...);"
+    ],
+    "te": [
+     "static Type name(params) { return value; }",
+     "void = return లేదు · return method ముగిస్తుంది",
+     "ప్రతి దారి return · దాయండి: Type x = name(...);"
+    ],
+    "hi": [
+     "static Type name(params) { return value; }",
+     "void = return नहीं · return method ख़त्म करता है",
+     "हर रास्ता return · रखिए: Type x = name(...);"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A shop uses withGst(price) in the bill, the receipt and the monthly report. Explain why returning the value is better than printing it inside the method.",
+      "te": "Shop bill, receipt, నెలవారీ report లో withGst(price) వాడుతుంది. Method లో print చేయడం కంటే value return చేయడం ఎందుకు మంచిదో వివరించండి.",
+      "hi": "दुकान bill, receipt और मासिक report में withGst(price) इस्तेमाल करती है। Method में print करने से value return करना बेहतर क्यों है, समझाइए।"
+     },
+     {
+      "en": "Explain what happens to code after a return line, with the max(a, b) example.",
+      "te": "max(a, b) ఉదాహరణతో return line తర్వాత code కి ఏమవుతుందో వివరించండి.",
+      "hi": "max(a, b) उदाहरण से समझाइए कि return line के बाद के code का क्या होता है।"
+     }
+    ],
+    "keywords": [
+     [
+      "return"
+     ],
+     [
+      "type",
+      "double",
+      "int",
+      "void"
+     ],
+     [
+      "reuse",
+      "value",
+      "ends",
+      "caller",
+      "ముగు",
+      "ख़त्म"
+     ]
+    ],
+    "challenge": {
+     "en": "Say what a return type is.",
+     "te": "Return type అంటే ఏమిటో చెప్పండి.",
+     "hi": "Return type क्या है, बताइए।"
+    }
+   }
+  },
+  {
+   "id": "jv-m3-l4",
+   "n": 4,
+   "minutes": 20,
+   "title": {
+    "en": "Overloading and recursion",
+    "te": "Overloading, recursion",
+    "hi": "Overloading और recursion"
+   },
+   "oneLine": {
+    "en": "Overloading lets several methods share a name when their parameters differ; recursion is a method that calls itself on a smaller problem until it reaches a simple case.",
+    "te": "Parameters వేరుగా ఉంటే overloading వల్ల చాలా methods ఒకే పేరు పంచుకుంటాయి; recursion అంటే ఒక method చిన్న సమస్యపై తనను తానే call చేసుకుంటూ సులభ case కి చేరడం.",
+    "hi": "Overloading से कई methods एक नाम रख सकते हैं जब उनके parameters अलग हों; recursion वह method है जो छोटी समस्या पर ख़ुद को call करता है जब तक आसान case न आ जाए।"
+   },
+   "useCase": {
+    "en": "An area tool has area(side) for squares and area(length, width) for rooms; a file explorer counts files in folders inside folders using recursion.",
+    "te": "Area tool కి squares కోసం area(side), rooms కోసం area(length, width) ఉంటాయి; file explorer folders లోపలి folders లో files ని recursion తో లెక్కిస్తుంది.",
+    "hi": "Area tool में squares के लिए area(side) और कमरों के लिए area(length, width) है; file explorer folders के अंदर के folders में files recursion से गिनता है।"
+   },
+   "explain": {
+    "en": [
+     "Overloading: area(int side) and area(int length, int width) can both exist. Java picks one by the number and types of the arguments.",
+     "The return type alone is not enough to overload; the parameters must differ.",
+     "Recursion: factorial(n) = n × factorial(n − 1), and factorial(1) = 1.",
+     "Every recursive method needs a base case that stops it; without one it runs until a StackOverflowError.",
+     "Each call works on a smaller problem, moving towards the base case."
+    ],
+    "te": [
+     "Overloading: area(int side), area(int length, int width) రెండూ ఉండవచ్చు. Arguments సంఖ్య, types బట్టి Java ఒకటి ఎంచుకుంటుంది.",
+     "Return type ఒక్కటే overload కి చాలదు; parameters వేరుగా ఉండాలి.",
+     "Recursion: factorial(n) = n × factorial(n − 1), factorial(1) = 1.",
+     "ప్రతి recursive method కి దాన్ని ఆపే base case కావాలి; లేకపోతే StackOverflowError వచ్చే వరకు నడుస్తుంది.",
+     "ప్రతి call చిన్న సమస్యపై పనిచేస్తూ base case వైపు వెళ్తుంది."
+    ],
+    "hi": [
+     "Overloading: area(int side) और area(int length, int width) दोनों हो सकते हैं। Java arguments की संख्या और types देखकर एक चुनता है।",
+     "सिर्फ़ return type से overload नहीं होता; parameters अलग होने चाहिए।",
+     "Recursion: factorial(n) = n × factorial(n − 1), और factorial(1) = 1।",
+     "हर recursive method को रोकने वाला base case चाहिए; उसके बिना StackOverflowError तक चलता है।",
+     "हर call छोटी समस्या पर काम करता है और base case की ओर बढ़ता है।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "Overloading: one name, many shapes. Recursion: a set of Russian dolls, each smaller, until the last one."
+    ],
+    "te": [
+     "Overloading: ఒకే పేరు, ఎన్నో రూపాలు. Recursion: ఒకదానిలో ఒకటి చిన్న బొమ్మలు, చివరిది వచ్చే వరకు."
+    ],
+    "hi": [
+     "Overloading: एक नाम, कई रूप। Recursion: एक के अंदर एक छोटी गुड़िया, आख़िरी तक।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "Recursion: sum of digits of 4321 is 1 + sumDigits(432), down to a single digit."
+    ],
+    "te": [
+     "Recursion: 4321 అంకెల మొత్తం 1 + sumDigits(432), ఒక్క అంకె వరకు."
+    ],
+    "hi": [
+     "Recursion: 4321 के अंकों का जोड़ 1 + sumDigits(432), एक अंक तक।"
+    ]
+   },
+   "picture": "flowchart TD\n  F4[\"factorial(4) = 4 × factorial(3)\"] --> F3[\"3 × factorial(2)\"] --> F2[\"2 × factorial(1)\"] --> F1[\"base case: 1\"]",
+   "code": {
+    "source": "public class Main {\n    static int area(int side) {\n        return side * side;\n    }\n\n    static int area(int length, int width) {\n        return length * width;\n    }\n\n    static int factorial(int n) {\n        if (n <= 1) {\n            return 1;\n        }\n        return n * factorial(n - 1);\n    }\n\n    public static void main(String[] args) {\n        System.out.println(area(5) + \" \" + area(4, 6));\n        System.out.println(factorial(5));\n    }\n}",
+    "output": "25 24\n120",
+    "notes": [
+     {
+      "line": 2,
+      "note": {
+       "en": "area with one parameter: a square.",
+       "te": "ఒక parameter area: చతురస్రం.",
+       "hi": "एक parameter वाला area: वर्ग।"
+      }
+     },
+     {
+      "line": 6,
+      "note": {
+       "en": "Same name, two parameters: overloading.",
+       "te": "అదే పేరు, రెండు parameters: overloading.",
+       "hi": "वही नाम, दो parameters: overloading।"
+      }
+     },
+     {
+      "line": 11,
+      "note": {
+       "en": "The base case stops the recursion.",
+       "te": "Base case recursion ని ఆపుతుంది.",
+       "hi": "Base case recursion को रोकता है।"
+      }
+     },
+     {
+      "line": 14,
+      "note": {
+       "en": "The method calls itself with a smaller n.",
+       "te": "Method చిన్న n తో తనను తాను call చేస్తుంది.",
+       "hi": "Method छोटे n के साथ ख़ुद को call करता है।"
+      }
+     },
+     {
+      "line": 18,
+      "note": {
+       "en": "Java picks the right area by the number of arguments.",
+       "te": "Arguments సంఖ్య బట్టి Java సరైన area ఎంచుకుంటుంది.",
+       "hi": "Arguments की संख्या देखकर Java सही area चुनता है।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "static int f(int n) {\n    return n * f(n - 1);\n}",
+     "fix": {
+      "en": "No base case: it never stops (StackOverflowError). Add if (n <= 1) return 1;",
+      "te": "Base case లేదు: ఎప్పుడూ ఆగదు (StackOverflowError). if (n <= 1) return 1; జోడించండి.",
+      "hi": "Base case नहीं: कभी नहीं रुकता (StackOverflowError)। if (n <= 1) return 1; जोड़िए।"
+     }
+    },
+    {
+     "wrong": "static int area(int s) { ... }\nstatic double area(int s) { ... }",
+     "fix": {
+      "en": "Only the return type differs, so Java cannot tell them apart. Change the parameters.",
+      "te": "Return type మాత్రమే వేరు, Java వాటిని గుర్తించలేదు. Parameters మార్చండి.",
+      "hi": "सिर्फ़ return type अलग है, Java फ़र्क़ नहीं कर पाता। Parameters बदलिए।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
       "en": "Overloading means…",
       "te": "Overloading అంటే…",
       "hi": "Overloading मतलब…"
@@ -497,7 +1034,7 @@
      "options": [
       {
        "en": "same name, different parameters",
-       "te": "అదే పేరు, వేర్వేరు parameters",
+       "te": "ఒకే పేరు, వేర్వేరు parameters",
        "hi": "वही नाम, अलग parameters"
       },
       {
@@ -512,107 +1049,150 @@
       "te": "Parameters బట్టి Java ఎంచుకుంటుంది.",
       "hi": "Java parameters से चुनता है।"
      }
+    },
+    {
+     "q": {
+      "en": "Every recursive method needs…",
+      "te": "ప్రతి recursive method కి…",
+      "hi": "हर recursive method को चाहिए…"
+     },
+     "options": [
+      {
+       "en": "a base case",
+       "te": "Base case",
+       "hi": "base case"
+      },
+      {
+       "en": "a loop",
+       "te": "Loop",
+       "hi": "loop"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "To stop.",
+      "te": "ఆపడానికి.",
+      "hi": "रुकने के लिए।"
+     }
+    },
+    {
+     "q": {
+      "en": "factorial(3) is…",
+      "te": "factorial(3) ఎంత?",
+      "hi": "factorial(3) क्या है?"
+     },
+     "options": [
+      "3",
+      "6",
+      "9"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "3 × 2 × 1.",
+      "te": "3 × 2 × 1.",
+      "hi": "3 × 2 × 1।"
+     }
     }
    ],
    "task": {
     "prompt": {
-     "en": "Write static double average(int a, int b) and an overloaded static double average(int a, int b, int c). Both return the average as a double.",
-     "te": "static double average(int a, int b), overload అయిన static double average(int a, int b, int c) రాయండి. రెండూ సగటును double గా return చేయాలి.",
-     "hi": "static double average(int a, int b) और overloaded static double average(int a, int b, int c) लिखिए। दोनों औसत double में return करें।"
+     "en": "Write static int sumTo(int n) that returns 1 + 2 + … + n using recursion (sumTo(1) is 1), and an overloaded static int sumTo(int from, int to) that returns from + … + to.",
+     "te": "Recursion తో 1 + 2 + … + n return చేసే static int sumTo(int n) (sumTo(1) = 1), from + … + to return చేసే overload static int sumTo(int from, int to) రాయండి.",
+     "hi": "Recursion से 1 + 2 + … + n return करने वाला static int sumTo(int n) (sumTo(1) = 1) लिखिए, और from + … + to return करने वाला overloaded static int sumTo(int from, int to)।"
     },
-    "starter": "public class Main {\n    static double average(int a, int b) {\n        return (a + b) / 2;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(average(70, 85));\n    }\n}\n",
+    "starter": "public class Main {\n    static int sumTo(int n) {\n        int total = 0;\n        for (int i = 1; i <= n; i++) {\n            total += i;\n        }\n        return total;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(sumTo(5));\n    }\n}\n",
     "tests": [
      {
-      "name": "two-number version",
-      "pattern": "static\\s+double\\s+average\\s*\\(\\s*int\\s+\\w+\\s*,\\s*int\\s+\\w+\\s*\\)"
+      "name": "recursive sumTo with a base case",
+      "pattern": "static\\s+int\\s+sumTo\\s*\\(\\s*int\\s+\\w+\\s*\\)\\s*\\{[\\s\\S]*?if\\s*\\([\\s\\S]*?return[\\s\\S]*?sumTo\\s*\\(\\s*\\w+\\s*-\\s*1\\s*\\)"
      },
      {
-      "name": "three-number version",
-      "pattern": "static\\s+double\\s+average\\s*\\(\\s*int\\s+\\w+\\s*,\\s*int\\s+\\w+\\s*,\\s*int\\s+\\w+\\s*\\)"
+      "name": "overloaded sumTo(from, to)",
+      "pattern": "static\\s+int\\s+sumTo\\s*\\(\\s*int\\s+\\w+\\s*,\\s*int\\s+\\w+\\s*\\)"
      },
      {
-      "name": "divides by a double",
-      "pattern": "/\\s*(2\\.0|3\\.0)|\\(double\\)",
-      "expected": "/ 2.0 and / 3.0"
-     },
-     {
-      "name": "both divisions use doubles",
-      "pattern": "/\\s*2\\.0[\\s\\S]*/\\s*3\\.0|/\\s*3\\.0[\\s\\S]*/\\s*2\\.0|\\(double\\)[\\s\\S]*\\(double\\)",
-      "expected": "/ 2.0 and / 3.0",
+      "name": "no loop in the one-number version",
+      "absent": "static\\s+int\\s+sumTo\\s*\\(\\s*int\\s+\\w+\\s*\\)\\s*\\{[^}]*for\\s*\\(",
       "hidden": true
      }
     ],
     "hints": [
      {
-      "en": "(a + b) / 2 drops decimals; use / 2.0.",
-      "te": "(a + b) / 2 decimals వదిలేస్తుంది; / 2.0 వాడండి.",
-      "hi": "(a + b) / 2 decimals हटा देता है; / 2.0 लिखिए।"
+      "en": "Base case: if (n <= 1) return n;",
+      "te": "Base case: if (n <= 1) return n;",
+      "hi": "Base case: if (n <= 1) return n;"
      },
      {
-      "en": "Add a second method with the same name and three int parameters.",
-      "te": "అదే పేరు, మూడు int parameters తో రెండో method జోడించండి.",
-      "hi": "उसी नाम और तीन int parameters वाला दूसरा method जोड़िए।"
+      "en": "Otherwise: return n + sumTo(n - 1);",
+      "te": "లేకపోతే: return n + sumTo(n - 1);",
+      "hi": "नहीं तो: return n + sumTo(n - 1);"
      },
      {
-      "en": "return (a + b + c) / 3.0;",
-      "te": "return (a + b + c) / 3.0;",
-      "hi": "return (a + b + c) / 3.0;"
+      "en": "sumTo(from, to): return sumTo(to) - sumTo(from - 1);",
+      "te": "sumTo(from, to): return sumTo(to) - sumTo(from - 1);",
+      "hi": "sumTo(from, to): return sumTo(to) - sumTo(from - 1);"
      }
     ],
-    "solution": "public class Main {\n    static double average(int a, int b) {\n        return (a + b) / 2.0;\n    }\n\n    static double average(int a, int b, int c) {\n        return (a + b + c) / 3.0;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(average(70, 85) + \" \" + average(60, 70, 90));\n    }\n}",
-    "output": "77.5 73.33333333333333"
+    "solution": "public class Main {\n    static int sumTo(int n) {\n        if (n <= 1) {\n            return n;\n        }\n        return n + sumTo(n - 1);\n    }\n\n    static int sumTo(int from, int to) {\n        return sumTo(to) - sumTo(from - 1);\n    }\n\n    public static void main(String[] args) {\n        System.out.println(sumTo(5) + \" \" + sumTo(3, 5));\n    }\n}",
+    "output": "15 12"
    },
    "cheat": {
     "en": [
-     "static Type name(params) { return value; }",
-     "void = no return · return ends the method",
-     "Overloading: same name, different parameter list."
+     "Overloading: same name, different parameter list (not just the return type).",
+     "Recursion: a method that calls itself on a smaller input.",
+     "Always a base case · each call moves towards it."
     ],
     "te": [
-     "static Type name(params) { return value; }",
-     "void = return లేదు · return method ముగిస్తుంది",
-     "Overloading: అదే పేరు, వేర్వేరు parameter list."
+     "Overloading: ఒకే పేరు, వేర్వేరు parameter list (return type మాత్రమే కాదు).",
+     "Recursion: చిన్న input పై తనను తానే call చేసే method.",
+     "ఎప్పుడూ base case · ప్రతి call దాని వైపు."
     ],
     "hi": [
-     "static Type name(params) { return value; }",
-     "void = return नहीं · return method ख़त्म करता है",
-     "Overloading: वही नाम, अलग parameter list।"
+     "Overloading: वही नाम, अलग parameter list (सिर्फ़ return type नहीं)।",
+     "Recursion: छोटे input पर ख़ुद को call करने वाला method।",
+     "हमेशा base case · हर call उसकी ओर।"
     ]
    },
    "check": {
     "questions": [
      {
-      "en": "A shop uses withGst(price) in the bill, the receipt and the monthly report. Explain why returning the value is better than printing it inside the method.",
-      "te": "Shop bill, receipt, నెలవారీ report లో withGst(price) వాడుతుంది. Method లో print చేయడం కంటే value return చేయడం ఎందుకు మంచిదో వివరించండి.",
-      "hi": "दुकान bill, receipt और मासिक report में withGst(price) इस्तेमाल करती है। Method के अंदर print करने से value return करना बेहतर क्यों है, समझाइए।"
+      "en": "Explain method overloading with the area of a square and a rectangle, and how Java picks the right one.",
+      "te": "చతురస్రం, దీర్ఘచతురస్రం area తో method overloading వివరించండి; Java సరైనదాన్ని ఎలా ఎంచుకుంటుందో చెప్పండి.",
+      "hi": "वर्ग और आयत के area से method overloading समझाइए, और Java सही वाला कैसे चुनता है।"
      },
      {
-      "en": "Explain method overloading with the area of a square and a rectangle.",
-      "te": "చతురస్రం, దీర్ఘచతురస్రం area తో method overloading వివరించండి.",
-      "hi": "वर्ग और आयत के area से method overloading समझाइए।"
+      "en": "Explain how factorial(4) works with recursion and why the base case is needed.",
+      "te": "factorial(4) recursion తో ఎలా పనిచేస్తుందో, base case ఎందుకు అవసరమో వివరించండి.",
+      "hi": "factorial(4) recursion से कैसे चलता है और base case क्यों ज़रूरी है, समझाइए।"
      }
     ],
     "keywords": [
      [
-      "return"
-     ],
-     [
       "overload",
       "same name",
+      "ఒకే పేరు",
+      "एक ही नाम",
       "parameter"
      ],
      [
-      "reuse",
-      "value",
-      "type",
-      "double",
-      "int"
+      "recursion",
+      "itself",
+      "calls",
+      "తనను",
+      "ख़ुद"
+     ],
+     [
+      "base case",
+      "base",
+      "stop",
+      "ఆగ",
+      "रुक"
      ]
     ],
     "challenge": {
-     "en": "Say what happens to the code after a return line.",
-     "te": "return line తర్వాత code ఏమవుతుందో చెప్పండి.",
-     "hi": "return line के बाद के code का क्या होता है, बताइए।"
+     "en": "Say what a base case is and why recursion needs it.",
+     "te": "Base case అంటే ఏమిటో, recursion కి ఎందుకు అవసరమో చెప్పండి.",
+     "hi": "Base case क्या है और recursion को इसकी ज़रूरत क्यों है, बताइए।"
     }
    }
   }
@@ -708,15 +1288,15 @@
    },
    {
     "q": {
-     "en": "A non-void method without return…",
-     "te": "return లేని void కాని method…",
-     "hi": "return के बिना non-void method…"
+     "en": "A recursive method without a base case…",
+     "te": "Base case లేని recursive method…",
+     "hi": "Base case के बिना recursive method…"
     },
     "options": [
      {
-      "en": "does not compile",
-      "te": "Compile కాదు",
-      "hi": "compile नहीं होता"
+      "en": "never stops (StackOverflowError)",
+      "te": "ఎప్పుడూ ఆగదు (StackOverflowError)",
+      "hi": "कभी नहीं रुकता (StackOverflowError)"
      },
      {
       "en": "returns 0",
@@ -726,9 +1306,9 @@
     ],
     "answer": 0,
     "why": {
-     "en": "Java requires a return.",
-     "te": "Java కి return కావాలి.",
-     "hi": "Java को return चाहिए।"
+     "en": "It needs a stop.",
+     "te": "దానికి ఆపు కావాలి.",
+     "hi": "उसे रुकना चाहिए।"
     }
    }
   ]

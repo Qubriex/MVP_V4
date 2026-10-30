@@ -8,9 +8,9 @@
   "hi": "Object-Oriented Programming"
  },
  "summary": {
-  "en": "Model real things with classes, objects, constructors, private data, inheritance and interfaces.",
-  "te": "Classes, objects, constructors, private data, inheritance, interfaces తో నిజమైన వస్తువులను రూపొందించడం.",
-  "hi": "Classes, objects, constructors, private data, inheritance और interfaces से असली चीज़ें बनाना।"
+  "en": "Model real things with classes, constructors, inheritance, polymorphism, abstraction and interfaces, and encapsulation.",
+  "te": "Classes, constructors, inheritance, polymorphism, abstraction, interfaces, encapsulation తో నిజమైన వస్తువులను రూపొందించడం.",
+  "hi": "Classes, constructors, inheritance, polymorphism, abstraction और interfaces, और encapsulation से असली चीज़ें बनाना।"
  },
  "lessons": [
   {
@@ -322,135 +322,127 @@
    "n": 2,
    "minutes": 20,
    "title": {
-    "en": "Constructors and encapsulation",
-    "te": "Constructors, encapsulation",
-    "hi": "Constructors और encapsulation"
+    "en": "Constructors",
+    "te": "Constructors",
+    "hi": "Constructors"
    },
    "oneLine": {
-    "en": "A constructor sets up a new object in one step, and private fields with getters and methods keep its data safe.",
-    "te": "Constructor కొత్త object ని ఒకే step లో సిద్ధం చేస్తుంది; private fields, getters, methods దాని data ని సురక్షితంగా ఉంచుతాయి.",
-    "hi": "Constructor नया object एक step में तैयार करता है, और private fields के साथ getters और methods उसका data सुरक्षित रखते हैं।"
+    "en": "A constructor is a special method that runs when you write new, and sets up the object's fields in one step.",
+    "te": "Constructor అంటే new రాసినప్పుడు నడిచే ప్రత్యేక method; object fields ని ఒకే step లో సిద్ధం చేస్తుంది.",
+    "hi": "Constructor एक ख़ास method है जो new लिखने पर चलता है और object की fields एक step में तैयार करता है।"
    },
    "useCase": {
-    "en": "A bank account keeps balance private, so no code can set it to a crazy value; money moves only through deposit and withdraw.",
-    "te": "Bank account balance ని private గా ఉంచుతుంది, ఏ code దాన్ని విచిత్రమైన value కి మార్చలేదు; డబ్బు deposit, withdraw ద్వారానే కదులుతుంది.",
-    "hi": "Bank account balance को private रखता है, ताकि कोई code उसे अजीब value न दे सके; पैसा सिर्फ़ deposit और withdraw से चलता है।"
+    "en": "A hostel app writes new Room(101, 3) and every room starts complete, instead of setting number and capacity line by line.",
+    "te": "Hostel app new Room(101, 3) రాస్తుంది; number, capacity ని line by line కాకుండా ప్రతి room పూర్తిగా మొదలవుతుంది.",
+    "hi": "Hostel app new Room(101, 3) लिखता है और हर room पूरा बनकर शुरू होता है, number और capacity एक-एक line में भरने की जगह।"
    },
    "explain": {
     "en": [
-     "A constructor has the class name and no return type: Account(String owner) { ... }.",
-     "new Account(\"Ravi\") calls it, so every object starts complete.",
-     "this.owner = owner; means \"this object's owner gets the parameter owner\".",
-     "private double balance; hides the field from other classes.",
-     "A getter, getBalance(), lets others read it; deposit() checks the amount before changing it. This is encapsulation."
+     "A constructor has the class name and no return type, not even void: Room(int number, int capacity) { ... }.",
+     "new Room(101, 3) calls it with those values.",
+     "Inside, this.number = number; means \"this object's number gets the parameter number\".",
+     "You can have several constructors with different parameters (overloading), and one can call another with this(...).",
+     "If you write no constructor, Java gives an empty one; once you write one, that empty one is gone."
     ],
     "te": [
-     "Constructor కి class పేరు ఉంటుంది, return type ఉండదు: Account(String owner) { ... }.",
-     "new Account(\"Ravi\") దాన్ని call చేస్తుంది, ప్రతి object పూర్తిగా మొదలవుతుంది.",
-     "this.owner = owner; అంటే \"ఈ object owner కి parameter owner వస్తుంది\".",
-     "private double balance; field ని ఇతర classes నుంచి దాస్తుంది.",
-     "Getter getBalance() ఇతరులు చదవనిస్తుంది; deposit() మార్చే ముందు amount చూస్తుంది. ఇదే encapsulation."
+     "Constructor కి class పేరు ఉంటుంది, return type ఉండదు, void కూడా కాదు: Room(int number, int capacity) { ... }.",
+     "new Room(101, 3) ఆ values తో దాన్ని call చేస్తుంది.",
+     "లోపల this.number = number; అంటే \"ఈ object number కి parameter number వస్తుంది\".",
+     "వేర్వేరు parameters తో చాలా constructors ఉండవచ్చు (overloading); ఒకటి మరొకదాన్ని this(...) తో call చేయగలదు.",
+     "మీరు constructor రాయకపోతే Java ఖాళీది ఇస్తుంది; మీరు ఒకటి రాసిన తర్వాత ఆ ఖాళీది ఉండదు."
     ],
     "hi": [
-     "Constructor का नाम class जैसा होता है और कोई return type नहीं: Account(String owner) { ... }।",
-     "new Account(\"Ravi\") उसे call करता है, ताकि हर object पूरा बनकर शुरू हो।",
-     "this.owner = owner; मतलब \"इस object का owner, parameter owner बनता है\"।",
-     "private double balance; field को दूसरी classes से छिपाता है।",
-     "Getter getBalance() दूसरों को पढ़ने देता है; deposit() बदलने से पहले amount जाँचता है। यही encapsulation है।"
+     "Constructor का नाम class जैसा होता है और कोई return type नहीं, void भी नहीं: Room(int number, int capacity) { ... }।",
+     "new Room(101, 3) उन values के साथ उसे call करता है।",
+     "अंदर this.number = number; मतलब \"इस object का number, parameter number बनता है\"।",
+     "अलग parameters वाले कई constructors हो सकते हैं (overloading), और एक दूसरे को this(...) से call कर सकता है।",
+     "आप constructor न लिखें तो Java एक ख़ाली देता है; आप एक लिखें तो वह ख़ाली वाला नहीं रहता।"
     ]
    },
    "simpler": {
     "en": [
-     "The constructor fills the form; private locks the drawer; methods are the only keys."
+     "The constructor fills in the form the moment the object is born."
     ],
     "te": [
-     "Constructor form నింపుతుంది; private అర తాళం వేస్తుంది; methods మాత్రమే తాళం చెవులు."
+     "Object పుట్టిన క్షణంలోనే constructor form నింపుతుంది."
     ],
     "hi": [
-     "Constructor form भरता है; private दराज़ पर ताला लगाता है; methods ही चाबियाँ हैं।"
+     "Object बनते ही constructor form भर देता है।"
     ]
    },
    "anotherExample": {
     "en": [
-     "A Student with private marks: setMarks(int m) refuses anything below 0 or above 100."
+     "new Ticket(\"Hyderabad\", \"Vijayawada\", 450) makes a ticket with route and fare set."
     ],
     "te": [
-     "private marks ఉన్న Student: setMarks(int m) 0 కంటే తక్కువ, 100 కంటే ఎక్కువను తిరస్కరిస్తుంది."
+     "new Ticket(\"Hyderabad\", \"Vijayawada\", 450) route, fare తో ticket చేస్తుంది."
     ],
     "hi": [
-     "private marks वाला Student: setMarks(int m) 0 से कम या 100 से ज़्यादा को मना करता है।"
+     "new Ticket(\"Delhi\", \"Agra\", 450) route और fare के साथ ticket बनाता है।"
     ]
    },
-   "picture": "flowchart LR\n  N[\"new Account(\\\"Ravi\\\")\"] --> C[\"constructor\"] --> O[\"owner=Ravi, balance=0 (private)\"]\n  D[\"deposit(500)\"] --> O\n  G[\"getBalance()\"] --> O",
+   "picture": "flowchart LR\n  N[\"new Room(101, 3)\"] --> C[\"Room(int number, int capacity)\"] --> O[\"number=101, capacity=3, students=0\"]",
    "code": {
-    "source": "class Account {\n    private String owner;\n    private double balance;\n\n    Account(String owner) {\n        this.owner = owner;\n        this.balance = 0;\n    }\n\n    void deposit(double amount) {\n        if (amount > 0) {\n            balance += amount;\n        }\n    }\n\n    double getBalance() {\n        return balance;\n    }\n\n    String getOwner() {\n        return owner;\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        Account acc = new Account(\"Ravi\");\n        acc.deposit(500);\n        acc.deposit(-200);\n        System.out.println(acc.getOwner() + \": \" + acc.getBalance());\n    }\n}",
-    "output": "Ravi: 500.0",
+    "source": "class Room {\n    int number;\n    int capacity;\n    int students;\n\n    Room(int number, int capacity) {\n        this.number = number;\n        this.capacity = capacity;\n        this.students = 0;\n    }\n\n    Room(int number) {\n        this(number, 2);\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        Room a = new Room(101, 3);\n        Room b = new Room(102);\n        System.out.println(a.number + \" holds \" + a.capacity);\n        System.out.println(b.number + \" holds \" + b.capacity);\n    }\n}",
+    "output": "101 holds 3\n102 holds 2",
     "notes": [
-     {
-      "line": 2,
-      "note": {
-       "en": "private: only this class can touch these fields.",
-       "te": "private: ఈ class మాత్రమే ఈ fields ని తాకగలదు.",
-       "hi": "private: सिर्फ़ यही class इन fields को छू सकती है।"
-      }
-     },
-     {
-      "line": 5,
-      "note": {
-       "en": "The constructor: same name as the class, no return type.",
-       "te": "Constructor: class పేరే, return type లేదు.",
-       "hi": "Constructor: class का ही नाम, कोई return type नहीं।"
-      }
-     },
      {
       "line": 6,
       "note": {
-       "en": "this.owner is the field; owner is the parameter.",
-       "te": "this.owner field; owner parameter.",
-       "hi": "this.owner field है; owner parameter।"
+       "en": "The constructor: class name, no return type.",
+       "te": "Constructor: class పేరు, return type లేదు.",
+       "hi": "Constructor: class का नाम, कोई return type नहीं।"
       }
      },
      {
-      "line": 11,
+      "line": 7,
       "note": {
-       "en": "The method guards the data: negative amounts are ignored.",
-       "te": "Method data ని కాపాడుతుంది: ప్రతికూల amounts పట్టించుకోదు.",
-       "hi": "Method data की रक्षा करता है: negative amounts नज़रअंदाज़।"
+       "en": "this.number is the field; number is the parameter.",
+       "te": "this.number field; number parameter.",
+       "hi": "this.number field है; number parameter।"
       }
      },
      {
-      "line": 16,
+      "line": 12,
       "note": {
-       "en": "A getter lets others read but not change.",
-       "te": "Getter ఇతరులను చదవనిస్తుంది, మార్చనివ్వదు.",
-       "hi": "Getter दूसरों को पढ़ने देता है, बदलने नहीं।"
+       "en": "A second constructor with fewer parameters.",
+       "te": "తక్కువ parameters ఉన్న రెండో constructor.",
+       "hi": "कम parameters वाला दूसरा constructor।"
       }
      },
      {
-      "line": 27,
+      "line": 13,
       "note": {
-       "en": "The constructor runs here.",
-       "te": "Constructor ఇక్కడ నడుస్తుంది.",
-       "hi": "Constructor यहाँ चलता है।"
+       "en": "this(...) calls the first one with a default capacity.",
+       "te": "this(...) default capacity తో మొదటిదాన్ని call చేస్తుంది.",
+       "hi": "this(...) default capacity के साथ पहले वाले को call करता है।"
+      }
+     },
+     {
+      "line": 19,
+      "note": {
+       "en": "new runs the constructor.",
+       "te": "new constructor ని నడుపుతుంది.",
+       "hi": "new constructor चलाता है।"
       }
      }
     ]
    },
    "mistakes": [
     {
-     "wrong": "void Account(String owner) { ... }",
+     "wrong": "void Room(int number) { ... }",
      "fix": {
-      "en": "A constructor has no return type. With void it becomes an ordinary method.",
-      "te": "Constructor కి return type ఉండదు. void తో అది సాధారణ method అవుతుంది.",
-      "hi": "Constructor का कोई return type नहीं होता। void लगाने पर वह सामान्य method बन जाता है।"
+      "en": "With void it is an ordinary method, not a constructor. Remove void.",
+      "te": "void తో అది సాధారణ method, constructor కాదు. void తీసేయండి.",
+      "hi": "void लगाने पर यह सामान्य method है, constructor नहीं। void हटाइए।"
      }
     },
     {
-     "wrong": "Account(String owner) {\n    owner = owner;\n}",
+     "wrong": "Room(int number) {\n    number = number;\n}",
      "fix": {
-      "en": "This sets the parameter to itself. Write this.owner = owner;",
-      "te": "ఇది parameter ని తనకే ఇస్తుంది. this.owner = owner; రాయండి.",
-      "hi": "यह parameter को ख़ुद को ही दे देता है। this.owner = owner; लिखिए।"
+      "en": "This sets the parameter to itself. Write this.number = number;",
+      "te": "ఇది parameter ని తనకే ఇస్తుంది. this.number = number; రాయండి.",
+      "hi": "यह parameter को ख़ुद को ही देता है। this.number = number; लिखिए।"
      }
     }
    ],
@@ -482,149 +474,146 @@
     },
     {
      "q": {
-      "en": "private fields can be read by…",
-      "te": "private fields ని చదవగలిగేది…",
-      "hi": "private fields कौन पढ़ सकता है…"
+      "en": "When does a constructor run?",
+      "te": "Constructor ఎప్పుడు నడుస్తుంది?",
+      "hi": "Constructor कब चलता है?"
      },
      "options": [
       {
-       "en": "any class",
-       "te": "ఏ class అయినా",
-       "hi": "कोई भी class"
+       "en": "when you write new",
+       "te": "new రాసినప్పుడు",
+       "hi": "new लिखने पर"
       },
       {
-       "en": "only their own class",
-       "te": "తమ class మాత్రమే",
-       "hi": "सिर्फ़ अपनी class"
-      }
-     ],
-     "answer": 1,
-     "why": {
-      "en": "Only inside the class.",
-      "te": "Class లోపల మాత్రమే.",
-      "hi": "सिर्फ़ class के अंदर।"
-     }
-    },
-    {
-     "q": {
-      "en": "this.name means…",
-      "te": "this.name అంటే…",
-      "hi": "this.name मतलब…"
-     },
-     "options": [
-      {
-       "en": "this object's field",
-       "te": "ఈ object field",
-       "hi": "इस object का field"
-      },
-      {
-       "en": "the parameter",
-       "te": "Parameter",
-       "hi": "parameter"
+       "en": "when main ends",
+       "te": "main ముగిసినప్పుడు",
+       "hi": "main ख़त्म होने पर"
       }
      ],
      "answer": 0,
      "why": {
-      "en": "The field.",
-      "te": "Field.",
-      "hi": "Field।"
+      "en": "At creation.",
+      "te": "తయారీ సమయంలో.",
+      "hi": "बनते समय।"
+     }
+    },
+    {
+     "q": {
+      "en": "this(number, 2) inside a constructor…",
+      "te": "Constructor లో this(number, 2)…",
+      "hi": "Constructor में this(number, 2)…"
+     },
+     "options": [
+      {
+       "en": "calls another constructor",
+       "te": "మరో constructor ని call చేస్తుంది",
+       "hi": "दूसरा constructor call करता है"
+      },
+      {
+       "en": "makes a new class",
+       "te": "కొత్త class చేస్తుంది",
+       "hi": "नई class बनाता है"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Reuses the other one.",
+      "te": "మరొకదాన్ని మళ్లీ వాడుతుంది.",
+      "hi": "दूसरे को दोबारा इस्तेमाल करता है।"
      }
     }
    ],
    "task": {
     "prompt": {
-     "en": "Write class Student with private String name and private int marks, a constructor Student(String name), a method setMarks(int m) that only accepts 0 to 100, and getMarks().",
-     "te": "private String name, private int marks, constructor Student(String name), 0 నుంచి 100 మాత్రమే అంగీకరించే setMarks(int m), getMarks() ఉన్న Student class రాయండి.",
-     "hi": "private String name और private int marks वाली Student class लिखिए, constructor Student(String name), setMarks(int m) जो सिर्फ़ 0 से 100 माने, और getMarks()।"
+     "en": "Write class Ticket with fields from, to and fare, a constructor Ticket(String from, String to, int fare), and a second constructor Ticket(String from, String to) that uses fare 100. Print both tickets' fares from main.",
+     "te": "from, to, fare fields, constructor Ticket(String from, String to, int fare), fare 100 వాడే రెండో constructor Ticket(String from, String to) ఉన్న Ticket class రాయండి. main నుంచి రెండు tickets fares print చేయండి.",
+     "hi": "Ticket class लिखिए जिसमें from, to और fare fields हों, constructor Ticket(String from, String to, int fare), और fare 100 लेने वाला दूसरा constructor Ticket(String from, String to)। main से दोनों tickets के fares print कीजिए।"
     },
-    "starter": "class Student {\n    String name;\n    int marks;\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        Student s = new Student();\n        s.marks = 150;\n        System.out.println(s.marks);\n    }\n}\n",
+    "starter": "class Ticket {\n    String from;\n    String to;\n    int fare;\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        Ticket t = new Ticket();\n        System.out.println(t.fare);\n    }\n}\n",
     "tests": [
      {
-      "name": "private fields",
-      "pattern": "private\\s+String\\s+name\\s*;[\\s\\S]*private\\s+int\\s+marks\\s*;"
+      "name": "three-value constructor",
+      "pattern": "Ticket\\s*\\(\\s*String\\s+\\w+\\s*,\\s*String\\s+\\w+\\s*,\\s*int\\s+\\w+\\s*\\)\\s*\\{[\\s\\S]*this\\.fare\\s*="
      },
      {
-      "name": "constructor with name",
-      "pattern": "Student\\s*\\(\\s*String\\s+\\w+\\s*\\)\\s*\\{[\\s\\S]*this\\.name\\s*="
+      "name": "two-value constructor",
+      "pattern": "Ticket\\s*\\(\\s*String\\s+\\w+\\s*,\\s*String\\s+\\w+\\s*\\)\\s*\\{"
      },
      {
-      "name": "setMarks checks the range",
-      "pattern": "void\\s+setMarks\\s*\\(\\s*int\\s+\\w+\\s*\\)[\\s\\S]*(>=\\s*0|<\\s*0)[\\s\\S]*100"
+      "name": "uses this(...) or sets 100",
+      "pattern": "this\\s*\\(\\s*\\w+\\s*,\\s*\\w+\\s*,\\s*100\\s*\\)|fare\\s*=\\s*100",
+      "expected": "this(from, to, 100);"
      },
      {
-      "name": "getter",
-      "pattern": "int\\s+getMarks\\s*\\(\\s*\\)"
-     },
-     {
-      "name": "no direct field access from main",
-      "absent": "s\\.marks\\s*=",
+      "name": "makes tickets with new",
+      "pattern": "new\\s+Ticket\\s*\\(\\s*\"",
+      "expected": "new Ticket(\"...\", ...)",
       "hidden": true
      }
     ],
     "hints": [
      {
-      "en": "private String name; private int marks;",
-      "te": "private String name; private int marks;",
-      "hi": "private String name; private int marks;"
+      "en": "Ticket(String from, String to, int fare) { this.from = from; this.to = to; this.fare = fare; }",
+      "te": "Ticket(String from, String to, int fare) { this.from = from; this.to = to; this.fare = fare; }",
+      "hi": "Ticket(String from, String to, int fare) { this.from = from; this.to = to; this.fare = fare; }"
      },
      {
-      "en": "Student(String name) { this.name = name; }",
-      "te": "Student(String name) { this.name = name; }",
-      "hi": "Student(String name) { this.name = name; }"
+      "en": "Ticket(String from, String to) { this(from, to, 100); }",
+      "te": "Ticket(String from, String to) { this(from, to, 100); }",
+      "hi": "Ticket(String from, String to) { this(from, to, 100); }"
      },
      {
-      "en": "void setMarks(int m) { if (m >= 0 && m <= 100) marks = m; }",
-      "te": "void setMarks(int m) { if (m >= 0 && m <= 100) marks = m; }",
-      "hi": "void setMarks(int m) { if (m >= 0 && m <= 100) marks = m; }"
+      "en": "In main: new Ticket(\"Hyderabad\", \"Vijayawada\", 450) and new Ticket(\"Hyderabad\", \"Warangal\").",
+      "te": "main లో: new Ticket(\"Hyderabad\", \"Vijayawada\", 450), new Ticket(\"Hyderabad\", \"Warangal\").",
+      "hi": "main में: new Ticket(\"Delhi\", \"Agra\", 450) और new Ticket(\"Delhi\", \"Noida\")।"
      }
     ],
-    "solution": "class Student {\n    private String name;\n    private int marks;\n\n    Student(String name) {\n        this.name = name;\n    }\n\n    void setMarks(int m) {\n        if (m >= 0 && m <= 100) {\n            marks = m;\n        }\n    }\n\n    int getMarks() {\n        return marks;\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        Student st = new Student(\"Sita\");\n        st.setMarks(150);\n        st.setMarks(88);\n        System.out.println(st.getMarks());\n    }\n}",
-    "output": "88"
+    "solution": "class Ticket {\n    String from;\n    String to;\n    int fare;\n\n    Ticket(String from, String to, int fare) {\n        this.from = from;\n        this.to = to;\n        this.fare = fare;\n    }\n\n    Ticket(String from, String to) {\n        this(from, to, 100);\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        Ticket a = new Ticket(\"Hyderabad\", \"Vijayawada\", 450);\n        Ticket b = new Ticket(\"Hyderabad\", \"Warangal\");\n        System.out.println(a.fare + \" \" + b.fare);\n    }\n}",
+    "output": "450 100"
    },
    "cheat": {
     "en": [
-     "Name(params) { this.x = x; } — no return type",
-     "private fields · public getters · checks in setters/methods",
-     "new Name(args) runs the constructor."
+     "ClassName(params) { this.x = x; } — no return type",
+     "new ClassName(args) runs it",
+     "Several constructors · this(...) calls another"
     ],
     "te": [
-     "Name(params) { this.x = x; } — return type లేదు",
-     "private fields · public getters · setters/methods లో checks",
-     "new Name(args) constructor నడుపుతుంది."
+     "ClassName(params) { this.x = x; } — return type లేదు",
+     "new ClassName(args) దాన్ని నడుపుతుంది",
+     "చాలా constructors · this(...) మరొకదాన్ని call"
     ],
     "hi": [
-     "Name(params) { this.x = x; } — कोई return type नहीं",
-     "private fields · public getters · setters/methods में जाँच",
-     "new Name(args) constructor चलाता है।"
+     "ClassName(params) { this.x = x; } — कोई return type नहीं",
+     "new ClassName(args) उसे चलाता है",
+     "कई constructors · this(...) दूसरे को call"
     ]
    },
    "check": {
     "questions": [
      {
-      "en": "Explain why a bank account should keep its balance private and change it only through deposit and withdraw.",
-      "te": "Bank account balance ని ఎందుకు private గా ఉంచి deposit, withdraw ద్వారానే మార్చాలో వివరించండి.",
-      "hi": "Bank account को balance private क्यों रखना चाहिए और सिर्फ़ deposit और withdraw से क्यों बदलना चाहिए, समझाइए।"
+      "en": "Explain what a constructor is and what happens when you write new Room(101, 3).",
+      "te": "Constructor అంటే ఏమిటో, new Room(101, 3) రాసినప్పుడు ఏమవుతుందో వివరించండి.",
+      "hi": "Constructor क्या है और new Room(101, 3) लिखने पर क्या होता है, समझाइए।"
      },
      {
-      "en": "Explain what a constructor is and what this.name = name does.",
-      "te": "Constructor అంటే ఏమిటో, this.name = name ఏం చేస్తుందో వివరించండి.",
-      "hi": "Constructor क्या है और this.name = name क्या करता है, समझाइए।"
+      "en": "Explain this.number = number and why the word this is needed.",
+      "te": "this.number = number, this అనే పదం ఎందుకు అవసరమో వివరించండి.",
+      "hi": "this.number = number और this शब्द क्यों ज़रूरी है, समझाइए।"
      }
     ],
     "keywords": [
      [
-      "private",
-      "encapsulation"
+      "constructor"
      ],
      [
-      "constructor",
-      "new"
+      "new",
+      "object",
+      "fields"
      ],
      [
       "this",
-      "getter",
-      "method",
-      "deposit"
+      "parameter",
+      "return type"
      ]
     ],
     "challenge": {
@@ -946,9 +935,302 @@
    "n": 4,
    "minutes": 20,
    "title": {
-    "en": "Interfaces and polymorphism",
-    "te": "Interfaces, polymorphism",
-    "hi": "Interfaces और polymorphism"
+    "en": "Polymorphism",
+    "te": "Polymorphism",
+    "hi": "Polymorphism"
+   },
+   "oneLine": {
+    "en": "Polymorphism means one parent-type variable can hold different child objects, and calling a method runs each child's own version.",
+    "te": "Polymorphism అంటే ఒక parent-type variable వేర్వేరు child objects ని ఉంచగలదు; method call చేస్తే ప్రతి child తన version నడుపుతుంది.",
+    "hi": "Polymorphism मतलब एक parent-type variable अलग-अलग child objects रख सकता है, और method call करने पर हर child का अपना version चलता है।"
+   },
+   "useCase": {
+    "en": "A notification service keeps SMS, email and WhatsApp senders in one list of Notifier and calls send() on each.",
+    "te": "Notification service SMS, email, WhatsApp senders ని ఒకే Notifier list లో ఉంచి ప్రతిదానిపై send() call చేస్తుంది.",
+    "hi": "Notification service SMS, email और WhatsApp senders को Notifier की एक list में रखकर हर एक पर send() call करती है।"
+   },
+   "explain": {
+    "en": [
+     "A child class can override a parent method with its own version (@Override).",
+     "A variable of the parent type can point to any child: Notifier n = new Sms();",
+     "n.send(\"Hi\") runs the Sms version, chosen while the program runs. This is runtime polymorphism.",
+     "So an array Notifier[] can mix Sms, Email and WhatsApp, and one loop handles them all.",
+     "Overloading (same name, different parameters) is the compile-time kind; overriding is the runtime kind."
+    ],
+    "te": [
+     "Child class parent method ని తన సొంత version తో override చేయగలదు (@Override).",
+     "Parent type variable ఏ child నైనా చూపగలదు: Notifier n = new Sms();",
+     "n.send(\"Hi\") Sms version నడుపుతుంది, program నడుస్తున్నప్పుడు ఎంచుకోబడుతుంది. ఇదే runtime polymorphism.",
+     "కాబట్టి Notifier[] array లో Sms, Email, WhatsApp కలపవచ్చు, ఒకే loop అన్నింటినీ నిర్వహిస్తుంది.",
+     "Overloading (ఒకే పేరు, వేర్వేరు parameters) compile-time రకం; overriding runtime రకం."
+    ],
+    "hi": [
+     "Child class parent के method को अपने version से override कर सकती है (@Override)।",
+     "Parent type का variable किसी भी child को रख सकता है: Notifier n = new Sms();",
+     "n.send(\"Hi\") Sms वाला version चलाता है, जो program चलते समय चुना जाता है। यही runtime polymorphism है।",
+     "इसलिए Notifier[] array में Sms, Email और WhatsApp मिल सकते हैं, और एक loop सबको संभालता है।",
+     "Overloading (वही नाम, अलग parameters) compile-time वाला है; overriding runtime वाला।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "One remote, many TVs: press \"power\" and each TV does it its own way."
+    ],
+    "te": [
+     "ఒకే remote, చాలా TVలు: \"power\" నొక్కితే ప్రతి TV తన పద్ధతిలో చేస్తుంది."
+    ],
+    "hi": [
+     "एक remote, कई TV: \"power\" दबाओ और हर TV अपने तरीक़े से करता है।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "Employee[] staff = {new Manager(), new Intern()}; staff[i].pay() gives each one's own pay."
+    ],
+    "te": [
+     "Employee[] staff = {new Manager(), new Intern()}; staff[i].pay() ప్రతి ఒక్కరి సొంత pay ఇస్తుంది."
+    ],
+    "hi": [
+     "Employee[] staff = {new Manager(), new Intern()}; staff[i].pay() हर एक का अपना pay देता है।"
+    ]
+   },
+   "picture": "flowchart TD\n  N[\"Notifier n\"] --> S[\"new Sms(): send → SMS to …\"]\n  N --> E[\"new Email(): send → Email to …\"]",
+   "code": {
+    "source": "class Notifier {\n    String send(String to) {\n        return \"Notice to \" + to;\n    }\n}\n\nclass Sms extends Notifier {\n    @Override\n    String send(String to) {\n        return \"SMS to \" + to;\n    }\n}\n\nclass Email extends Notifier {\n    @Override\n    String send(String to) {\n        return \"Email to \" + to;\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        Notifier[] all = {new Sms(), new Email(), new Notifier()};\n        for (Notifier n : all) {\n            System.out.println(n.send(\"Ravi\"));\n        }\n    }\n}",
+    "output": "SMS to Ravi\nEmail to Ravi\nNotice to Ravi",
+    "notes": [
+     {
+      "line": 2,
+      "note": {
+       "en": "The parent's version.",
+       "te": "Parent version.",
+       "hi": "Parent का version।"
+      }
+     },
+     {
+      "line": 8,
+      "note": {
+       "en": "@Override: Sms gives its own send.",
+       "te": "@Override: Sms తన send ఇస్తుంది.",
+       "hi": "@Override: Sms अपना send देता है।"
+      }
+     },
+     {
+      "line": 22,
+      "note": {
+       "en": "One array of the parent type holds different children.",
+       "te": "Parent type ఒకే array వేర్వేరు children ని ఉంచుతుంది.",
+       "hi": "Parent type का एक array अलग children रखता है।"
+      }
+     },
+     {
+      "line": 24,
+      "note": {
+       "en": "Each object runs its own send.",
+       "te": "ప్రతి object తన send నడుపుతుంది.",
+       "hi": "हर object अपना send चलाता है।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "Sms s = new Notifier();",
+     "fix": {
+      "en": "A parent object is not a child. The other way works: Notifier n = new Sms();",
+      "te": "Parent object child కాదు. రివర్స్ పనిచేస్తుంది: Notifier n = new Sms();",
+      "hi": "Parent object, child नहीं है। उल्टा चलता है: Notifier n = new Sms();"
+     }
+    },
+    {
+     "wrong": "String Send(String to) { ... }  // meant to override",
+     "fix": {
+      "en": "A different name (Send) does not override. Use @Override so Java catches it.",
+      "te": "వేరే పేరు (Send) override చేయదు. Java పట్టుకునేలా @Override వాడండి.",
+      "hi": "अलग नाम (Send) override नहीं करता। @Override लिखिए ताकि Java पकड़ ले।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "Notifier n = new Email(); n.send(\"A\") runs…",
+      "te": "Notifier n = new Email(); n.send(\"A\") నడిపేది…",
+      "hi": "Notifier n = new Email(); n.send(\"A\") चलाता है…"
+     },
+     "options": [
+      {
+       "en": "Email's send",
+       "te": "Email send",
+       "hi": "Email का send"
+      },
+      {
+       "en": "Notifier's send",
+       "te": "Notifier send",
+       "hi": "Notifier का send"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "The object's own version.",
+      "te": "Object సొంత version.",
+      "hi": "Object का अपना version।"
+     }
+    },
+    {
+     "q": {
+      "en": "Overriding is chosen…",
+      "te": "Overriding ఎంచుకోబడేది…",
+      "hi": "Overriding चुना जाता है…"
+     },
+     "options": [
+      {
+       "en": "while the program runs",
+       "te": "Program నడుస్తున్నప్పుడు",
+       "hi": "program चलते समय"
+      },
+      {
+       "en": "only when compiling",
+       "te": "Compile సమయంలో మాత్రమే",
+       "hi": "सिर्फ़ compile पर"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Runtime polymorphism.",
+      "te": "Runtime polymorphism.",
+      "hi": "Runtime polymorphism।"
+     }
+    },
+    {
+     "q": {
+      "en": "Which is allowed?",
+      "te": "ఏది అనుమతి?",
+      "hi": "कौन-सा ठीक है?"
+     },
+     "options": [
+      "Notifier n = new Sms();",
+      "Sms s = new Notifier();"
+     ],
+     "answer": 0,
+     "why": {
+      "en": "A child is a parent.",
+      "te": "Child ఒక parent.",
+      "hi": "Child एक parent है।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Given class Shape with double area() returning 0, write Circle(double r) and Square(double side) that extend Shape and override area(). In main, put both in a Shape[] and print the total area (Circle uses 3.14).",
+     "te": "0 return చేసే double area() ఉన్న Shape class ఇచ్చాం; Shape ని extend చేసి area() override చేసే Circle(double r), Square(double side) రాయండి. main లో రెండింటినీ Shape[] లో పెట్టి మొత్తం area print చేయండి (Circle కి 3.14).",
+     "hi": "Shape class दी है जिसका double area() 0 return करता है; Circle(double r) और Square(double side) लिखिए जो Shape extend करें और area() override करें। main में दोनों को Shape[] में रखकर कुल area print कीजिए (Circle के लिए 3.14)।"
+    },
+    "starter": "class Shape {\n    double area() {\n        return 0;\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        System.out.println(0.0);\n    }\n}\n",
+    "tests": [
+     {
+      "name": "Circle extends Shape",
+      "pattern": "class\\s+Circle\\s+extends\\s+Shape"
+     },
+     {
+      "name": "Square extends Shape",
+      "pattern": "class\\s+Square\\s+extends\\s+Shape"
+     },
+     {
+      "name": "overrides area",
+      "pattern": "(@Override\\s+double\\s+area\\s*\\(\\s*\\)[\\s\\S]*){2}",
+      "expected": "@Override double area() twice"
+     },
+     {
+      "name": "a Shape array",
+      "pattern": "Shape\\s*\\[\\]\\s*\\w+\\s*=",
+      "expected": "Shape[] shapes = {...};",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "class Circle extends Shape { double r; Circle(double r) { this.r = r; } @Override double area() { return 3.14 * r * r; } }",
+      "te": "class Circle extends Shape { double r; Circle(double r) { this.r = r; } @Override double area() { return 3.14 * r * r; } }",
+      "hi": "class Circle extends Shape { double r; Circle(double r) { this.r = r; } @Override double area() { return 3.14 * r * r; } }"
+     },
+     {
+      "en": "Square in the same way, with side * side.",
+      "te": "Square కూడా అదే విధంగా, side * side తో.",
+      "hi": "Square भी वैसे ही, side * side से।"
+     },
+     {
+      "en": "Shape[] shapes = {new Circle(1), new Square(2)}; add s.area() in a loop.",
+      "te": "Shape[] shapes = {new Circle(1), new Square(2)}; loop లో s.area() కలపండి.",
+      "hi": "Shape[] shapes = {new Circle(1), new Square(2)}; loop में s.area() जोड़िए।"
+     }
+    ],
+    "solution": "class Shape {\n    double area() {\n        return 0;\n    }\n}\n\nclass Circle extends Shape {\n    double r;\n\n    Circle(double r) {\n        this.r = r;\n    }\n\n    @Override\n    double area() {\n        return 3.14 * r * r;\n    }\n}\n\nclass Square extends Shape {\n    double side;\n\n    Square(double side) {\n        this.side = side;\n    }\n\n    @Override\n    double area() {\n        return side * side;\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        Shape[] shapes = {new Circle(1), new Square(2)};\n        double total = 0;\n        for (Shape s : shapes) {\n            total += s.area();\n        }\n        System.out.println(total);\n    }\n}",
+    "output": "7.140000000000001"
+   },
+   "cheat": {
+    "en": [
+     "Parent p = new Child(); p.method() runs the child's version.",
+     "@Override to replace a parent method.",
+     "Overriding = runtime · overloading = compile time."
+    ],
+    "te": [
+     "Parent p = new Child(); p.method() child version నడుపుతుంది.",
+     "Parent method ని మార్చడానికి @Override.",
+     "Overriding = runtime · overloading = compile time."
+    ],
+    "hi": [
+     "Parent p = new Child(); p.method() child का version चलाता है।",
+     "Parent method बदलने के लिए @Override।",
+     "Overriding = runtime · overloading = compile time।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A notification service sends by SMS, email and WhatsApp. Explain how polymorphism lets one loop send through all of them.",
+      "te": "Notification service SMS, email, WhatsApp ద్వారా పంపుతుంది. Polymorphism ఒకే loop తో అన్నింటి ద్వారా ఎలా పంపేలా చేస్తుందో వివరించండి.",
+      "hi": "Notification service SMS, email और WhatsApp से भेजती है। Polymorphism एक loop से सब के ज़रिए कैसे भेजने देता है, समझाइए।"
+     },
+     {
+      "en": "Explain the difference between overloading and overriding.",
+      "te": "Overloading, overriding మధ్య తేడా వివరించండి.",
+      "hi": "Overloading और overriding का फ़र्क़ समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "polymorphism",
+      "override",
+      "@override"
+     ],
+     [
+      "parent",
+      "child",
+      "extends"
+     ],
+     [
+      "runtime",
+      "own version",
+      "overloading",
+      "loop"
+     ]
+    ],
+    "challenge": {
+     "en": "Say which version runs for Notifier n = new Sms(); n.send(...).",
+     "te": "Notifier n = new Sms(); n.send(...) కి ఏ version నడుస్తుందో చెప్పండి.",
+     "hi": "Notifier n = new Sms(); n.send(...) पर कौन-सा version चलता है, बताइए।"
+    }
+   }
+  },
+  {
+   "id": "jv-m5-l5",
+   "n": 5,
+   "minutes": 20,
+   "title": {
+    "en": "Abstraction and interfaces",
+    "te": "Abstraction, interfaces",
+    "hi": "Abstraction और interfaces"
    },
    "oneLine": {
     "en": "An interface lists methods a class promises to have; polymorphism lets one piece of code work with any class that keeps that promise.",
@@ -966,21 +1248,21 @@
      "class Upi implements Payment must write pay. So must class Card implements Payment.",
      "A Payment variable can hold any of them: Payment p = new Upi(\"ravi@okbank\");",
      "p.pay(500) runs whichever object p holds. That is polymorphism: one call, many forms.",
-     "New payment types can be added later without changing the checkout code."
+     "An abstract class (abstract class Payment { abstract String pay(double a); }) is similar: it cannot be made with new, and it can also hold shared fields and ready methods. Abstraction means showing what something does and hiding how."
     ],
     "te": [
      "interface Payment { String pay(double amount); } ఒక వాగ్దానం, code కాదు.",
      "class Upi implements Payment, pay రాయాలి. class Card implements Payment కూడా.",
      "Payment variable వాటిలో దేన్నైనా ఉంచగలదు: Payment p = new Upi(\"ravi@okbank\");",
      "p.pay(500), p లో ఉన్న object ని నడుపుతుంది. ఇదే polymorphism: ఒకే call, ఎన్నో రూపాలు.",
-     "Checkout code మార్చకుండా తర్వాత కొత్త payment రకాలు జోడించవచ్చు."
+     "Abstract class (abstract class Payment { abstract String pay(double a); }) కూడా అలాంటిదే: దాన్ని new తో చేయలేం, అది ఉమ్మడి fields, సిద్ధమైన methods కూడా ఉంచగలదు. Abstraction అంటే ఏం చేస్తుందో చూపించి ఎలా చేస్తుందో దాచడం."
     ],
     "hi": [
      "interface Payment { String pay(double amount); } एक वादा है, code नहीं।",
      "class Upi implements Payment को pay लिखना होगा। class Card implements Payment को भी।",
      "Payment variable इनमें से किसी को भी रख सकता है: Payment p = new Upi(\"ravi@okbank\");",
      "p.pay(500) वही चलाता है जो object p में है। यही polymorphism है: एक call, कई रूप।",
-     "Checkout code बदले बिना बाद में नए payment प्रकार जोड़े जा सकते हैं।"
+     "Abstract class (abstract class Payment { abstract String pay(double a); }) भी ऐसी ही है: इसे new से नहीं बना सकते, और इसमें साझा fields और तैयार methods भी रह सकते हैं। Abstraction मतलब यह दिखाना कि चीज़ क्या करती है और कैसे करती है यह छिपाना।"
     ]
    },
    "simpler": {
@@ -1249,6 +1531,323 @@
      "en": "Say why you cannot write new Payment() for an interface.",
      "te": "Interface కి new Payment() ఎందుకు రాయలేమో చెప్పండి.",
      "hi": "Interface के लिए new Payment() क्यों नहीं लिख सकते, बताइए।"
+    }
+   }
+  },
+  {
+   "id": "jv-m5-l6",
+   "n": 6,
+   "minutes": 20,
+   "title": {
+    "en": "Encapsulation",
+    "te": "Encapsulation",
+    "hi": "Encapsulation"
+   },
+   "oneLine": {
+    "en": "A constructor sets up a new object in one step, and private fields with getters and methods keep its data safe.",
+    "te": "Constructor కొత్త object ని ఒకే step లో సిద్ధం చేస్తుంది; private fields, getters, methods దాని data ని సురక్షితంగా ఉంచుతాయి.",
+    "hi": "Constructor नया object एक step में तैयार करता है, और private fields के साथ getters और methods उसका data सुरक्षित रखते हैं।"
+   },
+   "useCase": {
+    "en": "A bank account keeps balance private, so no code can set it to a crazy value; money moves only through deposit and withdraw.",
+    "te": "Bank account balance ని private గా ఉంచుతుంది, ఏ code దాన్ని విచిత్రమైన value కి మార్చలేదు; డబ్బు deposit, withdraw ద్వారానే కదులుతుంది.",
+    "hi": "Bank account balance को private रखता है, ताकि कोई code उसे अजीब value न दे सके; पैसा सिर्फ़ deposit और withdraw से चलता है।"
+   },
+   "explain": {
+    "en": [
+     "A constructor has the class name and no return type: Account(String owner) { ... }.",
+     "new Account(\"Ravi\") calls it, so every object starts complete.",
+     "this.owner = owner; means \"this object's owner gets the parameter owner\".",
+     "private double balance; hides the field from other classes.",
+     "A getter, getBalance(), lets others read it; deposit() checks the amount before changing it. This is encapsulation."
+    ],
+    "te": [
+     "Constructor కి class పేరు ఉంటుంది, return type ఉండదు: Account(String owner) { ... }.",
+     "new Account(\"Ravi\") దాన్ని call చేస్తుంది, ప్రతి object పూర్తిగా మొదలవుతుంది.",
+     "this.owner = owner; అంటే \"ఈ object owner కి parameter owner వస్తుంది\".",
+     "private double balance; field ని ఇతర classes నుంచి దాస్తుంది.",
+     "Getter getBalance() ఇతరులు చదవనిస్తుంది; deposit() మార్చే ముందు amount చూస్తుంది. ఇదే encapsulation."
+    ],
+    "hi": [
+     "Constructor का नाम class जैसा होता है और कोई return type नहीं: Account(String owner) { ... }।",
+     "new Account(\"Ravi\") उसे call करता है, ताकि हर object पूरा बनकर शुरू हो।",
+     "this.owner = owner; मतलब \"इस object का owner, parameter owner बनता है\"।",
+     "private double balance; field को दूसरी classes से छिपाता है।",
+     "Getter getBalance() दूसरों को पढ़ने देता है; deposit() बदलने से पहले amount जाँचता है। यही encapsulation है।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "The constructor fills the form; private locks the drawer; methods are the only keys."
+    ],
+    "te": [
+     "Constructor form నింపుతుంది; private అర తాళం వేస్తుంది; methods మాత్రమే తాళం చెవులు."
+    ],
+    "hi": [
+     "Constructor form भरता है; private दराज़ पर ताला लगाता है; methods ही चाबियाँ हैं।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "A Student with private marks: setMarks(int m) refuses anything below 0 or above 100."
+    ],
+    "te": [
+     "private marks ఉన్న Student: setMarks(int m) 0 కంటే తక్కువ, 100 కంటే ఎక్కువను తిరస్కరిస్తుంది."
+    ],
+    "hi": [
+     "private marks वाला Student: setMarks(int m) 0 से कम या 100 से ज़्यादा को मना करता है।"
+    ]
+   },
+   "picture": "flowchart LR\n  N[\"new Account(\\\"Ravi\\\")\"] --> C[\"constructor\"] --> O[\"owner=Ravi, balance=0 (private)\"]\n  D[\"deposit(500)\"] --> O\n  G[\"getBalance()\"] --> O",
+   "code": {
+    "source": "class Account {\n    private String owner;\n    private double balance;\n\n    Account(String owner) {\n        this.owner = owner;\n        this.balance = 0;\n    }\n\n    void deposit(double amount) {\n        if (amount > 0) {\n            balance += amount;\n        }\n    }\n\n    double getBalance() {\n        return balance;\n    }\n\n    String getOwner() {\n        return owner;\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        Account acc = new Account(\"Ravi\");\n        acc.deposit(500);\n        acc.deposit(-200);\n        System.out.println(acc.getOwner() + \": \" + acc.getBalance());\n    }\n}",
+    "output": "Ravi: 500.0",
+    "notes": [
+     {
+      "line": 2,
+      "note": {
+       "en": "private: only this class can touch these fields.",
+       "te": "private: ఈ class మాత్రమే ఈ fields ని తాకగలదు.",
+       "hi": "private: सिर्फ़ यही class इन fields को छू सकती है।"
+      }
+     },
+     {
+      "line": 5,
+      "note": {
+       "en": "The constructor: same name as the class, no return type.",
+       "te": "Constructor: class పేరే, return type లేదు.",
+       "hi": "Constructor: class का ही नाम, कोई return type नहीं।"
+      }
+     },
+     {
+      "line": 6,
+      "note": {
+       "en": "this.owner is the field; owner is the parameter.",
+       "te": "this.owner field; owner parameter.",
+       "hi": "this.owner field है; owner parameter।"
+      }
+     },
+     {
+      "line": 11,
+      "note": {
+       "en": "The method guards the data: negative amounts are ignored.",
+       "te": "Method data ని కాపాడుతుంది: ప్రతికూల amounts పట్టించుకోదు.",
+       "hi": "Method data की रक्षा करता है: negative amounts नज़रअंदाज़।"
+      }
+     },
+     {
+      "line": 16,
+      "note": {
+       "en": "A getter lets others read but not change.",
+       "te": "Getter ఇతరులను చదవనిస్తుంది, మార్చనివ్వదు.",
+       "hi": "Getter दूसरों को पढ़ने देता है, बदलने नहीं।"
+      }
+     },
+     {
+      "line": 27,
+      "note": {
+       "en": "The constructor runs here.",
+       "te": "Constructor ఇక్కడ నడుస్తుంది.",
+       "hi": "Constructor यहाँ चलता है।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "void Account(String owner) { ... }",
+     "fix": {
+      "en": "A constructor has no return type. With void it becomes an ordinary method.",
+      "te": "Constructor కి return type ఉండదు. void తో అది సాధారణ method అవుతుంది.",
+      "hi": "Constructor का कोई return type नहीं होता। void लगाने पर वह सामान्य method बन जाता है।"
+     }
+    },
+    {
+     "wrong": "Account(String owner) {\n    owner = owner;\n}",
+     "fix": {
+      "en": "This sets the parameter to itself. Write this.owner = owner;",
+      "te": "ఇది parameter ని తనకే ఇస్తుంది. this.owner = owner; రాయండి.",
+      "hi": "यह parameter को ख़ुद को ही दे देता है। this.owner = owner; लिखिए।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "A constructor's name is…",
+      "te": "Constructor పేరు…",
+      "hi": "Constructor का नाम…"
+     },
+     "options": [
+      {
+       "en": "the class name",
+       "te": "Class పేరు",
+       "hi": "class का नाम"
+      },
+      {
+       "en": "init",
+       "te": "init",
+       "hi": "init"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Same as the class.",
+      "te": "Class పేరే.",
+      "hi": "Class जैसा।"
+     }
+    },
+    {
+     "q": {
+      "en": "private fields can be read by…",
+      "te": "private fields ని చదవగలిగేది…",
+      "hi": "private fields कौन पढ़ सकता है…"
+     },
+     "options": [
+      {
+       "en": "any class",
+       "te": "ఏ class అయినా",
+       "hi": "कोई भी class"
+      },
+      {
+       "en": "only their own class",
+       "te": "తమ class మాత్రమే",
+       "hi": "सिर्फ़ अपनी class"
+      }
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Only inside the class.",
+      "te": "Class లోపల మాత్రమే.",
+      "hi": "सिर्फ़ class के अंदर।"
+     }
+    },
+    {
+     "q": {
+      "en": "this.name means…",
+      "te": "this.name అంటే…",
+      "hi": "this.name मतलब…"
+     },
+     "options": [
+      {
+       "en": "this object's field",
+       "te": "ఈ object field",
+       "hi": "इस object का field"
+      },
+      {
+       "en": "the parameter",
+       "te": "Parameter",
+       "hi": "parameter"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "The field.",
+      "te": "Field.",
+      "hi": "Field।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write class Student with private String name and private int marks, a constructor Student(String name), a method setMarks(int m) that only accepts 0 to 100, and getMarks().",
+     "te": "private String name, private int marks, constructor Student(String name), 0 నుంచి 100 మాత్రమే అంగీకరించే setMarks(int m), getMarks() ఉన్న Student class రాయండి.",
+     "hi": "private String name और private int marks वाली Student class लिखिए, constructor Student(String name), setMarks(int m) जो सिर्फ़ 0 से 100 माने, और getMarks()।"
+    },
+    "starter": "class Student {\n    String name;\n    int marks;\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        Student s = new Student();\n        s.marks = 150;\n        System.out.println(s.marks);\n    }\n}\n",
+    "tests": [
+     {
+      "name": "private fields",
+      "pattern": "private\\s+String\\s+name\\s*;[\\s\\S]*private\\s+int\\s+marks\\s*;"
+     },
+     {
+      "name": "constructor with name",
+      "pattern": "Student\\s*\\(\\s*String\\s+\\w+\\s*\\)\\s*\\{[\\s\\S]*this\\.name\\s*="
+     },
+     {
+      "name": "setMarks checks the range",
+      "pattern": "void\\s+setMarks\\s*\\(\\s*int\\s+\\w+\\s*\\)[\\s\\S]*(>=\\s*0|<\\s*0)[\\s\\S]*100"
+     },
+     {
+      "name": "getter",
+      "pattern": "int\\s+getMarks\\s*\\(\\s*\\)"
+     },
+     {
+      "name": "no direct field access from main",
+      "absent": "s\\.marks\\s*=",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "private String name; private int marks;",
+      "te": "private String name; private int marks;",
+      "hi": "private String name; private int marks;"
+     },
+     {
+      "en": "Student(String name) { this.name = name; }",
+      "te": "Student(String name) { this.name = name; }",
+      "hi": "Student(String name) { this.name = name; }"
+     },
+     {
+      "en": "void setMarks(int m) { if (m >= 0 && m <= 100) marks = m; }",
+      "te": "void setMarks(int m) { if (m >= 0 && m <= 100) marks = m; }",
+      "hi": "void setMarks(int m) { if (m >= 0 && m <= 100) marks = m; }"
+     }
+    ],
+    "solution": "class Student {\n    private String name;\n    private int marks;\n\n    Student(String name) {\n        this.name = name;\n    }\n\n    void setMarks(int m) {\n        if (m >= 0 && m <= 100) {\n            marks = m;\n        }\n    }\n\n    int getMarks() {\n        return marks;\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        Student st = new Student(\"Sita\");\n        st.setMarks(150);\n        st.setMarks(88);\n        System.out.println(st.getMarks());\n    }\n}",
+    "output": "88"
+   },
+   "cheat": {
+    "en": [
+     "Name(params) { this.x = x; } — no return type",
+     "private fields · public getters · checks in setters/methods",
+     "new Name(args) runs the constructor."
+    ],
+    "te": [
+     "Name(params) { this.x = x; } — return type లేదు",
+     "private fields · public getters · setters/methods లో checks",
+     "new Name(args) constructor నడుపుతుంది."
+    ],
+    "hi": [
+     "Name(params) { this.x = x; } — कोई return type नहीं",
+     "private fields · public getters · setters/methods में जाँच",
+     "new Name(args) constructor चलाता है।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "Explain why a bank account should keep its balance private and change it only through deposit and withdraw.",
+      "te": "Bank account balance ని ఎందుకు private గా ఉంచి deposit, withdraw ద్వారానే మార్చాలో వివరించండి.",
+      "hi": "Bank account को balance private क्यों रखना चाहिए और सिर्फ़ deposit और withdraw से क्यों बदलना चाहिए, समझाइए।"
+     },
+     {
+      "en": "Explain what a constructor is and what this.name = name does.",
+      "te": "Constructor అంటే ఏమిటో, this.name = name ఏం చేస్తుందో వివరించండి.",
+      "hi": "Constructor क्या है और this.name = name क्या करता है, समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "private",
+      "encapsulation"
+     ],
+     [
+      "constructor",
+      "new"
+     ],
+     [
+      "this",
+      "getter",
+      "method",
+      "deposit"
+     ]
+    ],
+    "challenge": {
+     "en": "Say how a constructor is different from a method.",
+     "te": "Constructor, method కి ఎలా భిన్నమో చెప్పండి.",
+     "hi": "Constructor, method से कैसे अलग है, बताइए।"
     }
    }
   }

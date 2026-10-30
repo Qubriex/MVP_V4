@@ -306,9 +306,9 @@
    "n": 2,
    "minutes": 20,
    "title": {
-    "en": "Reading and writing files",
+    "en": "File reading and writing",
     "te": "Files చదవడం, రాయడం",
-    "hi": "Files पढ़ना और लिखना"
+    "hi": "File पढ़ना और लिखना"
    },
    "oneLine": {
     "en": "java.nio.file.Files writes lines to a file and reads them back, so data stays after the program ends; file errors are IOExceptions.",

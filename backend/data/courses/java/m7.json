@@ -3,14 +3,14 @@
  "n": 7,
  "skill": "java-collections",
  "title": {
-  "en": "Collections",
-  "te": "Collections",
-  "hi": "Collections"
+  "en": "Collections and Generics",
+  "te": "Collections, Generics",
+  "hi": "Collections और Generics"
  },
  "summary": {
-  "en": "Grow and shrink lists with ArrayList, look things up with HashMap, and keep unique values with HashSet.",
-  "te": "ArrayList తో lists పెంచడం, తగ్గించడం; HashMap తో వెతకడం; HashSet తో ప్రత్యేక values ఉంచడం.",
-  "hi": "ArrayList से lists बढ़ाना-घटाना, HashMap से ढूँढना, और HashSet से अनोखी values रखना।"
+  "en": "Grow lists with ArrayList, look things up with HashMap, keep unique values with HashSet, and write type-safe code with generics.",
+  "te": "ArrayList తో lists, HashMap తో వెతకడం, HashSet తో ప్రత్యేక values, generics తో type-safe code.",
+  "hi": "ArrayList से lists, HashMap से ढूँढना, HashSet से अनोखी values, और generics से type-safe code।"
  },
  "lessons": [
   {
@@ -311,52 +311,52 @@
    "n": 2,
    "minutes": 20,
    "title": {
-    "en": "HashMap and HashSet",
-    "te": "HashMap, HashSet",
-    "hi": "HashMap और HashSet"
+    "en": "HashMap",
+    "te": "HashMap",
+    "hi": "HashMap"
    },
    "oneLine": {
-    "en": "A HashMap stores key–value pairs for fast lookup by key; a HashSet stores unique values with no duplicates.",
-    "te": "HashMap key–value జతలను key తో వేగంగా వెతకడానికి ఉంచుతుంది; HashSet duplicates లేని ప్రత్యేక values ఉంచుతుంది.",
-    "hi": "HashMap key–value जोड़े रखता है ताकि key से जल्दी ढूँढें; HashSet बिना दोहराव के अनोखी values रखता है।"
+    "en": "A HashMap stores key–value pairs, so you look a value up quickly by its key, like a price by an item name.",
+    "te": "HashMap key–value జతలను ఉంచుతుంది; item పేరుతో ధర లాగా key తో value ని వేగంగా వెతుకుతాం.",
+    "hi": "HashMap key–value जोड़े रखता है, ताकि key से value जल्दी मिले, जैसे item के नाम से दाम।"
    },
    "useCase": {
-    "en": "A canteen app maps each item to its price, and keeps a HashSet of roll numbers so a student is counted only once.",
-    "te": "Canteen app ప్రతి item ని దాని ధరకు map చేస్తుంది; ఒక విద్యార్థి ఒక్కసారే లెక్కలోకి వచ్చేలా roll numbers HashSet ఉంచుతుంది.",
-    "hi": "Canteen app हर item को उसके दाम से जोड़ता है, और roll numbers का HashSet रखता है ताकि एक छात्र एक ही बार गिना जाए।"
+    "en": "A canteen app maps each item to its price and counts how many of each item were sold.",
+    "te": "Canteen app ప్రతి item ని దాని ధరకు map చేసి ప్రతి item ఎన్ని అమ్ముడయ్యాయో లెక్కిస్తుంది.",
+    "hi": "Canteen app हर item को उसके दाम से जोड़ता है और गिनता है कि हर item कितना बिका।"
    },
    "explain": {
     "en": [
      "HashMap<String, Integer> prices = new HashMap<>(); keys are Strings, values are Integers.",
-     "prices.put(\"tea\", 15) adds or replaces; prices.get(\"tea\") reads; containsKey checks.",
+     "put(\"tea\", 15) adds or replaces; get(\"tea\") reads; containsKey checks; remove deletes.",
      "getOrDefault(\"lassi\", 0) gives a safe default when the key is missing, which is ideal for counting.",
-     "Loop over pairs with for (var e : prices.entrySet()) using e.getKey() and e.getValue().",
-     "HashSet<Integer> seen = new HashSet<>(); add ignores duplicates, and contains is very fast."
+     "Loop over pairs with for (var e : prices.entrySet()), using e.getKey() and e.getValue().",
+     "A HashMap has no fixed order; use TreeMap for keys in sorted order, or LinkedHashMap for the order you added them."
     ],
     "te": [
      "HashMap<String, Integer> prices = new HashMap<>(); keys Strings, values Integers.",
-     "prices.put(\"tea\", 15) జోడిస్తుంది లేదా మారుస్తుంది; prices.get(\"tea\") చదువుతుంది; containsKey చూస్తుంది.",
+     "put(\"tea\", 15) జోడిస్తుంది లేదా మారుస్తుంది; get(\"tea\") చదువుతుంది; containsKey చూస్తుంది; remove తొలగిస్తుంది.",
      "Key లేనప్పుడు getOrDefault(\"lassi\", 0) సురక్షిత default ఇస్తుంది, లెక్కించడానికి అనువైనది.",
      "for (var e : prices.entrySet()) తో e.getKey(), e.getValue() వాడి జతలపై loop చేయండి.",
-     "HashSet<Integer> seen = new HashSet<>(); add duplicates ని పట్టించుకోదు, contains చాలా వేగం."
+     "HashMap కి స్థిర క్రమం లేదు; keys sorted క్రమానికి TreeMap, జోడించిన క్రమానికి LinkedHashMap వాడండి."
     ],
     "hi": [
      "HashMap<String, Integer> prices = new HashMap<>(); keys Strings हैं, values Integers।",
-     "prices.put(\"tea\", 15) जोड़ता या बदलता है; prices.get(\"tea\") पढ़ता है; containsKey जाँचता है।",
+     "put(\"tea\", 15) जोड़ता या बदलता है; get(\"tea\") पढ़ता है; containsKey जाँचता है; remove हटाता है।",
      "Key न हो तो getOrDefault(\"lassi\", 0) सुरक्षित default देता है, गिनती के लिए बढ़िया।",
      "for (var e : prices.entrySet()) से e.getKey() और e.getValue() लेकर जोड़ों पर loop कीजिए।",
-     "HashSet<Integer> seen = new HashSet<>(); add दोहराव को नज़रअंदाज़ करता है, और contains बहुत तेज़ है।"
+     "HashMap का कोई तय क्रम नहीं; keys के sorted क्रम के लिए TreeMap, और जोड़ने के क्रम के लिए LinkedHashMap लीजिए।"
     ]
    },
    "simpler": {
     "en": [
-     "HashMap is a phone book; HashSet is a guest list where each name appears once."
+     "A HashMap is a phone book: a name leads to a number."
     ],
     "te": [
-     "HashMap అంటే phone book; HashSet అంటే ప్రతి పేరు ఒక్కసారే ఉండే అతిథుల జాబితా."
+     "HashMap అంటే phone book: పేరు నుంచి number."
     ],
     "hi": [
-     "HashMap phone book है; HashSet ऐसी guest list जिसमें हर नाम एक बार।"
+     "HashMap एक phone book है: नाम से number।"
     ]
    },
    "anotherExample": {
@@ -370,13 +370,13 @@
      "Votes गिनना: votes.put(name, votes.getOrDefault(name, 0) + 1);"
     ]
    },
-   "picture": "flowchart LR\n  K1[\"\\\"tea\\\"\"] --> V1[\"15\"]\n  K2[\"\\\"coffee\\\"\"] --> V2[\"20\"]\n  S[\"HashSet: 101, 102, 101\"] --> U[\"{101, 102}\"]",
+   "picture": "flowchart LR\n  K1[\"\\\"tea\\\"\"] --> V1[\"15\"]\n  K2[\"\\\"coffee\\\"\"] --> V2[\"20\"]\n  K3[\"\\\"samosa\\\"\"] --> V3[\"12\"]",
    "code": {
-    "source": "import java.util.HashMap;\nimport java.util.HashSet;\nimport java.util.TreeMap;\n\npublic class Main {\n    public static void main(String[] args) {\n        HashMap<String, Integer> prices = new HashMap<>();\n        prices.put(\"tea\", 15);\n        prices.put(\"coffee\", 20);\n        System.out.println(prices.get(\"tea\") + \" \" + prices.getOrDefault(\"lassi\", 0));\n\n        String[] votes = {\"Ravi\", \"Sita\", \"Ravi\"};\n        HashMap<String, Integer> count = new HashMap<>();\n        for (String v : votes) {\n            count.put(v, count.getOrDefault(v, 0) + 1);\n        }\n        System.out.println(new TreeMap<>(count));\n\n        HashSet<Integer> scanned = new HashSet<>();\n        scanned.add(101);\n        scanned.add(102);\n        scanned.add(101);\n        System.out.println(scanned.size() + \" \" + scanned.contains(102));\n    }\n}",
-    "output": "15 0\n{Ravi=2, Sita=1}\n2 true",
+    "source": "import java.util.HashMap;\nimport java.util.TreeMap;\n\npublic class Main {\n    public static void main(String[] args) {\n        HashMap<String, Integer> prices = new HashMap<>();\n        prices.put(\"tea\", 15);\n        prices.put(\"coffee\", 20);\n        System.out.println(prices.get(\"tea\") + \" \" + prices.getOrDefault(\"lassi\", 0));\n        String[] sold = {\"tea\", \"samosa\", \"tea\"};\n        HashMap<String, Integer> count = new HashMap<>();\n        for (String s : sold) {\n            count.put(s, count.getOrDefault(s, 0) + 1);\n        }\n        System.out.println(new TreeMap<>(count));\n    }\n}",
+    "output": "15 0\n{samosa=1, tea=2}",
     "notes": [
      {
-      "line": 7,
+      "line": 6,
       "note": {
        "en": "Keys are item names; values are prices.",
        "te": "Keys item పేర్లు; values ధరలు.",
@@ -384,35 +384,27 @@
       }
      },
      {
-      "line": 10,
+      "line": 9,
       "note": {
-       "en": "get reads by key; getOrDefault avoids a null for missing keys.",
+       "en": "get reads by key; getOrDefault avoids null for missing keys.",
        "te": "get key తో చదువుతుంది; getOrDefault లేని keys కి null రాకుండా చూస్తుంది.",
        "hi": "get key से पढ़ता है; getOrDefault न होने वाली keys पर null से बचाता है।"
       }
      },
      {
-      "line": 15,
+      "line": 13,
       "note": {
-       "en": "Add one to this name's count.",
-       "te": "ఈ పేరు లెక్కకు ఒకటి కలపండి.",
-       "hi": "इस नाम की गिनती में एक जोड़िए।"
+       "en": "Add one to this item's count.",
+       "te": "ఈ item లెక్కకు ఒకటి కలపండి.",
+       "hi": "इस item की गिनती में एक जोड़िए।"
       }
      },
      {
-      "line": 17,
+      "line": 15,
       "note": {
        "en": "TreeMap shows the counts sorted by key.",
        "te": "TreeMap counts ని key క్రమంలో చూపిస్తుంది.",
        "hi": "TreeMap counts को key के क्रम में दिखाता है।"
-      }
-     },
-     {
-      "line": 22,
-      "note": {
-       "en": "The second 101 is ignored: sets keep one of each.",
-       "te": "రెండో 101 పట్టించుకోదు: sets ప్రతిది ఒక్కటే ఉంచుతాయి.",
-       "hi": "दूसरा 101 नज़रअंदाज़: sets हर एक की एक ही copy रखते हैं।"
       }
      }
     ]
@@ -421,17 +413,17 @@
     {
      "wrong": "int p = prices.get(\"lassi\");",
      "fix": {
-      "en": "A missing key gives null, and null cannot become an int (NullPointerException). Use getOrDefault.",
-      "te": "లేని key null ఇస్తుంది, null int కాలేదు (NullPointerException). getOrDefault వాడండి.",
-      "hi": "न होने वाली key null देती है, और null int नहीं बन सकता (NullPointerException)। getOrDefault लिखिए।"
+      "en": "A missing key gives null, which cannot become an int (NullPointerException). Use getOrDefault.",
+      "te": "లేని key null ఇస్తుంది, అది int కాలేదు (NullPointerException). getOrDefault వాడండి.",
+      "hi": "न होने वाली key null देती है, जो int नहीं बन सकता (NullPointerException)। getOrDefault लिखिए।"
      }
     },
     {
-     "wrong": "// expecting a HashMap to keep insertion order",
+     "wrong": "// expecting a HashMap to print in the order added",
      "fix": {
-      "en": "HashMap has no fixed order. Use LinkedHashMap for insertion order or TreeMap for sorted keys.",
-      "te": "HashMap కి స్థిర క్రమం లేదు. చొప్పించిన క్రమానికి LinkedHashMap, sorted keys కి TreeMap వాడండి.",
-      "hi": "HashMap का कोई तय क्रम नहीं। डालने के क्रम के लिए LinkedHashMap या sorted keys के लिए TreeMap लीजिए।"
+      "en": "HashMap has no fixed order. Use LinkedHashMap or TreeMap.",
+      "te": "HashMap కి స్థిర క్రమం లేదు. LinkedHashMap లేదా TreeMap వాడండి.",
+      "hi": "HashMap का कोई तय क्रम नहीं। LinkedHashMap या TreeMap लीजिए।"
      }
     }
    ],
@@ -463,23 +455,6 @@
     },
     {
      "q": {
-      "en": "HashSet add(5) twice gives size…",
-      "te": "HashSet లో add(5) రెండుసార్లు: size…",
-      "hi": "HashSet में add(5) दो बार: size…"
-     },
-     "options": [
-      "1",
-      "2"
-     ],
-     "answer": 0,
-     "why": {
-      "en": "No duplicates.",
-      "te": "Duplicates లేవు.",
-      "hi": "दोहराव नहीं।"
-     }
-    },
-    {
-     "q": {
       "en": "Safest way to read a count that may be missing?",
       "te": "లేకపోవచ్చు అనే count చదవడానికి సురక్షిత మార్గం?",
       "hi": "जो count शायद न हो, उसे पढ़ने का सुरक्षित तरीक़ा?"
@@ -493,6 +468,23 @@
       "en": "Gives a default.",
       "te": "Default ఇస్తుంది.",
       "hi": "Default देता है।"
+     }
+    },
+    {
+     "q": {
+      "en": "A map with keys in sorted order is…",
+      "te": "Keys sorted క్రమంలో ఉండే map…",
+      "hi": "Keys sorted क्रम में रखने वाला map…"
+     },
+     "options": [
+      "HashMap",
+      "TreeMap"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "TreeMap.",
+      "te": "TreeMap.",
+      "hi": "TreeMap।"
      }
     }
    ],
@@ -548,17 +540,17 @@
     "en": [
      "HashMap<K, V> m = new HashMap<>(); · put · get · getOrDefault · containsKey · remove",
      "for (var e : m.entrySet()) e.getKey(), e.getValue()",
-     "HashSet<T> s: add · contains · size · TreeMap sorted · LinkedHashMap ordered"
+     "No order · TreeMap sorted · LinkedHashMap insertion order"
     ],
     "te": [
      "HashMap<K, V> m = new HashMap<>(); · put · get · getOrDefault · containsKey · remove",
      "for (var e : m.entrySet()) e.getKey(), e.getValue()",
-     "HashSet<T> s: add · contains · size · TreeMap sorted · LinkedHashMap క్రమం"
+     "క్రమం లేదు · TreeMap sorted · LinkedHashMap జోడించిన క్రమం"
     ],
     "hi": [
      "HashMap<K, V> m = new HashMap<>(); · put · get · getOrDefault · containsKey · remove",
      "for (var e : m.entrySet()) e.getKey(), e.getValue()",
-     "HashSet<T> s: add · contains · size · TreeMap sorted · LinkedHashMap क्रम"
+     "क्रम नहीं · TreeMap sorted · LinkedHashMap जोड़ने का क्रम"
     ]
    },
    "check": {
@@ -569,9 +561,9 @@
       "hi": "College चुनाव में हर उम्मीदवार के votes गिने जाते हैं। getOrDefault वाला HashMap गिनती कैसे करता है, समझाइए।"
      },
      {
-      "en": "An exam hall scanner records some roll numbers twice. Explain how a HashSet gives the true count.",
-      "te": "Exam hall scanner కొన్ని roll numbers ని రెండుసార్లు నమోదు చేస్తుంది. HashSet నిజమైన లెక్క ఎలా ఇస్తుందో వివరించండి.",
-      "hi": "Exam hall scanner कुछ roll numbers दो बार दर्ज करता है। HashSet असली गिनती कैसे देता है, समझाइए।"
+      "en": "Explain what happens when you put a key that is already in the map.",
+      "te": "Map లో ఇప్పటికే ఉన్న key ని put చేస్తే ఏమవుతుందో వివరించండి.",
+      "hi": "Map में पहले से मौजूद key को put करने पर क्या होता है, समझाइए।"
      }
     ],
     "keywords": [
@@ -587,16 +579,609 @@
       "count"
      ],
      [
-      "hashset",
-      "set",
-      "duplicate",
-      "unique"
+      "replace",
+      "unique",
+      "missing",
+      "null"
      ]
     ],
     "challenge": {
-     "en": "Say when you would use a HashSet instead of an ArrayList.",
-     "te": "ArrayList బదులు HashSet ఎప్పుడు వాడతారో చెప్పండి.",
-     "hi": "ArrayList की जगह HashSet कब लेंगे, बताइए।"
+     "en": "Say what a key and a value are in a HashMap.",
+     "te": "HashMap లో key, value అంటే ఏమిటో చెప్పండి.",
+     "hi": "HashMap में key और value क्या हैं, बताइए।"
+    }
+   }
+  },
+  {
+   "id": "jv-m7-l3",
+   "n": 3,
+   "minutes": 20,
+   "title": {
+    "en": "HashSet",
+    "te": "HashSet",
+    "hi": "HashSet"
+   },
+   "oneLine": {
+    "en": "A HashSet keeps unique values with no duplicates and answers \"is this in it?\" very fast.",
+    "te": "HashSet duplicates లేని ప్రత్యేక values ఉంచుతుంది; \"ఇది ఉందా?\" కి చాలా వేగంగా జవాబిస్తుంది.",
+    "hi": "HashSet बिना दोहराव के अनोखी values रखता है और \"क्या यह इसमें है?\" का जवाब बहुत जल्दी देता है।"
+   },
+   "useCase": {
+    "en": "An exam hall scanner records roll numbers in a HashSet, so a student scanned twice is still counted once.",
+    "te": "Exam hall scanner roll numbers ని HashSet లో నమోదు చేస్తుంది; రెండుసార్లు scan అయిన విద్యార్థి ఒక్కసారే లెక్కలోకి వస్తారు.",
+    "hi": "Exam hall scanner roll numbers को HashSet में दर्ज करता है, ताकि दो बार scan हुआ छात्र एक ही बार गिना जाए।"
+   },
+   "explain": {
+    "en": [
+     "HashSet<Integer> seen = new HashSet<>(); makes an empty set.",
+     "add(101) adds a value; adding it again changes nothing (add returns false).",
+     "contains(101) checks membership quickly; size() counts the unique values.",
+     "A HashSet has no order and no index; use TreeSet for sorted order.",
+     "retainAll keeps only the common values of two sets; addAll joins them."
+    ],
+    "te": [
+     "HashSet<Integer> seen = new HashSet<>(); ఖాళీ set చేస్తుంది.",
+     "add(101) value జోడిస్తుంది; మళ్లీ జోడిస్తే ఏమీ మారదు (add false ఇస్తుంది).",
+     "contains(101) వేగంగా ఉందో చూస్తుంది; size() ప్రత్యేక values లెక్కిస్తుంది.",
+     "HashSet కి క్రమం, index లేవు; sorted క్రమానికి TreeSet వాడండి.",
+     "retainAll రెండు sets లో ఉమ్మడివి మాత్రమే ఉంచుతుంది; addAll కలుపుతుంది."
+    ],
+    "hi": [
+     "HashSet<Integer> seen = new HashSet<>(); ख़ाली set बनाता है।",
+     "add(101) value जोड़ता है; दोबारा जोड़ने पर कुछ नहीं बदलता (add false देता है)।",
+     "contains(101) जल्दी जाँचता है; size() अनोखी values गिनता है।",
+     "HashSet का न क्रम है न index; sorted क्रम के लिए TreeSet लीजिए।",
+     "retainAll दो sets की साझा values ही रखता है; addAll जोड़ता है।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "A HashSet is a guest list where each name appears once."
+    ],
+    "te": [
+     "HashSet అంటే ప్రతి పేరు ఒక్కసారే ఉండే అతిథుల జాబితా."
+    ],
+    "hi": [
+     "HashSet ऐसी guest list है जिसमें हर नाम एक बार।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "Students in both cricket and chess clubs: cricket.retainAll(chess)."
+    ],
+    "te": [
+     "Cricket, chess రెండు clubs లోనూ ఉన్న విద్యార్థులు: cricket.retainAll(chess)."
+    ],
+    "hi": [
+     "Cricket और chess दोनों clubs वाले छात्र: cricket.retainAll(chess)।"
+    ]
+   },
+   "picture": "flowchart LR\n  A[\"101, 102, 101, 103\"] --> S[\"HashSet\"] --> B[\"{101, 102, 103}\"]",
+   "code": {
+    "source": "import java.util.HashSet;\nimport java.util.TreeSet;\n\npublic class Main {\n    public static void main(String[] args) {\n        int[] scans = {101, 102, 101, 103};\n        HashSet<Integer> present = new HashSet<>();\n        for (int roll : scans) {\n            present.add(roll);\n        }\n        System.out.println(present.size() + \" \" + present.contains(102));\n        HashSet<String> cricket = new HashSet<>(java.util.List.of(\"Ravi\", \"Anu\", \"Sita\"));\n        HashSet<String> chess = new HashSet<>(java.util.List.of(\"Anu\", \"Kiran\", \"Ravi\"));\n        cricket.retainAll(chess);\n        System.out.println(new TreeSet<>(cricket));\n    }\n}",
+    "output": "3 true\n[Anu, Ravi]",
+    "notes": [
+     {
+      "line": 7,
+      "note": {
+       "en": "An empty set of roll numbers.",
+       "te": "Roll numbers ఖాళీ set.",
+       "hi": "Roll numbers का ख़ाली set।"
+      }
+     },
+     {
+      "line": 9,
+      "note": {
+       "en": "The second 101 is ignored.",
+       "te": "రెండో 101 పట్టించుకోదు.",
+       "hi": "दूसरा 101 नज़रअंदाज़।"
+      }
+     },
+     {
+      "line": 11,
+      "note": {
+       "en": "Three unique rolls; 102 is present.",
+       "te": "మూడు ప్రత్యేక rolls; 102 ఉంది.",
+       "hi": "तीन अनोखे rolls; 102 मौजूद है।"
+      }
+     },
+     {
+      "line": 14,
+      "note": {
+       "en": "retainAll keeps only those in both clubs.",
+       "te": "retainAll రెండు clubs లో ఉన్నవారినే ఉంచుతుంది.",
+       "hi": "retainAll दोनों clubs वालों को ही रखता है।"
+      }
+     },
+     {
+      "line": 15,
+      "note": {
+       "en": "TreeSet prints them sorted.",
+       "te": "TreeSet వాటిని sorted గా print చేస్తుంది.",
+       "hi": "TreeSet उन्हें sorted print करता है।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "HashSet<String> s = ...;\nSystem.out.println(s.get(0));",
+     "fix": {
+      "en": "Sets have no index. Use a list if you need positions.",
+      "te": "Sets కి index లేదు. స్థానాలు కావాలంటే list వాడండి.",
+      "hi": "Set में index नहीं होता। जगह चाहिए तो list लीजिए।"
+     }
+    },
+    {
+     "wrong": "// expecting a HashSet to print in the order added",
+     "fix": {
+      "en": "HashSet has no order. Use TreeSet for sorted, LinkedHashSet for insertion order.",
+      "te": "HashSet కి క్రమం లేదు. Sorted కి TreeSet, జోడించిన క్రమానికి LinkedHashSet వాడండి.",
+      "hi": "HashSet का कोई क्रम नहीं। Sorted के लिए TreeSet, जोड़ने के क्रम के लिए LinkedHashSet।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "add(5) twice gives size…",
+      "te": "add(5) రెండుసార్లు: size…",
+      "hi": "add(5) दो बार: size…"
+     },
+     "options": [
+      "1",
+      "2"
+     ],
+     "answer": 0,
+     "why": {
+      "en": "No duplicates.",
+      "te": "Duplicates లేవు.",
+      "hi": "दोहराव नहीं।"
+     }
+    },
+    {
+     "q": {
+      "en": "Which checks membership?",
+      "te": "ఉందో లేదో చూసేది?",
+      "hi": "मौजूदगी कौन जाँचता है?"
+     },
+     "options": [
+      "contains",
+      "get",
+      "indexOf"
+     ],
+     "answer": 0,
+     "why": {
+      "en": "contains.",
+      "te": "contains.",
+      "hi": "contains।"
+     }
+    },
+    {
+     "q": {
+      "en": "retainAll keeps…",
+      "te": "retainAll ఉంచేది…",
+      "hi": "retainAll रखता है…"
+     },
+     "options": [
+      {
+       "en": "values in both sets",
+       "te": "రెండు sets లో ఉన్నవి",
+       "hi": "दोनों sets की values"
+      },
+      {
+       "en": "all values",
+       "te": "అన్ని values",
+       "hi": "सारी values"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "The common ones.",
+      "te": "ఉమ్మడివి.",
+      "hi": "साझा वाली।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write static int uniqueCount(String[] names) that returns how many different names are in the array, using a HashSet.",
+     "te": "HashSet వాడి array లో ఎన్ని వేర్వేరు పేర్లు ఉన్నాయో return చేసే static int uniqueCount(String[] names) రాయండి.",
+     "hi": "HashSet से array में कितने अलग नाम हैं यह return करने वाला static int uniqueCount(String[] names) लिखिए।"
+    },
+    "starter": "public class Main {\n    static int uniqueCount(String[] names) {\n        return names.length;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(uniqueCount(new String[]{\"Ravi\", \"Sita\", \"Ravi\"}));\n    }\n}\n",
+    "tests": [
+     {
+      "name": "uses a HashSet",
+      "pattern": "HashSet\\s*<\\s*String\\s*>"
+     },
+     {
+      "name": "adds the names",
+      "pattern": "\\.add\\s*\\(|addAll|List\\.of|Arrays\\.asList"
+     },
+     {
+      "name": "returns the size",
+      "pattern": "return\\s+\\w+\\.size\\s*\\(\\s*\\)",
+      "expected": "return set.size();",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "import java.util.HashSet;",
+      "te": "import java.util.HashSet;",
+      "hi": "import java.util.HashSet;"
+     },
+     {
+      "en": "HashSet<String> set = new HashSet<>(); for (String n : names) set.add(n);",
+      "te": "HashSet<String> set = new HashSet<>(); for (String n : names) set.add(n);",
+      "hi": "HashSet<String> set = new HashSet<>(); for (String n : names) set.add(n);"
+     },
+     {
+      "en": "return set.size();",
+      "te": "return set.size();",
+      "hi": "return set.size();"
+     }
+    ],
+    "solution": "import java.util.HashSet;\n\npublic class Main {\n    static int uniqueCount(String[] names) {\n        HashSet<String> set = new HashSet<>();\n        for (String n : names) {\n            set.add(n);\n        }\n        return set.size();\n    }\n\n    public static void main(String[] args) {\n        System.out.println(uniqueCount(new String[]{\"Ravi\", \"Sita\", \"Ravi\"}));\n    }\n}",
+    "output": "2"
+   },
+   "cheat": {
+    "en": [
+     "HashSet<T> s = new HashSet<>(); · add · contains · remove · size",
+     "No duplicates · no index · no order (TreeSet sorted)",
+     "retainAll = common · addAll = join"
+    ],
+    "te": [
+     "HashSet<T> s = new HashSet<>(); · add · contains · remove · size",
+     "Duplicates లేవు · index లేదు · క్రమం లేదు (TreeSet sorted)",
+     "retainAll = ఉమ్మడి · addAll = కలుపు"
+    ],
+    "hi": [
+     "HashSet<T> s = new HashSet<>(); · add · contains · remove · size",
+     "दोहराव नहीं · index नहीं · क्रम नहीं (TreeSet sorted)",
+     "retainAll = साझा · addAll = जोड़"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "An exam hall scanner records some roll numbers twice. Explain how a HashSet gives the true count and checks whether one student came.",
+      "te": "Exam hall scanner కొన్ని roll numbers ని రెండుసార్లు నమోదు చేస్తుంది. HashSet నిజమైన లెక్క ఎలా ఇస్తుందో, ఒక విద్యార్థి వచ్చారో ఎలా చూస్తుందో వివరించండి.",
+      "hi": "Exam hall scanner कुछ roll numbers दो बार दर्ज करता है। HashSet असली गिनती कैसे देता है और कोई छात्र आया या नहीं कैसे जाँचता है, समझाइए।"
+     },
+     {
+      "en": "When would you choose a HashSet instead of an ArrayList?",
+      "te": "ArrayList బదులు HashSet ఎప్పుడు ఎంచుకుంటారు?",
+      "hi": "ArrayList की जगह HashSet कब चुनेंगे?"
+     }
+    ],
+    "keywords": [
+     [
+      "hashset",
+      "set"
+     ],
+     [
+      "duplicate",
+      "unique",
+      "once",
+      "ఒక్కసారి",
+      "एक बार"
+     ],
+     [
+      "contains",
+      "size",
+      "fast",
+      "order",
+      "index"
+     ]
+    ],
+    "challenge": {
+     "en": "Say what a HashSet does with duplicates.",
+     "te": "HashSet duplicates తో ఏం చేస్తుందో చెప్పండి.",
+     "hi": "HashSet दोहराव के साथ क्या करता है, बताइए।"
+    }
+   }
+  },
+  {
+   "id": "jv-m7-l4",
+   "n": 4,
+   "minutes": 20,
+   "title": {
+    "en": "Generics",
+    "te": "Generics",
+    "hi": "Generics"
+   },
+   "oneLine": {
+    "en": "Generics let a class or method work with any type you name in angle brackets, like ArrayList<String>, and Java checks the type for you.",
+    "te": "Generics వల్ల ఒక class లేదా method మీరు angle brackets లో చెప్పే ఏ type తోనైనా పనిచేస్తుంది, ArrayList<String> లాగా; Java మీ కోసం type చూస్తుంది.",
+    "hi": "Generics से class या method उस किसी भी type के साथ चलता है जो आप angle brackets में बताएँ, जैसे ArrayList<String>, और Java आपके लिए type जाँचता है।"
+   },
+   "useCase": {
+    "en": "A placement app writes one Pair<A, B> class and uses it for (name, marks), (company, package) and (city, count) without copying code.",
+    "te": "Placement app ఒకే Pair<A, B> class రాసి (name, marks), (company, package), (city, count) కోసం code copy చేయకుండా వాడుతుంది.",
+    "hi": "Placement app एक Pair<A, B> class लिखकर (name, marks), (company, package) और (city, count) के लिए बिना code copy किए इस्तेमाल करता है।"
+   },
+   "explain": {
+    "en": [
+     "You already used generics: ArrayList<String> holds only Strings, HashMap<String, Integer> maps Strings to Integers.",
+     "Java checks the type when compiling, so adding a number to an ArrayList<String> is an error before the program runs.",
+     "You can write your own: class Box<T> { T item; } where T is a type parameter, filled in when you use it: Box<String>.",
+     "A generic method puts the type parameter before the return type: static <T> T first(List<T> list).",
+     "Generics work with object types, so use Integer, Double and Boolean, not int, double and boolean."
+    ],
+    "te": [
+     "మీరు ఇప్పటికే generics వాడారు: ArrayList<String> Strings మాత్రమే ఉంచుతుంది, HashMap<String, Integer> Strings ని Integers కి map చేస్తుంది.",
+     "Compile సమయంలోనే Java type చూస్తుంది; ArrayList<String> కి number జోడిస్తే program నడవక ముందే error.",
+     "మీ సొంతది రాయవచ్చు: class Box<T> { T item; }; T ఒక type parameter, వాడినప్పుడు నింపుతారు: Box<String>.",
+     "Generic method return type ముందు type parameter పెడుతుంది: static <T> T first(List<T> list).",
+     "Generics object types తో పనిచేస్తాయి; int, double, boolean కాకుండా Integer, Double, Boolean వాడండి."
+    ],
+    "hi": [
+     "आप generics पहले ही इस्तेमाल कर चुके हैं: ArrayList<String> सिर्फ़ Strings रखता है, HashMap<String, Integer> Strings को Integers से जोड़ता है।",
+     "Java compile के समय type जाँचता है, इसलिए ArrayList<String> में number जोड़ना program चलने से पहले ही error है।",
+     "आप अपना भी लिख सकते हैं: class Box<T> { T item; }, जहाँ T एक type parameter है, जिसे इस्तेमाल करते समय भरते हैं: Box<String>।",
+     "Generic method return type से पहले type parameter लिखता है: static <T> T first(List<T> list)।",
+     "Generics object types के साथ चलते हैं, इसलिए int, double, boolean की जगह Integer, Double, Boolean लीजिए।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "A generic class is a box with a label slot: Box<String> holds only text."
+    ],
+    "te": [
+     "Generic class అంటే label స్థానం ఉన్న పెట్టె: Box<String> text మాత్రమే ఉంచుతుంది."
+    ],
+    "hi": [
+     "Generic class एक डिब्बा है जिस पर label की जगह है: Box<String> सिर्फ़ text रखता है।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "static <T> void printAll(List<T> items) prints a list of names, marks or anything else."
+    ],
+    "te": [
+     "static <T> void printAll(List<T> items) పేర్లు, marks లేదా ఏ list నైనా print చేస్తుంది."
+    ],
+    "hi": [
+     "static <T> void printAll(List<T> items) नामों, marks या किसी भी चीज़ की list print करता है।"
+    ]
+   },
+   "picture": "flowchart LR\n  P[\"Pair<A, B>\"] --> P1[\"Pair<String, Integer>: Ravi, 82\"]\n  P --> P2[\"Pair<String, Double>: TCS, 3.6\"]",
+   "code": {
+    "source": "import java.util.List;\n\nclass Pair<A, B> {\n    private final A first;\n    private final B second;\n\n    Pair(A first, B second) {\n        this.first = first;\n        this.second = second;\n    }\n\n    A getFirst() {\n        return first;\n    }\n\n    B getSecond() {\n        return second;\n    }\n}\n\npublic class Main {\n    static <T> T firstOf(List<T> list) {\n        return list.get(0);\n    }\n\n    public static void main(String[] args) {\n        Pair<String, Integer> student = new Pair<>(\"Ravi\", 82);\n        Pair<String, Double> offer = new Pair<>(\"TCS\", 3.6);\n        System.out.println(student.getFirst() + \" \" + student.getSecond());\n        System.out.println(offer.getFirst() + \" \" + offer.getSecond());\n        System.out.println(firstOf(List.of(\"Sita\", \"Anu\")) + \" \" + firstOf(List.of(5, 9)));\n    }\n}",
+    "output": "Ravi 82\nTCS 3.6\nSita 5",
+    "notes": [
+     {
+      "line": 3,
+      "note": {
+       "en": "A and B are type parameters, filled in later.",
+       "te": "A, B type parameters, తర్వాత నింపబడతాయి.",
+       "hi": "A और B type parameters हैं, बाद में भरे जाते हैं।"
+      }
+     },
+     {
+      "line": 22,
+      "note": {
+       "en": "A generic method: <T> before the return type.",
+       "te": "Generic method: return type ముందు <T>.",
+       "hi": "Generic method: return type से पहले <T>।"
+      }
+     },
+     {
+      "line": 27,
+      "note": {
+       "en": "Here A is String and B is Integer.",
+       "te": "ఇక్కడ A అంటే String, B అంటే Integer.",
+       "hi": "यहाँ A, String है और B, Integer।"
+      }
+     },
+     {
+      "line": 28,
+      "note": {
+       "en": "The same class, now with String and Double.",
+       "te": "అదే class, ఇప్పుడు String, Double తో.",
+       "hi": "वही class, अब String और Double के साथ।"
+      }
+     },
+     {
+      "line": 31,
+      "note": {
+       "en": "firstOf works for a list of Strings and a list of Integers.",
+       "te": "firstOf Strings list కి, Integers list కి పనిచేస్తుంది.",
+       "hi": "firstOf Strings की list और Integers की list दोनों पर चलता है।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "ArrayList<int> marks = new ArrayList<>();",
+     "fix": {
+      "en": "Generics need object types: ArrayList<Integer>.",
+      "te": "Generics కి object types కావాలి: ArrayList<Integer>.",
+      "hi": "Generics को object types चाहिए: ArrayList<Integer>।"
+     }
+    },
+    {
+     "wrong": "ArrayList list = new ArrayList();  // no type",
+     "fix": {
+      "en": "Without <Type> Java cannot check what goes in. Always name the type: ArrayList<String>.",
+      "te": "<Type> లేకపోతే లోపలికి ఏం వెళ్తుందో Java చూడలేదు. ఎప్పుడూ type చెప్పండి: ArrayList<String>.",
+      "hi": "<Type> के बिना Java जाँच नहीं पाता कि अंदर क्या जा रहा है। हमेशा type लिखिए: ArrayList<String>।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "In class Box<T>, T is…",
+      "te": "class Box<T> లో T…",
+      "hi": "class Box<T> में T है…"
+     },
+     "options": [
+      {
+       "en": "a type parameter",
+       "te": "Type parameter",
+       "hi": "type parameter"
+      },
+      {
+       "en": "a variable holding text",
+       "te": "Text ఉంచే variable",
+       "hi": "text रखने वाला variable"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Filled in when used.",
+      "te": "వాడినప్పుడు నింపుతారు.",
+      "hi": "इस्तेमाल पर भरा जाता है।"
+     }
+    },
+    {
+     "q": {
+      "en": "A list of whole numbers is…",
+      "te": "పూర్ణ సంఖ్యల list…",
+      "hi": "पूर्ण संख्याओं की list…"
+     },
+     "options": [
+      "ArrayList<int>",
+      "ArrayList<Integer>"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Use the wrapper class.",
+      "te": "Wrapper class వాడండి.",
+      "hi": "Wrapper class लीजिए।"
+     }
+    },
+    {
+     "q": {
+      "en": "Adding 5 to an ArrayList<String> gives…",
+      "te": "ArrayList<String> కి 5 జోడిస్తే…",
+      "hi": "ArrayList<String> में 5 जोड़ने पर…"
+     },
+     "options": [
+      {
+       "en": "a compile error",
+       "te": "Compile error",
+       "hi": "compile error"
+      },
+      {
+       "en": "\"5\"",
+       "te": "\"5\"",
+       "hi": "\"5\""
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Java checks types early.",
+      "te": "Java ముందే types చూస్తుంది.",
+      "hi": "Java पहले ही types जाँचता है।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write a generic class Box<T> with a private T item, a constructor, and T get(). Then write a generic method static <T> int countMatches(List<T> list, T value) that returns how many items equal value.",
+     "te": "Private T item, constructor, T get() ఉన్న generic class Box<T> రాయండి. తర్వాత value కి సమానమైన items ఎన్నో return చేసే generic method static <T> int countMatches(List<T> list, T value) రాయండి.",
+     "hi": "Generic class Box<T> लिखिए जिसमें private T item, constructor और T get() हो। फिर generic method static <T> int countMatches(List<T> list, T value) लिखिए जो value के बराबर items की गिनती return करे।"
+    },
+    "starter": "import java.util.List;\n\npublic class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Box and countMatches\");\n    }\n}\n",
+    "tests": [
+     {
+      "name": "generic class Box<T>",
+      "pattern": "class\\s+Box\\s*<\\s*T\\s*>"
+     },
+     {
+      "name": "a T field and get()",
+      "pattern": "private\\s+(final\\s+)?T\\s+\\w+\\s*;[\\s\\S]*T\\s+get\\s*\\(\\s*\\)"
+     },
+     {
+      "name": "generic method",
+      "pattern": "static\\s*<\\s*T\\s*>\\s*int\\s+countMatches\\s*\\(\\s*List\\s*<\\s*T\\s*>\\s*\\w+\\s*,\\s*T\\s+\\w+\\s*\\)"
+     },
+     {
+      "name": "compares with equals",
+      "pattern": "\\.equals\\s*\\(",
+      "expected": "item.equals(value)",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "class Box<T> { private T item; Box(T item) { this.item = item; } T get() { return item; } }",
+      "te": "class Box<T> { private T item; Box(T item) { this.item = item; } T get() { return item; } }",
+      "hi": "class Box<T> { private T item; Box(T item) { this.item = item; } T get() { return item; } }"
+     },
+     {
+      "en": "static <T> int countMatches(List<T> list, T value) { int n = 0; ... }",
+      "te": "static <T> int countMatches(List<T> list, T value) { int n = 0; ... }",
+      "hi": "static <T> int countMatches(List<T> list, T value) { int n = 0; ... }"
+     },
+     {
+      "en": "for (T x : list) if (x.equals(value)) n++; return n;",
+      "te": "for (T x : list) if (x.equals(value)) n++; return n;",
+      "hi": "for (T x : list) if (x.equals(value)) n++; return n;"
+     }
+    ],
+    "solution": "import java.util.List;\n\nclass Box<T> {\n    private final T item;\n\n    Box(T item) {\n        this.item = item;\n    }\n\n    T get() {\n        return item;\n    }\n}\n\npublic class Main {\n    static <T> int countMatches(List<T> list, T value) {\n        int n = 0;\n        for (T x : list) {\n            if (x.equals(value)) {\n                n++;\n            }\n        }\n        return n;\n    }\n\n    public static void main(String[] args) {\n        Box<String> b = new Box<>(\"Godan\");\n        System.out.println(b.get() + \" \" + countMatches(List.of(\"tea\", \"coffee\", \"tea\"), \"tea\") + \" \" + countMatches(List.of(1, 2, 1, 1), 1));\n    }\n}",
+    "output": "Godan 2 3"
+   },
+   "cheat": {
+    "en": [
+     "ArrayList<String> · HashMap<String, Integer> — the type in < >",
+     "class Box<T> { T item; } · Box<String> b = new Box<>(\"x\");",
+     "static <T> T first(List<T> l) · object types only (Integer, not int)"
+    ],
+    "te": [
+     "ArrayList<String> · HashMap<String, Integer> — < > లో type",
+     "class Box<T> { T item; } · Box<String> b = new Box<>(\"x\");",
+     "static <T> T first(List<T> l) · object types మాత్రమే (int కాదు Integer)"
+    ],
+    "hi": [
+     "ArrayList<String> · HashMap<String, Integer> — < > में type",
+     "class Box<T> { T item; } · Box<String> b = new Box<>(\"x\");",
+     "static <T> T first(List<T> l) · सिर्फ़ object types (int नहीं Integer)"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "Explain how one generic Pair<A, B> class can hold (name, marks) and (company, package) without copying code.",
+      "te": "ఒకే generic Pair<A, B> class code copy చేయకుండా (name, marks), (company, package) ని ఎలా ఉంచగలదో వివరించండి.",
+      "hi": "एक generic Pair<A, B> class बिना code copy किए (name, marks) और (company, package) कैसे रख सकती है, समझाइए।"
+     },
+     {
+      "en": "Why does ArrayList<String> stop you adding a number, and why is that useful?",
+      "te": "ArrayList<String> number జోడించకుండా ఎందుకు ఆపుతుంది, అది ఎందుకు ఉపయోగకరం?",
+      "hi": "ArrayList<String> number जोड़ने से क्यों रोकता है, और यह क्यों काम का है?"
+     }
+    ],
+    "keywords": [
+     [
+      "generic",
+      "<t>",
+      "type parameter",
+      "t"
+     ],
+     [
+      "type",
+      "string",
+      "integer"
+     ],
+     [
+      "check",
+      "compile",
+      "error",
+      "reuse",
+      "safe"
+     ]
+    ],
+    "challenge": {
+     "en": "Say what the T in ArrayList<T> stands for.",
+     "te": "ArrayList<T> లో T దేనికో చెప్పండి.",
+     "hi": "ArrayList<T> में T किसके लिए है, बताइए।"
     }
    }
   }

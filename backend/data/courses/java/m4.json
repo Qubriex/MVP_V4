@@ -8,9 +8,9 @@
   "hi": "Arrays & Strings"
  },
  "summary": {
-  "en": "Store many values in arrays and work with text using String methods and StringBuilder.",
-  "te": "Arrays లో చాలా values దాయడం, String methods, StringBuilder తో text పై పని.",
-  "hi": "Arrays में कई values रखना और String methods और StringBuilder से text पर काम करना।"
+  "en": "Store many values in arrays and 2D arrays, and work with text using String methods and StringBuilder.",
+  "te": "Arrays, 2D arrays లో చాలా values దాయడం, String methods, StringBuilder తో text పై పని.",
+  "hi": "Arrays और 2D arrays में कई values रखना, और String methods और StringBuilder से text पर काम।"
  },
  "lessons": [
   {
@@ -304,6 +304,304 @@
   {
    "id": "jv-m4-l2",
    "n": 2,
+   "minutes": 20,
+   "title": {
+    "en": "2D arrays",
+    "te": "2D arrays",
+    "hi": "2D arrays"
+   },
+   "oneLine": {
+    "en": "A 2D array is an array of rows, like a table: grid[row][col] reaches one cell.",
+    "te": "2D array అంటే rows array, table లాగా: grid[row][col] ఒక cell ని చేరుతుంది.",
+    "hi": "2D array rows का array है, table जैसा: grid[row][col] एक cell तक पहुँचता है।"
+   },
+   "useCase": {
+    "en": "A class marks sheet keeps 3 students × 4 subjects in one int[3][4] and finds each student's total.",
+    "te": "Class marks sheet 3 విద్యార్థులు × 4 subjects ని ఒక int[3][4] లో ఉంచి ప్రతి విద్యార్థి total కనుక్కుంటుంది.",
+    "hi": "Class marks sheet 3 छात्र × 4 subjects एक int[3][4] में रखती है और हर छात्र का total निकालती है।"
+   },
+   "explain": {
+    "en": [
+     "int[][] marks = new int[3][4]; makes 3 rows and 4 columns, all 0.",
+     "Or write the values directly: int[][] seats = {{1, 0}, {0, 1}};",
+     "marks[1][2] is row 1, column 2 (both start at 0).",
+     "marks.length is the number of rows; marks[0].length is the number of columns.",
+     "Use a loop inside a loop: the outer goes over rows, the inner over columns."
+    ],
+    "te": [
+     "int[][] marks = new int[3][4]; 3 rows, 4 columns చేస్తుంది, అన్నీ 0.",
+     "లేదా values నేరుగా రాయండి: int[][] seats = {{1, 0}, {0, 1}};",
+     "marks[1][2] అంటే row 1, column 2 (రెండూ 0 నుంచి).",
+     "marks.length rows సంఖ్య; marks[0].length columns సంఖ్య.",
+     "Loop లోపల loop వాడండి: బయటిది rows పై, లోపలిది columns పై."
+    ],
+    "hi": [
+     "int[][] marks = new int[3][4]; 3 rows और 4 columns बनाता है, सब 0।",
+     "या values सीधे लिखिए: int[][] seats = {{1, 0}, {0, 1}};",
+     "marks[1][2] मतलब row 1, column 2 (दोनों 0 से)।",
+     "marks.length rows की संख्या है; marks[0].length columns की।",
+     "Loop के अंदर loop लीजिए: बाहर वाला rows पर, अंदर वाला columns पर।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "A 2D array is a cinema hall: row number and seat number."
+    ],
+    "te": [
+     "2D array అంటే cinema hall: row number, seat number."
+    ],
+    "hi": [
+     "2D array एक cinema hall है: row number और seat number।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "A bus seat map: boolean[10][4] seats; seats[2][3] = true books row 2, seat 3."
+    ],
+    "te": [
+     "Bus seat map: boolean[10][4] seats; seats[2][3] = true row 2, seat 3 ని book చేస్తుంది."
+    ],
+    "hi": [
+     "Bus seat map: boolean[10][4] seats; seats[2][3] = true से row 2, seat 3 book होती है।"
+    ]
+   },
+   "picture": "flowchart LR\n  R0[\"row 0: 72 85 64\"] --- R1[\"row 1: 90 78 88\"]\n  R1 --> C[\"marks[1][2] = 88\"]",
+   "code": {
+    "source": "public class Main {\n    public static void main(String[] args) {\n        int[][] marks = {\n            {72, 85, 64},\n            {90, 78, 88}\n        };\n        System.out.println(marks[1][2]);\n        System.out.println(marks.length + \" rows, \" + marks[0].length + \" columns\");\n        for (int r = 0; r < marks.length; r++) {\n            int total = 0;\n            for (int c = 0; c < marks[r].length; c++) {\n                total += marks[r][c];\n            }\n            System.out.println(\"Student \" + (r + 1) + \": \" + total);\n        }\n    }\n}",
+    "output": "88\n2 rows, 3 columns\nStudent 1: 221\nStudent 2: 256",
+    "notes": [
+     {
+      "line": 3,
+      "note": {
+       "en": "Two rows, each an array of three marks.",
+       "te": "రెండు rows, ప్రతిది మూడు marks array.",
+       "hi": "दो rows, हर एक तीन marks का array।"
+      }
+     },
+     {
+      "line": 7,
+      "note": {
+       "en": "Row 1, column 2: 88.",
+       "te": "Row 1, column 2: 88.",
+       "hi": "Row 1, column 2: 88।"
+      }
+     },
+     {
+      "line": 8,
+      "note": {
+       "en": "length gives rows; marks[0].length gives columns.",
+       "te": "length rows ఇస్తుంది; marks[0].length columns.",
+       "hi": "length से rows; marks[0].length से columns।"
+      }
+     },
+     {
+      "line": 9,
+      "note": {
+       "en": "The outer loop goes row by row.",
+       "te": "బయటి loop ఒక్కో row.",
+       "hi": "बाहर का loop एक-एक row।"
+      }
+     },
+     {
+      "line": 11,
+      "note": {
+       "en": "The inner loop adds each column of that row.",
+       "te": "లోపలి loop ఆ row ప్రతి column కలుపుతుంది.",
+       "hi": "अंदर का loop उस row का हर column जोड़ता है।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "int[][] g = new int[3][4];\nSystem.out.println(g[3][0]);",
+     "fix": {
+      "en": "Rows are 0 to 2. g[3] throws ArrayIndexOutOfBoundsException.",
+      "te": "Rows 0 నుంచి 2. g[3] ArrayIndexOutOfBoundsException ఇస్తుంది.",
+      "hi": "Rows 0 से 2 हैं। g[3] ArrayIndexOutOfBoundsException देता है।"
+     }
+    },
+    {
+     "wrong": "for (int c = 0; c < g.length; c++)  // columns",
+     "fix": {
+      "en": "g.length is rows. For columns use g[r].length.",
+      "te": "g.length అంటే rows. Columns కి g[r].length వాడండి.",
+      "hi": "g.length rows है। Columns के लिए g[r].length लिखिए।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "int[][] g = new int[2][5]; how many cells?",
+      "te": "int[][] g = new int[2][5]; ఎన్ని cells?",
+      "hi": "int[][] g = new int[2][5]; कितने cells?"
+     },
+     "options": [
+      "7",
+      "10",
+      "25"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "2 × 5.",
+      "te": "2 × 5.",
+      "hi": "2 × 5।"
+     }
+    },
+    {
+     "q": {
+      "en": "g[0].length gives…",
+      "te": "g[0].length ఇచ్చేది…",
+      "hi": "g[0].length देता है…"
+     },
+     "options": [
+      {
+       "en": "columns",
+       "te": "Columns",
+       "hi": "columns"
+      },
+      {
+       "en": "rows",
+       "te": "Rows",
+       "hi": "rows"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Length of a row.",
+      "te": "ఒక row పొడవు.",
+      "hi": "एक row की लंबाई।"
+     }
+    },
+    {
+     "q": {
+      "en": "To visit every cell you use…",
+      "te": "ప్రతి cell చూడడానికి…",
+      "hi": "हर cell देखने के लिए…"
+     },
+     "options": [
+      {
+       "en": "a loop inside a loop",
+       "te": "Loop లోపల loop",
+       "hi": "loop के अंदर loop"
+      },
+      {
+       "en": "one loop",
+       "te": "ఒక loop",
+       "hi": "एक loop"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Rows, then columns.",
+      "te": "Rows, తర్వాత columns.",
+      "hi": "Rows, फिर columns।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write static int[] rowTotals(int[][] marks) that returns the total of each row.",
+     "te": "ప్రతి row total return చేసే static int[] rowTotals(int[][] marks) రాయండి.",
+     "hi": "static int[] rowTotals(int[][] marks) लिखिए जो हर row का total return करे।"
+    },
+    "starter": "import java.util.Arrays;\n\npublic class Main {\n    static int[] rowTotals(int[][] marks) {\n        return new int[0];\n    }\n\n    public static void main(String[] args) {\n        System.out.println(Arrays.toString(rowTotals(new int[][]{{1, 2}, {3, 4}})));\n    }\n}\n",
+    "tests": [
+     {
+      "name": "makes one total per row",
+      "pattern": "new\\s+int\\s*\\[\\s*marks\\.length\\s*\\]"
+     },
+     {
+      "name": "loops rows and columns",
+      "pattern": "for\\s*\\([^)]*marks\\.length[\\s\\S]*for\\s*\\([^)]*marks\\s*\\[\\s*\\w+\\s*\\]\\.length|for\\s*\\(\\s*int\\s*\\[\\]\\s*\\w+\\s*:\\s*marks\\s*\\)[\\s\\S]*for\\s*\\("
+     },
+     {
+      "name": "adds each cell",
+      "pattern": "\\+=\\s*marks\\s*\\[\\s*\\w+\\s*\\]\\s*\\[\\s*\\w+\\s*\\]|\\+=\\s*\\w+\\s*;",
+      "expected": "totals[r] += marks[r][c];",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "int[] totals = new int[marks.length];",
+      "te": "int[] totals = new int[marks.length];",
+      "hi": "int[] totals = new int[marks.length];"
+     },
+     {
+      "en": "for (int r = 0; r < marks.length; r++) for (int c = 0; c < marks[r].length; c++)",
+      "te": "for (int r = 0; r < marks.length; r++) for (int c = 0; c < marks[r].length; c++)",
+      "hi": "for (int r = 0; r < marks.length; r++) for (int c = 0; c < marks[r].length; c++)"
+     },
+     {
+      "en": "totals[r] += marks[r][c]; then return totals;",
+      "te": "totals[r] += marks[r][c]; తర్వాత return totals;",
+      "hi": "totals[r] += marks[r][c]; फिर return totals;"
+     }
+    ],
+    "solution": "import java.util.Arrays;\n\npublic class Main {\n    static int[] rowTotals(int[][] marks) {\n        int[] totals = new int[marks.length];\n        for (int r = 0; r < marks.length; r++) {\n            for (int c = 0; c < marks[r].length; c++) {\n                totals[r] += marks[r][c];\n            }\n        }\n        return totals;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(Arrays.toString(rowTotals(new int[][]{{1, 2}, {3, 4}})));\n    }\n}",
+    "output": "[3, 7]"
+   },
+   "cheat": {
+    "en": [
+     "int[][] g = new int[rows][cols]; · {{1, 2}, {3, 4}}",
+     "g[r][c] · g.length rows · g[r].length columns",
+     "for (r) { for (c) { g[r][c] } }"
+    ],
+    "te": [
+     "int[][] g = new int[rows][cols]; · {{1, 2}, {3, 4}}",
+     "g[r][c] · g.length rows · g[r].length columns",
+     "for (r) { for (c) { g[r][c] } }"
+    ],
+    "hi": [
+     "int[][] g = new int[rows][cols]; · {{1, 2}, {3, 4}}",
+     "g[r][c] · g.length rows · g[r].length columns",
+     "for (r) { for (c) { g[r][c] } }"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A teacher keeps 3 students × 4 subjects of marks. Explain how a 2D array stores them and how to find each student's total.",
+      "te": "Teacher 3 విద్యార్థులు × 4 subjects marks ఉంచుతారు. 2D array వాటిని ఎలా దాస్తుందో, ప్రతి విద్యార్థి total ఎలా కనుక్కోవాలో వివరించండి.",
+      "hi": "Teacher 3 छात्र × 4 subjects के marks रखते हैं। 2D array इन्हें कैसे रखता है और हर छात्र का total कैसे निकालें, समझाइए।"
+     },
+     {
+      "en": "Explain the difference between g.length and g[0].length.",
+      "te": "g.length, g[0].length మధ్య తేడా వివరించండి.",
+      "hi": "g.length और g[0].length का फ़र्क़ समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "2d",
+      "row",
+      "column"
+     ],
+     [
+      "[r][c]",
+      "index",
+      "length"
+     ],
+     [
+      "loop",
+      "nested",
+      "inner",
+      "outer",
+      "total"
+     ]
+    ],
+    "challenge": {
+     "en": "Say what marks[1][2] means.",
+     "te": "marks[1][2] అంటే ఏమిటో చెప్పండి.",
+     "hi": "marks[1][2] का मतलब बताइए।"
+    }
+   }
+  },
+  {
+   "id": "jv-m4-l3",
+   "n": 3,
    "minutes": 20,
    "title": {
     "en": "Strings and StringBuilder",
