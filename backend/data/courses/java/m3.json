@@ -1,0 +1,795 @@
+{
+ "id": "jv-m3",
+ "n": 3,
+ "skill": "java-methods",
+ "title": {
+  "en": "Methods",
+  "te": "Methods",
+  "hi": "Methods"
+ },
+ "summary": {
+  "en": "Group code into methods with parameters, return results, and overload method names.",
+  "te": "Parameters ఉన్న methods లో code ని కలపడం, ఫలితాలు return చేయడం, method పేర్లు overload చేయడం.",
+  "hi": "Parameters वाले methods में code रखना, result return करना और method नाम overload करना।"
+ },
+ "lessons": [
+  {
+   "id": "jv-m3-l1",
+   "n": 1,
+   "minutes": 20,
+   "title": {
+    "en": "Methods and parameters",
+    "te": "Methods, parameters",
+    "hi": "Methods और parameters"
+   },
+   "oneLine": {
+    "en": "A method is a named block of code you can call again and again, giving it different values through parameters.",
+    "te": "Method అంటే పేరున్న code block; parameters ద్వారా వేర్వేరు values ఇచ్చి మళ్లీ మళ్లీ call చేయవచ్చు.",
+    "hi": "Method नाम वाला code block है जिसे parameters से अलग-अलग values देकर बार-बार call कर सकते हैं।"
+   },
+   "useCase": {
+    "en": "A payroll program has one method printPayslip(name, salary) and calls it for every employee instead of repeating the same lines.",
+    "te": "Payroll program కి printPayslip(name, salary) అనే ఒక method ఉంటుంది; అవే lines మళ్లీ రాయకుండా ప్రతి employee కి call చేస్తుంది.",
+    "hi": "Payroll program में एक method printPayslip(name, salary) है जिसे हर employee के लिए call किया जाता है, वही lines दोहराने की जगह।"
+   },
+   "explain": {
+    "en": [
+     "When the same lines appear again and again, put them in a method.",
+     "static void greet(String name) { ... } defines a method named greet with one parameter, name.",
+     "void means it gives nothing back; it just does its work.",
+     "Call it with greet(\"Ravi\"); the value \"Ravi\" is the argument and goes into name.",
+     "A method can take several parameters, each with its type: static void slip(String name, int salary)."
+    ],
+    "te": [
+     "అవే lines మళ్లీ మళ్లీ వస్తే వాటిని method లో పెట్టండి.",
+     "static void greet(String name) { ... } name అనే ఒక parameter తో greet అనే method ని నిర్వచిస్తుంది.",
+     "void అంటే అది ఏమీ తిరిగి ఇవ్వదు; తన పని మాత్రమే చేస్తుంది.",
+     "greet(\"Ravi\"); తో call చేయండి; \"Ravi\" అనే value argument, అది name లోకి వెళ్తుంది.",
+     "Method చాలా parameters తీసుకోగలదు, ప్రతి దానికి type తో: static void slip(String name, int salary)."
+    ],
+    "hi": [
+     "जब वही lines बार-बार आएँ, उन्हें method में रखिए।",
+     "static void greet(String name) { ... } एक parameter name वाला greet नाम का method बनाता है।",
+     "void मतलब यह कुछ वापस नहीं देता; बस अपना काम करता है।",
+     "greet(\"Ravi\"); से call कीजिए; \"Ravi\" argument है और name में जाता है।",
+     "Method कई parameters ले सकता है, हर एक अपने type के साथ: static void slip(String name, int salary)।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "A method is a recipe; parameters are the ingredients you hand it."
+    ],
+    "te": [
+     "Method అంటే వంటకం; parameters అంటే మీరు ఇచ్చే పదార్థాలు."
+    ],
+    "hi": [
+     "Method एक recipe है; parameters वे सामग्री हैं जो आप उसे देते हैं।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "A greeting card: static void card(String name, String festival) prints \"Happy Diwali, Sita!\"."
+    ],
+    "te": [
+     "Greeting card: static void card(String name, String festival) \"Happy Diwali, Sita!\" print చేస్తుంది."
+    ],
+    "hi": [
+     "Greeting card: static void card(String name, String festival) \"Happy Diwali, Sita!\" print करता है।"
+    ]
+   },
+   "picture": "flowchart LR\n  M[\"main\"] -->|\"slip(\\\"Ravi\\\", 30000)\"| S[\"slip(name, salary)\"]\n  M -->|\"slip(\\\"Sita\\\", 42000)\"| S",
+   "code": {
+    "source": "public class Main {\n    static void slip(String name, int salary) {\n        int pf = salary * 12 / 100;\n        System.out.println(name + \": gross \" + salary + \", PF \" + pf + \", net \" + (salary - pf));\n    }\n\n    public static void main(String[] args) {\n        slip(\"Ravi\", 30000);\n        slip(\"Sita\", 42000);\n    }\n}",
+    "output": "Ravi: gross 30000, PF 3600, net 26400\nSita: gross 42000, PF 5040, net 36960",
+    "notes": [
+     {
+      "line": 2,
+      "note": {
+       "en": "A method with two parameters; void means it returns nothing.",
+       "te": "రెండు parameters ఉన్న method; void అంటే ఏమీ return చేయదు.",
+       "hi": "दो parameters वाला method; void मतलब कुछ return नहीं करता।"
+      }
+     },
+     {
+      "line": 3,
+      "note": {
+       "en": "It works out 12% PF from the salary it was given.",
+       "te": "ఇచ్చిన జీతం నుంచి 12% PF లెక్కిస్తుంది.",
+       "hi": "मिली salary से 12% PF निकालता है।"
+      }
+     },
+     {
+      "line": 4,
+      "note": {
+       "en": "One print line, reused for everyone.",
+       "te": "ఒకే print line, అందరికీ మళ్లీ వాడబడుతుంది.",
+       "hi": "एक print line, सबके लिए दोबारा इस्तेमाल।"
+      }
+     },
+     {
+      "line": 8,
+      "note": {
+       "en": "Call it with Ravi's values.",
+       "te": "Ravi values తో call చేయండి.",
+       "hi": "Ravi की values से call कीजिए।"
+      }
+     },
+     {
+      "line": 9,
+      "note": {
+       "en": "Same method, different values.",
+       "te": "అదే method, వేర్వేరు values.",
+       "hi": "वही method, अलग values।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "static void slip(name, salary)",
+     "fix": {
+      "en": "Each parameter needs a type: (String name, int salary).",
+      "te": "ప్రతి parameter కి type కావాలి: (String name, int salary).",
+      "hi": "हर parameter को type चाहिए: (String name, int salary)।"
+     }
+    },
+    {
+     "wrong": "slip(30000, \"Ravi\");",
+     "fix": {
+      "en": "Arguments must come in the same order and types as the parameters.",
+      "te": "Arguments, parameters ఉన్న క్రమం, types లోనే రావాలి.",
+      "hi": "Arguments उसी क्रम और type में आने चाहिए जैसे parameters हैं।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "void means the method…",
+      "te": "void అంటే method…",
+      "hi": "void मतलब method…"
+     },
+     "options": [
+      {
+       "en": "returns nothing",
+       "te": "ఏమీ return చేయదు",
+       "hi": "कुछ return नहीं करता"
+      },
+      {
+       "en": "is empty",
+       "te": "ఖాళీ",
+       "hi": "ख़ाली है"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "No return value.",
+      "te": "Return value లేదు.",
+      "hi": "कोई return value नहीं।"
+     }
+    },
+    {
+     "q": {
+      "en": "In greet(\"Ravi\"), \"Ravi\" is the…",
+      "te": "greet(\"Ravi\") లో \"Ravi\"…",
+      "hi": "greet(\"Ravi\") में \"Ravi\" है…"
+     },
+     "options": [
+      "parameter",
+      "argument",
+      "method"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "The value passed in.",
+      "te": "పంపిన value.",
+      "hi": "भेजी गई value।"
+     }
+    },
+    {
+     "q": {
+      "en": "Why use methods?",
+      "te": "Methods ఎందుకు?",
+      "hi": "Methods क्यों?"
+     },
+     "options": [
+      {
+       "en": "To avoid repeating code",
+       "te": "Code మళ్లీ రాయకుండా",
+       "hi": "Code दोहराने से बचने"
+      },
+      {
+       "en": "To make code slower",
+       "te": "Code నెమ్మది చేయడానికి",
+       "hi": "code धीमा करने"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Write once, call many times.",
+      "te": "ఒకసారి రాసి చాలాసార్లు call.",
+      "hi": "एक बार लिखो, कई बार call।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write static void receipt(String item, int qty, double price) that prints \"<item> x<qty> = Rs <qty*price>\". Call it twice from main.",
+     "te": "static void receipt(String item, int qty, double price) రాయండి: \"<item> x<qty> = Rs <qty*price>\" print చేయాలి. main నుంచి రెండుసార్లు call చేయండి.",
+     "hi": "static void receipt(String item, int qty, double price) लिखिए जो \"<item> x<qty> = Rs <qty*price>\" print करे। main से दो बार call कीजिए।"
+    },
+    "starter": "public class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Pen x2 = Rs 20.0\");\n    }\n}\n",
+    "tests": [
+     {
+      "name": "defines receipt with three typed parameters",
+      "pattern": "static\\s+void\\s+receipt\\s*\\(\\s*String\\s+\\w+\\s*,\\s*int\\s+\\w+\\s*,\\s*double\\s+\\w+\\s*\\)"
+     },
+     {
+      "name": "multiplies qty and price",
+      "pattern": "qty\\s*\\*\\s*price|price\\s*\\*\\s*qty"
+     },
+     {
+      "name": "calls receipt twice",
+      "pattern": "(receipt\\s*\\(\\s*\"[\\s\\S]*){2}",
+      "expected": "receipt(\"...\", ...) twice",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "static void receipt(String item, int qty, double price) { ... }",
+      "te": "static void receipt(String item, int qty, double price) { ... }",
+      "hi": "static void receipt(String item, int qty, double price) { ... }"
+     },
+     {
+      "en": "System.out.println(item + \" x\" + qty + \" = Rs \" + qty * price);",
+      "te": "System.out.println(item + \" x\" + qty + \" = Rs \" + qty * price);",
+      "hi": "System.out.println(item + \" x\" + qty + \" = Rs \" + qty * price);"
+     },
+     {
+      "en": "In main: receipt(\"Pen\", 2, 10.0); receipt(\"Book\", 1, 55.5);",
+      "te": "main లో: receipt(\"Pen\", 2, 10.0); receipt(\"Book\", 1, 55.5);",
+      "hi": "main में: receipt(\"Pen\", 2, 10.0); receipt(\"Book\", 1, 55.5);"
+     }
+    ],
+    "solution": "public class Main {\n    static void receipt(String item, int qty, double price) {\n        System.out.println(item + \" x\" + qty + \" = Rs \" + qty * price);\n    }\n\n    public static void main(String[] args) {\n        receipt(\"Pen\", 2, 10.0);\n        receipt(\"Book\", 1, 55.5);\n    }\n}",
+    "output": "Pen x2 = Rs 20.0\nBook x1 = Rs 55.5"
+   },
+   "cheat": {
+    "en": [
+     "static void name(Type p1, Type p2) { ... }",
+     "Call: name(value1, value2);",
+     "Same order, same types."
+    ],
+    "te": [
+     "static void name(Type p1, Type p2) { ... }",
+     "Call: name(value1, value2);",
+     "అదే క్రమం, అవే types."
+    ],
+    "hi": [
+     "static void name(Type p1, Type p2) { ... }",
+     "Call: name(value1, value2);",
+     "वही क्रम, वही types।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A payroll program prints a payslip for 50 employees. Explain how a method with parameters saves work here.",
+      "te": "Payroll program 50 employees కి payslip print చేస్తుంది. ఇక్కడ parameters ఉన్న method పని ఎలా తగ్గిస్తుందో వివరించండి.",
+      "hi": "Payroll program 50 employees की payslip print करता है। यहाँ parameters वाला method काम कैसे बचाता है, समझाइए।"
+     },
+     {
+      "en": "Explain the difference between a parameter and an argument, with an example.",
+      "te": "Parameter, argument మధ్య తేడా ఉదాహరణతో వివరించండి.",
+      "hi": "Parameter और argument का फ़र्क़ उदाहरण से समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "method"
+     ],
+     [
+      "parameter",
+      "argument"
+     ],
+     [
+      "call",
+      "repeat",
+      "reuse",
+      "void"
+     ]
+    ],
+    "challenge": {
+     "en": "Say what void means.",
+     "te": "void అంటే ఏమిటో చెప్పండి.",
+     "hi": "void का मतलब बताइए।"
+    }
+   }
+  },
+  {
+   "id": "jv-m3-l2",
+   "n": 2,
+   "minutes": 20,
+   "title": {
+    "en": "Return values and overloading",
+    "te": "Return values, overloading",
+    "hi": "Return values और overloading"
+   },
+   "oneLine": {
+    "en": "A method can return a result to its caller, and overloading lets several methods share a name when their parameters differ.",
+    "te": "Method తనను call చేసినవారికి ఫలితం return చేయగలదు; parameters వేరుగా ఉంటే overloading తో చాలా methods ఒకే పేరు పంచుకోగలవు.",
+    "hi": "Method call करने वाले को result return कर सकता है, और overloading से कई methods एक नाम रख सकते हैं जब उनके parameters अलग हों।"
+   },
+   "useCase": {
+    "en": "A GST calculator has withGst(price) returning the price with 18% tax, so the bill, the receipt and the report can all use the same number.",
+    "te": "GST calculator కి 18% tax తో ధర return చేసే withGst(price) ఉంటుంది; bill, receipt, report అన్నీ అదే number వాడతాయి.",
+    "hi": "GST calculator में withGst(price) 18% tax के साथ दाम return करता है, ताकि bill, receipt और report सब वही number इस्तेमाल करें।"
+   },
+   "explain": {
+    "en": [
+     "Instead of void, write the type of the answer: static double withGst(double price).",
+     "return price * 1.18; sends the value back and ends the method.",
+     "The caller can store it: double total = withGst(100);",
+     "Overloading: area(int side) and area(int length, int width) can both exist; Java picks one by the arguments.",
+     "Prefer return to println inside a method, so the result can be reused."
+    ],
+    "te": [
+     "void బదులు జవాబు type రాయండి: static double withGst(double price).",
+     "return price * 1.18; value ని తిరిగి పంపి method ముగిస్తుంది.",
+     "Call చేసినవారు దాన్ని దాయవచ్చు: double total = withGst(100);",
+     "Overloading: area(int side), area(int length, int width) రెండూ ఉండవచ్చు; arguments బట్టి Java ఒకటి ఎంచుకుంటుంది.",
+     "Method లోపల println కంటే return మంచిది, ఫలితం మళ్లీ వాడుకోవచ్చు."
+    ],
+    "hi": [
+     "void की जगह जवाब का type लिखिए: static double withGst(double price)।",
+     "return price * 1.18; value वापस भेजता है और method ख़त्म करता है।",
+     "Call करने वाला उसे रख सकता है: double total = withGst(100);",
+     "Overloading: area(int side) और area(int length, int width) दोनों हो सकते हैं; Java arguments देखकर एक चुनता है।",
+     "Method के अंदर println से बेहतर return है, ताकि result दोबारा इस्तेमाल हो।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "return hands the answer back, like a calculator showing the result."
+    ],
+    "te": [
+     "return జవాబు తిరిగి ఇస్తుంది, calculator ఫలితం చూపినట్లు."
+    ],
+    "hi": [
+     "return जवाब वापस देता है, जैसे calculator result दिखाता है।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "static int max(int a, int b) returns the bigger number; max(70, 85) gives 85."
+    ],
+    "te": [
+     "static int max(int a, int b) పెద్ద number return చేస్తుంది; max(70, 85) 85."
+    ],
+    "hi": [
+     "static int max(int a, int b) बड़ा number return करता है; max(70, 85) 85 देता है।"
+    ]
+   },
+   "picture": "flowchart LR\n  C[\"total = withGst(100)\"] -->|100| M[\"withGst(price)\"] -->|\"return 118.0\"| C",
+   "code": {
+    "source": "public class Main {\n    static double withGst(double price) {\n        return price * 1.18;\n    }\n\n    static int area(int side) {\n        return side * side;\n    }\n\n    static int area(int length, int width) {\n        return length * width;\n    }\n\n    public static void main(String[] args) {\n        double total = withGst(100);\n        System.out.println(total);\n        System.out.println(area(5) + \" \" + area(4, 6));\n    }\n}",
+    "output": "118.0\n25 24",
+    "notes": [
+     {
+      "line": 2,
+      "note": {
+       "en": "double before the name: this method returns a double.",
+       "te": "పేరు ముందు double: ఈ method double return చేస్తుంది.",
+       "hi": "नाम से पहले double: यह method double return करता है।"
+      }
+     },
+     {
+      "line": 3,
+      "note": {
+       "en": "return sends the answer back.",
+       "te": "return జవాబు తిరిగి పంపుతుంది.",
+       "hi": "return जवाब वापस भेजता है।"
+      }
+     },
+     {
+      "line": 6,
+      "note": {
+       "en": "area with one parameter: a square.",
+       "te": "ఒక parameter ఉన్న area: చతురస్రం.",
+       "hi": "एक parameter वाला area: वर्ग।"
+      }
+     },
+     {
+      "line": 10,
+      "note": {
+       "en": "Same name, two parameters: a rectangle. This is overloading.",
+       "te": "అదే పేరు, రెండు parameters: దీర్ఘచతురస్రం. ఇదే overloading.",
+       "hi": "वही नाम, दो parameters: आयत। यही overloading है।"
+      }
+     },
+     {
+      "line": 15,
+      "note": {
+       "en": "The returned value is stored in total.",
+       "te": "Return అయిన value total లో దాయబడుతుంది.",
+       "hi": "Return हुई value total में रखी जाती है।"
+      }
+     },
+     {
+      "line": 17,
+      "note": {
+       "en": "Java picks the right area by the number of arguments.",
+       "te": "Arguments సంఖ్య బట్టి Java సరైన area ఎంచుకుంటుంది.",
+       "hi": "Arguments की संख्या देखकर Java सही area चुनता है।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "static int square(int n) {\n    int s = n * n;\n}",
+     "fix": {
+      "en": "A non-void method must return: add return s;",
+      "te": "void కాని method return చేయాలి: return s; జోడించండి.",
+      "hi": "void नहीं है तो return करना ज़रूरी है: return s; जोड़िए।"
+     }
+    },
+    {
+     "wrong": "static int half(int n) {\n    return n / 2.0;\n}",
+     "fix": {
+      "en": "n / 2.0 is a double; the return type must be double.",
+      "te": "n / 2.0 ఒక double; return type double కావాలి.",
+      "hi": "n / 2.0 double है; return type double होना चाहिए।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "static int add(int a, int b) returns…",
+      "te": "static int add(int a, int b) return చేసేది…",
+      "hi": "static int add(int a, int b) return करता है…"
+     },
+     "options": [
+      "an int",
+      "nothing",
+      "a String"
+     ],
+     "answer": 0,
+     "why": {
+      "en": "The type before the name.",
+      "te": "పేరు ముందున్న type.",
+      "hi": "नाम से पहले का type।"
+     }
+    },
+    {
+     "q": {
+      "en": "After return runs, the method…",
+      "te": "return తర్వాత method…",
+      "hi": "return के बाद method…"
+     },
+     "options": [
+      {
+       "en": "ends",
+       "te": "ముగుస్తుంది",
+       "hi": "ख़त्म होता है"
+      },
+      {
+       "en": "continues",
+       "te": "కొనసాగుతుంది",
+       "hi": "चलता रहता है"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "return ends it.",
+      "te": "return ముగిస్తుంది.",
+      "hi": "return ख़त्म करता है।"
+     }
+    },
+    {
+     "q": {
+      "en": "Overloading means…",
+      "te": "Overloading అంటే…",
+      "hi": "Overloading मतलब…"
+     },
+     "options": [
+      {
+       "en": "same name, different parameters",
+       "te": "అదే పేరు, వేర్వేరు parameters",
+       "hi": "वही नाम, अलग parameters"
+      },
+      {
+       "en": "a method that is too long",
+       "te": "చాలా పొడవైన method",
+       "hi": "बहुत लंबा method"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Java picks by parameters.",
+      "te": "Parameters బట్టి Java ఎంచుకుంటుంది.",
+      "hi": "Java parameters से चुनता है।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write static double average(int a, int b) and an overloaded static double average(int a, int b, int c). Both return the average as a double.",
+     "te": "static double average(int a, int b), overload అయిన static double average(int a, int b, int c) రాయండి. రెండూ సగటును double గా return చేయాలి.",
+     "hi": "static double average(int a, int b) और overloaded static double average(int a, int b, int c) लिखिए। दोनों औसत double में return करें।"
+    },
+    "starter": "public class Main {\n    static double average(int a, int b) {\n        return (a + b) / 2;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(average(70, 85));\n    }\n}\n",
+    "tests": [
+     {
+      "name": "two-number version",
+      "pattern": "static\\s+double\\s+average\\s*\\(\\s*int\\s+\\w+\\s*,\\s*int\\s+\\w+\\s*\\)"
+     },
+     {
+      "name": "three-number version",
+      "pattern": "static\\s+double\\s+average\\s*\\(\\s*int\\s+\\w+\\s*,\\s*int\\s+\\w+\\s*,\\s*int\\s+\\w+\\s*\\)"
+     },
+     {
+      "name": "divides by a double",
+      "pattern": "/\\s*(2\\.0|3\\.0)|\\(double\\)",
+      "expected": "/ 2.0 and / 3.0"
+     },
+     {
+      "name": "both divisions use doubles",
+      "pattern": "/\\s*2\\.0[\\s\\S]*/\\s*3\\.0|/\\s*3\\.0[\\s\\S]*/\\s*2\\.0|\\(double\\)[\\s\\S]*\\(double\\)",
+      "expected": "/ 2.0 and / 3.0",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "(a + b) / 2 drops decimals; use / 2.0.",
+      "te": "(a + b) / 2 decimals వదిలేస్తుంది; / 2.0 వాడండి.",
+      "hi": "(a + b) / 2 decimals हटा देता है; / 2.0 लिखिए।"
+     },
+     {
+      "en": "Add a second method with the same name and three int parameters.",
+      "te": "అదే పేరు, మూడు int parameters తో రెండో method జోడించండి.",
+      "hi": "उसी नाम और तीन int parameters वाला दूसरा method जोड़िए।"
+     },
+     {
+      "en": "return (a + b + c) / 3.0;",
+      "te": "return (a + b + c) / 3.0;",
+      "hi": "return (a + b + c) / 3.0;"
+     }
+    ],
+    "solution": "public class Main {\n    static double average(int a, int b) {\n        return (a + b) / 2.0;\n    }\n\n    static double average(int a, int b, int c) {\n        return (a + b + c) / 3.0;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(average(70, 85) + \" \" + average(60, 70, 90));\n    }\n}",
+    "output": "77.5 73.33333333333333"
+   },
+   "cheat": {
+    "en": [
+     "static Type name(params) { return value; }",
+     "void = no return · return ends the method",
+     "Overloading: same name, different parameter list."
+    ],
+    "te": [
+     "static Type name(params) { return value; }",
+     "void = return లేదు · return method ముగిస్తుంది",
+     "Overloading: అదే పేరు, వేర్వేరు parameter list."
+    ],
+    "hi": [
+     "static Type name(params) { return value; }",
+     "void = return नहीं · return method ख़त्म करता है",
+     "Overloading: वही नाम, अलग parameter list।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A shop uses withGst(price) in the bill, the receipt and the monthly report. Explain why returning the value is better than printing it inside the method.",
+      "te": "Shop bill, receipt, నెలవారీ report లో withGst(price) వాడుతుంది. Method లో print చేయడం కంటే value return చేయడం ఎందుకు మంచిదో వివరించండి.",
+      "hi": "दुकान bill, receipt और मासिक report में withGst(price) इस्तेमाल करती है। Method के अंदर print करने से value return करना बेहतर क्यों है, समझाइए।"
+     },
+     {
+      "en": "Explain method overloading with the area of a square and a rectangle.",
+      "te": "చతురస్రం, దీర్ఘచతురస్రం area తో method overloading వివరించండి.",
+      "hi": "वर्ग और आयत के area से method overloading समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "return"
+     ],
+     [
+      "overload",
+      "same name",
+      "parameter"
+     ],
+     [
+      "reuse",
+      "value",
+      "type",
+      "double",
+      "int"
+     ]
+    ],
+    "challenge": {
+     "en": "Say what happens to the code after a return line.",
+     "te": "return line తర్వాత code ఏమవుతుందో చెప్పండి.",
+     "hi": "return line के बाद के code का क्या होता है, बताइए।"
+    }
+   }
+  }
+ ],
+ "test": {
+  "pass": 4,
+  "questions": [
+   {
+    "q": {
+     "en": "A method that gives nothing back is…",
+     "te": "ఏమీ తిరిగి ఇవ్వని method…",
+     "hi": "कुछ वापस न देने वाला method…"
+    },
+    "options": [
+     "void",
+     "int",
+     "static"
+    ],
+    "answer": 0,
+    "why": {
+     "en": "void.",
+     "te": "void.",
+     "hi": "void।"
+    }
+   },
+   {
+    "q": {
+     "en": "static int twice(int n) { return n * 2; }\ntwice(4) is…",
+     "te": "static int twice(int n) { return n * 2; }\ntwice(4)…",
+     "hi": "static int twice(int n) { return n * 2; }\ntwice(4)…"
+    },
+    "options": [
+     "4",
+     "8",
+     "16"
+    ],
+    "answer": 1,
+    "why": {
+     "en": "4 × 2.",
+     "te": "4 × 2.",
+     "hi": "4 × 2।"
+    }
+   },
+   {
+    "q": {
+     "en": "Each parameter needs…",
+     "te": "ప్రతి parameter కి…",
+     "hi": "हर parameter को चाहिए…"
+    },
+    "options": [
+     {
+      "en": "a type",
+      "te": "ఒక type",
+      "hi": "एक type"
+     },
+     {
+      "en": "a semicolon",
+      "te": "Semicolon",
+      "hi": "semicolon"
+     }
+    ],
+    "answer": 0,
+    "why": {
+     "en": "Type and name.",
+     "te": "Type, పేరు.",
+     "hi": "Type और नाम।"
+    }
+   },
+   {
+    "q": {
+     "en": "Can two methods share a name?",
+     "te": "రెండు methods ఒకే పేరు పంచుకోగలవా?",
+     "hi": "क्या दो methods का एक नाम हो सकता है?"
+    },
+    "options": [
+     {
+      "en": "Yes, with different parameters",
+      "te": "అవును, వేర్వేరు parameters తో",
+      "hi": "हाँ, अलग parameters के साथ"
+     },
+     {
+      "en": "Never",
+      "te": "ఎప్పుడూ కాదు",
+      "hi": "कभी नहीं"
+     }
+    ],
+    "answer": 0,
+    "why": {
+     "en": "Overloading.",
+     "te": "Overloading.",
+     "hi": "Overloading।"
+    }
+   },
+   {
+    "q": {
+     "en": "A non-void method without return…",
+     "te": "return లేని void కాని method…",
+     "hi": "return के बिना non-void method…"
+    },
+    "options": [
+     {
+      "en": "does not compile",
+      "te": "Compile కాదు",
+      "hi": "compile नहीं होता"
+     },
+     {
+      "en": "returns 0",
+      "te": "0 return చేస్తుంది",
+      "hi": "0 return करता है"
+     }
+    ],
+    "answer": 0,
+    "why": {
+     "en": "Java requires a return.",
+     "te": "Java కి return కావాలి.",
+     "hi": "Java को return चाहिए।"
+    }
+   }
+  ]
+ },
+ "project": {
+  "title": {
+   "en": "Mini calculator",
+   "te": "Mini calculator",
+   "hi": "Mini calculator"
+  },
+  "prompt": {
+   "en": "Write static double calc(double a, char op, double b) that returns a + b, a - b, a * b or a / b for op '+', '-', '*', '/'. Return 0 for division by zero and for an unknown operator. In main print calc(12, '+', 3), calc(12, '/', 0) and calc(7, '*', 6).",
+   "te": "static double calc(double a, char op, double b) రాయండి: op '+', '-', '*', '/' కి a + b, a - b, a * b, a / b return చేయాలి. Zero తో భాగహారానికి, తెలియని operator కి 0 return చేయండి. main లో calc(12, '+', 3), calc(12, '/', 0), calc(7, '*', 6) print చేయండి.",
+   "hi": "static double calc(double a, char op, double b) लिखिए जो op '+', '-', '*', '/' के लिए a + b, a - b, a * b या a / b return करे। Zero से भाग और अनजान operator पर 0 return कीजिए। main में calc(12, '+', 3), calc(12, '/', 0) और calc(7, '*', 6) print कीजिए।"
+  },
+  "starter": "public class Main {\n    public static void main(String[] args) {\n        System.out.println(12 + 3);\n    }\n}\n",
+  "tests": [
+   {
+    "name": "defines calc",
+    "pattern": "static\\s+double\\s+calc\\s*\\(\\s*double\\s+\\w+\\s*,\\s*char\\s+\\w+\\s*,\\s*double\\s+\\w+\\s*\\)"
+   },
+   {
+    "name": "handles all four operators",
+    "pattern": "'\\+'[\\s\\S]*'-'[\\s\\S]*'\\*'[\\s\\S]*'/'",
+    "expected": "'+', '-', '*', '/'"
+   },
+   {
+    "name": "guards division by zero",
+    "pattern": "b\\s*==\\s*0|0\\s*==\\s*b"
+   },
+   {
+    "name": "calls calc from main",
+    "pattern": "calc\\s*\\(\\s*12\\s*,",
+    "expected": "calc(12, ...)"
+   },
+   {
+    "name": "a default for unknown operators",
+    "pattern": "default|return\\s+0(\\.0)?\\s*;\\s*\\}\\s*$",
+    "expected": "default -> 0",
+    "hidden": true,
+    "flags": "m"
+   }
+  ],
+  "hints": [
+   {
+    "en": "Use a switch on op, or if / else if.",
+    "te": "op పై switch, లేదా if / else if వాడండి.",
+    "hi": "op पर switch या if / else if लीजिए।"
+   },
+   {
+    "en": "case '/' -> b == 0 ? 0 : a / b;",
+    "te": "case '/' -> b == 0 ? 0 : a / b;",
+    "hi": "case '/' -> b == 0 ? 0 : a / b;"
+   },
+   {
+    "en": "default -> 0;",
+    "te": "default -> 0;",
+    "hi": "default -> 0;"
+   }
+  ],
+  "solution": "public class Main {\n    static double calc(double a, char op, double b) {\n        return switch (op) {\n            case '+' -> a + b;\n            case '-' -> a - b;\n            case '*' -> a * b;\n            case '/' -> b == 0 ? 0 : a / b;\n            default -> 0;\n        };\n    }\n\n    public static void main(String[] args) {\n        System.out.println(calc(12, '+', 3));\n        System.out.println(calc(12, '/', 0));\n        System.out.println(calc(7, '*', 6));\n    }\n}",
+  "output": "15.0\n0.0\n42.0"
+ }
+}

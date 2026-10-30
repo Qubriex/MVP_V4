@@ -1,0 +1,1075 @@
+{
+ "id": "jv-m2",
+ "n": 2,
+ "skill": "java-control-flow",
+ "title": {
+  "en": "Control Flow",
+  "te": "Control Flow",
+  "hi": "Control Flow"
+ },
+ "summary": {
+  "en": "Make decisions with if, else and switch, and repeat work with for, while, break and continue.",
+  "te": "if, else, switch తో నిర్ణయాలు; for, while, break, continue తో పునరావృతం.",
+  "hi": "if, else और switch से फ़ैसले, और for, while, break और continue से दोहराना।"
+ },
+ "lessons": [
+  {
+   "id": "jv-m2-l1",
+   "n": 1,
+   "minutes": 20,
+   "title": {
+    "en": "if, else and switch",
+    "te": "if, else, switch",
+    "hi": "if, else और switch"
+   },
+   "oneLine": {
+    "en": "if and else choose which code runs based on a condition; switch picks one case from many values.",
+    "te": "if, else ఒక condition ఆధారంగా ఏ code నడవాలో ఎంచుకుంటాయి; switch చాలా values లో ఒక case ఎంచుకుంటుంది.",
+    "hi": "if और else condition के आधार पर तय करते हैं कि कौन-सा code चले; switch कई values में से एक case चुनता है।"
+   },
+   "useCase": {
+    "en": "A movie ticket app charges Rs 100 for children under 12, Rs 200 for adults, and Rs 120 for seniors over 60.",
+    "te": "Movie ticket app 12 లోపు పిల్లలకు Rs 100, పెద్దలకు Rs 200, 60 పైబడిన వారికి Rs 120 వసూలు చేస్తుంది.",
+    "hi": "Movie ticket app 12 से कम उम्र के बच्चों से Rs 100, बड़ों से Rs 200 और 60 से ऊपर वालों से Rs 120 लेता है।"
+   },
+   "explain": {
+    "en": [
+     "A condition is a question with a true or false answer, like age < 12.",
+     "if (condition) { ... } runs the block only when it is true. The condition sits in round brackets.",
+     "else if checks another condition; else runs when none matched.",
+     "Compare with == != < > <= >=. Join with && (and), || (or), ! (not).",
+     "switch (day) { case 1 -> ...; default -> ...; } is neat when one value has many fixed choices."
+    ],
+    "te": [
+     "Condition అంటే true లేదా false జవాబు ఉన్న ప్రశ్న, age < 12 లాగా.",
+     "if (condition) { ... } అది true అయినప్పుడే block నడుపుతుంది. Condition round brackets లో ఉంటుంది.",
+     "else if మరో condition చూస్తుంది; ఏదీ సరిపోకపోతే else నడుస్తుంది.",
+     "== != < > <= >= తో పోల్చండి. && (మరియు), || (లేదా), ! (కాదు) తో కలపండి.",
+     "ఒక value కి చాలా స్థిర ఎంపికలు ఉంటే switch (day) { case 1 -> ...; default -> ...; } చక్కగా ఉంటుంది."
+    ],
+    "hi": [
+     "Condition एक सवाल है जिसका जवाब true या false हो, जैसे age < 12।",
+     "if (condition) { ... } block तभी चलाता है जब वह true हो। Condition round brackets में होती है।",
+     "else if दूसरी condition जाँचता है; कोई न मिले तो else चलता है।",
+     "== != < > <= >= से तुलना कीजिए। && (और), || (या), ! (नहीं) से जोड़िए।",
+     "जब एक value के कई तय विकल्प हों तो switch (day) { case 1 -> ...; default -> ...; } साफ़ रहता है।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "if is a fork in the road: the condition decides the path."
+    ],
+    "te": [
+     "if అంటే దారిలో చీలిక: condition దారి నిర్ణయిస్తుంది."
+    ],
+    "hi": [
+     "if रास्ते का दोराहा है: condition रास्ता तय करती है।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "Exam result: if (marks >= 35) print \"Pass\" else print \"Fail\"."
+    ],
+    "te": [
+     "Exam ఫలితం: if (marks >= 35) \"Pass\" లేకపోతే \"Fail\"."
+    ],
+    "hi": [
+     "Exam result: if (marks >= 35) \"Pass\" नहीं तो \"Fail\"।"
+    ]
+   },
+   "picture": "flowchart TD\n  A{\"age < 12?\"} -->|yes| C[\"Rs 100\"]\n  A -->|no| B{\"age > 60?\"}\n  B -->|yes| S[\"Rs 120\"]\n  B -->|no| D[\"Rs 200\"]",
+   "code": {
+    "source": "public class Main {\n    static int ticket(int age) {\n        if (age < 12) {\n            return 100;\n        } else if (age > 60) {\n            return 120;\n        } else {\n            return 200;\n        }\n    }\n\n    public static void main(String[] args) {\n        System.out.println(ticket(8) + \" \" + ticket(30) + \" \" + ticket(65));\n        int day = 7;\n        String name = switch (day) {\n            case 6, 7 -> \"Weekend\";\n            default -> \"Weekday\";\n        };\n        System.out.println(name);\n    }\n}",
+    "output": "100 200 120\nWeekend",
+    "notes": [
+     {
+      "line": 3,
+      "note": {
+       "en": "The first condition: a child under 12.",
+       "te": "మొదటి condition: 12 లోపు పిల్లలు.",
+       "hi": "पहली condition: 12 से कम उम्र का बच्चा।"
+      }
+     },
+     {
+      "line": 5,
+      "note": {
+       "en": "Checked only if the first was false.",
+       "te": "మొదటిది false అయితేనే ఇది చూస్తుంది.",
+       "hi": "सिर्फ़ तब जाँचा जाता है जब पहली false हो।"
+      }
+     },
+     {
+      "line": 7,
+      "note": {
+       "en": "else catches everyone else.",
+       "te": "else మిగతా అందరినీ పట్టుకుంటుంది.",
+       "hi": "else बाक़ी सबको पकड़ता है।"
+      }
+     },
+     {
+      "line": 15,
+      "note": {
+       "en": "switch picks a case for the value of day.",
+       "te": "day value కి switch ఒక case ఎంచుకుంటుంది.",
+       "hi": "switch, day की value के लिए एक case चुनता है।"
+      }
+     },
+     {
+      "line": 16,
+      "note": {
+       "en": "One case can list several values.",
+       "te": "ఒక case చాలా values చెప్పగలదు.",
+       "hi": "एक case कई values ले सकता है।"
+      }
+     },
+     {
+      "line": 17,
+      "note": {
+       "en": "default is used when no case matches.",
+       "te": "ఏ case సరిపోకపోతే default.",
+       "hi": "कोई case न मिले तो default।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "if (marks = 35) { ... }",
+     "fix": {
+      "en": "= assigns; == compares. Write if (marks == 35).",
+      "te": "= assign చేస్తుంది; == పోలుస్తుంది. if (marks == 35) రాయండి.",
+      "hi": "= assign करता है; == तुलना करता है। if (marks == 35) लिखिए।"
+     }
+    },
+    {
+     "wrong": "if (name == \"Ravi\")",
+     "fix": {
+      "en": "Compare Strings with .equals: if (name.equals(\"Ravi\")).",
+      "te": "Strings ని .equals తో పోల్చండి: if (name.equals(\"Ravi\")).",
+      "hi": "Strings की तुलना .equals से कीजिए: if (name.equals(\"Ravi\"))।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "Which compares two ints?",
+      "te": "రెండు ints ని పోల్చేది ఏది?",
+      "hi": "दो ints की तुलना कौन करता है?"
+     },
+     "options": [
+      "=",
+      "==",
+      "equals"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "== for numbers.",
+      "te": "Numbers కి ==.",
+      "hi": "Numbers के लिए ==।"
+     }
+    },
+    {
+     "q": {
+      "en": "age >= 18 && hasId is true when…",
+      "te": "age >= 18 && hasId true అయ్యేది…",
+      "hi": "age >= 18 && hasId true होता है जब…"
+     },
+     "options": [
+      {
+       "en": "either is true",
+       "te": "ఏదో ఒకటి true",
+       "hi": "कोई एक true"
+      },
+      {
+       "en": "both are true",
+       "te": "రెండూ true",
+       "hi": "दोनों true"
+      }
+     ],
+     "answer": 1,
+     "why": {
+      "en": "&& needs both.",
+      "te": "&& కి రెండూ కావాలి.",
+      "hi": "&& को दोनों चाहिए।"
+     }
+    },
+    {
+     "q": {
+      "en": "How do you compare Strings?",
+      "te": "Strings ని ఎలా పోల్చాలి?",
+      "hi": "Strings की तुलना कैसे करें?"
+     },
+     "options": [
+      "a == b",
+      "a.equals(b)"
+     ],
+     "answer": 1,
+     "why": {
+      "en": ".equals compares the text.",
+      "te": ".equals text ని పోలుస్తుంది.",
+      "hi": ".equals text की तुलना करता है।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write a method static String grade(int marks) that returns \"A\" for 75 and above, \"B\" for 50 to 74, \"C\" for 35 to 49, and \"Fail\" below 35.",
+     "te": "static String grade(int marks) method రాయండి: 75 పైబడితే \"A\", 50–74 కి \"B\", 35–49 కి \"C\", 35 కంటే తక్కువ \"Fail\".",
+     "hi": "static String grade(int marks) method लिखिए जो 75 और ऊपर \"A\", 50–74 पर \"B\", 35–49 पर \"C\" और 35 से नीचे \"Fail\" return करे।"
+    },
+    "starter": "public class Main {\n    static String grade(int marks) {\n        return \"Fail\";\n    }\n\n    public static void main(String[] args) {\n        System.out.println(grade(80));\n    }\n}\n",
+    "tests": [
+     {
+      "name": "checks 75 and above",
+      "pattern": "marks\\s*>=\\s*75|75\\s*<=\\s*marks"
+     },
+     {
+      "name": "checks 50",
+      "pattern": "marks\\s*>=\\s*50|50\\s*<=\\s*marks"
+     },
+     {
+      "name": "checks 35",
+      "pattern": "marks\\s*>=\\s*35|35\\s*<=\\s*marks"
+     },
+     {
+      "name": "uses else if",
+      "pattern": "else\\s+if",
+      "expected": "else if",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "Start from the highest grade: if (marks >= 75) return \"A\";",
+      "te": "అత్యధిక grade నుంచి మొదలుపెట్టండి: if (marks >= 75) return \"A\";",
+      "hi": "सबसे ऊँचे grade से शुरू कीजिए: if (marks >= 75) return \"A\";"
+     },
+     {
+      "en": "Then else if (marks >= 50) return \"B\"; and so on.",
+      "te": "తర్వాత else if (marks >= 50) return \"B\"; అలా.",
+      "hi": "फिर else if (marks >= 50) return \"B\"; इसी तरह।"
+     },
+     {
+      "en": "The final else returns \"Fail\".",
+      "te": "చివరి else \"Fail\" return చేస్తుంది.",
+      "hi": "आख़िरी else \"Fail\" return करता है।"
+     }
+    ],
+    "solution": "public class Main {\n    static String grade(int marks) {\n        if (marks >= 75) {\n            return \"A\";\n        } else if (marks >= 50) {\n            return \"B\";\n        } else if (marks >= 35) {\n            return \"C\";\n        } else {\n            return \"Fail\";\n        }\n    }\n\n    public static void main(String[] args) {\n        System.out.println(grade(80) + \" \" + grade(50) + \" \" + grade(35) + \" \" + grade(10));\n    }\n}",
+    "output": "A B C Fail"
+   },
+   "cheat": {
+    "en": [
+     "if (cond) { } else if (cond) { } else { }",
+     "== != < > <= >= · && || ! · Strings: a.equals(b)",
+     "switch (x) { case 1, 2 -> ...; default -> ...; }"
+    ],
+    "te": [
+     "if (cond) { } else if (cond) { } else { }",
+     "== != < > <= >= · && || ! · Strings: a.equals(b)",
+     "switch (x) { case 1, 2 -> ...; default -> ...; }"
+    ],
+    "hi": [
+     "if (cond) { } else if (cond) { } else { }",
+     "== != < > <= >= · && || ! · Strings: a.equals(b)",
+     "switch (x) { case 1, 2 -> ...; default -> ...; }"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A cinema charges by age: under 12, 12 to 60, over 60. Explain how you would write this with if, else if and else.",
+      "te": "Cinema వయస్సు బట్టి వసూలు చేస్తుంది: 12 లోపు, 12–60, 60 పైన. if, else if, else తో ఎలా రాస్తారో వివరించండి.",
+      "hi": "Cinema उम्र के हिसाब से पैसे लेता है: 12 से कम, 12–60, 60 से ऊपर। if, else if और else से कैसे लिखेंगे, समझाइए।"
+     },
+     {
+      "en": "Why must Strings be compared with .equals and not ==? Give an example.",
+      "te": "Strings ని == తో కాకుండా .equals తో ఎందుకు పోల్చాలి? ఉదాహరణ ఇవ్వండి.",
+      "hi": "Strings की तुलना == से नहीं, .equals से क्यों करनी चाहिए? उदाहरण दीजिए।"
+     }
+    ],
+    "keywords": [
+     [
+      "if",
+      "else"
+     ],
+     [
+      "condition",
+      ">=",
+      "<",
+      "==",
+      "true"
+     ],
+     [
+      "equals",
+      "switch",
+      "case"
+     ]
+    ],
+    "challenge": {
+     "en": "Say the difference between = and ==.",
+     "te": "= , == మధ్య తేడా చెప్పండి.",
+     "hi": "= और == का फ़र्क़ बताइए।"
+    }
+   }
+  },
+  {
+   "id": "jv-m2-l2",
+   "n": 2,
+   "minutes": 20,
+   "title": {
+    "en": "for and while loops",
+    "te": "for, while loops",
+    "hi": "for और while loops"
+   },
+   "oneLine": {
+    "en": "A for loop repeats a set number of times; a while loop repeats as long as a condition stays true.",
+    "te": "for loop నిర్ణీత సార్లు పునరావృతం చేస్తుంది; while loop condition true గా ఉన్నంత కాలం పునరావృతం చేస్తుంది.",
+    "hi": "for loop तय बार दोहराता है; while loop तब तक दोहराता है जब तक condition true रहे।"
+   },
+   "useCase": {
+    "en": "A loan app prints the balance month by month until the loan is fully paid.",
+    "te": "Loan app loan పూర్తిగా తీరే వరకు నెల నెలా balance print చేస్తుంది.",
+    "hi": "Loan app loan पूरा चुकने तक हर महीने का balance print करता है।"
+   },
+   "explain": {
+    "en": [
+     "for (int i = 1; i <= 5; i++) has three parts: start at 1, keep going while i <= 5, add one each time.",
+     "i++ means i = i + 1.",
+     "Use for when you know how many times: 12 months, 10 students.",
+     "while (balance > 0) { ... } keeps going until the condition becomes false. Use it when you do not know the count in advance.",
+     "Something inside a while loop must change the condition, or it runs for ever."
+    ],
+    "te": [
+     "for (int i = 1; i <= 5; i++) కి మూడు భాగాలు: 1 వద్ద మొదలు, i <= 5 ఉన్నంత కాలం కొనసాగు, ప్రతిసారి ఒకటి కలుపు.",
+     "i++ అంటే i = i + 1.",
+     "ఎన్నిసార్లో తెలిసినప్పుడు for వాడండి: 12 నెలలు, 10 మంది విద్యార్థులు.",
+     "while (balance > 0) { ... } condition false అయ్యే వరకు కొనసాగుతుంది. ముందే లెక్క తెలియనప్పుడు వాడండి.",
+     "While loop లోపల ఏదో condition ని మార్చాలి, లేకపోతే ఎప్పటికీ నడుస్తుంది."
+    ],
+    "hi": [
+     "for (int i = 1; i <= 5; i++) के तीन हिस्से हैं: 1 से शुरू, जब तक i <= 5 चलते रहो, हर बार एक जोड़ो।",
+     "i++ मतलब i = i + 1।",
+     "जब पता हो कितनी बार, तब for लीजिए: 12 महीने, 10 छात्र।",
+     "while (balance > 0) { ... } condition false होने तक चलता है। जब गिनती पहले से पता न हो तब लीजिए।",
+     "While loop के अंदर कुछ condition को बदलना चाहिए, नहीं तो वह हमेशा चलता रहेगा।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "for counts; while waits for something to happen."
+    ],
+    "te": [
+     "for లెక్కిస్తుంది; while ఏదైనా జరిగే వరకు ఎదురుచూస్తుంది."
+    ],
+    "hi": [
+     "for गिनता है; while कुछ होने का इंतज़ार करता है।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "Printing a multiplication table: for (int i = 1; i <= 10; i++) println(7 + \" x \" + i + \" = \" + 7 * i);"
+    ],
+    "te": [
+     "గుణకార పట్టిక: for (int i = 1; i <= 10; i++) println(7 + \" x \" + i + \" = \" + 7 * i);"
+    ],
+    "hi": [
+     "पहाड़ा: for (int i = 1; i <= 10; i++) println(7 + \" x \" + i + \" = \" + 7 * i);"
+    ]
+   },
+   "picture": "flowchart TD\n  S[\"balance = 10000\"] --> C{\"balance > 0?\"}\n  C -->|yes| P[\"pay 4000, month++\"] --> C\n  C -->|no| E[\"done\"]",
+   "code": {
+    "source": "public class Main {\n    public static void main(String[] args) {\n        int total = 0;\n        for (int i = 1; i <= 5; i++) {\n            total = total + i;\n        }\n        System.out.println(\"Sum 1 to 5: \" + total);\n\n        int balance = 10000;\n        int month = 0;\n        while (balance > 0) {\n            balance = balance - 4000;\n            month++;\n        }\n        System.out.println(\"Paid in \" + month + \" months\");\n    }\n}",
+    "output": "Sum 1 to 5: 15\nPaid in 3 months",
+    "notes": [
+     {
+      "line": 4,
+      "note": {
+       "en": "Start at 1, go while i <= 5, add 1 each time.",
+       "te": "1 వద్ద మొదలు, i <= 5 వరకు, ప్రతిసారి 1 కలుపు.",
+       "hi": "1 से शुरू, i <= 5 तक, हर बार 1 जोड़ो।"
+      }
+     },
+     {
+      "line": 5,
+      "note": {
+       "en": "Add i to the running total.",
+       "te": "i ని మొత్తానికి కలపండి.",
+       "hi": "i को कुल में जोड़िए।"
+      }
+     },
+     {
+      "line": 11,
+      "note": {
+       "en": "Repeat while there is still money to pay.",
+       "te": "ఇంకా కట్టాల్సిన డబ్బు ఉన్నంత కాలం పునరావృతం.",
+       "hi": "जब तक चुकाने को पैसा बचा है, दोहराओ।"
+      }
+     },
+     {
+      "line": 12,
+      "note": {
+       "en": "This line changes the condition, so the loop ends.",
+       "te": "ఈ line condition ని మారుస్తుంది, loop ముగుస్తుంది.",
+       "hi": "यह line condition बदलती है, इसलिए loop रुकता है।"
+      }
+     },
+     {
+      "line": 13,
+      "note": {
+       "en": "Count the months.",
+       "te": "నెలలను లెక్కించండి.",
+       "hi": "महीने गिनिए।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "int i = 0;\nwhile (i < 5) {\n    System.out.println(i);\n}",
+     "fix": {
+      "en": "i never changes, so the loop never ends. Add i++; inside.",
+      "te": "i ఎప్పుడూ మారదు, loop ముగియదు. లోపల i++; జోడించండి.",
+      "hi": "i कभी नहीं बदलता, इसलिए loop कभी नहीं रुकता। अंदर i++; जोड़िए।"
+     }
+    },
+    {
+     "wrong": "for (int i = 1; i < 10; i++)  // wanted 1 to 10",
+     "fix": {
+      "en": "< 10 stops at 9. Use <= 10 to include 10.",
+      "te": "< 10 అంటే 9 వద్ద ఆగుతుంది. 10 కూడా కావాలంటే <= 10.",
+      "hi": "< 10, 9 पर रुकता है। 10 शामिल करने के लिए <= 10।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "for (int i = 0; i < 3; i++) runs how many times?",
+      "te": "for (int i = 0; i < 3; i++) ఎన్నిసార్లు?",
+      "hi": "for (int i = 0; i < 3; i++) कितनी बार?"
+     },
+     "options": [
+      "2",
+      "3",
+      "4"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "i = 0, 1, 2.",
+      "te": "i = 0, 1, 2.",
+      "hi": "i = 0, 1, 2।"
+     }
+    },
+    {
+     "q": {
+      "en": "i++ means…",
+      "te": "i++ అంటే…",
+      "hi": "i++ का मतलब…"
+     },
+     "options": [
+      "i = i + 1",
+      "i = i * 2",
+      "i = 1"
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Add one.",
+      "te": "ఒకటి కలుపు.",
+      "hi": "एक जोड़ो।"
+     }
+    },
+    {
+     "q": {
+      "en": "Use while when…",
+      "te": "while ఎప్పుడు?",
+      "hi": "while कब?"
+     },
+     "options": [
+      {
+       "en": "the count is known",
+       "te": "లెక్క తెలిసినప్పుడు",
+       "hi": "गिनती पता हो"
+      },
+      {
+       "en": "you repeat until something changes",
+       "te": "ఏదైనా మారే వరకు",
+       "hi": "कुछ बदलने तक दोहराना हो"
+      }
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Until a condition changes.",
+      "te": "Condition మారే వరకు.",
+      "hi": "Condition बदलने तक।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write static int sumEven(int n) that returns the sum of all even numbers from 1 to n using a for loop.",
+     "te": "for loop తో 1 నుంచి n వరకు అన్ని సరి సంఖ్యల మొత్తం return చేసే static int sumEven(int n) రాయండి.",
+     "hi": "for loop से 1 से n तक सभी सम संख्याओं का जोड़ return करने वाला static int sumEven(int n) लिखिए।"
+    },
+    "starter": "public class Main {\n    static int sumEven(int n) {\n        int total = 0;\n        return total;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(sumEven(10));\n    }\n}\n",
+    "tests": [
+     {
+      "name": "uses a for loop",
+      "pattern": "for\\s*\\(\\s*int\\s+\\w+\\s*=.*;.*;.*\\)"
+     },
+     {
+      "name": "checks for even numbers or steps by 2",
+      "pattern": "%\\s*2\\s*==\\s*0|\\+=\\s*2|=\\s*\\w+\\s*\\+\\s*2"
+     },
+     {
+      "name": "adds to the total",
+      "pattern": "total\\s*(\\+=|=\\s*total\\s*\\+)",
+      "expected": "total += i",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "for (int i = 1; i <= n; i++)",
+      "te": "for (int i = 1; i <= n; i++)",
+      "hi": "for (int i = 1; i <= n; i++)"
+     },
+     {
+      "en": "Inside: if (i % 2 == 0)",
+      "te": "లోపల: if (i % 2 == 0)",
+      "hi": "अंदर: if (i % 2 == 0)"
+     },
+     {
+      "en": "total += i;",
+      "te": "total += i;",
+      "hi": "total += i;"
+     }
+    ],
+    "solution": "public class Main {\n    static int sumEven(int n) {\n        int total = 0;\n        for (int i = 1; i <= n; i++) {\n            if (i % 2 == 0) {\n                total += i;\n            }\n        }\n        return total;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(sumEven(10));\n    }\n}",
+    "output": "30"
+   },
+   "cheat": {
+    "en": [
+     "for (int i = 1; i <= n; i++) { }",
+     "while (cond) { ... change cond ... }",
+     "i++ · total += i"
+    ],
+    "te": [
+     "for (int i = 1; i <= n; i++) { }",
+     "while (cond) { ... cond మార్చు ... }",
+     "i++ · total += i"
+    ],
+    "hi": [
+     "for (int i = 1; i <= n; i++) { }",
+     "while (cond) { ... cond बदलो ... }",
+     "i++ · total += i"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A student pays a Rs 10,000 loan at Rs 4,000 a month. Explain how a while loop finds the number of months, and what stops the loop.",
+      "te": "విద్యార్థి Rs 10,000 loan ని నెలకు Rs 4,000 చొప్పున కడతారు. While loop నెలల సంఖ్యను ఎలా కనుక్కుంటుందో, loop ని ఏది ఆపుతుందో వివరించండి.",
+      "hi": "छात्र Rs 10,000 का loan Rs 4,000 प्रति माह चुकाता है। While loop महीनों की संख्या कैसे निकालता है, और loop को क्या रोकता है, समझाइए।"
+     },
+     {
+      "en": "Explain the three parts of for (int i = 1; i <= 10; i++).",
+      "te": "for (int i = 1; i <= 10; i++) లోని మూడు భాగాలు వివరించండి.",
+      "hi": "for (int i = 1; i <= 10; i++) के तीन हिस्से समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "for",
+      "while"
+     ],
+     [
+      "condition",
+      "i++",
+      "<=",
+      "balance"
+     ],
+     [
+      "stop",
+      "end",
+      "false",
+      "change",
+      "ఆగ",
+      "रुक",
+      "మార",
+      "बदल"
+     ]
+    ],
+    "challenge": {
+     "en": "Say when you would choose while over for.",
+     "te": "for బదులు while ఎప్పుడు ఎంచుకుంటారో చెప్పండి.",
+     "hi": "for की जगह while कब चुनेंगे, बताइए।"
+    }
+   }
+  },
+  {
+   "id": "jv-m2-l3",
+   "n": 3,
+   "minutes": 20,
+   "title": {
+    "en": "break, continue and nested loops",
+    "te": "break, continue, nested loops",
+    "hi": "break, continue और nested loops"
+   },
+   "oneLine": {
+    "en": "break leaves a loop at once, continue skips to the next round, and a loop inside a loop handles rows and columns.",
+    "te": "break loop నుంచి వెంటనే బయటకు వస్తుంది, continue తదుపరి round కి దూకుతుంది, loop లోపల loop rows, columns ని నిర్వహిస్తుంది.",
+    "hi": "break loop से तुरंत बाहर आता है, continue अगले round पर जाता है, और loop के अंदर loop rows और columns संभालता है।"
+   },
+   "useCase": {
+    "en": "A cinema seat finder scans rows and seats with nested loops and stops with break as soon as it finds a free seat.",
+    "te": "Cinema seat finder nested loops తో rows, seats వెతుకుతుంది; ఖాళీ seat దొరకగానే break తో ఆగుతుంది.",
+    "hi": "Cinema seat finder nested loops से rows और seats देखता है और ख़ाली seat मिलते ही break से रुकता है।"
+   },
+   "explain": {
+    "en": [
+     "Sometimes you want to stop early, such as when you have found what you were searching for. break does that.",
+     "continue skips the rest of this round and moves to the next one, handy for skipping bad data.",
+     "A nested loop is a loop inside another loop. For each row, the inner loop goes through every seat.",
+     "If the outer loop runs 3 times and the inner 4 times, the inner body runs 12 times.",
+     "break only leaves the innermost loop it is in."
+    ],
+    "te": [
+     "కొన్నిసార్లు ముందే ఆపాలి, వెతుకుతున్నది దొరికినప్పుడు లాగా. break అది చేస్తుంది.",
+     "continue ఈ round లో మిగతాది దాటవేసి తదుపరి దానికి వెళ్తుంది; చెడు data దాటవేయడానికి ఉపయోగం.",
+     "Nested loop అంటే మరో loop లోపల loop. ప్రతి row కి లోపలి loop ప్రతి seat చూస్తుంది.",
+     "బయటి loop 3 సార్లు, లోపలిది 4 సార్లు నడిస్తే, లోపలి body 12 సార్లు నడుస్తుంది.",
+     "break తాను ఉన్న లోపలి loop నుంచి మాత్రమే బయటకు వస్తుంది."
+    ],
+    "hi": [
+     "कभी-कभी जल्दी रुकना होता है, जैसे जब जो ढूँढ रहे थे वह मिल जाए। break यही करता है।",
+     "continue इस round का बाक़ी हिस्सा छोड़कर अगले पर जाता है, ख़राब data छोड़ने में काम का।",
+     "Nested loop मतलब loop के अंदर loop। हर row के लिए अंदर का loop हर seat देखता है।",
+     "बाहर का loop 3 बार और अंदर का 4 बार चले, तो अंदर का body 12 बार चलता है।",
+     "break सिर्फ़ उसी सबसे अंदर वाले loop से बाहर आता है जिसमें वह है।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "break = stop now; continue = skip this one; nested = rows × columns."
+    ],
+    "te": [
+     "break = ఇప్పుడే ఆపు; continue = దీన్ని దాటవేయి; nested = rows × columns."
+    ],
+    "hi": [
+     "break = अभी रुको; continue = इसे छोड़ो; nested = rows × columns।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "Checking attendance marks: continue past students marked \"absent\", break when you reach the end marker."
+    ],
+    "te": [
+     "Attendance: \"absent\" విద్యార్థులను continue తో దాటవేయి, ముగింపు గుర్తు వచ్చినప్పుడు break."
+    ],
+    "hi": [
+     "Attendance: \"absent\" छात्रों को continue से छोड़ो, आख़िरी निशान आने पर break।"
+    ]
+   },
+   "picture": "flowchart TD\n  R[\"for row 1..3\"] --> S[\"for seat 1..4\"] --> F{\"free?\"}\n  F -->|yes| B[\"break\"]\n  F -->|no| S",
+   "code": {
+    "source": "public class Main {\n    public static void main(String[] args) {\n        for (int i = 1; i <= 10; i++) {\n            if (i % 3 == 0) {\n                continue;\n            }\n            if (i > 7) {\n                break;\n            }\n            System.out.print(i + \" \");\n        }\n        System.out.println();\n        for (int row = 1; row <= 3; row++) {\n            for (int col = 1; col <= row; col++) {\n                System.out.print(\"*\");\n            }\n            System.out.println();\n        }\n    }\n}",
+    "output": "1 2 4 5 7 \n*\n**\n***",
+    "notes": [
+     {
+      "line": 4,
+      "note": {
+       "en": "Multiples of 3 are skipped by continue.",
+       "te": "3 గుణిజాలను continue దాటవేస్తుంది.",
+       "hi": "3 के गुणज continue से छूट जाते हैं।"
+      }
+     },
+     {
+      "line": 7,
+      "note": {
+       "en": "Once i passes 7, break ends the loop.",
+       "te": "i 7 దాటగానే break loop ని ముగిస్తుంది.",
+       "hi": "i के 7 पार करते ही break loop ख़त्म करता है।"
+      }
+     },
+     {
+      "line": 13,
+      "note": {
+       "en": "The outer loop goes row by row.",
+       "te": "బయటి loop ఒక్కో row వెళ్తుంది.",
+       "hi": "बाहर का loop एक-एक row चलता है।"
+      }
+     },
+     {
+      "line": 14,
+      "note": {
+       "en": "The inner loop prints row stars on each row.",
+       "te": "లోపలి loop ప్రతి row లో row సంఖ్యలో stars print చేస్తుంది.",
+       "hi": "अंदर का loop हर row में row जितने stars print करता है।"
+      }
+     },
+     {
+      "line": 17,
+      "note": {
+       "en": "A new line after each row.",
+       "te": "ప్రతి row తర్వాత కొత్త line.",
+       "hi": "हर row के बाद नई line।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "for (...) {\n    break;\n    System.out.println(\"x\");\n}",
+     "fix": {
+      "en": "Code after break in the same block never runs; Java will not even compile it.",
+      "te": "అదే block లో break తర్వాత code ఎప్పుడూ నడవదు; Java దాన్ని compile కూడా చేయదు.",
+      "hi": "उसी block में break के बाद का code कभी नहीं चलता; Java उसे compile भी नहीं करता।"
+     }
+    },
+    {
+     "wrong": "for (int i...) {\n    for (int i...) {",
+     "fix": {
+      "en": "The inner loop needs a different variable name, such as j.",
+      "te": "లోపలి loop కి వేరే variable పేరు కావాలి, j లాగా.",
+      "hi": "अंदर के loop को अलग variable नाम चाहिए, जैसे j।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "break does…",
+      "te": "break చేసేది…",
+      "hi": "break करता है…"
+     },
+     "options": [
+      {
+       "en": "skip one round",
+       "te": "ఒక round దాటవేయడం",
+       "hi": "एक round छोड़ना"
+      },
+      {
+       "en": "leave the loop",
+       "te": "Loop నుంచి బయటకు",
+       "hi": "loop से बाहर"
+      }
+     ],
+     "answer": 1,
+     "why": {
+      "en": "It exits.",
+      "te": "బయటకు వస్తుంది.",
+      "hi": "बाहर आता है।"
+     }
+    },
+    {
+     "q": {
+      "en": "continue does…",
+      "te": "continue చేసేది…",
+      "hi": "continue करता है…"
+     },
+     "options": [
+      {
+       "en": "skip to the next round",
+       "te": "తదుపరి round కి",
+       "hi": "अगले round पर"
+      },
+      {
+       "en": "stop the program",
+       "te": "Program ఆపడం",
+       "hi": "program रोकना"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Next round.",
+      "te": "తదుపరి round.",
+      "hi": "अगला round।"
+     }
+    },
+    {
+     "q": {
+      "en": "Outer 3 × inner 5: the inner body runs…",
+      "te": "బయట 3 × లోపల 5: లోపలి body…",
+      "hi": "बाहर 3 × अंदर 5: अंदर का body…"
+     },
+     "options": [
+      "8",
+      "15",
+      "5"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "3 × 5.",
+      "te": "3 × 5.",
+      "hi": "3 × 5।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write static int firstOver(int[] marks, int limit) that returns the index of the first mark greater than limit, or -1 if none. Use a loop with break or an early return.",
+     "te": "static int firstOver(int[] marks, int limit) రాయండి: limit కంటే ఎక్కువ ఉన్న మొదటి mark index return చేయాలి, లేకపోతే -1. break లేదా ముందస్తు return ఉన్న loop వాడండి.",
+     "hi": "static int firstOver(int[] marks, int limit) लिखिए जो limit से बड़े पहले mark का index return करे, नहीं तो -1। break या जल्दी return वाला loop लीजिए।"
+    },
+    "starter": "public class Main {\n    static int firstOver(int[] marks, int limit) {\n        return -1;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(firstOver(new int[]{40, 72, 90}, 70));\n    }\n}\n",
+    "tests": [
+     {
+      "name": "loops over marks",
+      "pattern": "for\\s*\\([^)]*marks"
+     },
+     {
+      "name": "compares with limit",
+      "pattern": "marks\\s*\\[\\s*\\w+\\s*\\]\\s*>\\s*limit|limit\\s*<\\s*marks\\s*\\["
+     },
+     {
+      "name": "stops early",
+      "pattern": "break\\s*;|return\\s+\\w+\\s*;[\\s\\S]*return\\s+-1",
+      "expected": "break; or return i;",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "for (int i = 0; i < marks.length; i++)",
+      "te": "for (int i = 0; i < marks.length; i++)",
+      "hi": "for (int i = 0; i < marks.length; i++)"
+     },
+     {
+      "en": "if (marks[i] > limit) return i;",
+      "te": "if (marks[i] > limit) return i;",
+      "hi": "if (marks[i] > limit) return i;"
+     },
+     {
+      "en": "After the loop, return -1;",
+      "te": "Loop తర్వాత return -1;",
+      "hi": "Loop के बाद return -1;"
+     }
+    ],
+    "solution": "public class Main {\n    static int firstOver(int[] marks, int limit) {\n        for (int i = 0; i < marks.length; i++) {\n            if (marks[i] > limit) {\n                return i;\n            }\n        }\n        return -1;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(firstOver(new int[]{40, 72, 90}, 70) + \" \" + firstOver(new int[]{10}, 50));\n    }\n}",
+    "output": "1 -1"
+   },
+   "cheat": {
+    "en": [
+     "break; leaves the loop · continue; next round",
+     "for (rows) { for (cols) { } }",
+     "Use different names: i, j."
+    ],
+    "te": [
+     "break; loop నుంచి బయటకు · continue; తదుపరి round",
+     "for (rows) { for (cols) { } }",
+     "వేర్వేరు పేర్లు: i, j."
+    ],
+    "hi": [
+     "break; loop से बाहर · continue; अगला round",
+     "for (rows) { for (cols) { } }",
+     "अलग नाम: i, j।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A cinema app looks for the first free seat in a 10 × 20 hall. Explain how nested loops and break would do this.",
+      "te": "Cinema app 10 × 20 hall లో మొదటి ఖాళీ seat వెతుకుతుంది. Nested loops, break దీన్ని ఎలా చేస్తాయో వివరించండి.",
+      "hi": "Cinema app 10 × 20 hall में पहली ख़ाली seat ढूँढता है। Nested loops और break यह कैसे करेंगे, समझाइए।"
+     },
+     {
+      "en": "Explain the difference between break and continue with an attendance example.",
+      "te": "Attendance ఉదాహరణతో break, continue తేడా వివరించండి.",
+      "hi": "Attendance के उदाहरण से break और continue का फ़र्क़ समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "break"
+     ],
+     [
+      "continue",
+      "skip",
+      "దాటవే",
+      "छोड़"
+     ],
+     [
+      "nested",
+      "inner",
+      "row",
+      "loop"
+     ]
+    ],
+    "challenge": {
+     "en": "Say which loop break leaves when loops are nested.",
+     "te": "Loops nested అయినప్పుడు break ఏ loop నుంచి బయటకు వస్తుందో చెప్పండి.",
+     "hi": "Nested loops में break किस loop से बाहर आता है, बताइए।"
+    }
+   }
+  }
+ ],
+ "test": {
+  "pass": 4,
+  "questions": [
+   {
+    "q": {
+     "en": "Which compares Strings correctly?",
+     "te": "Strings ని సరిగా పోల్చేది?",
+     "hi": "Strings की सही तुलना कौन करता है?"
+    },
+    "options": [
+     "a == b",
+     "a.equals(b)"
+    ],
+    "answer": 1,
+    "why": {
+     "en": ".equals.",
+     "te": ".equals.",
+     "hi": ".equals।"
+    }
+   },
+   {
+    "q": {
+     "en": "x > 5 || x < 0 is true when…",
+     "te": "x > 5 || x < 0 true అయ్యేది…",
+     "hi": "x > 5 || x < 0 true होता है जब…"
+    },
+    "options": [
+     {
+      "en": "either side is true",
+      "te": "ఏదో ఒక వైపు true",
+      "hi": "कोई एक तरफ़ true"
+     },
+     {
+      "en": "both are true",
+      "te": "రెండూ true",
+      "hi": "दोनों true"
+     }
+    ],
+    "answer": 0,
+    "why": {
+     "en": "|| is or.",
+     "te": "|| అంటే లేదా.",
+     "hi": "|| मतलब या।"
+    }
+   },
+   {
+    "q": {
+     "en": "for (int i = 2; i <= 6; i += 2) runs…",
+     "te": "for (int i = 2; i <= 6; i += 2) ఎన్నిసార్లు…",
+     "hi": "for (int i = 2; i <= 6; i += 2) कितनी बार…"
+    },
+    "options": [
+     "2",
+     "3",
+     "4"
+    ],
+    "answer": 1,
+    "why": {
+     "en": "2, 4, 6.",
+     "te": "2, 4, 6.",
+     "hi": "2, 4, 6।"
+    }
+   },
+   {
+    "q": {
+     "en": "A while loop that never changes its condition…",
+     "te": "Condition మార్చని while loop…",
+     "hi": "Condition न बदलने वाला while loop…"
+    },
+    "options": [
+     {
+      "en": "runs for ever",
+      "te": "ఎప్పటికీ నడుస్తుంది",
+      "hi": "हमेशा चलता है"
+     },
+     {
+      "en": "runs once",
+      "te": "ఒక్కసారి నడుస్తుంది",
+      "hi": "एक बार चलता है"
+     }
+    ],
+    "answer": 0,
+    "why": {
+     "en": "Infinite loop.",
+     "te": "అనంత loop.",
+     "hi": "अनंत loop।"
+    }
+   },
+   {
+    "q": {
+     "en": "Which skips to the next round?",
+     "te": "తదుపరి round కి దూకేది?",
+     "hi": "अगले round पर कौन जाता है?"
+    },
+    "options": [
+     "break",
+     "continue",
+     "return"
+    ],
+    "answer": 1,
+    "why": {
+     "en": "continue.",
+     "te": "continue.",
+     "hi": "continue।"
+    }
+   }
+  ]
+ },
+ "project": {
+  "title": {
+   "en": "Number guessing game",
+   "te": "Number guessing game",
+   "hi": "Number guessing game"
+  },
+  "prompt": {
+   "en": "The secret number is 42. Read guesses with a Scanner in a while loop. Print \"Too low\" or \"Too high\" for wrong guesses. When the guess is right, print \"Correct in N tries\" and stop.",
+   "te": "రహస్య number 42. While loop లో Scanner తో guesses చదవండి. తప్పు guesses కి \"Too low\" లేదా \"Too high\" print చేయండి. సరైనప్పుడు \"Correct in N tries\" print చేసి ఆపండి.",
+   "hi": "गुप्त number 42 है। While loop में Scanner से guesses पढ़िए। ग़लत guess पर \"Too low\" या \"Too high\" print कीजिए। सही होने पर \"Correct in N tries\" print करके रुकिए।"
+  },
+  "starter": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int secret = 42;\n        // keep asking until the guess is right\n    }\n}\n",
+  "tests": [
+   {
+    "name": "a while loop",
+    "pattern": "while\\s*\\("
+   },
+   {
+    "name": "reads guesses",
+    "pattern": "\\.nextInt\\s*\\(\\s*\\)"
+   },
+   {
+    "name": "too low and too high",
+    "pattern": "Too low[\\s\\S]*Too high|Too high[\\s\\S]*Too low",
+    "expected": "\"Too low\" and \"Too high\""
+   },
+   {
+    "name": "counts tries",
+    "pattern": "\\w+\\s*\\+\\+|\\w+\\s*\\+=\\s*1",
+    "expected": "tries++"
+   },
+   {
+    "name": "stops when correct",
+    "pattern": "break\\s*;|while\\s*\\(\\s*\\w+\\s*!=\\s*secret",
+    "expected": "break; or while (guess != secret)",
+    "hidden": true
+   }
+  ],
+  "hints": [
+   {
+    "en": "int tries = 0; then while (true) { ... }",
+    "te": "int tries = 0; తర్వాత while (true) { ... }",
+    "hi": "int tries = 0; फिर while (true) { ... }"
+   },
+   {
+    "en": "Inside: int guess = sc.nextInt(); tries++;",
+    "te": "లోపల: int guess = sc.nextInt(); tries++;",
+    "hi": "अंदर: int guess = sc.nextInt(); tries++;"
+   },
+   {
+    "en": "if (guess < secret) \"Too low\"; else if (guess > secret) \"Too high\"; else { print and break; }",
+    "te": "if (guess < secret) \"Too low\"; else if (guess > secret) \"Too high\"; else { print చేసి break; }",
+    "hi": "if (guess < secret) \"Too low\"; else if (guess > secret) \"Too high\"; else { print करके break; }"
+   }
+  ],
+  "solution": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int secret = 42;\n        int tries = 0;\n        while (true) {\n            int guess = sc.nextInt();\n            tries++;\n            if (guess < secret) {\n                System.out.println(\"Too low\");\n            } else if (guess > secret) {\n                System.out.println(\"Too high\");\n            } else {\n                System.out.println(\"Correct in \" + tries + \" tries\");\n                break;\n            }\n        }\n    }\n}",
+  "stdin": "30\n50\n42",
+  "output": "Too low\nToo high\nCorrect in 3 tries"
+ }
+}

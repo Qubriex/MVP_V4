@@ -1,0 +1,750 @@
+{
+ "id": "jv-m4",
+ "n": 4,
+ "skill": "java-arrays-strings",
+ "title": {
+  "en": "Arrays & Strings",
+  "te": "Arrays & Strings",
+  "hi": "Arrays & Strings"
+ },
+ "summary": {
+  "en": "Store many values in arrays and work with text using String methods and StringBuilder.",
+  "te": "Arrays లో చాలా values దాయడం, String methods, StringBuilder తో text పై పని.",
+  "hi": "Arrays में कई values रखना और String methods और StringBuilder से text पर काम करना।"
+ },
+ "lessons": [
+  {
+   "id": "jv-m4-l1",
+   "n": 1,
+   "minutes": 20,
+   "title": {
+    "en": "Arrays",
+    "te": "Arrays",
+    "hi": "Arrays"
+   },
+   "oneLine": {
+    "en": "An array holds a fixed number of values of one type, reached by an index that starts at 0.",
+    "te": "Array ఒకే type కి చెందిన నిర్ణీత సంఖ్యలో values ని ఉంచుతుంది; 0 నుంచి మొదలయ్యే index తో చేరుకుంటాం.",
+    "hi": "Array एक type की तय संख्या में values रखता है, जिन तक 0 से शुरू होने वाले index से पहुँचते हैं।"
+   },
+   "useCase": {
+    "en": "A class register keeps 60 students' marks in one int array instead of 60 separate variables.",
+    "te": "Class register 60 విద్యార్థుల marks ని 60 variables బదులు ఒక int array లో ఉంచుతుంది.",
+    "hi": "Class register 60 छात्रों के marks 60 अलग variables की जगह एक int array में रखता है।"
+   },
+   "explain": {
+    "en": [
+     "int[] marks = {72, 85, 64}; makes an array of three ints.",
+     "marks[0] is the first value; marks.length is 3. The last index is length - 1.",
+     "An array's size is fixed when it is made: new int[60] makes 60 zeros.",
+     "Loop over every value with for (int m : marks), the for-each loop.",
+     "java.util.Arrays helps: Arrays.sort(marks) sorts, Arrays.toString(marks) prints them nicely."
+    ],
+    "te": [
+     "int[] marks = {72, 85, 64}; మూడు ints ఉన్న array చేస్తుంది.",
+     "marks[0] మొదటి value; marks.length 3. చివరి index length - 1.",
+     "Array తయారైనప్పుడే size స్థిరం: new int[60] 60 సున్నాలు చేస్తుంది.",
+     "for (int m : marks) అనే for-each loop తో ప్రతి value పై loop చేయండి.",
+     "java.util.Arrays సహాయం చేస్తుంది: Arrays.sort(marks) sort చేస్తుంది, Arrays.toString(marks) చక్కగా print చేస్తుంది."
+    ],
+    "hi": [
+     "int[] marks = {72, 85, 64}; तीन ints का array बनाता है।",
+     "marks[0] पहली value है; marks.length 3 है। आख़िरी index length - 1 है।",
+     "Array बनते समय उसका size तय हो जाता है: new int[60] 60 शून्य बनाता है।",
+     "हर value पर for (int m : marks), यानी for-each loop से चलिए।",
+     "java.util.Arrays मदद करता है: Arrays.sort(marks) sort करता है, Arrays.toString(marks) साफ़ print करता है।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "An array is a row of numbered lockers, all the same size."
+    ],
+    "te": [
+     "Array అంటే ఒకే size ఉన్న numbered lockers వరుస."
+    ],
+    "hi": [
+     "Array एक जैसे numbered lockers की कतार है।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "Daily temperatures for a week: double[] temps = new double[7]; temps[0] = 31.5;"
+    ],
+    "te": [
+     "వారం రోజుల ఉష్ణోగ్రతలు: double[] temps = new double[7]; temps[0] = 31.5;"
+    ],
+    "hi": [
+     "हफ़्ते का रोज़ का तापमान: double[] temps = new double[7]; temps[0] = 31.5;"
+    ]
+   },
+   "picture": "flowchart LR\n  A0[\"[0] 72\"] --- A1[\"[1] 85\"] --- A2[\"[2] 64\"]",
+   "code": {
+    "source": "import java.util.Arrays;\n\npublic class Main {\n    public static void main(String[] args) {\n        int[] marks = {72, 85, 64};\n        System.out.println(marks[0] + \" \" + marks.length);\n        int total = 0;\n        for (int m : marks) {\n            total += m;\n        }\n        System.out.println(\"Average: \" + (double) total / marks.length);\n        Arrays.sort(marks);\n        System.out.println(Arrays.toString(marks));\n    }\n}",
+    "output": "72 3\nAverage: 73.66666666666667\n[64, 72, 85]",
+    "notes": [
+     {
+      "line": 5,
+      "note": {
+       "en": "Curly braces list the starting values.",
+       "te": "Curly braces మొదటి values చెబుతాయి.",
+       "hi": "Curly braces शुरू की values बताते हैं।"
+      }
+     },
+     {
+      "line": 6,
+      "note": {
+       "en": "Index 0 is the first; length counts the items.",
+       "te": "Index 0 మొదటిది; length items లెక్కిస్తుంది.",
+       "hi": "Index 0 पहला; length items गिनता है।"
+      }
+     },
+     {
+      "line": 8,
+      "note": {
+       "en": "for-each visits every mark in turn.",
+       "te": "for-each ప్రతి mark ని వరుసగా చూస్తుంది.",
+       "hi": "for-each हर mark को बारी से देखता है।"
+      }
+     },
+     {
+      "line": 11,
+      "note": {
+       "en": "(double) keeps the decimals in the average.",
+       "te": "(double) సగటులో decimals ఉంచుతుంది.",
+       "hi": "(double) औसत में decimals रखता है।"
+      }
+     },
+     {
+      "line": 12,
+      "note": {
+       "en": "Arrays.sort puts them in order.",
+       "te": "Arrays.sort వాటిని క్రమంలో పెడుతుంది.",
+       "hi": "Arrays.sort उन्हें क्रम में रखता है।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "int[] a = {1, 2, 3};\nSystem.out.println(a[3]);",
+     "fix": {
+      "en": "Indexes are 0 to 2. a[3] throws ArrayIndexOutOfBoundsException.",
+      "te": "Indexes 0 నుంచి 2. a[3] ArrayIndexOutOfBoundsException ఇస్తుంది.",
+      "hi": "Index 0 से 2 हैं। a[3] ArrayIndexOutOfBoundsException देता है।"
+     }
+    },
+    {
+     "wrong": "System.out.println(marks);",
+     "fix": {
+      "en": "This prints a code like [I@1b6d3586. Use Arrays.toString(marks).",
+      "te": "ఇది [I@1b6d3586 లాంటి code print చేస్తుంది. Arrays.toString(marks) వాడండి.",
+      "hi": "यह [I@1b6d3586 जैसा code print करता है। Arrays.toString(marks) लिखिए।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "int[] a = {5, 9, 2};\na[1] is…",
+      "te": "int[] a = {5, 9, 2};\na[1]…",
+      "hi": "int[] a = {5, 9, 2};\na[1]…"
+     },
+     "options": [
+      "5",
+      "9",
+      "2"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Second item.",
+      "te": "రెండో item.",
+      "hi": "दूसरा item।"
+     }
+    },
+    {
+     "q": {
+      "en": "The last index of an array of length 10 is…",
+      "te": "Length 10 array చివరి index…",
+      "hi": "Length 10 वाले array का आख़िरी index…"
+     },
+     "options": [
+      "10",
+      "9",
+      "11"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "length - 1.",
+      "te": "length - 1.",
+      "hi": "length - 1।"
+     }
+    },
+    {
+     "q": {
+      "en": "Can an array grow after it is made?",
+      "te": "తయారైన తర్వాత array పెరగగలదా?",
+      "hi": "बनने के बाद array बढ़ सकता है?"
+     },
+     "options": [
+      {
+       "en": "Yes",
+       "te": "అవును",
+       "hi": "हाँ"
+      },
+      {
+       "en": "No",
+       "te": "లేదు",
+       "hi": "नहीं"
+      }
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Fixed size; use ArrayList to grow.",
+      "te": "స్థిర size; పెరగాలంటే ArrayList.",
+      "hi": "तय size; बढ़ाने के लिए ArrayList।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write static int highest(int[] marks) that returns the largest mark, using a loop (do not sort).",
+     "te": "Loop వాడి (sort చేయకుండా) అత్యధిక mark return చేసే static int highest(int[] marks) రాయండి.",
+     "hi": "Loop से (sort किए बिना) सबसे बड़ा mark return करने वाला static int highest(int[] marks) लिखिए।"
+    },
+    "starter": "public class Main {\n    static int highest(int[] marks) {\n        return marks[0];\n    }\n\n    public static void main(String[] args) {\n        System.out.println(highest(new int[]{64, 91, 78}));\n    }\n}\n",
+    "tests": [
+     {
+      "name": "loops over the array",
+      "pattern": "for\\s*\\(\\s*int\\s+\\w+\\s*(:|=)"
+     },
+     {
+      "name": "compares to the best so far",
+      "pattern": ">\\s*\\w+|\\w+\\s*<",
+      "expected": "if (m > best)"
+     },
+     {
+      "name": "does not sort",
+      "absent": "Arrays\\.sort",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "int best = marks[0];",
+      "te": "int best = marks[0];",
+      "hi": "int best = marks[0];"
+     },
+     {
+      "en": "for (int m : marks)",
+      "te": "for (int m : marks)",
+      "hi": "for (int m : marks)"
+     },
+     {
+      "en": "if (m > best) best = m; then return best;",
+      "te": "if (m > best) best = m; తర్వాత return best;",
+      "hi": "if (m > best) best = m; फिर return best;"
+     }
+    ],
+    "solution": "public class Main {\n    static int highest(int[] marks) {\n        int best = marks[0];\n        for (int m : marks) {\n            if (m > best) {\n                best = m;\n            }\n        }\n        return best;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(highest(new int[]{64, 91, 78}));\n    }\n}",
+    "output": "91"
+   },
+   "cheat": {
+    "en": [
+     "int[] a = {1, 2}; · new int[n] · a[0] · a.length",
+     "for (int x : a) { } · last index = length - 1",
+     "Arrays.sort(a) · Arrays.toString(a)"
+    ],
+    "te": [
+     "int[] a = {1, 2}; · new int[n] · a[0] · a.length",
+     "for (int x : a) { } · చివరి index = length - 1",
+     "Arrays.sort(a) · Arrays.toString(a)"
+    ],
+    "hi": [
+     "int[] a = {1, 2}; · new int[n] · a[0] · a.length",
+     "for (int x : a) { } · आख़िरी index = length - 1",
+     "Arrays.sort(a) · Arrays.toString(a)"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A teacher stores 60 students' marks. Explain how an array helps, how to find the average with a loop, and why marks[60] would fail.",
+      "te": "Teacher 60 విద్యార్థుల marks దాస్తారు. Array ఎలా సహాయపడుతుందో, loop తో సగటు ఎలా కనుక్కోవాలో, marks[60] ఎందుకు విఫలమవుతుందో వివరించండి.",
+      "hi": "Teacher 60 छात्रों के marks रखते हैं। Array कैसे मदद करता है, loop से औसत कैसे निकालें, और marks[60] क्यों fail होगा, समझाइए।"
+     },
+     {
+      "en": "Explain the for-each loop with an example.",
+      "te": "For-each loop ని ఉదాహరణతో వివరించండి.",
+      "hi": "For-each loop उदाहरण से समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "array"
+     ],
+     [
+      "index",
+      "0",
+      "length"
+     ],
+     [
+      "loop",
+      "for",
+      "bounds",
+      "average"
+     ]
+    ],
+    "challenge": {
+     "en": "Say why the last index is length - 1.",
+     "te": "చివరి index length - 1 ఎందుకో చెప్పండి.",
+     "hi": "आख़िरी index length - 1 क्यों है, बताइए।"
+    }
+   }
+  },
+  {
+   "id": "jv-m4-l2",
+   "n": 2,
+   "minutes": 20,
+   "title": {
+    "en": "Strings and StringBuilder",
+    "te": "Strings, StringBuilder",
+    "hi": "Strings और StringBuilder"
+   },
+   "oneLine": {
+    "en": "A String is text with useful methods like length, charAt, substring, toUpperCase and split; StringBuilder builds long text efficiently.",
+    "te": "String అంటే length, charAt, substring, toUpperCase, split లాంటి ఉపయోగకర methods ఉన్న text; StringBuilder పొడవైన text ని సమర్థంగా తయారుచేస్తుంది.",
+    "hi": "String, length, charAt, substring, toUpperCase और split जैसे काम के methods वाला text है; StringBuilder लंबा text कुशलता से बनाता है।"
+   },
+   "useCase": {
+    "en": "A sign-up form trims the email, checks it contains \"@\", and makes the username lower case.",
+    "te": "Sign-up form email ని trim చేసి, \"@\" ఉందో చూసి, username ని lower case చేస్తుంది.",
+    "hi": "Sign-up form email को trim करता है, उसमें \"@\" है या नहीं देखता है, और username को lower case बनाता है।"
+   },
+   "explain": {
+    "en": [
+     "A String is a sequence of characters: \"Ravi\".length() is 4 and \"Ravi\".charAt(0) is 'R'.",
+     "substring(0, 3) takes characters 0 to 2. indexOf(\"@\") finds a position, or -1.",
+     "Strings cannot be changed: toUpperCase() and trim() return a new String.",
+     "split(\",\") breaks text into a String array; String.join(\", \", parts) joins it back.",
+     "Adding to a String in a loop makes many copies. StringBuilder.append is the fast way."
+    ],
+    "te": [
+     "String అంటే అక్షరాల వరుస: \"Ravi\".length() 4, \"Ravi\".charAt(0) 'R'.",
+     "substring(0, 3) అక్షరాలు 0 నుంచి 2 తీసుకుంటుంది. indexOf(\"@\") స్థానం కనుక్కుంటుంది, లేకపోతే -1.",
+     "Strings మారవు: toUpperCase(), trim() కొత్త String return చేస్తాయి.",
+     "split(\",\") text ని String array గా విడదీస్తుంది; String.join(\", \", parts) మళ్లీ కలుపుతుంది.",
+     "Loop లో String కి కలుపుతూ ఉంటే చాలా copies అవుతాయి. StringBuilder.append వేగవంతమైన మార్గం."
+    ],
+    "hi": [
+     "String अक्षरों की कतार है: \"Ravi\".length() 4 है और \"Ravi\".charAt(0) 'R'।",
+     "substring(0, 3) अक्षर 0 से 2 लेता है। indexOf(\"@\") जगह ढूँढता है, या -1।",
+     "String बदलती नहीं: toUpperCase() और trim() नई String return करते हैं।",
+     "split(\",\") text को String array में तोड़ता है; String.join(\", \", parts) फिर जोड़ता है।",
+     "Loop में String में जोड़ते रहने से कई copies बनती हैं। StringBuilder.append तेज़ तरीक़ा है।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "String methods cut, search and tidy text; StringBuilder glues lots of text together."
+    ],
+    "te": [
+     "String methods text ని కోసి, వెతికి, శుభ్రం చేస్తాయి; StringBuilder చాలా text ని అతికిస్తుంది."
+    ],
+    "hi": [
+     "String methods text काटते, खोजते और साफ़ करते हैं; StringBuilder बहुत सारा text जोड़ता है।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "Masking a phone number: \"98\" + \"*\".repeat(6) + phone.substring(8) shows 98******10."
+    ],
+    "te": [
+     "Phone number దాచడం: \"98\" + \"*\".repeat(6) + phone.substring(8) 98******10 చూపిస్తుంది."
+    ],
+    "hi": [
+     "Phone number छिपाना: \"98\" + \"*\".repeat(6) + phone.substring(8) से 98******10 दिखता है।"
+    ]
+   },
+   "picture": "flowchart LR\n  A[\"\\\"  Ravi@Mail.com \\\"\"] -->|trim| B[\"\\\"Ravi@Mail.com\\\"\"] -->|toLowerCase| C[\"\\\"ravi@mail.com\\\"\"] -->|\"indexOf(\\\"@\\\")\"| D[\"4\"]",
+   "code": {
+    "source": "public class Main {\n    public static void main(String[] args) {\n        String email = \"  Ravi@Mail.com \".trim().toLowerCase();\n        System.out.println(email + \" \" + email.length());\n        int at = email.indexOf(\"@\");\n        System.out.println(email.substring(0, at));\n        String[] parts = \"tea,coffee,lassi\".split(\",\");\n        StringBuilder sb = new StringBuilder();\n        for (String p : parts) {\n            sb.append(p.toUpperCase()).append(\";\");\n        }\n        System.out.println(sb.toString());\n    }\n}",
+    "output": "ravi@mail.com 13\nravi\nTEA;COFFEE;LASSI;",
+    "notes": [
+     {
+      "line": 3,
+      "note": {
+       "en": "trim removes outer spaces; toLowerCase returns a lower-case copy.",
+       "te": "trim బయటి spaces తీస్తుంది; toLowerCase lower-case copy ఇస్తుంది.",
+       "hi": "trim बाहर के spaces हटाता है; toLowerCase lower-case copy देता है।"
+      }
+     },
+     {
+      "line": 5,
+      "note": {
+       "en": "indexOf finds where @ is.",
+       "te": "@ ఎక్కడుందో indexOf కనుక్కుంటుంది.",
+       "hi": "indexOf बताता है @ कहाँ है।"
+      }
+     },
+     {
+      "line": 6,
+      "note": {
+       "en": "substring takes the part before @.",
+       "te": "substring @ ముందు భాగం తీసుకుంటుంది.",
+       "hi": "substring @ से पहले का हिस्सा लेता है।"
+      }
+     },
+     {
+      "line": 7,
+      "note": {
+       "en": "split makes a String array.",
+       "te": "split String array చేస్తుంది.",
+       "hi": "split String array बनाता है।"
+      }
+     },
+     {
+      "line": 10,
+      "note": {
+       "en": "StringBuilder.append adds text without making copies.",
+       "te": "StringBuilder.append copies చేయకుండా text జోడిస్తుంది.",
+       "hi": "StringBuilder.append बिना copies बनाए text जोड़ता है।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "String s = \"ravi\";\ns.toUpperCase();\nSystem.out.println(s);  // still ravi",
+     "fix": {
+      "en": "Strings do not change. Save the result: s = s.toUpperCase();",
+      "te": "Strings మారవు. ఫలితం దాయండి: s = s.toUpperCase();",
+      "hi": "String नहीं बदलती। Result रखिए: s = s.toUpperCase();"
+     }
+    },
+    {
+     "wrong": "if (email.indexOf(\"@\"))",
+     "fix": {
+      "en": "indexOf returns a number. Write email.contains(\"@\") or indexOf(\"@\") >= 0.",
+      "te": "indexOf number return చేస్తుంది. email.contains(\"@\") లేదా indexOf(\"@\") >= 0 రాయండి.",
+      "hi": "indexOf number return करता है। email.contains(\"@\") या indexOf(\"@\") >= 0 लिखिए।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "\"Java\".length() is…",
+      "te": "\"Java\".length()…",
+      "hi": "\"Java\".length()…"
+     },
+     "options": [
+      "3",
+      "4",
+      "5"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Four characters.",
+      "te": "నాలుగు అక్షరాలు.",
+      "hi": "चार अक्षर।"
+     }
+    },
+    {
+     "q": {
+      "en": "\"Hello\".substring(1, 3) is…",
+      "te": "\"Hello\".substring(1, 3)…",
+      "hi": "\"Hello\".substring(1, 3)…"
+     },
+     "options": [
+      "\"He\"",
+      "\"el\"",
+      "\"ell\""
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Index 1 and 2.",
+      "te": "Index 1, 2.",
+      "hi": "Index 1 और 2।"
+     }
+    },
+    {
+     "q": {
+      "en": "Best for building text in a loop?",
+      "te": "Loop లో text తయారీకి ఉత్తమం?",
+      "hi": "Loop में text बनाने के लिए सबसे अच्छा?"
+     },
+     "options": [
+      "String +",
+      "StringBuilder"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "No copies.",
+      "te": "Copies ఉండవు.",
+      "hi": "Copies नहीं बनतीं।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write static String initials(String fullName) that returns capital initials with dots, e.g. \"ravi kumar\" gives \"R.K.\". Use split and a StringBuilder.",
+     "te": "static String initials(String fullName) రాయండి: పెద్ద అక్షరాల initials చుక్కలతో return చేయాలి, ఉదా. \"ravi kumar\" కి \"R.K.\". split, StringBuilder వాడండి.",
+     "hi": "static String initials(String fullName) लिखिए जो बड़े अक्षरों के initials बिंदुओं के साथ return करे, जैसे \"ravi kumar\" से \"R.K.\"। split और StringBuilder लीजिए।"
+    },
+    "starter": "public class Main {\n    static String initials(String fullName) {\n        return \"\";\n    }\n\n    public static void main(String[] args) {\n        System.out.println(initials(\"ravi kumar\"));\n    }\n}\n",
+    "tests": [
+     {
+      "name": "splits the name",
+      "pattern": "\\.split\\s*\\("
+     },
+     {
+      "name": "uses a StringBuilder",
+      "pattern": "new\\s+StringBuilder\\s*\\("
+     },
+     {
+      "name": "takes the first letter in upper case",
+      "pattern": "charAt\\s*\\(\\s*0\\s*\\)|substring\\s*\\(\\s*0\\s*,\\s*1\\s*\\)",
+      "expected": "word.charAt(0)"
+     },
+     {
+      "name": "upper case",
+      "pattern": "toUpperCase|Character\\.toUpperCase",
+      "expected": "toUpperCase",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "String[] words = fullName.trim().split(\"\\\\s+\");",
+      "te": "String[] words = fullName.trim().split(\"\\\\s+\");",
+      "hi": "String[] words = fullName.trim().split(\"\\\\s+\");"
+     },
+     {
+      "en": "For each word: sb.append(Character.toUpperCase(w.charAt(0))).append(\".\");",
+      "te": "ప్రతి పదానికి: sb.append(Character.toUpperCase(w.charAt(0))).append(\".\");",
+      "hi": "हर शब्द पर: sb.append(Character.toUpperCase(w.charAt(0))).append(\".\");"
+     },
+     {
+      "en": "return sb.toString();",
+      "te": "return sb.toString();",
+      "hi": "return sb.toString();"
+     }
+    ],
+    "solution": "public class Main {\n    static String initials(String fullName) {\n        StringBuilder sb = new StringBuilder();\n        for (String w : fullName.trim().split(\"\\\\s+\")) {\n            sb.append(Character.toUpperCase(w.charAt(0))).append(\".\");\n        }\n        return sb.toString();\n    }\n\n    public static void main(String[] args) {\n        System.out.println(initials(\"ravi kumar\") + \" \" + initials(\"  sita devi rao \"));\n    }\n}",
+    "output": "R.K. S.D.R."
+   },
+   "cheat": {
+    "en": [
+     "length() · charAt(i) · substring(a, b) · indexOf(s) · contains(s)",
+     "trim · toUpperCase · toLowerCase · split · String.join · equals",
+     "StringBuilder sb; sb.append(x); sb.toString()"
+    ],
+    "te": [
+     "length() · charAt(i) · substring(a, b) · indexOf(s) · contains(s)",
+     "trim · toUpperCase · toLowerCase · split · String.join · equals",
+     "StringBuilder sb; sb.append(x); sb.toString()"
+    ],
+    "hi": [
+     "length() · charAt(i) · substring(a, b) · indexOf(s) · contains(s)",
+     "trim · toUpperCase · toLowerCase · split · String.join · equals",
+     "StringBuilder sb; sb.append(x); sb.toString()"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A sign-up form receives \"  Ravi@Mail.com \". Explain which String methods you would use to clean it and check it is an email.",
+      "te": "Sign-up form కి \"  Ravi@Mail.com \" వస్తుంది. దాన్ని శుభ్రం చేసి email అని చూడడానికి ఏ String methods వాడతారో వివరించండి.",
+      "hi": "Sign-up form में \"  Ravi@Mail.com \" आता है। इसे साफ़ करने और email है यह जाँचने के लिए कौन-से String methods लेंगे, समझाइए।"
+     },
+     {
+      "en": "Explain why StringBuilder is better than + when building text in a loop.",
+      "te": "Loop లో text తయారుచేసేటప్పుడు + కంటే StringBuilder ఎందుకు మంచిదో వివరించండి.",
+      "hi": "Loop में text बनाते समय + से StringBuilder बेहतर क्यों है, समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "trim",
+      "tolowercase",
+      "touppercase"
+     ],
+     [
+      "indexof",
+      "contains",
+      "substring",
+      "split"
+     ],
+     [
+      "stringbuilder",
+      "append",
+      "copy",
+      "copies",
+      "immutable"
+     ]
+    ],
+    "challenge": {
+     "en": "Say why s.toUpperCase() alone does not change s.",
+     "te": "ఒక్క s.toUpperCase() s ని ఎందుకు మార్చదో చెప్పండి.",
+     "hi": "सिर्फ़ s.toUpperCase() से s क्यों नहीं बदलता, बताइए।"
+    }
+   }
+  }
+ ],
+ "test": {
+  "pass": 4,
+  "questions": [
+   {
+    "q": {
+     "en": "int[] a = new int[5]; a.length is…",
+     "te": "int[] a = new int[5]; a.length…",
+     "hi": "int[] a = new int[5]; a.length…"
+    },
+    "options": [
+     "4",
+     "5",
+     "6"
+    ],
+    "answer": 1,
+    "why": {
+     "en": "Five slots.",
+     "te": "ఐదు స్థానాలు.",
+     "hi": "पाँच जगह।"
+    }
+   },
+   {
+    "q": {
+     "en": "The first index is…",
+     "te": "మొదటి index…",
+     "hi": "पहला index…"
+    },
+    "options": [
+     "0",
+     "1"
+    ],
+    "answer": 0,
+    "why": {
+     "en": "0.",
+     "te": "0.",
+     "hi": "0।"
+    }
+   },
+   {
+    "q": {
+     "en": "\"a,b,c\".split(\",\").length is…",
+     "te": "\"a,b,c\".split(\",\").length…",
+     "hi": "\"a,b,c\".split(\",\").length…"
+    },
+    "options": [
+     "1",
+     "3",
+     "5"
+    ],
+    "answer": 1,
+    "why": {
+     "en": "Three parts.",
+     "te": "మూడు భాగాలు.",
+     "hi": "तीन हिस्से।"
+    }
+   },
+   {
+    "q": {
+     "en": "How do you print an array nicely?",
+     "te": "Array ని చక్కగా print చేయడం?",
+     "hi": "Array को साफ़ print कैसे करें?"
+    },
+    "options": [
+     "println(a)",
+     "Arrays.toString(a)"
+    ],
+    "answer": 1,
+    "why": {
+     "en": "Arrays.toString.",
+     "te": "Arrays.toString.",
+     "hi": "Arrays.toString।"
+    }
+   },
+   {
+    "q": {
+     "en": "Strings in Java are…",
+     "te": "Java లో Strings…",
+     "hi": "Java में Strings…"
+    },
+    "options": [
+     {
+      "en": "unchangeable",
+      "te": "మార్చలేనివి",
+      "hi": "बदल नहीं सकतीं"
+     },
+     {
+      "en": "changeable",
+      "te": "మార్చగలిగేవి",
+      "hi": "बदल सकती हैं"
+     }
+    ],
+    "answer": 0,
+    "why": {
+     "en": "Methods return new Strings.",
+     "te": "Methods కొత్త Strings ఇస్తాయి.",
+     "hi": "Methods नई Strings देते हैं।"
+    }
+   }
+  ]
+ },
+ "project": {
+  "title": {
+   "en": "Marks report",
+   "te": "Marks report",
+   "hi": "Marks report"
+  },
+  "prompt": {
+   "en": "Given String data = \"Ravi:72,Sita:91,Anu:64\", write static String report(String data) that returns \"Top: Sita (91), Average: 75.67\". Split on \",\" then \":\", track the top student, and format the average to 2 decimals with String.format(\"%.2f\", avg).",
+   "te": "String data = \"Ravi:72,Sita:91,Anu:64\" ఇచ్చాం; \"Top: Sita (91), Average: 75.67\" return చేసే static String report(String data) రాయండి. \",\" తర్వాత \":\" పై split చేసి, top విద్యార్థిని గుర్తుంచుకుని, String.format(\"%.2f\", avg) తో సగటును 2 decimals కి format చేయండి.",
+   "hi": "String data = \"Ravi:72,Sita:91,Anu:64\" दिया है; static String report(String data) लिखिए जो \"Top: Sita (91), Average: 75.67\" return करे। \",\" फिर \":\" पर split कीजिए, top छात्र याद रखिए, और औसत को String.format(\"%.2f\", avg) से 2 decimals में format कीजिए।"
+  },
+  "starter": "public class Main {\n    static String report(String data) {\n        return \"\";\n    }\n\n    public static void main(String[] args) {\n        System.out.println(report(\"Ravi:72,Sita:91,Anu:64\"));\n    }\n}\n",
+  "tests": [
+   {
+    "name": "splits records and fields",
+    "pattern": "split\\s*\\(\\s*\",\"\\s*\\)[\\s\\S]*split\\s*\\(\\s*\":\"\\s*\\)"
+   },
+   {
+    "name": "turns marks into numbers",
+    "pattern": "Integer\\.parseInt"
+   },
+   {
+    "name": "tracks the top mark",
+    "pattern": ">\\s*\\w+"
+   },
+   {
+    "name": "formats the average",
+    "pattern": "String\\.format\\s*\\(\\s*\"%\\.2f\""
+   },
+   {
+    "name": "returns the report text",
+    "pattern": "\"Top: \"",
+    "expected": "\"Top: \" + ...",
+    "hidden": true
+   }
+  ],
+  "hints": [
+   {
+    "en": "for (String rec : data.split(\",\")) { String[] f = rec.split(\":\"); ... }",
+    "te": "for (String rec : data.split(\",\")) { String[] f = rec.split(\":\"); ... }",
+    "hi": "for (String rec : data.split(\",\")) { String[] f = rec.split(\":\"); ... }"
+   },
+   {
+    "en": "int mark = Integer.parseInt(f[1]); total += mark; if (mark > best) { best = mark; top = f[0]; }",
+    "te": "int mark = Integer.parseInt(f[1]); total += mark; if (mark > best) { best = mark; top = f[0]; }",
+    "hi": "int mark = Integer.parseInt(f[1]); total += mark; if (mark > best) { best = mark; top = f[0]; }"
+   },
+   {
+    "en": "return \"Top: \" + top + \" (\" + best + \"), Average: \" + String.format(\"%.2f\", (double) total / count);",
+    "te": "return \"Top: \" + top + \" (\" + best + \"), Average: \" + String.format(\"%.2f\", (double) total / count);",
+    "hi": "return \"Top: \" + top + \" (\" + best + \"), Average: \" + String.format(\"%.2f\", (double) total / count);"
+   }
+  ],
+  "solution": "public class Main {\n    static String report(String data) {\n        String top = \"\";\n        int best = -1;\n        int total = 0;\n        int count = 0;\n        for (String rec : data.split(\",\")) {\n            String[] f = rec.split(\":\");\n            int mark = Integer.parseInt(f[1]);\n            total += mark;\n            count++;\n            if (mark > best) {\n                best = mark;\n                top = f[0];\n            }\n        }\n        return \"Top: \" + top + \" (\" + best + \"), Average: \" + String.format(\"%.2f\", (double) total / count);\n    }\n\n    public static void main(String[] args) {\n        System.out.println(report(\"Ravi:72,Sita:91,Anu:64\"));\n    }\n}",
+  "output": "Top: Sita (91), Average: 75.67"
+ }
+}
