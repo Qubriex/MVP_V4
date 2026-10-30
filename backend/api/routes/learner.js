@@ -33,6 +33,7 @@ import { isValidPin, hashPin, logEvent } from '../../core/access.js';
 import { eachSeq, mapSeq } from '../../core/util/seq.js';
 import { aiNotConfigured, aiUnavailableMessage, synthesize, recordVoiceMetric } from '../../core/ai/gateway.js';
 import { asksForCheck } from '../../core/ai/intent.js';
+import { welcomeBack, readyForCheck } from '../../core/ai/welcomeBack.js';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
@@ -360,10 +361,16 @@ router.post('/session/start', async (req, res) => {
   `).all(session.id);
   db.close();
 
+  // Coming back: the old messages stay in the transcript (each with Replay),
+  // and she greets with a short line about where they stopped instead of
+  // replaying the opening.
   if (history.length > 0) {
+    const lastAi = [...history].reverse().find(m => m.role === 'ai');
+    const inCheck = lastAi?.message_type === 'mastery_check';
     return res.json({
       session_id: session.id, node_label: node.node_label, cluster_label: node.cluster_label,
-      language: req.user.language, approach: session.current_approach, loop_count: session.loop_count, history
+      language: req.user.language, approach: session.current_approach, loop_count: session.loop_count, history,
+      resumed: true, welcome_back: welcomeBack({ language: req.user.language, skill: node.node_label, inCheck, seed: history.length + Date.now() / 86400000 })
     });
   }
 
@@ -376,18 +383,19 @@ router.post('/session/start', async (req, res) => {
       sessionState: { clusterId: node.cluster_id, approachesUsed }
     });
 
+    // The opening teaches (a fresh one for each skill), stored as instruction.
     const msgDb = getDb();
     await msgDb.prepare(`
-      INSERT INTO session_messages (id, session_id, role, content, message_type, caption_en)
-      VALUES (?, ?, 'ai', ?, 'diagnosis', ?)
-    `).run(uuidv4(), session.id, result.message, result.captionEn || null);
+      INSERT INTO session_messages (id, session_id, role, content, message_type, caption_en, mermaid, code)
+      VALUES (?, ?, 'ai', ?, 'instruction', ?, ?, ?)
+    `).run(uuidv4(), session.id, result.message, result.captionEn || null, result.mermaid || null, result.code || null);
     msgDb.close();
 
     res.json({
       session_id: session.id, node_label: node.node_label, cluster_label: node.cluster_label,
-      language: req.user.language, approach: session.current_approach, loop_count: session.loop_count,
-      message: result.message, caption_en: result.captionEn || null, decision: 'DIAGNOSE',
-      history: [{ role: 'ai', content: result.message, message_type: 'diagnosis', caption_en: result.captionEn || null }]
+      language: req.user.language, approach: result.approach || session.current_approach, loop_count: session.loop_count,
+      message: result.message, caption_en: result.captionEn || null, decision: 'TEACH',
+      history: [{ role: 'ai', content: result.message, message_type: 'instruction', caption_en: result.captionEn || null, mermaid: result.mermaid || null, code: result.code || null }]
     });
   } catch (err) {
     if (aiNotConfigured(err)) return res.status(503).json({ error: aiUnavailableMessage(err) });
@@ -467,6 +475,11 @@ async function handleSessionMessage(req, res) {
   // "I'm ready for the check" always leads to a check, even straight after
   // the opening question (it then runs as a learner message, not a diagnosis answer).
   let requestType;
+  // Asking for the check while one is open just shows that question again.
+  if (requestCheck && pendingCheck) {
+    const again = readyForCheck({ language: req.user.language });
+    return res.json({ session_id: session.id, decision: 'CHECK', message: again.message, caption_en: again.captionEn, check_question: pendingCheck.question_text, phase: 'mastery_check' });
+  }
   if (pendingCheck && lastAiMsg && ['mastery_check', 'feedback'].includes(lastAiMsg.message_type)) requestType = 'CHECK_RESPONSE';
   else if (!requestCheck && (!lastAiMsg || lastAiMsg.message_type === 'diagnosis')) requestType = 'DIAGNOSIS_RESPONSE';
   else requestType = 'LEARNER_MESSAGE';
@@ -502,11 +515,19 @@ async function handleSessionMessage(req, res) {
       };
     }
 
-    const result = await orchestrator.processMessage({
-      requestType, learnerId: req.user.id, engagementLearnerId: req.user.el_id, sessionId: session.id,
-      nodeId: node.id, nodeLabel: node.node_label, clusterLabel: node.cluster_label,
-      language: req.user.language, learnerMessage: content, sessionState
-    });
+    // "I'm ready for the check": the check starts now. TEACH is not asked (it
+    // cannot refuse); the question comes from the assessment system below.
+    let result;
+    if (sessionState.learnerRequestedCheck) {
+      const taught = await countTeaching(session.id);
+      result = { ...readyForCheck({ language: req.user.language, early: taught < 2 }), decision: 'CHECK', behaviourSignal: session.behaviour_signal || 'engaged', approach: session.current_approach };
+    } else {
+      result = await orchestrator.processMessage({
+        requestType, learnerId: req.user.id, engagementLearnerId: req.user.el_id, sessionId: session.id,
+        nodeId: node.id, nodeLabel: node.node_label, clusterLabel: node.cluster_label,
+        language: req.user.language, learnerMessage: content, sessionState
+      });
+    }
 
     if (requestType === 'CHECK_RESPONSE') {
       return await handleCheckResult({ req, res, session, node, result, learnerResponse: content, pendingCheck, gate, assessment });
@@ -517,6 +538,14 @@ async function handleSessionMessage(req, res) {
     req.log?.error('session.message_failed', { error: err });
     res.status(500).json({ error: 'Something went wrong. Please try again.' });
   }
+}
+
+// How many teaching turns this session has had (for the early-check note).
+async function countTeaching(sessionId) {
+  const db = getDb();
+  const r = await db.prepare("SELECT COUNT(*) AS n FROM session_messages WHERE session_id = ? AND role = 'ai' AND message_type IN ('instruction', 'diagnosis')").get(sessionId);
+  db.close();
+  return Number(r?.n || 0);
 }
 
 // A0: record the attempt (learning progress only), keep the check open, and
@@ -594,7 +623,7 @@ async function handleInstructionResult({ req, res, session, node, result }) {
   res.json({
     session_id: session.id, message: result.message, caption_en: result.captionEn || null, decision: result.decision,
     check_question: instance ? instance.question_text : null, mermaid: result.mermaid || null, code: result.code || null,
-    behaviour_signal: result.behaviourSignal, approach: result.approach || session.current_approach
+    behaviour_signal: result.behaviourSignal, approach: result.approach || session.current_approach, early_check: !!result.early
   });
 }
 

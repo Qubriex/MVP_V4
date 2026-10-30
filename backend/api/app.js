@@ -7,7 +7,7 @@ import cors from 'cors';
 import crypto from 'crypto';
 import { logger } from '../core/logger.js';
 import * as dal from '../core/db/dal.js';
-import { generate, synthesize } from '../core/ai/gateway.js';
+import { generate, synthesize, voiceStatus } from '../core/ai/gateway.js';
 import params from '../config/params.js';
 import authRoutes from './routes/auth.js';
 import institutionRoutes from './routes/institution.js';
@@ -126,6 +126,12 @@ export function createApp({ drainOutbox = null } = {}) {
       body.params = params.source();
       body.secrets = process.env.QBX_SECRETS_SOURCE || 'environment';
       body.ai = { adapter: process.env.AI_ADAPTER || (process.env.NODE_ENV === 'test' ? 'mock' : 'gemini'), key_set: !!process.env.GEMINI_API_KEY };
+      // Which voice learners hear: server | browser-fallback | off (cached ten minutes; &ai=1 checks afresh).
+      try {
+        const v = await voiceStatus({ fresh: req.query.ai === '1' });
+        body.voice = v.voice;
+        body.voice_detail = { engine: v.engine || null, missing: v.missing || [], engines: v.engines || [], models: v.models || [] };
+      } catch (err) { body.voice = 'browser-fallback'; body.voice_detail = { error: String(err.message).slice(0, 200) }; }
       // &ai=1 makes one tiny live model call, so a deployment can confirm its key and model.
       if (req.query.ai === '1') {
         const started = Date.now();

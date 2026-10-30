@@ -111,6 +111,12 @@ if (typeof document !== 'undefined') {
 // is not worth it mid-lesson, so the reply is shown as text instead.
 let serverVoice = true;
 export const usingServerVoice = () => serverVoice;
+// The phone's own voice is robotic in Telugu and Hindi, so it is used only
+// when the learner chose it in Settings ("Use my phone's voice"). Otherwise a
+// lesson she cannot speak is read as text, with a notice.
+let deviceVoice = false;
+export const setDeviceVoice = (on) => { deviceVoice = !!on; };
+export const deviceVoiceChosen = () => deviceVoice;
 const audioCache = new Map(); // lang|text → object URL
 const wait = (ms) => new Promise(r => setTimeout(r, ms));
 async function fetchAudio(text, lang, isCurrent) {
@@ -144,11 +150,8 @@ function reportVoiceMetric(body) {
   api.post('/learner/voice-metrics', body).catch(() => {});
 }
 
-export const VOICE_ISSUE = {
-  busy: 'Professor Qubirex’s voice is busy right now, so this one is shown as text. The next reply will be spoken again.',
-  tap: 'Your browser paused the voice. Tap Replay to hear it.',
-  none: 'Professor Qubirex’s voice is not available on this deployment, so replies show as text.'
-};
+// Translation keys for why she is silent (components/learn/VoiceStatus.js).
+export const VOICE_ISSUE = { busy: 'voice.issue.busy', tap: 'voice.issue.tap', none: 'voice.issue.none', text: 'voice.issue.text' };
 
 /**
  * @param {{ lang?: string, rate?: number, server?: boolean }} opts
@@ -183,12 +186,13 @@ export function useSpeechOutput({ lang = 'te-IN', rate = 1, server = true } = {}
     setPart(null);
   }, []);
 
-  // Browser fallback: a female voice only, otherwise the reply stays as text.
+  // The phone's voice, only when chosen in Settings and only a female one;
+  // otherwise the reply stays as text with a notice.
   const speakBrowser = useCallback((text, run, opts) => {
     const l = opts.lang || lang;
-    const voice = synth ? pickVoice(l) : null;
+    const voice = deviceVoice && synth ? pickVoice(l) : null;
     if (!voice) {
-      if (runRef.current === run) { setSpeakingId(null); setPart(null); if (!opts.quiet) setIssue(serverVoice ? 'busy' : 'none'); }
+      if (runRef.current === run) { setSpeakingId(null); setPart(null); if (!opts.quiet) setIssue(deviceVoice ? (serverVoice ? 'busy' : 'none') : 'text'); }
       return;
     }
     const chunks = parts(pronounce(text, l), 200, 240);
@@ -281,7 +285,7 @@ export function useSpeechOutput({ lang = 'te-IN', rate = 1, server = true } = {}
 
   return {
     speak, stop, pause, resume, replay, setRate, speakingId, paused, part,
-    issue, voiceIssue: issue ? VOICE_ISSUE[issue] : '', hasLast: () => !!lastRef.current,
+    issue, voiceIssueKey: issue ? VOICE_ISSUE[issue] : '', hasLast: () => !!lastRef.current,
     supported: canSpeak || typeof Audio !== 'undefined'
   };
 }

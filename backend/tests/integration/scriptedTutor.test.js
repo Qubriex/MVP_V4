@@ -70,7 +70,10 @@ describe('the loop through the API', () => {
     const start = await post(real, '/api/learner/session/start', {});
     expect(start.status).toBe(200);
     expect(start.body.message).not.toMatch(/^mock/);
-    expect(start.body.message).toMatch(/SQL queries/);
+    // Teach first: the opening is the explanation, never a diagnostic question.
+    expect(start.body.decision).toBe('TEACH');
+    expect(start.body.message).toBe(lessonFor('SQL queries', 'telugu').turns.explain.message);
+    expect(start.body.history[0].message_type).toBe('instruction');
     const sid = start.body.session_id;
     const lesson = await post(real, '/api/learner/session/message', { content: 'I know a little', session_id: sid });
     expect(lesson.body.decision).toBe('CONTINUE');
@@ -94,6 +97,26 @@ describe('the loop through the API', () => {
     expect(pass.body).toMatchObject({ passed: true, result_band: 'pass', forced: false });
     expect(pass.body.label_change).toMatchObject({ from: 'none', to: 'Partial' });
     expect(pass.body.next_node.label).toBe('Joins');
+  });
+
+  it('coming back never replays the opening: a short welcome-back line instead', async () => {
+    const first = await post(real, '/api/learner/session/start', {});
+    const again = await post(real, '/api/learner/session/start', {});
+    expect(again.body.session_id).toBe(first.body.session_id);
+    expect(again.body.resumed).toBe(true);
+    expect(again.body.message).toBeUndefined();
+    expect(again.body.welcome_back.message).toMatch(new RegExp(first.body.node_label));
+    expect(again.body.welcome_back.message).not.toBe(first.body.history[0].content);
+  });
+
+  it('"I\'m ready for the check" always gives a check question, even before much teaching; asking again shows the same one', async () => {
+    const start = await post(real, '/api/learner/session/start', {});
+    const ready = await post(real, '/api/learner/session/message', { request_check: true, session_id: start.body.session_id });
+    expect(ready.body.decision).toBe('CHECK');
+    expect(ready.body.check_question).toBeTruthy();
+    const typed = await post(real, '/api/learner/session/message', { content: "I'm ready for the test", session_id: start.body.session_id });
+    expect(typed.body.decision).toBe('CHECK');
+    expect(typed.body.check_question).toBe(ready.body.check_question);
   });
 
   it('#pass is only a code word for test-tenant learners', async () => {

@@ -7,7 +7,7 @@ import { Mic, Play, Plus, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useUiLang, UI_LANGS, speechTag } from '../../context/UiLangContext';
 import api, { getOr } from '../../utils/api';
-import { useSpeechInput, useSpeechOutput } from '../../utils/voice';
+import { useSpeechInput, useSpeechOutput, setDeviceVoice } from '../../utils/voice';
 import { MOCK_PROFILE } from '../../utils/learnerMockData';
 import { useLowBandwidth } from '../../utils/lowBandwidth';
 import { errMsg } from '../../utils/errors';
@@ -345,6 +345,10 @@ export function VoiceSection({ form }) {
         <label className="ln-toggle-row"><span>{t('learn.profileSections.startSessionsVoiceMode')}</span><input type="checkbox" checked={prefs.startInVoice !== false} onChange={e => setPref('startInVoice', e.target.checked)} /></label>
         <label className="ln-toggle-row"><span>{t('learn.profileSections.showEnglishCaptionsUnder')}{' '} {language === 'hindi' ? t('learn.profileSections.hindi') : t('learn.profileSections.telugu')} {' '}{t('learn.profileSections.speech')}</span><input type="checkbox" checked={prefs.showEnglishCaptions !== false} onChange={e => setPref('showEnglishCaptions', e.target.checked)} /></label>
         <label className="ln-toggle-row"><span>{t('learn.profileSections.dailyStudyReminder')}</span><input type="checkbox" checked={!!prefs.dailyReminder} onChange={e => setPref('dailyReminder', e.target.checked)} /></label>
+        <label className="ln-toggle-row" style={{ alignItems: 'flex-start' }}>
+          <span className="ln-col" style={{ gap: 2 }}><span>{t('voice.deviceChoice')}</span><span className="ln-xs ln-muted">{t('voice.deviceChoiceHelp')}</span></span>
+          <input type="checkbox" checked={!!prefs.deviceVoice} onChange={e => { setPref('deviceVoice', e.target.checked); setDeviceVoice(e.target.checked); }} data-device-voice />
+        </label>
         <LowBandwidthToggle />
       </div>
     </Section>

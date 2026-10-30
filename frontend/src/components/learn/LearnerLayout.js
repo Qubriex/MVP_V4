@@ -12,6 +12,8 @@ import BrandLogo from '../BrandLogo';
 import ThemeToggle from '../ThemeToggle';
 import { initials } from './ui';
 import TopActions from '../shared/TopActions';
+import api from '../../utils/api';
+import { setDeviceVoice } from '../../utils/voice';
 
 // Bottom tabs on phones; each lights up for the pages it stands for.
 const TABS = [
@@ -53,6 +55,8 @@ export default function LearnerLayout() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => { setOpen(false); }, [location.pathname]);
+  // The phone's voice only if the learner chose it (Settings → voice).
+  useEffect(() => { api.get('/learner/profile').then(r => setDeviceVoice(r.data?.voice_prefs?.deviceVoice)).catch(() => {}); }, []);
 
   const langLabel = UI_LANGS.find(l => l.id === (user?.language || lang))?.label;
   const doLogout = () => { logout(); navigate('/learner-login'); };

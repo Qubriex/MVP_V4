@@ -33,7 +33,7 @@ import { ArrowLeft, Clock, Mic, Keyboard, RotateCcw, Pause, Play, Volume2, Award
 import { useAuth } from '../../context/AuthContext';
 import { useUiLang, speechTag } from '../../context/UiLangContext';
 import api, { getOr } from '../../utils/api';
-import { useSpeechInput, useSpeechOutput, speechParts } from '../../utils/voice';
+import { useSpeechInput, useSpeechOutput, speechParts, setDeviceVoice } from '../../utils/voice';
 import VoiceStatus from '../../components/learn/VoiceStatus';
 import { playCue, useBargeIn, parseVoiceCommand, FILLER } from '../../utils/voiceMode';
 import { MOCK_SESSION_START, MOCK_PROFILE, MOCK_LEARNER_DASHBOARD } from '../../utils/learnerMockData';
@@ -107,6 +107,7 @@ export default function Session() {
   const turnRef = useRef(null);       // when the learner finished their turn (speed metric)
   const spokenRef = useRef(null);     // { id, text } of what she is saying, for highlighting
   const lastAiRef = useRef(null);
+  const welcomeRef = useRef(''); // welcome-back line said before an open check question
   const handsFreeRef = useRef(false);
   handsFreeRef.current = handsFree;
 
@@ -143,19 +144,28 @@ export default function Session() {
     setApproach(data.approach || 'native_concept');
     setLoopCount(data.loop_count || 0);
     const history = (data.history || []).map(fromHistory);
-    setMessages(history);
     const last = [...history].reverse().find(m => m.role === 'ai');
     if (last?.type === 'mastery_check') { setPhase('mastery_check'); setCheckAt(Date.now()); }
+    // Coming back: old messages stay in the transcript (each with Replay);
+    // she says a short welcome-back line instead of replaying them.
+    const welcome = data.resumed && data.welcome_back ? withId({ role: 'ai', content: data.welcome_back.message, caption_en: data.welcome_back.caption_en, type: 'welcome' }) : null;
+    // During a check the question stays the current line: the welcome goes just before it.
+    const inCheck = last?.type === 'mastery_check';
+    const at = inCheck ? history.lastIndexOf(last) : history.length;
+    setMessages(welcome ? [...history.slice(0, at), welcome, ...history.slice(at)] : history);
     setBusy(false);
     setHelpSent(false);
+    welcomeRef.current = welcome && inCheck ? welcome.content : '';
     // Speak only after a tap: browsers block sound that starts on its own.
-    if (last && !lowBwRef.current && startedRef.current) say(last.content, last.id);
+    const first = inCheck ? last : (welcome || last);
+    if (first && !lowBwRef.current && startedRef.current) say(welcomeRef.current ? `${welcomeRef.current} ${first.content}` : first.content, first.id);
   }, [say]);
 
   useEffect(() => {
     startSession();
     getOr('/learner/profile', MOCK_PROFILE, d => d && d.voice_prefs).then(p => {
       const v = p.voice_prefs || {};
+      setDeviceVoice(v.deviceVoice);
       setShowEnglish(v.showEnglishCaptions !== false);
       if (RATES.includes(v.rate)) setRate(v.rate);
       setHandsFree(!!v.handsFree);
@@ -382,7 +392,7 @@ export default function Session() {
   const endSession = () => { speech.stop(); if (mic.listening) mic.stop(); navigate('/learn/dashboard'); };
   const tapToStart = () => {
     setStarted(true);
-    if (lastAi && !lowBw) say(lastAi.content, lastAi.id);
+    if (lastAi && !lowBw) say(welcomeRef.current ? `${welcomeRef.current} ${lastAi.content}` : lastAi.content, lastAi.id);
   };
   const askProfessor = async () => {
     if (!result?.node?.id) return;

@@ -154,12 +154,29 @@ export const _resetTtsEngines = () => resting.clear();
  * changes to another voice to get past a failure.
  * @param {{model: string, text: string, voice: string, language?: string, style?: string}} req
  */
+// The Gemini speech models this key can use, read from the model list once an
+// hour, so a renamed or retired model (a 404) never silences her.
+let ttsModels = { at: 0, list: [] };
+export async function availableTtsModels() {
+  if (Date.now() - ttsModels.at < 3600000) return ttsModels.list;
+  try {
+    const res = await fetch(`${TTS_ENDPOINT}?pageSize=200`, { headers: { 'x-goog-api-key': process.env.GEMINI_API_KEY } });
+    const json = res.ok ? await res.json() : { models: [] };
+    const list = (json.models || []).filter(m => /tts/i.test(m.name) && (m.supportedGenerationMethods || []).includes('generateContent')).map(m => m.name.replace(/^models\//, ''));
+    ttsModels = { at: Date.now(), list };
+  } catch { ttsModels = { at: Date.now(), list: [] }; }
+  return ttsModels.list;
+}
+
+async function engineList(req) {
+  const found = await availableTtsModels();
+  const models = [...new Set([req.model, ...found, ...TTS_FALLBACK_MODELS].filter(Boolean))];
+  return [['cloud-tts', () => cloudSpeak(req)], ...models.map(m => [m, () => ttsOnce(m, req)])];
+}
+
 export async function speak(req) {
   if (!process.env.GEMINI_API_KEY) throw Object.assign(new Error('GEMINI_API_KEY is not set'), { status: 503 });
-  const engines = [
-    ['cloud-tts', () => cloudSpeak(req)],
-    ...[req.model, ...TTS_FALLBACK_MODELS.filter(m => m !== req.model)].map(m => [m, () => ttsOnce(m, req)])
-  ];
+  const engines = await engineList(req);
   const now = Date.now();
   let last = null;
   for (const [name, run] of engines) {
@@ -177,3 +194,20 @@ export async function speak(req) {
   }
   throw last;
 }
+
+/**
+ * Every voice engine tried once, for /api/health: which answered, and why the
+ * others did not. Error text is Google's, trimmed; it never holds the key.
+ */
+export async function voiceDiagnosis(req) {
+  if (!process.env.GEMINI_API_KEY) return { engines: [], models: [] };
+  const engines = await engineList(req);
+  const out = [];
+  for (const [name, run] of engines) {
+    try { const r = await run(); out.push({ engine: name, ok: true, voice: r.modelVersion }); } catch (err) {
+      out.push({ engine: name, ok: false, status: err.status || null, error: String(err.message).replace(/key=[^&\s]+/g, 'key=…').slice(0, 160) });
+    }
+  }
+  return { engines: out, models: await availableTtsModels() };
+}
+

@@ -95,17 +95,24 @@ async function processMessage(params) {
         Promise.resolve(await currBrain.retrieveNodeContext(nodeId, nodeLabel))
       ]);
 
+      // Teach first: the opening turn explains the idea; it never asks a
+      // diagnostic question or offers options.
       brainsActivated.push('TEACH');
-      const diagnosis = await teachBrain.runDiagnosis({ nodeLabel, clusterLabel, language, learnerContext });
+      const approach = (sessionState.approachesUsed || []).length ? selectNextApproach(sessionState.approachesUsed) : 'native_concept';
+      const opening = await teachBrain.generateInstruction({
+        nodeLabel, clusterLabel, language, approach,
+        approachesAlreadyUsed: sessionState.approachesUsed || [],
+        conversationHistory: [], loopCount: 0, behaviourSignal: 'engaged', learnerContext, culturalExamples, nodeSpec, opening: true
+      });
 
       await memBrain.writeAfterTurn(learnerId, engagementLearnerId, {
-        role: 'ai', content: diagnosis.message, nodeId, clusterId: sessionState.clusterId,
-        decision: 'DIAGNOSE', behaviourSignal: diagnosis.behaviourSignal
+        role: 'ai', content: opening.message, nodeId, clusterId: sessionState.clusterId,
+        decision: 'TEACH', approachUsed: approach, behaviourSignal: opening.behaviourSignal
       });
 
       result = {
-        message: diagnosis.message, captionEn: diagnosis.captionEn || null, decision: 'DIAGNOSE', state: 'DIAGNOSE',
-        culturalExamplesRetrieved: culturalExamples.length, nodeSpec, culturalExamples
+        message: opening.message, captionEn: opening.captionEn || null, mermaid: opening.mermaid || null, code: opening.code || null,
+        decision: 'TEACH', state: 'TEACH', approach, culturalExamplesRetrieved: culturalExamples.length, nodeSpec, culturalExamples
       };
       break;
     }
