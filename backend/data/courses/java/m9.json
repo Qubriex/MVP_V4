@@ -1,0 +1,761 @@
+{
+ "id": "jv-m9",
+ "n": 9,
+ "skill": "java-project",
+ "title": {
+  "en": "Project",
+  "te": "Project",
+  "hi": "Project"
+ },
+ "summary": {
+  "en": "Design a program with classes, test it, and build a complete small app.",
+  "te": "Classes తో program రూపకల్పన, test, పూర్తి చిన్న app తయారీ.",
+  "hi": "Classes से program design करना, test करना, और एक पूरा छोटा app बनाना।"
+ },
+ "lessons": [
+  {
+   "id": "jv-m9-l1",
+   "n": 1,
+   "minutes": 20,
+   "title": {
+    "en": "Designing a program with classes",
+    "te": "Classes తో program రూపకల్పన",
+    "hi": "Classes से program design करना"
+   },
+   "oneLine": {
+    "en": "Before coding, list the nouns (they become classes) and the verbs (they become methods), then give each class one clear job.",
+    "te": "Code రాసే ముందు నామవాచకాలు (classes అవుతాయి), క్రియలు (methods అవుతాయి) list చేసి, ప్రతి class కి ఒక స్పష్టమైన పని ఇవ్వండి.",
+    "hi": "Code से पहले संज्ञाएँ (जो classes बनेंगी) और क्रियाएँ (जो methods बनेंगी) लिखिए, फिर हर class को एक साफ़ काम दीजिए।"
+   },
+   "useCase": {
+    "en": "A team building a hostel mess app writes: \"a student places an order from the menu; the mess prepares the bill\". Student, Order, Menu and Mess become classes.",
+    "te": "Hostel mess app తయారుచేసే team రాస్తుంది: \"విద్యార్థి menu నుంచి order చేస్తారు; mess bill తయారుచేస్తుంది\". Student, Order, Menu, Mess classes అవుతాయి.",
+    "hi": "Hostel mess app बनाने वाली team लिखती है: \"छात्र menu से order देता है; mess bill बनाता है\"। Student, Order, Menu और Mess classes बनते हैं।"
+   },
+   "explain": {
+    "en": [
+     "Write the problem as a few plain sentences.",
+     "Underline the nouns: they are candidate classes. Underline the verbs: they are candidate methods.",
+     "Give each class one responsibility. A Menu knows prices; an Order knows its items; it should not print reports.",
+     "Keep fields private and expose small methods. Decide what each method takes and returns.",
+     "Build and test one class at a time, starting with the one that depends on nothing else."
+    ],
+    "te": [
+     "సమస్యను కొన్ని సాధారణ వాక్యాలుగా రాయండి.",
+     "నామవాచకాల కింద గీత గీయండి: అవి classes కావచ్చు. క్రియల కింద గీత: అవి methods కావచ్చు.",
+     "ప్రతి class కి ఒక బాధ్యత ఇవ్వండి. Menu కి ధరలు తెలుసు; Order కి దాని items తెలుసు; అది reports print చేయకూడదు.",
+     "Fields ని private గా ఉంచి చిన్న methods బయటపెట్టండి. ప్రతి method ఏం తీసుకుంటుందో, ఏం return చేస్తుందో నిర్ణయించండి.",
+     "ఒక్కోసారి ఒక class తయారుచేసి test చేయండి, దేనిపైనా ఆధారపడని దానితో మొదలుపెట్టండి."
+    ],
+    "hi": [
+     "समस्या को कुछ सादे वाक्यों में लिखिए।",
+     "संज्ञाओं के नीचे रेखा खींचिए: वे संभावित classes हैं। क्रियाओं के नीचे: वे संभावित methods हैं।",
+     "हर class को एक ज़िम्मेदारी दीजिए। Menu दाम जानता है; Order अपने items जानता है; उसे reports print नहीं करनी चाहिए।",
+     "Fields private रखिए और छोटे methods दीजिए। तय कीजिए हर method क्या लेता और क्या return करता है।",
+     "एक बार में एक class बनाकर test कीजिए, उससे शुरू करके जो किसी और पर निर्भर नहीं।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "Nouns become classes, verbs become methods, one job per class."
+    ],
+    "te": [
+     "నామవాచకాలు classes, క్రియలు methods, ప్రతి class కి ఒక పని."
+    ],
+    "hi": [
+     "संज्ञाएँ classes, क्रियाएँ methods, हर class का एक काम।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "A bus booking app: Passenger, Bus, Seat, Booking; book(seat), cancel(), fare()."
+    ],
+    "te": [
+     "Bus booking app: Passenger, Bus, Seat, Booking; book(seat), cancel(), fare()."
+    ],
+    "hi": [
+     "Bus booking app: Passenger, Bus, Seat, Booking; book(seat), cancel(), fare()।"
+    ]
+   },
+   "picture": "flowchart LR\n  M[\"Menu: price(item)\"] --> O[\"Order: add(item, qty), total(menu)\"] --> R[\"Main: prints the bill\"]",
+   "code": {
+    "source": "import java.util.LinkedHashMap;\nimport java.util.Map;\n\nclass Menu {\n    private final Map<String, Integer> prices = Map.of(\"tea\", 15, \"dosa\", 40, \"idli\", 30);\n\n    int price(String item) {\n        return prices.getOrDefault(item, 0);\n    }\n}\n\nclass Order {\n    private final Map<String, Integer> items = new LinkedHashMap<>();\n\n    void add(String item, int qty) {\n        items.merge(item, qty, Integer::sum);\n    }\n\n    int total(Menu menu) {\n        int sum = 0;\n        for (var e : items.entrySet()) {\n            sum += menu.price(e.getKey()) * e.getValue();\n        }\n        return sum;\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        Menu menu = new Menu();\n        Order order = new Order();\n        order.add(\"dosa\", 1);\n        order.add(\"tea\", 2);\n        order.add(\"tea\", 1);\n        System.out.println(\"Bill: Rs \" + order.total(menu));\n    }\n}",
+    "output": "Bill: Rs 85",
+    "notes": [
+     {
+      "line": 4,
+      "note": {
+       "en": "Menu has one job: knowing prices.",
+       "te": "Menu కి ఒకే పని: ధరలు తెలుసుకోవడం.",
+       "hi": "Menu का एक काम: दाम जानना।"
+      }
+     },
+     {
+      "line": 12,
+      "note": {
+       "en": "Order has one job: holding items and working out its total.",
+       "te": "Order కి ఒకే పని: items ఉంచి తన total లెక్కించడం.",
+       "hi": "Order का एक काम: items रखना और अपना total निकालना।"
+      }
+     },
+     {
+      "line": 16,
+      "note": {
+       "en": "merge adds to the quantity if the item is already there.",
+       "te": "Item ఇప్పటికే ఉంటే merge quantity కి కలుపుతుంది.",
+       "hi": "Item पहले से हो तो merge quantity में जोड़ता है।"
+      }
+     },
+     {
+      "line": 19,
+      "note": {
+       "en": "Order asks Menu for prices instead of storing them.",
+       "te": "Order ధరలు దాచకుండా Menu ని అడుగుతుంది.",
+       "hi": "Order दाम रखने की जगह Menu से पूछता है।"
+      }
+     },
+     {
+      "line": 29,
+      "note": {
+       "en": "Main only connects the pieces and prints.",
+       "te": "Main భాగాలను కలిపి print చేస్తుంది, అంతే.",
+       "hi": "Main सिर्फ़ हिस्सों को जोड़कर print करता है।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "class Order {\n    // stores prices, prints bills, saves files, sends SMS\n}",
+     "fix": {
+      "en": "One class doing everything is hard to change and test. Split it: Menu, Order, BillPrinter.",
+      "te": "అన్నీ చేసే ఒకే class మార్చడం, test చేయడం కష్టం. విభజించండి: Menu, Order, BillPrinter.",
+      "hi": "सब कुछ करने वाली एक class बदलना और test करना मुश्किल है। बाँटिए: Menu, Order, BillPrinter।"
+     }
+    },
+    {
+     "wrong": "public int total;  // anyone can change it",
+     "fix": {
+      "en": "Keep fields private and calculate through methods, so the total cannot be wrong.",
+      "te": "Fields ని private గా ఉంచి methods ద్వారా లెక్కించండి, total తప్పు కాదు.",
+      "hi": "Fields private रखिए और methods से निकालिए, ताकि total ग़लत न हो।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "In \"a student places an order\", which word is likely a class?",
+      "te": "\"విద్యార్థి order చేస్తారు\" లో class కాగల పదం?",
+      "hi": "\"छात्र order देता है\" में कौन-सा शब्द class होगा?"
+     },
+     "options": [
+      "places",
+      "student",
+      "an"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Nouns become classes.",
+      "te": "నామవాచకాలు classes.",
+      "hi": "संज्ञाएँ classes बनती हैं।"
+     }
+    },
+    {
+     "q": {
+      "en": "Verbs usually become…",
+      "te": "క్రియలు సాధారణంగా…",
+      "hi": "क्रियाएँ आमतौर पर बनती हैं…"
+     },
+     "options": [
+      "fields",
+      "methods"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Methods.",
+      "te": "Methods.",
+      "hi": "Methods।"
+     }
+    },
+    {
+     "q": {
+      "en": "A good class has…",
+      "te": "మంచి class కి…",
+      "hi": "अच्छी class में…"
+     },
+     "options": [
+      {
+       "en": "one clear job",
+       "te": "ఒక స్పష్టమైన పని",
+       "hi": "एक साफ़ काम"
+      },
+      {
+       "en": "every job",
+       "te": "అన్ని పనులు",
+       "hi": "सारे काम"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Single responsibility.",
+      "te": "ఒకే బాధ్యత.",
+      "hi": "एक ज़िम्मेदारी।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Add a class Coupon with a private int percent, a constructor, and int apply(int amount) that returns the amount after the discount (integer maths). In main, apply a 10% coupon to a bill of 85 and print \"Pay: Rs 77\".",
+     "te": "Private int percent, constructor, తగ్గింపు తర్వాత amount (integer లెక్క) return చేసే int apply(int amount) ఉన్న Coupon class జోడించండి. main లో 85 bill కి 10% coupon వర్తింపజేసి \"Pay: Rs 77\" print చేయండి.",
+     "hi": "Coupon class जोड़िए जिसमें private int percent, constructor, और int apply(int amount) हो जो छूट के बाद की रक़म (integer गणित) return करे। main में 85 के bill पर 10% coupon लगाकर \"Pay: Rs 77\" print कीजिए।"
+    },
+    "starter": "public class Main {\n    public static void main(String[] args) {\n        int bill = 85;\n        System.out.println(\"Pay: Rs \" + bill);\n    }\n}\n",
+    "tests": [
+     {
+      "name": "class Coupon with a private field",
+      "pattern": "class\\s+Coupon\\s*\\{[\\s\\S]*private\\s+(final\\s+)?int\\s+percent\\s*;"
+     },
+     {
+      "name": "constructor",
+      "pattern": "Coupon\\s*\\(\\s*int\\s+\\w+\\s*\\)"
+     },
+     {
+      "name": "apply method",
+      "pattern": "int\\s+apply\\s*\\(\\s*int\\s+\\w+\\s*\\)[\\s\\S]*percent"
+     },
+     {
+      "name": "used from main",
+      "pattern": "new\\s+Coupon\\s*\\(\\s*10\\s*\\)[\\s\\S]*\\.apply\\s*\\(",
+      "expected": "new Coupon(10).apply(bill)",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "class Coupon { private int percent; Coupon(int percent) { this.percent = percent; } }",
+      "te": "class Coupon { private int percent; Coupon(int percent) { this.percent = percent; } }",
+      "hi": "class Coupon { private int percent; Coupon(int percent) { this.percent = percent; } }"
+     },
+     {
+      "en": "int apply(int amount) { return amount - amount * percent / 100; }",
+      "te": "int apply(int amount) { return amount - amount * percent / 100; }",
+      "hi": "int apply(int amount) { return amount - amount * percent / 100; }"
+     },
+     {
+      "en": "In main: new Coupon(10).apply(bill)",
+      "te": "main లో: new Coupon(10).apply(bill)",
+      "hi": "main में: new Coupon(10).apply(bill)"
+     }
+    ],
+    "solution": "class Coupon {\n    private final int percent;\n\n    Coupon(int percent) {\n        this.percent = percent;\n    }\n\n    int apply(int amount) {\n        return amount - amount * percent / 100;\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        int bill = 85;\n        System.out.println(\"Pay: Rs \" + new Coupon(10).apply(bill));\n    }\n}",
+    "output": "Pay: Rs 77"
+   },
+   "cheat": {
+    "en": [
+     "Sentences → nouns = classes, verbs = methods",
+     "One job per class · private fields · small methods",
+     "Build and test the class with no dependencies first."
+    ],
+    "te": [
+     "వాక్యాలు → నామవాచకాలు = classes, క్రియలు = methods",
+     "ప్రతి class కి ఒక పని · private fields · చిన్న methods",
+     "ఆధారం లేని class ని ముందు తయారుచేసి test చేయండి."
+    ],
+    "hi": [
+     "वाक्य → संज्ञाएँ = classes, क्रियाएँ = methods",
+     "हर class का एक काम · private fields · छोटे methods",
+     "जिस class की कोई निर्भरता नहीं, उसे पहले बनाकर test कीजिए।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "You must build a bus booking app. Explain how you would find the classes and methods from a short description before writing code.",
+      "te": "మీరు bus booking app తయారుచేయాలి. Code రాసే ముందు చిన్న వివరణ నుంచి classes, methods ఎలా కనుక్కుంటారో వివరించండి.",
+      "hi": "आपको bus booking app बनाना है। Code लिखने से पहले छोटे विवरण से classes और methods कैसे निकालेंगे, समझाइए।"
+     },
+     {
+      "en": "Why should each class have only one job? Use the hostel mess example.",
+      "te": "ప్రతి class కి ఒకే పని ఎందుకు ఉండాలి? Hostel mess ఉదాహరణ వాడండి.",
+      "hi": "हर class का एक ही काम क्यों होना चाहिए? Hostel mess का उदाहरण लीजिए।"
+     }
+    ],
+    "keywords": [
+     [
+      "class",
+      "noun",
+      "నామవాచ",
+      "संज्ञा"
+     ],
+     [
+      "method",
+      "verb",
+      "క్రియ",
+      "क्रिया"
+     ],
+     [
+      "one job",
+      "responsibility",
+      "private",
+      "test",
+      "బాధ్యత",
+      "ज़िम्मेदारी"
+     ]
+    ],
+    "challenge": {
+     "en": "Say what nouns and verbs in a problem become in Java.",
+     "te": "సమస్యలోని నామవాచకాలు, క్రియలు Java లో ఏమవుతాయో చెప్పండి.",
+     "hi": "समस्या की संज्ञाएँ और क्रियाएँ Java में क्या बनती हैं, बताइए।"
+    }
+   }
+  },
+  {
+   "id": "jv-m9-l2",
+   "n": 2,
+   "minutes": 20,
+   "title": {
+    "en": "Testing with JUnit",
+    "te": "JUnit తో testing",
+    "hi": "JUnit से testing"
+   },
+   "oneLine": {
+    "en": "JUnit runs small test methods that check your code with assertEquals, so you find a broken change at once.",
+    "te": "JUnit మీ code ని assertEquals తో పరీక్షించే చిన్న test methods నడుపుతుంది; పాడైన మార్పు వెంటనే తెలుస్తుంది.",
+    "hi": "JUnit छोटे test methods चलाता है जो assertEquals से आपका code जाँचते हैं, ताकि टूटा बदलाव तुरंत पता चले।"
+   },
+   "useCase": {
+    "en": "A payroll team runs hundreds of JUnit tests on every change before salaries are paid.",
+    "te": "Payroll team జీతాలు చెల్లించే ముందు ప్రతి మార్పుపై వందల JUnit tests నడుపుతుంది.",
+    "hi": "Payroll team salary देने से पहले हर बदलाव पर सैकड़ों JUnit tests चलाती है।"
+   },
+   "explain": {
+    "en": [
+     "A test is code that checks other code with an expected answer.",
+     "In JUnit 5, a test is a method marked @Test inside a test class.",
+     "assertEquals(expected, actual) fails the test when they differ; assertTrue and assertThrows check other things.",
+     "Test normal cases, edge cases (0, empty, the boundary like 35) and bad input.",
+     "Build tools such as Maven and Gradle run all tests; the Run tests button here does the same idea for your exercises."
+    ],
+    "te": [
+     "Test అంటే ఆశించిన జవాబుతో మరో code ని పరీక్షించే code.",
+     "JUnit 5 లో test అంటే test class లోపల @Test గుర్తు ఉన్న method.",
+     "assertEquals(expected, actual) అవి వేరైతే test ని విఫలం చేస్తుంది; assertTrue, assertThrows ఇతర విషయాలు చూస్తాయి.",
+     "సాధారణ cases, edge cases (0, ఖాళీ, 35 లాంటి హద్దు), చెడు input ని test చేయండి.",
+     "Maven, Gradle లాంటి build tools అన్ని tests నడుపుతాయి; ఇక్కడ Run tests button మీ exercises కి అదే పని చేస్తుంది."
+    ],
+    "hi": [
+     "Test वह code है जो अपेक्षित जवाब से दूसरे code को जाँचता है।",
+     "JUnit 5 में test, test class के अंदर @Test लगा method है।",
+     "assertEquals(expected, actual) दोनों अलग हों तो test fail करता है; assertTrue और assertThrows दूसरी चीज़ें जाँचते हैं।",
+     "सामान्य cases, edge cases (0, ख़ाली, 35 जैसी सीमा) और ग़लत input test कीजिए।",
+     "Maven और Gradle जैसे build tools सारे tests चलाते हैं; यहाँ Run tests button आपके exercises के लिए यही करता है।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "A test is an answer key that checks your method every time."
+    ],
+    "te": [
+     "Test అంటే ప్రతిసారి మీ method ని పరీక్షించే answer key."
+    ],
+    "hi": [
+     "Test एक answer key है जो हर बार आपका method जाँचती है।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "@Test void passMark() { assertEquals(\"Pass\", Result.of(35)); } checks the boundary."
+    ],
+    "te": [
+     "@Test void passMark() { assertEquals(\"Pass\", Result.of(35)); } హద్దును పరీక్షిస్తుంది."
+    ],
+    "hi": [
+     "@Test void passMark() { assertEquals(\"Pass\", Result.of(35)); } सीमा जाँचता है।"
+    ]
+   },
+   "picture": "flowchart LR\n  C[\"change code\"] --> T[\"run tests\"] --> R{\"all pass?\"}\n  R -->|yes| S[\"ship\"]\n  R -->|no| F[\"fix\"] --> T",
+   "code": {
+    "source": "public class Main {\n    static String result(int marks) {\n        return marks >= 35 ? \"Pass\" : \"Fail\";\n    }\n\n    static void assertEquals(String expected, String actual, String name) {\n        String status = expected.equals(actual) ? \"PASS\" : \"FAIL (got \" + actual + \")\";\n        System.out.println(name + \": \" + status);\n    }\n\n    public static void main(String[] args) {\n        assertEquals(\"Pass\", result(80), \"normal pass\");\n        assertEquals(\"Fail\", result(10), \"normal fail\");\n        assertEquals(\"Pass\", result(35), \"boundary 35\");\n        assertEquals(\"Fail\", result(34), \"boundary 34\");\n    }\n}",
+    "output": "normal pass: PASS\nnormal fail: PASS\nboundary 35: PASS\nboundary 34: PASS",
+    "notes": [
+     {
+      "line": 2,
+      "note": {
+       "en": "The method under test.",
+       "te": "Test చేస్తున్న method.",
+       "hi": "जिस method का test हो रहा है।"
+      }
+     },
+     {
+      "line": 6,
+      "note": {
+       "en": "A tiny assertEquals, the same idea as JUnit's.",
+       "te": "చిన్న assertEquals, JUnit ఆలోచనే.",
+       "hi": "छोटा assertEquals, JUnit वाला ही विचार।"
+      }
+     },
+     {
+      "line": 12,
+      "note": {
+       "en": "A normal case.",
+       "te": "సాధారణ case.",
+       "hi": "सामान्य case।"
+      }
+     },
+     {
+      "line": 14,
+      "note": {
+       "en": "The boundary: exactly 35 must pass.",
+       "te": "హద్దు: సరిగ్గా 35 pass కావాలి.",
+       "hi": "सीमा: ठीक 35 पास होना चाहिए।"
+      }
+     },
+     {
+      "line": 15,
+      "note": {
+       "en": "Just below the boundary must fail.",
+       "te": "హద్దుకు కొంచెం తక్కువ fail కావాలి.",
+       "hi": "सीमा से ठीक नीचे fail होना चाहिए।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "assertEquals(result(35), \"Pass\");",
+     "fix": {
+      "en": "JUnit expects (expected, actual). Swapping them makes failure messages confusing.",
+      "te": "JUnit కి (expected, actual) కావాలి. మార్చితే failure messages గందరగోళంగా ఉంటాయి.",
+      "hi": "JUnit को (expected, actual) चाहिए। उलटने से failure messages उलझ जाते हैं।"
+     }
+    },
+    {
+     "wrong": "// tested only result(80)",
+     "fix": {
+      "en": "One happy case misses boundary bugs. Test 34, 35 and 0 too.",
+      "te": "ఒక్క సంతోష case హద్దు bugs ని తప్పిపోతుంది. 34, 35, 0 కూడా test చేయండి.",
+      "hi": "एक ख़ुशी वाला case सीमा के bugs छोड़ देता है। 34, 35 और 0 भी test कीजिए।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "In JUnit 5 a test method is marked with…",
+      "te": "JUnit 5 లో test method గుర్తు…",
+      "hi": "JUnit 5 में test method पर लगता है…"
+     },
+     "options": [
+      "@Override",
+      "@Test",
+      "@Main"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "@Test.",
+      "te": "@Test.",
+      "hi": "@Test।"
+     }
+    },
+    {
+     "q": {
+      "en": "assertEquals takes…",
+      "te": "assertEquals తీసుకునేది…",
+      "hi": "assertEquals लेता है…"
+     },
+     "options": [
+      "(expected, actual)",
+      "(actual, expected)"
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Expected first.",
+      "te": "Expected ముందు.",
+      "hi": "Expected पहले।"
+     }
+    },
+    {
+     "q": {
+      "en": "A boundary test for \"pass at 35\" uses…",
+      "te": "\"35 కి pass\" హద్దు test వాడేది…",
+      "hi": "\"35 पर pass\" के सीमा test में…"
+     },
+     "options": [
+      "80",
+      "35 and 34",
+      "100"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Right at the edge.",
+      "te": "సరిగ్గా అంచు వద్ద.",
+      "hi": "ठीक किनारे पर।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "fee(int months) should return 1500 per month, with a 10% discount (integer maths) when months is 12 or more. The starter has a boundary bug. Fix it so fee(12) is 16200 and fee(11) is 16500; main prints both.",
+     "te": "fee(int months) నెలకు 1500 return చేయాలి, months 12 లేదా ఎక్కువ అయితే 10% తగ్గింపు (integer లెక్క). Starter లో హద్దు bug ఉంది. fee(12) 16200, fee(11) 16500 అయ్యేలా సరిచేయండి; main రెండూ print చేస్తుంది.",
+     "hi": "fee(int months) प्रति माह 1500 return करे, और months 12 या ज़्यादा हो तो 10% छूट (integer गणित)। Starter में सीमा का bug है। ठीक कीजिए ताकि fee(12) 16200 और fee(11) 16500 हो; main दोनों print करता है।"
+    },
+    "starter": "public class Main {\n    static int fee(int months) {\n        int total = months * 1500;\n        if (months > 12) {\n            total = total - total / 10;\n        }\n        return total;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(fee(12) + \" \" + fee(11));\n    }\n}\n",
+    "tests": [
+     {
+      "name": "uses >= 12",
+      "pattern": "months\\s*>=\\s*12|12\\s*<=\\s*months"
+     },
+     {
+      "name": "no > 12 left",
+      "absent": "months\\s*>\\s*12\\b"
+     },
+     {
+      "name": "10% discount",
+      "pattern": "total\\s*/\\s*10|\\*\\s*0\\.9|\\*\\s*90\\s*/\\s*100",
+      "expected": "total - total / 10",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "Run it: fee(12) gives 18000, but 12 months should get the discount.",
+      "te": "నడపండి: fee(12) 18000 ఇస్తుంది, కానీ 12 నెలలకు తగ్గింపు రావాలి.",
+      "hi": "चलाइए: fee(12) 18000 देता है, पर 12 महीनों पर छूट मिलनी चाहिए।"
+     },
+     {
+      "en": "The check months > 12 misses exactly 12.",
+      "te": "months > 12 check సరిగ్గా 12 ని వదిలేస్తుంది.",
+      "hi": "months > 12 जाँच ठीक 12 को छोड़ देती है।"
+     },
+     {
+      "en": "Change it to months >= 12.",
+      "te": "దాన్ని months >= 12 గా మార్చండి.",
+      "hi": "इसे months >= 12 कीजिए।"
+     }
+    ],
+    "solution": "public class Main {\n    static int fee(int months) {\n        int total = months * 1500;\n        if (months >= 12) {\n            total = total - total / 10;\n        }\n        return total;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(fee(12) + \" \" + fee(11));\n    }\n}",
+    "output": "16200 16500"
+   },
+   "cheat": {
+    "en": [
+     "@Test void name() { assertEquals(expected, actual); }",
+     "assertTrue · assertThrows(Exception.class, () -> ...)",
+     "Test normal, edge (0, empty, boundary) and bad input · run on every change"
+    ],
+    "te": [
+     "@Test void name() { assertEquals(expected, actual); }",
+     "assertTrue · assertThrows(Exception.class, () -> ...)",
+     "సాధారణ, edge (0, ఖాళీ, హద్దు), చెడు input test · ప్రతి మార్పుకు నడపండి"
+    ],
+    "hi": [
+     "@Test void name() { assertEquals(expected, actual); }",
+     "assertTrue · assertThrows(Exception.class, () -> ...)",
+     "सामान्य, edge (0, ख़ाली, सीमा) और ग़लत input test · हर बदलाव पर चलाइए"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A fee method gives a discount from 12 months. Explain which test cases you would write and why 11 and 12 both matter.",
+      "te": "Fee method 12 నెలల నుంచి తగ్గింపు ఇస్తుంది. ఏ test cases రాస్తారో, 11, 12 రెండూ ఎందుకు ముఖ్యమో వివరించండి.",
+      "hi": "Fee method 12 महीनों से छूट देता है। कौन-से test cases लिखेंगे और 11 और 12 दोनों क्यों ज़रूरी हैं, समझाइए।"
+     },
+     {
+      "en": "Explain what a JUnit test method looks like and what assertEquals does.",
+      "te": "JUnit test method ఎలా ఉంటుందో, assertEquals ఏం చేస్తుందో వివరించండి.",
+      "hi": "JUnit test method कैसा दिखता है और assertEquals क्या करता है, समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "test",
+      "junit",
+      "@test"
+     ],
+     [
+      "assertequals",
+      "expected",
+      "actual"
+     ],
+     [
+      "boundary",
+      "edge",
+      "12",
+      "11",
+      "హద్దు",
+      "सीमा"
+     ]
+    ],
+    "challenge": {
+     "en": "Say what a boundary test is, with one example.",
+     "te": "హద్దు test అంటే ఏమిటో ఒక ఉదాహరణతో చెప్పండి.",
+     "hi": "सीमा test क्या है, एक उदाहरण से बताइए।"
+    }
+   }
+  }
+ ],
+ "test": {
+  "pass": 4,
+  "questions": [
+   {
+    "q": {
+     "en": "Nouns in a problem usually become…",
+     "te": "సమస్యలోని నామవాచకాలు సాధారణంగా…",
+     "hi": "समस्या की संज्ञाएँ आमतौर पर बनती हैं…"
+    },
+    "options": [
+     "classes",
+     "loops"
+    ],
+    "answer": 0,
+    "why": {
+     "en": "Classes.",
+     "te": "Classes.",
+     "hi": "Classes।"
+    }
+   },
+   {
+    "q": {
+     "en": "A class should have…",
+     "te": "Class కి ఉండాల్సింది…",
+     "hi": "Class में होना चाहिए…"
+    },
+    "options": [
+     {
+      "en": "one clear job",
+      "te": "ఒక స్పష్టమైన పని",
+      "hi": "एक साफ़ काम"
+     },
+     {
+      "en": "all the code",
+      "te": "మొత్తం code",
+      "hi": "सारा code"
+     }
+    ],
+    "answer": 0,
+    "why": {
+     "en": "One job.",
+     "te": "ఒక పని.",
+     "hi": "एक काम।"
+    }
+   },
+   {
+    "q": {
+     "en": "JUnit tests are marked…",
+     "te": "JUnit tests గుర్తు…",
+     "hi": "JUnit tests पर लगता है…"
+    },
+    "options": [
+     "@Test",
+     "@Run"
+    ],
+    "answer": 0,
+    "why": {
+     "en": "@Test.",
+     "te": "@Test.",
+     "hi": "@Test।"
+    }
+   },
+   {
+    "q": {
+     "en": "assertEquals(5, add(2, 3)) passes when add returns…",
+     "te": "add ఏం return చేస్తే assertEquals(5, add(2, 3)) pass?",
+     "hi": "add क्या return करे तो assertEquals(5, add(2, 3)) पास?"
+    },
+    "options": [
+     "5",
+     "6"
+    ],
+    "answer": 0,
+    "why": {
+     "en": "5.",
+     "te": "5.",
+     "hi": "5।"
+    }
+   },
+   {
+    "q": {
+     "en": "A boundary test for \"discount from 12\" uses…",
+     "te": "\"12 నుంచి తగ్గింపు\" హద్దు test…",
+     "hi": "\"12 से छूट\" का सीमा test…"
+    },
+    "options": [
+     "11 and 12",
+     "1 and 100"
+    ],
+    "answer": 0,
+    "why": {
+     "en": "Either side of the edge.",
+     "te": "అంచుకు ఇరువైపులా.",
+     "hi": "किनारे के दोनों तरफ़।"
+    }
+   }
+  ]
+ },
+ "project": {
+  "title": {
+   "en": "Student results app",
+   "te": "Student results app",
+   "hi": "Student results app"
+  },
+  "prompt": {
+   "en": "Build a results app. class Student has private name and a Map<String, Integer> of subject marks, addMark(subject, mark) that throws IllegalArgumentException for marks outside 0–100, average() (0 when empty) and passed() (every mark at least 35). class ResultBook keeps students by name, add(String line) parses \"name,subject,mark\" and skips bad lines, and report() returns lines \"name: avg, PASS|FAIL\" sorted by name with the average to 1 decimal. main loads the sample lines and prints the report.",
+   "te": "Results app తయారుచేయండి. class Student కి private name, subject marks Map<String, Integer>, 0–100 బయటి marks కి IllegalArgumentException ఇచ్చే addMark(subject, mark), average() (ఖాళీ అయితే 0), passed() (ప్రతి mark కనీసం 35). class ResultBook విద్యార్థులను పేరుతో ఉంచుతుంది; add(String line) \"name,subject,mark\" ని parse చేసి చెడు lines దాటవేస్తుంది; report() పేరు క్రమంలో, సగటు 1 decimal తో \"name: avg, PASS|FAIL\" lines return చేస్తుంది. main sample lines load చేసి report print చేస్తుంది.",
+   "hi": "Results app बनाइए। class Student में private name और subject marks का Map<String, Integer> हो, addMark(subject, mark) जो 0–100 के बाहर के marks पर IllegalArgumentException दे, average() (ख़ाली हो तो 0) और passed() (हर mark कम से कम 35)। class ResultBook छात्रों को नाम से रखे, add(String line) \"name,subject,mark\" parse करे और ग़लत lines छोड़े, और report() नाम के क्रम में, औसत 1 decimal के साथ \"name: avg, PASS|FAIL\" lines return करे। main sample lines load करके report print करे।"
+  },
+  "starter": "import java.util.List;\n\npublic class Main {\n    public static void main(String[] args) {\n        List<String> lines = List.of(\"Sita,Maths,30\", \"Ravi,Maths,80\", \"Ravi,Physics,71\", \"Anu,Maths,abc\", \"Anu,Physics,150\");\n        // build Student and ResultBook, then print the report\n    }\n}\n",
+  "tests": [
+   {
+    "name": "Student with private fields",
+    "pattern": "class\\s+Student\\s*\\{[\\s\\S]*private\\s+(final\\s+)?String\\s+name[\\s\\S]*private\\s+(final\\s+)?Map\\s*<\\s*String\\s*,\\s*Integer\\s*>"
+   },
+   {
+    "name": "addMark validates",
+    "pattern": "void\\s+addMark\\s*\\([\\s\\S]*throw\\s+new\\s+IllegalArgumentException"
+   },
+   {
+    "name": "average and passed",
+    "pattern": "double\\s+average\\s*\\(\\s*\\)[\\s\\S]*boolean\\s+passed\\s*\\(\\s*\\)|boolean\\s+passed\\s*\\(\\s*\\)[\\s\\S]*double\\s+average\\s*\\(\\s*\\)"
+   },
+   {
+    "name": "ResultBook parses lines",
+    "pattern": "class\\s+ResultBook[\\s\\S]*split\\s*\\(\\s*\",\"\\s*\\)"
+   },
+   {
+    "name": "skips bad lines",
+    "pattern": "catch\\s*\\(\\s*(NumberFormatException|IllegalArgumentException)"
+   },
+   {
+    "name": "sorted report",
+    "pattern": "TreeMap|sorted\\s*\\(|Collections\\.sort",
+    "expected": "TreeMap or sorted()"
+   },
+   {
+    "name": "one decimal",
+    "pattern": "String\\.format\\s*\\(\\s*\"%\\.1f\"",
+    "expected": "String.format(\"%.1f\", avg)",
+    "hidden": true
+   }
+  ],
+  "hints": [
+   {
+    "en": "Student: private final Map<String, Integer> marks = new HashMap<>(); addMark checks if (mark < 0 || mark > 100) throw new IllegalArgumentException(\"bad mark\");",
+    "te": "Student: private final Map<String, Integer> marks = new HashMap<>(); addMark లో if (mark < 0 || mark > 100) throw new IllegalArgumentException(\"bad mark\");",
+    "hi": "Student: private final Map<String, Integer> marks = new HashMap<>(); addMark में if (mark < 0 || mark > 100) throw new IllegalArgumentException(\"bad mark\");"
+   },
+   {
+    "en": "ResultBook: private final Map<String, Student> students = new TreeMap<>(); in add: split, parseInt, getOrDefault(name, new Student(name)), addMark(...), then putIfAbsent, catch NumberFormatException (it is an IllegalArgumentException too).",
+    "te": "ResultBook: private final Map<String, Student> students = new TreeMap<>(); add లో: split, parseInt, getOrDefault(name, new Student(name)), addMark(...), then putIfAbsent, NumberFormatException పట్టుకోండి (అది కూడా IllegalArgumentException).",
+    "hi": "ResultBook: private final Map<String, Student> students = new TreeMap<>(); add में: split, parseInt, getOrDefault(name, new Student(name)), addMark(...), then putIfAbsent, NumberFormatException पकड़िए (यह भी IllegalArgumentException है)।"
+   },
+   {
+    "en": "report: for each student, name + \": \" + String.format(\"%.1f\", s.average()) + \", \" + (s.passed() ? \"PASS\" : \"FAIL\").",
+    "te": "report: ప్రతి student కి name + \": \" + String.format(\"%.1f\", s.average()) + \", \" + (s.passed() ? \"PASS\" : \"FAIL\").",
+    "hi": "report: हर student के लिए name + \": \" + String.format(\"%.1f\", s.average()) + \", \" + (s.passed() ? \"PASS\" : \"FAIL\")।"
+   }
+  ],
+  "solution": "import java.util.ArrayList;\nimport java.util.HashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.TreeMap;\n\nclass Student {\n    private final String name;\n    private final Map<String, Integer> marks = new HashMap<>();\n\n    Student(String name) {\n        this.name = name;\n    }\n\n    String getName() {\n        return name;\n    }\n\n    void addMark(String subject, int mark) {\n        if (mark < 0 || mark > 100) {\n            throw new IllegalArgumentException(\"bad mark: \" + mark);\n        }\n        marks.put(subject, mark);\n    }\n\n    double average() {\n        return marks.values().stream().mapToInt(m -> m).average().orElse(0);\n    }\n\n    boolean passed() {\n        return marks.values().stream().allMatch(m -> m >= 35);\n    }\n}\n\nclass ResultBook {\n    private final Map<String, Student> students = new TreeMap<>();\n\n    void add(String line) {\n        String[] f = line.split(\",\");\n        if (f.length != 3) {\n            return;\n        }\n        try {\n            int mark = Integer.parseInt(f[2].trim());\n            Student s = students.getOrDefault(f[0], new Student(f[0]));\n            s.addMark(f[1], mark);\n            students.putIfAbsent(f[0], s);\n        } catch (IllegalArgumentException e) {\n            // skip a bad line (not a number, or out of range)\n        }\n    }\n\n    List<String> report() {\n        List<String> out = new ArrayList<>();\n        for (Student s : students.values()) {\n            out.add(s.getName() + \": \" + String.format(\"%.1f\", s.average()) + \", \" + (s.passed() ? \"PASS\" : \"FAIL\"));\n        }\n        return out;\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        List<String> lines = List.of(\"Sita,Maths,30\", \"Ravi,Maths,80\", \"Ravi,Physics,71\", \"Anu,Maths,abc\", \"Anu,Physics,150\");\n        ResultBook book = new ResultBook();\n        lines.forEach(book::add);\n        book.report().forEach(System.out::println);\n    }\n}",
+  "output": "Ravi: 75.5, PASS\nSita: 30.0, FAIL"
+ }
+}

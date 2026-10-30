@@ -1,0 +1,1431 @@
+{
+ "id": "jv-m5",
+ "n": 5,
+ "skill": "java-oop",
+ "title": {
+  "en": "Object-Oriented Programming",
+  "te": "Object-Oriented Programming",
+  "hi": "Object-Oriented Programming"
+ },
+ "summary": {
+  "en": "Model real things with classes, objects, constructors, private data, inheritance and interfaces.",
+  "te": "Classes, objects, constructors, private data, inheritance, interfaces తో నిజమైన వస్తువులను రూపొందించడం.",
+  "hi": "Classes, objects, constructors, private data, inheritance और interfaces से असली चीज़ें बनाना।"
+ },
+ "lessons": [
+  {
+   "id": "jv-m5-l1",
+   "n": 1,
+   "minutes": 20,
+   "title": {
+    "en": "Classes and objects",
+    "te": "Classes, objects",
+    "hi": "Classes और objects"
+   },
+   "oneLine": {
+    "en": "A class describes a kind of thing with fields (data) and methods (actions); new makes an object from it.",
+    "te": "Class ఒక రకం వస్తువును fields (data), methods (పనులు) తో వర్ణిస్తుంది; new దానితో object చేస్తుంది.",
+    "hi": "Class किसी तरह की चीज़ को fields (data) और methods (काम) से बताती है; new उससे object बनाता है।"
+   },
+   "useCase": {
+    "en": "A hostel app has a Room class; each room object knows its number, its capacity and how many students are in it.",
+    "te": "Hostel app లో Room class ఉంటుంది; ప్రతి room object కి తన number, capacity, ఎంతమంది విద్యార్థులు ఉన్నారో తెలుసు.",
+    "hi": "Hostel app में Room class है; हर room object अपना number, capacity और उसमें कितने छात्र हैं, जानता है।"
+   },
+   "explain": {
+    "en": [
+     "A class is a design; an object is one real thing built from it.",
+     "Fields are variables inside the class: int number; int capacity;",
+     "Methods inside the class use those fields, like boolean isFull().",
+     "Room r = new Room(); makes an object. r.number = 101; sets its field.",
+     "Each object has its own copy of the fields, so room 101 and room 102 do not mix."
+    ],
+    "te": [
+     "Class అంటే రూపకల్పన; object అంటే దానితో కట్టిన ఒక నిజమైన వస్తువు.",
+     "Fields అంటే class లోపలి variables: int number; int capacity;",
+     "Class లోని methods ఆ fields ని వాడతాయి, boolean isFull() లాగా.",
+     "Room r = new Room(); object చేస్తుంది. r.number = 101; దాని field నింపుతుంది.",
+     "ప్రతి object కి fields సొంత copy ఉంటుంది, కాబట్టి room 101, room 102 కలవవు."
+    ],
+    "hi": [
+     "Class एक design है; object उससे बनी एक असली चीज़।",
+     "Fields class के अंदर के variables हैं: int number; int capacity;",
+     "Class के methods उन fields को इस्तेमाल करते हैं, जैसे boolean isFull()।",
+     "Room r = new Room(); object बनाता है। r.number = 101; उसका field भरता है।",
+     "हर object की fields की अपनी copy होती है, इसलिए room 101 और room 102 आपस में नहीं मिलते।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "The class is the form; each object is one filled form."
+    ],
+    "te": [
+     "Class అంటే form; ప్రతి object ఒక నింపిన form."
+    ],
+    "hi": [
+     "Class एक form है; हर object एक भरा हुआ form।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "A Bus class with route and seatsLeft; bus1 and bus2 are two buses on different routes."
+    ],
+    "te": [
+     "route, seatsLeft ఉన్న Bus class; bus1, bus2 వేర్వేరు routes లో రెండు buses."
+    ],
+    "hi": [
+     "route और seatsLeft वाली Bus class; bus1 और bus2 अलग routes की दो buses।"
+    ]
+   },
+   "picture": "flowchart TD\n  C[\"class Room: number, capacity, students, isFull()\"] --> A[\"room 101\"]\n  C --> B[\"room 102\"]",
+   "code": {
+    "source": "class Room {\n    int number;\n    int capacity;\n    int students;\n\n    boolean isFull() {\n        return students >= capacity;\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        Room a = new Room();\n        a.number = 101;\n        a.capacity = 3;\n        a.students = 3;\n        Room b = new Room();\n        b.number = 102;\n        b.capacity = 4;\n        b.students = 1;\n        System.out.println(a.number + \" full: \" + a.isFull());\n        System.out.println(b.number + \" full: \" + b.isFull());\n    }\n}",
+    "output": "101 full: true\n102 full: false",
+    "notes": [
+     {
+      "line": 1,
+      "note": {
+       "en": "The design for every room.",
+       "te": "ప్రతి room రూపకల్పన.",
+       "hi": "हर room का design।"
+      }
+     },
+     {
+      "line": 2,
+      "note": {
+       "en": "Fields: the data each room keeps.",
+       "te": "Fields: ప్రతి room ఉంచుకునే data.",
+       "hi": "Fields: हर room का data।"
+      }
+     },
+     {
+      "line": 6,
+      "note": {
+       "en": "A method that uses this room's fields.",
+       "te": "ఈ room fields వాడే method.",
+       "hi": "इस room की fields इस्तेमाल करने वाला method।"
+      }
+     },
+     {
+      "line": 13,
+      "note": {
+       "en": "new makes a real room object.",
+       "te": "new నిజమైన room object చేస్తుంది.",
+       "hi": "new असली room object बनाता है।"
+      }
+     },
+     {
+      "line": 17,
+      "note": {
+       "en": "A second object with its own data.",
+       "te": "సొంత data ఉన్న రెండో object.",
+       "hi": "अपने data वाला दूसरा object।"
+      }
+     },
+     {
+      "line": 21,
+      "note": {
+       "en": "Each object answers for itself.",
+       "te": "ప్రతి object తన గురించి తానే జవాబిస్తుంది.",
+       "hi": "हर object अपने लिए ख़ुद जवाब देता है।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "Room r;\nr.number = 101;",
+     "fix": {
+      "en": "r is not an object yet. Write Room r = new Room(); first.",
+      "te": "r ఇంకా object కాదు. ముందు Room r = new Room(); రాయండి.",
+      "hi": "r अभी object नहीं है। पहले Room r = new Room(); लिखिए।"
+     }
+    },
+    {
+     "wrong": "Room.number = 101;",
+     "fix": {
+      "en": "number belongs to each object, not to the class. Use r.number.",
+      "te": "number ప్రతి object కి చెందుతుంది, class కి కాదు. r.number వాడండి.",
+      "hi": "number हर object का है, class का नहीं। r.number लिखिए।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "Which makes an object?",
+      "te": "Object చేసేది ఏది?",
+      "hi": "Object कौन बनाता है?"
+     },
+     "options": [
+      "class Room",
+      "new Room()",
+      "Room.make()"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "new.",
+      "te": "new.",
+      "hi": "new।"
+     }
+    },
+    {
+     "q": {
+      "en": "Fields are…",
+      "te": "Fields అంటే…",
+      "hi": "Fields हैं…"
+     },
+     "options": [
+      {
+       "en": "data inside an object",
+       "te": "Object లోని data",
+       "hi": "object के अंदर का data"
+      },
+      {
+       "en": "loops",
+       "te": "loops",
+       "hi": "loops"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "The object's data.",
+      "te": "Object data.",
+      "hi": "Object का data।"
+     }
+    },
+    {
+     "q": {
+      "en": "Two Room objects share their fields?",
+      "te": "రెండు Room objects fields పంచుకుంటాయా?",
+      "hi": "क्या दो Room objects अपनी fields साझा करते हैं?"
+     },
+     "options": [
+      {
+       "en": "Yes",
+       "te": "అవును",
+       "hi": "हाँ"
+      },
+      {
+       "en": "No, each has its own",
+       "te": "లేదు, ప్రతి దానికీ సొంతం",
+       "hi": "नहीं, हर एक की अपनी"
+      }
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Separate copies.",
+      "te": "వేర్వేరు copies.",
+      "hi": "अलग copies।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write class Book with fields String title and int pages, and a method boolean isLong() that is true when pages > 300. In main, make one book and print whether it is long.",
+     "te": "String title, int pages fields, pages > 300 అయితే true ఇచ్చే boolean isLong() method ఉన్న Book class రాయండి. main లో ఒక book చేసి అది long అవునో కాదో print చేయండి.",
+     "hi": "String title और int pages fields वाली Book class लिखिए, और boolean isLong() method जो pages > 300 पर true हो। main में एक book बनाकर print कीजिए कि वह long है या नहीं।"
+    },
+    "starter": "public class Main {\n    public static void main(String[] args) {\n        System.out.println(false);\n    }\n}\n",
+    "tests": [
+     {
+      "name": "class Book",
+      "pattern": "class\\s+Book\\s*\\{"
+     },
+     {
+      "name": "fields title and pages",
+      "pattern": "String\\s+title\\s*;[\\s\\S]*int\\s+pages\\s*;|int\\s+pages\\s*;[\\s\\S]*String\\s+title\\s*;"
+     },
+     {
+      "name": "isLong method",
+      "pattern": "boolean\\s+isLong\\s*\\(\\s*\\)[\\s\\S]*pages\\s*>\\s*300"
+     },
+     {
+      "name": "makes an object",
+      "pattern": "new\\s+Book\\s*\\(\\s*\\)",
+      "expected": "new Book()",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "class Book { String title; int pages; ... }",
+      "te": "class Book { String title; int pages; ... }",
+      "hi": "class Book { String title; int pages; ... }"
+     },
+     {
+      "en": "boolean isLong() { return pages > 300; }",
+      "te": "boolean isLong() { return pages > 300; }",
+      "hi": "boolean isLong() { return pages > 300; }"
+     },
+     {
+      "en": "Book b = new Book(); b.title = \"Godan\"; b.pages = 312; println(b.isLong());",
+      "te": "Book b = new Book(); b.title = \"Godan\"; b.pages = 312; println(b.isLong());",
+      "hi": "Book b = new Book(); b.title = \"Godan\"; b.pages = 312; println(b.isLong());"
+     }
+    ],
+    "solution": "class Book {\n    String title;\n    int pages;\n\n    boolean isLong() {\n        return pages > 300;\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        Book b = new Book();\n        b.title = \"Godan\";\n        b.pages = 312;\n        System.out.println(b.title + \" long: \" + b.isLong());\n    }\n}",
+    "output": "Godan long: true"
+   },
+   "cheat": {
+    "en": [
+     "class Name { fields; methods }",
+     "Name obj = new Name(); · obj.field · obj.method()",
+     "Each object has its own fields."
+    ],
+    "te": [
+     "class Name { fields; methods }",
+     "Name obj = new Name(); · obj.field · obj.method()",
+     "ప్రతి object కి సొంత fields."
+    ],
+    "hi": [
+     "class Name { fields; methods }",
+     "Name obj = new Name(); · obj.field · obj.method()",
+     "हर object की अपनी fields।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A hostel has 50 rooms. Explain how a Room class and room objects would model them, with fields and one method.",
+      "te": "Hostel లో 50 rooms ఉన్నాయి. Room class, room objects వాటిని fields, ఒక method తో ఎలా రూపొందిస్తాయో వివరించండి.",
+      "hi": "Hostel में 50 rooms हैं। Room class और room objects उन्हें fields और एक method से कैसे दिखाएँगे, समझाइए।"
+     },
+     {
+      "en": "Explain what new does and why Room r; alone is not enough.",
+      "te": "new ఏం చేస్తుందో, Room r; ఒక్కటే ఎందుకు చాలదో వివరించండి.",
+      "hi": "new क्या करता है और सिर्फ़ Room r; क्यों काफ़ी नहीं, समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "class"
+     ],
+     [
+      "object",
+      "new"
+     ],
+     [
+      "field",
+      "method"
+     ]
+    ],
+    "challenge": {
+     "en": "Say the difference between a class and an object.",
+     "te": "Class, object మధ్య తేడా చెప్పండి.",
+     "hi": "Class और object का फ़र्क़ बताइए।"
+    }
+   }
+  },
+  {
+   "id": "jv-m5-l2",
+   "n": 2,
+   "minutes": 20,
+   "title": {
+    "en": "Constructors and encapsulation",
+    "te": "Constructors, encapsulation",
+    "hi": "Constructors और encapsulation"
+   },
+   "oneLine": {
+    "en": "A constructor sets up a new object in one step, and private fields with getters and methods keep its data safe.",
+    "te": "Constructor కొత్త object ని ఒకే step లో సిద్ధం చేస్తుంది; private fields, getters, methods దాని data ని సురక్షితంగా ఉంచుతాయి.",
+    "hi": "Constructor नया object एक step में तैयार करता है, और private fields के साथ getters और methods उसका data सुरक्षित रखते हैं।"
+   },
+   "useCase": {
+    "en": "A bank account keeps balance private, so no code can set it to a crazy value; money moves only through deposit and withdraw.",
+    "te": "Bank account balance ని private గా ఉంచుతుంది, ఏ code దాన్ని విచిత్రమైన value కి మార్చలేదు; డబ్బు deposit, withdraw ద్వారానే కదులుతుంది.",
+    "hi": "Bank account balance को private रखता है, ताकि कोई code उसे अजीब value न दे सके; पैसा सिर्फ़ deposit और withdraw से चलता है।"
+   },
+   "explain": {
+    "en": [
+     "A constructor has the class name and no return type: Account(String owner) { ... }.",
+     "new Account(\"Ravi\") calls it, so every object starts complete.",
+     "this.owner = owner; means \"this object's owner gets the parameter owner\".",
+     "private double balance; hides the field from other classes.",
+     "A getter, getBalance(), lets others read it; deposit() checks the amount before changing it. This is encapsulation."
+    ],
+    "te": [
+     "Constructor కి class పేరు ఉంటుంది, return type ఉండదు: Account(String owner) { ... }.",
+     "new Account(\"Ravi\") దాన్ని call చేస్తుంది, ప్రతి object పూర్తిగా మొదలవుతుంది.",
+     "this.owner = owner; అంటే \"ఈ object owner కి parameter owner వస్తుంది\".",
+     "private double balance; field ని ఇతర classes నుంచి దాస్తుంది.",
+     "Getter getBalance() ఇతరులు చదవనిస్తుంది; deposit() మార్చే ముందు amount చూస్తుంది. ఇదే encapsulation."
+    ],
+    "hi": [
+     "Constructor का नाम class जैसा होता है और कोई return type नहीं: Account(String owner) { ... }।",
+     "new Account(\"Ravi\") उसे call करता है, ताकि हर object पूरा बनकर शुरू हो।",
+     "this.owner = owner; मतलब \"इस object का owner, parameter owner बनता है\"।",
+     "private double balance; field को दूसरी classes से छिपाता है।",
+     "Getter getBalance() दूसरों को पढ़ने देता है; deposit() बदलने से पहले amount जाँचता है। यही encapsulation है।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "The constructor fills the form; private locks the drawer; methods are the only keys."
+    ],
+    "te": [
+     "Constructor form నింపుతుంది; private అర తాళం వేస్తుంది; methods మాత్రమే తాళం చెవులు."
+    ],
+    "hi": [
+     "Constructor form भरता है; private दराज़ पर ताला लगाता है; methods ही चाबियाँ हैं।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "A Student with private marks: setMarks(int m) refuses anything below 0 or above 100."
+    ],
+    "te": [
+     "private marks ఉన్న Student: setMarks(int m) 0 కంటే తక్కువ, 100 కంటే ఎక్కువను తిరస్కరిస్తుంది."
+    ],
+    "hi": [
+     "private marks वाला Student: setMarks(int m) 0 से कम या 100 से ज़्यादा को मना करता है।"
+    ]
+   },
+   "picture": "flowchart LR\n  N[\"new Account(\\\"Ravi\\\")\"] --> C[\"constructor\"] --> O[\"owner=Ravi, balance=0 (private)\"]\n  D[\"deposit(500)\"] --> O\n  G[\"getBalance()\"] --> O",
+   "code": {
+    "source": "class Account {\n    private String owner;\n    private double balance;\n\n    Account(String owner) {\n        this.owner = owner;\n        this.balance = 0;\n    }\n\n    void deposit(double amount) {\n        if (amount > 0) {\n            balance += amount;\n        }\n    }\n\n    double getBalance() {\n        return balance;\n    }\n\n    String getOwner() {\n        return owner;\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        Account acc = new Account(\"Ravi\");\n        acc.deposit(500);\n        acc.deposit(-200);\n        System.out.println(acc.getOwner() + \": \" + acc.getBalance());\n    }\n}",
+    "output": "Ravi: 500.0",
+    "notes": [
+     {
+      "line": 2,
+      "note": {
+       "en": "private: only this class can touch these fields.",
+       "te": "private: ఈ class మాత్రమే ఈ fields ని తాకగలదు.",
+       "hi": "private: सिर्फ़ यही class इन fields को छू सकती है।"
+      }
+     },
+     {
+      "line": 5,
+      "note": {
+       "en": "The constructor: same name as the class, no return type.",
+       "te": "Constructor: class పేరే, return type లేదు.",
+       "hi": "Constructor: class का ही नाम, कोई return type नहीं।"
+      }
+     },
+     {
+      "line": 6,
+      "note": {
+       "en": "this.owner is the field; owner is the parameter.",
+       "te": "this.owner field; owner parameter.",
+       "hi": "this.owner field है; owner parameter।"
+      }
+     },
+     {
+      "line": 11,
+      "note": {
+       "en": "The method guards the data: negative amounts are ignored.",
+       "te": "Method data ని కాపాడుతుంది: ప్రతికూల amounts పట్టించుకోదు.",
+       "hi": "Method data की रक्षा करता है: negative amounts नज़रअंदाज़।"
+      }
+     },
+     {
+      "line": 16,
+      "note": {
+       "en": "A getter lets others read but not change.",
+       "te": "Getter ఇతరులను చదవనిస్తుంది, మార్చనివ్వదు.",
+       "hi": "Getter दूसरों को पढ़ने देता है, बदलने नहीं।"
+      }
+     },
+     {
+      "line": 27,
+      "note": {
+       "en": "The constructor runs here.",
+       "te": "Constructor ఇక్కడ నడుస్తుంది.",
+       "hi": "Constructor यहाँ चलता है।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "void Account(String owner) { ... }",
+     "fix": {
+      "en": "A constructor has no return type. With void it becomes an ordinary method.",
+      "te": "Constructor కి return type ఉండదు. void తో అది సాధారణ method అవుతుంది.",
+      "hi": "Constructor का कोई return type नहीं होता। void लगाने पर वह सामान्य method बन जाता है।"
+     }
+    },
+    {
+     "wrong": "Account(String owner) {\n    owner = owner;\n}",
+     "fix": {
+      "en": "This sets the parameter to itself. Write this.owner = owner;",
+      "te": "ఇది parameter ని తనకే ఇస్తుంది. this.owner = owner; రాయండి.",
+      "hi": "यह parameter को ख़ुद को ही दे देता है। this.owner = owner; लिखिए।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "A constructor's name is…",
+      "te": "Constructor పేరు…",
+      "hi": "Constructor का नाम…"
+     },
+     "options": [
+      {
+       "en": "the class name",
+       "te": "Class పేరు",
+       "hi": "class का नाम"
+      },
+      {
+       "en": "init",
+       "te": "init",
+       "hi": "init"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Same as the class.",
+      "te": "Class పేరే.",
+      "hi": "Class जैसा।"
+     }
+    },
+    {
+     "q": {
+      "en": "private fields can be read by…",
+      "te": "private fields ని చదవగలిగేది…",
+      "hi": "private fields कौन पढ़ सकता है…"
+     },
+     "options": [
+      {
+       "en": "any class",
+       "te": "ఏ class అయినా",
+       "hi": "कोई भी class"
+      },
+      {
+       "en": "only their own class",
+       "te": "తమ class మాత్రమే",
+       "hi": "सिर्फ़ अपनी class"
+      }
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Only inside the class.",
+      "te": "Class లోపల మాత్రమే.",
+      "hi": "सिर्फ़ class के अंदर।"
+     }
+    },
+    {
+     "q": {
+      "en": "this.name means…",
+      "te": "this.name అంటే…",
+      "hi": "this.name मतलब…"
+     },
+     "options": [
+      {
+       "en": "this object's field",
+       "te": "ఈ object field",
+       "hi": "इस object का field"
+      },
+      {
+       "en": "the parameter",
+       "te": "Parameter",
+       "hi": "parameter"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "The field.",
+      "te": "Field.",
+      "hi": "Field।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write class Student with private String name and private int marks, a constructor Student(String name), a method setMarks(int m) that only accepts 0 to 100, and getMarks().",
+     "te": "private String name, private int marks, constructor Student(String name), 0 నుంచి 100 మాత్రమే అంగీకరించే setMarks(int m), getMarks() ఉన్న Student class రాయండి.",
+     "hi": "private String name और private int marks वाली Student class लिखिए, constructor Student(String name), setMarks(int m) जो सिर्फ़ 0 से 100 माने, और getMarks()।"
+    },
+    "starter": "class Student {\n    String name;\n    int marks;\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        Student s = new Student();\n        s.marks = 150;\n        System.out.println(s.marks);\n    }\n}\n",
+    "tests": [
+     {
+      "name": "private fields",
+      "pattern": "private\\s+String\\s+name\\s*;[\\s\\S]*private\\s+int\\s+marks\\s*;"
+     },
+     {
+      "name": "constructor with name",
+      "pattern": "Student\\s*\\(\\s*String\\s+\\w+\\s*\\)\\s*\\{[\\s\\S]*this\\.name\\s*="
+     },
+     {
+      "name": "setMarks checks the range",
+      "pattern": "void\\s+setMarks\\s*\\(\\s*int\\s+\\w+\\s*\\)[\\s\\S]*(>=\\s*0|<\\s*0)[\\s\\S]*100"
+     },
+     {
+      "name": "getter",
+      "pattern": "int\\s+getMarks\\s*\\(\\s*\\)"
+     },
+     {
+      "name": "no direct field access from main",
+      "absent": "s\\.marks\\s*=",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "private String name; private int marks;",
+      "te": "private String name; private int marks;",
+      "hi": "private String name; private int marks;"
+     },
+     {
+      "en": "Student(String name) { this.name = name; }",
+      "te": "Student(String name) { this.name = name; }",
+      "hi": "Student(String name) { this.name = name; }"
+     },
+     {
+      "en": "void setMarks(int m) { if (m >= 0 && m <= 100) marks = m; }",
+      "te": "void setMarks(int m) { if (m >= 0 && m <= 100) marks = m; }",
+      "hi": "void setMarks(int m) { if (m >= 0 && m <= 100) marks = m; }"
+     }
+    ],
+    "solution": "class Student {\n    private String name;\n    private int marks;\n\n    Student(String name) {\n        this.name = name;\n    }\n\n    void setMarks(int m) {\n        if (m >= 0 && m <= 100) {\n            marks = m;\n        }\n    }\n\n    int getMarks() {\n        return marks;\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        Student st = new Student(\"Sita\");\n        st.setMarks(150);\n        st.setMarks(88);\n        System.out.println(st.getMarks());\n    }\n}",
+    "output": "88"
+   },
+   "cheat": {
+    "en": [
+     "Name(params) { this.x = x; } — no return type",
+     "private fields · public getters · checks in setters/methods",
+     "new Name(args) runs the constructor."
+    ],
+    "te": [
+     "Name(params) { this.x = x; } — return type లేదు",
+     "private fields · public getters · setters/methods లో checks",
+     "new Name(args) constructor నడుపుతుంది."
+    ],
+    "hi": [
+     "Name(params) { this.x = x; } — कोई return type नहीं",
+     "private fields · public getters · setters/methods में जाँच",
+     "new Name(args) constructor चलाता है।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "Explain why a bank account should keep its balance private and change it only through deposit and withdraw.",
+      "te": "Bank account balance ని ఎందుకు private గా ఉంచి deposit, withdraw ద్వారానే మార్చాలో వివరించండి.",
+      "hi": "Bank account को balance private क्यों रखना चाहिए और सिर्फ़ deposit और withdraw से क्यों बदलना चाहिए, समझाइए।"
+     },
+     {
+      "en": "Explain what a constructor is and what this.name = name does.",
+      "te": "Constructor అంటే ఏమిటో, this.name = name ఏం చేస్తుందో వివరించండి.",
+      "hi": "Constructor क्या है और this.name = name क्या करता है, समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "private",
+      "encapsulation"
+     ],
+     [
+      "constructor",
+      "new"
+     ],
+     [
+      "this",
+      "getter",
+      "method",
+      "deposit"
+     ]
+    ],
+    "challenge": {
+     "en": "Say how a constructor is different from a method.",
+     "te": "Constructor, method కి ఎలా భిన్నమో చెప్పండి.",
+     "hi": "Constructor, method से कैसे अलग है, बताइए।"
+    }
+   }
+  },
+  {
+   "id": "jv-m5-l3",
+   "n": 3,
+   "minutes": 20,
+   "title": {
+    "en": "Inheritance",
+    "te": "Inheritance",
+    "hi": "Inheritance"
+   },
+   "oneLine": {
+    "en": "With extends, a child class gets the fields and methods of a parent class and can override methods to behave differently.",
+    "te": "extends తో child class, parent class fields, methods పొందుతుంది; methods ని override చేసి వేరుగా ప్రవర్తించగలదు.",
+    "hi": "extends से child class को parent class की fields और methods मिलती हैं, और वह methods override करके अलग व्यवहार कर सकती है।"
+   },
+   "useCase": {
+    "en": "A transport app has Vehicle; Bus and Auto extend it and each works out its own fare.",
+    "te": "Transport app లో Vehicle ఉంటుంది; Bus, Auto దాన్ని extend చేసి తమ fare తామే లెక్కిస్తాయి.",
+    "hi": "Transport app में Vehicle है; Bus और Auto उसे extend करके अपना fare ख़ुद निकालते हैं।"
+   },
+   "explain": {
+    "en": [
+     "class Bus extends Vehicle means a Bus is a Vehicle and gets all of its fields and methods.",
+     "The child adds what is new and can override a method with @Override.",
+     "super(...) in the child's constructor calls the parent constructor first.",
+     "protected fields are visible to child classes but hidden from other code.",
+     "A Vehicle variable can hold a Bus: Vehicle v = new Bus(...); v.fare(10) runs the Bus version."
+    ],
+    "te": [
+     "class Bus extends Vehicle అంటే Bus ఒక Vehicle, దాని అన్ని fields, methods పొందుతుంది.",
+     "Child కొత్తది జోడిస్తుంది, @Override తో method ని override చేయగలదు.",
+     "Child constructor లో super(...) ముందుగా parent constructor ని call చేస్తుంది.",
+     "protected fields child classes కి కనిపిస్తాయి, ఇతర code కి కనిపించవు.",
+     "Vehicle variable లో Bus ఉంచవచ్చు: Vehicle v = new Bus(...); v.fare(10) Bus version నడుపుతుంది."
+    ],
+    "hi": [
+     "class Bus extends Vehicle मतलब Bus एक Vehicle है और उसे उसकी सारी fields और methods मिलती हैं।",
+     "Child नया जोड़ता है और @Override से method override कर सकता है।",
+     "Child के constructor में super(...) पहले parent constructor call करता है।",
+     "protected fields child classes को दिखती हैं पर दूसरे code से छिपी रहती हैं।",
+     "Vehicle variable में Bus रख सकते हैं: Vehicle v = new Bus(...); v.fare(10) Bus वाला version चलाता है।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "The child inherits the family business and runs one shop its own way."
+    ],
+    "te": [
+     "Child కుటుంబ వ్యాపారాన్ని వారసత్వంగా పొంది ఒక దుకాణాన్ని తన పద్ధతిలో నడుపుతుంది."
+    ],
+    "hi": [
+     "Child को परिवार का कारोबार मिलता है और वह एक दुकान अपने तरीक़े से चलाता है।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "Employee → Manager adds a bonus and overrides salary()."
+    ],
+    "te": [
+     "Employee → Manager bonus జోడించి salary() ని override చేస్తుంది."
+    ],
+    "hi": [
+     "Employee → Manager bonus जोड़ता है और salary() override करता है।"
+    ]
+   },
+   "picture": "flowchart TD\n  V[\"Vehicle: name, fare(km)\"] --> B[\"Bus: fare = 2 per km\"]\n  V --> A[\"Auto: fare = 25 + 15 per km\"]",
+   "code": {
+    "source": "class Vehicle {\n    protected String name;\n\n    Vehicle(String name) {\n        this.name = name;\n    }\n\n    double fare(int km) {\n        return km * 10;\n    }\n}\n\nclass Bus extends Vehicle {\n    Bus() {\n        super(\"Bus\");\n    }\n\n    @Override\n    double fare(int km) {\n        return km * 2;\n    }\n}\n\nclass Auto extends Vehicle {\n    Auto() {\n        super(\"Auto\");\n    }\n\n    @Override\n    double fare(int km) {\n        return 25 + km * 15;\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        Vehicle[] options = {new Bus(), new Auto()};\n        for (Vehicle v : options) {\n            System.out.println(v.name + \" for 6 km: Rs \" + v.fare(6));\n        }\n    }\n}",
+    "output": "Bus for 6 km: Rs 12.0\nAuto for 6 km: Rs 115.0",
+    "notes": [
+     {
+      "line": 2,
+      "note": {
+       "en": "protected: children can use name.",
+       "te": "protected: children name వాడగలవు.",
+       "hi": "protected: children name इस्तेमाल कर सकते हैं।"
+      }
+     },
+     {
+      "line": 13,
+      "note": {
+       "en": "Bus extends Vehicle: it is a Vehicle.",
+       "te": "Bus extends Vehicle: అది ఒక Vehicle.",
+       "hi": "Bus extends Vehicle: वह एक Vehicle है।"
+      }
+     },
+     {
+      "line": 15,
+      "note": {
+       "en": "super calls the parent constructor.",
+       "te": "super parent constructor ని call చేస్తుంది.",
+       "hi": "super parent constructor call करता है।"
+      }
+     },
+     {
+      "line": 18,
+      "note": {
+       "en": "@Override: this replaces the parent's fare.",
+       "te": "@Override: ఇది parent fare స్థానంలో వస్తుంది.",
+       "hi": "@Override: यह parent के fare की जगह लेता है।"
+      }
+     },
+     {
+      "line": 37,
+      "note": {
+       "en": "A Vehicle array can hold any child.",
+       "te": "Vehicle array ఏ child నైనా ఉంచగలదు.",
+       "hi": "Vehicle array किसी भी child को रख सकता है।"
+      }
+     },
+     {
+      "line": 39,
+      "note": {
+       "en": "Each object uses its own fare.",
+       "te": "ప్రతి object తన fare వాడుతుంది.",
+       "hi": "हर object अपना fare इस्तेमाल करता है।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "class Bus extends Vehicle {\n    Bus() { }\n}",
+     "fix": {
+      "en": "Vehicle has no empty constructor, so Bus must call super(\"Bus\"); first.",
+      "te": "Vehicle కి ఖాళీ constructor లేదు, కాబట్టి Bus ముందు super(\"Bus\"); call చేయాలి.",
+      "hi": "Vehicle का ख़ाली constructor नहीं है, इसलिए Bus को पहले super(\"Bus\"); call करना होगा।"
+     }
+    },
+    {
+     "wrong": "double Fare(int km) { ... }  // meant to override",
+     "fix": {
+      "en": "The name must match exactly (fare). @Override catches such typos.",
+      "te": "పేరు ఖచ్చితంగా సరిపోవాలి (fare). @Override అలాంటి తప్పులు పట్టుకుంటుంది.",
+      "hi": "नाम बिल्कुल मेल खाना चाहिए (fare)। @Override ऐसी ग़लतियाँ पकड़ता है।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "class Car extends Vehicle: Car is the…",
+      "te": "class Car extends Vehicle: Car…",
+      "hi": "class Car extends Vehicle: Car है…"
+     },
+     "options": [
+      "parent",
+      "child"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Child.",
+      "te": "Child.",
+      "hi": "Child।"
+     }
+    },
+    {
+     "q": {
+      "en": "@Override means…",
+      "te": "@Override అంటే…",
+      "hi": "@Override मतलब…"
+     },
+     "options": [
+      {
+       "en": "this replaces a parent method",
+       "te": "ఇది parent method స్థానంలో",
+       "hi": "यह parent method की जगह लेता है"
+      },
+      {
+       "en": "this is a new class",
+       "te": "ఇది కొత్త class",
+       "hi": "यह नई class है"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Override.",
+      "te": "Override.",
+      "hi": "Override।"
+     }
+    },
+    {
+     "q": {
+      "en": "super(\"Bus\") calls…",
+      "te": "super(\"Bus\") call చేసేది…",
+      "hi": "super(\"Bus\") call करता है…"
+     },
+     "options": [
+      {
+       "en": "the parent constructor",
+       "te": "Parent constructor",
+       "hi": "parent constructor"
+      },
+      {
+       "en": "the main method",
+       "te": "main method",
+       "hi": "main method"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "The parent constructor.",
+      "te": "Parent constructor.",
+      "hi": "Parent constructor।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Given class Employee(name, salary) with double pay() returning salary, write class Manager extends Employee with an extra double bonus, a constructor that calls super, and pay() overridden to return salary + bonus.",
+     "te": "pay() salary return చేసే Employee(name, salary) class ఇచ్చాం; అదనపు double bonus, super call చేసే constructor, salary + bonus return చేసేలా override అయిన pay() ఉన్న class Manager extends Employee రాయండి.",
+     "hi": "Employee(name, salary) class दी गई है जिसका double pay() salary return करता है; class Manager extends Employee लिखिए जिसमें अतिरिक्त double bonus हो, super call करने वाला constructor हो, और pay() override होकर salary + bonus return करे।"
+    },
+    "starter": "class Employee {\n    protected String name;\n    protected double salary;\n\n    Employee(String name, double salary) {\n        this.name = name;\n        this.salary = salary;\n    }\n\n    double pay() {\n        return salary;\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        System.out.println(new Employee(\"Anu\", 30000).pay());\n    }\n}\n",
+    "tests": [
+     {
+      "name": "Manager extends Employee",
+      "pattern": "class\\s+Manager\\s+extends\\s+Employee"
+     },
+     {
+      "name": "calls super",
+      "pattern": "super\\s*\\(\\s*\\w+\\s*,\\s*\\w+\\s*\\)\\s*;"
+     },
+     {
+      "name": "overrides pay",
+      "pattern": "@Override\\s+double\\s+pay\\s*\\(\\s*\\)"
+     },
+     {
+      "name": "adds the bonus",
+      "pattern": "salary\\s*\\+\\s*bonus|bonus\\s*\\+\\s*salary|super\\.pay\\s*\\(\\s*\\)\\s*\\+\\s*bonus",
+      "expected": "salary + bonus",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "class Manager extends Employee { private double bonus; ... }",
+      "te": "class Manager extends Employee { private double bonus; ... }",
+      "hi": "class Manager extends Employee { private double bonus; ... }"
+     },
+     {
+      "en": "Manager(String name, double salary, double bonus) { super(name, salary); this.bonus = bonus; }",
+      "te": "Manager(String name, double salary, double bonus) { super(name, salary); this.bonus = bonus; }",
+      "hi": "Manager(String name, double salary, double bonus) { super(name, salary); this.bonus = bonus; }"
+     },
+     {
+      "en": "@Override double pay() { return salary + bonus; }",
+      "te": "@Override double pay() { return salary + bonus; }",
+      "hi": "@Override double pay() { return salary + bonus; }"
+     }
+    ],
+    "solution": "class Employee {\n    protected String name;\n    protected double salary;\n\n    Employee(String name, double salary) {\n        this.name = name;\n        this.salary = salary;\n    }\n\n    double pay() {\n        return salary;\n    }\n}\n\nclass Manager extends Employee {\n    private double bonus;\n\n    Manager(String name, double salary, double bonus) {\n        super(name, salary);\n        this.bonus = bonus;\n    }\n\n    @Override\n    double pay() {\n        return salary + bonus;\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        Employee e = new Manager(\"Ravi\", 50000, 8000);\n        System.out.println(e.name + \": \" + e.pay());\n    }\n}",
+    "output": "Ravi: 58000.0"
+   },
+   "cheat": {
+    "en": [
+     "class Child extends Parent { }",
+     "Child(...) { super(...); } · @Override method",
+     "protected: visible to children · Parent p = new Child();"
+    ],
+    "te": [
+     "class Child extends Parent { }",
+     "Child(...) { super(...); } · @Override method",
+     "protected: children కి కనిపిస్తుంది · Parent p = new Child();"
+    ],
+    "hi": [
+     "class Child extends Parent { }",
+     "Child(...) { super(...); } · @Override method",
+     "protected: children को दिखता है · Parent p = new Child();"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A transport app has Bus and Auto with different fares. Explain how inheritance and overriding let both share Vehicle code but charge differently.",
+      "te": "Transport app లో వేర్వేరు fares ఉన్న Bus, Auto ఉన్నాయి. Inheritance, overriding రెండూ Vehicle code పంచుకుంటూ వేరుగా ఎలా వసూలు చేయనిస్తాయో వివరించండి.",
+      "hi": "Transport app में अलग fares वाले Bus और Auto हैं। Inheritance और overriding दोनों को Vehicle code साझा करते हुए अलग किराया कैसे लेने देते हैं, समझाइए।"
+     },
+     {
+      "en": "Explain what super(...) does in a child constructor.",
+      "te": "Child constructor లో super(...) ఏం చేస్తుందో వివరించండి.",
+      "hi": "Child constructor में super(...) क्या करता है, समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "extends",
+      "inherit",
+      "parent",
+      "child"
+     ],
+     [
+      "override",
+      "@override"
+     ],
+     [
+      "super",
+      "fare",
+      "constructor"
+     ]
+    ],
+    "challenge": {
+     "en": "Say what @Override protects you from.",
+     "te": "@Override మిమ్మల్ని దేని నుంచి కాపాడుతుందో చెప్పండి.",
+     "hi": "@Override आपको किससे बचाता है, बताइए।"
+    }
+   }
+  },
+  {
+   "id": "jv-m5-l4",
+   "n": 4,
+   "minutes": 20,
+   "title": {
+    "en": "Interfaces and polymorphism",
+    "te": "Interfaces, polymorphism",
+    "hi": "Interfaces और polymorphism"
+   },
+   "oneLine": {
+    "en": "An interface lists methods a class promises to have; polymorphism lets one piece of code work with any class that keeps that promise.",
+    "te": "Interface ఒక class కలిగి ఉంటానని వాగ్దానం చేసే methods ని చెబుతుంది; ఆ వాగ్దానం నిలబెట్టే ఏ class తోనైనా ఒకే code పనిచేయడం polymorphism.",
+    "hi": "Interface उन methods की सूची है जिन्हें रखने का वादा class करती है; polymorphism से एक code उस वादे को निभाने वाली किसी भी class के साथ चलता है।"
+   },
+   "useCase": {
+    "en": "A checkout page accepts any Payment (UPI, Card, Wallet) and simply calls pay(amount); each one does it its own way.",
+    "te": "Checkout page ఏ Payment (UPI, Card, Wallet) నైనా అంగీకరించి pay(amount) call చేస్తుంది; ప్రతిది తన పద్ధతిలో చేస్తుంది.",
+    "hi": "Checkout page कोई भी Payment (UPI, Card, Wallet) लेकर बस pay(amount) call करता है; हर एक अपने तरीक़े से करता है।"
+   },
+   "explain": {
+    "en": [
+     "interface Payment { String pay(double amount); } is a promise, not code.",
+     "class Upi implements Payment must write pay. So must class Card implements Payment.",
+     "A Payment variable can hold any of them: Payment p = new Upi(\"ravi@okbank\");",
+     "p.pay(500) runs whichever object p holds. That is polymorphism: one call, many forms.",
+     "New payment types can be added later without changing the checkout code."
+    ],
+    "te": [
+     "interface Payment { String pay(double amount); } ఒక వాగ్దానం, code కాదు.",
+     "class Upi implements Payment, pay రాయాలి. class Card implements Payment కూడా.",
+     "Payment variable వాటిలో దేన్నైనా ఉంచగలదు: Payment p = new Upi(\"ravi@okbank\");",
+     "p.pay(500), p లో ఉన్న object ని నడుపుతుంది. ఇదే polymorphism: ఒకే call, ఎన్నో రూపాలు.",
+     "Checkout code మార్చకుండా తర్వాత కొత్త payment రకాలు జోడించవచ్చు."
+    ],
+    "hi": [
+     "interface Payment { String pay(double amount); } एक वादा है, code नहीं।",
+     "class Upi implements Payment को pay लिखना होगा। class Card implements Payment को भी।",
+     "Payment variable इनमें से किसी को भी रख सकता है: Payment p = new Upi(\"ravi@okbank\");",
+     "p.pay(500) वही चलाता है जो object p में है। यही polymorphism है: एक call, कई रूप।",
+     "Checkout code बदले बिना बाद में नए payment प्रकार जोड़े जा सकते हैं।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "An interface is a socket; any plug that fits can be used."
+    ],
+    "te": [
+     "Interface అంటే socket; సరిపోయే ఏ plug నైనా వాడవచ్చు."
+    ],
+    "hi": [
+     "Interface एक socket है; जो plug फ़िट हो, लगाया जा सकता है।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "interface Shape { double area(); } — Circle and Square both implement area, and a loop adds up the area of any shapes."
+    ],
+    "te": [
+     "interface Shape { double area(); } — Circle, Square రెండూ area implement చేస్తాయి; ఒక loop ఏ shapes area నైనా కలుపుతుంది."
+    ],
+    "hi": [
+     "interface Shape { double area(); } — Circle और Square दोनों area implement करते हैं, और एक loop किसी भी shapes का area जोड़ता है।"
+    ]
+   },
+   "picture": "flowchart TD\n  P[\"interface Payment: pay(amount)\"] --> U[\"Upi\"]\n  P --> C[\"Card\"]\n  K[\"checkout(Payment p)\"] -->|\"p.pay(500)\"| P",
+   "code": {
+    "source": "interface Payment {\n    String pay(double amount);\n}\n\nclass Upi implements Payment {\n    private String id;\n\n    Upi(String id) {\n        this.id = id;\n    }\n\n    public String pay(double amount) {\n        return \"UPI \" + id + \" paid Rs \" + amount;\n    }\n}\n\nclass Card implements Payment {\n    public String pay(double amount) {\n        return \"Card paid Rs \" + (amount + 10) + \" incl. fee\";\n    }\n}\n\npublic class Main {\n    static void checkout(Payment p, double amount) {\n        System.out.println(p.pay(amount));\n    }\n\n    public static void main(String[] args) {\n        checkout(new Upi(\"ravi@okbank\"), 500);\n        checkout(new Card(), 500);\n    }\n}",
+    "output": "UPI ravi@okbank paid Rs 500.0\nCard paid Rs 510.0 incl. fee",
+    "notes": [
+     {
+      "line": 1,
+      "note": {
+       "en": "The interface: a promise that pay exists.",
+       "te": "Interface: pay ఉంటుందని వాగ్దానం.",
+       "hi": "Interface: वादा कि pay मौजूद है।"
+      }
+     },
+     {
+      "line": 5,
+      "note": {
+       "en": "Upi keeps the promise.",
+       "te": "Upi వాగ్దానం నిలబెడుతుంది.",
+       "hi": "Upi वादा निभाता है।"
+      }
+     },
+     {
+      "line": 12,
+      "note": {
+       "en": "Interface methods are public, so the class writes public.",
+       "te": "Interface methods public, కాబట్టి class public రాస్తుంది.",
+       "hi": "Interface methods public होते हैं, इसलिए class public लिखती है।"
+      }
+     },
+     {
+      "line": 17,
+      "note": {
+       "en": "Card keeps it its own way, with a fee.",
+       "te": "Card తన పద్ధతిలో, fee తో.",
+       "hi": "Card अपने तरीक़े से, fee के साथ।"
+      }
+     },
+     {
+      "line": 24,
+      "note": {
+       "en": "checkout knows only Payment, not Upi or Card.",
+       "te": "checkout కి Payment మాత్రమే తెలుసు, Upi లేదా Card కాదు.",
+       "hi": "checkout सिर्फ़ Payment जानता है, Upi या Card नहीं।"
+      }
+     },
+     {
+      "line": 29,
+      "note": {
+       "en": "Same call, different behaviour: polymorphism.",
+       "te": "అదే call, వేరే ప్రవర్తన: polymorphism.",
+       "hi": "वही call, अलग व्यवहार: polymorphism।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "class Upi implements Payment { }",
+     "fix": {
+      "en": "A class that implements an interface must write every method in it, or it will not compile.",
+      "te": "Interface ని implement చేసే class అందులోని ప్రతి method రాయాలి, లేకపోతే compile కాదు.",
+      "hi": "Interface implement करने वाली class को उसका हर method लिखना होगा, नहीं तो compile नहीं होगा।"
+     }
+    },
+    {
+     "wrong": "Payment p = new Payment();",
+     "fix": {
+      "en": "You cannot make an object of an interface. Make a class that implements it: new Upi(...).",
+      "te": "Interface object చేయలేం. దాన్ని implement చేసే class చేయండి: new Upi(...).",
+      "hi": "Interface का object नहीं बना सकते। उसे implement करने वाली class बनाइए: new Upi(...)।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "A class keeps an interface's promise with…",
+      "te": "Interface వాగ్దానం class నిలబెట్టేది…",
+      "hi": "Class interface का वादा निभाती है…"
+     },
+     "options": [
+      "extends",
+      "implements",
+      "super"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "implements.",
+      "te": "implements.",
+      "hi": "implements।"
+     }
+    },
+    {
+     "q": {
+      "en": "Can you write new Payment() for an interface?",
+      "te": "Interface కి new Payment() రాయగలమా?",
+      "hi": "Interface के लिए new Payment() लिख सकते हैं?"
+     },
+     "options": [
+      {
+       "en": "Yes",
+       "te": "అవును",
+       "hi": "हाँ"
+      },
+      {
+       "en": "No",
+       "te": "లేదు",
+       "hi": "नहीं"
+      }
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Only classes make objects.",
+      "te": "Classes మాత్రమే objects చేస్తాయి.",
+      "hi": "सिर्फ़ classes objects बनाती हैं।"
+     }
+    },
+    {
+     "q": {
+      "en": "Polymorphism means…",
+      "te": "Polymorphism అంటే…",
+      "hi": "Polymorphism मतलब…"
+     },
+     "options": [
+      {
+       "en": "one call, different behaviour per object",
+       "te": "ఒకే call, object బట్టి వేరే ప్రవర్తన",
+       "hi": "एक call, हर object का अलग व्यवहार"
+      },
+      {
+       "en": "many main methods",
+       "te": "చాలా main methods",
+       "hi": "कई main methods"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Many forms.",
+      "te": "ఎన్నో రూపాలు.",
+      "hi": "कई रूप।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write interface Shape { double area(); } and two classes, Circle(double r) and Rect(double w, double h), that implement it. Write static double totalArea(Shape[] shapes) that adds up the areas.",
+     "te": "interface Shape { double area(); }, దాన్ని implement చేసే Circle(double r), Rect(double w, double h) classes రాయండి. Areas కలిపే static double totalArea(Shape[] shapes) రాయండి.",
+     "hi": "interface Shape { double area(); } और उसे implement करने वाली दो classes, Circle(double r) और Rect(double w, double h), लिखिए। Areas जोड़ने वाला static double totalArea(Shape[] shapes) लिखिए।"
+    },
+    "starter": "public class Main {\n    public static void main(String[] args) {\n        System.out.println(0.0);\n    }\n}\n",
+    "tests": [
+     {
+      "name": "interface Shape",
+      "pattern": "interface\\s+Shape\\s*\\{\\s*double\\s+area\\s*\\(\\s*\\)\\s*;\\s*\\}"
+     },
+     {
+      "name": "Circle implements Shape",
+      "pattern": "class\\s+Circle\\s+implements\\s+Shape"
+     },
+     {
+      "name": "Rect implements Shape",
+      "pattern": "class\\s+Rect\\s+implements\\s+Shape"
+     },
+     {
+      "name": "totalArea loops over shapes",
+      "pattern": "static\\s+double\\s+totalArea\\s*\\(\\s*Shape\\s*\\[\\]\\s*\\w+\\s*\\)[\\s\\S]*\\.area\\s*\\(\\s*\\)"
+     },
+     {
+      "name": "circle uses Math.PI",
+      "pattern": "Math\\.PI",
+      "expected": "Math.PI * r * r",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "interface Shape { double area(); }",
+      "te": "interface Shape { double area(); }",
+      "hi": "interface Shape { double area(); }"
+     },
+     {
+      "en": "class Circle implements Shape { private double r; Circle(double r) { this.r = r; } public double area() { return Math.PI * r * r; } }",
+      "te": "class Circle implements Shape { private double r; Circle(double r) { this.r = r; } public double area() { return Math.PI * r * r; } }",
+      "hi": "class Circle implements Shape { private double r; Circle(double r) { this.r = r; } public double area() { return Math.PI * r * r; } }"
+     },
+     {
+      "en": "for (Shape s : shapes) total += s.area();",
+      "te": "for (Shape s : shapes) total += s.area();",
+      "hi": "for (Shape s : shapes) total += s.area();"
+     }
+    ],
+    "solution": "interface Shape { double area(); }\n\nclass Circle implements Shape {\n    private double r;\n\n    Circle(double r) {\n        this.r = r;\n    }\n\n    public double area() {\n        return Math.PI * r * r;\n    }\n}\n\nclass Rect implements Shape {\n    private double w;\n    private double h;\n\n    Rect(double w, double h) {\n        this.w = w;\n        this.h = h;\n    }\n\n    public double area() {\n        return w * h;\n    }\n}\n\npublic class Main {\n    static double totalArea(Shape[] shapes) {\n        double total = 0;\n        for (Shape s : shapes) {\n            total += s.area();\n        }\n        return total;\n    }\n\n    public static void main(String[] args) {\n        Shape[] shapes = {new Rect(2, 3), new Rect(4, 5)};\n        System.out.println(totalArea(shapes));\n    }\n}",
+    "output": "26.0"
+   },
+   "cheat": {
+    "en": [
+     "interface I { Type m(); } · class C implements I { public Type m() { } }",
+     "I x = new C(); x.m() runs C's version.",
+     "No new I(); code against the interface."
+    ],
+    "te": [
+     "interface I { Type m(); } · class C implements I { public Type m() { } }",
+     "I x = new C(); x.m() C version నడుపుతుంది.",
+     "new I(); లేదు; interface పై code రాయండి."
+    ],
+    "hi": [
+     "interface I { Type m(); } · class C implements I { public Type m() { } }",
+     "I x = new C(); x.m() C का version चलाता है।",
+     "new I(); नहीं; interface के हिसाब से code लिखिए।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A checkout page must accept UPI, cards and wallets, and new methods later. Explain how an interface and polymorphism make this easy.",
+      "te": "Checkout page UPI, cards, wallets, తర్వాత కొత్త పద్ధతులు అంగీకరించాలి. Interface, polymorphism దీన్ని ఎలా సులభం చేస్తాయో వివరించండి.",
+      "hi": "Checkout page को UPI, cards, wallets और बाद में नए तरीक़े स्वीकार करने हैं। Interface और polymorphism इसे कैसे आसान बनाते हैं, समझाइए।"
+     },
+     {
+      "en": "Explain the difference between extends and implements.",
+      "te": "extends, implements మధ్య తేడా వివరించండి.",
+      "hi": "extends और implements का फ़र्क़ समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "interface"
+     ],
+     [
+      "implements",
+      "extends"
+     ],
+     [
+      "polymorphism",
+      "pay",
+      "any",
+      "many",
+      "same call"
+     ]
+    ],
+    "challenge": {
+     "en": "Say why you cannot write new Payment() for an interface.",
+     "te": "Interface కి new Payment() ఎందుకు రాయలేమో చెప్పండి.",
+     "hi": "Interface के लिए new Payment() क्यों नहीं लिख सकते, बताइए।"
+    }
+   }
+  }
+ ],
+ "test": {
+  "pass": 4,
+  "questions": [
+   {
+    "q": {
+     "en": "Which keyword makes an object?",
+     "te": "Object చేసే keyword?",
+     "hi": "Object कौन-सा keyword बनाता है?"
+    },
+    "options": [
+     "class",
+     "new",
+     "this"
+    ],
+    "answer": 1,
+    "why": {
+     "en": "new.",
+     "te": "new.",
+     "hi": "new।"
+    }
+   },
+   {
+    "q": {
+     "en": "A constructor has…",
+     "te": "Constructor కి…",
+     "hi": "Constructor में…"
+    },
+    "options": [
+     {
+      "en": "no return type",
+      "te": "Return type ఉండదు",
+      "hi": "कोई return type नहीं"
+     },
+     {
+      "en": "return type void",
+      "te": "Return type void",
+      "hi": "return type void"
+     }
+    ],
+    "answer": 0,
+    "why": {
+     "en": "No return type.",
+     "te": "Return type లేదు.",
+     "hi": "कोई return type नहीं।"
+    }
+   },
+   {
+    "q": {
+     "en": "private fields are reached from outside through…",
+     "te": "బయటి నుంచి private fields చేరేది…",
+     "hi": "बाहर से private fields तक पहुँचते हैं…"
+    },
+    "options": [
+     {
+      "en": "methods such as getters",
+      "te": "Getters లాంటి methods",
+      "hi": "getters जैसे methods"
+     },
+     {
+      "en": "directly",
+      "te": "నేరుగా",
+      "hi": "सीधे"
+     }
+    ],
+    "answer": 0,
+    "why": {
+     "en": "Methods.",
+     "te": "Methods.",
+     "hi": "Methods।"
+    }
+   },
+   {
+    "q": {
+     "en": "class Dog extends Animal: Dog is…",
+     "te": "class Dog extends Animal: Dog…",
+     "hi": "class Dog extends Animal: Dog…"
+    },
+    "options": [
+     {
+      "en": "an Animal",
+      "te": "ఒక Animal",
+      "hi": "एक Animal"
+     },
+     {
+      "en": "unrelated",
+      "te": "సంబంధం లేనిది",
+      "hi": "असंबंधित"
+     }
+    ],
+    "answer": 0,
+    "why": {
+     "en": "Inheritance.",
+     "te": "Inheritance.",
+     "hi": "Inheritance।"
+    }
+   },
+   {
+    "q": {
+     "en": "A class keeps an interface's promise with…",
+     "te": "Interface వాగ్దానాన్ని నిలబెట్టేది…",
+     "hi": "Interface का वादा निभाया जाता है…"
+    },
+    "options": [
+     "implements",
+     "extends"
+    ],
+    "answer": 0,
+    "why": {
+     "en": "implements.",
+     "te": "implements.",
+     "hi": "implements।"
+    }
+   }
+  ]
+ },
+ "project": {
+  "title": {
+   "en": "Library system",
+   "te": "Library system",
+   "hi": "Library system"
+  },
+  "prompt": {
+   "en": "Write class Book with private title and boolean available (true at first), a constructor, getTitle(), isAvailable(), and borrow() that returns true and marks it unavailable only if it was available. Write class Library with a private Book[] of size 10 and a count, add(Book), borrow(String title) and availableCount(). Print the result of borrowing \"Godan\" twice and the available count.",
+   "te": "Private title, మొదట true అయిన boolean available, constructor, getTitle(), isAvailable(), అందుబాటులో ఉంటేనే true return చేసి unavailable గా గుర్తించే borrow() ఉన్న Book class రాయండి. Size 10 private Book[], count, add(Book), borrow(String title), availableCount() ఉన్న Library class రాయండి. \"Godan\" ని రెండుసార్లు borrow చేసిన ఫలితం, available count print చేయండి.",
+   "hi": "Private title और शुरू में true वाले boolean available के साथ Book class लिखिए: constructor, getTitle(), isAvailable(), और borrow() जो सिर्फ़ उपलब्ध होने पर true return करे और उसे unavailable करे। Library class लिखिए: size 10 का private Book[] और count, add(Book), borrow(String title) और availableCount()। \"Godan\" को दो बार borrow करने का result और available count print कीजिए।"
+  },
+  "starter": "public class Main {\n    public static void main(String[] args) {\n        // build the library here\n    }\n}\n",
+  "tests": [
+   {
+    "name": "Book has private fields",
+    "pattern": "class\\s+Book\\s*\\{[\\s\\S]*private\\s+String\\s+title\\s*;[\\s\\S]*private\\s+boolean\\s+available"
+   },
+   {
+    "name": "Book constructor",
+    "pattern": "Book\\s*\\(\\s*String\\s+\\w+\\s*\\)"
+   },
+   {
+    "name": "borrow checks availability",
+    "pattern": "boolean\\s+borrow\\s*\\(\\s*\\)[\\s\\S]*available"
+   },
+   {
+    "name": "Library with an array",
+    "pattern": "class\\s+Library[\\s\\S]*private\\s+Book\\s*\\[\\]\\s*\\w+\\s*=\\s*new\\s+Book\\s*\\[\\s*10\\s*\\]"
+   },
+   {
+    "name": "borrow by title uses equals",
+    "pattern": "boolean\\s+borrow\\s*\\(\\s*String\\s+\\w+\\s*\\)[\\s\\S]*\\.equals\\s*\\("
+   },
+   {
+    "name": "availableCount",
+    "pattern": "int\\s+availableCount\\s*\\(\\s*\\)",
+    "expected": "availableCount()",
+    "hidden": true
+   }
+  ],
+  "hints": [
+   {
+    "en": "Book: private String title; private boolean available = true; boolean borrow() { if (!available) return false; available = false; return true; }",
+    "te": "Book: private String title; private boolean available = true; boolean borrow() { if (!available) return false; available = false; return true; }",
+    "hi": "Book: private String title; private boolean available = true; boolean borrow() { if (!available) return false; available = false; return true; }"
+   },
+   {
+    "en": "Library: private Book[] books = new Book[10]; private int count = 0; void add(Book b) { books[count++] = b; }",
+    "te": "Library: private Book[] books = new Book[10]; private int count = 0; void add(Book b) { books[count++] = b; }",
+    "hi": "Library: private Book[] books = new Book[10]; private int count = 0; void add(Book b) { books[count++] = b; }"
+   },
+   {
+    "en": "borrow(String t): loop i < count, if (books[i].getTitle().equals(t)) return books[i].borrow(); after the loop return false.",
+    "te": "borrow(String t): loop i < count, if (books[i].getTitle().equals(t)) return books[i].borrow(); loop తర్వాత return false.",
+    "hi": "borrow(String t): loop i < count, if (books[i].getTitle().equals(t)) return books[i].borrow(); loop के बाद return false।"
+   }
+  ],
+  "solution": "class Book {\n    private String title;\n    private boolean available = true;\n\n    Book(String title) {\n        this.title = title;\n    }\n\n    String getTitle() {\n        return title;\n    }\n\n    boolean isAvailable() {\n        return available;\n    }\n\n    boolean borrow() {\n        if (!available) {\n            return false;\n        }\n        available = false;\n        return true;\n    }\n}\n\nclass Library {\n    private Book[] books = new Book[10];\n    private int count = 0;\n\n    void add(Book b) {\n        books[count++] = b;\n    }\n\n    boolean borrow(String title) {\n        for (int i = 0; i < count; i++) {\n            if (books[i].getTitle().equals(title)) {\n                return books[i].borrow();\n            }\n        }\n        return false;\n    }\n\n    int availableCount() {\n        int n = 0;\n        for (int i = 0; i < count; i++) {\n            if (books[i].isAvailable()) {\n                n++;\n            }\n        }\n        return n;\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        Library lib = new Library();\n        lib.add(new Book(\"Godan\"));\n        lib.add(new Book(\"Gitanjali\"));\n        System.out.println(lib.borrow(\"Godan\") + \" \" + lib.borrow(\"Godan\"));\n        System.out.println(\"Available: \" + lib.availableCount());\n    }\n}",
+  "output": "true false\nAvailable: 1"
+ }
+}
