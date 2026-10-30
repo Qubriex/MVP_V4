@@ -14,6 +14,7 @@ import { LoadingRows } from '../../components/shared/EmptyState';
 import { useUiLang } from '../../context/UiLangContext';
 import { usePageCrumbs } from '../../components/learn/BackBar';
 import LearningLangPicker from '../../components/learn/LearningLangPicker';
+import usePageTitle from '../../hooks/usePageTitle';
 
 const STATUS_ICON = { not_started: Circle, in_progress: CircleDot, known: CheckCircle2, done: CheckCircle2, confirmed: ShieldCheck };
 const STATUS_TAG = { not_started: 'ln-tag-neutral', in_progress: 'ln-tag-info', known: 'ln-tag-success', done: 'ln-tag-success', confirmed: 'ln-tag-success' };
@@ -22,6 +23,7 @@ export default function CoursePage() {
   const { t } = useUiLang();
   const { courseId } = useParams();
   const { data: c, error, reload } = useCachedGet(`/learner/courses/${courseId}`);
+  usePageTitle(c?.title);
   const [open, setOpen] = useState(null);
   const [msg, setMsg] = useState('');
   usePageCrumbs(c ? [{ key: 'nav.courses', to: '/learn/courses' }, { label: c.title }] : null);

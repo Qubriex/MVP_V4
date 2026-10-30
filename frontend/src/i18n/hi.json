@@ -4067,5 +4067,15 @@
   "lj.market.added": "जोड़ा ✓",
   "lj.market.alsoOn": "यहाँ खोजें:",
   "lj.market.outboundNote": "Job site सिर्फ़ role और city के साथ खुलती है। आपके बारे में कुछ नहीं भेजा जाता।",
-  "shared.askQubirex.answerIn": "जवाब की भाषा:"
+  "shared.askQubirex.answerIn": "जवाब की भाषा:",
+  "lj.passport.programme": "College programme",
+  "lj.market.needsTopics": "इस role के लिए ज़रूरी topics:",
+  "title.learn.courses": "Topics देखें",
+  "title.learn.course": "Course",
+  "title.learn.lesson": "पाठ",
+  "title.learn.moduleTest": "Module test",
+  "title.learn.moduleProject": "Module project",
+  "title.inst.topics": "Topics",
+  "title.topics": "हमारे topics देखिए",
+  "title.topicSample": "मुफ़्त sample पाठ"
 }

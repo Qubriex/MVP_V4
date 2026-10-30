@@ -45,7 +45,10 @@ async function jobCard(job, state, saved) {
     experience: job.experience, posted_days_ago: job.posted_days_ago,
     match: score.match, covered: score.covered, total: score.total, gap_hours: score.gap_hours,
     skills: score.skills.map(x => ({ name: x.name, status: x.status, required: x.required })),
-    saved_status: saved.get(job.id) || null
+    saved_status: saved.get(job.id) || null,
+    // The topics this role needs, from our catalog ("Add to my topics").
+    topics: topicsFor(`${job.title} ${job.skills.map(x => x.name).join(' ')}`, catalog().courses.map(c => c.id))
+      .map(id => ({ id, title: catalog().byId.get(id).title.en, status: catalog().byId.get(id).status }))
   };
 }
 

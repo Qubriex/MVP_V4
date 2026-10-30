@@ -27,6 +27,7 @@ import MermaidDiagram from '../../components/learn/MermaidDiagram';
 import AnswerBox from '../../components/learn/AnswerBox';
 import VoiceStatus from '../../components/learn/VoiceStatus';
 import { ResultCard } from '../../components/learn/journey';
+import usePageTitle from '../../hooks/usePageTitle';
 
 const STEPS = ['learn', 'code', 'practise', 'check'];
 const RATES = [0.8, 1, 1.2];
@@ -137,6 +138,7 @@ export default function Lesson() {
   const { lessonId } = useParams();
   const location = useLocation();
   const [d, setD] = useState(null);
+  usePageTitle(d?.title);
   const [error, setError] = useState('');
   const [step, setStepState] = useState('learn');
   const [reached, setReached] = useState('learn');

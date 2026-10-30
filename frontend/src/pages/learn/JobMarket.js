@@ -55,6 +55,24 @@ function SearchHelp({ jobs, onPick }) {
   );
 }
 
+// The topics a role needs, each with "Add to my topics".
+function RoleTopics({ topics }) {
+  const { t } = useUiLang();
+  const [added, setAdded] = useState({});
+  const add = (id) => api.post(`/learner/courses/${id}/add`).then(() => { dropCached('/learner/courses'); setAdded(a => ({ ...a, [id]: true })); }).catch(() => {});
+  return (
+    <div className="ln-row ln-wrap" style={{ gap: 6 }} data-role-topics>
+      <span className="ln-xs ln-muted">{t('lj.market.needsTopics')}</span>
+      {topics.map(c => (
+        <span key={c.id} className="ln-row" style={{ gap: 4 }}>
+          <Link to={`/learn/courses/${c.id}`} state={{ from: '/learn/market' }} className="ln-link ln-small">{c.title}</Link>
+          <button type="button" className="ln-btn ln-btn-sm" disabled={!!added[c.id]} onClick={() => add(c.id)} data-add-topic={c.id}>{added[c.id] ? t('lj.market.added') : t('lj.market.addTopic')}</button>
+        </span>
+      ))}
+    </div>
+  );
+}
+
 export default function JobMarket() {
   const { t, fmtNum } = useUiLang();
   const [params, setParams] = useSearchParams();
@@ -204,6 +222,7 @@ export default function JobMarket() {
               </div>
               <span className="ln-small">{[j.city, j.mode, salary(j.salary_min, j.salary_max), posted(j.posted_days_ago, t)].filter(Boolean).join(' · ')}</span>
               <div className="ln-row ln-wrap" style={{ gap: 6 }}>{j.skills.map(s => <SkillChip key={s.name} name={s.name} status={s.status} />)}</div>
+              {j.topics?.length > 0 && <RoleTopics topics={j.topics} />}
             </div>
             <div className="ln-col" style={{ gap: 8 }}>
               <Link to={`/learn/market/${j.id}`} className="ln-btn ln-btn-primary">{t('learn.jobMarket.viewJdGap')}</Link>

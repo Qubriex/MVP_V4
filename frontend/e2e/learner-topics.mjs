@@ -18,6 +18,7 @@
 //   DEV_PASS=… BASE=http://localhost:3000 node e2e/learner-topics.mjs
 import { createRequire } from 'module';
 import path from 'path';
+import fs from 'fs';
 
 const require = createRequire(import.meta.url);
 let chromium;
@@ -74,6 +75,13 @@ async function setLearning(page, value) {
   await settle(page);
 }
 
+async function setLearningApi(page, value) {
+  await page.evaluate(async (v) => {
+    const token = localStorage.getItem('qubirex_token');
+    await fetch('/api/learner/learning-language', { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ value: v }) });
+  }, value);
+}
+
 // One lesson, every step, in the current learning language.
 async function teachFirst(page, lessonId, script, label) {
   await page.goto(`${BASE}/learn/lesson/${lessonId}`);
@@ -82,10 +90,23 @@ async function teachFirst(page, lessonId, script, label) {
   check(`${label}: the lesson teaches first, in the learning language`, script.test(explain), explain.slice(0, 60));
   check(`${label}: the stepper shows Learn → See the code → Practise → Check`, (await page.$$('.lj-stepper [data-step]')).length === 4);
   await page.click('.lj-stepper [data-step="learn"] button');
+  await page.click('[data-simpler]');
+  check(`${label}: "Explain simpler" gives a simpler explanation`, !!(await page.waitForSelector('[data-extra="simpler"]', { timeout: 5000 }).catch(() => null)));
+  await page.click('[data-feedback="explain"] button[aria-label]');
+  await page.fill('[data-ask-input]', script === TELUGU ? 'return ఎందుకు వాడతాం?' : 'Why do we use return?');
+  await page.press('[data-ask-input]', 'Enter');
+  const asked = await page.waitForSelector('[data-ask-answer="0"]', { timeout: 15000 }).then(e => e.textContent()).catch(() => '');
+  check(`${label}: a question asked during the lesson is answered`, asked.length > 20, asked.replace(/\s+/g, ' ').slice(0, 70));
   await page.click('[data-step-panel="learn"] [data-next-step]');
   await page.click('[data-run-example]');
   const out = await page.waitForSelector('[data-output]', { timeout: 120000 }).then(e => e.textContent()).catch(() => '');
   check(`${label}: Run shows the example's output`, /177/.test(out), out.replace(/\s+/g, ' ').slice(0, 80));
+  const walk = await page.$('[data-walk]');
+  if (walk) {
+    await walk.click();
+    check(`${label}: the walkthrough highlights code lines`, !!(await page.waitForSelector('.lj-code-line.is-active', { timeout: 10000 }).catch(() => null)));
+    const stop = await page.$('[data-walk]'); if (stop) await stop.click().catch(() => {});
+  }
   await page.locator('[data-next-step]').last().click();
   await page.waitForSelector('[data-editor]', { timeout: 10000 });
   for (let i = 0; i < 3; i += 1) {
@@ -104,6 +125,10 @@ async function teachFirst(page, lessonId, script, label) {
   await page.click('[data-start-check]');
   const q = await page.waitForSelector('[data-check-question]', { timeout: 15000 }).then(e => e.textContent()).catch(() => '');
   check(`${label}: only then the check, with a fresh question`, q.length > 10, q.replace(/\s+/g, ' ').slice(0, 60));
+  await page.fill('[data-check-question] textarea', '#pass');
+  await page.click('[data-check-question] button[type=submit]');
+  const next = await page.waitForSelector('[data-next-lesson]', { timeout: 15000 }).catch(() => null);
+  check(`${label}: the result is shown, with the next lesson`, !!next);
 }
 
 // path → parent, as in src/components/learn/BackBar.js
@@ -168,6 +193,21 @@ try {
   await teachFirst(me, 'py-m3-l3', /return/i, 'Return values (English)');
   await setLearning(me, 'telugu');
 
+  await me.goto(`${BASE}/learn/courses/python`); await settle(me);
+  if (!(await me.$('[data-lesson="py-m3-l3"]'))) await me.click('[data-module="py-m3"] .lj-module-head');
+  check('Module 3 progress shows "Return values" done', ['done', 'confirmed'].includes(await me.getAttribute('[data-lesson="py-m3-l3"]', 'data-status')), await me.getAttribute('[data-lesson="py-m3-l3"]', 'data-status'));
+
+  // 4b. A lesson opened from a skill page goes back to that skill page
+  await me.goto(`${BASE}/learn/skill/test-node-4-4`); await settle(me);
+  const toLesson = await me.$('button:has-text("lesson"), [role=tab]:has-text("Lesson")');
+  if (toLesson) {
+    await toLesson.click();
+    await me.waitForURL('**/learn/session**', { timeout: 15000 }).catch(() => {});
+    await me.locator('[data-back]').first().click();
+    await me.waitForURL('**/learn/skill/test-node-4-4', { timeout: 10000 }).catch(() => {});
+    check('A lesson opened from a skill page: Back returns to that skill page', new URL(me.url()).pathname === '/learn/skill/test-node-4-4', me.url());
+  } else check('A lesson opened from a skill page: Back returns to that skill page', false, 'no lesson button on the skill page');
+
   // 5. Topics flow, desktop
   await me.goto(`${BASE}/learn/courses`); await settle(me);
   check('My topics shows Python', !!(await me.$('[data-course="python"]')));
@@ -175,6 +215,35 @@ try {
   check('Draft topics say they need faculty review', /faculty review/i.test(await me.textContent('main').catch(() => '')));
   await me.goto(`${BASE}/learn/courses/java`); await settle(me);
   check('Java opens with 9 modules', (await me.$$('[data-module]')).length === 9);
+  // Lesson answers share the learner's per-minute AI limit (30); the lessons above used much of it.
+  await me.waitForTimeout(61000);
+  await me.goto(`${BASE}/learn/lesson/jv-m1-l1`); await me.waitForSelector('[data-lesson-page]', { timeout: 15000 });
+  await me.click('[data-testout]');
+  await me.waitForSelector('[data-testout-answer="0"]', { timeout: 10000 });
+  for (const i of [0, 1]) await me.fill(`[data-testout-answer="${i}"]`, 'not sure');
+  await me.click('[data-testout-send]');
+  check('Test-out not passed: the lesson stays open to learn', (await me.waitForSelector('[data-testout-result]', { timeout: 10000 }).then(e => e.getAttribute('data-testout-result')).catch(() => '')) === 'learn');
+  await me.goto(`${BASE}/learn/lesson/jv-m1-l1`); await me.waitForSelector('[data-lesson-page]', { timeout: 15000 });
+  await me.click('[data-testout]');
+  await me.waitForSelector('[data-testout-answer="0"]', { timeout: 10000 });
+  for (const i of [0, 1]) await me.fill(`[data-testout-answer="${i}"]`, '#pass');
+  await me.click('[data-testout-send]');
+  check('Test-out passed: the lesson is Known', (await me.waitForSelector('[data-testout-result]', { timeout: 10000 }).then(e => e.getAttribute('data-testout-result')).catch(() => '')) === 'known');
+  // The rest of Java Module 1, then its test and project, through the same API the pages use.
+  const m1 = JSON.parse(fs.readFileSync(path.join(path.dirname(new URL(import.meta.url).pathname), '../../backend/data/courses/java/m1.json'), 'utf8'));
+  const api = (method, url, body) => me.evaluate(async ([m, u, b]) => {
+    const token = localStorage.getItem('qubirex_token');
+    const r = await fetch(`/api/learner${u}`, { method: m, headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body: b ? JSON.stringify(b) : undefined });
+    return { status: r.status, body: await r.json().catch(() => null) };
+  }, [method, url, body]);
+  for (const l of m1.lessons.slice(1)) await api('POST', `/lessons/${l.id}/testout`, { answers: ['#pass', '#pass'] });
+  const t = await api('POST', '/modules/jv-m1/test', { answers: m1.test.questions.map(q => q.answer) });
+  const proj = await api('GET', '/modules/jv-m1/project');
+  const done = await api('POST', '/modules/jv-m1/project', { results: (proj.body?.runner_tests || []).map(x => ({ name: x.name, passed: true })) });
+  check('Java Module 1 test and project pass', t.body?.passed === true && done.body?.module?.completed === true, JSON.stringify(done.body?.module || t.body).slice(0, 120));
+  await me.goto(`${BASE}/learn/passport`); await settle(me);
+  const javaGroup = await me.waitForSelector('[data-passport-group="java"]', { timeout: 15000 }).then(e => e.textContent()).catch(() => '');
+  check('The Passport shows the skill under Java', /Fundamentals/.test(javaGroup), javaGroup.replace(/\s+/g, ' ').slice(0, 80));
   check('No console errors on the topic pages', me.errors.length === 0, me.errors.slice(0, 2).join(' | '));
 
   // 5b. Topics flow at 390 px
@@ -213,9 +282,41 @@ try {
   await prof.waitForSelector('[data-review-panel] [role=status]', { timeout: 10000 }).catch(() => {});
   // /dev keeps one developer session at a time: open the learner again.
   await openStage(me, 'topics');
+  await prof.click('[data-topic-lesson="py-m1-l1"] button');
+  await prof.click('[data-topic-lesson="py-m3-l3"] button').catch(() => {});
+  if (!(await prof.$('[data-topic-lesson="py-m3-l3"]'))) await prof.click('[data-topic-course="python"] .lj-module-head');
+  const fb = await prof.waitForSelector('[data-topic-lesson="py-m3-l3"]', { timeout: 10000 }).then(e => e.textContent()).catch(() => '');
+  const ups = Number(await prof.getAttribute('[data-topic-lesson="py-m3-l3"] [data-up]', 'data-up').catch(() => 0));
+  check('👍 feedback from the lesson reaches the professor view', ups >= 1, `${ups} 👍 · ${fb.replace(/\s+/g, ' ').slice(0, 30)}`);
   await me.goto(`${BASE}/learn/lesson/py-m1-l1`);
   await me.waitForSelector('[data-lesson-page]', { timeout: 15000 });
   check('The learner sees "Reviewed by … faculty"', /Reviewed by .* faculty/.test(await me.textContent('[data-lesson-page]')));
+
+  // 8. Ask Qubirex and an open review question follow the learning language (S3 learner, reviews due).
+  await openStage(me, 's3');
+  await setLearningApi(me, 'telugu');
+  await me.goto(`${BASE}/learn/dashboard`); await settle(me);
+  await me.fill('#cmd-learner', 'loop ante enti?');
+  await me.press('#cmd-learner', 'Enter');
+  const tel = await me.waitForSelector('[data-ask-msg="qbx"]', { timeout: 20000 }).then(e => e.textContent()).catch(() => '');
+  check('Ask Qubirex: "loop ante enti?" with Telugu chosen gets a Telugu answer', TELUGU.test(tel), tel.slice(0, 60));
+  await me.selectOption('[data-ask-language] select', 'english');
+  await me.waitForFunction(() => { const m = [...document.querySelectorAll('[data-ask-msg="qbx"]')].pop(); return m && !/[\u0C00-\u0C7F]/.test(m.textContent); }, null, { timeout: 20000 }).catch(() => {});
+  const eng = await me.$$eval('[data-ask-msg="qbx"]', els => els[els.length - 1].textContent).catch(() => '');
+  check('Ask Qubirex: switching to English answers the same question again in English', !TELUGU.test(eng) && eng.length > 10, eng.slice(0, 60));
+  await me.keyboard.press('Escape');
+
+  await me.goto(`${BASE}/learn/reviews`); await settle(me);
+  const startBtn = me.locator('main button:has-text("Start"), main button:has-text("Continue")').first();
+  await startBtn.click();
+  const q1 = await me.waitForSelector('[data-review-question]', { timeout: 15000 }).then(e => e.textContent()).catch(() => '');
+  const inst1 = await me.getAttribute('[data-review-question]', 'data-review-question').catch(() => null);
+  await setLearning(me, 'hindi');
+  await me.waitForFunction(() => /[\u0900-\u097F]/.test(document.querySelector('[data-review-question]')?.textContent || ''), null, { timeout: 20000 }).catch(() => {});
+  const q2 = await me.textContent('[data-review-question]').catch(() => '');
+  const inst2 = await me.getAttribute('[data-review-question]', 'data-review-question').catch(() => null);
+  check('Reviews: switching language on an open question shows the same question in Hindi', TELUGU.test(q1) && HINDI.test(q2) && inst1 && inst1 === inst2, `${inst1 === inst2 ? 'same instance' : 'different'} · ${q2.slice(0, 50)}`);
+  await setLearningApi(me, 'telugu');
 } catch (e) {
   check('Run finished without an error', false, e.message.slice(0, 200));
 } finally {

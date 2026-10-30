@@ -4067,5 +4067,15 @@
   "lj.market.added": "జోడించాం ✓",
   "lj.market.alsoOn": "ఇక్కడ వెతకండి:",
   "lj.market.outboundNote": "Job site ని role, city తో మాత్రమే తెరుస్తుంది. మీ గురించి ఏమీ పంపదు.",
-  "shared.askQubirex.answerIn": "జవాబు భాష:"
+  "shared.askQubirex.answerIn": "జవాబు భాష:",
+  "lj.passport.programme": "College programme",
+  "lj.market.needsTopics": "ఈ role కి కావలసిన topics:",
+  "title.learn.courses": "Topics చూడండి",
+  "title.learn.course": "Course",
+  "title.learn.lesson": "పాఠం",
+  "title.learn.moduleTest": "Module test",
+  "title.learn.moduleProject": "Module project",
+  "title.inst.topics": "Topics",
+  "title.topics": "మా topics చూడండి",
+  "title.topicSample": "ఉచిత sample పాఠం"
 }

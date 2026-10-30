@@ -133,7 +133,7 @@ export default function Topics() {
                               {LANGS.map(([v, code]) => <span key={v} className={`ln-tag ${l.reviewed[v] ? 'ln-tag-success' : ''}`} title={t(l.reviewed[v] ? 'inst.topics.statusReviewed' : 'inst.topics.notReviewed')}>{code.toUpperCase()}{l.reviewed[v] ? ' ✓' : ''}</span>)}
                             </span>
                             <span className="ln-xs ln-muted ln-row" style={{ gap: 6 }}>
-                              <ThumbsUp size={12} aria-hidden="true" />{l.feedback.up}<ThumbsDown size={12} aria-hidden="true" />{l.feedback.down}
+                              <ThumbsUp size={12} aria-hidden="true" /><span data-up={l.feedback.up}>{l.feedback.up}</span><ThumbsDown size={12} aria-hidden="true" /><span data-down={l.feedback.down}>{l.feedback.down}</span>
                               {l.suggestions > 0 && ` · ${t('inst.topics.suggestionsN', { n: l.suggestions })}`}
                             </span>
                             {openLesson === l.id && <div style={{ flexBasis: '100%' }}><ReviewPanel lessonId={l.id} canReview={canReview} onChanged={load} /></div>}

@@ -25,7 +25,10 @@ const TITLES = [
   ['/institution/board-report', 'title.inst.boardReport'], ['/institution/profile', 'title.inst.profile'], ['/institution/mastery-log/:logId', 'title.inst.masteryLog'],
   ['/learn/session', 'title.learn.session'], ['/learn/dashboard', 'title.learn.home'], ['/learn/welcome', 'title.learn.welcome'], ['/learn/record', 'title.learn.record'], ['/learn/jobs', 'title.learn.jobs'],
   ['/learn/market', 'title.learn.market'], ['/learn/market/:jobId', 'title.learn.job'], ['/learn/market/:jobId/interview', 'title.learn.interview'], ['/learn/topics', 'title.learn.topics'],
-  ['/learn/profile', 'title.learn.profile'], ['/learn/settings', 'title.learn.settings'], ['/learn/resume', 'title.learn.resume'], ['/learn/reviews', 'title.learn.reviews'], ['/learn/passport', 'title.learn.passport']
+  ['/learn/profile', 'title.learn.profile'], ['/learn/settings', 'title.learn.settings'], ['/learn/resume', 'title.learn.resume'], ['/learn/reviews', 'title.learn.reviews'], ['/learn/passport', 'title.learn.passport'],
+  ['/learn/courses', 'title.learn.courses'], ['/learn/courses/:courseId', 'title.learn.course'], ['/learn/lesson/:lessonId', 'title.learn.lesson'],
+  ['/learn/modules/:moduleId/test', 'title.learn.moduleTest'], ['/learn/modules/:moduleId/project', 'title.learn.moduleProject'],
+  ['/institution/topics', 'title.inst.topics'], ['/topics', 'title.topics'], ['/topics/sample/:lessonId', 'title.topicSample']
 ];
 
 export function titleKeyFor(pathname) {

@@ -4066,5 +4066,15 @@
   "lj.market.added": "Added ✓",
   "lj.market.alsoOn": "Search on:",
   "lj.market.outboundNote": "Opens the job site with only the role and city. Nothing about you is sent.",
-  "shared.askQubirex.answerIn": "Answer in:"
+  "shared.askQubirex.answerIn": "Answer in:",
+  "lj.passport.programme": "College programme",
+  "lj.market.needsTopics": "Topics this role needs:",
+  "title.learn.courses": "Explore topics",
+  "title.learn.course": "Course",
+  "title.learn.lesson": "Lesson",
+  "title.learn.moduleTest": "Module test",
+  "title.learn.moduleProject": "Module project",
+  "title.inst.topics": "Topics",
+  "title.topics": "See our topics",
+  "title.topicSample": "Free sample lesson"
 }

@@ -276,9 +276,25 @@ export default function Passport() {
         {(() => {
           const list = p.skills.filter(s => filter === 'all' || labelOf(s) === filter).sort(SORTS[sort]);
           if (p.skills.length && !list.length) return <div className="ln-card ln-muted">{t('learn.passport.noneInFilter')}</div>;
-          return view === 'grid'
-            ? <div className="pp-grid">{list.map(s => <SkillCell key={s.skill_id} s={s} />)}</div>
-            : list.map(s => <SkillLine key={s.skill_id} s={s} />);
+          const show = (items) => (view === 'grid'
+            ? <div className="pp-grid">{items.map(s => <SkillCell key={s.skill_id} s={s} />)}</div>
+            : items.map(s => <SkillLine key={s.skill_id} s={s} />));
+          // Grouped by topic: the college programme first, then each course the learner chose.
+          const groups = [];
+          list.forEach(s => {
+            const key = s.course || 'programme';
+            let g = groups.find(x => x.key === key);
+            if (!g) { g = { key, title: s.course ? String(s.name).split(':')[0] : t('lj.passport.programme'), items: [] }; groups.push(g); }
+            g.items.push(s);
+          });
+          groups.sort((a, b) => (a.key === 'programme' ? -1 : b.key === 'programme' ? 1 : 0));
+          if (groups.length < 2 && groups[0]?.key === 'programme') return show(list);
+          return groups.map(g => (
+            <div key={g.key} className="ln-col" style={{ gap: 8 }} data-passport-group={g.key}>
+              <h3 className="ln-h3" style={{ margin: 0 }}>{g.title}</h3>
+              {show(g.items)}
+            </div>
+          ));
         })()}
         <p className="ln-small ln-muted">{p.note || t('learn.passport.labelsComputedFromDated')} {' '}{t('learn.passport.reviewsKeepSkillsFresh')}{' '} <Link className="ln-link" to="/learn/reviews">{t('learn.passport.seeReviewsDue')}</Link>.</p>
       </section>

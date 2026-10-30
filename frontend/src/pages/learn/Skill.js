@@ -236,7 +236,7 @@ export default function Skill() {
             <span className="ln-small"><b>{t('lj.whatNext')}</b> {t(`lj.skill.next.${p.next.key}`)}</span>
             {p.next.href ? <Link className="ln-btn ln-btn-primary" to={p.next.href}>{t('lj.go')}</Link> : p.next.tab ? <button type="button" className="ln-btn ln-btn-primary" onClick={() => setTab(p.next.tab)}>{t('lj.go')}</button> : null}
           </div>
-          {!data.mastered && <Link className="ln-link ln-small" to="/learn/session"><MessageCircleQuestion size={14} aria-hidden="true" /> {t('lj.skill.stuck')}</Link>}
+          {!data.mastered && <Link className="ln-link ln-small" to="/learn/session" state={{ from: `/learn/skill/${nodeId}` }}><MessageCircleQuestion size={14} aria-hidden="true" /> {t('lj.skill.stuck')}</Link>}
         </section>
       )}
     </>
