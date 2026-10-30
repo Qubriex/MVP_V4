@@ -1,0 +1,801 @@
+{
+ "id": "py-m8",
+ "n": 8,
+ "skill": "python-project",
+ "title": {
+  "en": "Project",
+  "te": "Project",
+  "hi": "Project"
+ },
+ "summary": {
+  "en": "Plan, build and test a complete small app that uses everything from this course.",
+  "te": "ఈ course లోని అన్నింటినీ వాడే పూర్తి చిన్న app ని ప్రణాళిక చేసి, తయారు చేసి, test చేయడం.",
+  "hi": "इस course की हर चीज़ इस्तेमाल करने वाला एक पूरा छोटा app योजना बनाकर बनाना और test करना।"
+ },
+ "lessons": [
+  {
+   "id": "py-m8-l1",
+   "n": 1,
+   "minutes": 20,
+   "title": {
+    "en": "Planning a program",
+    "te": "Program ప్రణాళిక",
+    "hi": "Program की योजना"
+   },
+   "oneLine": {
+    "en": "Before coding, split the problem into small functions with clear inputs and outputs, then build and test them one by one.",
+    "te": "Code రాసే ముందు సమస్యను స్పష్టమైన inputs, outputs ఉన్న చిన్న functions గా విభజించి, ఒక్కొక్కటిగా తయారు చేసి test చేయండి.",
+    "hi": "Code लिखने से पहले समस्या को साफ़ inputs और outputs वाले छोटे functions में बाँटिए, फिर एक-एक करके बनाइए और test कीजिए।"
+   },
+   "useCase": {
+    "en": "A team building a canteen ordering app first lists the steps: read the menu, take an order, work out the bill, save the order.",
+    "te": "Canteen ordering app తయారుచేసే team ముందు steps list చేస్తుంది: menu చదవడం, order తీసుకోవడం, bill లెక్కించడం, order దాచడం.",
+    "hi": "Canteen ordering app बनाने वाली team पहले steps लिखती है: menu पढ़ना, order लेना, bill निकालना, order सहेजना।"
+   },
+   "explain": {
+    "en": [
+     "Big programs are hard to write in one go. Professionals break them into small steps.",
+     "Write the steps in plain words first. Each step becomes one function.",
+     "For each function, decide its input and its output. bill(order, menu) → a number.",
+     "Build the smallest piece first, run it, then add the next. Small steps make mistakes easy to find.",
+     "Finally, a main part calls the functions in order."
+    ],
+    "te": [
+     "పెద్ద programs ఒకేసారి రాయడం కష్టం. నిపుణులు వాటిని చిన్న steps గా విభజిస్తారు.",
+     "ముందు steps ని సాధారణ పదాల్లో రాయండి. ప్రతి step ఒక function అవుతుంది.",
+     "ప్రతి function కి input, output నిర్ణయించండి. bill(order, menu) → ఒక number.",
+     "అతి చిన్న భాగం ముందు తయారుచేసి నడపండి, తర్వాత తదుపరిది జోడించండి. చిన్న steps తో తప్పులు సులభంగా దొరుకుతాయి.",
+     "చివరగా main భాగం functions ని క్రమంలో call చేస్తుంది."
+    ],
+    "hi": [
+     "बड़े programs एक बार में लिखना मुश्किल है। Professionals उन्हें छोटे steps में बाँटते हैं।",
+     "पहले steps सादे शब्दों में लिखिए। हर step एक function बनता है।",
+     "हर function का input और output तय कीजिए। bill(order, menu) → एक number।",
+     "सबसे छोटा हिस्सा पहले बनाकर चलाइए, फिर अगला जोड़िए। छोटे steps से ग़लतियाँ आसानी से मिलती हैं।",
+     "आख़िर में main हिस्सा functions को क्रम से call करता है।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "Plan in steps, one function per step, test each as you go."
+    ],
+    "te": [
+     "Steps లో ప్రణాళిక, ప్రతి step కి ఒక function, వెంటనే test."
+    ],
+    "hi": [
+     "Steps में योजना, हर step का एक function, साथ-साथ test।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "A fee reminder tool: load_students(), unpaid(students), message(student), then send each message."
+    ],
+    "te": [
+     "Fee reminder tool: load_students(), unpaid(students), message(student), తర్వాత ప్రతి message పంపండి."
+    ],
+    "hi": [
+     "Fee reminder tool: load_students(), unpaid(students), message(student), फिर हर message भेजिए।"
+    ]
+   },
+   "picture": "flowchart LR\n  A[\"menu\"] --> B[\"take_order\"] --> C[\"bill\"] --> D[\"save_order\"]",
+   "code": {
+    "source": "MENU = {\"tea\": 15, \"samosa\": 12, \"dosa\": 40}\n\ndef bill(order):\n    return sum(MENU[item] * qty for item, qty in order.items())\n\ndef receipt(order):\n    lines = [f\"{item} x{qty}\" for item, qty in order.items()]\n    return \", \".join(lines) + f\" = Rs {bill(order)}\"\n\norder = {\"tea\": 2, \"dosa\": 1}\nprint(bill(order))\nprint(receipt(order))",
+    "output": "70\ntea x2, dosa x1 = Rs 70",
+    "notes": [
+     {
+      "line": 1,
+      "note": {
+       "en": "The data the program needs, kept in one place.",
+       "te": "Program కి కావలసిన data ఒకే చోట.",
+       "hi": "Program का ज़रूरी data एक जगह।"
+      }
+     },
+     {
+      "line": 3,
+      "note": {
+       "en": "Step 1 as a function: input an order, output a number.",
+       "te": "Step 1 function గా: input order, output number.",
+       "hi": "Step 1 function के रूप में: input order, output number।"
+      }
+     },
+     {
+      "line": 6,
+      "note": {
+       "en": "Step 2 reuses step 1 instead of repeating the sum.",
+       "te": "Step 2, sum మళ్లీ రాయకుండా step 1 ని వాడుకుంటుంది.",
+       "hi": "Step 2, जोड़ दोहराने की जगह step 1 इस्तेमाल करता है।"
+      }
+     },
+     {
+      "line": 10,
+      "note": {
+       "en": "The main part: make an order and call the steps.",
+       "te": "Main భాగం: order చేసి steps call చేయండి.",
+       "hi": "Main हिस्सा: order बनाइए और steps call कीजिए।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "# 200 lines in one go, then run",
+     "fix": {
+      "en": "Write and run one small function at a time; errors are then easy to find.",
+      "te": "ఒక్కోసారి ఒక చిన్న function రాసి నడపండి; అప్పుడు errors సులభంగా దొరుకుతాయి.",
+      "hi": "एक बार में एक छोटा function लिखकर चलाइए; तब errors आसानी से मिलते हैं।"
+     }
+    },
+    {
+     "wrong": "def bill(order):\n    print(total)",
+     "fix": {
+      "en": "Return the result so other steps can use it; print only at the end.",
+      "te": "ఇతర steps వాడేలా ఫలితం return చేయండి; చివర మాత్రమే print.",
+      "hi": "Result return कीजिए ताकि दूसरे steps इस्तेमाल करें; print सिर्फ़ आख़िर में।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "What should you write first?",
+      "te": "ముందు ఏం రాయాలి?",
+      "hi": "पहले क्या लिखना चाहिए?"
+     },
+     "options": [
+      {
+       "en": "All the code",
+       "te": "మొత్తం code",
+       "hi": "सारा code"
+      },
+      {
+       "en": "The steps in plain words",
+       "te": "సాధారణ పదాల్లో steps",
+       "hi": "सादे शब्दों में steps"
+      }
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Plan first.",
+      "te": "ముందు ప్రణాళిక.",
+      "hi": "पहले योजना।"
+     }
+    },
+    {
+     "q": {
+      "en": "A good function has…",
+      "te": "మంచి function కి…",
+      "hi": "अच्छे function में…"
+     },
+     "options": [
+      {
+       "en": "a clear input and output",
+       "te": "స్పష్టమైన input, output",
+       "hi": "साफ़ input और output"
+      },
+      {
+       "en": "as many lines as possible",
+       "te": "వీలైనన్ని lines",
+       "hi": "जितनी हो सकें उतनी lines"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Clear input and output.",
+      "te": "స్పష్టమైన input, output.",
+      "hi": "साफ़ input और output।"
+     }
+    },
+    {
+     "q": {
+      "en": "Why build in small pieces?",
+      "te": "చిన్న భాగాలుగా ఎందుకు?",
+      "hi": "छोटे हिस्सों में क्यों?"
+     },
+     "options": [
+      {
+       "en": "Mistakes are easier to find",
+       "te": "తప్పులు సులభంగా దొరుకుతాయి",
+       "hi": "ग़लतियाँ आसानी से मिलती हैं"
+      },
+      {
+       "en": "It runs faster",
+       "te": "వేగంగా నడుస్తుంది",
+       "hi": "तेज़ चलता है"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Smaller steps, easier fixes.",
+      "te": "చిన్న steps, సులభమైన సవరణలు.",
+      "hi": "छोटे steps, आसान सुधार।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "The canteen gives 10% off when the bill is Rs 200 or more. Write final_bill(order, menu) that uses a helper subtotal(order, menu) and returns the amount after the discount.",
+     "te": "Bill Rs 200 లేదా ఎక్కువ అయితే canteen 10% తగ్గింపు ఇస్తుంది. subtotal(order, menu) helper వాడి తగ్గింపు తర్వాత మొత్తం return చేసే final_bill(order, menu) రాయండి.",
+     "hi": "Bill Rs 200 या ज़्यादा हो तो canteen 10% छूट देती है। helper subtotal(order, menu) इस्तेमाल करके छूट के बाद की रक़म return करने वाला final_bill(order, menu) लिखिए।"
+    },
+    "starter": "def subtotal(order, menu):\n    pass\n\ndef final_bill(order, menu):\n    pass\n",
+    "tests": [
+     {
+      "name": "no discount",
+      "call": "final_bill({\"tea\": 2}, {\"tea\": 15})",
+      "expected": "30"
+     },
+     {
+      "name": "10% off at 200",
+      "call": "final_bill({\"dosa\": 5}, {\"dosa\": 40})",
+      "expected": "180.0"
+     },
+     {
+      "name": "subtotal",
+      "call": "subtotal({\"a\": 3, \"b\": 1}, {\"a\": 10, \"b\": 5})",
+      "expected": "35"
+     },
+     {
+      "name": "final_bill uses subtotal",
+      "call": "'subtotal' in final_bill.__code__.co_names",
+      "expected": "True",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "subtotal: sum of menu[item] * qty.",
+      "te": "subtotal: menu[item] * qty మొత్తం.",
+      "hi": "subtotal: menu[item] * qty का जोड़।"
+     },
+     {
+      "en": "final_bill: s = subtotal(order, menu)",
+      "te": "final_bill: s = subtotal(order, menu)",
+      "hi": "final_bill: s = subtotal(order, menu)"
+     },
+     {
+      "en": "if s >= 200: return s * 0.9, else return s",
+      "te": "if s >= 200: return s * 0.9, లేకపోతే return s",
+      "hi": "if s >= 200: return s * 0.9, नहीं तो return s"
+     }
+    ],
+    "solution": "def subtotal(order, menu):\n    return sum(menu[item] * qty for item, qty in order.items())\n\ndef final_bill(order, menu):\n    s = subtotal(order, menu)\n    if s >= 200:\n        return s * 0.9\n    return s"
+   },
+   "cheat": {
+    "en": [
+     "1. Steps in words  2. One function per step",
+     "Decide input → output for each.",
+     "Build small, run often; main calls the steps."
+    ],
+    "te": [
+     "1. పదాల్లో steps  2. ప్రతి step కి ఒక function",
+     "ప్రతి దానికి input → output నిర్ణయించండి.",
+     "చిన్నగా తయారు చేసి తరచూ నడపండి; main steps ని call చేస్తుంది."
+    ],
+    "hi": [
+     "1. शब्दों में steps  2. हर step का एक function",
+     "हर एक का input → output तय कीजिए।",
+     "छोटा बनाइए, बार-बार चलाइए; main steps को call करता है।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "You are asked to build a fee reminder tool for a college. Explain how you would plan it into steps and functions before writing code.",
+      "te": "College కోసం fee reminder tool తయారుచేయమన్నారు. Code రాసే ముందు దాన్ని steps, functions గా ఎలా ప్రణాళిక చేస్తారో వివరించండి.",
+      "hi": "आपसे college के लिए fee reminder tool बनाने को कहा गया है। Code लिखने से पहले इसे steps और functions में कैसे बाँटेंगे, समझाइए।"
+     },
+     {
+      "en": "Why is it better for a function to return a value than to print it?",
+      "te": "Function value ని print చేయడం కంటే return చేయడం ఎందుకు మంచిది?",
+      "hi": "Function का value print करने से return करना बेहतर क्यों है?"
+     }
+    ],
+    "keywords": [
+     [
+      "step",
+      "plan",
+      "ప్రణాళిక",
+      "योजना"
+     ],
+     [
+      "function",
+      "input",
+      "output"
+     ],
+     [
+      "return",
+      "test",
+      "small",
+      "చిన్న",
+      "छोटे"
+     ]
+    ],
+    "challenge": {
+     "en": "Say the first thing you do before coding a big program.",
+     "te": "పెద్ద program code చేసే ముందు మొదట చేసే పని చెప్పండి.",
+     "hi": "बड़ा program code करने से पहले सबसे पहला काम बताइए।"
+    }
+   }
+  },
+  {
+   "id": "py-m8-l2",
+   "n": 2,
+   "minutes": 20,
+   "title": {
+    "en": "Testing your code",
+    "te": "మీ code ని test చేయడం",
+    "hi": "अपने code को test करना"
+   },
+   "oneLine": {
+    "en": "assert checks that a function gives the answer you expect, so you know at once when a change breaks something.",
+    "te": "assert ఒక function మీరు ఆశించిన జవాబు ఇస్తుందో చూస్తుంది; ఏదైనా మార్పు ఏదైనా పాడుచేస్తే వెంటనే తెలుస్తుంది.",
+    "hi": "assert जाँचता है कि function वही जवाब दे जिसकी उम्मीद है, ताकि कोई बदलाव कुछ तोड़े तो तुरंत पता चले।"
+   },
+   "useCase": {
+    "en": "Before a payroll app pays salaries, its tests check the tax function on known cases.",
+    "te": "Payroll app జీతాలు చెల్లించే ముందు దాని tests తెలిసిన cases పై tax function ని పరీక్షిస్తాయి.",
+    "hi": "Payroll app salary देने से पहले उसके tests जाने-पहचाने cases पर tax function जाँचते हैं।"
+   },
+   "explain": {
+    "en": [
+     "A test is a small program that checks another program.",
+     "assert add(2, 3) == 5 does nothing when it is right, and raises AssertionError when it is wrong.",
+     "Test normal cases, edge cases (zero, empty list, one item) and wrong input.",
+     "Keep tests in a function like test_bill() and run them after every change.",
+     "Real projects use pytest, which finds and runs test_ functions for you. This is what the Run tests button does here."
+    ],
+    "te": [
+     "Test అంటే మరో program ని పరీక్షించే చిన్న program.",
+     "assert add(2, 3) == 5 సరైనప్పుడు ఏమీ చేయదు; తప్పైనప్పుడు AssertionError ఇస్తుంది.",
+     "సాధారణ cases, edge cases (సున్నా, ఖాళీ list, ఒక్క item), తప్పు input ని test చేయండి.",
+     "Tests ని test_bill() లాంటి function లో ఉంచి ప్రతి మార్పు తర్వాత నడపండి.",
+     "నిజమైన projects pytest వాడతాయి; అది test_ functions ని వెతికి నడుపుతుంది. ఇక్కడ Run tests button చేసేది ఇదే."
+    ],
+    "hi": [
+     "Test एक छोटा program है जो दूसरे program को जाँचता है।",
+     "assert add(2, 3) == 5 सही होने पर कुछ नहीं करता, और ग़लत होने पर AssertionError देता है।",
+     "सामान्य cases, edge cases (शून्य, ख़ाली list, एक item) और ग़लत input test कीजिए।",
+     "Tests को test_bill() जैसे function में रखिए और हर बदलाव के बाद चलाइए।",
+     "असली projects pytest इस्तेमाल करते हैं, जो test_ functions ढूँढकर चलाता है। यहाँ Run tests button यही करता है।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "A test is an answer key for your function."
+    ],
+    "te": [
+     "Test అంటే మీ function కి answer key."
+    ],
+    "hi": [
+     "Test आपके function की answer key है।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "Testing a grade function: assert grade(90) == \"A\", assert grade(0) == \"F\", assert grade(100) == \"A\"."
+    ],
+    "te": [
+     "Grade function test: assert grade(90) == \"A\", assert grade(0) == \"F\", assert grade(100) == \"A\"."
+    ],
+    "hi": [
+     "Grade function का test: assert grade(90) == \"A\", assert grade(0) == \"F\", assert grade(100) == \"A\"।"
+    ]
+   },
+   "picture": "flowchart LR\n  F[\"function\"] --> T{\"assert result == expected\"}\n  T -->|yes| OK[\"silent: pass\"]\n  T -->|no| E[\"AssertionError: fail\"]",
+   "code": {
+    "source": "def average(marks):\n    if not marks:\n        return 0\n    return sum(marks) / len(marks)\n\ndef test_average():\n    assert average([80, 90]) == 85\n    assert average([]) == 0\n    assert average([50]) == 50\n    return \"all tests passed\"\n\nprint(test_average())",
+    "output": "all tests passed",
+    "notes": [
+     {
+      "line": 2,
+      "note": {
+       "en": "An edge case is handled: an empty list.",
+       "te": "ఒక edge case నిర్వహించబడింది: ఖాళీ list.",
+       "hi": "एक edge case संभाला गया: ख़ाली list।"
+      }
+     },
+     {
+      "line": 6,
+      "note": {
+       "en": "Tests live in their own function.",
+       "te": "Tests వాటి సొంత function లో ఉంటాయి.",
+       "hi": "Tests अपने function में रहते हैं।"
+      }
+     },
+     {
+      "line": 7,
+      "note": {
+       "en": "A normal case.",
+       "te": "సాధారణ case.",
+       "hi": "सामान्य case।"
+      }
+     },
+     {
+      "line": 8,
+      "note": {
+       "en": "The empty list edge case.",
+       "te": "ఖాళీ list edge case.",
+       "hi": "ख़ाली list वाला edge case।"
+      }
+     },
+     {
+      "line": 9,
+      "note": {
+       "en": "One item: another edge case.",
+       "te": "ఒక్క item: మరో edge case.",
+       "hi": "एक item: एक और edge case।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "assert average([80, 90]) == 85\n# only one test",
+     "fix": {
+      "en": "One test is not enough. Add edge cases like an empty list.",
+      "te": "ఒక్క test చాలదు. ఖాళీ list లాంటి edge cases జోడించండి.",
+      "hi": "एक test काफ़ी नहीं। ख़ाली list जैसे edge cases जोड़िए।"
+     }
+    },
+    {
+     "wrong": "assert(average([1, 2]), 1.5)",
+     "fix": {
+      "en": "This is always true (a non-empty tuple). Write assert average([1, 2]) == 1.5.",
+      "te": "ఇది ఎప్పుడూ true (ఖాళీ కాని tuple). assert average([1, 2]) == 1.5 రాయండి.",
+      "hi": "यह हमेशा true है (ख़ाली नहीं tuple)। assert average([1, 2]) == 1.5 लिखिए।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "assert 2 + 2 == 4 does…",
+      "te": "assert 2 + 2 == 4 చేసేది…",
+      "hi": "assert 2 + 2 == 4 करता है…"
+     },
+     "options": [
+      {
+       "en": "nothing",
+       "te": "ఏమీ లేదు",
+       "hi": "कुछ नहीं"
+      },
+      {
+       "en": "raises an error",
+       "te": "Error ఇస్తుంది",
+       "hi": "error देता है"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "It is true, so it is silent.",
+      "te": "True కాబట్టి నిశ్శబ్దం.",
+      "hi": "True है, इसलिए चुप।"
+     }
+    },
+    {
+     "q": {
+      "en": "Which is an edge case for average(marks)?",
+      "te": "average(marks) కి edge case ఏది?",
+      "hi": "average(marks) के लिए edge case कौन-सा?"
+     },
+     "options": [
+      "[70, 80]",
+      "[]",
+      "[60, 65]"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "An empty list.",
+      "te": "ఖాళీ list.",
+      "hi": "ख़ाली list।"
+     }
+    },
+    {
+     "q": {
+      "en": "A failing assert raises…",
+      "te": "విఫలమైన assert ఇచ్చేది…",
+      "hi": "Fail होने वाला assert देता है…"
+     },
+     "options": [
+      "ValueError",
+      "AssertionError",
+      "KeyError"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "AssertionError.",
+      "te": "AssertionError.",
+      "hi": "AssertionError।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "grade(mark) should return \"A\" for 75 and above, \"B\" for 50 to 74, and \"F\" below 50. Fix the starter so every test passes (look at the boundary marks).",
+     "te": "grade(mark) 75 పైబడితే \"A\", 50 నుంచి 74 కి \"B\", 50 కంటే తక్కువకు \"F\" return చేయాలి. ప్రతి test pass అయ్యేలా starter ని సరిచేయండి (హద్దు marks చూడండి).",
+     "hi": "grade(mark) को 75 और ऊपर पर \"A\", 50 से 74 पर \"B\", और 50 से नीचे \"F\" return करना है। Starter ठीक कीजिए ताकि हर test pass हो (सीमा वाले marks देखिए)।"
+    },
+    "starter": "def grade(mark):\n    if mark > 75:\n        return \"A\"\n    elif mark > 50:\n        return \"B\"\n    return \"F\"\n",
+    "tests": [
+     {
+      "name": "grade(90)",
+      "call": "grade(90)",
+      "expected": "'A'"
+     },
+     {
+      "name": "boundary 75",
+      "call": "grade(75)",
+      "expected": "'A'"
+     },
+     {
+      "name": "boundary 50",
+      "call": "grade(50)",
+      "expected": "'B'"
+     },
+     {
+      "name": "grade(49)",
+      "call": "grade(49)",
+      "expected": "'F'",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "Run the tests: which marks fail?",
+      "te": "Tests నడపండి: ఏ marks విఫలమవుతాయి?",
+      "hi": "Tests चलाइए: कौन-से marks fail होते हैं?"
+     },
+     {
+      "en": "75 should be \"A\", but 75 > 75 is False.",
+      "te": "75 \"A\" కావాలి, కానీ 75 > 75 False.",
+      "hi": "75 को \"A\" होना चाहिए, पर 75 > 75 False है।"
+     },
+     {
+      "en": "Use >= 75 and >= 50.",
+      "te": ">= 75, >= 50 వాడండి.",
+      "hi": ">= 75 और >= 50 लिखिए।"
+     }
+    ],
+    "solution": "def grade(mark):\n    if mark >= 75:\n        return \"A\"\n    elif mark >= 50:\n        return \"B\"\n    return \"F\""
+   },
+   "cheat": {
+    "en": [
+     "assert result == expected",
+     "Test normal, edge (0, [], one item) and wrong input.",
+     "def test_x(): ... · pytest runs test_ functions."
+    ],
+    "te": [
+     "assert result == expected",
+     "సాధారణ, edge (0, [], ఒక్క item), తప్పు input test చేయండి.",
+     "def test_x(): ... · pytest test_ functions నడుపుతుంది."
+    ],
+    "hi": [
+     "assert result == expected",
+     "सामान्य, edge (0, [], एक item) और ग़लत input test कीजिए।",
+     "def test_x(): ... · pytest test_ functions चलाता है।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "You wrote a grade function for your college. Explain which cases you would test and why boundary marks like 50 and 75 matter.",
+      "te": "మీ college కోసం grade function రాశారు. ఏ cases test చేస్తారో, 50, 75 లాంటి హద్దు marks ఎందుకు ముఖ్యమో వివరించండి.",
+      "hi": "आपने college के लिए grade function लिखा। कौन-से cases test करेंगे और 50 और 75 जैसे सीमा marks क्यों ज़रूरी हैं, समझाइए।"
+     },
+     {
+      "en": "Explain what assert does when the check is true and when it is false.",
+      "te": "Check true అయినప్పుడు, false అయినప్పుడు assert ఏం చేస్తుందో వివరించండి.",
+      "hi": "जाँच true होने पर और false होने पर assert क्या करता है, समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "assert",
+      "test"
+     ],
+     [
+      "edge",
+      "boundary",
+      "హద్దు",
+      "सीमा",
+      "50",
+      "75"
+     ],
+     [
+      "assertionerror",
+      "error",
+      "fail",
+      "pass",
+      "expected"
+     ]
+    ],
+    "challenge": {
+     "en": "Say what an edge case is, with one example.",
+     "te": "Edge case అంటే ఏమిటో ఒక ఉదాహరణతో చెప్పండి.",
+     "hi": "Edge case क्या है, एक उदाहरण से बताइए।"
+    }
+   }
+  }
+ ],
+ "test": {
+  "pass": 4,
+  "questions": [
+   {
+    "q": {
+     "en": "Which comes first?",
+     "te": "ఏది ముందు?",
+     "hi": "पहले क्या?"
+    },
+    "options": [
+     {
+      "en": "Plan the steps",
+      "te": "Steps ప్రణాళిక",
+      "hi": "Steps की योजना"
+     },
+     {
+      "en": "Write all code",
+      "te": "మొత్తం code రాయడం",
+      "hi": "सारा code लिखना"
+     }
+    ],
+    "answer": 0,
+    "why": {
+     "en": "Plan first.",
+     "te": "ముందు ప్రణాళిక.",
+     "hi": "पहले योजना।"
+    }
+   },
+   {
+    "q": {
+     "en": "Functions should mostly…",
+     "te": "Functions ఎక్కువగా…",
+     "hi": "Functions को ज़्यादातर…"
+    },
+    "options": [
+     {
+      "en": "return values",
+      "te": "Values return చేయాలి",
+      "hi": "values return करनी चाहिए"
+     },
+     {
+      "en": "print values",
+      "te": "Values print చేయాలి",
+      "hi": "values print करनी चाहिए"
+     }
+    ],
+    "answer": 0,
+    "why": {
+     "en": "Return, so others can use them.",
+     "te": "Return, ఇతరులు వాడేలా.",
+     "hi": "Return, ताकि दूसरे इस्तेमाल करें।"
+    }
+   },
+   {
+    "q": {
+     "en": "A wrong assert raises…",
+     "te": "తప్పు assert ఇచ్చేది…",
+     "hi": "ग़लत assert देता है…"
+    },
+    "options": [
+     "AssertionError",
+     "ImportError"
+    ],
+    "answer": 0,
+    "why": {
+     "en": "AssertionError.",
+     "te": "AssertionError.",
+     "hi": "AssertionError।"
+    }
+   },
+   {
+    "q": {
+     "en": "An edge case for a list is…",
+     "te": "List కి edge case…",
+     "hi": "List के लिए edge case…"
+    },
+    "options": [
+     {
+      "en": "an empty list",
+      "te": "ఖాళీ list",
+      "hi": "ख़ाली list"
+     },
+     {
+      "en": "a list of 3",
+      "te": "3 ఉన్న list",
+      "hi": "3 वाली list"
+     }
+    ],
+    "answer": 0,
+    "why": {
+     "en": "Empty.",
+     "te": "ఖాళీ.",
+     "hi": "ख़ाली।"
+    }
+   },
+   {
+    "q": {
+     "en": "Testing after every change helps you…",
+     "te": "ప్రతి మార్పు తర్వాత test చేస్తే…",
+     "hi": "हर बदलाव के बाद test करने से…"
+    },
+    "options": [
+     {
+      "en": "find breaks at once",
+      "te": "పాడైనది వెంటనే తెలుస్తుంది",
+      "hi": "टूटी चीज़ तुरंत मिलती है"
+     },
+     {
+      "en": "write fewer functions",
+      "te": "తక్కువ functions రాయడం",
+      "hi": "कम functions लिखना"
+     }
+    ],
+    "answer": 0,
+    "why": {
+     "en": "You see breaks immediately.",
+     "te": "పాడైనది వెంటనే కనిపిస్తుంది.",
+     "hi": "टूटी चीज़ तुरंत दिखती है।"
+    }
+   }
+  ]
+ },
+ "project": {
+  "title": {
+   "en": "Student results app",
+   "te": "Student results app",
+   "hi": "Student results app"
+  },
+  "prompt": {
+   "en": "Build a small results app. class Student(name, marks) where marks is a dict {subject: mark}, with average() (0 when there are no marks) and passed() (True when every mark is 35 or more). load(text) takes lines \"name,subject,mark\", skips lines with a bad mark, and returns a dict {name: Student}. report(students) returns a list of \"name: average, PASS|FAIL\" sorted by name, with the average rounded to 1 decimal.",
+   "te": "చిన్న results app తయారుచేయండి. class Student(name, marks): marks అంటే {subject: mark} dict; average() (marks లేకపోతే 0), passed() (ప్రతి mark 35 లేదా ఎక్కువ అయితే True). load(text) \"name,subject,mark\" lines తీసుకుని, తప్పు mark ఉన్న lines దాటవేసి, {name: Student} dict return చేయాలి. report(students) పేరు క్రమంలో \"name: average, PASS|FAIL\" list return చేయాలి; average ఒక decimal కి round.",
+   "hi": "एक छोटा results app बनाइए। class Student(name, marks) जहाँ marks {subject: mark} dict है, average() (marks न हों तो 0) और passed() (हर mark 35 या ज़्यादा हो तो True) के साथ। load(text) \"name,subject,mark\" lines लेकर, ग़लत mark वाली lines छोड़कर {name: Student} dict return करे। report(students) नाम के क्रम में \"name: average, PASS|FAIL\" की list return करे, average एक decimal तक round।"
+  },
+  "starter": "class Student:\n    def __init__(self, name, marks=None):\n        self.name = name\n        self.marks = marks or {}\n\ndef load(text):\n    pass\n\ndef report(students):\n    pass\n",
+  "tests": [
+   {
+    "name": "average",
+    "call": "Student(\"A\", {\"Maths\": 80, \"Physics\": 70}).average()",
+    "expected": "75.0"
+   },
+   {
+    "name": "passed",
+    "call": "(Student(\"A\", {\"M\": 35}).passed(), Student(\"B\", {\"M\": 34}).passed())",
+    "expected": "(True, False)"
+   },
+   {
+    "name": "load",
+    "call": "(lambda s: (sorted(s), s[\"Ravi\"].marks))(load(\"Ravi,Maths,80\\nSita,Maths,30\\nRavi,Physics,70\\nSita,Physics,abc\"))",
+    "expected": "(['Ravi', 'Sita'], {'Maths': 80, 'Physics': 70})"
+   },
+   {
+    "name": "report",
+    "call": "report(load(\"Sita,Maths,30\\nRavi,Maths,80\\nRavi,Physics,71\"))",
+    "expected": "['Ravi: 75.5, PASS', 'Sita: 30.0, FAIL']"
+   },
+   {
+    "name": "no marks",
+    "call": "Student(\"X\").average()",
+    "expected": "0",
+    "hidden": true
+   }
+  ],
+  "hints": [
+   {
+    "en": "average: if not self.marks: return 0; else sum(values) / len(values).",
+    "te": "average: if not self.marks: return 0; లేకపోతే sum(values) / len(values).",
+    "hi": "average: if not self.marks: return 0; नहीं तो sum(values) / len(values)।"
+   },
+   {
+    "en": "load: for each line, split(\",\"), try int(mark), then students.setdefault(name, Student(name)).marks[subject] = mark.",
+    "te": "load: ప్రతి line కి split(\",\"), int(mark) try, తర్వాత students.setdefault(name, Student(name)).marks[subject] = mark.",
+    "hi": "load: हर line पर split(\",\"), int(mark) try, फिर students.setdefault(name, Student(name)).marks[subject] = mark।"
+   },
+   {
+    "en": "report: for name in sorted(students): f\"{name}: {round(s.average(), 1)}, \" + (\"PASS\" if s.passed() else \"FAIL\")",
+    "te": "report: for name in sorted(students): f\"{name}: {round(s.average(), 1)}, \" + (\"PASS\" if s.passed() else \"FAIL\")",
+    "hi": "report: for name in sorted(students): f\"{name}: {round(s.average(), 1)}, \" + (\"PASS\" if s.passed() else \"FAIL\")"
+   }
+  ],
+  "solution": "class Student:\n    def __init__(self, name, marks=None):\n        self.name = name\n        self.marks = marks or {}\n\n    def average(self):\n        if not self.marks:\n            return 0\n        return sum(self.marks.values()) / len(self.marks)\n\n    def passed(self):\n        return all(m >= 35 for m in self.marks.values())\n\ndef load(text):\n    students = {}\n    for line in text.split(\"\\n\"):\n        parts = line.strip().split(\",\")\n        if len(parts) != 3:\n            continue\n        name, subject, mark = parts\n        try:\n            mark = int(mark)\n        except ValueError:\n            continue\n        students.setdefault(name, Student(name)).marks[subject] = mark\n    return students\n\ndef report(students):\n    out = []\n    for name in sorted(students):\n        s = students[name]\n        result = \"PASS\" if s.passed() else \"FAIL\"\n        out.append(f\"{name}: {round(s.average(), 1)}, {result}\")\n    return out"
+ }
+}

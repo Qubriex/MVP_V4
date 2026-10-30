@@ -1,0 +1,1363 @@
+{
+ "id": "py-m6",
+ "n": 6,
+ "skill": "python-oop",
+ "title": {
+  "en": "Object-Oriented Programming",
+  "te": "Object-Oriented Programming",
+  "hi": "Object-Oriented Programming"
+ },
+ "summary": {
+  "en": "Model real things with classes and objects: data, methods, inheritance and special methods.",
+  "te": "Classes, objects తో నిజమైన వస్తువులను రూపొందించడం: data, methods, inheritance, special methods.",
+  "hi": "Classes और objects से असली चीज़ें बनाना: data, methods, inheritance और special methods।"
+ },
+ "lessons": [
+  {
+   "id": "py-m6-l1",
+   "n": 1,
+   "minutes": 20,
+   "title": {
+    "en": "Classes and objects",
+    "te": "Classes, objects",
+    "hi": "Classes और objects"
+   },
+   "oneLine": {
+    "en": "A class is a design for a kind of thing; each object made from it holds its own data.",
+    "te": "Class అంటే ఒక రకం వస్తువు రూపకల్పన; దానితో చేసిన ప్రతి object తన సొంత data ఉంచుకుంటుంది.",
+    "hi": "Class किसी तरह की चीज़ का design है; उससे बना हर object अपना data रखता है।"
+   },
+   "useCase": {
+    "en": "A college app has a Student class; each student object keeps its own name, roll number and marks.",
+    "te": "College app లో Student class ఉంటుంది; ప్రతి student object తన పేరు, roll number, marks ఉంచుకుంటుంది.",
+    "hi": "College app में Student class होती है; हर student object अपना नाम, roll number और marks रखता है।"
+   },
+   "explain": {
+    "en": [
+     "A building plan is not a house, but many houses can be built from one plan.",
+     "A class is the plan. An object is one house built from it.",
+     "class Student: starts the plan. __init__ runs when a new object is made and stores its data.",
+     "self means \"this object\". self.name = name saves the name inside this student.",
+     "Make objects by calling the class: s = Student(\"Ravi\", 12). Read data with s.name."
+    ],
+    "te": [
+     "Building plan ఇల్లు కాదు, కానీ ఒకే plan తో చాలా ఇళ్లు కట్టవచ్చు.",
+     "Class అంటే plan. Object అంటే దానితో కట్టిన ఒక ఇల్లు.",
+     "class Student: plan మొదలుపెడుతుంది. కొత్త object తయారైనప్పుడు __init__ నడిచి దాని data దాస్తుంది.",
+     "self అంటే \"ఈ object\". self.name = name ఈ student లో పేరు దాస్తుంది.",
+     "Class ని call చేసి objects చేయండి: s = Student(\"Ravi\", 12). s.name తో data చదవండి."
+    ],
+    "hi": [
+     "मकान का नक्शा मकान नहीं है, पर एक नक्शे से कई मकान बन सकते हैं।",
+     "Class नक्शा है। Object उससे बना एक मकान।",
+     "class Student: नक्शा शुरू करता है। नया object बनते समय __init__ चलकर उसका data रखता है।",
+     "self मतलब \"यह object\"। self.name = name इस student में नाम रखता है।",
+     "Class को call करके objects बनाइए: s = Student(\"Ravi\", 12)। s.name से data पढ़िए।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "A class is a cookie cutter; objects are the cookies."
+    ],
+    "te": [
+     "Class అంటే cookie అచ్చు; objects అంటే cookies."
+    ],
+    "hi": [
+     "Class एक साँचा है; objects उससे बनी चीज़ें।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "A Book class: Book(\"Wings of Fire\", \"Kalam\") and Book(\"Gitanjali\", \"Tagore\") are two objects with their own title and author."
+    ],
+    "te": [
+     "Book class: Book(\"Wings of Fire\", \"Kalam\"), Book(\"Gitanjali\", \"Tagore\") తమ సొంత title, author ఉన్న రెండు objects."
+    ],
+    "hi": [
+     "Book class: Book(\"Wings of Fire\", \"Kalam\") और Book(\"Gitanjali\", \"Tagore\") अपने title और author वाले दो objects हैं।"
+    ]
+   },
+   "picture": "flowchart TD\n  C[\"class Student\"] --> A[\"Student(\\\"Ravi\\\", 12)\"]\n  C --> B[\"Student(\\\"Sita\\\", 7)\"]",
+   "code": {
+    "source": "class Student:\n    def __init__(self, name, roll):\n        self.name = name\n        self.roll = roll\n\na = Student(\"Ravi\", 12)\nb = Student(\"Sita\", 7)\nprint(a.name, a.roll)\nprint(b.name, b.roll)",
+    "output": "Ravi 12\nSita 7",
+    "notes": [
+     {
+      "line": 1,
+      "note": {
+       "en": "class starts the design for students.",
+       "te": "class students రూపకల్పన మొదలుపెడుతుంది.",
+       "hi": "class students का design शुरू करता है।"
+      }
+     },
+     {
+      "line": 2,
+      "note": {
+       "en": "__init__ runs once for every new student.",
+       "te": "ప్రతి కొత్త student కి __init__ ఒక్కసారి నడుస్తుంది.",
+       "hi": "हर नए student के लिए __init__ एक बार चलता है।"
+      }
+     },
+     {
+      "line": 3,
+      "note": {
+       "en": "self.name stores the name inside this object.",
+       "te": "self.name పేరును ఈ object లోనే దాస్తుంది.",
+       "hi": "self.name नाम को इसी object में रखता है।"
+      }
+     },
+     {
+      "line": 6,
+      "note": {
+       "en": "Calling the class makes a new object.",
+       "te": "Class ని call చేస్తే కొత్త object తయారవుతుంది.",
+       "hi": "Class को call करने से नया object बनता है।"
+      }
+     },
+     {
+      "line": 8,
+      "note": {
+       "en": "Each object keeps its own data.",
+       "te": "ప్రతి object తన data తానే ఉంచుకుంటుంది.",
+       "hi": "हर object अपना data ख़ुद रखता है।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "class Student:\n    def __init__(name):\n        self.name = name",
+     "fix": {
+      "en": "__init__ needs self as its first parameter: def __init__(self, name):",
+      "te": "__init__ కి మొదటి parameter గా self కావాలి: def __init__(self, name):",
+      "hi": "__init__ का पहला parameter self होना चाहिए: def __init__(self, name):"
+     }
+    },
+    {
+     "wrong": "def __init__(self, name):\n    name = name",
+     "fix": {
+      "en": "This only makes a local variable. Write self.name = name to keep it in the object.",
+      "te": "ఇది local variable మాత్రమే చేస్తుంది. Object లో ఉంచడానికి self.name = name రాయండి.",
+      "hi": "यह सिर्फ़ local variable बनाता है। Object में रखने के लिए self.name = name लिखिए।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "What does self mean inside a class?",
+      "te": "Class లో self అంటే ఏమిటి?",
+      "hi": "Class में self का मतलब?"
+     },
+     "options": [
+      {
+       "en": "The class name",
+       "te": "Class పేరు",
+       "hi": "Class का नाम"
+      },
+      {
+       "en": "This object",
+       "te": "ఈ object",
+       "hi": "यह object"
+      },
+      {
+       "en": "A loop",
+       "te": "ఒక loop",
+       "hi": "एक loop"
+      }
+     ],
+     "answer": 1,
+     "why": {
+      "en": "self is the object being used.",
+      "te": "self అంటే వాడుతున్న object.",
+      "hi": "self इस्तेमाल हो रहा object है।"
+     }
+    },
+    {
+     "q": {
+      "en": "When does __init__ run?",
+      "te": "__init__ ఎప్పుడు నడుస్తుంది?",
+      "hi": "__init__ कब चलता है?"
+     },
+     "options": [
+      {
+       "en": "When an object is made",
+       "te": "Object తయారైనప్పుడు",
+       "hi": "Object बनते समय"
+      },
+      {
+       "en": "When the program ends",
+       "te": "Program ముగిసినప్పుడు",
+       "hi": "Program ख़त्म होने पर"
+      },
+      {
+       "en": "Never",
+       "te": "ఎప్పుడూ కాదు",
+       "hi": "कभी नहीं"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Every new object.",
+      "te": "ప్రతి కొత్త object కి.",
+      "hi": "हर नए object पर।"
+     }
+    },
+    {
+     "q": {
+      "en": "s = Student(\"Anu\", 3)\nHow do you read the name?",
+      "te": "s = Student(\"Anu\", 3)\nపేరు ఎలా చదువుతారు?",
+      "hi": "s = Student(\"Anu\", 3)\nनाम कैसे पढ़ेंगे?"
+     },
+     "options": [
+      "s[\"name\"]",
+      "s.name",
+      "name(s)"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Use a dot.",
+      "te": "Dot వాడండి.",
+      "hi": "Dot लगाइए।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write a class Book with __init__(self, title, author, pages) that stores all three.",
+     "te": "Book class రాయండి: __init__(self, title, author, pages) మూడింటినీ దాయాలి.",
+     "hi": "Book class लिखिए जिसका __init__(self, title, author, pages) तीनों रखे।"
+    },
+    "starter": "class Book:\n    pass\n",
+    "tests": [
+     {
+      "name": "title",
+      "call": "Book(\"Gitanjali\", \"Tagore\", 103).title",
+      "expected": "'Gitanjali'"
+     },
+     {
+      "name": "author and pages",
+      "call": "(lambda b: (b.author, b.pages))(Book(\"Godan\", \"Premchand\", 312))",
+      "expected": "('Premchand', 312)"
+     },
+     {
+      "name": "two books stay separate",
+      "call": "(lambda a, b: a.title)(Book(\"A\", \"x\", 1), Book(\"B\", \"y\", 2))",
+      "expected": "'A'",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "Start with def __init__(self, title, author, pages):",
+      "te": "def __init__(self, title, author, pages): తో మొదలుపెట్టండి.",
+      "hi": "def __init__(self, title, author, pages): से शुरू कीजिए।"
+     },
+     {
+      "en": "Store each one on self.",
+      "te": "ప్రతి దాన్ని self పై దాయండి.",
+      "hi": "हर एक को self पर रखिए।"
+     },
+     {
+      "en": "self.title = title, self.author = author, self.pages = pages",
+      "te": "self.title = title, self.author = author, self.pages = pages",
+      "hi": "self.title = title, self.author = author, self.pages = pages"
+     }
+    ],
+    "solution": "class Book:\n    def __init__(self, title, author, pages):\n        self.title = title\n        self.author = author\n        self.pages = pages"
+   },
+   "cheat": {
+    "en": [
+     "class Name: · def __init__(self, ...):",
+     "self.x = x stores data in the object.",
+     "obj = Name(...) · obj.x"
+    ],
+    "te": [
+     "class Name: · def __init__(self, ...):",
+     "self.x = x object లో data దాస్తుంది.",
+     "obj = Name(...) · obj.x"
+    ],
+    "hi": [
+     "class Name: · def __init__(self, ...):",
+     "self.x = x object में data रखता है।",
+     "obj = Name(...) · obj.x"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A library app has many books. Explain the difference between a Book class and a book object, using two real books.",
+      "te": "Library app లో చాలా books ఉన్నాయి. రెండు నిజమైన books తో Book class, book object మధ్య తేడా వివరించండి.",
+      "hi": "Library app में कई books हैं। दो असली books से Book class और book object का फ़र्क़ समझाइए।"
+     },
+     {
+      "en": "Explain what self and __init__ do when you write Student(\"Ravi\", 12).",
+      "te": "Student(\"Ravi\", 12) రాసినప్పుడు self, __init__ ఏం చేస్తాయో వివరించండి.",
+      "hi": "Student(\"Ravi\", 12) लिखने पर self और __init__ क्या करते हैं, समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "class"
+     ],
+     [
+      "object",
+      "instance"
+     ],
+     [
+      "self",
+      "__init__",
+      "init"
+     ]
+    ],
+    "challenge": {
+     "en": "Say in one line what a class is and what an object is.",
+     "te": "Class అంటే ఏమిటి, object అంటే ఏమిటి ఒక్క line లో చెప్పండి.",
+     "hi": "Class क्या है और object क्या है, एक line में बताइए।"
+    }
+   }
+  },
+  {
+   "id": "py-m6-l2",
+   "n": 2,
+   "minutes": 20,
+   "title": {
+    "en": "Methods",
+    "te": "Methods",
+    "hi": "Methods"
+   },
+   "oneLine": {
+    "en": "A method is a function inside a class that works with the object's own data through self.",
+    "te": "Method అంటే class లోని function; self ద్వారా object సొంత data తో పనిచేస్తుంది.",
+    "hi": "Method class के अंदर का function है जो self से object के अपने data पर काम करता है।"
+   },
+   "useCase": {
+    "en": "A bank account object has deposit and withdraw methods that change its own balance.",
+    "te": "Bank account object కి deposit, withdraw methods ఉంటాయి; అవి దాని balance మారుస్తాయి.",
+    "hi": "Bank account object के deposit और withdraw methods उसका अपना balance बदलते हैं।"
+   },
+   "explain": {
+    "en": [
+     "Data alone is not enough; objects also do things.",
+     "A method is written with def inside the class, and its first parameter is self.",
+     "Call it with a dot: acc.deposit(500). Python passes acc as self for you.",
+     "Inside the method, self.balance reads and changes this account's balance.",
+     "Methods can return values too, like acc.statement() returning a line of text."
+    ],
+    "te": [
+     "Data ఒక్కటే చాలదు; objects పనులు కూడా చేస్తాయి.",
+     "Method ని class లోపల def తో రాస్తాం; దాని మొదటి parameter self.",
+     "Dot తో call చేయండి: acc.deposit(500). Python acc ని self గా మీ కోసం పంపుతుంది.",
+     "Method లోపల self.balance ఈ account balance ని చదివి మారుస్తుంది.",
+     "Methods values కూడా return చేయగలవు, acc.statement() ఒక text line return చేసినట్లు."
+    ],
+    "hi": [
+     "सिर्फ़ data काफ़ी नहीं; objects काम भी करते हैं।",
+     "Method class के अंदर def से लिखा जाता है, और उसका पहला parameter self होता है।",
+     "Dot से call कीजिए: acc.deposit(500)। Python acc को self बनाकर भेजता है।",
+     "Method के अंदर self.balance इस account का balance पढ़ता और बदलता है।",
+     "Methods values भी return कर सकते हैं, जैसे acc.statement() एक text line return करे।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "Methods are the buttons on an object."
+    ],
+    "te": [
+     "Methods అంటే object పై ఉన్న buttons."
+    ],
+    "hi": [
+     "Methods object के buttons हैं।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "A Cart object: cart.add(\"pen\", 10) and cart.total() returning the sum."
+    ],
+    "te": [
+     "Cart object: cart.add(\"pen\", 10), cart.total() మొత్తం return చేస్తుంది."
+    ],
+    "hi": [
+     "Cart object: cart.add(\"pen\", 10) और cart.total() जो जोड़ return करे।"
+    ]
+   },
+   "picture": "flowchart LR\n  A[\"acc (balance 1000)\"] -->|\"deposit(500)\"| B[\"balance 1500\"]\n  B -->|\"withdraw(200)\"| C[\"balance 1300\"]",
+   "code": {
+    "source": "class Account:\n    def __init__(self, owner):\n        self.owner = owner\n        self.balance = 0\n\n    def deposit(self, amount):\n        self.balance = self.balance + amount\n\n    def withdraw(self, amount):\n        if amount > self.balance:\n            return \"Not enough balance\"\n        self.balance = self.balance - amount\n        return \"OK\"\n\nacc = Account(\"Ravi\")\nacc.deposit(1000)\nprint(acc.withdraw(300), acc.balance)\nprint(acc.withdraw(5000), acc.balance)",
+    "output": "OK 700\nNot enough balance 700",
+    "notes": [
+     {
+      "line": 4,
+      "note": {
+       "en": "Every new account starts with balance 0.",
+       "te": "ప్రతి కొత్త account balance 0 తో మొదలవుతుంది.",
+       "hi": "हर नया account balance 0 से शुरू होता है।"
+      }
+     },
+     {
+      "line": 6,
+      "note": {
+       "en": "A method: def inside the class, with self first.",
+       "te": "Method: class లోపల def, self ముందు.",
+       "hi": "Method: class के अंदर def, पहले self।"
+      }
+     },
+     {
+      "line": 7,
+      "note": {
+       "en": "It changes this account's balance.",
+       "te": "ఇది ఈ account balance మారుస్తుంది.",
+       "hi": "यह इस account का balance बदलता है।"
+      }
+     },
+     {
+      "line": 10,
+      "note": {
+       "en": "A check stops the balance going below zero.",
+       "te": "ఒక check balance సున్నా కంటే తగ్గకుండా ఆపుతుంది.",
+       "hi": "एक जाँच balance को शून्य से नीचे जाने से रोकती है।"
+      }
+     },
+     {
+      "line": 17,
+      "note": {
+       "en": "Call methods with a dot.",
+       "te": "Dot తో methods call చేయండి.",
+       "hi": "Dot से methods call कीजिए।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "class A:\n    def show():\n        print(\"hi\")",
+     "fix": {
+      "en": "Methods need self: def show(self):",
+      "te": "Methods కి self కావాలి: def show(self):",
+      "hi": "Methods को self चाहिए: def show(self):"
+     }
+    },
+    {
+     "wrong": "def deposit(self, amount):\n    balance = balance + amount",
+     "fix": {
+      "en": "Use self.balance; plain balance is not the object's data.",
+      "te": "self.balance వాడండి; ఒట్టి balance object data కాదు.",
+      "hi": "self.balance लिखिए; सिर्फ़ balance object का data नहीं है।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "The first parameter of a method is…",
+      "te": "Method మొదటి parameter…",
+      "hi": "Method का पहला parameter…"
+     },
+     "options": [
+      "this",
+      "self",
+      "obj"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "self.",
+      "te": "self.",
+      "hi": "self।"
+     }
+    },
+    {
+     "q": {
+      "en": "How do you call deposit on acc?",
+      "te": "acc పై deposit ఎలా call చేస్తారు?",
+      "hi": "acc पर deposit कैसे call करेंगे?"
+     },
+     "options": [
+      "deposit(acc, 5)",
+      "acc.deposit(5)",
+      "acc[deposit](5)"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Dot syntax.",
+      "te": "Dot పద్ధతి.",
+      "hi": "Dot तरीका।"
+     }
+    },
+    {
+     "q": {
+      "en": "Inside a method, the object's balance is…",
+      "te": "Method లో object balance…",
+      "hi": "Method में object का balance…"
+     },
+     "options": [
+      "balance",
+      "self.balance",
+      "Account.balance"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Through self.",
+      "te": "self ద్వారా.",
+      "hi": "self से।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write a class Cart with add(item, price) and total(). total() returns the sum of all prices added.",
+     "te": "Cart class రాయండి: add(item, price), total(). total() జోడించిన అన్ని ధరల మొత్తం return చేయాలి.",
+     "hi": "Cart class लिखिए जिसमें add(item, price) और total() हों। total() जोड़े गए सभी दामों का जोड़ return करे।"
+    },
+    "starter": "class Cart:\n    def __init__(self):\n        self.items = []\n",
+    "tests": [
+     {
+      "name": "empty cart",
+      "call": "Cart().total()",
+      "expected": "0"
+     },
+     {
+      "name": "two items",
+      "call": "(lambda c: (c.add(\"pen\", 10), c.add(\"book\", 45), c.total())[2])(Cart())",
+      "expected": "55"
+     },
+     {
+      "name": "carts are separate",
+      "call": "(lambda a, b: (a.add(\"x\", 5), b.total())[1])(Cart(), Cart())",
+      "expected": "0",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "add appends a (item, price) pair to self.items.",
+      "te": "add, self.items కి (item, price) జత జోడిస్తుంది.",
+      "hi": "add, self.items में (item, price) जोड़ा जोड़ता है।"
+     },
+     {
+      "en": "total loops over self.items and adds the prices.",
+      "te": "total, self.items పై loop చేసి ధరలు కలుపుతుంది.",
+      "hi": "total, self.items पर loop करके दाम जोड़ता है।"
+     },
+     {
+      "en": "return sum(price for item, price in self.items)",
+      "te": "return sum(price for item, price in self.items)",
+      "hi": "return sum(price for item, price in self.items)"
+     }
+    ],
+    "solution": "class Cart:\n    def __init__(self):\n        self.items = []\n\n    def add(self, item, price):\n        self.items.append((item, price))\n\n    def total(self):\n        return sum(price for item, price in self.items)"
+   },
+   "cheat": {
+    "en": [
+     "def method(self, ...): inside the class",
+     "obj.method(...) · self.data inside",
+     "Methods can change data or return values."
+    ],
+    "te": [
+     "class లోపల def method(self, ...):",
+     "obj.method(...) · లోపల self.data",
+     "Methods data మార్చగలవు లేదా values return చేయగలవు."
+    ],
+    "hi": [
+     "class के अंदर def method(self, ...):",
+     "obj.method(...) · अंदर self.data",
+     "Methods data बदल सकते हैं या values return कर सकते हैं।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "Explain how deposit and withdraw methods let a bank account object look after its own balance safely.",
+      "te": "deposit, withdraw methods ఒక bank account object తన balance ని సురక్షితంగా ఎలా చూసుకునేలా చేస్తాయో వివరించండి.",
+      "hi": "deposit और withdraw methods bank account object को अपना balance सुरक्षित रूप से कैसे संभालने देते हैं, समझाइए।"
+     },
+     {
+      "en": "What is the difference between a method and a normal function? Use a shopping cart example.",
+      "te": "Method కి, సాధారణ function కి తేడా ఏమిటి? Shopping cart ఉదాహరణ వాడండి.",
+      "hi": "Method और सामान्य function में क्या फ़र्क़ है? Shopping cart का उदाहरण लीजिए।"
+     }
+    ],
+    "keywords": [
+     [
+      "method"
+     ],
+     [
+      "self"
+     ],
+     [
+      "balance",
+      "object",
+      "data",
+      "class",
+      "cart"
+     ]
+    ],
+    "challenge": {
+     "en": "Say why a method needs self.",
+     "te": "Method కి self ఎందుకు కావాలో చెప్పండి.",
+     "hi": "Method को self क्यों चाहिए, बताइए।"
+    }
+   }
+  },
+  {
+   "id": "py-m6-l3",
+   "n": 3,
+   "minutes": 20,
+   "title": {
+    "en": "Inheritance",
+    "te": "Inheritance",
+    "hi": "Inheritance"
+   },
+   "oneLine": {
+    "en": "Inheritance lets a new class reuse everything from an existing class and add or change only what is different.",
+    "te": "Inheritance తో కొత్త class ఉన్న class లోని అన్నీ మళ్లీ వాడుకుని, వేరుగా ఉన్నదాన్ని మాత్రమే జోడిస్తుంది లేదా మారుస్తుంది.",
+    "hi": "Inheritance से नई class मौजूदा class की हर चीज़ दोबारा इस्तेमाल करती है और सिर्फ़ अलग बातें जोड़ती या बदलती है।"
+   },
+   "useCase": {
+    "en": "A payroll app has Employee, and Manager inherits from it, adding a bonus.",
+    "te": "Payroll app లో Employee ఉంటుంది; Manager దాని నుంచి inherit చేసి bonus జోడిస్తుంది.",
+    "hi": "Payroll app में Employee है, और Manager उससे inherit करके bonus जोड़ता है।"
+   },
+   "explain": {
+    "en": [
+     "A manager is still an employee: they have a name and a salary.",
+     "So we write class Manager(Employee): and Manager gets every method of Employee.",
+     "Employee is the parent class; Manager is the child class.",
+     "The child can override a method by writing its own version with the same name.",
+     "super() calls the parent's version, so you reuse it instead of copying it."
+    ],
+    "te": [
+     "Manager కూడా employee నే: వారికి పేరు, జీతం ఉంటాయి.",
+     "కాబట్టి class Manager(Employee): రాస్తాం; Employee లోని ప్రతి method Manager కి వస్తుంది.",
+     "Employee parent class; Manager child class.",
+     "అదే పేరుతో తన సొంత version రాసి child ఒక method ని override చేయగలదు.",
+     "super() parent version ని call చేస్తుంది; copy చేయకుండా మళ్లీ వాడుకుంటాం."
+    ],
+    "hi": [
+     "Manager भी employee है: उसका नाम और salary होती है।",
+     "इसलिए class Manager(Employee): लिखते हैं और Manager को Employee के सारे methods मिल जाते हैं।",
+     "Employee parent class है; Manager child class।",
+     "Child उसी नाम से अपना version लिखकर method को override कर सकता है।",
+     "super() parent का version call करता है, ताकि copy करने की जगह उसे दोबारा इस्तेमाल करें।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "A child class gets everything from its parent and adds a little more."
+    ],
+    "te": [
+     "Child class parent నుంచి అన్నీ పొంది కొంచెం ఎక్కువ జోడిస్తుంది."
+    ],
+    "hi": [
+     "Child class को parent से सब मिलता है और वह थोड़ा और जोड़ती है।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "Vehicle has wheels and speed; Bike(Vehicle) and Bus(Vehicle) reuse that and add their own fare rules."
+    ],
+    "te": [
+     "Vehicle కి wheels, speed ఉన్నాయి; Bike(Vehicle), Bus(Vehicle) వాటిని వాడుకుని సొంత fare నియమాలు జోడిస్తాయి."
+    ],
+    "hi": [
+     "Vehicle में wheels और speed हैं; Bike(Vehicle) और Bus(Vehicle) उन्हें लेकर अपने fare नियम जोड़ते हैं।"
+    ]
+   },
+   "picture": "flowchart TD\n  E[\"Employee: name, salary, pay()\"] --> M[\"Manager(Employee): + bonus, pay() overridden\"]",
+   "code": {
+    "source": "class Employee:\n    def __init__(self, name, salary):\n        self.name = name\n        self.salary = salary\n\n    def pay(self):\n        return self.salary\n\nclass Manager(Employee):\n    def __init__(self, name, salary, bonus):\n        super().__init__(name, salary)\n        self.bonus = bonus\n\n    def pay(self):\n        return super().pay() + self.bonus\n\nprint(Employee(\"Anu\", 30000).pay())\nprint(Manager(\"Ravi\", 50000, 8000).pay())",
+    "output": "30000\n58000",
+    "notes": [
+     {
+      "line": 9,
+      "note": {
+       "en": "Manager(Employee) means Manager inherits from Employee.",
+       "te": "Manager(Employee) అంటే Manager, Employee నుంచి inherit చేస్తుంది.",
+       "hi": "Manager(Employee) मतलब Manager, Employee से inherit करता है।"
+      }
+     },
+     {
+      "line": 11,
+      "note": {
+       "en": "super().__init__ lets the parent store name and salary.",
+       "te": "super().__init__ పేరు, జీతం parent దాసేలా చేస్తుంది.",
+       "hi": "super().__init__ नाम और salary parent को रखने देता है।"
+      }
+     },
+     {
+      "line": 12,
+      "note": {
+       "en": "Only the new part, bonus, is added here.",
+       "te": "కొత్త భాగం bonus మాత్రమే ఇక్కడ జోడించబడుతుంది.",
+       "hi": "यहाँ सिर्फ़ नया हिस्सा, bonus, जोड़ा गया है।"
+      }
+     },
+     {
+      "line": 14,
+      "note": {
+       "en": "Manager overrides pay with its own version.",
+       "te": "Manager తన సొంత version తో pay ని override చేస్తుంది.",
+       "hi": "Manager अपने version से pay को override करता है।"
+      }
+     },
+     {
+      "line": 15,
+      "note": {
+       "en": "super().pay() reuses the parent's pay, then adds the bonus.",
+       "te": "super().pay() parent pay వాడుకుని bonus కలుపుతుంది.",
+       "hi": "super().pay() parent का pay लेकर bonus जोड़ता है।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "class Manager(Employee):\n    def __init__(self, name, salary, bonus):\n        self.bonus = bonus",
+     "fix": {
+      "en": "Without super().__init__(name, salary), name and salary are never stored.",
+      "te": "super().__init__(name, salary) లేకపోతే name, salary దాయబడవు.",
+      "hi": "super().__init__(name, salary) के बिना name और salary कभी नहीं रखे जाते।"
+     }
+    },
+    {
+     "wrong": "class Manager:\n    ...  # copied all of Employee",
+     "fix": {
+      "en": "Copying code means fixing bugs twice. Inherit with class Manager(Employee):.",
+      "te": "Code copy చేస్తే bugs రెండుసార్లు సరిచేయాలి. class Manager(Employee): తో inherit చేయండి.",
+      "hi": "Code copy करने से bugs दो बार ठीक करने पड़ते हैं। class Manager(Employee): से inherit कीजिए।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "In class B(A):, which is the parent?",
+      "te": "class B(A): లో parent ఏది?",
+      "hi": "class B(A): में parent कौन है?"
+     },
+     "options": [
+      "A",
+      "B"
+     ],
+     "answer": 0,
+     "why": {
+      "en": "The one in brackets.",
+      "te": "Brackets లోనిది.",
+      "hi": "Brackets वाली।"
+     }
+    },
+    {
+     "q": {
+      "en": "What does super() call?",
+      "te": "super() దేన్ని call చేస్తుంది?",
+      "hi": "super() किसे call करता है?"
+     },
+     "options": [
+      {
+       "en": "The parent's method",
+       "te": "Parent method",
+       "hi": "Parent का method"
+      },
+      {
+       "en": "A new object",
+       "te": "కొత్త object",
+       "hi": "नया object"
+      },
+      {
+       "en": "The child's method",
+       "te": "Child method",
+       "hi": "Child का method"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "The parent's version.",
+      "te": "Parent version.",
+      "hi": "Parent का version।"
+     }
+    },
+    {
+     "q": {
+      "en": "Writing a method with the same name in the child is called…",
+      "te": "Child లో అదే పేరుతో method రాయడాన్ని…",
+      "hi": "Child में उसी नाम का method लिखना कहलाता है…"
+     },
+     "options": [
+      "overriding",
+      "importing",
+      "looping"
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Overriding.",
+      "te": "Overriding.",
+      "hi": "Overriding।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Given class Shape with area() returning 0, write class Square(Shape) with __init__(self, side) and an area() that returns side * side.",
+     "te": "area() 0 return చేసే Shape class ఇచ్చాం; __init__(self, side), side * side return చేసే area() ఉన్న Square(Shape) class రాయండి.",
+     "hi": "Shape class दी गई है जिसका area() 0 return करता है; Square(Shape) class लिखिए जिसमें __init__(self, side) हो और area() side * side return करे।"
+    },
+    "starter": "class Shape:\n    def area(self):\n        return 0\n\nclass Square:\n    pass\n",
+    "tests": [
+     {
+      "name": "Square(4).area()",
+      "call": "Square(4).area()",
+      "expected": "16"
+     },
+     {
+      "name": "a Square is a Shape",
+      "call": "isinstance(Square(2), Shape)",
+      "expected": "True"
+     },
+     {
+      "name": "side 1",
+      "call": "Square(1).area()",
+      "expected": "1",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "Write class Square(Shape): so it inherits.",
+      "te": "Inherit చేయడానికి class Square(Shape): రాయండి.",
+      "hi": "Inherit करने के लिए class Square(Shape): लिखिए।"
+     },
+     {
+      "en": "Store the side in __init__: self.side = side",
+      "te": "__init__ లో side దాయండి: self.side = side",
+      "hi": "__init__ में side रखिए: self.side = side"
+     },
+     {
+      "en": "def area(self): return self.side * self.side",
+      "te": "def area(self): return self.side * self.side",
+      "hi": "def area(self): return self.side * self.side"
+     }
+    ],
+    "solution": "class Shape:\n    def area(self):\n        return 0\n\nclass Square(Shape):\n    def __init__(self, side):\n        self.side = side\n\n    def area(self):\n        return self.side * self.side"
+   },
+   "cheat": {
+    "en": [
+     "class Child(Parent): reuses the parent.",
+     "Same method name = override.",
+     "super().__init__(...) · super().method()"
+    ],
+    "te": [
+     "class Child(Parent): parent ని మళ్లీ వాడుకుంటుంది.",
+     "అదే method పేరు = override.",
+     "super().__init__(...) · super().method()"
+    ],
+    "hi": [
+     "class Child(Parent): parent को दोबारा इस्तेमाल करता है।",
+     "वही method नाम = override।",
+     "super().__init__(...) · super().method()"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A payroll app has Employee and Manager. Explain how inheritance avoids copying code and how the manager's pay adds a bonus.",
+      "te": "Payroll app లో Employee, Manager ఉన్నాయి. Inheritance code copy ని ఎలా తప్పిస్తుందో, manager pay కి bonus ఎలా కలుస్తుందో వివరించండి.",
+      "hi": "Payroll app में Employee और Manager हैं। Inheritance code copy करने से कैसे बचाता है और manager के pay में bonus कैसे जुड़ता है, समझाइए।"
+     },
+     {
+      "en": "Explain what super() does, with an example.",
+      "te": "super() ఏం చేస్తుందో ఉదాహరణతో వివరించండి.",
+      "hi": "super() क्या करता है, उदाहरण से समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "inherit",
+      "parent",
+      "child"
+     ],
+     [
+      "super"
+     ],
+     [
+      "override",
+      "reuse",
+      "copy",
+      "bonus"
+     ]
+    ],
+    "challenge": {
+     "en": "Say what a child class gets from its parent.",
+     "te": "Child class కి parent నుంచి ఏం వస్తుందో చెప్పండి.",
+     "hi": "Child class को parent से क्या मिलता है, बताइए।"
+    }
+   }
+  },
+  {
+   "id": "py-m6-l4",
+   "n": 4,
+   "minutes": 20,
+   "title": {
+    "en": "Special methods and printing objects",
+    "te": "Special methods, objects print చేయడం",
+    "hi": "Special methods और objects print करना"
+   },
+   "oneLine": {
+    "en": "Special methods like __str__ and __eq__ tell Python how to print your objects and compare them.",
+    "te": "__str__, __eq__ లాంటి special methods మీ objects ని ఎలా print చేయాలో, ఎలా పోల్చాలో Python కి చెబుతాయి.",
+    "hi": "__str__ और __eq__ जैसे special methods Python को बताते हैं कि आपके objects कैसे print हों और कैसे तुलना हो।"
+   },
+   "useCase": {
+    "en": "An order system prints \"Order #12: 3 items, Rs 450\" instead of a confusing memory address.",
+    "te": "Order system గందరగోళ memory address బదులు \"Order #12: 3 items, Rs 450\" print చేస్తుంది.",
+    "hi": "Order system उलझे memory address की जगह \"Order #12: 3 items, Rs 450\" print करता है।"
+   },
+   "explain": {
+    "en": [
+     "print(student) normally shows something like <Student object at 0x7f...>. Not helpful.",
+     "Add a method named __str__ that returns the text you want to see.",
+     "Now print(student) and str(student) use your text.",
+     "__eq__(self, other) decides when two objects count as equal, for example the same roll number.",
+     "Names with double underscores on both sides are special methods; Python calls them for you."
+    ],
+    "te": [
+     "print(student) సాధారణంగా <Student object at 0x7f...> లాంటిది చూపిస్తుంది. ఉపయోగం లేదు.",
+     "మీరు చూడాలనుకునే text return చేసే __str__ method జోడించండి.",
+     "ఇప్పుడు print(student), str(student) మీ text వాడతాయి.",
+     "రెండు objects ఎప్పుడు సమానమో __eq__(self, other) నిర్ణయిస్తుంది, ఉదాహరణకు ఒకే roll number.",
+     "రెండు వైపులా double underscores ఉన్న పేర్లు special methods; Python వాటిని మీ కోసం call చేస్తుంది."
+    ],
+    "hi": [
+     "print(student) आमतौर पर <Student object at 0x7f...> जैसा कुछ दिखाता है। काम का नहीं।",
+     "__str__ नाम का method जोड़िए जो वह text return करे जो आप देखना चाहते हैं।",
+     "अब print(student) और str(student) आपका text इस्तेमाल करते हैं।",
+     "__eq__(self, other) तय करता है कि दो objects कब बराबर माने जाएँ, जैसे एक ही roll number।",
+     "दोनों तरफ़ double underscore वाले नाम special methods हैं; Python उन्हें ख़ुद call करता है।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "__str__ is the name tag your object shows when printed."
+    ],
+    "te": [
+     "__str__ అంటే print అయినప్పుడు object చూపించే పేరు బిళ్ల."
+    ],
+    "hi": [
+     "__str__ वह name tag है जो print होने पर object दिखाता है।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "A Train class: __str__ returns \"12727 Godavari Express\"; __eq__ compares train numbers."
+    ],
+    "te": [
+     "Train class: __str__ \"12727 Godavari Express\" return చేస్తుంది; __eq__ train numbers పోలుస్తుంది."
+    ],
+    "hi": [
+     "Train class: __str__ \"12002 Shatabdi Express\" return करता है; __eq__ train numbers की तुलना करता है।"
+    ]
+   },
+   "picture": "flowchart LR\n  P[\"print(order)\"] --> S[\"order.__str__()\"] --> O[\"Order #12: Rs 450\"]",
+   "code": {
+    "source": "class Order:\n    def __init__(self, number, amount):\n        self.number = number\n        self.amount = amount\n\n    def __str__(self):\n        return f\"Order #{self.number}: Rs {self.amount}\"\n\n    def __eq__(self, other):\n        return self.number == other.number\n\na = Order(12, 450)\nprint(a)\nprint(a == Order(12, 999))",
+    "output": "Order #12: Rs 450\nTrue",
+    "notes": [
+     {
+      "line": 6,
+      "note": {
+       "en": "__str__ returns the text print should show.",
+       "te": "print చూపించాల్సిన text ని __str__ return చేస్తుంది.",
+       "hi": "__str__ वह text return करता है जो print दिखाए।"
+      }
+     },
+     {
+      "line": 9,
+      "note": {
+       "en": "__eq__ decides what == means for orders.",
+       "te": "Orders కి == అర్థాన్ని __eq__ నిర్ణయిస్తుంది.",
+       "hi": "__eq__ तय करता है कि orders के लिए == का मतलब क्या है।"
+      }
+     },
+     {
+      "line": 10,
+      "note": {
+       "en": "Two orders are equal when their numbers match.",
+       "te": "Numbers సరిపోతే రెండు orders సమానం.",
+       "hi": "Numbers मिलें तो दो orders बराबर हैं।"
+      }
+     },
+     {
+      "line": 13,
+      "note": {
+       "en": "print uses __str__ automatically.",
+       "te": "print స్వయంగా __str__ వాడుతుంది.",
+       "hi": "print अपने-आप __str__ इस्तेमाल करता है।"
+      }
+     },
+     {
+      "line": 14,
+      "note": {
+       "en": "== uses __eq__, so the same number gives True.",
+       "te": "== , __eq__ వాడుతుంది; ఒకే number కి True.",
+       "hi": "== , __eq__ इस्तेमाल करता है, इसलिए एक ही number पर True।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "def __str__(self):\n    print(\"Order\", self.number)",
+     "fix": {
+      "en": "__str__ must return text, not print it.",
+      "te": "__str__ text ని return చేయాలి, print కాదు.",
+      "hi": "__str__ को text return करना है, print नहीं।"
+     }
+    },
+    {
+     "wrong": "def _str_(self):",
+     "fix": {
+      "en": "Use two underscores on each side: __str__.",
+      "te": "ప్రతి వైపు రెండు underscores: __str__.",
+      "hi": "दोनों तरफ़ दो underscores: __str__।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "Which method controls print(obj)?",
+      "te": "print(obj) ని నియంత్రించేది ఏది?",
+      "hi": "print(obj) को कौन नियंत्रित करता है?"
+     },
+     "options": [
+      "__init__",
+      "__str__",
+      "__eq__"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "__str__.",
+      "te": "__str__.",
+      "hi": "__str__।"
+     }
+    },
+    {
+     "q": {
+      "en": "__str__ should…",
+      "te": "__str__ చేయాల్సింది…",
+      "hi": "__str__ को चाहिए…"
+     },
+     "options": [
+      {
+       "en": "print text",
+       "te": "text print చేయడం",
+       "hi": "text print करना"
+      },
+      {
+       "en": "return text",
+       "te": "text return చేయడం",
+       "hi": "text return करना"
+      }
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Return a string.",
+      "te": "String return చేయాలి.",
+      "hi": "String return करे।"
+     }
+    },
+    {
+     "q": {
+      "en": "a == b on objects uses…",
+      "te": "Objects పై a == b వాడేది…",
+      "hi": "Objects पर a == b इस्तेमाल करता है…"
+     },
+     "options": [
+      "__eq__",
+      "__str__",
+      "__add__"
+     ],
+     "answer": 0,
+     "why": {
+      "en": "__eq__.",
+      "te": "__eq__.",
+      "hi": "__eq__।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Add __str__ to class Student so str(Student(\"Ravi\", 12)) returns \"Ravi (roll 12)\", and __eq__ so two students with the same roll are equal.",
+     "te": "Student class కి __str__ జోడించండి: str(Student(\"Ravi\", 12)) \"Ravi (roll 12)\" ఇవ్వాలి; ఒకే roll ఉన్న ఇద్దరు సమానం అయ్యేలా __eq__.",
+     "hi": "Student class में __str__ जोड़िए ताकि str(Student(\"Ravi\", 12)) \"Ravi (roll 12)\" दे, और __eq__ ताकि एक ही roll वाले दो students बराबर हों।"
+    },
+    "starter": "class Student:\n    def __init__(self, name, roll):\n        self.name = name\n        self.roll = roll\n",
+    "tests": [
+     {
+      "name": "str",
+      "call": "str(Student(\"Ravi\", 12))",
+      "expected": "'Ravi (roll 12)'"
+     },
+     {
+      "name": "same roll is equal",
+      "call": "Student(\"A\", 5) == Student(\"B\", 5)",
+      "expected": "True"
+     },
+     {
+      "name": "different roll",
+      "call": "Student(\"A\", 5) == Student(\"A\", 6)",
+      "expected": "False",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "def __str__(self): return f\"...\"",
+      "te": "def __str__(self): return f\"...\"",
+      "hi": "def __str__(self): return f\"...\""
+     },
+     {
+      "en": "f\"{self.name} (roll {self.roll})\"",
+      "te": "f\"{self.name} (roll {self.roll})\"",
+      "hi": "f\"{self.name} (roll {self.roll})\""
+     },
+     {
+      "en": "def __eq__(self, other): return self.roll == other.roll",
+      "te": "def __eq__(self, other): return self.roll == other.roll",
+      "hi": "def __eq__(self, other): return self.roll == other.roll"
+     }
+    ],
+    "solution": "class Student:\n    def __init__(self, name, roll):\n        self.name = name\n        self.roll = roll\n\n    def __str__(self):\n        return f\"{self.name} (roll {self.roll})\"\n\n    def __eq__(self, other):\n        return self.roll == other.roll"
+   },
+   "cheat": {
+    "en": [
+     "__str__(self) → text for print",
+     "__eq__(self, other) → True/False for ==",
+     "Special methods: double underscores both sides."
+    ],
+    "te": [
+     "__str__(self) → print కోసం text",
+     "__eq__(self, other) → == కోసం True/False",
+     "Special methods: రెండు వైపులా double underscores."
+    ],
+    "hi": [
+     "__str__(self) → print के लिए text",
+     "__eq__(self, other) → == के लिए True/False",
+     "Special methods: दोनों तरफ़ double underscores।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "An order system prints confusing text for orders. Explain how __str__ fixes it, with an example.",
+      "te": "Order system orders కి గందరగోళ text print చేస్తుంది. __str__ దాన్ని ఎలా సరిచేస్తుందో ఉదాహరణతో వివరించండి.",
+      "hi": "Order system orders के लिए उलझा text print करता है। __str__ इसे कैसे ठीक करता है, उदाहरण से समझाइए।"
+     },
+     {
+      "en": "Explain when two Student objects should be equal and how __eq__ decides it.",
+      "te": "రెండు Student objects ఎప్పుడు సమానం కావాలో, __eq__ దాన్ని ఎలా నిర్ణయిస్తుందో వివరించండి.",
+      "hi": "दो Student objects कब बराबर हों और __eq__ यह कैसे तय करता है, समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "__str__",
+      "str"
+     ],
+     [
+      "__eq__",
+      "equal",
+      "=="
+     ],
+     [
+      "return",
+      "print",
+      "text"
+     ]
+    ],
+    "challenge": {
+     "en": "Say what print(obj) shows without __str__.",
+     "te": "__str__ లేకుండా print(obj) ఏం చూపిస్తుందో చెప్పండి.",
+     "hi": "__str__ के बिना print(obj) क्या दिखाता है, बताइए।"
+    }
+   }
+  }
+ ],
+ "test": {
+  "pass": 4,
+  "questions": [
+   {
+    "q": {
+     "en": "An object is…",
+     "te": "Object అంటే…",
+     "hi": "Object है…"
+    },
+    "options": [
+     {
+      "en": "a plan",
+      "te": "ఒక plan",
+      "hi": "एक नक्शा"
+     },
+     {
+      "en": "one thing made from a class",
+      "te": "Class నుంచి చేసిన ఒక వస్తువు",
+      "hi": "class से बनी एक चीज़"
+     },
+     {
+      "en": "a loop",
+      "te": "ఒక loop",
+      "hi": "एक loop"
+     }
+    ],
+    "answer": 1,
+    "why": {
+     "en": "A class is the plan.",
+     "te": "Class అంటే plan.",
+     "hi": "Class नक्शा है।"
+    }
+   },
+   {
+    "q": {
+     "en": "self.name = name stores the name…",
+     "te": "self.name = name పేరును దాసేది…",
+     "hi": "self.name = name नाम रखता है…"
+    },
+    "options": [
+     {
+      "en": "in this object",
+      "te": "ఈ object లో",
+      "hi": "इस object में"
+     },
+     {
+      "en": "in a file",
+      "te": "File లో",
+      "hi": "File में"
+     },
+     {
+      "en": "nowhere",
+      "te": "ఎక్కడా కాదు",
+      "hi": "कहीं नहीं"
+     }
+    ],
+    "answer": 0,
+    "why": {
+     "en": "On self.",
+     "te": "self పై.",
+     "hi": "self पर।"
+    }
+   },
+   {
+    "q": {
+     "en": "class Car(Vehicle): Car is the…",
+     "te": "class Car(Vehicle): Car అంటే…",
+     "hi": "class Car(Vehicle): Car है…"
+    },
+    "options": [
+     "parent",
+     "child"
+    ],
+    "answer": 1,
+    "why": {
+     "en": "It inherits from Vehicle.",
+     "te": "ఇది Vehicle నుంచి inherit చేస్తుంది.",
+     "hi": "यह Vehicle से inherit करती है।"
+    }
+   },
+   {
+    "q": {
+     "en": "super().pay() calls…",
+     "te": "super().pay() call చేసేది…",
+     "hi": "super().pay() call करता है…"
+    },
+    "options": [
+     {
+      "en": "the parent's pay",
+      "te": "Parent pay",
+      "hi": "Parent का pay"
+     },
+     {
+      "en": "itself again",
+      "te": "మళ్లీ తనను",
+      "hi": "ख़ुद को फिर"
+     }
+    ],
+    "answer": 0,
+    "why": {
+     "en": "The parent version.",
+     "te": "Parent version.",
+     "hi": "Parent version।"
+    }
+   },
+   {
+    "q": {
+     "en": "print(obj) uses…",
+     "te": "print(obj) వాడేది…",
+     "hi": "print(obj) इस्तेमाल करता है…"
+    },
+    "options": [
+     "__init__",
+     "__str__",
+     "__eq__"
+    ],
+    "answer": 1,
+    "why": {
+     "en": "__str__.",
+     "te": "__str__.",
+     "hi": "__str__।"
+    }
+   }
+  ]
+ },
+ "project": {
+  "title": {
+   "en": "Library system",
+   "te": "Library system",
+   "hi": "Library system"
+  },
+  "prompt": {
+   "en": "Write class Book(title, author) with an available flag that starts True and __str__ returning \"title by author\". Write class Library with add(book), borrow(title) returning True if the book is there and available (and marks it borrowed) else False, and available_titles() returning a sorted list of available titles.",
+   "te": "Book(title, author) class రాయండి: available flag True తో మొదలవ్వాలి, __str__ \"title by author\" return చేయాలి. Library class: add(book); borrow(title) book ఉండి available అయితే True (borrowed గా గుర్తించి), లేకపోతే False; available_titles() available titles sorted list return చేయాలి.",
+   "hi": "Book(title, author) class लिखिए जिसका available flag True से शुरू हो और __str__ \"title by author\" return करे। Library class लिखिए: add(book); borrow(title) जो book मौजूद और available होने पर True return करे (और उसे borrowed करे), नहीं तो False; और available_titles() जो available titles की sorted list return करे।"
+  },
+  "starter": "class Book:\n    pass\n\nclass Library:\n    pass\n",
+  "tests": [
+   {
+    "name": "book text",
+    "call": "str(Book(\"Godan\", \"Premchand\"))",
+    "expected": "'Godan by Premchand'"
+   },
+   {
+    "name": "borrow once",
+    "call": "(lambda lib: (lib.add(Book(\"A\", \"x\")), lib.borrow(\"A\"), lib.borrow(\"A\"))[1:])(Library())",
+    "expected": "(True, False)"
+   },
+   {
+    "name": "available titles",
+    "call": "(lambda lib: (lib.add(Book(\"C\", \"z\")), lib.add(Book(\"A\", \"x\")), lib.add(Book(\"B\", \"y\")), lib.borrow(\"B\"), lib.available_titles())[4])(Library())",
+    "expected": "['A', 'C']"
+   },
+   {
+    "name": "unknown title",
+    "call": "Library().borrow(\"Nothing\")",
+    "expected": "False",
+    "hidden": true
+   }
+  ],
+  "hints": [
+   {
+    "en": "Book.__init__ stores title, author and self.available = True.",
+    "te": "Book.__init__ title, author, self.available = True దాస్తుంది.",
+    "hi": "Book.__init__ title, author और self.available = True रखता है।"
+   },
+   {
+    "en": "Library keeps self.books = [] and add appends.",
+    "te": "Library, self.books = [] ఉంచుతుంది; add జోడిస్తుంది.",
+    "hi": "Library, self.books = [] रखती है और add जोड़ता है।"
+   },
+   {
+    "en": "borrow loops: if b.title == title and b.available: set available False and return True. After the loop return False.",
+    "te": "borrow loop: b.title == title, b.available అయితే available False చేసి True return. Loop తర్వాత False.",
+    "hi": "borrow loop: अगर b.title == title और b.available तो available False करके True return। Loop के बाद False।"
+   }
+  ],
+  "solution": "class Book:\n    def __init__(self, title, author):\n        self.title = title\n        self.author = author\n        self.available = True\n\n    def __str__(self):\n        return f\"{self.title} by {self.author}\"\n\nclass Library:\n    def __init__(self):\n        self.books = []\n\n    def add(self, book):\n        self.books.append(book)\n\n    def borrow(self, title):\n        for b in self.books:\n            if b.title == title and b.available:\n                b.available = False\n                return True\n        return False\n\n    def available_titles(self):\n        return sorted(b.title for b in self.books if b.available)"
+ }
+}

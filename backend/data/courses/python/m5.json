@@ -1,0 +1,788 @@
+{
+ "id": "py-m5",
+ "n": 5,
+ "skill": "python-files-errors",
+ "title": {
+  "en": "Files & Errors",
+  "te": "Files & Errors",
+  "hi": "Files & Errors"
+ },
+ "summary": {
+  "en": "Save and read data in files, and handle errors so programs do not crash.",
+  "te": "Files లో data దాచడం, చదవడం; programs crash కాకుండా errors నిర్వహించడం.",
+  "hi": "Files में data सहेजना और पढ़ना, और errors संभालना ताकि program crash न हों।"
+ },
+ "lessons": [
+  {
+   "id": "py-m5-l1",
+   "n": 1,
+   "minutes": 20,
+   "title": {
+    "en": "Reading and writing files",
+    "te": "Files చదవడం, రాయడం",
+    "hi": "Files पढ़ना और लिखना"
+   },
+   "oneLine": {
+    "en": "open() lets a program save text to a file and read it back later, so data survives after the program ends.",
+    "te": "open() తో program text ని file లో దాచి తర్వాత మళ్లీ చదవగలదు; program ముగిసినా data ఉంటుంది.",
+    "hi": "open() से program text को file में सहेजकर बाद में पढ़ सकता है, ताकि program ख़त्म होने के बाद भी data बचा रहे।"
+   },
+   "useCase": {
+    "en": "A billing app writes each day's sales to a file so the owner can open the report next morning.",
+    "te": "Billing app ప్రతి రోజు sales ని file లో రాస్తుంది, యజమాని మరుసటి ఉదయం report తెరవగలరు.",
+    "hi": "Billing app हर दिन की sales file में लिखता है ताकि मालिक अगली सुबह report खोल सके।"
+   },
+   "explain": {
+    "en": [
+     "Variables disappear when a program stops. A file keeps the data on disk.",
+     "open(\"notes.txt\", \"w\") opens a file for writing; \"a\" adds to the end; \"r\" reads.",
+     "Use with open(...) as f: so the file is closed for you, even if something goes wrong.",
+     "f.write(text) writes. Add \"\\n\" yourself to end a line.",
+     "f.read() gives all the text; looping over f gives one line at a time."
+    ],
+    "te": [
+     "Program ఆగితే variables పోతాయి. File data ని disk పై ఉంచుతుంది.",
+     "open(\"notes.txt\", \"w\") file ని రాయడానికి తెరుస్తుంది; \"a\" చివర జోడిస్తుంది; \"r\" చదువుతుంది.",
+     "with open(...) as f: వాడండి, ఏదైనా తప్పు జరిగినా file మీ కోసం మూసివేయబడుతుంది.",
+     "f.write(text) రాస్తుంది. Line ముగించడానికి \"\\n\" మీరే జోడించండి.",
+     "f.read() మొత్తం text ఇస్తుంది; f పై loop చేస్తే ఒక్కో line వస్తుంది."
+    ],
+    "hi": [
+     "Program रुकते ही variables मिट जाते हैं। File data को disk पर रखती है।",
+     "open(\"notes.txt\", \"w\") file को लिखने के लिए खोलता है; \"a\" आख़िर में जोड़ता है; \"r\" पढ़ता है।",
+     "with open(...) as f: लिखिए, ताकि कुछ गड़बड़ होने पर भी file अपने-आप बंद हो जाए।",
+     "f.write(text) लिखता है। Line ख़त्म करने के लिए \"\\n\" ख़ुद जोड़िए।",
+     "f.read() पूरा text देता है; f पर loop करने से एक-एक line मिलती है।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "A file is a notebook your program can write in and read later."
+    ],
+    "te": [
+     "File అంటే మీ program రాసి తర్వాత చదవగలిగే notebook."
+    ],
+    "hi": [
+     "File एक notebook है जिसमें program लिखकर बाद में पढ़ सकता है।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "A diary app: each day, open(\"diary.txt\", \"a\") and write one line with the date and the note."
+    ],
+    "te": [
+     "Diary app: ప్రతి రోజు open(\"diary.txt\", \"a\") తో తేదీ, note ఉన్న ఒక line రాయండి."
+    ],
+    "hi": [
+     "Diary app: हर दिन open(\"diary.txt\", \"a\") से तारीख़ और note वाली एक line लिखिए।"
+    ]
+   },
+   "picture": "flowchart LR\n  P[\"program\"] -->|\"write (w / a)\"| F[(\"sales.txt\")]\n  F -->|\"read (r)\"| P2[\"program later\"]",
+   "code": {
+    "source": "with open(\"sales.txt\", \"w\") as f:\n    f.write(\"tea,15\\n\")\n    f.write(\"samosa,12\\n\")\n\ntotal = 0\nwith open(\"sales.txt\") as f:\n    for line in f:\n        item, price = line.strip().split(\",\")\n        total = total + int(price)\nprint(\"Total:\", total)",
+    "output": "Total: 27",
+    "notes": [
+     {
+      "line": 1,
+      "note": {
+       "en": "\"w\" opens the file for writing; with closes it for us.",
+       "te": "\"w\" file ని రాయడానికి తెరుస్తుంది; with దాన్ని మూసివేస్తుంది.",
+       "hi": "\"w\" file को लिखने के लिए खोलता है; with उसे बंद करता है।"
+      }
+     },
+     {
+      "line": 2,
+      "note": {
+       "en": "Each write adds a line; \"\\n\" ends it.",
+       "te": "ప్రతి write ఒక line జోడిస్తుంది; \"\\n\" దాన్ని ముగిస్తుంది.",
+       "hi": "हर write एक line जोड़ता है; \"\\n\" उसे ख़त्म करता है।"
+      }
+     },
+     {
+      "line": 6,
+      "note": {
+       "en": "Without a mode, open reads.",
+       "te": "Mode లేకపోతే open చదువుతుంది.",
+       "hi": "Mode न हो तो open पढ़ता है।"
+      }
+     },
+     {
+      "line": 7,
+      "note": {
+       "en": "Looping over the file gives one line at a time.",
+       "te": "File పై loop ఒక్కో line ఇస్తుంది.",
+       "hi": "File पर loop एक-एक line देता है।"
+      }
+     },
+     {
+      "line": 8,
+      "note": {
+       "en": "strip removes \"\\n\"; split(\",\") separates item and price.",
+       "te": "strip \"\\n\" తీస్తుంది; split(\",\") item, price వేరు చేస్తుంది.",
+       "hi": "strip \"\\n\" हटाता है; split(\",\") item और price अलग करता है।"
+      }
+     },
+     {
+      "line": 9,
+      "note": {
+       "en": "The price is text, so int() turns it into a number.",
+       "te": "Price text, కాబట్టి int() దాన్ని number చేస్తుంది.",
+       "hi": "Price text है, इसलिए int() उसे number बनाता है।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "f = open(\"a.txt\", \"w\")\nf.write(5)",
+     "fix": {
+      "en": "write takes text: f.write(str(5)). And use with so the file closes.",
+      "te": "write text తీసుకుంటుంది: f.write(str(5)). File మూతపడేలా with వాడండి.",
+      "hi": "write text लेता है: f.write(str(5))। और with लिखिए ताकि file बंद हो।"
+     }
+    },
+    {
+     "wrong": "open(\"log.txt\", \"w\")  # to add a line",
+     "fix": {
+      "en": "\"w\" wipes the file first. Use \"a\" to add to the end.",
+      "te": "\"w\" ముందు file ని ఖాళీ చేస్తుంది. చివర జోడించడానికి \"a\" వాడండి.",
+      "hi": "\"w\" पहले file ख़ाली कर देता है। आख़िर में जोड़ने के लिए \"a\" लिखिए।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "Which mode adds to the end of a file?",
+      "te": "File చివర జోడించే mode ఏది?",
+      "hi": "कौन-सा mode file के आख़िर में जोड़ता है?"
+     },
+     "options": [
+      "\"w\"",
+      "\"a\"",
+      "\"r\""
+     ],
+     "answer": 1,
+     "why": {
+      "en": "\"a\" is append.",
+      "te": "\"a\" అంటే append.",
+      "hi": "\"a\" मतलब append।"
+     }
+    },
+    {
+     "q": {
+      "en": "Why use with open(...) as f:?",
+      "te": "with open(...) as f: ఎందుకు?",
+      "hi": "with open(...) as f: क्यों?"
+     },
+     "options": [
+      {
+       "en": "It is faster",
+       "te": "వేగం కోసం",
+       "hi": "तेज़ है"
+      },
+      {
+       "en": "It closes the file for you",
+       "te": "File ని మూసివేస్తుంది",
+       "hi": "File अपने-आप बंद करता है"
+      },
+      {
+       "en": "It makes a new folder",
+       "te": "కొత్త folder చేస్తుంది",
+       "hi": "नया folder बनाता है"
+      }
+     ],
+     "answer": 1,
+     "why": {
+      "en": "with always closes the file.",
+      "te": "with ఎప్పుడూ file మూసివేస్తుంది.",
+      "hi": "with हमेशा file बंद करता है।"
+     }
+    },
+    {
+     "q": {
+      "en": "Each line read from a file ends with…",
+      "te": "File నుంచి చదివిన ప్రతి line చివర…",
+      "hi": "File से पढ़ी हर line के आख़िर में…"
+     },
+     "options": [
+      "\"\\n\"",
+      "\",\"",
+      {
+       "en": "nothing",
+       "te": "ఏమీ లేదు",
+       "hi": "कुछ नहीं"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Use strip() to remove it.",
+      "te": "దాన్ని strip() తో తీయండి.",
+      "hi": "उसे strip() से हटाइए।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write save_names(path, names) that writes each name on its own line, and count_lines(path) that returns how many lines the file has.",
+     "te": "save_names(path, names) రాయండి: ప్రతి పేరును వేరే line లో రాయాలి. count_lines(path) file లో ఎన్ని lines ఉన్నాయో return చేయాలి.",
+     "hi": "save_names(path, names) लिखिए जो हर नाम अलग line में लिखे, और count_lines(path) जो file की lines की गिनती return करे।"
+    },
+    "starter": "def save_names(path, names):\n    pass\n\ndef count_lines(path):\n    pass\n",
+    "tests": [
+     {
+      "name": "save then count",
+      "call": "(save_names(\"t1.txt\", [\"Ravi\", \"Sita\"]), count_lines(\"t1.txt\"))[1]",
+      "expected": "2"
+     },
+     {
+      "name": "each name on a line",
+      "call": "(save_names(\"t2.txt\", [\"A\", \"B\"]), open(\"t2.txt\").read())[1]",
+      "expected": "'A\\nB\\n'"
+     },
+     {
+      "name": "saving again replaces the file",
+      "call": "(save_names(\"t3.txt\", [\"X\", \"Y\"]), save_names(\"t3.txt\", [\"Z\"]), count_lines(\"t3.txt\"))[2]",
+      "expected": "1",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "Open with \"w\" inside with open(path, \"w\") as f:",
+      "te": "with open(path, \"w\") as f: లో \"w\" తో తెరవండి.",
+      "hi": "with open(path, \"w\") as f: में \"w\" से खोलिए।"
+     },
+     {
+      "en": "for name in names: f.write(name + \"\\n\")",
+      "te": "for name in names: f.write(name + \"\\n\")",
+      "hi": "for name in names: f.write(name + \"\\n\")"
+     },
+     {
+      "en": "count_lines: with open(path) as f: return len(f.readlines())",
+      "te": "count_lines: with open(path) as f: return len(f.readlines())",
+      "hi": "count_lines: with open(path) as f: return len(f.readlines())"
+     }
+    ],
+    "solution": "def save_names(path, names):\n    with open(path, \"w\") as f:\n        for name in names:\n            f.write(name + \"\\n\")\n\ndef count_lines(path):\n    with open(path) as f:\n        return len(f.readlines())"
+   },
+   "cheat": {
+    "en": [
+     "with open(path, mode) as f:",
+     "\"r\" read · \"w\" write (wipes) · \"a\" append",
+     "f.write(text + \"\\n\") · f.read() · for line in f"
+    ],
+    "te": [
+     "with open(path, mode) as f:",
+     "\"r\" చదువు · \"w\" రాయి (ఖాళీ చేస్తుంది) · \"a\" జోడించు",
+     "f.write(text + \"\\n\") · f.read() · for line in f"
+    ],
+    "hi": [
+     "with open(path, mode) as f:",
+     "\"r\" पढ़ो · \"w\" लिखो (मिटाता है) · \"a\" जोड़ो",
+     "f.write(text + \"\\n\") · f.read() · for line in f"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A shop wants to keep each sale in a file and add new sales every day without losing old ones. Explain which mode to use and how to read the total back.",
+      "te": "Shop ప్రతి sale ని file లో ఉంచి, పాతవి పోకుండా రోజూ కొత్తవి జోడించాలి. ఏ mode వాడాలో, total ఎలా మళ్లీ చదవాలో వివరించండి.",
+      "hi": "दुकान हर sale file में रखना और पुरानी खोए बिना रोज़ नई जोड़ना चाहती है। कौन-सा mode लिखें और total कैसे वापस पढ़ें, समझाइए।"
+     },
+     {
+      "en": "Explain why with open(...) is safer than open() alone.",
+      "te": "ఒక్క open() కంటే with open(...) ఎందుకు సురక్షితమో వివరించండి.",
+      "hi": "सिर्फ़ open() से with open(...) ज़्यादा सुरक्षित क्यों है, समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "open",
+      "file"
+     ],
+     [
+      "\"a\"",
+      "append",
+      "with",
+      "close",
+      "మూస",
+      "बंद",
+      "జోడ",
+      "जोड़"
+     ],
+     [
+      "read",
+      "line",
+      "write",
+      "చదువ",
+      "पढ़",
+      "రాయ",
+      "लिख"
+     ]
+    ],
+    "challenge": {
+     "en": "Say the difference between \"w\" and \"a\".",
+     "te": "\"w\", \"a\" మధ్య తేడా చెప్పండి.",
+     "hi": "\"w\" और \"a\" में फ़र्क़ बताइए।"
+    }
+   }
+  },
+  {
+   "id": "py-m5-l2",
+   "n": 2,
+   "minutes": 20,
+   "title": {
+    "en": "Handling errors",
+    "te": "Errors ని నిర్వహించడం",
+    "hi": "Errors संभालना"
+   },
+   "oneLine": {
+    "en": "try and except catch an error, so the program can explain the problem and carry on instead of crashing.",
+    "te": "try, except ఒక error ని పట్టుకుంటాయి; program crash అవ్వకుండా సమస్య చెప్పి ముందుకు సాగుతుంది.",
+    "hi": "try और except error को पकड़ते हैं, ताकि program crash होने की जगह समस्या बताकर आगे चले।"
+   },
+   "useCase": {
+    "en": "An ATM app asks again when you type letters for the amount, instead of shutting down.",
+    "te": "Amount కి అక్షరాలు type చేస్తే ATM app ఆగిపోకుండా మళ్లీ అడుగుతుంది.",
+    "hi": "Amount में अक्षर लिखने पर ATM app बंद होने की जगह फिर पूछता है।"
+   },
+   "explain": {
+    "en": [
+     "Some lines can fail: int(\"abc\") raises ValueError, 10 / 0 raises ZeroDivisionError.",
+     "Put the risky line inside try:.",
+     "If it fails, Python jumps to the matching except block and runs it.",
+     "Name the error you expect: except ValueError:. A bare except hides real bugs.",
+     "finally runs whether it failed or not, and raise lets your own function report a problem."
+    ],
+    "te": [
+     "కొన్ని lines విఫలం కావచ్చు: int(\"abc\") ValueError, 10 / 0 ZeroDivisionError ఇస్తాయి.",
+     "ప్రమాదకరమైన line ని try: లోపల పెట్టండి.",
+     "అది విఫలమైతే Python సరిపోయే except block కి వెళ్లి దాన్ని నడుపుతుంది.",
+     "ఊహించిన error పేరు చెప్పండి: except ValueError:. ఒట్టి except నిజమైన bugs ని దాచేస్తుంది.",
+     "విఫలమైనా కాకపోయినా finally నడుస్తుంది; raise తో మీ function సమస్యను తెలుపుతుంది."
+    ],
+    "hi": [
+     "कुछ lines fail हो सकती हैं: int(\"abc\") ValueError देता है, 10 / 0 ZeroDivisionError।",
+     "जोखिम वाली line try: के अंदर रखिए।",
+     "Fail होने पर Python मिलते-जुलते except block पर जाकर उसे चलाता है।",
+     "जिस error की उम्मीद है उसका नाम लिखिए: except ValueError:। ख़ाली except असली bugs छिपा देता है।",
+     "finally हर हाल में चलता है, और raise से आपका function समस्या बता सकता है।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "try is \"attempt this\"; except is \"if it goes wrong, do this instead\"."
+    ],
+    "te": [
+     "try అంటే \"ఇది ప్రయత్నించు\"; except అంటే \"తప్పైతే బదులుగా ఇది చేయి\"."
+    ],
+    "hi": [
+     "try मतलब \"यह कोशिश करो\"; except मतलब \"गड़बड़ हो तो इसकी जगह यह करो\"।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "Reading a settings file that may not exist: except FileNotFoundError: use the default settings."
+    ],
+    "te": [
+     "ఉండకపోవచ్చు అనే settings file చదవడం: except FileNotFoundError: default settings వాడండి."
+    ],
+    "hi": [
+     "शायद न हो ऐसी settings file पढ़ना: except FileNotFoundError: default settings लीजिए।"
+    ]
+   },
+   "picture": "flowchart TD\n  T[\"try: int(text)\"] -->|ok| OK[\"use the number\"]\n  T -->|ValueError| E[\"except: show a message\"]\n  OK --> F[\"finally\"]\n  E --> F",
+   "code": {
+    "source": "def to_amount(text):\n    try:\n        return int(text)\n    except ValueError:\n        print(\"Please type digits only:\", text)\n        return 0\n\nprint(to_amount(\"500\"))\nprint(to_amount(\"five\"))",
+    "output": "500\nPlease type digits only: five\n0",
+    "notes": [
+     {
+      "line": 2,
+      "note": {
+       "en": "try marks the line that may fail.",
+       "te": "విఫలం కాగల line ని try గుర్తిస్తుంది.",
+       "hi": "try उस line को चिह्नित करता है जो fail हो सकती है।"
+      }
+     },
+     {
+      "line": 3,
+      "note": {
+       "en": "int(\"500\") works, so the number is returned.",
+       "te": "int(\"500\") పనిచేస్తుంది, number return అవుతుంది.",
+       "hi": "int(\"500\") चलता है, इसलिए number return होता है।"
+      }
+     },
+     {
+      "line": 4,
+      "note": {
+       "en": "int(\"five\") raises ValueError, so this block runs.",
+       "te": "int(\"five\") ValueError ఇస్తుంది, అందుకే ఈ block నడుస్తుంది.",
+       "hi": "int(\"five\") ValueError देता है, इसलिए यह block चलता है।"
+      }
+     },
+     {
+      "line": 6,
+      "note": {
+       "en": "The program carries on with a safe value.",
+       "te": "Program సురక్షిత value తో ముందుకు సాగుతుంది.",
+       "hi": "Program सुरक्षित value के साथ आगे चलता है।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "try:\n    x = int(text)\nexcept:\n    pass",
+     "fix": {
+      "en": "A bare except with pass hides every error. Catch the one you expect and say what went wrong.",
+      "te": "pass తో ఒట్టి except ప్రతి error ని దాచేస్తుంది. ఊహించినదాన్ని పట్టుకుని ఏం తప్పైందో చెప్పండి.",
+      "hi": "pass वाला ख़ाली except हर error छिपा देता है। जिसकी उम्मीद है वही पकड़िए और बताइए क्या ग़लत हुआ।"
+     }
+    },
+    {
+     "wrong": "try:\n    print(10 / n)\nexcept ValueError:\n    print(\"bad\")",
+     "fix": {
+      "en": "Dividing by zero raises ZeroDivisionError, not ValueError, so this except never catches it.",
+      "te": "Zero తో భాగిస్తే ZeroDivisionError వస్తుంది, ValueError కాదు; ఈ except దాన్ని పట్టుకోదు.",
+      "hi": "Zero से भाग देने पर ZeroDivisionError आता है, ValueError नहीं, इसलिए यह except उसे नहीं पकड़ता।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "int(\"12a\") raises…",
+      "te": "int(\"12a\") ఇచ్చేది…",
+      "hi": "int(\"12a\") देता है…"
+     },
+     "options": [
+      "ValueError",
+      "TypeError",
+      "KeyError"
+     ],
+     "answer": 0,
+     "why": {
+      "en": "The text is not a whole number.",
+      "te": "Text పూర్ణ సంఖ్య కాదు.",
+      "hi": "Text पूर्ण संख्या नहीं है।"
+     }
+    },
+    {
+     "q": {
+      "en": "When does finally run?",
+      "te": "finally ఎప్పుడు నడుస్తుంది?",
+      "hi": "finally कब चलता है?"
+     },
+     "options": [
+      {
+       "en": "Only on error",
+       "te": "Error అప్పుడే",
+       "hi": "सिर्फ़ error पर"
+      },
+      {
+       "en": "Always",
+       "te": "ఎప్పుడూ",
+       "hi": "हमेशा"
+      },
+      {
+       "en": "Never",
+       "te": "ఎప్పుడూ కాదు",
+       "hi": "कभी नहीं"
+      }
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Error or not.",
+      "te": "Error ఉన్నా లేకపోయినా.",
+      "hi": "Error हो या न हो।"
+     }
+    },
+    {
+     "q": {
+      "en": "Opening a missing file raises…",
+      "te": "లేని file తెరిస్తే వచ్చేది…",
+      "hi": "न होने वाली file खोलने पर आता है…"
+     },
+     "options": [
+      "FileNotFoundError",
+      "ValueError",
+      "IndexError"
+     ],
+     "answer": 0,
+     "why": {
+      "en": "The file is not found.",
+      "te": "File దొరకదు.",
+      "hi": "File नहीं मिलती।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write safe_divide(a, b) that returns a / b, or the text \"cannot divide by zero\" when b is 0. Use try and except.",
+     "te": "safe_divide(a, b) రాయండి: a / b return చేయాలి, b 0 అయితే \"cannot divide by zero\" text. try, except వాడండి.",
+     "hi": "safe_divide(a, b) लिखिए जो a / b return करे, या b के 0 होने पर text \"cannot divide by zero\"। try और except लिखिए।"
+    },
+    "starter": "def safe_divide(a, b):\n    return a / b\n",
+    "tests": [
+     {
+      "name": "safe_divide(10, 4)",
+      "call": "safe_divide(10, 4)",
+      "expected": "2.5"
+     },
+     {
+      "name": "safe_divide(5, 0)",
+      "call": "safe_divide(5, 0)",
+      "expected": "'cannot divide by zero'"
+     },
+     {
+      "name": "uses try",
+      "call": "'ZeroDivisionError' in safe_divide.__code__.co_names",
+      "expected": "True",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "Wrap return a / b in try:",
+      "te": "return a / b ని try: లో పెట్టండి.",
+      "hi": "return a / b को try: में रखिए।"
+     },
+     {
+      "en": "Catch ZeroDivisionError.",
+      "te": "ZeroDivisionError ని పట్టుకోండి.",
+      "hi": "ZeroDivisionError पकड़िए।"
+     },
+     {
+      "en": "except ZeroDivisionError:\n    return \"cannot divide by zero\"",
+      "te": "except ZeroDivisionError:\n    return \"cannot divide by zero\"",
+      "hi": "except ZeroDivisionError:\n    return \"cannot divide by zero\""
+     }
+    ],
+    "solution": "def safe_divide(a, b):\n    try:\n        return a / b\n    except ZeroDivisionError:\n        return \"cannot divide by zero\""
+   },
+   "cheat": {
+    "en": [
+     "try: risky · except SomeError: plan B",
+     "ValueError · ZeroDivisionError · FileNotFoundError · KeyError",
+     "finally: always · raise ValueError(\"msg\")"
+    ],
+    "te": [
+     "try: ప్రమాదం · except SomeError: plan B",
+     "ValueError · ZeroDivisionError · FileNotFoundError · KeyError",
+     "finally: ఎప్పుడూ · raise ValueError(\"msg\")"
+    ],
+    "hi": [
+     "try: जोखिम · except SomeError: plan B",
+     "ValueError · ZeroDivisionError · FileNotFoundError · KeyError",
+     "finally: हमेशा · raise ValueError(\"msg\")"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A fee app asks the student to type an amount. Explain how try and except stop the app from crashing when they type letters.",
+      "te": "Fee app విద్యార్థిని amount type చేయమంటుంది. అక్షరాలు type చేసినప్పుడు app crash కాకుండా try, except ఎలా ఆపుతాయో వివరించండి.",
+      "hi": "Fee app छात्र से amount लिखने को कहता है। अक्षर लिखने पर app crash न हो, इसके लिए try और except कैसे काम करते हैं, समझाइए।"
+     },
+     {
+      "en": "Why is it better to write except ValueError: than a bare except:?",
+      "te": "ఒట్టి except: కంటే except ValueError: రాయడం ఎందుకు మంచిది?",
+      "hi": "ख़ाली except: से except ValueError: लिखना बेहतर क्यों है?"
+     }
+    ],
+    "keywords": [
+     [
+      "try"
+     ],
+     [
+      "except",
+      "catch",
+      "పట్టు",
+      "पकड़"
+     ],
+     [
+      "valueerror",
+      "error",
+      "crash",
+      "specific",
+      "message"
+     ]
+    ],
+    "challenge": {
+     "en": "Say what happens to the rest of a try block after an error.",
+     "te": "Error తర్వాత try block లో మిగతాది ఏమవుతుందో చెప్పండి.",
+     "hi": "Error के बाद try block के बाक़ी हिस्से का क्या होता है, बताइए।"
+    }
+   }
+  }
+ ],
+ "test": {
+  "pass": 4,
+  "questions": [
+   {
+    "q": {
+     "en": "Which mode wipes a file before writing?",
+     "te": "రాయడానికి ముందు file ని ఖాళీ చేసే mode ఏది?",
+     "hi": "लिखने से पहले file कौन-सा mode मिटाता है?"
+    },
+    "options": [
+     "\"a\"",
+     "\"w\"",
+     "\"r\""
+    ],
+    "answer": 1,
+    "why": {
+     "en": "\"w\" starts fresh.",
+     "te": "\"w\" కొత్తగా మొదలుపెడుతుంది.",
+     "hi": "\"w\" नए सिरे से शुरू करता है।"
+    }
+   },
+   {
+    "q": {
+     "en": "line.strip() removes…",
+     "te": "line.strip() తీసేది…",
+     "hi": "line.strip() हटाता है…"
+    },
+    "options": [
+     {
+      "en": "spaces and \"\\n\" at the ends",
+      "te": "చివర్లలో spaces, \"\\n\"",
+      "hi": "किनारों के spaces और \"\\n\""
+     },
+     {
+      "en": "all letters",
+      "te": "అన్ని అక్షరాలు",
+      "hi": "सारे अक्षर"
+     },
+     {
+      "en": "commas",
+      "te": "commas",
+      "hi": "commas"
+     }
+    ],
+    "answer": 0,
+    "why": {
+     "en": "Only the ends.",
+     "te": "చివర్లు మాత్రమే.",
+     "hi": "सिर्फ़ किनारे।"
+    }
+   },
+   {
+    "q": {
+     "en": "10 / 0 raises…",
+     "te": "10 / 0 ఇచ్చేది…",
+     "hi": "10 / 0 देता है…"
+    },
+    "options": [
+     "ValueError",
+     "ZeroDivisionError",
+     "TypeError"
+    ],
+    "answer": 1,
+    "why": {
+     "en": "Division by zero.",
+     "te": "Zero తో భాగహారం.",
+     "hi": "Zero से भाग।"
+    }
+   },
+   {
+    "q": {
+     "en": "Code after an error inside try…",
+     "te": "try లో error తర్వాత code…",
+     "hi": "try में error के बाद का code…"
+    },
+    "options": [
+     {
+      "en": "still runs",
+      "te": "ఇంకా నడుస్తుంది",
+      "hi": "फिर भी चलता है"
+     },
+     {
+      "en": "is skipped",
+      "te": "దాటవేయబడుతుంది",
+      "hi": "छोड़ दिया जाता है"
+     }
+    ],
+    "answer": 1,
+    "why": {
+     "en": "Python jumps to except.",
+     "te": "Python except కి వెళ్తుంది.",
+     "hi": "Python except पर जाता है।"
+    }
+   },
+   {
+    "q": {
+     "en": "Which runs always?",
+     "te": "ఎప్పుడూ నడిచేది ఏది?",
+     "hi": "हमेशा कौन चलता है?"
+    },
+    "options": [
+     "except",
+     "finally",
+     "else"
+    ],
+    "answer": 1,
+    "why": {
+     "en": "finally.",
+     "te": "finally.",
+     "hi": "finally।"
+    }
+   }
+  ]
+ },
+ "project": {
+  "title": {
+   "en": "Marks file report",
+   "te": "Marks file report",
+   "hi": "Marks file report"
+  },
+  "prompt": {
+   "en": "Write load_marks(path) that reads a file of \"name,mark\" lines and returns a dictionary {name: mark}. Skip lines whose mark is not a number. If the file does not exist, return an empty dictionary.",
+   "te": "load_marks(path) రాయండి: \"name,mark\" lines ఉన్న file చదివి {name: mark} dictionary return చేయాలి. Mark number కాని lines దాటవేయండి. File లేకపోతే ఖాళీ dictionary return చేయండి.",
+   "hi": "load_marks(path) लिखिए जो \"name,mark\" lines वाली file पढ़कर {name: mark} dictionary return करे। जिन lines में mark number नहीं, उन्हें छोड़िए। File न हो तो ख़ाली dictionary return कीजिए।"
+  },
+  "starter": "def load_marks(path):\n    marks = {}\n    return marks\n",
+  "tests": [
+   {
+    "name": "reads the marks",
+    "call": "(open(\"m1.txt\", \"w\").write(\"Ravi,80\\nSita,92\\n\"), load_marks(\"m1.txt\"))[1]",
+    "expected": "{'Ravi': 80, 'Sita': 92}"
+   },
+   {
+    "name": "skips a bad line",
+    "call": "(open(\"m2.txt\", \"w\").write(\"Ravi,80\\nAnu,absent\\n\"), load_marks(\"m2.txt\"))[1]",
+    "expected": "{'Ravi': 80}"
+   },
+   {
+    "name": "missing file",
+    "call": "load_marks(\"no-such-file.txt\")",
+    "expected": "{}"
+   },
+   {
+    "name": "ignores blank lines",
+    "call": "(open(\"m3.txt\", \"w\").write(\"A,1\\n\\nB,2\\n\"), load_marks(\"m3.txt\"))[1]",
+    "expected": "{'A': 1, 'B': 2}",
+    "hidden": true
+   }
+  ],
+  "hints": [
+   {
+    "en": "Wrap the whole with open(path) block in try / except FileNotFoundError.",
+    "te": "with open(path) block మొత్తాన్ని try / except FileNotFoundError లో పెట్టండి.",
+    "hi": "पूरे with open(path) block को try / except FileNotFoundError में रखिए।"
+   },
+   {
+    "en": "For each line: name, mark = line.strip().split(\",\")",
+    "te": "ప్రతి line కి: name, mark = line.strip().split(\",\")",
+    "hi": "हर line के लिए: name, mark = line.strip().split(\",\")"
+   },
+   {
+    "en": "Inside the loop, try int(mark) and except ValueError: continue.",
+    "te": "Loop లో int(mark) try చేసి except ValueError: continue.",
+    "hi": "Loop में int(mark) try कीजिए और except ValueError: continue।"
+   }
+  ],
+  "solution": "def load_marks(path):\n    marks = {}\n    try:\n        with open(path) as f:\n            for line in f:\n                line = line.strip()\n                if not line:\n                    continue\n                name, mark = line.split(\",\")\n                try:\n                    marks[name] = int(mark)\n                except ValueError:\n                    continue\n    except FileNotFoundError:\n        return {}\n    return marks"
+ }
+}
