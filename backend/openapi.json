@@ -7681,6 +7681,41 @@
         ]
       }
     },
+    "/api/learner/reviews/instances/{id}/question": {
+      "get": {
+        "tags": [
+          "learner"
+        ],
+        "operationId": "get_learner_reviews_instances_id_question",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
     "/api/learner/reviews/{nodeId}/start": {
       "post": {
         "tags": [

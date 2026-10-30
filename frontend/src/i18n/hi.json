@@ -4066,5 +4066,6 @@
   "lj.market.addTopic": "मेरे topics में जोड़ें",
   "lj.market.added": "जोड़ा ✓",
   "lj.market.alsoOn": "यहाँ खोजें:",
-  "lj.market.outboundNote": "Job site सिर्फ़ role और city के साथ खुलती है। आपके बारे में कुछ नहीं भेजा जाता।"
+  "lj.market.outboundNote": "Job site सिर्फ़ role और city के साथ खुलती है। आपके बारे में कुछ नहीं भेजा जाता।",
+  "shared.askQubirex.answerIn": "जवाब की भाषा:"
 }

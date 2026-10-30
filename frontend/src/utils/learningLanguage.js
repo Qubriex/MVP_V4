@@ -26,13 +26,14 @@ export async function setLearningLanguage(value) {
 /** The speech tag for the main language of a learning language. */
 export const learningSpeechTag = (v) => (String(v).startsWith('hindi') ? 'hi-IN' : v === 'english' ? 'en-IN' : 'te-IN');
 
-/** [value, setValue]; value is null until loaded. */
-export function useLearningLanguage() {
-  const [value, setValue] = useState(current);
+/** [value, setValue]; value is null until loaded. enabled=false (staff, employers) never asks the learner API. */
+export function useLearningLanguage(enabled = true) {
+  const [value, setValue] = useState(enabled ? current : null);
   useEffect(() => {
+    if (!enabled) return undefined;
     listeners.add(setValue);
     if (current == null) load(); else setValue(current);
     return () => { listeners.delete(setValue); };
-  }, []);
+  }, [enabled]);
   return [value, setLearningLanguage];
 }
