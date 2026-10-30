@@ -17,7 +17,7 @@ export function runCode({ language, code, tests = [], setup = '', stdin = '', ex
   if (!url || typeof Worker === 'undefined') return Promise.resolve({ ok: false, output: '', error: 'This browser cannot run code here.', results: [], runner: 'none' });
   return new Promise((resolve) => {
     const w = new Worker(url);
-    const timer = setTimeout(() => { w.terminate(); resolve({ ok: false, output: '', error: 'timeout', timedOut: true, results: [], runner: language }); }, LIMIT_MS[language]);
+    const timer = setTimeout(() => { w.terminate(); resolve({ ok: false, output: '', error: 'timeout', timedOut: true, results: [], runner: language }); }, LIMIT_MS[language] + (language === 'python' && /^\s*(import|from)\s+(numpy|pandas)\b/m.test(code) ? 120000 : 0));
     w.onmessage = (e) => { clearTimeout(timer); w.terminate(); resolve({ ...e.data, runner: language }); };
     w.onerror = (e) => { clearTimeout(timer); w.terminate(); resolve({ ok: false, output: '', error: e.message || 'The runner stopped.', results: [], runner: language }); };
     w.postMessage({ code, tests, setup, stdin });

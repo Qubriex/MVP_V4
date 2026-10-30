@@ -47,6 +47,16 @@ def check_python():
     for f in sorted(glob.glob(os.path.join(DATA, 'python', 'm*.json'))):
         m = json.load(open(f))
         items = [(l['id'], l['task']) for l in m['lessons'] if l.get('task')] + ([(m['id'] + '-project', m['project'])] if m.get('project') else [])
+        for l in m['lessons']:
+            src = l['code']['source']
+            if 'input(' in src:
+                continue  # examples that read input are shown with their stored output
+            buf = io.StringIO(); prev = sys.stdout; sys.stdout = buf
+            try: exec(src, {'__name__': '__main__'}); err = None
+            except Exception as e: err = f'{type(e).__name__}: {e}'
+            finally: sys.stdout = prev
+            if err or buf.getvalue().strip() != str(l['code'].get('output', '')).strip():
+                bad += 1; print('python: example', l['id'], err or repr(buf.getvalue()[:200]))
         for name, task in items:
             first_in = next((t['stdin'] for t in task['tests'] if 'stdin' in t), '')
             fails = [x for x in run(task['solution'], task['tests'], first_in) if not x[1]]

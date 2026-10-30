@@ -322,287 +322,6 @@
    "n": 2,
    "minutes": 20,
    "title": {
-    "en": "Methods",
-    "te": "Methods",
-    "hi": "Methods"
-   },
-   "oneLine": {
-    "en": "A method is a function inside a class that works with the object's own data through self.",
-    "te": "Method అంటే class లోని function; self ద్వారా object సొంత data తో పనిచేస్తుంది.",
-    "hi": "Method class के अंदर का function है जो self से object के अपने data पर काम करता है।"
-   },
-   "useCase": {
-    "en": "A bank account object has deposit and withdraw methods that change its own balance.",
-    "te": "Bank account object కి deposit, withdraw methods ఉంటాయి; అవి దాని balance మారుస్తాయి.",
-    "hi": "Bank account object के deposit और withdraw methods उसका अपना balance बदलते हैं।"
-   },
-   "explain": {
-    "en": [
-     "Data alone is not enough; objects also do things.",
-     "A method is written with def inside the class, and its first parameter is self.",
-     "Call it with a dot: acc.deposit(500). Python passes acc as self for you.",
-     "Inside the method, self.balance reads and changes this account's balance.",
-     "Methods can return values too, like acc.statement() returning a line of text."
-    ],
-    "te": [
-     "Data ఒక్కటే చాలదు; objects పనులు కూడా చేస్తాయి.",
-     "Method ని class లోపల def తో రాస్తాం; దాని మొదటి parameter self.",
-     "Dot తో call చేయండి: acc.deposit(500). Python acc ని self గా మీ కోసం పంపుతుంది.",
-     "Method లోపల self.balance ఈ account balance ని చదివి మారుస్తుంది.",
-     "Methods values కూడా return చేయగలవు, acc.statement() ఒక text line return చేసినట్లు."
-    ],
-    "hi": [
-     "सिर्फ़ data काफ़ी नहीं; objects काम भी करते हैं।",
-     "Method class के अंदर def से लिखा जाता है, और उसका पहला parameter self होता है।",
-     "Dot से call कीजिए: acc.deposit(500)। Python acc को self बनाकर भेजता है।",
-     "Method के अंदर self.balance इस account का balance पढ़ता और बदलता है।",
-     "Methods values भी return कर सकते हैं, जैसे acc.statement() एक text line return करे।"
-    ]
-   },
-   "simpler": {
-    "en": [
-     "Methods are the buttons on an object."
-    ],
-    "te": [
-     "Methods అంటే object పై ఉన్న buttons."
-    ],
-    "hi": [
-     "Methods object के buttons हैं।"
-    ]
-   },
-   "anotherExample": {
-    "en": [
-     "A Cart object: cart.add(\"pen\", 10) and cart.total() returning the sum."
-    ],
-    "te": [
-     "Cart object: cart.add(\"pen\", 10), cart.total() మొత్తం return చేస్తుంది."
-    ],
-    "hi": [
-     "Cart object: cart.add(\"pen\", 10) और cart.total() जो जोड़ return करे।"
-    ]
-   },
-   "picture": "flowchart LR\n  A[\"acc (balance 1000)\"] -->|\"deposit(500)\"| B[\"balance 1500\"]\n  B -->|\"withdraw(200)\"| C[\"balance 1300\"]",
-   "code": {
-    "source": "class Account:\n    def __init__(self, owner):\n        self.owner = owner\n        self.balance = 0\n\n    def deposit(self, amount):\n        self.balance = self.balance + amount\n\n    def withdraw(self, amount):\n        if amount > self.balance:\n            return \"Not enough balance\"\n        self.balance = self.balance - amount\n        return \"OK\"\n\nacc = Account(\"Ravi\")\nacc.deposit(1000)\nprint(acc.withdraw(300), acc.balance)\nprint(acc.withdraw(5000), acc.balance)",
-    "output": "OK 700\nNot enough balance 700",
-    "notes": [
-     {
-      "line": 4,
-      "note": {
-       "en": "Every new account starts with balance 0.",
-       "te": "ప్రతి కొత్త account balance 0 తో మొదలవుతుంది.",
-       "hi": "हर नया account balance 0 से शुरू होता है।"
-      }
-     },
-     {
-      "line": 6,
-      "note": {
-       "en": "A method: def inside the class, with self first.",
-       "te": "Method: class లోపల def, self ముందు.",
-       "hi": "Method: class के अंदर def, पहले self।"
-      }
-     },
-     {
-      "line": 7,
-      "note": {
-       "en": "It changes this account's balance.",
-       "te": "ఇది ఈ account balance మారుస్తుంది.",
-       "hi": "यह इस account का balance बदलता है।"
-      }
-     },
-     {
-      "line": 10,
-      "note": {
-       "en": "A check stops the balance going below zero.",
-       "te": "ఒక check balance సున్నా కంటే తగ్గకుండా ఆపుతుంది.",
-       "hi": "एक जाँच balance को शून्य से नीचे जाने से रोकती है।"
-      }
-     },
-     {
-      "line": 17,
-      "note": {
-       "en": "Call methods with a dot.",
-       "te": "Dot తో methods call చేయండి.",
-       "hi": "Dot से methods call कीजिए।"
-      }
-     }
-    ]
-   },
-   "mistakes": [
-    {
-     "wrong": "class A:\n    def show():\n        print(\"hi\")",
-     "fix": {
-      "en": "Methods need self: def show(self):",
-      "te": "Methods కి self కావాలి: def show(self):",
-      "hi": "Methods को self चाहिए: def show(self):"
-     }
-    },
-    {
-     "wrong": "def deposit(self, amount):\n    balance = balance + amount",
-     "fix": {
-      "en": "Use self.balance; plain balance is not the object's data.",
-      "te": "self.balance వాడండి; ఒట్టి balance object data కాదు.",
-      "hi": "self.balance लिखिए; सिर्फ़ balance object का data नहीं है।"
-     }
-    }
-   ],
-   "quick": [
-    {
-     "q": {
-      "en": "The first parameter of a method is…",
-      "te": "Method మొదటి parameter…",
-      "hi": "Method का पहला parameter…"
-     },
-     "options": [
-      "this",
-      "self",
-      "obj"
-     ],
-     "answer": 1,
-     "why": {
-      "en": "self.",
-      "te": "self.",
-      "hi": "self।"
-     }
-    },
-    {
-     "q": {
-      "en": "How do you call deposit on acc?",
-      "te": "acc పై deposit ఎలా call చేస్తారు?",
-      "hi": "acc पर deposit कैसे call करेंगे?"
-     },
-     "options": [
-      "deposit(acc, 5)",
-      "acc.deposit(5)",
-      "acc[deposit](5)"
-     ],
-     "answer": 1,
-     "why": {
-      "en": "Dot syntax.",
-      "te": "Dot పద్ధతి.",
-      "hi": "Dot तरीका।"
-     }
-    },
-    {
-     "q": {
-      "en": "Inside a method, the object's balance is…",
-      "te": "Method లో object balance…",
-      "hi": "Method में object का balance…"
-     },
-     "options": [
-      "balance",
-      "self.balance",
-      "Account.balance"
-     ],
-     "answer": 1,
-     "why": {
-      "en": "Through self.",
-      "te": "self ద్వారా.",
-      "hi": "self से।"
-     }
-    }
-   ],
-   "task": {
-    "prompt": {
-     "en": "Write a class Cart with add(item, price) and total(). total() returns the sum of all prices added.",
-     "te": "Cart class రాయండి: add(item, price), total(). total() జోడించిన అన్ని ధరల మొత్తం return చేయాలి.",
-     "hi": "Cart class लिखिए जिसमें add(item, price) और total() हों। total() जोड़े गए सभी दामों का जोड़ return करे।"
-    },
-    "starter": "class Cart:\n    def __init__(self):\n        self.items = []\n",
-    "tests": [
-     {
-      "name": "empty cart",
-      "call": "Cart().total()",
-      "expected": "0"
-     },
-     {
-      "name": "two items",
-      "call": "(lambda c: (c.add(\"pen\", 10), c.add(\"book\", 45), c.total())[2])(Cart())",
-      "expected": "55"
-     },
-     {
-      "name": "carts are separate",
-      "call": "(lambda a, b: (a.add(\"x\", 5), b.total())[1])(Cart(), Cart())",
-      "expected": "0",
-      "hidden": true
-     }
-    ],
-    "hints": [
-     {
-      "en": "add appends a (item, price) pair to self.items.",
-      "te": "add, self.items కి (item, price) జత జోడిస్తుంది.",
-      "hi": "add, self.items में (item, price) जोड़ा जोड़ता है।"
-     },
-     {
-      "en": "total loops over self.items and adds the prices.",
-      "te": "total, self.items పై loop చేసి ధరలు కలుపుతుంది.",
-      "hi": "total, self.items पर loop करके दाम जोड़ता है।"
-     },
-     {
-      "en": "return sum(price for item, price in self.items)",
-      "te": "return sum(price for item, price in self.items)",
-      "hi": "return sum(price for item, price in self.items)"
-     }
-    ],
-    "solution": "class Cart:\n    def __init__(self):\n        self.items = []\n\n    def add(self, item, price):\n        self.items.append((item, price))\n\n    def total(self):\n        return sum(price for item, price in self.items)"
-   },
-   "cheat": {
-    "en": [
-     "def method(self, ...): inside the class",
-     "obj.method(...) · self.data inside",
-     "Methods can change data or return values."
-    ],
-    "te": [
-     "class లోపల def method(self, ...):",
-     "obj.method(...) · లోపల self.data",
-     "Methods data మార్చగలవు లేదా values return చేయగలవు."
-    ],
-    "hi": [
-     "class के अंदर def method(self, ...):",
-     "obj.method(...) · अंदर self.data",
-     "Methods data बदल सकते हैं या values return कर सकते हैं।"
-    ]
-   },
-   "check": {
-    "questions": [
-     {
-      "en": "Explain how deposit and withdraw methods let a bank account object look after its own balance safely.",
-      "te": "deposit, withdraw methods ఒక bank account object తన balance ని సురక్షితంగా ఎలా చూసుకునేలా చేస్తాయో వివరించండి.",
-      "hi": "deposit और withdraw methods bank account object को अपना balance सुरक्षित रूप से कैसे संभालने देते हैं, समझाइए।"
-     },
-     {
-      "en": "What is the difference between a method and a normal function? Use a shopping cart example.",
-      "te": "Method కి, సాధారణ function కి తేడా ఏమిటి? Shopping cart ఉదాహరణ వాడండి.",
-      "hi": "Method और सामान्य function में क्या फ़र्क़ है? Shopping cart का उदाहरण लीजिए।"
-     }
-    ],
-    "keywords": [
-     [
-      "method"
-     ],
-     [
-      "self"
-     ],
-     [
-      "balance",
-      "object",
-      "data",
-      "class",
-      "cart"
-     ]
-    ],
-    "challenge": {
-     "en": "Say why a method needs self.",
-     "te": "Method కి self ఎందుకు కావాలో చెప్పండి.",
-     "hi": "Method को self क्यों चाहिए, बताइए।"
-    }
-   }
-  },
-  {
-   "id": "py-m6-l3",
-   "n": 3,
-   "minutes": 20,
-   "title": {
     "en": "Inheritance",
     "te": "Inheritance",
     "hi": "Inheritance"
@@ -892,291 +611,624 @@
    }
   },
   {
-   "id": "py-m6-l4",
-   "n": 4,
+   "id": "py-m6-l3",
+   "n": 3,
    "minutes": 20,
    "title": {
-    "en": "Special methods and printing objects",
-    "te": "Special methods, objects print చేయడం",
-    "hi": "Special methods और objects print करना"
+    "en": "Polymorphism",
+    "te": "Polymorphism",
+    "hi": "Polymorphism"
    },
    "oneLine": {
-    "en": "Special methods like __str__ and __eq__ tell Python how to print your objects and compare them.",
-    "te": "__str__, __eq__ లాంటి special methods మీ objects ని ఎలా print చేయాలో, ఎలా పోల్చాలో Python కి చెబుతాయి.",
-    "hi": "__str__ और __eq__ जैसे special methods Python को बताते हैं कि आपके objects कैसे print हों और कैसे तुलना हो।"
+    "en": "Polymorphism means different classes have a method with the same name, so one piece of code can work with all of them.",
+    "te": "Polymorphism అంటే వేర్వేరు classes కి ఒకే పేరుతో method ఉంటుంది; ఒకే code వాటన్నింటితో పనిచేస్తుంది.",
+    "hi": "Polymorphism मतलब अलग-अलग classes में एक ही नाम का method होता है, ताकि एक ही code सबके साथ चल सके।"
    },
    "useCase": {
-    "en": "An order system prints \"Order #12: 3 items, Rs 450\" instead of a confusing memory address.",
-    "te": "Order system గందరగోళ memory address బదులు \"Order #12: 3 items, Rs 450\" print చేస్తుంది.",
-    "hi": "Order system उलझे memory address की जगह \"Order #12: 3 items, Rs 450\" print करता है।"
+    "en": "A payment page calls pay() on UPI, card or cash objects without caring which one it is.",
+    "te": "Payment page UPI, card, cash objects పై అది ఏదో పట్టించుకోకుండా pay() call చేస్తుంది.",
+    "hi": "Payment page UPI, card या cash objects पर, कौन-सा है यह देखे बिना, pay() call करता है।"
    },
    "explain": {
     "en": [
-     "print(student) normally shows something like <Student object at 0x7f...>. Not helpful.",
-     "Add a method named __str__ that returns the text you want to see.",
-     "Now print(student) and str(student) use your text.",
-     "__eq__(self, other) decides when two objects count as equal, for example the same roll number.",
-     "Names with double underscores on both sides are special methods; Python calls them for you."
+     "Many things can do the same action in their own way: a bus, an auto and a metro all \"charge a fare\".",
+     "In Python, give each class a method with the same name: fare(km).",
+     "Then one loop can call v.fare(10) on every vehicle; each object runs its own version.",
+     "Python does not check the type first. If the object has the method, it works. This is called duck typing.",
+     "Special methods like __str__ are polymorphism too: print() calls each object's own __str__."
     ],
     "te": [
-     "print(student) సాధారణంగా <Student object at 0x7f...> లాంటిది చూపిస్తుంది. ఉపయోగం లేదు.",
-     "మీరు చూడాలనుకునే text return చేసే __str__ method జోడించండి.",
-     "ఇప్పుడు print(student), str(student) మీ text వాడతాయి.",
-     "రెండు objects ఎప్పుడు సమానమో __eq__(self, other) నిర్ణయిస్తుంది, ఉదాహరణకు ఒకే roll number.",
-     "రెండు వైపులా double underscores ఉన్న పేర్లు special methods; Python వాటిని మీ కోసం call చేస్తుంది."
+     "చాలా వస్తువులు ఒకే పనిని తమ పద్ధతిలో చేస్తాయి: bus, auto, metro అన్నీ \"fare వసూలు చేస్తాయి\".",
+     "Python లో ప్రతి class కి ఒకే పేరుతో method ఇవ్వండి: fare(km).",
+     "అప్పుడు ఒకే loop ప్రతి vehicle పై v.fare(10) call చేయగలదు; ప్రతి object తన version నడుపుతుంది.",
+     "Python ముందు type చూడదు. Object కి ఆ method ఉంటే పనిచేస్తుంది. దీన్ని duck typing అంటారు.",
+     "__str__ లాంటి special methods కూడా polymorphism: print() ప్రతి object సొంత __str__ ని call చేస్తుంది."
     ],
     "hi": [
-     "print(student) आमतौर पर <Student object at 0x7f...> जैसा कुछ दिखाता है। काम का नहीं।",
-     "__str__ नाम का method जोड़िए जो वह text return करे जो आप देखना चाहते हैं।",
-     "अब print(student) और str(student) आपका text इस्तेमाल करते हैं।",
-     "__eq__(self, other) तय करता है कि दो objects कब बराबर माने जाएँ, जैसे एक ही roll number।",
-     "दोनों तरफ़ double underscore वाले नाम special methods हैं; Python उन्हें ख़ुद call करता है।"
+     "कई चीज़ें एक ही काम अपने तरीक़े से करती हैं: bus, auto और metro सब \"किराया लेते हैं\"।",
+     "Python में हर class को एक ही नाम का method दीजिए: fare(km)।",
+     "फिर एक loop हर vehicle पर v.fare(10) call कर सकता है; हर object अपना version चलाता है।",
+     "Python पहले type नहीं जाँचता। Object में वह method है तो चल जाता है। इसे duck typing कहते हैं।",
+     "__str__ जैसे special methods भी polymorphism हैं: print() हर object का अपना __str__ call करता है।"
     ]
    },
    "simpler": {
     "en": [
-     "__str__ is the name tag your object shows when printed."
+     "Same button, different machines: \"pay\" works for UPI and for cash."
     ],
     "te": [
-     "__str__ అంటే print అయినప్పుడు object చూపించే పేరు బిళ్ల."
+     "ఒకే button, వేర్వేరు యంత్రాలు: \"pay\" UPI కి, cash కి రెండింటికీ పనిచేస్తుంది."
     ],
     "hi": [
-     "__str__ वह name tag है जो print होने पर object दिखाता है।"
+     "एक ही button, अलग मशीनें: \"pay\" UPI और cash दोनों पर चलता है।"
     ]
    },
    "anotherExample": {
     "en": [
-     "A Train class: __str__ returns \"12727 Godavari Express\"; __eq__ compares train numbers."
+     "Shapes in a drawing app: Circle and Square both have area(); total = sum(s.area() for s in shapes)."
     ],
     "te": [
-     "Train class: __str__ \"12727 Godavari Express\" return చేస్తుంది; __eq__ train numbers పోలుస్తుంది."
+     "Drawing app లో shapes: Circle, Square రెండింటికీ area(); total = sum(s.area() for s in shapes)."
     ],
     "hi": [
-     "Train class: __str__ \"12002 Shatabdi Express\" return करता है; __eq__ train numbers की तुलना करता है।"
+     "Drawing app में shapes: Circle और Square दोनों में area(); total = sum(s.area() for s in shapes)।"
     ]
    },
-   "picture": "flowchart LR\n  P[\"print(order)\"] --> S[\"order.__str__()\"] --> O[\"Order #12: Rs 450\"]",
+   "picture": "flowchart LR\n  L[\"for v in vehicles\"] -->|\"v.fare(10)\"| B[\"Bus: 20\"]\n  L -->|\"v.fare(10)\"| A[\"Auto: 175\"]\n  L -->|\"v.fare(10)\"| M[\"Metro: 40\"]",
    "code": {
-    "source": "class Order:\n    def __init__(self, number, amount):\n        self.number = number\n        self.amount = amount\n\n    def __str__(self):\n        return f\"Order #{self.number}: Rs {self.amount}\"\n\n    def __eq__(self, other):\n        return self.number == other.number\n\na = Order(12, 450)\nprint(a)\nprint(a == Order(12, 999))",
-    "output": "Order #12: Rs 450\nTrue",
+    "source": "class Bus:\n    def fare(self, km):\n        return km * 2\n\nclass Auto:\n    def fare(self, km):\n        return 25 + km * 15\n\nclass Metro:\n    def fare(self, km):\n        return 10 if km <= 2 else 40\n\nfor v in [Bus(), Auto(), Metro()]:\n    print(type(v).__name__, v.fare(10))",
+    "output": "Bus 20\nAuto 175\nMetro 40",
     "notes": [
      {
-      "line": 6,
+      "line": 2,
       "note": {
-       "en": "__str__ returns the text print should show.",
-       "te": "print చూపించాల్సిన text ని __str__ return చేస్తుంది.",
-       "hi": "__str__ वह text return करता है जो print दिखाए।"
+       "en": "Bus has a fare method.",
+       "te": "Bus కి fare method ఉంది.",
+       "hi": "Bus में fare method है।"
       }
      },
      {
-      "line": 9,
+      "line": 6,
       "note": {
-       "en": "__eq__ decides what == means for orders.",
-       "te": "Orders కి == అర్థాన్ని __eq__ నిర్ణయిస్తుంది.",
-       "hi": "__eq__ तय करता है कि orders के लिए == का मतलब क्या है।"
+       "en": "Auto has a fare method with the same name, its own rule.",
+       "te": "Auto కి అదే పేరుతో fare method, సొంత నియమం.",
+       "hi": "Auto में उसी नाम का fare method, अपना नियम।"
       }
      },
      {
       "line": 10,
       "note": {
-       "en": "Two orders are equal when their numbers match.",
-       "te": "Numbers సరిపోతే రెండు orders సమానం.",
-       "hi": "Numbers मिलें तो दो orders बराबर हैं।"
+       "en": "Metro too: a flat fare.",
+       "te": "Metro కూడా: స్థిర fare.",
+       "hi": "Metro भी: एक तय किराया।"
       }
      },
      {
       "line": 13,
       "note": {
-       "en": "print uses __str__ automatically.",
-       "te": "print స్వయంగా __str__ వాడుతుంది.",
-       "hi": "print अपने-आप __str__ इस्तेमाल करता है।"
+       "en": "One loop works with all three.",
+       "te": "ఒకే loop మూడింటితో పనిచేస్తుంది.",
+       "hi": "एक loop तीनों के साथ चलता है।"
       }
      },
      {
       "line": 14,
       "note": {
-       "en": "== uses __eq__, so the same number gives True.",
-       "te": "== , __eq__ వాడుతుంది; ఒకే number కి True.",
-       "hi": "== , __eq__ इस्तेमाल करता है, इसलिए एक ही number पर True।"
+       "en": "Each object runs its own fare.",
+       "te": "ప్రతి object తన fare నడుపుతుంది.",
+       "hi": "हर object अपना fare चलाता है।"
       }
      }
     ]
    },
    "mistakes": [
     {
-     "wrong": "def __str__(self):\n    print(\"Order\", self.number)",
+     "wrong": "class Metro:\n    def price(self, km): ...",
      "fix": {
-      "en": "__str__ must return text, not print it.",
-      "te": "__str__ text ని return చేయాలి, print కాదు.",
-      "hi": "__str__ को text return करना है, print नहीं।"
+      "en": "The loop calls fare(). A different name (price) breaks it: AttributeError. Use the same method name.",
+      "te": "Loop fare() ని call చేస్తుంది. వేరే పేరు (price) తో AttributeError. అదే method పేరు వాడండి.",
+      "hi": "Loop fare() call करता है। अलग नाम (price) से AttributeError आता है। वही method नाम लीजिए।"
      }
     },
     {
-     "wrong": "def _str_(self):",
+     "wrong": "if type(v) == Bus: ...\nelif type(v) == Auto: ...",
      "fix": {
-      "en": "Use two underscores on each side: __str__.",
-      "te": "ప్రతి వైపు రెండు underscores: __str__.",
-      "hi": "दोनों तरफ़ दो underscores: __str__।"
+      "en": "Checking types by hand defeats polymorphism. Give each class the method and just call it.",
+      "te": "Types ని చేత్తో చూడడం polymorphism ఉద్దేశానికి వ్యతిరేకం. ప్రతి class కి method ఇచ్చి call చేయండి.",
+      "hi": "हाथ से type जाँचना polymorphism का मतलब खो देता है। हर class को method दीजिए और बस call कीजिए।"
      }
     }
    ],
    "quick": [
     {
      "q": {
-      "en": "Which method controls print(obj)?",
-      "te": "print(obj) ని నియంత్రించేది ఏది?",
-      "hi": "print(obj) को कौन नियंत्रित करता है?"
+      "en": "Polymorphism lets one loop…",
+      "te": "Polymorphism వల్ల ఒకే loop…",
+      "hi": "Polymorphism से एक loop…"
      },
      "options": [
-      "__init__",
-      "__str__",
-      "__eq__"
+      {
+       "en": "call the same method on different objects",
+       "te": "వేర్వేరు objects పై ఒకే method call",
+       "hi": "अलग objects पर एक ही method call"
+      },
+      {
+       "en": "run faster",
+       "te": "వేగంగా నడుస్తుంది",
+       "hi": "तेज़ चलता है"
+      }
      ],
-     "answer": 1,
+     "answer": 0,
      "why": {
-      "en": "__str__.",
-      "te": "__str__.",
-      "hi": "__str__।"
+      "en": "Same name, own behaviour.",
+      "te": "ఒకే పేరు, సొంత ప్రవర్తన.",
+      "hi": "एक नाम, अपना व्यवहार।"
      }
     },
     {
      "q": {
-      "en": "__str__ should…",
-      "te": "__str__ చేయాల్సింది…",
-      "hi": "__str__ को चाहिए…"
+      "en": "Duck typing means Python…",
+      "te": "Duck typing అంటే Python…",
+      "hi": "Duck typing मतलब Python…"
      },
      "options": [
       {
-       "en": "print text",
-       "te": "text print చేయడం",
-       "hi": "text print करना"
+       "en": "checks the class first",
+       "te": "ముందు class చూస్తుంది",
+       "hi": "पहले class जाँचता है"
       },
       {
-       "en": "return text",
-       "te": "text return చేయడం",
-       "hi": "text return करना"
+       "en": "only needs the method to exist",
+       "te": "Method ఉంటే చాలు",
+       "hi": "बस method होना चाहिए"
       }
      ],
      "answer": 1,
      "why": {
-      "en": "Return a string.",
-      "te": "String return చేయాలి.",
-      "hi": "String return करे।"
+      "en": "If it has the method, it works.",
+      "te": "Method ఉంటే పనిచేస్తుంది.",
+      "hi": "Method है तो चलता है।"
      }
     },
     {
      "q": {
-      "en": "a == b on objects uses…",
-      "te": "Objects పై a == b వాడేది…",
-      "hi": "Objects पर a == b इस्तेमाल करता है…"
+      "en": "print(obj) calls…",
+      "te": "print(obj) call చేసేది…",
+      "hi": "print(obj) call करता है…"
      },
      "options": [
-      "__eq__",
-      "__str__",
-      "__add__"
+      "obj.__str__()",
+      "obj.print()",
+      "str.print(obj)"
      ],
      "answer": 0,
      "why": {
-      "en": "__eq__.",
-      "te": "__eq__.",
-      "hi": "__eq__।"
+      "en": "Each class's own __str__.",
+      "te": "ప్రతి class సొంత __str__.",
+      "hi": "हर class का अपना __str__।"
      }
     }
    ],
    "task": {
     "prompt": {
-     "en": "Add __str__ to class Student so str(Student(\"Ravi\", 12)) returns \"Ravi (roll 12)\", and __eq__ so two students with the same roll are equal.",
-     "te": "Student class కి __str__ జోడించండి: str(Student(\"Ravi\", 12)) \"Ravi (roll 12)\" ఇవ్వాలి; ఒకే roll ఉన్న ఇద్దరు సమానం అయ్యేలా __eq__.",
-     "hi": "Student class में __str__ जोड़िए ताकि str(Student(\"Ravi\", 12)) \"Ravi (roll 12)\" दे, और __eq__ ताकि एक ही roll वाले दो students बराबर हों।"
+     "en": "Write classes Circle(r) and Rect(w, h), each with area(). Then write total_area(shapes) that adds the areas of any list of shapes. Use 3.14 for pi.",
+     "te": "Circle(r), Rect(w, h) classes రాయండి, ప్రతి దానికి area(). తర్వాత ఏ shapes list కైనా areas కలిపే total_area(shapes) రాయండి. pi కి 3.14.",
+     "hi": "Circle(r) और Rect(w, h) classes लिखिए, हर एक में area()। फिर total_area(shapes) लिखिए जो किसी भी shapes list के areas जोड़े। pi के लिए 3.14।"
     },
-    "starter": "class Student:\n    def __init__(self, name, roll):\n        self.name = name\n        self.roll = roll\n",
+    "starter": "class Circle:\n    def __init__(self, r):\n        self.r = r\n\nclass Rect:\n    def __init__(self, w, h):\n        self.w = w\n        self.h = h\n\ndef total_area(shapes):\n    pass\n",
     "tests": [
      {
-      "name": "str",
-      "call": "str(Student(\"Ravi\", 12))",
-      "expected": "'Ravi (roll 12)'"
+      "name": "Rect(2, 3).area()",
+      "call": "Rect(2, 3).area()",
+      "expected": "6"
      },
      {
-      "name": "same roll is equal",
-      "call": "Student(\"A\", 5) == Student(\"B\", 5)",
+      "name": "Circle(1).area()",
+      "call": "Circle(1).area()",
+      "expected": "3.14"
+     },
+     {
+      "name": "total of mixed shapes",
+      "call": "total_area([Rect(2, 3), Rect(1, 1)])",
+      "expected": "7"
+     },
+     {
+      "name": "empty list",
+      "call": "total_area([])",
+      "expected": "0",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "Add def area(self): to both classes.",
+      "te": "రెండు classes కి def area(self): జోడించండి.",
+      "hi": "दोनों classes में def area(self): जोड़िए।"
+     },
+     {
+      "en": "Circle: return 3.14 * self.r * self.r; Rect: return self.w * self.h",
+      "te": "Circle: return 3.14 * self.r * self.r; Rect: return self.w * self.h",
+      "hi": "Circle: return 3.14 * self.r * self.r; Rect: return self.w * self.h"
+     },
+     {
+      "en": "return sum(s.area() for s in shapes)",
+      "te": "return sum(s.area() for s in shapes)",
+      "hi": "return sum(s.area() for s in shapes)"
+     }
+    ],
+    "solution": "class Circle:\n    def __init__(self, r):\n        self.r = r\n\n    def area(self):\n        return 3.14 * self.r * self.r\n\nclass Rect:\n    def __init__(self, w, h):\n        self.w = w\n        self.h = h\n\n    def area(self):\n        return self.w * self.h\n\ndef total_area(shapes):\n    return sum(s.area() for s in shapes)"
+   },
+   "cheat": {
+    "en": [
+     "Same method name in different classes.",
+     "for x in items: x.method() — each runs its own.",
+     "Duck typing: having the method is enough · __str__ is polymorphism too."
+    ],
+    "te": [
+     "వేర్వేరు classes లో ఒకే method పేరు.",
+     "for x in items: x.method() — ప్రతిది తనది నడుపుతుంది.",
+     "Duck typing: method ఉంటే చాలు · __str__ కూడా polymorphism."
+    ],
+    "hi": [
+     "अलग classes में एक ही method नाम।",
+     "for x in items: x.method() — हर एक अपना चलाता है।",
+     "Duck typing: method होना काफ़ी है · __str__ भी polymorphism है।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A payment page supports UPI, card and cash. Explain how polymorphism lets one checkout function handle all three.",
+      "te": "Payment page UPI, card, cash సపోర్ట్ చేస్తుంది. Polymorphism ఒకే checkout function మూడింటినీ ఎలా నిర్వహించేలా చేస్తుందో వివరించండి.",
+      "hi": "Payment page UPI, card और cash सपोर्ट करता है। Polymorphism एक checkout function से तीनों कैसे संभालता है, समझाइए।"
+     },
+     {
+      "en": "Explain duck typing with an example of shapes that have area().",
+      "te": "area() ఉన్న shapes ఉదాహరణతో duck typing వివరించండి.",
+      "hi": "area() वाले shapes के उदाहरण से duck typing समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "polymorphism",
+      "same name",
+      "same method",
+      "ఒకే పేరు",
+      "एक ही नाम"
+     ],
+     [
+      "method",
+      "pay",
+      "area",
+      "fare"
+     ],
+     [
+      "class",
+      "object",
+      "duck",
+      "own",
+      "సొంత",
+      "अपना"
+     ]
+    ],
+    "challenge": {
+     "en": "Say what polymorphism means in one line.",
+     "te": "Polymorphism అంటే ఏమిటో ఒక్క line లో చెప్పండి.",
+     "hi": "Polymorphism का मतलब एक line में बताइए।"
+    }
+   }
+  },
+  {
+   "id": "py-m6-l4",
+   "n": 4,
+   "minutes": 20,
+   "title": {
+    "en": "Encapsulation",
+    "te": "Encapsulation",
+    "hi": "Encapsulation"
+   },
+   "oneLine": {
+    "en": "Encapsulation keeps an object's data inside it and lets the outside change it only through methods that check the values.",
+    "te": "Encapsulation object data ని దాని లోపలే ఉంచి, values ని చూసే methods ద్వారానే బయటి నుంచి మార్చనిస్తుంది.",
+    "hi": "Encapsulation object का data उसके अंदर रखता है और बाहर से सिर्फ़ उन methods से बदलने देता है जो values जाँचते हैं।"
+   },
+   "useCase": {
+    "en": "A bank account never lets code set the balance directly; money moves only through deposit and withdraw, which refuse wrong amounts.",
+    "te": "Bank account balance ని code నేరుగా మార్చనివ్వదు; డబ్బు deposit, withdraw ద్వారానే కదులుతుంది, అవి తప్పు amounts తిరస్కరిస్తాయి.",
+    "hi": "Bank account किसी code को balance सीधे नहीं बदलने देता; पैसा सिर्फ़ deposit और withdraw से चलता है, जो ग़लत रक़म मना करते हैं।"
+   },
+   "explain": {
+    "en": [
+     "If anyone can write acc.balance = -5000, the data can become wrong.",
+     "Python's habit: a name starting with an underscore, like _balance, means \"inside use only\".",
+     "Two underscores, like __pin, make the name harder to reach from outside.",
+     "Give methods that change the data safely: deposit(amount) checks amount > 0.",
+     "@property lets others read a value like a field (acc.balance) without being able to set it."
+    ],
+    "te": [
+     "ఎవరైనా acc.balance = -5000 అని రాయగలిగితే data తప్పు కావచ్చు.",
+     "Python అలవాటు: _balance లాగా underscore తో మొదలయ్యే పేరు అంటే \"లోపలి వాడకానికి మాత్రమే\".",
+     "__pin లాగా రెండు underscores ఉంటే బయటి నుంచి చేరడం కష్టం.",
+     "Data ని సురక్షితంగా మార్చే methods ఇవ్వండి: deposit(amount) amount > 0 అని చూస్తుంది.",
+     "@property ఇతరులు value ని field లాగా (acc.balance) చదవనిస్తుంది, మార్చనివ్వదు."
+    ],
+    "hi": [
+     "अगर कोई भी acc.balance = -5000 लिख सके, तो data ग़लत हो सकता है।",
+     "Python की आदत: _balance जैसा underscore से शुरू होने वाला नाम मतलब \"सिर्फ़ अंदर के लिए\"।",
+     "__pin जैसे दो underscores से नाम बाहर से पहुँचना मुश्किल होता है।",
+     "Data सुरक्षित बदलने वाले methods दीजिए: deposit(amount) जाँचता है कि amount > 0 है।",
+     "@property दूसरों को value field की तरह (acc.balance) पढ़ने देता है, बदलने नहीं।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "Keep the data in a locked box; give out only safe buttons."
+    ],
+    "te": [
+     "Data ని తాళం వేసిన పెట్టెలో ఉంచండి; సురక్షిత buttons మాత్రమే ఇవ్వండి."
+    ],
+    "hi": [
+     "Data बंद डिब्बे में रखिए; सिर्फ़ सुरक्षित buttons दीजिए।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "A Student with _marks: set_marks(m) refuses anything below 0 or above 100."
+    ],
+    "te": [
+     "_marks ఉన్న Student: set_marks(m) 0 కంటే తక్కువ, 100 కంటే ఎక్కువను తిరస్కరిస్తుంది."
+    ],
+    "hi": [
+     "_marks वाला Student: set_marks(m) 0 से कम या 100 से ज़्यादा मना करता है।"
+    ]
+   },
+   "picture": "flowchart LR\n  O[\"outside code\"] -->|\"deposit(500) ✓\"| A[\"Account (_balance)\"]\n  O -.->|\"balance = -5000 ✗\"| A\n  A -->|\"balance (read only)\"| O",
+   "code": {
+    "source": "class Account:\n    def __init__(self, owner):\n        self.owner = owner\n        self._balance = 0\n\n    def deposit(self, amount):\n        if amount <= 0:\n            return \"Amount must be positive\"\n        self._balance += amount\n        return \"OK\"\n\n    @property\n    def balance(self):\n        return self._balance\n\nacc = Account(\"Ravi\")\nprint(acc.deposit(500), acc.deposit(-100))\nprint(acc.balance)",
+    "output": "OK Amount must be positive\n500",
+    "notes": [
+     {
+      "line": 4,
+      "note": {
+       "en": "The underscore says: inside use only.",
+       "te": "Underscore అంటుంది: లోపలి వాడకానికి మాత్రమే.",
+       "hi": "Underscore कहता है: सिर्फ़ अंदर के लिए।"
+      }
+     },
+     {
+      "line": 7,
+      "note": {
+       "en": "The method checks the value before changing the data.",
+       "te": "Data మార్చే ముందు method value ని చూస్తుంది.",
+       "hi": "Data बदलने से पहले method value जाँचता है।"
+      }
+     },
+     {
+      "line": 12,
+      "note": {
+       "en": "@property makes balance readable like a field.",
+       "te": "@property balance ని field లాగా చదవగలిగేలా చేస్తుంది.",
+       "hi": "@property से balance field की तरह पढ़ा जा सकता है।"
+      }
+     },
+     {
+      "line": 17,
+      "note": {
+       "en": "The bad deposit is refused.",
+       "te": "తప్పు deposit తిరస్కరించబడుతుంది.",
+       "hi": "ग़लत deposit मना होता है।"
+      }
+     },
+     {
+      "line": 18,
+      "note": {
+       "en": "Read through the property: 500.",
+       "te": "Property ద్వారా చదవండి: 500.",
+       "hi": "Property से पढ़िए: 500।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "acc._balance = 1000000",
+     "fix": {
+      "en": "The underscore is a warning: outside code should not touch it. Use the methods.",
+      "te": "Underscore ఒక హెచ్చరిక: బయటి code దాన్ని తాకకూడదు. Methods వాడండి.",
+      "hi": "Underscore एक चेतावनी है: बाहर का code इसे न छुए। Methods लीजिए।"
+     }
+    },
+    {
+     "wrong": "acc.balance = 50  # with @property only",
+     "fix": {
+      "en": "A read-only property cannot be set: AttributeError. Change it through deposit().",
+      "te": "Read-only property ని set చేయలేం: AttributeError. deposit() ద్వారా మార్చండి.",
+      "hi": "Read-only property set नहीं हो सकती: AttributeError। deposit() से बदलिए।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "_balance with one underscore means…",
+      "te": "ఒక underscore ఉన్న _balance అంటే…",
+      "hi": "एक underscore वाला _balance मतलब…"
+     },
+     "options": [
+      {
+       "en": "inside use only",
+       "te": "లోపలి వాడకానికి మాత్రమే",
+       "hi": "सिर्फ़ अंदर के लिए"
+      },
+      {
+       "en": "a global variable",
+       "te": "Global variable",
+       "hi": "global variable"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "A convention.",
+      "te": "ఒక అలవాటు.",
+      "hi": "एक परंपरा।"
+     }
+    },
+    {
+     "q": {
+      "en": "Why change data through a method?",
+      "te": "Method ద్వారా data ఎందుకు మార్చాలి?",
+      "hi": "Method से data क्यों बदलें?"
+     },
+     "options": [
+      {
+       "en": "The method can check the value",
+       "te": "Method value ని చూడగలదు",
+       "hi": "Method value जाँच सकता है"
+      },
+      {
+       "en": "It is shorter",
+       "te": "చిన్నది",
+       "hi": "छोटा है"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "It guards the data.",
+      "te": "Data ని కాపాడుతుంది.",
+      "hi": "Data की रक्षा करता है।"
+     }
+    },
+    {
+     "q": {
+      "en": "@property lets outside code…",
+      "te": "@property బయటి code ని…",
+      "hi": "@property बाहर के code को…"
+     },
+     "options": [
+      {
+       "en": "read a value like a field",
+       "te": "Field లాగా value చదవనిస్తుంది",
+       "hi": "field की तरह value पढ़ने देता है"
+      },
+      {
+       "en": "delete the object",
+       "te": "Object ని తొలగించనిస్తుంది",
+       "hi": "object हटाने देता है"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Read without setting.",
+      "te": "Set చేయకుండా చదవడం.",
+      "hi": "Set किए बिना पढ़ना।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write class Student(name) with a hidden _marks (starts 0), set_marks(m) that accepts only 0–100 and returns True or False, and a read-only property marks.",
+     "te": "దాచిన _marks (0 తో మొదలు), 0–100 మాత్రమే అంగీకరించి True లేదా False return చేసే set_marks(m), read-only property marks ఉన్న Student(name) class రాయండి.",
+     "hi": "Student(name) class लिखिए जिसमें छिपा _marks (0 से शुरू), set_marks(m) जो सिर्फ़ 0–100 माने और True या False return करे, और read-only property marks हो।"
+    },
+    "starter": "class Student:\n    def __init__(self, name):\n        self.name = name\n        self.marks = 0\n",
+    "tests": [
+     {
+      "name": "set_marks(88) then marks",
+      "call": "(lambda s: (s.set_marks(88), s.marks))(Student(\"Sita\"))",
+      "expected": "(True, 88)"
+     },
+     {
+      "name": "150 is refused",
+      "call": "(lambda s: (s.set_marks(150), s.marks))(Student(\"Sita\"))",
+      "expected": "(False, 0)"
+     },
+     {
+      "name": "marks is read only",
+      "call": "isinstance(Student.__dict__.get('marks'), property)",
       "expected": "True"
      },
      {
-      "name": "different roll",
-      "call": "Student(\"A\", 5) == Student(\"A\", 6)",
+      "name": "-5 refused",
+      "call": "Student(\"A\").set_marks(-5)",
       "expected": "False",
       "hidden": true
      }
     ],
     "hints": [
      {
-      "en": "def __str__(self): return f\"...\"",
-      "te": "def __str__(self): return f\"...\"",
-      "hi": "def __str__(self): return f\"...\""
+      "en": "Store self._marks = 0 in __init__.",
+      "te": "__init__ లో self._marks = 0 దాయండి.",
+      "hi": "__init__ में self._marks = 0 रखिए।"
      },
      {
-      "en": "f\"{self.name} (roll {self.roll})\"",
-      "te": "f\"{self.name} (roll {self.roll})\"",
-      "hi": "f\"{self.name} (roll {self.roll})\""
+      "en": "set_marks: if 0 <= m <= 100: self._marks = m; return True. Otherwise return False.",
+      "te": "set_marks: if 0 <= m <= 100: self._marks = m; return True. లేకపోతే return False.",
+      "hi": "set_marks: if 0 <= m <= 100: self._marks = m; return True। नहीं तो return False।"
      },
      {
-      "en": "def __eq__(self, other): return self.roll == other.roll",
-      "te": "def __eq__(self, other): return self.roll == other.roll",
-      "hi": "def __eq__(self, other): return self.roll == other.roll"
+      "en": "@property\ndef marks(self): return self._marks",
+      "te": "@property\ndef marks(self): return self._marks",
+      "hi": "@property\ndef marks(self): return self._marks"
      }
     ],
-    "solution": "class Student:\n    def __init__(self, name, roll):\n        self.name = name\n        self.roll = roll\n\n    def __str__(self):\n        return f\"{self.name} (roll {self.roll})\"\n\n    def __eq__(self, other):\n        return self.roll == other.roll"
+    "solution": "class Student:\n    def __init__(self, name):\n        self.name = name\n        self._marks = 0\n\n    def set_marks(self, m):\n        if 0 <= m <= 100:\n            self._marks = m\n            return True\n        return False\n\n    @property\n    def marks(self):\n        return self._marks"
    },
    "cheat": {
     "en": [
-     "__str__(self) → text for print",
-     "__eq__(self, other) → True/False for ==",
-     "Special methods: double underscores both sides."
+     "_name: inside use only · __name: harder to reach",
+     "Change data through methods that check values.",
+     "@property: read like a field, no setting."
     ],
     "te": [
-     "__str__(self) → print కోసం text",
-     "__eq__(self, other) → == కోసం True/False",
-     "Special methods: రెండు వైపులా double underscores."
+     "_name: లోపలికి మాత్రమే · __name: చేరడం కష్టం",
+     "Values చూసే methods ద్వారా data మార్చండి.",
+     "@property: field లాగా చదవడం, set లేదు."
     ],
     "hi": [
-     "__str__(self) → print के लिए text",
-     "__eq__(self, other) → == के लिए True/False",
-     "Special methods: दोनों तरफ़ double underscores।"
+     "_name: सिर्फ़ अंदर · __name: पहुँचना मुश्किल",
+     "Values जाँचने वाले methods से data बदलिए।",
+     "@property: field की तरह पढ़ें, set नहीं।"
     ]
    },
    "check": {
     "questions": [
      {
-      "en": "An order system prints confusing text for orders. Explain how __str__ fixes it, with an example.",
-      "te": "Order system orders కి గందరగోళ text print చేస్తుంది. __str__ దాన్ని ఎలా సరిచేస్తుందో ఉదాహరణతో వివరించండి.",
-      "hi": "Order system orders के लिए उलझा text print करता है। __str__ इसे कैसे ठीक करता है, उदाहरण से समझाइए।"
+      "en": "Explain why a bank account should hide its balance and change it only through deposit and withdraw.",
+      "te": "Bank account తన balance ని ఎందుకు దాచి deposit, withdraw ద్వారానే మార్చాలో వివరించండి.",
+      "hi": "Bank account को अपना balance क्यों छिपाना चाहिए और सिर्फ़ deposit और withdraw से बदलना चाहिए, समझाइए।"
      },
      {
-      "en": "Explain when two Student objects should be equal and how __eq__ decides it.",
-      "te": "రెండు Student objects ఎప్పుడు సమానం కావాలో, __eq__ దాన్ని ఎలా నిర్ణయిస్తుందో వివరించండి.",
-      "hi": "दो Student objects कब बराबर हों और __eq__ यह कैसे तय करता है, समझाइए।"
+      "en": "Explain what an underscore before a name and @property do in Python.",
+      "te": "Python లో పేరు ముందు underscore, @property ఏం చేస్తాయో వివరించండి.",
+      "hi": "Python में नाम से पहले underscore और @property क्या करते हैं, समझाइए।"
      }
     ],
     "keywords": [
      [
-      "__str__",
-      "str"
+      "encapsulation",
+      "hide",
+      "private",
+      "దాచ",
+      "छिपा"
      ],
      [
-      "__eq__",
-      "equal",
-      "=="
+      "_",
+      "underscore",
+      "property"
      ],
      [
-      "return",
-      "print",
-      "text"
+      "method",
+      "check",
+      "deposit",
+      "safe",
+      "సురక్షిత",
+      "सुरक्षित"
      ]
     ],
     "challenge": {
-     "en": "Say what print(obj) shows without __str__.",
-     "te": "__str__ లేకుండా print(obj) ఏం చూపిస్తుందో చెప్పండి.",
-     "hi": "__str__ के बिना print(obj) क्या दिखाता है, बताइए।"
+     "en": "Say why data should change only through methods.",
+     "te": "Data methods ద్వారానే ఎందుకు మారాలో చెప్పండి.",
+     "hi": "Data सिर्फ़ methods से क्यों बदलना चाहिए, बताइए।"
     }
    }
   }
@@ -1288,20 +1340,20 @@
    },
    {
     "q": {
-     "en": "print(obj) uses…",
-     "te": "print(obj) వాడేది…",
-     "hi": "print(obj) इस्तेमाल करता है…"
+     "en": "Calling the same method name on different classes is…",
+     "te": "వేర్వేరు classes పై ఒకే method పేరు call చేయడం…",
+     "hi": "अलग classes पर एक ही method नाम call करना…"
     },
     "options": [
-     "__init__",
-     "__str__",
-     "__eq__"
+     "polymorphism",
+     "encapsulation",
+     "recursion"
     ],
-    "answer": 1,
+    "answer": 0,
     "why": {
-     "en": "__str__.",
-     "te": "__str__.",
-     "hi": "__str__।"
+     "en": "Polymorphism.",
+     "te": "Polymorphism.",
+     "hi": "Polymorphism।"
     }
    }
   ]

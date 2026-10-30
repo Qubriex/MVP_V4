@@ -333,9 +333,9 @@
    "n": 2,
    "minutes": 20,
    "title": {
-    "en": "Handling errors",
-    "te": "Errors ని నిర్వహించడం",
-    "hi": "Errors संभालना"
+    "en": "Exceptions (try / except)",
+    "te": "Exceptions (try / except)",
+    "hi": "Exceptions (try / except)"
    },
    "oneLine": {
     "en": "try and except catch an error, so the program can explain the problem and carry on instead of crashing.",

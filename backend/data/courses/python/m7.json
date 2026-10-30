@@ -8,9 +8,9 @@
   "hi": "Modules & Libraries"
  },
  "summary": {
-  "en": "Use ready-made code: math, random, dates, JSON, collections, statistics and pip packages.",
-  "te": "సిద్ధమైన code వాడడం: math, random, dates, JSON, collections, statistics, pip packages.",
-  "hi": "तैयार code इस्तेमाल करना: math, random, dates, JSON, collections, statistics और pip packages।"
+  "en": "Use ready-made code: import, your own modules, pip packages, and a first look at NumPy and pandas.",
+  "te": "సిద్ధమైన code వాడడం: import, మీ సొంత modules, pip packages, NumPy, pandas పరిచయం.",
+  "hi": "तैयार code इस्तेमाल करना: import, अपने modules, pip packages, और NumPy और pandas की पहली झलक।"
  },
  "lessons": [
   {
@@ -18,9 +18,9 @@
    "n": 1,
    "minutes": 20,
    "title": {
-    "en": "Importing modules",
-    "te": "Modules import చేయడం",
-    "hi": "Modules import करना"
+    "en": "Import and your own modules",
+    "te": "Import, మీ సొంత modules",
+    "hi": "Import और अपने modules"
    },
    "oneLine": {
     "en": "import brings in ready-made code, like math for square roots and random for picking at random.",
@@ -38,21 +38,21 @@
      "import math loads the math module; use its tools with a dot: math.sqrt(16).",
      "from math import sqrt brings in just one name, so you can write sqrt(16).",
      "import random gives random.randint(1, 6) for a dice roll and random.choice(list) to pick one item.",
-     "You can give a module a short name: import statistics as st."
+     "Your own file is a module too: save helpers in fees.py, then write import fees and call fees.total(...). Keep the file in the same folder."
     ],
     "te": [
      "Python తో పాటు modules పెద్ద library వస్తుంది. Module అంటే ఉపయోగపడే functions ఉన్న file.",
      "import math, math module ని load చేస్తుంది; dot తో వాడండి: math.sqrt(16).",
      "from math import sqrt ఒక్క పేరు మాత్రమే తెస్తుంది, sqrt(16) అని రాయవచ్చు.",
      "import random తో dice కోసం random.randint(1, 6), ఒక item ఎంచుకోవడానికి random.choice(list) వస్తాయి.",
-     "Module కి చిన్న పేరు పెట్టవచ్చు: import statistics as st."
+     "మీ సొంత file కూడా ఒక module: helpers ని fees.py లో దాచి, import fees రాసి fees.total(...) call చేయండి. File అదే folder లో ఉంచండి."
     ],
     "hi": [
      "Python के साथ modules की बड़ी library आती है। Module काम के functions वाली file है।",
      "import math, math module load करता है; dot से इस्तेमाल कीजिए: math.sqrt(16)।",
      "from math import sqrt सिर्फ़ एक नाम लाता है, ताकि sqrt(16) लिख सकें।",
      "import random से dice के लिए random.randint(1, 6) और एक item चुनने के लिए random.choice(list) मिलते हैं।",
-     "Module को छोटा नाम दे सकते हैं: import statistics as st।"
+     "आपकी अपनी file भी एक module है: helpers को fees.py में रखिए, फिर import fees लिखकर fees.total(...) call कीजिए। File उसी folder में रखिए।"
     ]
    },
    "simpler": {
@@ -68,13 +68,13 @@
    },
    "anotherExample": {
     "en": [
-     "A lucky draw: import random; winner = random.choice(names)."
+     "A college project keeps grade rules in grades.py; app.py does from grades import grade_of and uses it for every student."
     ],
     "te": [
-     "Lucky draw: import random; winner = random.choice(names)."
+     "College project grade నియమాలను grades.py లో ఉంచుతుంది; app.py లో from grades import grade_of రాసి ప్రతి విద్యార్థికి వాడుతుంది."
     ],
     "hi": [
-     "Lucky draw: import random; winner = random.choice(names)।"
+     "College project grade के नियम grades.py में रखता है; app.py में from grades import grade_of लिखकर हर छात्र के लिए इस्तेमाल करता है।"
     ]
    },
    "picture": "flowchart LR\n  P[\"your program\"] -->|import math| M[\"math: sqrt, ceil, pi\"]\n  P -->|import random| R[\"random: randint, choice\"]",
@@ -246,17 +246,17 @@
     "en": [
      "import math → math.sqrt(x)",
      "from random import choice → choice(list)",
-     "import statistics as st"
+     "Own module: fees.py → import fees → fees.total()"
     ],
     "te": [
      "import math → math.sqrt(x)",
      "from random import choice → choice(list)",
-     "import statistics as st"
+     "సొంత module: fees.py → import fees → fees.total()"
     ],
     "hi": [
      "import math → math.sqrt(x)",
      "from random import choice → choice(list)",
-     "import statistics as st"
+     "अपना module: fees.py → import fees → fees.total()"
     ]
    },
    "check": {
@@ -301,305 +301,9 @@
    "n": 2,
    "minutes": 20,
    "title": {
-    "en": "Dates and JSON",
-    "te": "Dates, JSON",
-    "hi": "Dates और JSON"
-   },
-   "oneLine": {
-    "en": "datetime works with dates and times, and json turns Python data into text that other programs and websites understand.",
-    "te": "datetime తేదీలు, సమయాలతో పనిచేస్తుంది; json Python data ని ఇతర programs, websites అర్థం చేసుకునే text గా మారుస్తుంది.",
-    "hi": "datetime तारीख़ों और समय के साथ काम करता है, और json Python data को ऐसे text में बदलता है जो दूसरे programs और websites समझें।"
-   },
-   "useCase": {
-    "en": "A library app works out the due date 14 days from today and sends the loan details to the server as JSON.",
-    "te": "Library app ఈ రోజు నుంచి 14 రోజుల due date లెక్కించి loan వివరాలను JSON గా server కి పంపుతుంది.",
-    "hi": "Library app आज से 14 दिन बाद की due date निकालता है और loan की जानकारी JSON में server को भेजता है।"
-   },
-   "explain": {
-    "en": [
-     "from datetime import date, timedelta gives you dates you can add to.",
-     "date(2026, 10, 30) is a date; date.today() is today.",
-     "Adding timedelta(days=14) gives a date 14 days later. Subtracting two dates gives the gap in days.",
-     "json.dumps(data) turns a dictionary or list into JSON text.",
-     "json.loads(text) turns JSON text back into Python data. Apps use JSON to talk to servers."
-    ],
-    "te": [
-     "from datetime import date, timedelta తో కలపగలిగే dates వస్తాయి.",
-     "date(2026, 10, 30) ఒక తేదీ; date.today() ఈ రోజు.",
-     "timedelta(days=14) కలిపితే 14 రోజుల తర్వాత తేదీ వస్తుంది. రెండు తేదీలు తీసివేస్తే రోజుల తేడా వస్తుంది.",
-     "json.dumps(data) dictionary లేదా list ని JSON text గా మారుస్తుంది.",
-     "json.loads(text) JSON text ని మళ్లీ Python data గా మారుస్తుంది. Apps servers తో JSON లో మాట్లాడతాయి."
-    ],
-    "hi": [
-     "from datetime import date, timedelta से जोड़ी जा सकने वाली तारीख़ें मिलती हैं।",
-     "date(2026, 10, 30) एक तारीख़ है; date.today() आज।",
-     "timedelta(days=14) जोड़ने से 14 दिन बाद की तारीख़ मिलती है। दो तारीख़ें घटाने पर दिनों का अंतर मिलता है।",
-     "json.dumps(data) dictionary या list को JSON text में बदलता है।",
-     "json.loads(text) JSON text को फिर Python data में बदलता है। Apps servers से JSON में बात करते हैं।"
-    ]
-   },
-   "simpler": {
-    "en": [
-     "datetime is a calendar; json is a common language for sending data."
-    ],
-    "te": [
-     "datetime ఒక calendar; json data పంపడానికి ఉమ్మడి భాష."
-    ],
-    "hi": [
-     "datetime एक calendar है; json data भेजने की साझा भाषा।"
-    ]
-   },
-   "anotherExample": {
-    "en": [
-     "Days left for an exam: (date(2026, 12, 1) - date.today()).days."
-    ],
-    "te": [
-     "Exam కి మిగిలిన రోజులు: (date(2026, 12, 1) - date.today()).days."
-    ],
-    "hi": [
-     "Exam के बचे दिन: (date(2026, 12, 1) - date.today()).days।"
-    ]
-   },
-   "picture": "flowchart LR\n  D[\"{\\\"book\\\": \\\"Godan\\\", \\\"due\\\": \\\"2026-11-13\\\"}\"] -->|json.dumps| T[\"JSON text\"] -->|json.loads| D2[\"Python dict\"]",
-   "code": {
-    "source": "from datetime import date, timedelta\nimport json\n\nissued = date(2026, 10, 30)\ndue = issued + timedelta(days=14)\nprint(due)\nprint((due - issued).days)\n\nloan = {\"book\": \"Godan\", \"due\": str(due)}\ntext = json.dumps(loan)\nprint(text)\nprint(json.loads(text)[\"book\"])",
-    "output": "2026-11-13\n14\n{\"book\": \"Godan\", \"due\": \"2026-11-13\"}\nGodan",
-    "notes": [
-     {
-      "line": 4,
-      "note": {
-       "en": "A date: year, month, day.",
-       "te": "ఒక తేదీ: year, month, day.",
-       "hi": "एक तारीख़: year, month, day।"
-      }
-     },
-     {
-      "line": 5,
-      "note": {
-       "en": "Add 14 days with timedelta.",
-       "te": "timedelta తో 14 రోజులు కలపండి.",
-       "hi": "timedelta से 14 दिन जोड़िए।"
-      }
-     },
-     {
-      "line": 7,
-      "note": {
-       "en": "Subtracting dates gives a gap; .days is the number of days.",
-       "te": "తేదీలు తీసివేస్తే తేడా; .days రోజుల సంఖ్య.",
-       "hi": "तारीख़ें घटाने से अंतर; .days दिनों की संख्या।"
-      }
-     },
-     {
-      "line": 10,
-      "note": {
-       "en": "dumps turns the dictionary into JSON text.",
-       "te": "dumps dictionary ని JSON text గా మారుస్తుంది.",
-       "hi": "dumps dictionary को JSON text बनाता है।"
-      }
-     },
-     {
-      "line": 12,
-      "note": {
-       "en": "loads turns it back, so we can read \"book\".",
-       "te": "loads దాన్ని తిరిగి మారుస్తుంది, \"book\" చదవవచ్చు.",
-       "hi": "loads उसे वापस बदलता है, ताकि \"book\" पढ़ सकें।"
-      }
-     }
-    ]
-   },
-   "mistakes": [
-    {
-     "wrong": "json.dumps({\"due\": date(2026, 1, 1)})",
-     "fix": {
-      "en": "JSON cannot hold a date object. Convert it first: str(date(...)).",
-      "te": "JSON date object ని ఉంచలేదు. ముందు మార్చండి: str(date(...)).",
-      "hi": "JSON date object नहीं रख सकता। पहले बदलिए: str(date(...))।"
-     }
-    },
-    {
-     "wrong": "due = date(2026, 10, 30) + 14",
-     "fix": {
-      "en": "You cannot add a number to a date. Use timedelta(days=14).",
-      "te": "తేదీకి number కలపలేం. timedelta(days=14) వాడండి.",
-      "hi": "तारीख़ में number नहीं जोड़ सकते। timedelta(days=14) लिखिए।"
-     }
-    }
-   ],
-   "quick": [
-    {
-     "q": {
-      "en": "Which adds 7 days to a date d?",
-      "te": "తేదీ d కి 7 రోజులు కలిపేది ఏది?",
-      "hi": "तारीख़ d में 7 दिन कौन जोड़ता है?"
-     },
-     "options": [
-      "d + 7",
-      "d + timedelta(days=7)",
-      "d.add(7)"
-     ],
-     "answer": 1,
-     "why": {
-      "en": "Use timedelta.",
-      "te": "timedelta వాడండి.",
-      "hi": "timedelta लिखिए।"
-     }
-    },
-    {
-     "q": {
-      "en": "json.dumps turns a dict into…",
-      "te": "json.dumps dict ని దేనిగా మారుస్తుంది?",
-      "hi": "json.dumps dict को किसमें बदलता है?"
-     },
-     "options": [
-      {
-       "en": "text",
-       "te": "text",
-       "hi": "text"
-      },
-      {
-       "en": "a date",
-       "te": "తేదీ",
-       "hi": "तारीख़"
-      },
-      {
-       "en": "a file",
-       "te": "file",
-       "hi": "file"
-      }
-     ],
-     "answer": 0,
-     "why": {
-      "en": "JSON text.",
-      "te": "JSON text.",
-      "hi": "JSON text।"
-     }
-    },
-    {
-     "q": {
-      "en": "json.loads('{\"a\": 1}')[\"a\"] is…",
-      "te": "json.loads('{\"a\": 1}')[\"a\"] ఎంత?",
-      "hi": "json.loads('{\"a\": 1}')[\"a\"] क्या है?"
-     },
-     "options": [
-      "\"1\"",
-      "1",
-      "\"a\""
-     ],
-     "answer": 1,
-     "why": {
-      "en": "Back to a number.",
-      "te": "మళ్లీ number.",
-      "hi": "फिर number।"
-     }
-    }
-   ],
-   "task": {
-    "prompt": {
-     "en": "Write due_date(issued_text, days) that takes a date as \"YYYY-MM-DD\" text and returns the due date as \"YYYY-MM-DD\" text. Hint: date.fromisoformat.",
-     "te": "due_date(issued_text, days) రాయండి: \"YYYY-MM-DD\" text తేదీ తీసుకుని due date ని \"YYYY-MM-DD\" text గా return చేయాలి. సూచన: date.fromisoformat.",
-     "hi": "due_date(issued_text, days) लिखिए जो \"YYYY-MM-DD\" text में तारीख़ लेकर due date \"YYYY-MM-DD\" text में return करे। संकेत: date.fromisoformat।"
-    },
-    "starter": "from datetime import date, timedelta\n\ndef due_date(issued_text, days):\n    pass\n",
-    "tests": [
-     {
-      "name": "due_date(\"2026-10-30\", 14)",
-      "call": "due_date(\"2026-10-30\", 14)",
-      "expected": "'2026-11-13'"
-     },
-     {
-      "name": "crosses a year",
-      "call": "due_date(\"2026-12-25\", 10)",
-      "expected": "'2027-01-04'"
-     },
-     {
-      "name": "leap day",
-      "call": "due_date(\"2028-02-28\", 1)",
-      "expected": "'2028-02-29'",
-      "hidden": true
-     }
-    ],
-    "hints": [
-     {
-      "en": "date.fromisoformat(\"2026-10-30\") makes a date.",
-      "te": "date.fromisoformat(\"2026-10-30\") తేదీ చేస్తుంది.",
-      "hi": "date.fromisoformat(\"2026-10-30\") तारीख़ बनाता है।"
-     },
-     {
-      "en": "Add timedelta(days=days).",
-      "te": "timedelta(days=days) కలపండి.",
-      "hi": "timedelta(days=days) जोड़िए।"
-     },
-     {
-      "en": "return str(date.fromisoformat(issued_text) + timedelta(days=days))",
-      "te": "return str(date.fromisoformat(issued_text) + timedelta(days=days))",
-      "hi": "return str(date.fromisoformat(issued_text) + timedelta(days=days))"
-     }
-    ],
-    "solution": "from datetime import date, timedelta\n\ndef due_date(issued_text, days):\n    return str(date.fromisoformat(issued_text) + timedelta(days=days))"
-   },
-   "cheat": {
-    "en": [
-     "date(y, m, d) · date.today() · d + timedelta(days=n)",
-     "(d2 - d1).days · str(d) → \"YYYY-MM-DD\"",
-     "json.dumps(data) → text · json.loads(text) → data"
-    ],
-    "te": [
-     "date(y, m, d) · date.today() · d + timedelta(days=n)",
-     "(d2 - d1).days · str(d) → \"YYYY-MM-DD\"",
-     "json.dumps(data) → text · json.loads(text) → data"
-    ],
-    "hi": [
-     "date(y, m, d) · date.today() · d + timedelta(days=n)",
-     "(d2 - d1).days · str(d) → \"YYYY-MM-DD\"",
-     "json.dumps(data) → text · json.loads(text) → data"
-    ]
-   },
-   "check": {
-    "questions": [
-     {
-      "en": "A library gives books for 14 days. Explain how datetime works out the due date and how many days are left.",
-      "te": "Library books ని 14 రోజులకు ఇస్తుంది. datetime due date ని, మిగిలిన రోజులను ఎలా లెక్కిస్తుందో వివరించండి.",
-      "hi": "Library 14 दिन के लिए books देती है। datetime due date और बचे दिन कैसे निकालता है, समझाइए।"
-     },
-     {
-      "en": "Explain what JSON is and why an app turns a dictionary into JSON before sending it to a server.",
-      "te": "JSON అంటే ఏమిటో, server కి పంపే ముందు app dictionary ని JSON గా ఎందుకు మారుస్తుందో వివరించండి.",
-      "hi": "JSON क्या है और server को भेजने से पहले app dictionary को JSON में क्यों बदलता है, समझाइए।"
-     }
-    ],
-    "keywords": [
-     [
-      "datetime",
-      "date",
-      "timedelta"
-     ],
-     [
-      "json",
-      "dumps",
-      "loads"
-     ],
-     [
-      "text",
-      "server",
-      "days",
-      "string"
-     ]
-    ],
-    "challenge": {
-     "en": "Say why you cannot add 14 directly to a date.",
-     "te": "తేదీకి నేరుగా 14 ఎందుకు కలపలేమో చెప్పండి.",
-     "hi": "तारीख़ में सीधे 14 क्यों नहीं जोड़ सकते, बताइए।"
-    }
-   }
-  },
-  {
-   "id": "py-m7-l3",
-   "n": 3,
-   "minutes": 20,
-   "title": {
-    "en": "Packages and pip",
-    "te": "Packages, pip",
-    "hi": "Packages और pip"
+    "en": "pip and packages",
+    "te": "pip, packages",
+    "hi": "pip और packages"
    },
    "oneLine": {
     "en": "pip installs packages that other people wrote, and the standard library already has many ready tools such as collections and statistics.",
@@ -874,6 +578,309 @@
      "hi": "pip install कहाँ लिखते हैं और क्या करता है, बताइए।"
     }
    }
+  },
+  {
+   "id": "py-m7-l3",
+   "n": 3,
+   "minutes": 20,
+   "title": {
+    "en": "First look at NumPy and pandas",
+    "te": "NumPy, pandas పరిచయం",
+    "hi": "NumPy और pandas की पहली झलक"
+   },
+   "oneLine": {
+    "en": "NumPy does maths on whole lists of numbers at once, and pandas holds tables of data you can filter and summarise in one line.",
+    "te": "NumPy మొత్తం numbers list పై ఒకేసారి లెక్కలు చేస్తుంది; pandas data tables ని ఉంచి ఒక్క line లో filter, సారాంశం చేస్తుంది.",
+    "hi": "NumPy पूरी numbers list पर एक साथ गणित करता है, और pandas data की tables रखता है जिन्हें एक line में filter और सारांश कर सकते हैं।"
+   },
+   "useCase": {
+    "en": "A placement cell loads every student's marks into a pandas table and finds the class average and the toppers in seconds.",
+    "te": "Placement cell ప్రతి విద్యార్థి marks ని pandas table లోకి తెచ్చి class సగటు, toppers ని క్షణాల్లో కనుక్కుంటుంది.",
+    "hi": "Placement cell हर छात्र के marks pandas table में लाकर class का औसत और toppers सेकंडों में निकालता है।"
+   },
+   "explain": {
+    "en": [
+     "With plain lists you need a loop to add 5 grace marks to everyone.",
+     "NumPy makes an array: marks = np.array([62, 75, 48]). Now marks + 5 adds 5 to every value at once.",
+     "np.mean, np.max and comparisons like marks >= 50 also work on the whole array.",
+     "pandas makes a DataFrame: a table with named columns, like a spreadsheet.",
+     "df[df[\"marks\"] >= 50] keeps the rows that pass; df[\"marks\"].mean() gives the average. Install both with pip install numpy pandas."
+    ],
+    "te": [
+     "సాధారణ lists తో అందరికీ 5 grace marks కలపడానికి loop కావాలి.",
+     "NumPy array చేస్తుంది: marks = np.array([62, 75, 48]). ఇప్పుడు marks + 5 ప్రతి value కి ఒకేసారి 5 కలుపుతుంది.",
+     "np.mean, np.max, marks >= 50 లాంటి పోలికలు కూడా మొత్తం array పై పనిచేస్తాయి.",
+     "pandas ఒక DataFrame చేస్తుంది: spreadsheet లాగా పేర్లున్న columns ఉన్న table.",
+     "df[df[\"marks\"] >= 50] pass అయిన rows ఉంచుతుంది; df[\"marks\"].mean() సగటు ఇస్తుంది. రెండింటినీ pip install numpy pandas తో install చేయండి."
+    ],
+    "hi": [
+     "सादी lists में सबको 5 grace marks देने के लिए loop चाहिए।",
+     "NumPy array बनाता है: marks = np.array([62, 75, 48])। अब marks + 5 हर value में एक साथ 5 जोड़ता है।",
+     "np.mean, np.max और marks >= 50 जैसी तुलनाएँ भी पूरे array पर चलती हैं।",
+     "pandas एक DataFrame बनाता है: spreadsheet जैसी नाम वाले columns की table।",
+     "df[df[\"marks\"] >= 50] पास होने वाली rows रखता है; df[\"marks\"].mean() औसत देता है। दोनों को pip install numpy pandas से install कीजिए।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "NumPy is a calculator for whole columns; pandas is Excel inside Python."
+    ],
+    "te": [
+     "NumPy మొత్తం columns కి calculator; pandas అంటే Python లోపల Excel."
+    ],
+    "hi": [
+     "NumPy पूरे columns का calculator है; pandas, Python के अंदर Excel।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "Monthly electricity units: np.array([120, 95, 140]).sum() is 355, and .mean() is about 118.3."
+    ],
+    "te": [
+     "నెలవారీ కరెంట్ units: np.array([120, 95, 140]).sum() 355, .mean() సుమారు 118.3."
+    ],
+    "hi": [
+     "मासिक बिजली units: np.array([120, 95, 140]).sum() 355 है, और .mean() लगभग 118.3।"
+    ]
+   },
+   "picture": "flowchart LR\n  L[\"[62, 75, 48]\"] -->|\"np.array + 5\"| A[\"[67, 80, 53]\"]\n  T[\"DataFrame name | marks\"] -->|\"df[df.marks >= 50]\"| P[\"rows that pass\"]",
+   "code": {
+    "source": "import numpy as np\nimport pandas as pd\n\nmarks = np.array([62, 75, 48])\nprint((marks + 5).tolist())\nprint(int(marks.max()), float(marks.mean()))\n\ndf = pd.DataFrame({\"name\": [\"Ravi\", \"Sita\", \"Anu\"], \"marks\": [62, 75, 48]})\npassed = df[df[\"marks\"] >= 50]\nprint(passed[\"name\"].tolist())\nprint(float(df[\"marks\"].mean()))",
+    "output": "[67, 80, 53]\n75 61.666666666666664\n['Ravi', 'Sita']\n61.666666666666664",
+    "notes": [
+     {
+      "line": 1,
+      "note": {
+       "en": "The usual short names: np and pd.",
+       "te": "సాధారణ చిన్న పేర్లు: np, pd.",
+       "hi": "आम छोटे नाम: np और pd।"
+      }
+     },
+     {
+      "line": 4,
+      "note": {
+       "en": "A NumPy array of marks.",
+       "te": "Marks NumPy array.",
+       "hi": "Marks का NumPy array।"
+      }
+     },
+     {
+      "line": 5,
+      "note": {
+       "en": "Adds 5 to every value, no loop.",
+       "te": "Loop లేకుండా ప్రతి value కి 5 కలుపుతుంది.",
+       "hi": "बिना loop हर value में 5 जोड़ता है।"
+      }
+     },
+     {
+      "line": 8,
+      "note": {
+       "en": "A table with two named columns.",
+       "te": "పేర్లున్న రెండు columns table.",
+       "hi": "दो नाम वाले columns की table।"
+      }
+     },
+     {
+      "line": 9,
+      "note": {
+       "en": "Keep only the rows where marks >= 50.",
+       "te": "marks >= 50 ఉన్న rows మాత్రమే ఉంచండి.",
+       "hi": "सिर्फ़ marks >= 50 वाली rows रखिए।"
+      }
+     },
+     {
+      "line": 11,
+      "note": {
+       "en": "The average of the column.",
+       "te": "Column సగటు.",
+       "hi": "Column का औसत।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "marks = [62, 75]\nprint(marks + 5)",
+     "fix": {
+      "en": "A plain list cannot add a number: TypeError. Make it np.array(marks) first.",
+      "te": "సాధారణ list కి number కలపలేం: TypeError. ముందు np.array(marks) చేయండి.",
+      "hi": "सादी list में number नहीं जुड़ता: TypeError। पहले np.array(marks) बनाइए।"
+     }
+    },
+    {
+     "wrong": "df[df[\"marks\"] >= 50 and df[\"marks\"] < 90]",
+     "fix": {
+      "en": "Use & with brackets for tables: (df[\"marks\"] >= 50) & (df[\"marks\"] < 90).",
+      "te": "Tables కి brackets తో & వాడండి: (df[\"marks\"] >= 50) & (df[\"marks\"] < 90).",
+      "hi": "Tables के लिए brackets के साथ & लिखिए: (df[\"marks\"] >= 50) & (df[\"marks\"] < 90)।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "np.array([1, 2]) * 3 gives…",
+      "te": "np.array([1, 2]) * 3 ఇచ్చేది…",
+      "hi": "np.array([1, 2]) * 3 देता है…"
+     },
+     "options": [
+      "[3, 6]",
+      "[1, 2, 1, 2, 1, 2]",
+      "error"
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Each value times 3.",
+      "te": "ప్రతి value × 3.",
+      "hi": "हर value × 3।"
+     }
+    },
+    {
+     "q": {
+      "en": "A pandas DataFrame is like…",
+      "te": "pandas DataFrame దేనిలాంటిది…",
+      "hi": "pandas DataFrame किसके जैसा है…"
+     },
+     "options": [
+      {
+       "en": "a table with columns",
+       "te": "Columns ఉన్న table",
+       "hi": "columns वाली table"
+      },
+      {
+       "en": "a single number",
+       "te": "ఒక్క number",
+       "hi": "एक number"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Rows and named columns.",
+      "te": "Rows, పేర్లున్న columns.",
+      "hi": "Rows और नाम वाले columns।"
+     }
+    },
+    {
+     "q": {
+      "en": "How do you install them?",
+      "te": "వాటిని ఎలా install చేస్తారు?",
+      "hi": "इन्हें कैसे install करें?"
+     },
+     "options": [
+      "pip install numpy pandas",
+      "import install numpy",
+      "python numpy"
+     ],
+     "answer": 0,
+     "why": {
+      "en": "With pip, in the terminal.",
+      "te": "Terminal లో pip తో.",
+      "hi": "Terminal में pip से।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write class_report(names, marks) that uses pandas to return a tuple (average rounded to 1 decimal, list of names with marks >= 75).",
+     "te": "pandas వాడి (1 decimal కి round చేసిన సగటు, marks >= 75 ఉన్న పేర్ల list) tuple return చేసే class_report(names, marks) రాయండి.",
+     "hi": "class_report(names, marks) लिखिए जो pandas से tuple (1 decimal तक round किया औसत, marks >= 75 वाले नामों की list) return करे।"
+    },
+    "starter": "import pandas as pd\n\ndef class_report(names, marks):\n    pass\n",
+    "tests": [
+     {
+      "name": "class_report",
+      "call": "class_report([\"Ravi\", \"Sita\", \"Anu\"], [62, 81, 75])",
+      "expected": "(72.7, ['Sita', 'Anu'])"
+     },
+     {
+      "name": "nobody above 75",
+      "call": "class_report([\"A\"], [40])",
+      "expected": "(40.0, [])"
+     },
+     {
+      "name": "uses pandas",
+      "call": "'pd' in class_report.__code__.co_names",
+      "expected": "True",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "df = pd.DataFrame({\"name\": names, \"marks\": marks})",
+      "te": "df = pd.DataFrame({\"name\": names, \"marks\": marks})",
+      "hi": "df = pd.DataFrame({\"name\": names, \"marks\": marks})"
+     },
+     {
+      "en": "avg = round(float(df[\"marks\"].mean()), 1)",
+      "te": "avg = round(float(df[\"marks\"].mean()), 1)",
+      "hi": "avg = round(float(df[\"marks\"].mean()), 1)"
+     },
+     {
+      "en": "top = df[df[\"marks\"] >= 75][\"name\"].tolist(); return (avg, top)",
+      "te": "top = df[df[\"marks\"] >= 75][\"name\"].tolist(); return (avg, top)",
+      "hi": "top = df[df[\"marks\"] >= 75][\"name\"].tolist(); return (avg, top)"
+     }
+    ],
+    "solution": "import pandas as pd\n\ndef class_report(names, marks):\n    df = pd.DataFrame({\"name\": names, \"marks\": marks})\n    avg = round(float(df[\"marks\"].mean()), 1)\n    top = df[df[\"marks\"] >= 75][\"name\"].tolist()\n    return (avg, top)"
+   },
+   "cheat": {
+    "en": [
+     "import numpy as np · np.array(list) · arr + 5 · arr.mean() · arr.max()",
+     "import pandas as pd · pd.DataFrame({...}) · df[\"col\"]",
+     "df[df[\"col\"] >= x] · df[\"col\"].mean() · .tolist()"
+    ],
+    "te": [
+     "import numpy as np · np.array(list) · arr + 5 · arr.mean() · arr.max()",
+     "import pandas as pd · pd.DataFrame({...}) · df[\"col\"]",
+     "df[df[\"col\"] >= x] · df[\"col\"].mean() · .tolist()"
+    ],
+    "hi": [
+     "import numpy as np · np.array(list) · arr + 5 · arr.mean() · arr.max()",
+     "import pandas as pd · pd.DataFrame({...}) · df[\"col\"]",
+     "df[df[\"col\"] >= x] · df[\"col\"].mean() · .tolist()"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A placement cell has every student's marks. Explain how pandas finds the class average and the students who scored 75 or more.",
+      "te": "Placement cell దగ్గర ప్రతి విద్యార్థి marks ఉన్నాయి. pandas class సగటు, 75 లేదా ఎక్కువ వచ్చిన విద్యార్థులను ఎలా కనుక్కుంటుందో వివరించండి.",
+      "hi": "Placement cell के पास हर छात्र के marks हैं। pandas class का औसत और 75 या ज़्यादा वाले छात्र कैसे निकालता है, समझाइए।"
+     },
+     {
+      "en": "Explain why marks + 5 works on a NumPy array but not on a plain list.",
+      "te": "marks + 5 NumPy array పై ఎందుకు పనిచేస్తుంది, సాధారణ list పై ఎందుకు కాదో వివరించండి.",
+      "hi": "marks + 5 NumPy array पर क्यों चलता है पर सादी list पर क्यों नहीं, समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "pandas",
+      "dataframe",
+      "numpy",
+      "array"
+     ],
+     [
+      "mean",
+      "average",
+      "సగటు",
+      "औसत",
+      "filter"
+     ],
+     [
+      "column",
+      "table",
+      "whole",
+      "every",
+      "loop"
+     ]
+    ],
+    "challenge": {
+     "en": "Say what a pandas DataFrame is in one line.",
+     "te": "pandas DataFrame అంటే ఏమిటో ఒక్క line లో చెప్పండి.",
+     "hi": "pandas DataFrame क्या है, एक line में बताइए।"
+    }
+   }
   }
  ],
  "test": {
@@ -917,27 +924,20 @@
    },
    {
     "q": {
-     "en": "json.dumps gives…",
-     "te": "json.dumps ఇచ్చేది…",
-     "hi": "json.dumps देता है…"
+     "en": "np.array([2, 4]).mean() is…",
+     "te": "np.array([2, 4]).mean() ఎంత?",
+     "hi": "np.array([2, 4]).mean() क्या है?"
     },
     "options": [
-     {
-      "en": "text",
-      "te": "text",
-      "hi": "text"
-     },
-     {
-      "en": "a dict",
-      "te": "dict",
-      "hi": "dict"
-     }
+     "3.0",
+     "6",
+     "[2, 4]"
     ],
     "answer": 0,
     "why": {
-     "en": "JSON text.",
-     "te": "JSON text.",
-     "hi": "JSON text।"
+     "en": "The average.",
+     "te": "సగటు.",
+     "hi": "औसत।"
     }
    },
    {
@@ -987,51 +987,51 @@
  },
  "project": {
   "title": {
-   "en": "Exam day planner",
-   "te": "Exam day planner",
-   "hi": "Exam day planner"
+   "en": "Shop sales summary",
+   "te": "Shop sales summary",
+   "hi": "Shop sales summary"
   },
   "prompt": {
-   "en": "Write days_left(today_text, exam_text) returning the whole days from today to the exam (both \"YYYY-MM-DD\"), and plan_json(subjects, today_text, exam_text) returning JSON text of {\"days_left\": n, \"per_subject\": d} where d is math.floor(days_left / number of subjects).",
-   "te": "days_left(today_text, exam_text) రాయండి: ఈ రోజు నుంచి exam వరకు పూర్తి రోజులు (రెండూ \"YYYY-MM-DD\") return చేయాలి. plan_json(subjects, today_text, exam_text) {\"days_left\": n, \"per_subject\": d} JSON text return చేయాలి; d = math.floor(days_left / subjects సంఖ్య).",
-   "hi": "days_left(today_text, exam_text) लिखिए जो आज से exam तक के पूरे दिन (दोनों \"YYYY-MM-DD\") return करे, और plan_json(subjects, today_text, exam_text) जो {\"days_left\": n, \"per_subject\": d} का JSON text return करे, जहाँ d = math.floor(days_left / subjects की संख्या)।"
+   "en": "A shop logs each sale as an item name. Write summary(sales, prices) that returns a dict with \"total\" (sum of prices of all sales), \"top\" (the item sold most, using collections.Counter) and \"per_item\" (a dict of item → count). Use math.ceil to round the total up to whole rupees.",
+   "te": "Shop ప్రతి sale ని item పేరుగా నమోదు చేస్తుంది. \"total\" (అన్ని sales ధరల మొత్తం), \"top\" (collections.Counter తో ఎక్కువగా అమ్మిన item), \"per_item\" (item → count dict) ఉన్న dict return చేసే summary(sales, prices) రాయండి. Total ని పూర్తి రూపాయలకు పైకి round చేయడానికి math.ceil వాడండి.",
+   "hi": "दुकान हर sale को item के नाम से दर्ज करती है। summary(sales, prices) लिखिए जो dict return करे: \"total\" (सभी sales के दामों का जोड़), \"top\" (collections.Counter से सबसे ज़्यादा बिका item) और \"per_item\" (item → count का dict)। Total को पूरे रुपयों तक ऊपर round करने के लिए math.ceil लीजिए।"
   },
-  "starter": "import json\nimport math\nfrom datetime import date\n\ndef days_left(today_text, exam_text):\n    pass\n\ndef plan_json(subjects, today_text, exam_text):\n    pass\n",
+  "starter": "import math\nfrom collections import Counter\n\ndef summary(sales, prices):\n    return {}\n",
   "tests": [
    {
-    "name": "days_left",
-    "call": "days_left(\"2026-10-30\", \"2026-11-20\")",
-    "expected": "21"
+    "name": "summary",
+    "call": "summary([\"tea\", \"samosa\", \"tea\"], {\"tea\": 12.5, \"samosa\": 15})",
+    "expected": "{'total': 40, 'top': 'tea', 'per_item': {'tea': 2, 'samosa': 1}}"
    },
    {
-    "name": "plan_json",
-    "call": "plan_json([\"Maths\", \"Physics\"], \"2026-10-30\", \"2026-11-20\")",
-    "expected": "'{\"days_left\": 21, \"per_subject\": 10}'"
+    "name": "one sale",
+    "call": "summary([\"dosa\"], {\"dosa\": 39.2})[\"total\"]",
+    "expected": "40"
    },
    {
-    "name": "plan is valid JSON",
-    "call": "__import__(\"json\").loads(plan_json([\"A\", \"B\", \"C\"], \"2026-11-01\", \"2026-11-10\"))[\"per_subject\"]",
-    "expected": "3",
+    "name": "uses Counter",
+    "call": "'Counter' in summary.__code__.co_names",
+    "expected": "True",
     "hidden": true
    }
   ],
   "hints": [
    {
-    "en": "date.fromisoformat turns text into dates; subtract and use .days.",
-    "te": "date.fromisoformat text ని dates గా మారుస్తుంది; తీసివేసి .days వాడండి.",
-    "hi": "date.fromisoformat text को dates बनाता है; घटाकर .days लीजिए।"
+    "en": "counts = Counter(sales)",
+    "te": "counts = Counter(sales)",
+    "hi": "counts = Counter(sales)"
    },
    {
-    "en": "In plan_json, call days_left first.",
-    "te": "plan_json లో ముందు days_left call చేయండి.",
-    "hi": "plan_json में पहले days_left call कीजिए।"
+    "en": "total = math.ceil(sum(prices[s] for s in sales))",
+    "te": "total = math.ceil(sum(prices[s] for s in sales))",
+    "hi": "total = math.ceil(sum(prices[s] for s in sales))"
    },
    {
-    "en": "return json.dumps({\"days_left\": n, \"per_subject\": math.floor(n / len(subjects))})",
-    "te": "return json.dumps({\"days_left\": n, \"per_subject\": math.floor(n / len(subjects))})",
-    "hi": "return json.dumps({\"days_left\": n, \"per_subject\": math.floor(n / len(subjects))})"
+    "en": "return {\"total\": total, \"top\": counts.most_common(1)[0][0], \"per_item\": dict(counts)}",
+    "te": "return {\"total\": total, \"top\": counts.most_common(1)[0][0], \"per_item\": dict(counts)}",
+    "hi": "return {\"total\": total, \"top\": counts.most_common(1)[0][0], \"per_item\": dict(counts)}"
    }
   ],
-  "solution": "import json\nimport math\nfrom datetime import date\n\ndef days_left(today_text, exam_text):\n    return (date.fromisoformat(exam_text) - date.fromisoformat(today_text)).days\n\ndef plan_json(subjects, today_text, exam_text):\n    n = days_left(today_text, exam_text)\n    return json.dumps({\"days_left\": n, \"per_subject\": math.floor(n / len(subjects))})"
+  "solution": "import math\nfrom collections import Counter\n\ndef summary(sales, prices):\n    counts = Counter(sales)\n    total = math.ceil(sum(prices[s] for s in sales))\n    return {\"total\": total, \"top\": counts.most_common(1)[0][0], \"per_item\": dict(counts)}"
  }
 }

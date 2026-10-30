@@ -46,10 +46,28 @@ def _qbx_run(src, stdin_text):
     return g, out.getvalue(), err
 `;
 
+// NumPy and pandas are not in our own copy of Pyodide; when a learner's code
+// imports them, the runner (not the learner's code) loads the official
+// Pyodide builds of those packages, once per worker.
+const PKG_BASE = 'https://cdn.jsdelivr.net/pyodide/v0.27.8/full/';
+const PKGS = {
+  numpy: ['numpy-2.0.2-cp312-cp312-pyodide_2024_0_wasm32.whl'],
+  pandas: ['numpy-2.0.2-cp312-cp312-pyodide_2024_0_wasm32.whl', 'six-1.16.0-py2.py3-none-any.whl', 'python_dateutil-2.9.0.post0-py2.py3-none-any.whl', 'pytz-2024.1-py2.py3-none-any.whl', 'pandas-2.2.3-cp312-cp312-pyodide_2024_0_wasm32.whl']
+};
+const loaded = new Set();
+async function loadImports(py, code) {
+  const wanted = Object.keys(PKGS).filter(p => new RegExp(`^\\s*(import|from)\\s+${p}\\b`, 'm').test(code));
+  const files = [...new Set(wanted.flatMap(p => PKGS[p]))].filter(f => !loaded.has(f));
+  if (!files.length) return;
+  await py.loadPackage(files.map(f => PKG_BASE + f));
+  files.forEach(f => loaded.add(f));
+}
+
 self.onmessage = async (e) => {
   const { code, tests = [], stdin = '' } = e.data;
   try {
     const py = await boot();
+    await loadImports(py, code);
     py.runPython(HARNESS);
     const run = py.globals.get('_qbx_run');
     // A program that reads input runs first with the first test's input.
