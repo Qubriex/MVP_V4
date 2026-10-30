@@ -1,0 +1,85 @@
+{
+ "id": "ai-basics",
+ "order": 10,
+ "language": "python",
+ "status": "draft",
+ "level": "Beginner",
+ "hours": 20,
+ "icon": "sparkle",
+ "title": {
+  "en": "AI Basics",
+  "te": "AI Basics",
+  "hi": "AI Basics"
+ },
+ "summary": {
+  "en": "Understand how AI works and use it well: data, models, training, prompts, limits and responsible use.",
+  "te": "AI ఎలా పనిచేస్తుందో అర్థం చేసుకుని బాగా వాడడం: data, models, training, prompts, పరిమితులు, బాధ్యతాయుత ఉపయోగం.",
+  "hi": "AI कैसे काम करता है समझना और उसे अच्छे से इस्तेमाल करना: data, models, training, prompts, सीमाएँ और ज़िम्मेदार उपयोग।"
+ },
+ "modules": [
+  {
+   "id": "ai-basics-m1",
+   "n": 1,
+   "skill": "ai-basics-m1",
+   "title": {
+    "en": "What is AI?",
+    "te": "AI అంటే ఏమిటి?",
+    "hi": "AI क्या है?"
+   },
+   "summary": {
+    "en": "Rules, learning from data, and models.",
+    "te": "నియమాలు, data నుంచి నేర్చుకోవడం, models.",
+    "hi": "नियम, data से सीखना और models।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "ai-basics-m2",
+   "n": 2,
+   "skill": "ai-basics-m2",
+   "title": {
+    "en": "Data & Training",
+    "te": "Data & Training",
+    "hi": "Data & Training"
+   },
+   "summary": {
+    "en": "Training, testing and accuracy.",
+    "te": "Training, testing, accuracy.",
+    "hi": "Training, testing और accuracy।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "ai-basics-m3",
+   "n": 3,
+   "skill": "ai-basics-m3",
+   "title": {
+    "en": "Working with AI tools",
+    "te": "AI tools తో పని",
+    "hi": "AI tools के साथ काम"
+   },
+   "summary": {
+    "en": "Writing clear prompts and checking answers.",
+    "te": "స్పష్టమైన prompts రాయడం, జవాబులు తనిఖీ చేయడం.",
+    "hi": "साफ़ prompts लिखना और जवाब जाँचना।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "ai-basics-m4",
+   "n": 4,
+   "skill": "ai-basics-m4",
+   "title": {
+    "en": "Limits & Responsibility",
+    "te": "పరిమితులు, బాధ్యత",
+    "hi": "सीमाएँ और ज़िम्मेदारी"
+   },
+   "summary": {
+    "en": "Bias, privacy and honest use.",
+    "te": "Bias, privacy, నిజాయితీ ఉపయోగం.",
+    "hi": "Bias, privacy और ईमानदार उपयोग।"
+   },
+   "lessons": []
+  }
+ ]
+}

@@ -13,7 +13,7 @@ import { LoadingRows } from '../../components/shared/EmptyState';
 import { useCachedGet } from '../../utils/cachedGet';
 import { usePageCrumbs } from '../../components/learn/BackBar';
 
-const courseOf = (moduleId) => ({ py: 'python', jv: 'java' }[moduleId.split('-')[0]] || moduleId.split('-')[0]);
+const courseOf = (moduleId) => { const id = moduleId.replace(/-m\d+$/, ''); return { py: 'python', jv: 'java' }[id] || id; };
 // The course's name for the breadcrumb.
 const useCourseTitle = (courseId) => useCachedGet(`/learner/courses/${courseId}`).data?.title || courseId;
 

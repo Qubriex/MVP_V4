@@ -26,6 +26,14 @@ jobs:
       # Structural guarantees run first and fail the build on their own.
       - run: npm run test:structural
       - run: npm run test:rest
+      # Python and Java courses must be complete in en/te/hi (drafts are listed only).
+      - run: npm run topics:check
+      # Every course exercise: solutions pass their tests, starters do not, Java compiles and prints what it says.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: npm run topics:code
 
   frontend:
     runs-on: ubuntu-latest

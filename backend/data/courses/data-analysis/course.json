@@ -1,0 +1,101 @@
+{
+ "id": "data-analysis",
+ "order": 9,
+ "language": "python",
+ "status": "draft",
+ "level": "Beginner",
+ "hours": 30,
+ "icon": "chart",
+ "title": {
+  "en": "Data Analysis",
+  "te": "Data Analysis",
+  "hi": "Data Analysis"
+ },
+ "summary": {
+  "en": "Turn data into answers with Python: reading CSV files, cleaning, summarising, grouping and charts.",
+  "te": "Python తో data ని జవాబులుగా మార్చడం: CSV files చదవడం, శుభ్రం చేయడం, సారాంశం, grouping, charts.",
+  "hi": "Python से data को जवाबों में बदलना: CSV files पढ़ना, साफ़ करना, सारांश, grouping और charts।"
+ },
+ "modules": [
+  {
+   "id": "data-analysis-m1",
+   "n": 1,
+   "skill": "data-analysis-m1",
+   "title": {
+    "en": "Data & CSV",
+    "te": "Data & CSV",
+    "hi": "Data & CSV"
+   },
+   "summary": {
+    "en": "Reading and inspecting a dataset.",
+    "te": "Dataset చదవడం, పరిశీలించడం.",
+    "hi": "Dataset पढ़ना और देखना।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "data-analysis-m2",
+   "n": 2,
+   "skill": "data-analysis-m2",
+   "title": {
+    "en": "Cleaning",
+    "te": "Cleaning",
+    "hi": "Cleaning"
+   },
+   "summary": {
+    "en": "Missing values, types and duplicates.",
+    "te": "Missing values, types, duplicates.",
+    "hi": "Missing values, types और duplicates।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "data-analysis-m3",
+   "n": 3,
+   "skill": "data-analysis-m3",
+   "title": {
+    "en": "Summarising",
+    "te": "Summarising",
+    "hi": "Summarising"
+   },
+   "summary": {
+    "en": "Averages, counts and grouping.",
+    "te": "సగటులు, counts, grouping.",
+    "hi": "औसत, counts और grouping।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "data-analysis-m4",
+   "n": 4,
+   "skill": "data-analysis-m4",
+   "title": {
+    "en": "Charts",
+    "te": "Charts",
+    "hi": "Charts"
+   },
+   "summary": {
+    "en": "Bar, line and scatter charts.",
+    "te": "Bar, line, scatter charts.",
+    "hi": "Bar, line और scatter charts।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "data-analysis-m5",
+   "n": 5,
+   "skill": "data-analysis-m5",
+   "title": {
+    "en": "Project",
+    "te": "Project",
+    "hi": "Project"
+   },
+   "summary": {
+    "en": "Analyse a real public dataset.",
+    "te": "నిజమైన public dataset విశ్లేషణ.",
+    "hi": "एक असली public dataset का विश्लेषण।"
+   },
+   "lessons": []
+  }
+ ]
+}

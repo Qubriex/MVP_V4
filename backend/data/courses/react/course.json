@@ -1,0 +1,101 @@
+{
+ "id": "react",
+ "order": 8,
+ "language": "javascript",
+ "status": "draft",
+ "level": "Beginner",
+ "hours": 30,
+ "icon": "code",
+ "title": {
+  "en": "React",
+  "te": "React",
+  "hi": "React"
+ },
+ "summary": {
+  "en": "Build modern web apps with React: components, props, state, effects, routing and forms.",
+  "te": "React తో ఆధునిక web apps: components, props, state, effects, routing, forms.",
+  "hi": "React से आधुनिक web apps: components, props, state, effects, routing और forms।"
+ },
+ "modules": [
+  {
+   "id": "react-m1",
+   "n": 1,
+   "skill": "react-m1",
+   "title": {
+    "en": "Components",
+    "te": "Components",
+    "hi": "Components"
+   },
+   "summary": {
+    "en": "JSX and components.",
+    "te": "JSX, components.",
+    "hi": "JSX और components।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "react-m2",
+   "n": 2,
+   "skill": "react-m2",
+   "title": {
+    "en": "Props & State",
+    "te": "Props & State",
+    "hi": "Props & State"
+   },
+   "summary": {
+    "en": "Passing data and remembering it.",
+    "te": "Data పంపడం, గుర్తుంచుకోవడం.",
+    "hi": "Data भेजना और याद रखना।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "react-m3",
+   "n": 3,
+   "skill": "react-m3",
+   "title": {
+    "en": "Effects & Data",
+    "te": "Effects & Data",
+    "hi": "Effects & Data"
+   },
+   "summary": {
+    "en": "useEffect and loading data.",
+    "te": "useEffect, data load చేయడం.",
+    "hi": "useEffect और data load करना।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "react-m4",
+   "n": 4,
+   "skill": "react-m4",
+   "title": {
+    "en": "Routing & Forms",
+    "te": "Routing & Forms",
+    "hi": "Routing & Forms"
+   },
+   "summary": {
+    "en": "Pages, links and forms.",
+    "te": "Pages, links, forms.",
+    "hi": "Pages, links और forms।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "react-m5",
+   "n": 5,
+   "skill": "react-m5",
+   "title": {
+    "en": "Project",
+    "te": "Project",
+    "hi": "Project"
+   },
+   "summary": {
+    "en": "A small task tracker app.",
+    "te": "చిన్న task tracker app.",
+    "hi": "एक छोटा task tracker app।"
+   },
+   "lessons": []
+  }
+ ]
+}

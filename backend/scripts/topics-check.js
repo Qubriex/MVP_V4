@@ -34,8 +34,8 @@ for (const course of catalog().courses) {
   if (!gaps.length) console.log(`✓ ${head}: complete in English, Telugu and Hindi`);
   else {
     console.log(`${complete ? '✗' : '·'} ${head}: ${gaps.length} gap(s)`);
-    gaps.slice(0, complete ? 200 : 8).forEach(g => console.log(`    ${g}`));
-    if (!complete && gaps.length > 8) console.log(`    … and ${gaps.length - 8} more (draft: needs faculty review)`);
+    if (complete) gaps.slice(0, 200).forEach(g => console.log(`    ${g}`));
+    else console.log(`    draft: outline only, needs lessons and faculty review`);
     if (complete) failed = true;
   }
 }
