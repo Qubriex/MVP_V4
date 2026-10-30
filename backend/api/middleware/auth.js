@@ -157,6 +157,15 @@ export function authenticate({ errors = 'legacy', optional = false } = {}) {
       if (Date.now() - new Date(sb.last_active_at).getTime() > 60000) await dal.run('UPDATE demo_sandboxes SET last_active_at = ? WHERE id = ?', nowIso, session.sandbox_id);
     }
     req.user = payload;
+    // Learners: everything taught (sessions, concept notes, practice, reviews,
+    // topic intros, Ask Qubirex) follows the learning language they chose in
+    // Settings or on any learning screen; the cohort's language is the default.
+    if (session.actor_type === 'learner') {
+      const ll = await dal.one('SELECT learning_language FROM learners WHERE id = ?', session.actor_id);
+      req.user = { ...payload, cohort_language: payload.language };
+      if (ll?.learning_language) req.user.language = String(ll.learning_language).replace(/_en$/, '');
+      req.user.learning_language = ll?.learning_language || payload.language;
+    }
     req.session = session;
     req.tenant = tenantFor(session, payload);
     req.authVia = viaCookie ? 'cookie' : 'bearer';

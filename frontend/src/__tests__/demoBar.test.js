@@ -25,8 +25,8 @@ test('the demo bar shows sample data, the time left, switch, story, inbox, reset
   expect(screen.getByRole('button', { name: /Reset my demo/ })).toBeInTheDocument();
   expect(screen.getByRole('button', { name: /Exit demo/ })).toBeInTheDocument();
 
-  fireEvent.click(screen.getByRole('button', { name: /Guided story 2\/8/ }));
-  expect(screen.getAllByRole('button', { name: /Show me/ })).toHaveLength(8);
+  fireEvent.click(screen.getByRole('button', { name: /Guided story 2\/9/ }));
+  expect(screen.getAllByRole('button', { name: /Show me/ })).toHaveLength(9);
   expect(screen.getAllByText('Done')).toHaveLength(2);
 
   fireEvent.click(screen.getByRole('button', { name: /Demo inbox \(2\)/ }));

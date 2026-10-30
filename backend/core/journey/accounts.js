@@ -21,7 +21,8 @@ export const JOURNEY = [
   ['s12', 'S12', 'telugu', 'Srinivas Goud', 'Going stale: skills ageing, Passport renewal due'],
   ['s1-hi', 'S1', 'hindi', 'Pooja Verma', 'पहला दिन: स्वागत के कदम, शुरुआती जाँच बाकी'],
   ['s3-hi', 'S3', 'hindi', 'Rohit Sharma', 'सीख रहे हैं: बीच का रास्ता, 2 रिव्यू बाकी, कॉलेज का ब्रिज प्रोग्राम'],
-  ['s7-hi', 'S7', 'hindi', 'Anjali Singh', 'तैयार: Confirmed skills, Passport सार्वजनिक']
+  ['s7-hi', 'S7', 'hindi', 'Anjali Singh', 'तैयार: Confirmed skills, Passport सार्वजनिक'],
+  ['topics', 'S3', 'telugu', 'Sai Krishna', 'Learner with 2 topics known: Python (tested out, 3 modules on the Passport) and SQL Confirmed; now choosing Java']
 ].map(([key, stage, language, name, note]) => ({
   key, stage, language, name, note,
   learnerId: `test-j-${key}`, elId: `test-jel-${key}`, ref: `TEST-J-${key.toUpperCase()}`,

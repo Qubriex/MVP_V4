@@ -15,6 +15,7 @@ import { deleteJourneyLearners } from '../core/demo/cleanup.js';
 import { issueCredential, setPublic } from '../core/return/credentialEngine.js';
 import { saveMasteryLog, produceLearnerMasteryLog } from '../core/masteryLog.js';
 import { JOURNEY } from '../core/journey/accounts.js';
+import { courseById } from '../core/courses/catalog.js';
 
 export { JOURNEY };
 
@@ -183,6 +184,36 @@ function build(j, b) {
   }
 }
 
+// "Learner with 2 topics known": SQL Confirmed in the programme (its SQL
+// nodes), the whole Python course tested out with modules 1-3 finished (test
+// and project), and Java just added, not started.
+function buildTopics(j, b) {
+  NODE_IDS.slice(18, 20).forEach((node, i) => b.confirmed(node, 22 - i));
+  const python = courseById('python');
+  const java = courseById('java');
+  const LC = ['learner_id', 'course_id', 'source', 'added_at', 'last_lesson_id', 'last_at'];
+  b.add('learner_courses', LC, [j.learnerId, 'python', 'self', at(13), python.modules[2].lessons[0].id, at(5)]);
+  if (java) b.add('learner_courses', LC, [j.learnerId, 'java', 'self', at(0.1), null, null]);
+  const EV = ['id', 'learner_id', 'course_id', 'module_id', 'lesson_id', 'kind', 'passed', 'score', 'level', 'assurance', 'answer_hash', 'detail_json', 'created_at'];
+  let day = 12;
+  python.modules.forEach((m, mi) => {
+    m.lessons.forEach((l) => {
+      day -= 0.35;
+      b.add('lesson_progress', ['learner_id', 'lesson_id', 'course_id', 'status', 'step', 'practice_passed', 'practice_tries', 'hints_used', 'started_at', 'updated_at'],
+        [j.learnerId, l.id, 'python', 'known', 'result', mi < 3 ? 1 : 0, mi < 3 ? 1 : 0, 0, at(day + 0.1), at(day)]);
+      b.add('course_evidence', EV, [b.id('ce'), j.learnerId, 'python', m.id, l.id, 'testout', 1, 0.9, 'L1', 'A1', null, null, at(day)]);
+      if (mi < 3) b.add('course_evidence', EV, [b.id('ce'), j.learnerId, 'python', m.id, l.id, 'practice', 1, 1, 'L1', 'A1', null, null, at(day - 0.2)]);
+      b.add('course_evidence', EV, [b.id('ce'), j.learnerId, 'python', m.id, l.id, 'review', 1, 0.9, 'L1', 'A1', null, null, at(1)]);
+    });
+    if (mi < 3) {
+      b.add('course_evidence', EV, [b.id('ce'), j.learnerId, 'python', m.id, null, 'module_test', 1, 0.9, 'L1', 'A1', null, null, at(day - 0.3)]);
+      b.add('course_evidence', EV, [b.id('ce'), j.learnerId, 'python', m.id, null, 'project', 1, 1, 'L2', 'A1', null, null, at(day - 0.35)]);
+      b.add('module_results', ['learner_id', 'module_id', 'course_id', 'test_passed', 'test_score', 'project_passed', 'completed_at', 'updated_at'],
+        [j.learnerId, m.id, 'python', 1, 0.9, 1, at(day - 0.35), at(day - 0.35)]);
+    }
+  });
+}
+
 const CURRENT = { S0: 0, S1: 0, S2: 2, S3: 6, S4: 7, S5: 5, S6: 17 };
 
 /**
@@ -223,7 +254,8 @@ export async function seedJourney({ only = null } = {}) {
 
   for (const j of pick) {
     const b = builder(j);
-    build(j, b);
+    if (j.key === 'topics') buildTopics(j, b);
+    else build(j, b);
     await writeRows(b.rows);
     if (j.stage === 'S3') {
       await dal.run(`INSERT INTO bridge_assignments (id, bridge_id, el_id, baseline_readiness, baseline_mastered_json, assigned_at)
@@ -235,7 +267,7 @@ export async function seedJourney({ only = null } = {}) {
         VALUES (?, ?, ?, 3, 'Let verified employers find me by my verified skills, without my name until I say yes', 'discoverable-v1', 'learner', ?)`, `${j.learnerId}-c3`, j.learnerId, INSTITUTION, at(30));
     }
     // Mastery Logs and Passports for the stages that have them; S7 shares it publicly.
-    if (['S5', 'S6', 'S7', 'S8', 'S9', 'S10', 'S11', 'S12'].includes(j.stage)) {
+    if (['S5', 'S6', 'S7', 'S8', 'S9', 'S10', 'S11', 'S12'].includes(j.stage) || j.key === 'topics') {
       const log = await produceLearnerMasteryLog(j.engagementId, j.learnerId);
       await saveMasteryLog(j.engagementId, j.learnerId, log);
       const cred = await issueCredential(j.elId, { reason: 'journey_seed' });

@@ -62,6 +62,23 @@ function ActionModal({ action, count, cohorts, onCancel, onConfirm }) {
   );
 }
 
+// A student's own topics (courses they chose themselves), shown only when the
+// student shares their record with the college.
+function ExtraTopics({ elId }) {
+  const { t } = useUiLang();
+  const [d, setD] = useState(null);
+  useEffect(() => { setD(null); api.get(`/institution/students/${elId}/extra-topics`).then(r => setD(r.data)).catch(() => setD({ shared: false, courses: [] })); }, [elId]);
+  if (!d) return null;
+  return (
+    <div className="ln-col" style={{ gap: 6 }} data-extra-topics>
+      <span className="ln-kicker">{t('inst.students.extraTopics')}</span>
+      {!d.shared && <span className="ln-small ln-muted">{t('inst.students.extraNotShared')}</span>}
+      {d.shared && d.courses.length === 0 && <span className="ln-small ln-muted">{t('inst.students.extraNone')}</span>}
+      {d.courses.map(c => <div key={c.course_id} className="ln-between ln-small"><span>{c.title}</span><span className="ln-muted">{t('inst.students.extraProgress', { done: c.lessons_done, total: c.lessons_total })}</span></div>)}
+    </div>
+  );
+}
+
 export default function Students() {
   const { t } = useUiLang();
   const { role } = useStaff();
@@ -241,6 +258,7 @@ export default function Students() {
                   ))}
                 </div>
               </div>
+              <ExtraTopics elId={detail.el_id} />
               <button type="button" className="ln-btn" onClick={() => api.get(`/institution/students/${detail.el_id}/learning-curve`).then(r => setCurve(r.data)).catch(() => setCurve({ error: true }))}>{t('inst.students.learningCurve')}</button>
               {canManage && (
                 <div className="ln-col" style={{ gap: 8 }}>

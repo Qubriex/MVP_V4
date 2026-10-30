@@ -29,7 +29,8 @@ export const STORY = [
   { step: 'unlocked', who: 'recruiter', to: () => '/employer/pipeline', mark: null },
   { step: 'dayone', who: 'recruiter', to: () => '/employer/pipeline', mark: 'dayone' },
   { step: 'lesson', who: 'lakshmi', to: () => '/learn/dashboard', mark: 'lesson' },
-  { step: 'bridge', who: 'placement', to: () => '/institution/bridges', mark: 'bridge' }
+  { step: 'bridge', who: 'placement', to: () => '/institution/bridges', mark: 'bridge' },
+  { step: 'topics', who: 'professor', to: () => '/institution/topics', mark: null }
 ];
 
 // The learner journey story: Lakshmi's side only, lessons use the scripted tutor.

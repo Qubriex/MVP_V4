@@ -92,7 +92,7 @@ router.get('/lessons/:id', wrap(async (req, res) => {
     label: await lessonLabel(req.user.id, lesson.id),
     prev: prev ? { id: prev.id, title: prev.title.en, done: !!prevDone } : null,
     next: all[i + 1] ? { id: all[i + 1].id } : null,
-    reviewed_by: await lessonReviewBadge(req.user.institution_id, lesson.id)
+    reviewed_by: await lessonReviewBadge(req.user.institution_id || (await dal.one('SELECT institution_id FROM learners WHERE id = ?', req.user.id))?.institution_id, lesson.id)
   });
 }));
 router.post('/lessons/:id/step', wrap(async (req, res) => { const p = await setStep(req.user.id, req.params.id, String(req.body?.step || '')); res.json({ step: p.step, status: p.status }); }));

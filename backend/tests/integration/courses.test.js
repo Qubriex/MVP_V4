@@ -86,7 +86,7 @@ describe('a lesson, taught first, in the learning language', () => {
     expect(bad.body.passed).toBe(false);
     const good = await post('/lessons/py-m3-l3/practice', { results: allPass(tests), code: 'return a*b' });
     expect(good.body).toMatchObject({ passed: true, practice_passed: true });
-    expect((await dal.one("SELECT COUNT(*) AS n FROM course_evidence WHERE lesson_id = 'py-m3-l3' AND kind = 'practice'")).n).toBe(1);
+    expect((await dal.one("SELECT COUNT(*) AS n FROM course_evidence WHERE learner_id = 'test-j-s3' AND lesson_id = 'py-m3-l3' AND kind = 'practice'")).n).toBe(1);
   });
 
   it('the check: a fresh question, rule grading with feedback, the label and module progress', async () => {
@@ -125,5 +125,54 @@ describe('a lesson, taught first, in the learning language', () => {
     expect(done.body.module).toMatchObject({ test_passed: true, project_passed: true, completed: true });
     const passport = (await get('/passport')).body;
     expect(passport.skills.some(s => s.skill_id === 'course:py-m3' && s.course === 'python')).toBe(true);
+  });
+});
+
+describe('topics for the college', () => {
+  let prof;
+  beforeAll(async () => {
+    prof = await login(app, '/api/auth/institution/login', { email: 'test.professor@qubirex.local', password: 'QubirexTest2026!' });
+  });
+
+  it('lists the catalog with review state per language, and drafts marked draft', async () => {
+    const r = await prof.agent.get('/api/institution/topics');
+    expect(r.status).toBe(200);
+    const py = r.body.courses.find(c => c.id === 'python');
+    expect(py.status).toBe('complete');
+    expect(py.modules[2].lessons[2].reviewed).toEqual({ english: false, telugu: false, hindi: false });
+    expect(r.body.courses.find(c => c.id === 'java').status).toBe('complete');
+    expect(r.body.courses.filter(c => c.status === 'draft').length).toBeGreaterThanOrEqual(8);
+  });
+
+  it('a professor reads a lesson in Telugu, marks it Reviewed, and learners see the badge', async () => {
+    const lesson = await prof.agent.get('/api/institution/topics/lessons/py-m3-l2?language=telugu');
+    expect(lesson.body.lesson.content_language).toBe('te');
+    expect(lesson.body.lesson.task_solution).toBeTruthy();
+    const empty = await prof.agent.post('/api/institution/topics/lessons/py-m3-l2/review').set('X-CSRF-Token', prof.csrf).send({ language: 'telugu', status: 'suggested', suggestion: '' });
+    expect(empty.status).toBe(400);
+    const ok = await prof.agent.post('/api/institution/topics/lessons/py-m3-l2/review').set('X-CSRF-Token', prof.csrf).send({ language: 'telugu', status: 'reviewed' });
+    expect(ok.body).toEqual({ ok: true });
+    const after = (await prof.agent.get('/api/institution/topics')).body.courses.find(c => c.id === 'python');
+    expect(after.modules[2].lessons[1].reviewed.telugu).toBe(true);
+    expect((await get('/lessons/py-m3-l2')).body.reviewed_by).toEqual({ college: 'Qubirex Test Institution' });
+  });
+
+  it('shows a student\'s extra topics only when they share their record', async () => {
+    const r = await prof.agent.get('/api/institution/students/test-jel-topics/extra-topics');
+    expect(r.body.shared).toBe(true);
+    expect(r.body.courses.map(c => c.course_id).sort()).toEqual(['java', 'python']);
+    await dal.run("UPDATE learner_profiles SET share_with_institution = 0 WHERE learner_id = 'test-j-topics'");
+    expect((await prof.agent.get('/api/institution/students/test-jel-topics/extra-topics')).body).toEqual({ shared: false, courses: [] });
+  });
+
+  it('the "2 topics known" learner: Python known with 3 modules on the Passport, Java added, nothing started', async () => {
+    const t = await login(app, '/api/auth/learner/login', { learner_ref: 'TEST-J-TOPICS', join_code: 'QX-FSD-T01', pin: PIN });
+    const mine = (await t.agent.get('/api/learner/courses/mine')).body;
+    const ids = (mine.courses || mine).map(c => c.id || c.course_id);
+    expect(ids).toEqual(expect.arrayContaining(['python', 'java']));
+    const py = (await t.agent.get('/api/learner/courses/python')).body.progress;
+    expect(py.lessons['py-m8-l2'].status).toBe('known');
+    const passport = (await t.agent.get('/api/learner/passport')).body;
+    expect(passport.skills.filter(s => s.course === 'python').map(s => s.skill_id)).toEqual(expect.arrayContaining(['course:py-m1', 'course:py-m2', 'course:py-m3']));
   });
 });

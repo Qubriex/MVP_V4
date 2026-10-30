@@ -7,7 +7,7 @@
 import { useUiLang } from '../../context/UiLangContext';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Home, LayoutGrid, Users, TrendingUp, BarChart3, ShieldCheck, UserRound, LogOut, Menu, X, ClipboardCheck, Route as RouteIcon, Briefcase } from 'lucide-react';
+import { Home, LayoutGrid, Users, TrendingUp, BarChart3, ShieldCheck, UserRound, LogOut, Menu, X, ClipboardCheck, Route as RouteIcon, Briefcase, BookOpen } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 import { fetchCached } from '../../utils/cachedGet';
@@ -59,6 +59,7 @@ export default function InstitutionLayout() {
       { to: '/institution/cohorts', label: t('inst.nav.cohorts'), icon: LayoutGrid },
       { to: '/institution/students', label: t('inst.nav.students'), icon: Users },
       { to: '/institution/review', label: t('inst.nav.review'), icon: ClipboardCheck },
+      { to: '/institution/topics', label: t('inst.nav.topics'), icon: BookOpen },
       { to: '/institution/bridges', label: t('inst.nav.bridges'), icon: RouteIcon }
     ] },
     { label: t('inst.nav.insights'), items: [

@@ -18,7 +18,7 @@ export const DEV_CARDS = [
 ];
 // One test learner at each stage of the learning journey (backend
 // core/journey/accounts.js). The /dev page lists them from GET /dev/journey.
-export const JOURNEY_KEYS = ['s0', 's1', 's2', 's3', 's4', 's5', 's6', 's7', 's8', 's9', 's10', 's11', 's12', 's1-hi', 's3-hi', 's7-hi']
+export const JOURNEY_KEYS = ['s0', 's1', 's2', 's3', 's4', 's5', 's6', 's7', 's8', 's9', 's10', 's11', 's12', 's1-hi', 's3-hi', 's7-hi', 'topics']
   .map(k => ({ key: `journey_${k.replace('-', '_')}`, journey: k, stage: k.split('-')[0].toUpperCase(), hindi: k.endsWith('-hi') }));
 export const cardFor = (key) => DEV_CARDS.find(c => c.key === key) || null;
 export const journeyFor = (key) => JOURNEY_KEYS.find(j => j.key === key) || null;

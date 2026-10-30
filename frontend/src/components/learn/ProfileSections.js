@@ -12,6 +12,7 @@ import { MOCK_PROFILE } from '../../utils/learnerMockData';
 import { useLowBandwidth } from '../../utils/lowBandwidth';
 import { errMsg } from '../../utils/errors';
 import { Select } from '../shared/ui';
+import LearningLangPicker from './LearningLangPicker';
 
 const EDITABLE = ['email', 'phone', 'city', 'link_url', 'headline', 'about', 'target_roles', 'preferred_cities', 'graduation_year',
   'expected_salary', 'self_skills', 'experience', 'certifications', 'ui_language', 'voice_prefs', 'education', 'projects',
@@ -326,8 +327,9 @@ export function VoiceSection({ form }) {
   return (
     <Section id="preferences" title={t('learn.profileSections.learningVoicePreferences')}>
       <div className="ln-grid ln-g-2" style={{ gap: 16 }}>
-        <div className="ln-field"><span className="ln-label">{t('learn.profileSections.teachingLanguage')}</span>
-          <span className="ln-tile ln-indic" style={{ fontSize: 'var(--fs-body)', padding: '12px 14px' }}>{language === 'hindi' ? 'हिंदी' : 'తెలుగు'} <span className="ln-muted">{t('learn.profileSections.setByInstitution')}</span></span></div>
+        <div className="ln-field" data-settings-learning-language><span className="ln-label">{t('lang.learningLanguage')}</span>
+          <LearningLangPicker />
+          <span className="ln-xs ln-muted">{t('lang.learningDefault', { lang: language === 'hindi' ? 'हिंदी' : 'తెలుగు' })}</span></div>
         <div className="ln-field"><span className="ln-label" id="ui-lang">{t('learn.profileSections.interfaceLanguage')}</span>
           <div className="ln-seg ln-indic" role="group" aria-labelledby="ui-lang">
             {UI_LANGS.map(l => <button key={l.id} type="button" aria-pressed={draft.ui_language === l.id} onClick={() => { set('ui_language', l.id); setLang(l.id); }}>{l.label}</button>)}

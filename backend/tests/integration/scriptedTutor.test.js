@@ -119,6 +119,16 @@ describe('the loop through the API', () => {
     expect(typed.body.check_question).toBe(ready.body.check_question);
   });
 
+  it('the tutor follows the learning language chosen in Settings, not only the cohort default', async () => {
+    const set = await test.agent.put('/api/learner/learning-language').set('X-CSRF-Token', test.csrf).send({ value: 'english' });
+    expect(set.body.value).toBe('english');
+    const s = await post(test, '/api/learner/session/start', {});
+    expect(s.body.language).toBe('english');
+    await test.agent.put('/api/learner/learning-language').set('X-CSRF-Token', test.csrf).send({ value: 'telugu_en' });
+    expect((await post(test, '/api/learner/session/start', {})).body.language).toBe('telugu');
+    await dal.run('UPDATE learners SET learning_language = NULL WHERE id = ?', test.user?.id || (await dal.one("SELECT id FROM learners WHERE learning_language = 'telugu_en'")).id);
+  });
+
   it('#pass is only a code word for test-tenant learners', async () => {
     const realStart = await post(real, '/api/learner/session/start', {});
     await post(real, '/api/learner/session/message', { request_check: true, session_id: realStart.body.session_id });

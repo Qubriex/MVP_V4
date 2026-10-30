@@ -11,6 +11,7 @@ import { ToastProvider, TableLabels } from './components/shared/ui';
 // Pages
 import PublicHome from './pages/public/Home';
 import Pricing from './pages/public/Pricing';
+import PublicTopics, { TopicSample } from './pages/public/Topics';
 import Demo from './pages/public/Demo';
 import Audience from './pages/public/Audience';
 import SignIn from './pages/public/SignIn';
@@ -33,6 +34,7 @@ import Cohort from './pages/inst/Cohort';
 import CohortLive from './pages/inst/CohortLive';
 import EvidenceReport from './pages/inst/EvidenceReport';
 import Curriculum from './pages/inst/Curriculum';
+import InstTopics from './pages/inst/Topics';
 import Standing from './pages/inst/Standing';
 import FacultyReview from './pages/inst/Review';
 import { BridgeList, BridgeDetail } from './pages/inst/Bridges';
@@ -119,6 +121,8 @@ export default function App() {
             <Routes>
               <Route path="/" element={<PublicHome />} />
               <Route path="/pricing" element={<Pricing />} />
+              <Route path="/topics" element={<PublicTopics />} />
+              <Route path="/topics/sample/:lessonId" element={<TopicSample />} />
               <Route path="/learners" element={<Audience side="learners" />} />
               <Route path="/colleges" element={<Audience side="colleges" />} />
               <Route path="/employers" element={<Audience side="employers" />} />
@@ -193,6 +197,7 @@ export default function App() {
                       <Route path="cohorts/:id/live" element={<CohortLive />} />
                       <Route path="cohorts/:id/report" element={<EvidenceReport />} />
                       <Route path="curriculum" element={<Curriculum />} />
+                      <Route path="topics" element={<InstTopics />} />
                       <Route path="benchmark" element={<Standing />} />
                       <Route path="review" element={<FacultyReview />} />
                       <Route path="bridges" element={<BridgeList />} />

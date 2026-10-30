@@ -41,7 +41,7 @@ import { clientIp } from '../middleware/rateLimit.js';
 const router = express.Router();
 export const DEMO_COOKIE = 'qbx_demo';
 const HARD_MS = 4 * 3600000;
-export const STORY_STEPS = ['jd', 'search', 'request', 'approve', 'unlocked', 'dayone', 'lesson', 'bridge'];
+export const STORY_STEPS = ['jd', 'search', 'request', 'approve', 'unlocked', 'dayone', 'lesson', 'bridge', 'topics'];
 // The second guided story: one learner's journey, step by step, with the scripted tutor.
 export const LEARNER_STEPS = ['lj_home', 'lj_lesson', 'lj_skill', 'lj_passport', 'lj_readiness', 'lj_jobs'];
 
@@ -200,6 +200,7 @@ async function storyProgress(sb) {
   if (after(['dayone', 'offer', 'hired'])) done.add('dayone');
   if (lesson) done.add('lesson');
   if (bridge) done.add('bridge');
+  if (await dal.one('SELECT 1 FROM content_reviews WHERE institution_id = ?', ids.institution)) done.add('topics');
   let marked = [];
   try { marked = JSON.parse(sb.story_json || '[]'); } catch { marked = []; }
   marked.forEach(m => done.add(m));

@@ -27,6 +27,16 @@ const LANGUAGE_CONTEXTS = {
     check_prompt: 'क्या आप इसे समझ गए?',
     still_confused: 'अभी भी उलझन में हैं?',
     region: 'North India'
+  },
+  english: {
+    lang_name: 'English',
+    script_note: 'Use simple Indian English, short sentences',
+    greeting: 'Hello',
+    advance_message: 'You have got it. Let us move on.',
+    loop_message: 'Good try. Let us look at it another way.',
+    check_prompt: 'Does that make sense?',
+    still_confused: 'Still unsure?',
+    region: 'India'
   }
 };
 
