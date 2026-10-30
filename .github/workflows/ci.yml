@@ -105,6 +105,9 @@ jobs:
       - name: Learner journey
         working-directory: frontend
         run: NODE_PATH="$(npm root -g)" DEV_PASS="$DEV_LOGIN_SECRET" node e2e/learner-journey.mjs
+      - name: Topics, lessons, language, Back and the job flag
+        working-directory: frontend
+        run: NODE_PATH="$(npm root -g)" DEV_PASS="$DEV_LOGIN_SECRET" node e2e/learner-topics.mjs
       - name: Developer login
         working-directory: frontend
         run: NODE_PATH="$(npm root -g)" DEV_PASS="$DEV_LOGIN_SECRET" node e2e/dev-login.mjs

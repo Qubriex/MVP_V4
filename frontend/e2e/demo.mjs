@@ -79,7 +79,7 @@ try {
 
   // ── Every page of each side, inside a sandbox, at 1440 and 360 px ─────────────
   const SWEEP = {
-    'Lakshmi Prasanna': ['/learn/dashboard', '/learn/record', '/learn/reviews', '/learn/passport', '/learn/jobs', '/learn/market', '/learn/topics', '/learn/profile', '/learn/resume', '/learn/settings'],
+    'Lakshmi Prasanna': ['/learn/dashboard', '/learn/record', '/learn/reviews', '/learn/passport', '/learn/jobs', '/learn/courses', '/learn/courses/python', '/learn/profile', '/learn/resume', '/learn/settings'],
     'Sunita Reddy': ['/institution/home', '/institution/team', '/institution/students', '/institution/cohorts', '/institution/curriculum', '/institution/benchmark', '/institution/review', '/institution/bridges', '/institution/placements', '/institution/board-report', '/institution/profile'],
     'Meera Iyer': ['/employer/home', '/employer/company', '/employer/team', '/employer/roles', '/employer/pipeline', '/employer/sponsor', '/employer/colleges', '/employer/verify-bulk', '/employer/templates', '/employer/billing']
   };

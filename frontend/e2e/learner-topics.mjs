@@ -1,0 +1,226 @@
+// e2e/learner-topics.mjs — topics, lessons, language, Back and the job flag,
+// in a real browser against a copy with DEV_LOGIN_ENABLED=true:
+//   1. Jobs hidden (FEATURE_LEARNER_JOBS off): no job market in the menu or
+//      on Home, and /learn/market goes Home.
+//   2. Back on every /learn page: the Back button and breadcrumb are there
+//      (not on Home), and Back opened directly goes to the logical parent;
+//      opened from a course page, Back returns to that course page.
+//   3. Learning language: the lesson follows the picker (English, then
+//      Telugu), and Settings shows the same choice.
+//   4. Teach-first lesson "Return values" in Telugu and in English: Learn →
+//      See the code (Run shows the output) → Practise (a wrong answer shows
+//      what failed, the solution passes) → Check (a fresh question).
+//   5. Topics flow at 1280 px and 390 px: My topics, add Java, open a lesson,
+//      no sideways scroll.
+//   6. Public "See our topics" and its free sample, in Hindi.
+//   7. A professor marks a lesson Reviewed in Telugu; the learner sees
+//      "Reviewed by … faculty".
+//   DEV_PASS=… BASE=http://localhost:3000 node e2e/learner-topics.mjs
+import { createRequire } from 'module';
+import path from 'path';
+
+const require = createRequire(import.meta.url);
+let chromium;
+try { ({ chromium } = require('playwright')); } catch { ({ chromium } = require(path.join(process.env.NODE_PATH || '/opt/node22/lib/node_modules', 'playwright'))); }
+const BASE = process.env.BASE || 'http://localhost:3000';
+const BYPASS = process.env.VERCEL_BYPASS ? { extraHTTPHeaders: { 'x-vercel-protection-bypass': process.env.VERCEL_BYPASS, 'x-vercel-set-bypass-cookie': 'true' } } : {};
+const PASS = process.env.DEV_PASS;
+if (!PASS) { console.error('Set DEV_PASS to the deployment\'s DEV_LOGIN_SECRET.'); process.exit(2); }
+
+const started = Date.now();
+const results = [];
+const check = (name, ok, detail = '') => { results.push(!!ok); console.log(`${ok ? '✓' : '✗'} ${name}${detail ? ` — ${detail}` : ''}`); return ok; };
+const browser = await chromium.launch({ executablePath: process.env.CHROMIUM || undefined });
+const TELUGU = /[ఀ-౿]/;
+const HINDI = /[ऀ-ॿ]/;
+
+async function newContext({ width = 1280, height = 860 } = {}) {
+  const ctx = await browser.newContext({ ...BYPASS, viewport: { width, height } });
+  await ctx.addInitScript(() => { try { localStorage.setItem('qubirex_ui_lang', 'english'); } catch { /* blocked */ } });
+  return ctx;
+}
+async function newPage(ctx) {
+  const page = await ctx.newPage();
+  page.errors = [];
+  page.on('console', m => { if (m.type() === 'error' && !/401|403|503|Failed to load resource/.test(m.text())) page.errors.push(m.text().slice(0, 160)); });
+  page.on('pageerror', e => page.errors.push(e.message.slice(0, 160)));
+  return page;
+}
+const settle = (page) => page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+async function unlock(page) {
+  await page.goto(`${BASE}/dev`);
+  await page.waitForSelector('#dev-pass, .dx-stages, .dx-cards', { timeout: 15000 });
+  if (await page.$('#dev-pass')) { await page.fill('#dev-pass', PASS); await page.click('button[type=submit]'); }
+  await page.waitForSelector('.dx-cards', { timeout: 15000 });
+}
+async function openStage(page, key) {
+  await unlock(page);
+  await page.click(`.dx-stages [data-stage="${key}"]`);
+  await page.waitForURL(u => /\/learn\//.test(u.pathname), { timeout: 15000 });
+  await settle(page);
+}
+async function openCard(page, label, home) {
+  await unlock(page);
+  await page.locator('.dx-card', { hasText: label }).first().locator('button').click();
+  await page.waitForURL(`**${home}`, { timeout: 15000 });
+  await settle(page);
+}
+const noSideways = (page) => page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1);
+async function setLearning(page, value) {
+  const sel = page.locator('[data-learning-language] select').first();
+  await sel.waitFor({ timeout: 10000 });
+  await sel.selectOption(value);
+  await page.waitForFunction((v) => document.querySelector('[data-learning-language]')?.getAttribute('data-learning-language') === v, value, { timeout: 10000 });
+  await settle(page);
+}
+
+// One lesson, every step, in the current learning language.
+async function teachFirst(page, lessonId, script, label) {
+  await page.goto(`${BASE}/learn/lesson/${lessonId}`);
+  await page.waitForSelector('[data-lesson-page] [data-explain]', { timeout: 15000 });
+  const explain = await page.textContent('[data-explain]');
+  check(`${label}: the lesson teaches first, in the learning language`, script.test(explain), explain.slice(0, 60));
+  check(`${label}: the stepper shows Learn → See the code → Practise → Check`, (await page.$$('.lj-stepper [data-step]')).length === 4);
+  await page.click('.lj-stepper [data-step="learn"] button');
+  await page.click('[data-step-panel="learn"] [data-next-step]');
+  await page.click('[data-run-example]');
+  const out = await page.waitForSelector('[data-output]', { timeout: 120000 }).then(e => e.textContent()).catch(() => '');
+  check(`${label}: Run shows the example's output`, /177/.test(out), out.replace(/\s+/g, ' ').slice(0, 80));
+  await page.locator('[data-next-step]').last().click();
+  await page.waitForSelector('[data-editor]', { timeout: 10000 });
+  for (let i = 0; i < 3; i += 1) {
+    await page.fill('[data-editor]', 'def total_bill(price, qty):\n    print(price * qty)\n');
+    await page.click('[data-run-tests]');
+    await page.waitForSelector('[data-practice-result]', { timeout: 120000 });
+  }
+  check(`${label}: a wrong answer shows what failed`, (await page.getAttribute('[data-practice-result]', 'data-practice-result')) === 'fail' && !!(await page.$('[data-test-results] [data-passed="no"]')));
+  await page.click('[data-solution]');
+  const solution = await page.waitForSelector('[data-solution-text]', { timeout: 10000 }).then(e => e.textContent());
+  await page.fill('[data-editor]', solution);
+  await page.click('[data-run-tests]');
+  await page.waitForFunction(() => document.querySelector('[data-practice-result]')?.getAttribute('data-practice-result') === 'pass', null, { timeout: 120000 }).catch(() => {});
+  check(`${label}: the right answer passes every test`, (await page.getAttribute('[data-practice-result]', 'data-practice-result')) === 'pass');
+  await page.locator('[data-next-step]').last().click();
+  await page.click('[data-start-check]');
+  const q = await page.waitForSelector('[data-check-question]', { timeout: 15000 }).then(e => e.textContent()).catch(() => '');
+  check(`${label}: only then the check, with a fresh question`, q.length > 10, q.replace(/\s+/g, ' ').slice(0, 60));
+}
+
+// path → parent, as in src/components/learn/BackBar.js
+const BACK = [
+  ['/learn/record', '/learn/dashboard'], ['/learn/history', '/learn/record'], ['/learn/reviews', '/learn/dashboard'],
+  ['/learn/assigned', '/learn/dashboard'], ['/learn/passport', '/learn/dashboard'], ['/learn/readiness', '/learn/passport'],
+  ['/learn/courses', '/learn/dashboard'], ['/learn/courses/python', '/learn/courses'], ['/learn/lesson/py-m1-l1', '/learn/courses'],
+  ['/learn/modules/py-m3/test', '/learn/courses'], ['/learn/modules/py-m3/project', '/learn/courses'],
+  ['/learn/skill/test-node-4-4', '/learn/record'], ['/learn/profile', '/learn/dashboard'], ['/learn/resume', '/learn/profile'],
+  ['/learn/settings', '/learn/profile'], ['/learn/notifications', '/learn/settings']
+];
+
+try {
+  const ctx = await newContext();
+  const me = await newPage(ctx);
+  await openStage(me, 'topics');
+
+  // 1. Jobs hidden
+  await me.goto(`${BASE}/learn/dashboard`); await settle(me);
+  const nav = await me.textContent('nav').catch(() => '');
+  check('Jobs hidden: no Job market in the menu', !/job market/i.test(nav));
+  check('Jobs hidden: Home is learning only', !(await me.$('[data-market-snapshot], [data-jobs-section]')));
+  await me.goto(`${BASE}/learn/market`);
+  await me.waitForURL('**/learn/dashboard', { timeout: 10000 }).catch(() => {});
+  check('Jobs hidden: /learn/market goes Home', me.url().endsWith('/learn/dashboard'), me.url());
+  check('Home has no Back button', !(await me.$('[data-backbar]')));
+
+  // 2. Back on every /learn page
+  for (const [from, parent] of BACK) {
+    const p = await newPage(ctx);
+    await p.goto(`${BASE}${from}`);
+    const bar = await p.waitForSelector('[data-backbar] [data-back]', { timeout: 15000 }).catch(() => null);
+    const crumbs = bar ? (await p.textContent('[data-backbar] nav')).trim() : '';
+    if (bar) { await bar.click(); await p.waitForURL(`**${parent}`, { timeout: 10000 }).catch(() => {}); }
+    check(`Back on ${from} → ${parent}`, !!bar && new URL(p.url()).pathname === parent && /Home/.test(crumbs), `${new URL(p.url()).pathname} · ${crumbs.slice(0, 50)}`);
+    await p.close();
+  }
+  await me.goto(`${BASE}/learn/courses/python`); await settle(me);
+  if (!(await me.$('[data-lesson="py-m3-l2"] a'))) await me.click('[data-module="py-m3"] .lj-module-head');
+  await me.click('[data-lesson="py-m3-l2"] a');
+  await me.waitForSelector('[data-lesson-page]', { timeout: 15000 });
+  await me.click('[data-backbar] [data-back]');
+  await me.waitForURL('**/learn/courses/python', { timeout: 10000 }).catch(() => {});
+  check('Back from a lesson returns to the course page it was opened from', new URL(me.url()).pathname === '/learn/courses/python');
+
+  // 3. Learning language
+  await me.goto(`${BASE}/learn/lesson/py-m3-l3`);
+  await me.waitForSelector('[data-explain]', { timeout: 15000 });
+  await setLearning(me, 'english');
+  check('Learning language English: the lesson is in English', !TELUGU.test(await me.textContent('[data-explain]')));
+  await setLearning(me, 'telugu');
+  await me.waitForFunction(() => /[\u0C00-\u0C7F]/.test(document.querySelector('[data-explain]')?.textContent || ''), null, { timeout: 15000 }).catch(() => {});
+  check('Learning language Telugu: the lesson is in Telugu', TELUGU.test(await me.textContent('[data-explain]')));
+  await me.goto(`${BASE}/learn/settings`);
+  const s = await me.waitForSelector('[data-settings-learning-language] [data-learning-language]', { timeout: 15000 }).then(e => e.getAttribute('data-learning-language')).catch(() => null);
+  check('Settings shows the same learning language', s === 'telugu', s);
+
+  // 4. Teach-first "Return values", Telugu then English
+  await teachFirst(me, 'py-m3-l3', TELUGU, 'Return values (Telugu)');
+  await me.goto(`${BASE}/learn/lesson/py-m3-l3`); await me.waitForSelector('[data-explain]', { timeout: 15000 });
+  await setLearning(me, 'english');
+  await teachFirst(me, 'py-m3-l3', /return/i, 'Return values (English)');
+  await setLearning(me, 'telugu');
+
+  // 5. Topics flow, desktop
+  await me.goto(`${BASE}/learn/courses`); await settle(me);
+  check('My topics shows Python', !!(await me.$('[data-course="python"]')));
+  await me.goto(`${BASE}/learn/courses/javascript`); await settle(me);
+  check('Draft topics say they need faculty review', /faculty review/i.test(await me.textContent('main').catch(() => '')));
+  await me.goto(`${BASE}/learn/courses/java`); await settle(me);
+  check('Java opens with 9 modules', (await me.$$('[data-module]')).length === 9);
+  check('No console errors on the topic pages', me.errors.length === 0, me.errors.slice(0, 2).join(' | '));
+
+  // 5b. Topics flow at 390 px
+  const phoneCtx = await newContext({ width: 390, height: 844 });
+  const phone = await newPage(phoneCtx);
+  await openStage(phone, 'topics');
+  for (const url of ['/learn/courses', '/learn/courses/python', '/learn/lesson/py-m3-l3', '/learn/modules/py-m3/test']) {
+    await phone.goto(`${BASE}${url}`); await settle(phone);
+    check(`390 px: ${url} has no sideways scroll and a Back button`, (await noSideways(phone)) && !!(await phone.$('[data-backbar] [data-back]')));
+  }
+  await phoneCtx.close();
+
+  // 6. Public "See our topics"
+  const pub = await newPage(await newContext());
+  await pub.goto(`${BASE}/topics`);
+  await pub.waitForSelector('[data-public-course="python"]', { timeout: 15000 });
+  check('See our topics lists Python and Java as ready', !!(await pub.$('[data-public-course="java"]')));
+  await pub.click('[data-public-course="python"] [data-sample-link]');
+  await pub.waitForSelector('[data-readout]', { timeout: 15000 });
+  await pub.click('[data-lang="hindi"]');
+  await pub.waitForFunction(() => /[ऀ-ॿ]/.test(document.querySelector('[data-part="explain"]')?.textContent || ''), null, { timeout: 15000 }).catch(() => {});
+  check('The free sample reads in Hindi', HINDI.test(await pub.textContent('[data-part="explain"]')));
+
+  // 7. A professor reviews; the learner sees the badge
+  const prof = await newPage(await newContext());
+  await openCard(prof, 'Professor', '/institution/home');
+  await prof.goto(`${BASE}/institution/topics`); await settle(prof);
+  await prof.waitForSelector('[data-topic-course="python"]', { timeout: 15000 });
+  if (!(await prof.$('[data-topic-lesson="py-m1-l1"]'))) await prof.click('[data-topic-course="python"] .lj-module-head');
+  await prof.waitForSelector('[data-topic-lesson="py-m1-l1"] button', { timeout: 15000 });
+  await prof.click('[data-topic-lesson="py-m1-l1"] button');
+  await prof.click('[data-review-lang="telugu"]');
+  await prof.waitForSelector('[data-mark-reviewed]', { timeout: 15000 });
+  check('The professor reads the lesson in Telugu', TELUGU.test(await prof.textContent('[data-review-panel]')));
+  await prof.click('[data-mark-reviewed]');
+  await prof.waitForSelector('[data-review-panel] [role=status]', { timeout: 10000 }).catch(() => {});
+  // /dev keeps one developer session at a time: open the learner again.
+  await openStage(me, 'topics');
+  await me.goto(`${BASE}/learn/lesson/py-m1-l1`);
+  await me.waitForSelector('[data-lesson-page]', { timeout: 15000 });
+  check('The learner sees "Reviewed by … faculty"', /Reviewed by .* faculty/.test(await me.textContent('[data-lesson-page]')));
+} catch (e) {
+  check('Run finished without an error', false, e.message.slice(0, 200));
+} finally {
+  await browser.close();
+}
+const failed = results.filter(r => !r).length;
+console.log(`\n${results.length - failed}/${results.length} checks passed in ${Math.round((Date.now() - started) / 1000)} s`);
+process.exit(failed ? 1 : 0);

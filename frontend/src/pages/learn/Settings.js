@@ -14,6 +14,7 @@ import { useSpeechOutput } from '../../utils/voice';
 import { NAME_OPTIONS } from '../../utils/pronounce';
 import { useProfileDraft, Section, LowBandwidthToggle } from '../../components/learn/ProfileSections';
 import { errMsg } from '../../utils/errors';
+import LearningLangPicker from '../../components/learn/LearningLangPicker';
 
 const UI_LANGS = [{ id: 'telugu', label: 'తెలుగు' }, { id: 'hindi', label: 'हिंदी' }, { id: 'english', label: 'English' }];
 const when = (t) => (t ? new Date(t).toLocaleString(uiLocale(), { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) : '—');
@@ -38,8 +39,9 @@ function VoiceAndLanguage({ form, language }) {
           <div className="ln-seg" role="group" aria-labelledby="rate-pick">
             {[0.8, 1, 1.2].map(r => <button key={r} type="button" aria-pressed={(prefs.rate || 1) === r} onClick={() => setPref('rate', r)}>{r.toFixed(1)}×</button>)}
           </div></div>
-        <div className="ln-field"><span className="ln-label">{t('learn.settings.teachingLanguage')}</span>
-          <span className="ln-tile ln-indic" style={{ fontSize: 'var(--fs-body)', padding: '12px 14px' }}>{language === 'hindi' ? 'हिंदी' : 'తెలుగు'} <span className="ln-muted">{t('learn.settings.setByInstitution')}</span></span></div>
+        <div className="ln-field" data-settings-learning-language><span className="ln-label">{t('lang.learningLanguage')}</span>
+          <LearningLangPicker />
+          <span className="ln-xs ln-muted">{t('lang.learningDefault', { lang: language === 'hindi' ? 'हिंदी' : 'తెలుగు' })}</span></div>
         <div className="ln-field"><span className="ln-label" id="ui-lang">{t('learn.settings.interfaceLanguage')}</span>
           <div className="ln-seg ln-indic" role="group" aria-labelledby="ui-lang">
             {UI_LANGS.map(l => <button key={l.id} type="button" aria-pressed={draft.ui_language === l.id} onClick={() => { set('ui_language', l.id); setLang(l.id); }}>{l.label}</button>)}
