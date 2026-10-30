@@ -1,0 +1,1307 @@
+{
+ "id": "py-m1",
+ "n": 1,
+ "skill": "python-fundamentals",
+ "title": {
+  "en": "Python Fundamentals",
+  "te": "Python ప్రాథమికాలు",
+  "hi": "Python की बुनियाद"
+ },
+ "summary": {
+  "en": "Your first programs: print, variables and types, operators, and talking to the user with input.",
+  "te": "మీ మొదటి programs: print, variables, types, operators, input తో user తో మాట్లాడడం.",
+  "hi": "आपके पहले programs: print, variables और types, operators, और input से user से बात करना।"
+ },
+ "lessons": [
+  {
+   "id": "py-m1-l1",
+   "n": 1,
+   "minutes": 15,
+   "title": {
+    "en": "Introduction to Python",
+    "te": "Python పరిచయం",
+    "hi": "Python का परिचय"
+   },
+   "oneLine": {
+    "en": "Python is a programming language that lets you give a computer clear, step-by-step instructions in simple English-like words.",
+    "te": "Python ఒక programming language; సులభమైన English లాంటి పదాలతో computer కి స్పష్టమైన, ఒక్కో step సూచనలు ఇవ్వడానికి సహాయపడుతుంది.",
+    "hi": "Python एक programming language है जिससे आप आसान English जैसे शब्दों में computer को साफ़, एक-एक step के निर्देश दे सकते हैं।"
+   },
+   "useCase": {
+    "en": "Banks, railway booking and data teams use Python to automate reports that would take people hours.",
+    "te": "Banks, railway booking, data teams గంటల సమయం పట్టే reports ని Python తో స్వయంచాలకంగా చేస్తాయి.",
+    "hi": "Banks, railway booking और data teams घंटों लगने वाली reports Python से अपने-आप बनाती हैं।"
+   },
+   "explain": {
+    "en": [
+     "A computer does exactly what it is told, one line at a time.",
+     "A program is a list of those instructions, written in a language the computer understands.",
+     "Python is popular because its lines read almost like English.",
+     "The first instruction most people learn is print. It shows text on the screen.",
+     "Text goes inside quotes, so Python knows it is words and not a command.",
+     "Python runs your lines from top to bottom, in order."
+    ],
+    "te": [
+     "Computer తనకు చెప్పింది సరిగ్గా అదే చేస్తుంది, ఒక్కో line.",
+     "Program అంటే ఆ సూచనల జాబితా, computer కి అర్థమయ్యే భాషలో రాసింది.",
+     "Python lines దాదాపు English లాగే చదవబడతాయి, అందుకే ఇది ప్రసిద్ధి.",
+     "చాలా మంది మొదట నేర్చుకునే instruction print. ఇది screen పై text చూపిస్తుంది.",
+     "Text quotes లోపల ఉంటుంది, అప్పుడు అది పదాలు, command కాదని Python కి తెలుస్తుంది.",
+     "Python మీ lines ని పై నుంచి కిందికి, వరుసగా నడుపుతుంది."
+    ],
+    "hi": [
+     "Computer वही करता है जो उसे कहा जाए, एक-एक line।",
+     "Program उन निर्देशों की सूची है, उस भाषा में लिखी जो computer समझता है।",
+     "Python की lines लगभग English जैसी पढ़ी जाती हैं, इसलिए यह लोकप्रिय है।",
+     "ज़्यादातर लोग सबसे पहले print सीखते हैं। यह screen पर text दिखाता है।",
+     "Text quotes के अंदर लिखा जाता है, ताकि Python समझे कि ये शब्द हैं, command नहीं।",
+     "Python आपकी lines ऊपर से नीचे, क्रम से चलाता है।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "A program is a to-do list for the computer.",
+     "print(\"Hi\") shows Hi on the screen."
+    ],
+    "te": [
+     "Program అంటే computer కి పనుల జాబితా.",
+     "print(\"Hi\") screen పై Hi చూపిస్తుంది."
+    ],
+    "hi": [
+     "Program computer के लिए कामों की सूची है।",
+     "print(\"Hi\") screen पर Hi दिखाता है।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "A bus display board program prints \"Next stop: Ameerpet\" and then \"Mind the gap\"."
+    ],
+    "te": [
+     "Bus display board program \"Next stop: Ameerpet\", తర్వాత \"Mind the gap\" అని print చేస్తుంది."
+    ],
+    "hi": [
+     "Bus display board program \"Next stop: Kashmere Gate\" और फिर \"Mind the gap\" print करता है।"
+    ]
+   },
+   "picture": "flowchart TD\n  A[\"line 1: print(\\\"Namaste\\\")\"] --> B[\"line 2: print(\\\"I am learning Python\\\")\"]\n  B --> C[\"screen shows both lines\"]",
+   "code": {
+    "source": "print(\"Namaste\")\nprint(\"I am learning Python\")\nprint(2 + 3)",
+    "output": "Namaste\nI am learning Python\n5",
+    "notes": [
+     {
+      "line": 1,
+      "note": {
+       "en": "print shows the text inside the quotes.",
+       "te": "quotes లోపలి text ని print చూపిస్తుంది.",
+       "hi": "print quotes के अंदर का text दिखाता है।"
+      }
+     },
+     {
+      "line": 2,
+      "note": {
+       "en": "The next line runs after the first one.",
+       "te": "మొదటి line తర్వాత ఈ line నడుస్తుంది.",
+       "hi": "पहली line के बाद यह line चलती है।"
+      }
+     },
+     {
+      "line": 3,
+      "note": {
+       "en": "Without quotes, Python calculates: 2 + 3 shows 5.",
+       "te": "Quotes లేకపోతే Python లెక్కిస్తుంది: 2 + 3 అంటే 5 చూపిస్తుంది.",
+       "hi": "Quotes के बिना Python हिसाब करता है: 2 + 3 से 5 दिखता है।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "Print(\"Hi\")",
+     "fix": {
+      "en": "Python is case-sensitive: write print in small letters.",
+      "te": "Python లో పెద్ద, చిన్న అక్షరాలు తేడా: print చిన్న అక్షరాల్లో రాయండి.",
+      "hi": "Python में छोटे-बड़े अक्षर अलग हैं: print छोटे अक्षरों में लिखिए।"
+     }
+    },
+    {
+     "wrong": "print(Hello)",
+     "fix": {
+      "en": "Text needs quotes: print(\"Hello\").",
+      "te": "Text కి quotes కావాలి: print(\"Hello\").",
+      "hi": "Text को quotes चाहिए: print(\"Hello\")।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "Which line shows Hello on the screen?",
+      "te": "Screen పై Hello చూపించే line ఏది?",
+      "hi": "कौन-सी line screen पर Hello दिखाएगी?"
+     },
+     "options": [
+      "show(\"Hello\")",
+      "print(\"Hello\")",
+      "Print(Hello)"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "print with the text in quotes.",
+      "te": "quotes లో text తో print.",
+      "hi": "quotes में text के साथ print।"
+     }
+    },
+    {
+     "q": {
+      "en": "What does print(4 + 4) show?",
+      "te": "print(4 + 4) ఏం చూపిస్తుంది?",
+      "hi": "print(4 + 4) क्या दिखाएगा?"
+     },
+     "options": [
+      "4 + 4",
+      "8",
+      "44"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Without quotes, Python calculates.",
+      "te": "Quotes లేకపోతే Python లెక్కిస్తుంది.",
+      "hi": "Quotes के बिना Python हिसाब करता है।"
+     }
+    },
+    {
+     "q": {
+      "en": "In which order do Python lines run?",
+      "te": "Python lines ఏ క్రమంలో నడుస్తాయి?",
+      "hi": "Python lines किस क्रम में चलती हैं?"
+     },
+     "options": [
+      {
+       "en": "Top to bottom",
+       "te": "పై నుంచి కిందికి",
+       "hi": "ऊपर से नीचे"
+      },
+      {
+       "en": "Bottom to top",
+       "te": "కింది నుంచి పైకి",
+       "hi": "नीचे से ऊपर"
+      },
+      {
+       "en": "Random",
+       "te": "ఏ క్రమమైనా",
+       "hi": "कोई भी क्रम"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "One line after another, from the top.",
+      "te": "పై నుంచి ఒకదాని తర్వాత ఒకటి.",
+      "hi": "ऊपर से, एक के बाद एक।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write a program that prints \"Welcome to Qubirex\" on the first line and \"Let us learn Python\" on the second line.",
+     "te": "మొదటి line లో \"Welcome to Qubirex\", రెండో line లో \"Let us learn Python\" print చేసే program రాయండి.",
+     "hi": "ऐसा program लिखिए जो पहली line में \"Welcome to Qubirex\" और दूसरी line में \"Let us learn Python\" print करे।"
+    },
+    "starter": "# write two print lines\n",
+    "tests": [
+     {
+      "name": "prints both lines in order",
+      "output": "Welcome to Qubirex\nLet us learn Python"
+     }
+    ],
+    "hints": [
+     {
+      "en": "You need two print lines.",
+      "te": "మీకు రెండు print lines కావాలి.",
+      "hi": "आपको दो print lines चाहिए।"
+     },
+     {
+      "en": "Put each sentence inside quotes.",
+      "te": "ప్రతి వాక్యాన్ని quotes లో పెట్టండి.",
+      "hi": "हर वाक्य quotes में रखिए।"
+     },
+     {
+      "en": "print(\"Welcome to Qubirex\") then print(\"Let us learn Python\")",
+      "te": "print(\"Welcome to Qubirex\") తర్వాత print(\"Let us learn Python\")",
+      "hi": "print(\"Welcome to Qubirex\") फिर print(\"Let us learn Python\")"
+     }
+    ],
+    "solution": "print(\"Welcome to Qubirex\")\nprint(\"Let us learn Python\")"
+   },
+   "cheat": {
+    "en": [
+     "print(\"text\") shows text.",
+     "Text needs quotes; numbers and sums do not.",
+     "Lines run top to bottom."
+    ],
+    "te": [
+     "print(\"text\") text చూపిస్తుంది.",
+     "Text కి quotes కావాలి; numbers, లెక్కలకు అక్కర్లేదు.",
+     "Lines పై నుంచి కిందికి నడుస్తాయి."
+    ],
+    "hi": [
+     "print(\"text\") text दिखाता है।",
+     "Text को quotes चाहिए; numbers और हिसाब को नहीं।",
+     "Lines ऊपर से नीचे चलती हैं।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A tea shop wants a screen to show \"Open\" and then the price list. Explain what a Python program is and how print would do this.",
+      "te": "ఒక టీ కొట్టు screen పై \"Open\", తర్వాత ధరల జాబితా చూపించాలి. Python program అంటే ఏమిటో, print దీన్ని ఎలా చేస్తుందో వివరించండి.",
+      "hi": "चाय की दुकान की screen पर \"Open\" और फिर दामों की सूची दिखानी है। Python program क्या है और print यह कैसे करेगा, समझाइए।"
+     },
+     {
+      "en": "Explain why print(\"5 + 5\") and print(5 + 5) show different things on the screen.",
+      "te": "print(\"5 + 5\"), print(5 + 5) screen పై వేర్వేరుగా ఎందుకు చూపిస్తాయో వివరించండి.",
+      "hi": "print(\"5 + 5\") और print(5 + 5) screen पर अलग-अलग क्यों दिखाते हैं, समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "print"
+     ],
+     [
+      "quote",
+      "text",
+      "కోట్",
+      "quotes",
+      "टेक्स्ट",
+      "text"
+     ],
+     [
+      "line",
+      "order",
+      "step",
+      "calculate",
+      "క్రమ",
+      "లెక్క",
+      "क्रम",
+      "हिसाब"
+     ]
+    ],
+    "challenge": {
+     "en": "Say in your own words what a program is.",
+     "te": "Program అంటే ఏమిటో మీ మాటల్లో చెప్పండి.",
+     "hi": "Program क्या है, अपने शब्दों में बताइए।"
+    }
+   }
+  },
+  {
+   "id": "py-m1-l2",
+   "n": 2,
+   "minutes": 20,
+   "title": {
+    "en": "Variables and data types",
+    "te": "Variables మరియు data types",
+    "hi": "Variables और data types"
+   },
+   "oneLine": {
+    "en": "A variable is a named box that stores a value; the data type says what kind of value it is: number, decimal, text or True/False.",
+    "te": "Variable అంటే value ని దాచే పేరున్న డబ్బా; data type ఆ value ఏ రకమో చెబుతుంది: number, decimal, text లేదా True/False.",
+    "hi": "Variable एक नाम वाला डिब्बा है जो value रखता है; data type बताता है कि value किस तरह की है: number, decimal, text या True/False।"
+   },
+   "useCase": {
+    "en": "A school app keeps a student's name as text, roll number as a number and fees paid as True or False.",
+    "te": "School app విద్యార్థి పేరును text గా, roll number ని number గా, fees కట్టారా లేదా అని True/False గా ఉంచుతుంది.",
+    "hi": "School app छात्र का नाम text, roll number number, और fees दी या नहीं, True/False के रूप में रखता है।"
+   },
+   "explain": {
+    "en": [
+     "Think of labelled steel boxes in a kitchen: sugar, salt, rice.",
+     "A variable is like that: a label and what is inside.",
+     "We write the name, an equals sign, then the value: marks = 85.",
+     "The equals sign here means \"store\", not \"is equal to\".",
+     "Whole numbers are int, decimals are float, text in quotes is str, and True or False is bool.",
+     "You can change what is in a box later; the new value replaces the old one."
+    ],
+    "te": [
+     "వంటగదిలో పేర్లు రాసిన steel డబ్బాలు ఊహించండి: చక్కెర, ఉప్పు, బియ్యం.",
+     "Variable కూడా అంతే: ఒక పేరు, లోపల ఉన్నది.",
+     "పేరు, equals గుర్తు, తర్వాత value రాస్తాం: marks = 85.",
+     "ఇక్కడ equals అంటే \"దాచు\", \"సమానం\" కాదు.",
+     "పూర్ణ సంఖ్యలు int, దశాంశాలు float, quotes లోని text str, True లేదా False bool.",
+     "డబ్బాలో ఉన్నదాన్ని తర్వాత మార్చవచ్చు; కొత్త value పాతదాని స్థానంలో వస్తుంది."
+    ],
+    "hi": [
+     "रसोई में नाम लिखे steel के डिब्बे सोचिए: चीनी, नमक, चावल।",
+     "Variable भी ऐसा ही है: एक नाम और उसके अंदर की चीज़।",
+     "हम नाम, बराबर का निशान, फिर value लिखते हैं: marks = 85।",
+     "यहाँ बराबर का निशान \"रखो\" है, \"बराबर है\" नहीं।",
+     "पूरे अंक int, दशमलव float, quotes वाला text str, और True या False bool है।",
+     "डिब्बे में रखी चीज़ बाद में बदल सकते हैं; नई value पुरानी की जगह ले लेती है।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "A variable is a box with a name.",
+     "name = \"Ravi\" puts Ravi in the box called name."
+    ],
+    "te": [
+     "Variable అంటే పేరున్న డబ్బా.",
+     "name = \"Ravi\" అంటే name అనే డబ్బాలో Ravi పెట్టడం."
+    ],
+    "hi": [
+     "Variable नाम वाला डिब्बा है।",
+     "name = \"Ravi\" का मतलब name नाम के डिब्बे में Ravi रखना।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "A mobile recharge: balance = 199.0 is a float, plan = \"Unlimited\" is a str, active = True is a bool."
+    ],
+    "te": [
+     "Mobile recharge: balance = 199.0 float, plan = \"Unlimited\" str, active = True bool."
+    ],
+    "hi": [
+     "Mobile recharge: balance = 199.0 float है, plan = \"Unlimited\" str है, active = True bool है।"
+    ]
+   },
+   "picture": "flowchart LR\n  A[\"name\"] --> A1[\"\\\"Sita\\\" (str)\"]\n  B[\"age\"] --> B1[\"19 (int)\"]\n  C[\"height\"] --> C1[\"5.4 (float)\"]\n  D[\"passed\"] --> D1[\"True (bool)\"]",
+   "code": {
+    "source": "name = \"Sita\"\nage = 19\nfees = 2500.50\npassed = True\nprint(name, age, fees, passed)\nprint(type(age), type(fees))",
+    "output": "Sita 19 2500.5 True\n<class 'int'> <class 'float'>",
+    "notes": [
+     {
+      "line": 1,
+      "note": {
+       "en": "Text in quotes: name is a str.",
+       "te": "Quotes లో text: name ఒక str.",
+       "hi": "Quotes में text: name एक str है।"
+      }
+     },
+     {
+      "line": 2,
+      "note": {
+       "en": "A whole number: age is an int.",
+       "te": "పూర్ణ సంఖ్య: age ఒక int.",
+       "hi": "पूरा अंक: age एक int है।"
+      }
+     },
+     {
+      "line": 3,
+      "note": {
+       "en": "A decimal: fees is a float.",
+       "te": "దశాంశం: fees ఒక float.",
+       "hi": "दशमलव: fees एक float है।"
+      }
+     },
+     {
+      "line": 4,
+      "note": {
+       "en": "True or False, with a capital letter: passed is a bool.",
+       "te": "పెద్ద అక్షరంతో True లేదా False: passed ఒక bool.",
+       "hi": "बड़े अक्षर से True या False: passed एक bool है।"
+      }
+     },
+     {
+      "line": 6,
+      "note": {
+       "en": "type() tells you the data type of a value.",
+       "te": "type() ఒక value data type ఏమిటో చెబుతుంది.",
+       "hi": "type() बताता है कि value का data type क्या है।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "marks = \"85\"\nprint(marks + 5)",
+     "fix": {
+      "en": "In quotes it is text, not a number. Write marks = 85 to do sums.",
+      "te": "Quotes లో ఉంటే అది text, number కాదు. లెక్కలకు marks = 85 రాయండి.",
+      "hi": "Quotes में यह text है, number नहीं। हिसाब के लिए marks = 85 लिखिए।"
+     }
+    },
+    {
+     "wrong": "passed = true",
+     "fix": {
+      "en": "True and False start with a capital letter.",
+      "te": "True, False పెద్ద అక్షరంతో మొదలవుతాయి.",
+      "hi": "True और False बड़े अक्षर से शुरू होते हैं।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "What type is 3.5?",
+      "te": "3.5 ఏ type?",
+      "hi": "3.5 किस type का है?"
+     },
+     "options": [
+      "int",
+      "float",
+      "str"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "A decimal is a float.",
+      "te": "దశాంశం float.",
+      "hi": "दशमलव float है।"
+     }
+    },
+    {
+     "q": {
+      "en": "What type is \"100\"?",
+      "te": "\"100\" ఏ type?",
+      "hi": "\"100\" किस type का है?"
+     },
+     "options": [
+      "int",
+      "str",
+      "bool"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Anything in quotes is a str.",
+      "te": "Quotes లో ఏదైనా str.",
+      "hi": "Quotes में कुछ भी str है।"
+     }
+    },
+    {
+     "q": {
+      "en": "x = 5\nx = 9\nWhat is x now?",
+      "te": "x = 5\nx = 9\nఇప్పుడు x ఎంత?",
+      "hi": "x = 5\nx = 9\nअब x क्या है?"
+     },
+     "options": [
+      "5",
+      "9",
+      "14"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "The new value replaces the old one.",
+      "te": "కొత్త value పాతదాని స్థానంలో వస్తుంది.",
+      "hi": "नई value पुरानी की जगह लेती है।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Create these variables: city = \"Vijayawada\", rank = 3, rating = 4.5, open_now = True. Then print city and rank on one line.",
+     "te": "ఈ variables సృష్టించండి: city = \"Vijayawada\", rank = 3, rating = 4.5, open_now = True. తర్వాత city, rank ఒకే line లో print చేయండి.",
+     "hi": "ये variables बनाइए: city = \"Bhopal\", rank = 3, rating = 4.5, open_now = True। फिर city और rank एक line में print कीजिए।"
+    },
+    "starter": "# create the four variables, then print city and rank\n",
+    "tests": [
+     {
+      "name": "city is text",
+      "call": "type(city).__name__",
+      "expected": "'str'"
+     },
+     {
+      "name": "rank is 3",
+      "call": "rank",
+      "expected": "3"
+     },
+     {
+      "name": "rating is 4.5",
+      "call": "rating",
+      "expected": "4.5"
+     },
+     {
+      "name": "open_now is True",
+      "call": "open_now",
+      "expected": "True",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "Each line: name = value.",
+      "te": "ప్రతి line: name = value.",
+      "hi": "हर line: name = value।"
+     },
+     {
+      "en": "Text needs quotes; True needs a capital T.",
+      "te": "Text కి quotes; True కి పెద్ద T.",
+      "hi": "Text को quotes; True में बड़ा T।"
+     },
+     {
+      "en": "print(city, rank) prints both.",
+      "te": "print(city, rank) రెండూ print చేస్తుంది.",
+      "hi": "print(city, rank) दोनों print करता है।"
+     }
+    ],
+    "solution": "city = \"Vijayawada\"\nrank = 3\nrating = 4.5\nopen_now = True\nprint(city, rank)"
+   },
+   "cheat": {
+    "en": [
+     "name = value stores a value.",
+     "int 5 · float 5.5 · str \"5\" · bool True",
+     "type(x) shows the type."
+    ],
+    "te": [
+     "name = value ఒక value దాచుతుంది.",
+     "int 5 · float 5.5 · str \"5\" · bool True",
+     "type(x) type చూపిస్తుంది."
+    ],
+    "hi": [
+     "name = value एक value रखता है।",
+     "int 5 · float 5.5 · str \"5\" · bool True",
+     "type(x) type दिखाता है।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A ration card app stores the family name, number of members, monthly quota in kilograms like 12.5, and whether the card is active. Which data type fits each, and why?",
+      "te": "Ration card app కుటుంబం పేరు, సభ్యుల సంఖ్య, 12.5 లాంటి నెలవారీ kilo quota, card active ఆ కాదా దాచుతుంది. ప్రతిదానికి ఏ data type సరిపోతుంది, ఎందుకు?",
+      "hi": "Ration card app परिवार का नाम, सदस्यों की संख्या, 12.5 जैसा मासिक kilo quota और card चालू है या नहीं, रखता है। हर एक के लिए कौन-सा data type ठीक है और क्यों?"
+     },
+     {
+      "en": "Explain what a variable is and what happens when you write score = 10 and later score = 15.",
+      "te": "Variable అంటే ఏమిటో, score = 10 తర్వాత score = 15 రాస్తే ఏమవుతుందో వివరించండి.",
+      "hi": "Variable क्या है, और score = 10 के बाद score = 15 लिखने पर क्या होता है, समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "int",
+      "integer",
+      "whole",
+      "పూర్ణ",
+      "पूरा"
+     ],
+     [
+      "float",
+      "decimal",
+      "దశాంశ",
+      "दशमलव"
+     ],
+     [
+      "str",
+      "text",
+      "string",
+      "టెక్స్ట్",
+      "टेक्स्ट"
+     ],
+     [
+      "bool",
+      "true",
+      "false",
+      "variable",
+      "box",
+      "డబ్బా",
+      "डिब्बा"
+     ]
+    ],
+    "challenge": {
+     "en": "Say the four basic data types with one example each.",
+     "te": "నాలుగు ప్రాథమిక data types ని ఒక్కో ఉదాహరణతో చెప్పండి.",
+     "hi": "चार मूल data types एक-एक उदाहरण के साथ बताइए।"
+    }
+   }
+  },
+  {
+   "id": "py-m1-l3",
+   "n": 3,
+   "minutes": 20,
+   "title": {
+    "en": "Operators",
+    "te": "Operators",
+    "hi": "Operators"
+   },
+   "oneLine": {
+    "en": "Operators are the symbols that do work on values: + - * / for sums, == and < to compare, and and/or/not to combine conditions.",
+    "te": "Operators అంటే values పై పని చేసే గుర్తులు: లెక్కలకు + - * /, పోల్చడానికి == మరియు <, షరతులు కలపడానికి and/or/not.",
+    "hi": "Operators values पर काम करने वाले निशान हैं: हिसाब के लिए + - * /, तुलना के लिए == और <, शर्तें जोड़ने के लिए and/or/not।"
+   },
+   "useCase": {
+    "en": "An electricity bill app multiplies units by rate, and checks whether units are above 100 to add a higher rate.",
+    "te": "కరెంటు bill app units ని rate తో గుణిస్తుంది, units 100 కంటే ఎక్కువా అని చూసి ఎక్కువ rate జోడిస్తుంది.",
+    "hi": "बिजली bill app units को rate से गुणा करता है, और units 100 से ज़्यादा हैं या नहीं, जाँचकर ज़्यादा rate जोड़ता है।"
+   },
+   "explain": {
+    "en": [
+     "Arithmetic operators work like your calculator: plus, minus, star for multiply, slash for divide.",
+     "Two more are useful: // gives the whole part of a division, and % gives the remainder.",
+     "Comparison operators ask a question and answer True or False.",
+     "Double equals == asks \"are these equal?\". A single = only stores a value.",
+     "and needs both sides True; or needs at least one; not flips the answer."
+    ],
+    "te": [
+     "Arithmetic operators calculator లాగే పనిచేస్తాయి: plus, minus, గుణకారానికి star, భాగహారానికి slash.",
+     "ఇంకా రెండు ఉపయోగపడతాయి: // భాగహారంలో పూర్ణ భాగం ఇస్తుంది, % శేషం ఇస్తుంది.",
+     "Comparison operators ఒక ప్రశ్న అడిగి True లేదా False జవాబిస్తాయి.",
+     "Double equals == అంటే \"ఇవి సమానమా?\" అని అడగడం. ఒక్క = value ని దాచుతుంది మాత్రమే.",
+     "and కి రెండు వైపులా True కావాలి; or కి కనీసం ఒకటి; not జవాబును తిప్పుతుంది."
+    ],
+    "hi": [
+     "Arithmetic operators calculator की तरह काम करते हैं: plus, minus, गुणा के लिए star, भाग के लिए slash।",
+     "दो और काम के हैं: // भाग का पूरा हिस्सा देता है, % शेष देता है।",
+     "Comparison operators एक सवाल पूछते हैं और True या False जवाब देते हैं।",
+     "Double equals == पूछता है \"क्या ये बराबर हैं?\"। एक = सिर्फ़ value रखता है।",
+     "and में दोनों तरफ़ True चाहिए; or में कम से कम एक; not जवाब उलट देता है।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "+ - * / do sums.",
+     "== and > ask yes-or-no questions."
+    ],
+    "te": [
+     "+ - * / లెక్కలు చేస్తాయి.",
+     "== మరియు > అవును-కాదు ప్రశ్నలు అడుగుతాయి."
+    ],
+    "hi": [
+     "+ - * / हिसाब करते हैं।",
+     "== और > हाँ-ना वाले सवाल पूछते हैं।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "17 // 5 is 3 auto-rickshaws full, and 17 % 5 is 2 people left over."
+    ],
+    "te": [
+     "17 // 5 అంటే 3 auto లు నిండాయి, 17 % 5 అంటే 2 మంది మిగిలారు."
+    ],
+    "hi": [
+     "17 // 5 यानी 3 auto पूरे भरे, और 17 % 5 यानी 2 लोग बचे।"
+    ]
+   },
+   "picture": "flowchart LR\n  A[\"units = 120\"] --> B{\"units > 100 ?\"}\n  B -->|True| C[\"higher rate\"]\n  B -->|False| D[\"normal rate\"]",
+   "code": {
+    "source": "units = 120\nrate = 6\nbill = units * rate\nprint(bill)\nprint(17 // 5, 17 % 5)\nprint(units > 100 and bill < 1000)",
+    "output": "720\n3 2\nTrue",
+    "notes": [
+     {
+      "line": 3,
+      "note": {
+       "en": "The star multiplies: 120 times 6.",
+       "te": "Star గుణిస్తుంది: 120 సార్లు 6.",
+       "hi": "Star गुणा करता है: 120 गुणा 6।"
+      }
+     },
+     {
+      "line": 5,
+      "note": {
+       "en": "// gives the whole part, % the remainder.",
+       "te": "// పూర్ణ భాగం, % శేషం ఇస్తాయి.",
+       "hi": "// पूरा हिस्सा, % शेष देता है।"
+      }
+     },
+     {
+      "line": 6,
+      "note": {
+       "en": "Two comparisons joined by and: both are True, so the answer is True.",
+       "te": "and తో కలిపిన రెండు పోలికలు: రెండూ True, అందుకే జవాబు True.",
+       "hi": "and से जुड़ी दो तुलनाएँ: दोनों True हैं, इसलिए जवाब True है।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "if marks = 35:",
+     "fix": {
+      "en": "Use == to compare; = only stores.",
+      "te": "పోల్చడానికి == వాడండి; = దాచుతుంది మాత్రమే.",
+      "hi": "तुलना के लिए == लिखिए; = सिर्फ़ रखता है।"
+     }
+    },
+    {
+     "wrong": "print(7 / 2)   # expected 3",
+     "fix": {
+      "en": "A single slash gives 3.5. Use // for the whole part.",
+      "te": "ఒక్క slash 3.5 ఇస్తుంది. పూర్ణ భాగానికి // వాడండి.",
+      "hi": "एक slash 3.5 देता है। पूरे हिस्से के लिए // लिखिए।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "What is 10 % 3?",
+      "te": "10 % 3 ఎంత?",
+      "hi": "10 % 3 क्या है?"
+     },
+     "options": [
+      "3",
+      "1",
+      "0"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "10 divided by 3 leaves 1.",
+      "te": "10 ని 3 తో భాగిస్తే 1 మిగులుతుంది.",
+      "hi": "10 को 3 से भाग देने पर 1 बचता है।"
+     }
+    },
+    {
+     "q": {
+      "en": "What does 5 == 5 give?",
+      "te": "5 == 5 ఏం ఇస్తుంది?",
+      "hi": "5 == 5 क्या देता है?"
+     },
+     "options": [
+      "5",
+      "True",
+      "False"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "They are equal, so True.",
+      "te": "సమానం, కాబట్టి True.",
+      "hi": "बराबर हैं, इसलिए True।"
+     }
+    },
+    {
+     "q": {
+      "en": "True and False gives…",
+      "te": "True and False ఇచ్చేది…",
+      "hi": "True and False देता है…"
+     },
+     "options": [
+      "True",
+      "False",
+      "Error"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "and needs both to be True.",
+      "te": "and కి రెండూ True కావాలి.",
+      "hi": "and में दोनों True होने चाहिए।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write a function share(total, people) that returns how much each person pays when the bill is shared equally, as a whole number (use //), and a function left(total, people) that returns the remainder.",
+     "te": "share(total, people) function రాయండి: bill సమానంగా పంచితే ఒక్కొక్కరు ఎంత కట్టాలో పూర్ణ సంఖ్యగా (// వాడి) return చేయాలి. left(total, people) function శేషాన్ని return చేయాలి.",
+     "hi": "share(total, people) function लिखिए जो bill बराबर बाँटने पर हर व्यक्ति का हिस्सा पूरे अंक में (// से) return करे, और left(total, people) जो शेष return करे।"
+    },
+    "starter": "def share(total, people):\n    pass\n\ndef left(total, people):\n    pass\n",
+    "tests": [
+     {
+      "name": "share(100, 3) gives 33",
+      "call": "share(100, 3)",
+      "expected": "33"
+     },
+     {
+      "name": "left(100, 3) gives 1",
+      "call": "left(100, 3)",
+      "expected": "1"
+     },
+     {
+      "name": "share(90, 9) gives 10",
+      "call": "share(90, 9)",
+      "expected": "10",
+      "hidden": true
+     },
+     {
+      "name": "left(90, 9) gives 0",
+      "call": "left(90, 9)",
+      "expected": "0",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "Each function needs one return line.",
+      "te": "ప్రతి function కి ఒక return line కావాలి.",
+      "hi": "हर function में एक return line चाहिए।"
+     },
+     {
+      "en": "// gives the whole part, % gives the remainder.",
+      "te": "// పూర్ణ భాగం, % శేషం.",
+      "hi": "// पूरा हिस्सा, % शेष।"
+     },
+     {
+      "en": "return total // people and return total % people",
+      "te": "return total // people మరియు return total % people",
+      "hi": "return total // people और return total % people"
+     }
+    ],
+    "solution": "def share(total, people):\n    return total // people\n\ndef left(total, people):\n    return total % people"
+   },
+   "cheat": {
+    "en": [
+     "+ - * / // %",
+     "== != < > <= >= give True or False.",
+     "and both · or either · not flips."
+    ],
+    "te": [
+     "+ - * / // %",
+     "== != < > <= >= True లేదా False ఇస్తాయి.",
+     "and రెండూ · or ఏదో ఒకటి · not తిప్పుతుంది."
+    ],
+    "hi": [
+     "+ - * / // %",
+     "== != < > <= >= True या False देते हैं।",
+     "and दोनों · or कोई एक · not उलटता है।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "In a cricket scorer, 47 runs are scored in 9 overs. Explain how you would find the full overs worth of 5 runs each with // and the leftover runs with %, and what == would be used for.",
+      "te": "Cricket scorer లో 9 overs లో 47 runs వచ్చాయి. ఒక్కోటి 5 runs చొప్పున పూర్తి భాగాలు // తో, మిగిలిన runs % తో ఎలా కనుక్కుంటారో, == దేనికి వాడతారో వివరించండి.",
+      "hi": "Cricket scorer में 9 overs में 47 runs बने। 5-5 runs के पूरे हिस्से // से और बचे runs % से कैसे निकालेंगे, और == किसलिए इस्तेमाल होगा, समझाइए।"
+     },
+     {
+      "en": "Explain the difference between = and == with an example from a login screen.",
+      "te": "Login screen ఉదాహరణతో = కి == కి తేడా వివరించండి.",
+      "hi": "Login screen के उदाहरण से = और == का फ़र्क समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "//",
+      "whole",
+      "floor",
+      "పూర్ణ",
+      "पूरा"
+     ],
+     [
+      "%",
+      "remainder",
+      "శేష",
+      "शेष"
+     ],
+     [
+      "==",
+      "compare",
+      "equal",
+      "పోల్చ",
+      "సమాన",
+      "तुलना",
+      "बराबर"
+     ]
+    ],
+    "challenge": {
+     "en": "Say what = does and what == does.",
+     "te": "= ఏం చేస్తుంది, == ఏం చేస్తుంది చెప్పండి.",
+     "hi": "= क्या करता है और == क्या करता है, बताइए।"
+    }
+   }
+  },
+  {
+   "id": "py-m1-l4",
+   "n": 4,
+   "minutes": 20,
+   "title": {
+    "en": "Input and output",
+    "te": "Input మరియు output",
+    "hi": "Input और output"
+   },
+   "oneLine": {
+    "en": "input() reads what the user types, always as text; print() shows results, and int() or float() turn text into numbers.",
+    "te": "input() user టైప్ చేసినదాన్ని ఎప్పుడూ text గా చదువుతుంది; print() ఫలితం చూపిస్తుంది; int() లేదా float() text ని numbers గా మారుస్తాయి.",
+    "hi": "input() user का टाइप किया पढ़ता है, हमेशा text के रूप में; print() नतीजा दिखाता है, और int() या float() text को numbers में बदलते हैं।"
+   },
+   "useCase": {
+    "en": "A billing counter asks the cashier for the item price and quantity, then prints the total.",
+    "te": "Billing counter cashier ని వస్తువు ధర, సంఖ్య అడిగి total print చేస్తుంది.",
+    "hi": "Billing counter cashier से चीज़ का दाम और गिनती पूछकर total print करता है।"
+   },
+   "explain": {
+    "en": [
+     "Programs become useful when they talk with people.",
+     "input() waits for the user to type and press Enter.",
+     "Whatever is typed comes back as text, even if it looks like a number.",
+     "To do maths, wrap it: int(input()) for whole numbers, float(input()) for decimals.",
+     "print() can show several things at once, separated by commas."
+    ],
+    "te": [
+     "Programs మనుషులతో మాట్లాడినప్పుడు ఉపయోగపడతాయి.",
+     "input() user టైప్ చేసి Enter నొక్కే వరకు ఎదురుచూస్తుంది.",
+     "టైప్ చేసినది number లా కనిపించినా, text గానే వస్తుంది.",
+     "లెక్కలకు దాన్ని చుట్టండి: పూర్ణ సంఖ్యలకు int(input()), దశాంశాలకు float(input()).",
+     "print() commas తో చాలా విషయాలు ఒకేసారి చూపిస్తుంది."
+    ],
+    "hi": [
+     "Programs तब काम के होते हैं जब वे लोगों से बात करते हैं।",
+     "input() user के टाइप करके Enter दबाने तक इंतज़ार करता है।",
+     "जो टाइप हुआ, वह text बनकर आता है, भले number जैसा दिखे।",
+     "हिसाब के लिए उसे लपेटिए: पूरे अंक के लिए int(input()), दशमलव के लिए float(input())।",
+     "print() commas से कई चीज़ें एक साथ दिखाता है।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "input() asks; print() tells.",
+     "Turn typed text into a number with int()."
+    ],
+    "te": [
+     "input() అడుగుతుంది; print() చెబుతుంది.",
+     "టైప్ చేసిన text ని int() తో number గా మార్చండి."
+    ],
+    "hi": [
+     "input() पूछता है; print() बताता है।",
+     "टाइप हुए text को int() से number बनाइए।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "age = int(input(\"Your age: \")) then print(\"Next year you will be\", age + 1)."
+    ],
+    "te": [
+     "age = int(input(\"Your age: \")) తర్వాత print(\"Next year you will be\", age + 1)."
+    ],
+    "hi": [
+     "age = int(input(\"Your age: \")) फिर print(\"Next year you will be\", age + 1)।"
+    ]
+   },
+   "picture": "flowchart LR\n  U[\"user types 40\"] --> I[\"input(): \\\"40\\\" text\"]\n  I --> C[\"int(): 40 number\"]\n  C --> P[\"print(total)\"]",
+   "code": {
+    "source": "price = int(input(\"Price: \"))\nqty = int(input(\"Quantity: \"))\ntotal = price * qty\nprint(\"Total:\", total)",
+    "output": "Price: 40\nQuantity: 3\nTotal: 120",
+    "notes": [
+     {
+      "line": 1,
+      "note": {
+       "en": "input shows the prompt and reads the typed text; int turns it into a number.",
+       "te": "input prompt చూపించి టైప్ చేసిన text చదువుతుంది; int దాన్ని number గా మారుస్తుంది.",
+       "hi": "input prompt दिखाकर टाइप हुआ text पढ़ता है; int उसे number बनाता है।"
+      }
+     },
+     {
+      "line": 2,
+      "note": {
+       "en": "The same for the quantity.",
+       "te": "Quantity కి కూడా అంతే.",
+       "hi": "Quantity के लिए भी यही।"
+      }
+     },
+     {
+      "line": 3,
+      "note": {
+       "en": "Now both are numbers, so we can multiply.",
+       "te": "ఇప్పుడు రెండూ numbers, కాబట్టి గుణించవచ్చు.",
+       "hi": "अब दोनों numbers हैं, इसलिए गुणा कर सकते हैं।"
+      }
+     },
+     {
+      "line": 4,
+      "note": {
+       "en": "print shows a label and the total together.",
+       "te": "print label, total కలిపి చూపిస్తుంది.",
+       "hi": "print label और total एक साथ दिखाता है।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "a = input()\nb = input()\nprint(a + b)   # 2 and 3 give 23",
+     "fix": {
+      "en": "Typed values are text, so + joins them. Use int(input()).",
+      "te": "టైప్ చేసినవి text, అందుకే + వాటిని జోడిస్తుంది. int(input()) వాడండి.",
+      "hi": "टाइप की गई values text हैं, इसलिए + उन्हें जोड़ देता है। int(input()) लिखिए।"
+     }
+    },
+    {
+     "wrong": "print(\"Total: \" + 120)",
+     "fix": {
+      "en": "You cannot add text and a number. Use a comma: print(\"Total:\", 120).",
+      "te": "Text కి number కలపలేం. Comma వాడండి: print(\"Total:\", 120).",
+      "hi": "Text और number नहीं जुड़ते। Comma लिखिए: print(\"Total:\", 120)।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "What type does input() always give?",
+      "te": "input() ఎప్పుడూ ఏ type ఇస్తుంది?",
+      "hi": "input() हमेशा कौन-सा type देता है?"
+     },
+     "options": [
+      "int",
+      "str",
+      "float"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Typed text is always a str.",
+      "te": "టైప్ చేసిన text ఎప్పుడూ str.",
+      "hi": "टाइप हुआ text हमेशा str है।"
+     }
+    },
+    {
+     "q": {
+      "en": "Which line reads a whole number?",
+      "te": "పూర్ణ సంఖ్యను చదివే line ఏది?",
+      "hi": "कौन-सी line पूरा अंक पढ़ती है?"
+     },
+     "options": [
+      "n = input()",
+      "n = int(input())",
+      "n = print()"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Wrap input() in int().",
+      "te": "input() ని int() లో చుట్టండి.",
+      "hi": "input() को int() में लपेटिए।"
+     }
+    },
+    {
+     "q": {
+      "en": "print(\"Hi\", \"Ravi\") shows…",
+      "te": "print(\"Hi\", \"Ravi\") చూపించేది…",
+      "hi": "print(\"Hi\", \"Ravi\") दिखाएगा…"
+     },
+     "options": [
+      "HiRavi",
+      "Hi Ravi",
+      "\"Hi\" \"Ravi\""
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Commas put a space between the items.",
+      "te": "Commas మధ్యలో space పెడతాయి.",
+      "hi": "Commas बीच में space डालते हैं।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write a program that reads a name and a number of tickets, then prints \"NAME booked N tickets\". For input Ravi and 2 it prints \"Ravi booked 2 tickets\".",
+     "te": "పేరు, tickets సంఖ్య చదివి \"NAME booked N tickets\" print చేసే program రాయండి. Ravi, 2 ఇస్తే \"Ravi booked 2 tickets\" print అవ్వాలి.",
+     "hi": "ऐसा program लिखिए जो नाम और tickets की गिनती पढ़कर \"NAME booked N tickets\" print करे। Ravi और 2 देने पर \"Ravi booked 2 tickets\" print हो।"
+    },
+    "starter": "name = input()\n# read the number of tickets, then print the message\n",
+    "tests": [
+     {
+      "name": "Ravi books 2",
+      "stdin": "Ravi\n2",
+      "output": "Ravi booked 2 tickets"
+     },
+     {
+      "name": "Sita books 5",
+      "stdin": "Sita\n5",
+      "output": "Sita booked 5 tickets",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "Read the tickets with int(input()).",
+      "te": "tickets ని int(input()) తో చదవండి.",
+      "hi": "tickets को int(input()) से पढ़िए।"
+     },
+     {
+      "en": "print with commas puts spaces between words.",
+      "te": "Commas తో print పదాల మధ్య spaces పెడుతుంది.",
+      "hi": "Commas वाला print शब्दों के बीच spaces डालता है।"
+     },
+     {
+      "en": "print(name, \"booked\", tickets, \"tickets\")",
+      "te": "print(name, \"booked\", tickets, \"tickets\")",
+      "hi": "print(name, \"booked\", tickets, \"tickets\")"
+     }
+    ],
+    "solution": "name = input()\ntickets = int(input())\nprint(name, \"booked\", tickets, \"tickets\")"
+   },
+   "cheat": {
+    "en": [
+     "x = input(\"prompt\") reads text.",
+     "int(...) or float(...) makes a number.",
+     "print(a, b) shows both with a space."
+    ],
+    "te": [
+     "x = input(\"prompt\") text చదువుతుంది.",
+     "int(...) లేదా float(...) number చేస్తుంది.",
+     "print(a, b) రెండూ space తో చూపిస్తుంది."
+    ],
+    "hi": [
+     "x = input(\"prompt\") text पढ़ता है।",
+     "int(...) या float(...) number बनाता है।",
+     "print(a, b) दोनों को space के साथ दिखाता है।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A canteen counter program asks for the plate count and adds 20 rupees per plate, but it prints 2020 instead of 40 for 2 plates. Explain why and how to fix it.",
+      "te": "Canteen counter program plates సంఖ్య అడిగి ప్రతి plate కి 20 రూపాయలు కలుపుతుంది, కానీ 2 plates కి 40 బదులు 2020 print చేస్తోంది. ఎందుకో, ఎలా సరిచేయాలో వివరించండి.",
+      "hi": "Canteen counter program plates की गिनती पूछकर हर plate के 20 रुपये जोड़ता है, पर 2 plates पर 40 की जगह 2020 print करता है। ऐसा क्यों, और कैसे ठीक करें, समझाइए।"
+     },
+     {
+      "en": "Explain what input() and print() do, using a bus ticket counter as the example.",
+      "te": "Bus ticket counter ఉదాహరణతో input(), print() ఏం చేస్తాయో వివరించండి.",
+      "hi": "Bus ticket counter के उदाहरण से input() और print() क्या करते हैं, समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "input"
+     ],
+     [
+      "text",
+      "str",
+      "string",
+      "టెక్స్ట్",
+      "टेक्स्ट"
+     ],
+     [
+      "int",
+      "number",
+      "convert",
+      "మార్చ",
+      "बदल",
+      "print"
+     ]
+    ],
+    "challenge": {
+     "en": "Say why input() needs int() before doing maths.",
+     "te": "లెక్కల ముందు input() కి int() ఎందుకు కావాలో చెప్పండి.",
+     "hi": "हिसाब से पहले input() को int() क्यों चाहिए, बताइए।"
+    }
+   }
+  }
+ ],
+ "test": {
+  "pass": 4,
+  "questions": [
+   {
+    "q": {
+     "en": "What does print(\"2\" + \"3\") show?",
+     "te": "print(\"2\" + \"3\") ఏం చూపిస్తుంది?",
+     "hi": "print(\"2\" + \"3\") क्या दिखाएगा?"
+    },
+    "options": [
+     "5",
+     "23",
+     "Error"
+    ],
+    "answer": 1,
+    "why": {
+     "en": "Text + text joins them.",
+     "te": "Text + text కలిపి జోడిస్తుంది.",
+     "hi": "Text + text उन्हें जोड़ देता है।"
+    }
+   },
+   {
+    "q": {
+     "en": "Which is a float?",
+     "te": "ఏది float?",
+     "hi": "कौन-सा float है?"
+    },
+    "options": [
+     "7",
+     "\"7.0\"",
+     "7.0"
+    ],
+    "answer": 2,
+    "why": {
+     "en": "A decimal number without quotes.",
+     "te": "Quotes లేని దశాంశ సంఖ్య.",
+     "hi": "बिना quotes वाला दशमलव।"
+    }
+   },
+   {
+    "q": {
+     "en": "What is 20 // 6?",
+     "te": "20 // 6 ఎంత?",
+     "hi": "20 // 6 क्या है?"
+    },
+    "options": [
+     "3",
+     "3.33",
+     "2"
+    ],
+    "answer": 0,
+    "why": {
+     "en": "The whole part of 20 ÷ 6.",
+     "te": "20 ÷ 6 పూర్ణ భాగం.",
+     "hi": "20 ÷ 6 का पूरा हिस्सा।"
+    }
+   },
+   {
+    "q": {
+     "en": "n = input() and the user types 5. What type is n?",
+     "te": "n = input(), user 5 టైప్ చేశారు. n ఏ type?",
+     "hi": "n = input() और user 5 टाइप करता है। n किस type का है?"
+    },
+    "options": [
+     "int",
+     "str",
+     "bool"
+    ],
+    "answer": 1,
+    "why": {
+     "en": "input() gives text.",
+     "te": "input() text ఇస్తుంది.",
+     "hi": "input() text देता है।"
+    }
+   },
+   {
+    "q": {
+     "en": "Which compares two values?",
+     "te": "రెండు values ని పోల్చేది ఏది?",
+     "hi": "दो values की तुलना कौन करता है?"
+    },
+    "options": [
+     "=",
+     "==",
+     "=>"
+    ],
+    "answer": 1,
+    "why": {
+     "en": "== compares; = stores.",
+     "te": "== పోలుస్తుంది; = దాచుతుంది.",
+     "hi": "== तुलना करता है; = रखता है।"
+    }
+   }
+  ]
+ },
+ "project": {
+  "title": {
+   "en": "Recharge calculator",
+   "te": "Recharge calculator",
+   "hi": "Recharge calculator"
+  },
+  "prompt": {
+   "en": "Read a plan price (whole number) and the number of months. Print the total, and on the next line print True if the total is more than 1000, otherwise False. For 299 and 4, it prints 1196 then True.",
+   "te": "Plan ధర (పూర్ణ సంఖ్య), నెలల సంఖ్య చదవండి. Total print చేసి, తర్వాతి line లో total 1000 కంటే ఎక్కువైతే True, లేకపోతే False print చేయండి. 299, 4 కి 1196 తర్వాత True.",
+   "hi": "Plan का दाम (पूरा अंक) और महीनों की गिनती पढ़िए। Total print कीजिए, और अगली line में total 1000 से ज़्यादा हो तो True, वरना False। 299 और 4 पर 1196 फिर True।"
+  },
+  "starter": "price = int(input())\n# read months, print the total, then whether it is more than 1000\n",
+  "tests": [
+   {
+    "name": "299 for 4 months",
+    "stdin": "299\n4",
+    "output": "1196\nTrue"
+   },
+   {
+    "name": "149 for 3 months",
+    "stdin": "149\n3",
+    "output": "447\nFalse"
+   },
+   {
+    "name": "500 for 2 months",
+    "stdin": "500\n2",
+    "output": "1000\nFalse",
+    "hidden": true
+   }
+  ],
+  "hints": [
+   {
+    "en": "months = int(input())",
+    "te": "months = int(input())",
+    "hi": "months = int(input())"
+   },
+   {
+    "en": "total = price * months",
+    "te": "total = price * months",
+    "hi": "total = price * months"
+   },
+   {
+    "en": "print(total > 1000) prints True or False.",
+    "te": "print(total > 1000) True లేదా False print చేస్తుంది.",
+    "hi": "print(total > 1000) True या False print करता है।"
+   }
+  ],
+  "solution": "price = int(input())\nmonths = int(input())\ntotal = price * months\nprint(total)\nprint(total > 1000)"
+ }
+}

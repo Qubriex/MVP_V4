@@ -52,7 +52,9 @@ self.onmessage = async (e) => {
     const py = await boot();
     py.runPython(HARNESS);
     const run = py.globals.get('_qbx_run');
-    const first = run(code, stdin);
+    // A program that reads input runs first with the first test's input.
+    const firstStdin = stdin || (tests.find(t => t.stdin != null) || {}).stdin || '';
+    const first = run(code, firstStdin);
     const globals = first.get(0); const output = first.get(1); const error = first.get(2) ?? null;
     const results = [];
     for (const t of tests) {
