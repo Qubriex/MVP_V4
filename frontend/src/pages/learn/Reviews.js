@@ -14,6 +14,7 @@ import AnswerBox from '../../components/learn/AnswerBox';
 import { fmtDate } from '../../components/learn/evidenceText';
 
 import { useUiLang } from '../../context/UiLangContext';
+import LearningLangPicker from '../../components/learn/LearningLangPicker';
 export default function Reviews() {
   const { t } = useUiLang();
   const [params] = useSearchParams();
@@ -65,6 +66,7 @@ export default function Reviews() {
           <h1 className="ln-title">{warmup ? t('learn.reviews.warmUp') : t('learn.reviews.reviews')}</h1>
           <span className="ln-sub">{warmup ? t('learn.reviews.twoMinutesEarlierSkills') : t('learn.reviews.shortQuestionsKeepSkills')}</span>
         </div>
+        <LearningLangPicker onChange={load} />
         {warmup && <button type="button" className="ln-btn ln-btn-primary" onClick={() => navigate('/learn/session', { state: { from: '/learn/reviews' } })}>{warmupsLeft ? t('learn.reviews.skipLesson') : t('learn.reviews.continueLesson')}</button>}
       </header>
       {error && <div className="ln-error" role="alert">{error}</div>}

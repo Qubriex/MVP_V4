@@ -4059,5 +4059,12 @@
   "demo2.story.topics": "एक lesson review कीजिए",
   "demo2.story.topicsText": "Topics खोलिए, एक Python lesson Telugu में पढ़िए और Reviewed चिह्नित कीजिए; आपके छात्रों को \"आपकी faculty ने review किया\" दिखेगा",
   "devx.stage.TOPICS": "2 topics जानने वाला learner",
-  "lang.learningDefault": "आपके college का default {lang} है। Lessons, notes, practice, reviews और Ask Qubirex इस चुनाव के हिसाब से चलते हैं; menus नीचे दी गई screen language के हिसाब से।"
+  "lang.learningDefault": "आपके college का default {lang} है। Lessons, notes, practice, reviews और Ask Qubirex इस चुनाव के हिसाब से चलते हैं; menus नीचे दी गई screen language के हिसाब से।",
+  "lj.market.searchHelp": "इस search के लिए और",
+  "lj.market.related": "मिलते-जुलते roles:",
+  "lj.market.learnFor": "इस role के लिए topics:",
+  "lj.market.addTopic": "मेरे topics में जोड़ें",
+  "lj.market.added": "जोड़ा ✓",
+  "lj.market.alsoOn": "यहाँ खोजें:",
+  "lj.market.outboundNote": "Job site सिर्फ़ role और city के साथ खुलती है। आपके बारे में कुछ नहीं भेजा जाता।"
 }

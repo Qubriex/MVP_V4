@@ -4058,5 +4058,12 @@
   "demo2.story.topics": "Review a lesson",
   "demo2.story.topicsText": "Open Topics, read a Python lesson in Telugu and mark it Reviewed; your students then see \"Reviewed by your faculty\"",
   "devx.stage.TOPICS": "Learner with 2 topics known",
-  "lang.learningDefault": "Your college's default is {lang}. Lessons, notes, practice, reviews and Ask Qubirex follow this choice; menus follow the screen language below."
+  "lang.learningDefault": "Your college's default is {lang}. Lessons, notes, practice, reviews and Ask Qubirex follow this choice; menus follow the screen language below.",
+  "lj.market.searchHelp": "More for this search",
+  "lj.market.related": "Related roles:",
+  "lj.market.learnFor": "Topics for this role:",
+  "lj.market.addTopic": "Add to my topics",
+  "lj.market.added": "Added ✓",
+  "lj.market.alsoOn": "Search on:",
+  "lj.market.outboundNote": "Opens the job site with only the role and city. Nothing about you is sent."
 }

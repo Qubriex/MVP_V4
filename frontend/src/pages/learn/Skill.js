@@ -20,6 +20,7 @@ import AnswerBox from '../../components/learn/AnswerBox';
 import { ResultCard, LabelTag, ConfirmedSteps } from '../../components/learn/journey';
 import { fmtDate } from '../../components/learn/evidenceText';
 import { newTracker, recordPaste, provenanceFor } from '../../utils/provenance';
+import LearningLangPicker from '../../components/learn/LearningLangPicker';
 
 const TABS = ['concept', 'lesson', 'practice', 'apply', 'progress'];
 
@@ -150,6 +151,7 @@ export default function Skill() {
           <h1 className="ln-title">{data.node.label}</h1>
           <span className="ln-row ln-wrap" style={{ gap: 8 }}><LabelTag label={p.label} /><span className="ln-small ln-muted">{t('lj.skill.about', { n: data.node.minutes })}</span></span>
         </div>
+        <LearningLangPicker onChange={load} />
       </header>
       <Tabs tabs={TABS.map(id => ({ id, label: t(`lj.skill.tab.${id}`) }))} value={tab} onChange={setTab} label={t('lj.skill.steps')} />
       {error && <div className="ln-error" role="alert">{error}</div>}

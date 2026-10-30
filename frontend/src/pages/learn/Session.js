@@ -43,6 +43,7 @@ import { enqueue, flush } from '../../utils/offlineQueue';
 import { useLowBandwidth, recorderOptions } from '../../utils/lowBandwidth';
 import { errMsg } from '../../utils/errors';
 import { ResultCard, cleanAiText } from '../../components/learn/journey';
+import LearningLangPicker from '../../components/learn/LearningLangPicker';
 
 const APPROACH_NAMES = { native_concept: 'learn.session.approachNames.nativeConcept', analogy: 'learn.session.approachNames.analogy', worked_example: 'learn.session.approachNames.workedExample', decomposition: 'learn.session.approachNames.buildingBlocks', socratic: 'learn.session.approachNames.socratic' };
 const LANG_LABEL = { telugu: 'తెలుగు', hindi: 'हिंदी' };
@@ -420,7 +421,7 @@ export default function Session() {
         </div>
         <div className="ln-row ln-wrap" style={{ gap: 8 }}>
           <span className="ln-tag ln-tag-lg ln-tag-info ln-hide-phone">{t('learn.session.approach')}{' '} {APPROACH_NAMES[approach] ? t(APPROACH_NAMES[approach]) : approach}</span>
-          <span className="ln-tag ln-tag-lg ln-tag-accent ln-indic ln-hide-phone">{langName}</span>
+          <LearningLangPicker compact onChange={() => { speech.stop(); window.location.reload(); }} />
           {loopCount > 0 && <span className="ln-tag ln-tag-lg ln-tag-warning ln-hide-phone">{t('learn.session.loopLoopcount', { loopCount })}</span>}
           <span className="ln-row ln-small" style={{ gap: 6, opacity: 0.75 }} aria-label={t('learn.session.sessionTimeClock', { clock })}><Clock size={16} aria-hidden="true" />{clock}</span>
           <button type="button" className="ln-btn ln-btn-sm ln-hide-phone ln-indic" onClick={endSession}>{t('session.end')}</button>

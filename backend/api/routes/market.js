@@ -13,6 +13,8 @@ import { getLearnerSkillState, classifySkill, scoreJob } from '../../core/market
 import { explainJobAloud, explainTopicAloud, interviewTurn } from '../../core/portfolio.js';
 import { aiNotConfigured, aiUnavailableMessage } from '../../core/ai/gateway.js';
 import { mapSeq } from '../../core/util/seq.js';
+import { matchesJob, relatedRoles, topicsFor, outboundLinks } from '../../core/market/search.js';
+import { catalog } from '../../core/courses/catalog.js';
 
 const router = express.Router();
 router.use(authenticateToken);
@@ -60,7 +62,7 @@ router.get('/jobs', async (req, res) => {
       .filter(j => !city || j.city === city)
       .filter(j => !mode || j.mode === mode)
       .filter(j => j.salary_max >= minSalary)
-      .filter(j => !needle || j.title.toLowerCase().includes(needle) || j.skills.some(s => s.name.toLowerCase().includes(needle))), async j => await jobCard(j, state, saved));
+      .filter(j => !needle || matchesJob(j, needle)), async j => await jobCard(j, state, saved));
 
     const counts = {
       all: cards.filter(c => c.match >= minMatch).length,
@@ -86,7 +88,12 @@ router.get('/jobs', async (req, res) => {
         modes: ['On-site', 'Hybrid', 'Remote']
       },
       counts,
-      jobs: cards
+      jobs: cards,
+      // With a search: roles that share skills (when few matched), topics to
+      // add, and plain search links on job sites (role and city only).
+      related_roles: needle && cards.length < 3 ? relatedRoles(market.JOBS, needle, new Set(cards.map(c => c.id))) : [],
+      topics: needle ? topicsFor(needle, catalog().courses.map(c => c.id)).map(id => { const c = catalog().byId.get(id); return { id, title: c.title.en, status: c.status }; }) : [],
+      outbound: needle ? outboundLinks(q.trim(), city) : []
     });
   });
 });

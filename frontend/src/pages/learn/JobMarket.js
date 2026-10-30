@@ -4,8 +4,9 @@
 // and skill chips. All market figures are sample data for now.
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Search, Bookmark, BookmarkCheck } from 'lucide-react';
+import { Search, Bookmark, BookmarkCheck, ExternalLink } from 'lucide-react';
 import api, { getOr } from '../../utils/api';
+import { dropCached } from '../../utils/cachedGet';
 import { MOCK_JOBS, MOCK_TRENDS } from '../../utils/learnerMockData';
 import { MatchRing, SampleBadge, SkillChip, StatusTag, salary, posted } from '../../components/learn/ui';
 import { Select } from '../../components/shared/ui';
@@ -13,6 +14,46 @@ import { SourceLine, AddToPlan } from '../../components/learn/journey';
 
 import { useUiLang, uiLocale } from '../../context/UiLangContext';
 const SALARY_STEPS = [0, 3, 4, 5, 6];
+
+// Under a search: related roles (when few matched), topics to add to "My
+// topics", and plain search links on job sites (role and city only).
+function SearchHelp({ jobs, onPick }) {
+  const { t } = useUiLang();
+  const [added, setAdded] = useState({});
+  const add = (id) => api.post(`/learner/courses/${id}/add`).then(() => { dropCached('/learner/courses'); setAdded(a => ({ ...a, [id]: true })); }).catch(() => {});
+  const related = jobs.related_roles || [];
+  const topics = jobs.topics || [];
+  const outbound = jobs.outbound || [];
+  if (!related.length && !topics.length && !outbound.length) return null;
+  return (
+    <section className="ln-card ln-col" style={{ gap: 10 }} aria-label={t('lj.market.searchHelp')} data-search-help>
+      {related.length > 0 && (
+        <div className="ln-row ln-wrap" style={{ gap: 6 }} data-related-roles>
+          <span className="ln-small ln-muted">{t('lj.market.related')}</span>
+          {related.map(r => <button key={r.title} type="button" className="ln-btn ln-btn-sm" onClick={() => onPick(r.q)}>{r.title}</button>)}
+        </div>
+      )}
+      {topics.length > 0 && (
+        <div className="ln-row ln-wrap" style={{ gap: 6 }} data-search-topics>
+          <span className="ln-small ln-muted">{t('lj.market.learnFor')}</span>
+          {topics.map(c => (
+            <span key={c.id} className="ln-row" style={{ gap: 4 }}>
+              <Link to={`/learn/courses/${c.id}`} state={{ from: '/learn/market' }} className="ln-link ln-small">{c.title}</Link>
+              <button type="button" className="ln-btn ln-btn-sm" disabled={!!added[c.id]} onClick={() => add(c.id)} data-add-topic={c.id}>{added[c.id] ? t('lj.market.added') : t('lj.market.addTopic')}</button>
+            </span>
+          ))}
+        </div>
+      )}
+      {outbound.length > 0 && (
+        <div className="ln-row ln-wrap" style={{ gap: 6 }} data-outbound>
+          <span className="ln-small ln-muted">{t('lj.market.alsoOn')}</span>
+          {outbound.map(o => <a key={o.site} href={o.url} target="_blank" rel="noopener noreferrer nofollow" referrerPolicy="no-referrer" className="ln-btn ln-btn-sm" data-site={o.site}>{o.site} <ExternalLink size={12} aria-hidden="true" /></a>)}
+          <span className="ln-xs ln-muted" style={{ flexBasis: '100%' }}>{t('lj.market.outboundNote')}</span>
+        </div>
+      )}
+    </section>
+  );
+}
 
 export default function JobMarket() {
   const { t, fmtNum } = useUiLang();
@@ -87,6 +128,8 @@ export default function JobMarket() {
         </label>
         <label className="ln-check" style={{ minHeight: 44, padding: '0 8px' }}><input type="checkbox" checked={onlyGood} onChange={e => setOnlyGood(e.target.checked)} />{t('learn.jobMarket.only60Match')}</label>
       </div>
+
+      {q.trim() && jobs && <SearchHelp jobs={jobs} onPick={setQ} />}
 
       <div className="ln-grid ln-g-4" style={{ gap: 16 }}>
         <div className="ln-card ln-card-sm"><span className="ln-small ln-muted">{t('learn.jobMarket.openFresherRoles')}{city ? ` · ${city}` : ''}</span><span className="ln-stat">{k ? fmtNum(k.open_roles) : '—'}</span><span className="ln-xs ln-muted">{k && k.open_roles_change >= 0 ? t('learn.jobMarket.upOnLastMonth', { n: fmtNum(k.open_roles_change) }) : t('learn.jobMarket.downLastMonth')}</span></div>
