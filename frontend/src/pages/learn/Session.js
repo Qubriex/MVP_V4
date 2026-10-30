@@ -28,7 +28,7 @@
 // becomes a bottom sheet (see learner.css).
 // ─────────────────────────────────────────────────────────────────────────────
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Clock, Mic, Keyboard, RotateCcw, Pause, Play, Volume2, Award, MessageCircleQuestion, Repeat, ListChecks } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useUiLang, speechTag } from '../../context/UiLangContext';
@@ -58,6 +58,7 @@ export default function Session() {
   const { t } = useUiLang();
   const navigate = useNavigate();
   const [params] = useSearchParams();
+  const location = useLocation();
   const language = user?.language || 'telugu';
   const bcp47 = speechTag(language);
 
@@ -389,7 +390,10 @@ export default function Session() {
   const spoken = spokenRef.current;
   const speakingParts = !mic.listening && speech.part && spoken && speech.part.id === spoken.id ? speechParts(spoken.text) : null;
 
-  const endSession = () => { speech.stop(); if (mic.listening) mic.stop(); navigate('/learn/dashboard'); };
+  // Back and End session return to the page that opened the lesson (Skill path,
+  // a skill page, Reviews, Home…), not always Home.
+  const backTo = (location.state?.from || params.get('from') || '').startsWith('/learn') ? (location.state?.from || params.get('from')) : '/learn/dashboard';
+  const endSession = () => { speech.stop(); if (mic.listening) mic.stop(); navigate(backTo); };
   const tapToStart = () => {
     setStarted(true);
     if (lastAi && !lowBw) say(welcomeRef.current ? `${welcomeRef.current} ${lastAi.content}` : lastAi.content, lastAi.id);
@@ -405,8 +409,8 @@ export default function Session() {
   return (
     <div className="ln-session">
       <header className="ln-session-head">
-        <Link to="/learn/dashboard" className="ln-btn ln-btn-sm ln-hide-phone" onClick={() => speech.stop()}><ArrowLeft size={16} aria-hidden="true" />{t('nav.home')}</Link>
-        <Link to="/learn/dashboard" className="ln-roundbtn ln-show-phone" aria-label={t('learn.session.backHome')} onClick={() => speech.stop()}><ArrowLeft size={18} aria-hidden="true" /></Link>
+        <Link to={backTo} className="ln-btn ln-btn-sm ln-hide-phone" onClick={() => speech.stop()} data-back><ArrowLeft size={16} aria-hidden="true" />{t('nav.back')}</Link>
+        <Link to={backTo} className="ln-roundbtn ln-show-phone" aria-label={t('nav.back')} onClick={() => speech.stop()} data-back><ArrowLeft size={18} aria-hidden="true" /></Link>
         <div className="ln-col" style={{ flex: 1, minWidth: 0 }}>
           <span className="ln-session-title" style={{ fontSize: 'var(--fs-h3)', fontWeight: 600 }}>{nodeLabel || '…'}</span>
           <span className="ln-small ln-session-sub-desk" style={{ opacity: 0.75 }}>

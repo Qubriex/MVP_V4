@@ -795,8 +795,9 @@ router.post('/tts', async (req, res) => {
   if (!text) return res.status(400).json({ error: 'Nothing to say' });
   if (text.length > 1500) return res.status(413).json({ error: 'Too long: send at most 1500 characters per request' });
   try {
-    // lang: 'english' speaks the English caption in the same voice ("say it in English").
-    const language = req.body?.lang === 'english' ? 'english' : (req.user.language || 'telugu');
+    // lang: the language of the text (the learning language, or 'english' for a
+    // caption: "say it in English"); otherwise the learner's own language.
+    const language = ['english', 'hindi', 'telugu'].includes(req.body?.lang) ? req.body.lang : (req.user.language || 'telugu');
     const out = await synthesize({ text, language, institutionId: req.user.institution_id || null });
     res.set('Content-Type', out.mimeType);
     res.set('Cache-Control', 'private, max-age=86400');

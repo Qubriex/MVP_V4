@@ -411,3 +411,80 @@
 .lj-note { padding: 10px 14px; border-radius: var(--radius-md); background: var(--color-surface-2, var(--color-surface)); border: 1px solid var(--color-border); font-size: var(--fs-small); }
 .lj-note.is-warn { border-color: var(--warn, var(--color-border-strong)); }
 .lj-proves summary { cursor: pointer; min-height: 32px; display: flex; align-items: center; }
+
+/* ── Back bar (every learner page except Home) ───────────────────────────── */
+.lj-backbar { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; min-width: 0; }
+.lj-back { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 12px; border-radius: var(--radius-md); border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text); font: inherit; font-size: var(--fs-small); cursor: pointer; flex-shrink: 0; }
+.lj-back:focus-visible { outline: 3px solid var(--accent-400); outline-offset: 2px; }
+.lj-crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-width: 0; color: var(--color-text-muted); }
+.lj-crumb-now { color: var(--color-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 40ch; }
+@media (max-width: 639px) { .lj-back-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); } .lj-back { padding: 0 10px; } .lj-crumbs { font-size: var(--fs-caption); } .lj-crumbs > span:not(:last-child):not(:nth-last-child(2)) { display: none; } }
+
+/* ── Learning language picker ────────────────────────────────────────────── */
+.lj-langpick { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: var(--radius-full, 999px); border: 1px solid var(--color-border); background: var(--color-surface); }
+.lj-langpick select { border: 0; background: transparent; color: var(--color-text); font: inherit; font-size: var(--fs-small); min-height: 32px; cursor: pointer; }
+
+/* ── Courses and modules ─────────────────────────────────────────────────── */
+.lj-course { gap: 10px; }
+.lj-module { gap: 10px; padding: 0; overflow: hidden; }
+.lj-module > :not(.lj-module-head) { padding: 0 18px 16px; }
+.lj-module-head { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 18px; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; text-align: left; }
+.lj-module-head:focus-visible { outline: 3px solid var(--accent-400); outline-offset: -3px; }
+.lj-module-n { flex-shrink: 0; font-size: var(--fs-caption); font-weight: 700; padding: 4px 8px; border-radius: 6px; background: var(--color-surface-2); }
+.lj-module .lj-chev { transition: transform .15s; flex-shrink: 0; }
+.lj-module.is-open .lj-chev { transform: rotate(180deg); }
+.lj-lessons { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.lj-lessons li { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 0; border-top: 1px solid var(--color-border); }
+.lj-lessons li > a { flex: 1 1 200px; min-width: 0; }
+.lj-st.is-known, .lj-st.is-done, .lj-st.is-confirmed { color: var(--status-success); }
+.lj-st.is-in_progress { color: var(--accent-700); }
+.lj-module-end { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-top: 6px; }
+
+/* ── A lesson ────────────────────────────────────────────────────────────── */
+.lj-lesson { display: flex; flex-direction: column; gap: 14px; }
+.lj-stepper { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.lj-stepper button { width: 100%; display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 6px 10px; border-radius: var(--radius-md); border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text-muted); font: inherit; font-size: var(--fs-small); cursor: pointer; text-align: left; }
+.lj-stepper button:disabled { cursor: not-allowed; opacity: .6; }
+.lj-stepper-n { flex-shrink: 0; width: 24px; height: 24px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; background: var(--color-surface-2); font-weight: 700; font-size: var(--fs-caption); }
+.lj-stepper li.is-done button { color: var(--color-text); }
+.lj-stepper li.is-done .lj-stepper-n { background: var(--status-success); color: #fff; }
+.lj-stepper li.is-now button { border-color: var(--accent-700); color: var(--color-text); font-weight: 600; box-shadow: inset 0 -3px 0 var(--accent-700); }
+.lj-stepper li.is-now .lj-stepper-n { background: var(--accent-700); color: #fff; }
+@media (max-width: 639px) { .lj-stepper button { flex-direction: column; gap: 2px; text-align: center; font-size: var(--fs-caption); padding: 6px 2px; } }
+.lj-oneline { margin: 0; font-size: var(--fs-h3); font-weight: 600; line-height: 1.5; }
+.lj-sentence { margin: 0; line-height: 1.7; padding: 2px 6px; border-radius: 6px; transition: background .2s; }
+.lj-sentence.is-spoken { background: var(--color-surface-2); }
+.lj-cap { display: block; font-size: var(--fs-small); color: var(--color-text-muted); }
+.lj-extra { margin: 0; padding: 10px 12px; border-left: 3px solid var(--accent-700); background: var(--color-surface-2); border-radius: 6px; line-height: 1.6; }
+.lj-rates { display: inline-flex; align-items: center; gap: 2px; padding: 2px 6px; border: 1px solid var(--color-border); border-radius: 999px; }
+.lj-rates button { border: 0; background: none; font: inherit; font-size: var(--fs-caption); padding: 4px 6px; border-radius: 999px; cursor: pointer; color: var(--color-text-muted); min-height: 28px; }
+.lj-rates button[aria-pressed='true'] { background: var(--color-surface-2); color: var(--color-text); font-weight: 700; }
+.lj-mistake { display: flex; flex-direction: column; gap: 4px; padding: 8px 0; border-top: 1px solid var(--color-border); }
+.lj-code, .lj-code-small, .lj-q { margin: 0; font-family: var(--font-mono, ui-monospace, Menlo, Consolas, monospace); font-size: 13.5px; line-height: 1.6; overflow-x: auto; }
+.lj-code { padding: 10px 0; border-radius: var(--radius-md); background: #10131A; color: #E8EAF0; }
+.lj-code-line { display: flex; gap: 12px; padding: 0 12px; cursor: pointer; border-left: 3px solid transparent; }
+.lj-code-line.is-active { background: rgba(255, 214, 102, .14); border-left-color: #FFD666; }
+.lj-code-n { width: 2ch; text-align: right; color: #7D8597; user-select: none; flex-shrink: 0; }
+.lj-code-small { padding: 8px 10px; border-radius: 8px; background: var(--color-surface-2); }
+.lj-q { white-space: pre-wrap; font-family: inherit; font-size: var(--fs-body); }
+.lj-note-now { margin: 0; padding: 8px 12px; border-radius: 8px; background: var(--color-surface-2); line-height: 1.6; }
+.lj-notes { margin: 6px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+.lj-output { display: flex; flex-direction: column; gap: 4px; }
+.lj-output pre { margin: 0; padding: 8px 10px; border-radius: 8px; background: var(--color-surface-2); font-family: var(--font-mono, monospace); font-size: 13px; white-space: pre-wrap; }
+.lj-opt.is-right { border-color: var(--status-success); background: var(--ok-bg, #E7F6EC); }
+.lj-opt.is-wrong { border-color: var(--status-danger); }
+.lj-editor { width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: var(--radius-md); border: 1px solid var(--color-border-strong); background: #10131A; color: #E8EAF0; font-family: var(--font-mono, ui-monospace, Menlo, Consolas, monospace); font-size: 14px; line-height: 1.6; tab-size: 4; resize: vertical; }
+.lj-editor:focus-visible { outline: 3px solid var(--accent-400); outline-offset: 1px; }
+.lj-tests { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.lj-tests li { display: flex; gap: 8px; align-items: flex-start; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--color-border); }
+.lj-tests li.is-pass { border-color: var(--status-success); }
+.lj-tests li.is-fail { border-color: var(--status-danger); }
+.lj-tests .ln-xs { word-break: break-word; }
+.lj-hint { margin: 0; padding: 8px 12px; border-radius: 8px; background: var(--color-surface-2); }
+.lj-runerror { color: var(--status-danger); white-space: pre-wrap; word-break: break-word; }
+.lj-clear { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding-top: 4px; }
+.lj-clear > button { border: 1px solid var(--color-border); background: var(--color-surface); border-radius: 999px; min-width: 32px; min-height: 32px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: var(--color-text-muted); }
+.lj-clear > button[aria-pressed='true'] { color: var(--accent-700); border-color: var(--accent-700); }
+.lj-clear-input { min-height: 32px; width: 220px; max-width: 60vw; }
+.lj-ask { border-style: dashed; }
+.lj-testout { border: 2px solid var(--accent-700); }

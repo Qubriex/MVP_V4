@@ -112,7 +112,7 @@ export async function myCourses(learnerId) {
   for (const r of rows) {
     if (!courseById(r.course_id)) continue;
     const p = await courseProgress(learnerId, r.course_id);
-    out.push({ course_id: r.course_id, source: r.source, added_at: r.added_at, last_lesson_id: r.last_lesson_id, last_at: r.last_at, done: p.done, total: p.total, pct: p.pct, next_lesson_id: r.last_lesson_id && p.lessons[r.last_lesson_id]?.status === 'in_progress' ? r.last_lesson_id : p.next_lesson_id });
+    out.push({ course_id: r.course_id, title: courseById(r.course_id).title.en, source: r.source, added_at: r.added_at, last_lesson_id: r.last_lesson_id, last_at: r.last_at, done: p.done, total: p.total, pct: p.pct, next_lesson_id: r.last_lesson_id && p.lessons[r.last_lesson_id]?.status === 'in_progress' ? r.last_lesson_id : p.next_lesson_id });
   }
   return out;
 }

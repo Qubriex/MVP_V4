@@ -224,7 +224,8 @@ export function useSpeechOutput({ lang = 'te-IN', rate = 1, server = true } = {}
     const spoken = pronounce(clean, l);
     const chunks = parts(spoken);
     const shown = parts(clean); // same sentence boundaries, without spelling changes
-    const ttsLang = l.startsWith('en') ? 'english' : null; // otherwise the learner's own language
+    // Spoken in the language of the text: the learning language, or English captions.
+    const ttsLang = l.startsWith('en') ? 'english' : l.startsWith('hi') ? 'hindi' : 'telugu';
     const t0 = Date.now();
     let next = fetchAudio(chunks[0], ttsLang, isCurrent);
     const p = getPlayer();

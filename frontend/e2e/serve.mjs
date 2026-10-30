@@ -9,7 +9,7 @@ const SITE = path.resolve(process.env.SITE || 'build');
 const API = Number(process.env.API || 3001);
 const PORT = Number(process.env.PORT || 3000);
 const TYPES = { '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.json': 'application/json',
-  '.ico': 'image/x-icon', '.woff2': 'font/woff2', '.wav': 'audio/wav', '.mp3': 'audio/mpeg', '.webmanifest': 'application/manifest+json', '.txt': 'text/plain' };
+  '.ico': 'image/x-icon', '.woff2': 'font/woff2', '.wav': 'audio/wav', '.mp3': 'audio/mpeg', '.webmanifest': 'application/manifest+json', '.txt': 'text/plain', '.wasm': 'application/wasm', '.zip': 'application/zip', '.mjs': 'application/javascript' };
 
 http.createServer((req, res) => {
   if (req.url.startsWith('/api/') || req.url.startsWith('/.well-known/')) {

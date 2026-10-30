@@ -9,6 +9,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Mic, Keyboard, Check, Flame, Route as RouteIcon, Building2, RotateCcw } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useUiLang } from '../../context/UiLangContext';
+import { useFeatures } from '../../utils/features';
 import api, { getOr } from '../../utils/api';
 import { MOCK_LEARNER_DASHBOARD, MOCK_MARKET_SNAPSHOT, MOCK_PROFILE_BASICS } from '../../utils/learnerMockData';
 import { Bar, SampleBadge, StatusTag, salary, minutes, RequestButton, useSkillRequests } from '../../components/learn/ui';
@@ -72,6 +73,38 @@ const fmtDay = (iso) => new Date(iso).toLocaleDateString(document.documentElemen
 const APPROACH_NAMES = { native_concept: 'learn.dashboard.approachNames.nativeConcept', analogy: 'learn.dashboard.approachNames.analogy', worked_example: 'learn.dashboard.approachNames.workedExample', decomposition: 'learn.dashboard.approachNames.buildingBlocks', socratic: 'learn.dashboard.approachNames.socratic' };
 const SECTION_NAMES = { personal: 'learn.dashboard.sectionNames.yourDetails', education: 'learn.dashboard.sectionNames.education', projects: 'learn.dashboard.sectionNames.yourProjects', skills: 'learn.dashboard.sectionNames.skills', goals: 'learn.dashboard.sectionNames.careerGoals' };
 
+// Continue learning in the topics this learner picked: the last course they
+// were on first, each with its progress and next lesson.
+function MyTopics({ topics }) {
+  const { t } = useUiLang();
+  if (!topics) return null;
+  if (!topics.length) {
+    return (
+      <section className="ln-card ln-between ln-wrap" style={{ gap: 10 }} aria-label={t('lj.home.topicsTitle')} data-home-topics="empty">
+        <span className="ln-col" style={{ gap: 2 }}><b>{t('lj.home.topicsTitle')}</b><span className="ln-small">{t('lj.home.topicsEmpty')}</span></span>
+        <Link className="ln-btn ln-btn-sm" to="/learn/courses">{t('lj.home.topicsExplore')}</Link>
+      </section>
+    );
+  }
+  const [last, ...rest] = topics;
+  return (
+    <section className="ln-card" style={{ gap: 10 }} aria-label={t('lj.home.topicsTitle')} data-home-topics>
+      <div className="ln-between ln-wrap"><b>{t('lj.home.topicsTitle')}</b><Link className="ln-link ln-small" to="/learn/courses">{t('lj.home.topicsAll')}</Link></div>
+      <div className="ln-col" style={{ gap: 8 }}>
+        {[last, ...rest.slice(0, 2)].map((c, i) => (
+          <div key={c.course_id} className="ln-row ln-wrap" style={{ gap: 12 }}>
+            <span className="ln-col" style={{ gap: 4, flex: '1 1 200px', minWidth: 0 }}>
+              <span className="ln-small"><b>{c.title}</b> · {t('lj.course.done', { n: c.done, total: c.total })}</span>
+              <span className="ln-bar" role="progressbar" aria-valuenow={c.pct} aria-valuemin={0} aria-valuemax={100} aria-label={c.course_id}><span style={{ width: `${c.pct}%` }} /></span>
+            </span>
+            {c.next_lesson_id && <Link className={`ln-btn ln-btn-sm ${i === 0 ? 'ln-btn-primary' : ''}`} to={`/learn/lesson/${c.next_lesson_id}`} state={{ from: '/learn/dashboard' }} data-continue-topic={c.course_id}>{t('lj.home.topicsContinue')}</Link>}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default function Dashboard() {
   const { user } = useAuth();
   const { t } = useUiLang();
@@ -82,12 +115,15 @@ export default function Dashboard() {
   const requests = useSkillRequests();
   const [today, setToday] = useState(null);
   const [journey, setJourney] = useState(null);
+  const [topics, setTopics] = useState(null);
+  const features = useFeatures();
+  useEffect(() => { if (features.learner_jobs) getOr('/market/snapshot', MOCK_MARKET_SNAPSHOT, d => d && Array.isArray(d.jobs)).then(setMarket); }, [features.learner_jobs]);
   const [lowBw, setLowBw] = useLowBandwidth();
   const suggestLowBw = !lowBw && slowConnection();
 
   useEffect(() => {
     getOr('/learner/dashboard', MOCK_LEARNER_DASHBOARD, d => d && typeof d.progress_pct !== 'undefined').then(setData);
-    getOr('/market/snapshot', MOCK_MARKET_SNAPSHOT, d => d && Array.isArray(d.jobs)).then(setMarket);
+    api.get('/learner/courses/mine').then(r => setTopics(r.data.courses)).catch(() => setTopics([]));
     getOr('/learner/profile', MOCK_PROFILE_BASICS, d => d && d.completeness).then(setProfile);
     getOr('/learner/professors', [], Array.isArray).then(setProfessors);
     api.get('/learner/today').then(r => setToday(r.data)).catch(() => {});
@@ -126,9 +162,10 @@ export default function Dashboard() {
           <span className="ln-xs ln-muted">{t('learn.dashboard.lessonsChecksNeedConnection')}</span>
         </section>
       )}
-      <CommandBox side="learner" placeholder={t('learn.dashboard.askOrSearch')} searchHref="/learn/market" />
+      <CommandBox side="learner" placeholder={t('learn.dashboard.askOrSearch')} searchHref={features.learner_jobs ? '/learn/market' : '/learn/courses'} />
       <StartHere j={journey} />
       {today && <Today today={today} />}
+      <MyTopics topics={topics} />
 
       <div className="ln-grid ln-g-hero">
         <section className="ln-card ln-card-dark" style={{ gap: 18, padding: 28 }}>
@@ -180,6 +217,8 @@ export default function Dashboard() {
         </section>
       </div>
 
+      {/* Jobs, skills worth learning and emerging topics: only with FEATURE_LEARNER_JOBS. */}
+      {features.learner_jobs && (<>
       <section className="ln-col" style={{ gap: 14 }}>
         <div className="ln-between ln-wrap">
           <div className="ln-row"><h2 className="ln-h2 ln-indic" style={{ fontSize: 'var(--fs-h2)' }}>{t('dash.jobs')}</h2>{market?.sample && <SampleBadge />}</div>
@@ -232,6 +271,8 @@ export default function Dashboard() {
           ))}
         </section>
       </div>
+
+      </>)}
 
       <div className="ln-grid ln-g-hero">
         <section className="ln-card">

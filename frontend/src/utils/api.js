@@ -13,7 +13,7 @@ api.interceptors.request.use(config => {
 // "qubirex:saved" event; the ToastProvider turns it into a short toast.
 // Previews, AI calls, transcription, heartbeats, sign-in and reads sent as
 // POST are left out — they are not changes the person made.
-const TOAST_SKIP = /\/(parse|preview|transcribe|tts|heartbeat|voice-metrics|session\/|summary-from-speech|tailor|login|logout|verify\/|verify-domain\/request|bulk|ask|assist|read-all|path\/node|doubts|help\/contact|passport\/|reviews\/instances)/;
+const TOAST_SKIP = /\/(parse|preview|transcribe|tts|heartbeat|voice-metrics|session\/|summary-from-speech|tailor|login|logout|verify\/|verify-domain\/request|bulk|ask|assist|read-all|path\/node|doubts|help\/contact|passport\/|reviews\/instances|lessons\/|modules\/|learning-language)/;
 const TOAST_SCOPE = /^\/(institution|employer|admin|learner|notifications|market\/jobs)\//;
 const noteSaved = (res) => {
   const { method, url = '' } = res.config || {};

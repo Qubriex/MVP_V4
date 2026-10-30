@@ -65,7 +65,7 @@ export default function Reviews() {
           <h1 className="ln-title">{warmup ? t('learn.reviews.warmUp') : t('learn.reviews.reviews')}</h1>
           <span className="ln-sub">{warmup ? t('learn.reviews.twoMinutesEarlierSkills') : t('learn.reviews.shortQuestionsKeepSkills')}</span>
         </div>
-        {warmup && <button type="button" className="ln-btn ln-btn-primary" onClick={() => navigate('/learn/session')}>{warmupsLeft ? t('learn.reviews.skipLesson') : t('learn.reviews.continueLesson')}</button>}
+        {warmup && <button type="button" className="ln-btn ln-btn-primary" onClick={() => navigate('/learn/session', { state: { from: '/learn/reviews' } })}>{warmupsLeft ? t('learn.reviews.skipLesson') : t('learn.reviews.continueLesson')}</button>}
       </header>
       {error && <div className="ln-error" role="alert">{error}</div>}
       {!warmup && data && (

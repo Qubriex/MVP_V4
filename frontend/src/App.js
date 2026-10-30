@@ -61,6 +61,11 @@ import Assigned from './pages/learn/Assigned';
 import DayOne from './pages/learn/DayOne';
 import ApplyRole from './pages/learn/Apply';
 import RequestDetail from './pages/learn/RequestDetail';
+import Courses from './pages/learn/Courses';
+import CoursePage from './pages/learn/Course';
+import Lesson from './pages/learn/Lesson';
+import { ModuleTest, ModuleProject } from './pages/learn/Module';
+import JobsFlag from './components/learn/JobsFlag';
 import NotificationPrefs from './pages/learn/NotificationPrefs';
 import Verify from './pages/Verify';
 import EmployerLogin from './pages/employer/Login';
@@ -217,10 +222,15 @@ export default function App() {
                       <Route path="welcome" element={<Welcome />} />
                       <Route path="record" element={<SkillRecord />} />
                       <Route path="jobs" element={<LearnerJobs />} />
-                      <Route path="market" element={<JobMarket />} />
-                      <Route path="market/:jobId" element={<JobDetail />} />
-                      <Route path="market/:jobId/interview" element={<InterviewPractice />} />
-                      <Route path="topics" element={<EmergingTopics />} />
+                      <Route path="market" element={<JobsFlag><JobMarket /></JobsFlag>} />
+                      <Route path="market/:jobId" element={<JobsFlag><JobDetail /></JobsFlag>} />
+                      <Route path="market/:jobId/interview" element={<JobsFlag><InterviewPractice /></JobsFlag>} />
+                      <Route path="topics" element={<JobsFlag><EmergingTopics /></JobsFlag>} />
+                      <Route path="courses" element={<Courses />} />
+                      <Route path="courses/:courseId" element={<CoursePage />} />
+                      <Route path="lesson/:lessonId" element={<Lesson />} />
+                      <Route path="modules/:moduleId/test" element={<ModuleTest />} />
+                      <Route path="modules/:moduleId/project" element={<ModuleProject />} />
                       <Route path="profile" element={<LearnerProfile />} />
                       <Route path="settings" element={<LearnerSettings />} />
                       <Route path="resume" element={<ResumeBuilder />} />

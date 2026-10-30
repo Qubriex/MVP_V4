@@ -20,7 +20,7 @@ const CONFIDENCE = { high: 'learn.record.confidence.high', solid: 'learn.record.
 function NodePill({ n }) {
   const { t } = useUiLang();
   if (n.status === 'mastered') return <Link to={`/learn/skill/${n.id}`} className="ln-chip ln-tag-success" style={{ padding: '7px 12px' }}><Check size={13} aria-hidden="true" />{n.label}<span className="ln-sr"> {' '}{t('learn.record.mastered')}</span></Link>;
-  if (n.status === 'current') return <Link to="/learn/session" className="ln-chip ln-tag-accent" style={{ padding: '7px 12px', fontWeight: 600, border: '1.5px solid var(--accent-800)' }}>● {n.label}<span className="ln-sr"> {' '}{t('learn.record.currentContinue')}</span></Link>;
+  if (n.status === 'current') return <Link to="/learn/session" state={{ from: '/learn/record' }} className="ln-chip ln-tag-accent" style={{ padding: '7px 12px', fontWeight: 600, border: '1.5px solid var(--accent-800)' }}>● {n.label}<span className="ln-sr"> {' '}{t('learn.record.currentContinue')}</span></Link>;
   return <Link to={`/learn/skill/${n.id}`} className="ln-chip" style={{ padding: '7px 12px', background: 'transparent', border: '1px solid var(--color-border-strong)', color: 'var(--color-text-muted)' }}>{n.label}</Link>;
 }
 
@@ -33,7 +33,7 @@ export default function Record() {
   // Start another section: its first skill not yet mastered becomes current.
   const startSection = async (c) => {
     setSwitching(c.id); setSwitchError('');
-    try { await api.post('/learner/path/start', { cluster_id: c.id }); navigate('/learn/session'); } catch (e) {
+    try { await api.post('/learner/path/start', { cluster_id: c.id }); navigate('/learn/session', { state: { from: '/learn/record' } }); } catch (e) {
       setSwitchError(e.response?.data?.error || t('learn.record.couldnTSwitchSections'));
     }
     setSwitching('');
@@ -107,7 +107,7 @@ export default function Record() {
             <div className="ln-row ln-wrap" style={{ gap: 8 }}>{c.nodes.map(n => <NodePill key={n.id} n={n} />)}</div>
             {c.status !== 'done' && (
               <div className="ln-row ln-wrap" style={{ gap: 10 }}>
-                {c.current ? <Link to="/learn/session" className="ln-btn ln-btn-sm ln-btn-primary"><Play size={14} aria-hidden="true" />{t('learn.record.continueSection')}</Link>
+                {c.current ? <Link to="/learn/session" state={{ from: '/learn/record' }} className="ln-btn ln-btn-sm ln-btn-primary"><Play size={14} aria-hidden="true" />{t('learn.record.continueSection')}</Link>
                   : c.can_start ? <button type="button" className="ln-btn ln-btn-sm" disabled={switching === c.id} onClick={() => startSection(c)}><Play size={14} aria-hidden="true" />{switching === c.id ? t('learn.record.switching') : c.mastered ? t('learn.record.continueSection') : t('learn.record.startThisSection')}</button>
                     : c.locked_by?.length ? <span className="ln-small ln-muted ln-row" style={{ gap: 6 }}><Lock size={14} aria-hidden="true" />{t('learn.record.lockedFinishJoinFirst', { join: c.locked_by.map(x => x.label).join(' and ') })}</span> : null}
               </div>

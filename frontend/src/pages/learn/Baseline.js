@@ -65,7 +65,7 @@ export default function Baseline() {
             <b>{p.start_label}</b>
             <span className="ln-small ln-muted">{p.start_group}</span>
           </div>
-          <button type="button" className="ln-btn ln-btn-primary" onClick={() => navigate('/learn/session')}><Play size={16} aria-hidden="true" />{t('lj.baseline.firstLesson')}</button>
+          <button type="button" className="ln-btn ln-btn-primary" onClick={() => navigate('/learn/session', { state: { from: '/learn/dashboard' } })}><Play size={16} aria-hidden="true" />{t('lj.baseline.firstLesson')}</button>
         </section>
       </div>
     );

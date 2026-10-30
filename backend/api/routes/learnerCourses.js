@@ -16,6 +16,7 @@
 //   GET  /modules/:id/test   POST /modules/:id/test   the module test
 //   GET  /modules/:id/project  POST /modules/:id/project  the module project
 //   GET  /learning-language  PUT /learning-language   { value }
+//   GET  /features                         learner switches: { learner_jobs }
 import express from 'express';
 import * as dal from '../../core/db/dal.js';
 import { ulid } from '../../core/db/ulid.js';
@@ -45,6 +46,10 @@ const lang = (req) => learningLanguage(req.user.id);
 async function refreshPassport(req) {
   try { await issueCredential(req.user.el_id, { reason: 'module_completed' }); } catch (e) { req.log?.warn?.('courses.passport_refresh_failed', { error: e.message }); }
 }
+
+// Switches for the learner side. learner_jobs: the job market and emerging
+// topics (FEATURE_LEARNER_JOBS=true turns them on; off by default).
+router.get('/features', (req, res) => res.json({ learner_jobs: process.env.FEATURE_LEARNER_JOBS === 'true' }));
 
 router.get('/learning-language', wrap(async (req, res) => res.json({ value: await lang(req) })));
 router.put('/learning-language', wrap(async (req, res) => res.json({ value: await setLearningLanguage(req.user.id, String(req.body?.value || '')) })));
