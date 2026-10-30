@@ -26,6 +26,9 @@ import learnerJobsRoutes from './routes/learnerJobs.js';
 import learnerJourneyRoutes from './routes/learnerJourney.js';
 import learnerEvidenceRoutes from './routes/learnerEvidence.js';
 import learnerSettingsRoutes from './routes/learnerSettings.js';
+import learnerCoursesRoutes from './routes/learnerCourses.js';
+import institutionTopicsRoutes from './routes/institutionTopics.js';
+import catalogRoutes from './routes/catalog.js';
 import sharedRoutes from './routes/shared.js';
 import verifyRoutes from './routes/verify.js';
 import { didDocument } from '../core/return/keyRegistry.js';
@@ -45,6 +48,7 @@ export const MOUNTS = [
   ['/api/institution', institutionReviewRoutes],    // faculty review queue, κ, review load
   ['/api/institution', institutionActivityRoutes],  // live status, activity, exports, evidence report
   ['/api/institution', institutionLoopRoutes],      // command centre, grid, bridges, placements
+  ['/api/institution', institutionTopicsRoutes],    // topics: catalog, content review, students' extra topics
   ['/api', sharedRoutes],                           // notifications, Ask Qubirex, help, glossary
   ['/api/learner', learnerRoutes],
   ['/api/learner', portfolioRoutes],                // profile, resume, skill requests, transcribe
@@ -52,6 +56,8 @@ export const MOUNTS = [
   ['/api/learner', learnerSettingsRoutes],          // settings: devices, consent, my data
   ['/api/learner', learnerJobsRoutes],              // jobs & applications, employer requests
   ['/api/learner', learnerJourneyRoutes],           // journey: baseline, skill tabs, readiness, Day-One, apply, requests
+  ['/api/learner', learnerCoursesRoutes],           // topics: courses, lessons, practice, checks, module test and project
+  ['/api/catalog', catalogRoutes],                  // public "See our topics" and free sample lessons
   ['/api/market', marketRoutes],                    // job market, JD gap, emerging topics
   ['/api/employer', employerRoutes],
   ['/api/employer', employerHiringRoutes],           // roles, candidates, pipeline, sponsor, colleges, bulk verify

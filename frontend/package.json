@@ -7,14 +7,18 @@
     "jsqr": "^1.4.0",
     "lucide-react": "^0.383.0",
     "mermaid": "^11.17.2",
+    "pyodide": "0.27.8",
     "qrcode": "^1.5.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.0",
-    "react-scripts": "5.0.1"
+    "react-scripts": "5.0.1",
+    "sql.js": "1.12.0"
   },
   "scripts": {
+    "prestart": "node scripts/vendor-runtimes.js",
     "start": "react-scripts start",
+    "prebuild": "node scripts/vendor-runtimes.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "i18n:check": "node scripts/i18n-check.js",

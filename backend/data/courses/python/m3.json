@@ -1,0 +1,1426 @@
+{
+ "id": "py-m3",
+ "n": 3,
+ "skill": "python-functions",
+ "title": {
+  "en": "Functions",
+  "te": "Functions",
+  "hi": "Functions"
+ },
+ "summary": {
+  "en": "Write code once and use it many times: define functions, pass values in, get values back, and let a function call itself.",
+  "te": "ఒకసారి రాసి ఎన్నిసార్లైనా వాడండి: functions నిర్వచించడం, values పంపడం, values తిరిగి పొందడం, function తనను తానే call చేసుకోవడం.",
+  "hi": "एक बार लिखो, कई बार इस्तेमाल करो: functions बनाना, values भेजना, values वापस पाना, और function का ख़ुद को call करना।"
+ },
+ "lessons": [
+  {
+   "id": "py-m3-l1",
+   "n": 1,
+   "minutes": 20,
+   "title": {
+    "en": "Defining functions",
+    "te": "Functions నిర్వచించడం",
+    "hi": "Functions बनाना"
+   },
+   "oneLine": {
+    "en": "A function is a named block of code you write once and use many times.",
+    "te": "Function అంటే ఒకసారి రాసి, ఎన్నిసార్లైనా వాడుకునే పేరున్న code భాగం.",
+    "hi": "Function एक नाम वाला code का हिस्सा है, जिसे एक बार लिखकर कई बार इस्तेमाल करते हैं।"
+   },
+   "useCase": {
+    "en": "A mobile recharge app calls one function, recharge(), every time any customer pays.",
+    "te": "Mobile recharge app లో ఏ customer డబ్బు కట్టినా, ప్రతిసారీ ఒకే recharge() function ని పిలుస్తుంది.",
+    "hi": "Mobile recharge app में कोई भी customer पैसे दे, हर बार एक ही recharge() function बुलाया जाता है।"
+   },
+   "explain": {
+    "en": [
+     "Think of a tea stall. The owner does not explain how to make tea every time.",
+     "He just says \"one tea\", and the same steps happen.",
+     "A function works the same way. You give a set of steps a name.",
+     "In Python we write def, then the name, then brackets and a colon.",
+     "The steps go below, pushed in by four spaces.",
+     "Writing def only teaches Python the steps. To run them, you call the function by its name with brackets."
+    ],
+    "te": [
+     "ఒక టీ కొట్టు గురించి ఆలోచించండి. యజమాని ప్రతిసారీ టీ ఎలా చేయాలో వివరించడు.",
+     "\"ఒక టీ\" అంటే చాలు, అవే steps జరుగుతాయి.",
+     "Function కూడా అలాగే పనిచేస్తుంది. కొన్ని steps కి ఒక పేరు పెడతాం.",
+     "Python లో ముందు def, తర్వాత పేరు, తర్వాత brackets, colon రాస్తాం.",
+     "Steps కింద, నాలుగు spaces లోపలికి జరిపి రాస్తాం.",
+     "def రాస్తే Python కి steps నేర్పినట్టు మాత్రమే. అవి నడవాలంటే పేరు, brackets తో function ని call చేయాలి."
+    ],
+    "hi": [
+     "एक चाय की दुकान के बारे में सोचिए। मालिक हर बार चाय बनाने का तरीका नहीं समझाता।",
+     "बस \"एक चाय\" कहना काफ़ी है, वही steps हो जाते हैं।",
+     "Function भी ऐसे ही काम करता है। हम कुछ steps को एक नाम दे देते हैं।",
+     "Python में पहले def, फिर नाम, फिर brackets और colon लिखते हैं।",
+     "Steps नीचे, चार spaces अंदर खिसकाकर लिखते हैं।",
+     "def लिखने से Python सिर्फ़ steps सीखता है। उन्हें चलाने के लिए नाम और brackets के साथ function को call करते हैं।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "A function is a recipe with a name.",
+     "def writes the recipe. Calling the name cooks it."
+    ],
+    "te": [
+     "Function అంటే పేరున్న వంటకం.",
+     "def వంటకాన్ని రాస్తుంది. పేరు పిలిస్తే వంట జరుగుతుంది."
+    ],
+    "hi": [
+     "Function एक नाम वाली recipe है।",
+     "def recipe लिखता है। नाम बुलाने पर खाना बनता है।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "A school bell function: ring_bell() prints \"Class over\" whenever the period ends."
+    ],
+    "te": [
+     "School bell function: period అయిపోయిన ప్రతిసారీ ring_bell() \"Class over\" అని print చేస్తుంది."
+    ],
+    "hi": [
+     "School bell function: period ख़त्म होने पर हर बार ring_bell() \"Class over\" print करता है।"
+    ]
+   },
+   "picture": "flowchart LR\n  A[\"def greet():\"] --> B[\"steps saved\"]\n  C[\"greet()\"] --> D[\"steps run\"]\n  B -.-> D",
+   "code": {
+    "source": "def greet():\n    print(\"Namaste!\")\n    print(\"Welcome to Qubirex\")\n\ngreet()\ngreet()",
+    "output": "Namaste!\nWelcome to Qubirex\nNamaste!\nWelcome to Qubirex",
+    "notes": [
+     {
+      "line": 1,
+      "note": {
+       "en": "def starts a new function named greet. The colon says the steps come next.",
+       "te": "def తో greet అనే కొత్త function మొదలవుతుంది. Colon అంటే steps తర్వాత వస్తాయి.",
+       "hi": "def से greet नाम का नया function शुरू होता है। Colon का मतलब है steps आगे हैं।"
+      }
+     },
+     {
+      "line": 2,
+      "note": {
+       "en": "The first step, pushed in by four spaces, prints a greeting.",
+       "te": "నాలుగు spaces లోపల ఉన్న మొదటి step, ఒక greeting print చేస్తుంది.",
+       "hi": "चार spaces अंदर लिखा पहला step एक greeting print करता है।"
+      }
+     },
+     {
+      "line": 3,
+      "note": {
+       "en": "The second step is also inside, so it belongs to greet.",
+       "te": "రెండో step కూడా లోపలే ఉంది, కాబట్టి అది greet కి చెందినది.",
+       "hi": "दूसरा step भी अंदर है, इसलिए वह greet का हिस्सा है।"
+      }
+     },
+     {
+      "line": 5,
+      "note": {
+       "en": "Here we call greet. Now the two steps actually run.",
+       "te": "ఇక్కడ greet ని call చేస్తున్నాం. ఇప్పుడే ఆ రెండు steps నిజంగా నడుస్తాయి.",
+       "hi": "यहाँ greet को call करते हैं। अब दोनों steps सच में चलते हैं।"
+      }
+     },
+     {
+      "line": 6,
+      "note": {
+       "en": "We call it again, so the greeting prints a second time. Write once, use many times.",
+       "te": "మళ్లీ call చేశాం, కాబట్టి greeting రెండోసారి print అవుతుంది. ఒకసారి రాసి, ఎన్నిసార్లైనా వాడండి.",
+       "hi": "फिर से call किया, इसलिए greeting दूसरी बार print होती है। एक बार लिखो, कई बार इस्तेमाल करो।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "def greet:\n    print(\"Hi\")",
+     "fix": {
+      "en": "Brackets are needed after the name: def greet():",
+      "te": "పేరు తర్వాత brackets కావాలి: def greet():",
+      "hi": "नाम के बाद brackets ज़रूरी हैं: def greet():"
+     }
+    },
+    {
+     "wrong": "def greet():\nprint(\"Hi\")",
+     "fix": {
+      "en": "The steps must be pushed in by four spaces, otherwise Python gives an IndentationError.",
+      "te": "Steps నాలుగు spaces లోపలికి ఉండాలి, లేకపోతే Python IndentationError ఇస్తుంది.",
+      "hi": "Steps चार spaces अंदर होने चाहिए, वरना Python IndentationError देगा।"
+     }
+    },
+    {
+     "wrong": "def greet():\n    print(\"Hi\")\n# nothing happens",
+     "fix": {
+      "en": "Defining is not running. Add greet() to call it.",
+      "te": "నిర్వచించడం అంటే నడపడం కాదు. Call చేయడానికి greet() జోడించండి.",
+      "hi": "बनाना चलाना नहीं है। Call करने के लिए greet() जोड़िए।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "Which line creates a function?",
+      "te": "ఏ line function ని సృష్టిస్తుంది?",
+      "hi": "कौन-सी line function बनाती है?"
+     },
+     "options": [
+      "greet()",
+      "def greet():",
+      "function greet"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "def, the name, brackets and a colon create it.",
+      "te": "def, పేరు, brackets, colon కలిసి దాన్ని సృష్టిస్తాయి.",
+      "hi": "def, नाम, brackets और colon मिलकर इसे बनाते हैं।"
+     }
+    },
+    {
+     "q": {
+      "en": "What does greet() do?",
+      "te": "greet() ఏం చేస్తుంది?",
+      "hi": "greet() क्या करता है?"
+     },
+     "options": [
+      {
+       "en": "Defines greet",
+       "te": "greet ని నిర్వచిస్తుంది",
+       "hi": "greet को बनाता है"
+      },
+      {
+       "en": "Runs the steps of greet",
+       "te": "greet steps ని నడుపుతుంది",
+       "hi": "greet के steps चलाता है"
+      },
+      {
+       "en": "Deletes greet",
+       "te": "greet ని తొలగిస్తుంది",
+       "hi": "greet को हटाता है"
+      }
+     ],
+     "answer": 1,
+     "why": {
+      "en": "The name with brackets calls the function, so its steps run.",
+      "te": "పేరు, brackets కలిసి function ని call చేస్తాయి, అందుకే steps నడుస్తాయి.",
+      "hi": "नाम और brackets function को call करते हैं, इसलिए steps चलते हैं।"
+     }
+    },
+    {
+     "q": {
+      "en": "How many times does \"Hi\" print?\ndef say():\n    print(\"Hi\")\nsay()\nsay()\nsay()",
+      "te": "\"Hi\" ఎన్నిసార్లు print అవుతుంది?\ndef say():\n    print(\"Hi\")\nsay()\nsay()\nsay()",
+      "hi": "\"Hi\" कितनी बार print होगा?\ndef say():\n    print(\"Hi\")\nsay()\nsay()\nsay()"
+     },
+     "options": [
+      "1",
+      "3",
+      "0"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "The function is called three times.",
+      "te": "Function మూడుసార్లు call అయింది.",
+      "hi": "Function तीन बार call हुआ।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write a function named show_menu that prints \"1. Tea\" and then \"2. Coffee\" on two lines. Do not call it.",
+     "te": "show_menu అనే function రాయండి. అది \"1. Tea\", తర్వాత \"2. Coffee\" రెండు lines లో print చేయాలి. దాన్ని call చేయకండి.",
+     "hi": "show_menu नाम का function लिखिए जो \"1. Tea\" और फिर \"2. Coffee\" दो lines में print करे। उसे call मत कीजिए।"
+    },
+    "starter": "def show_menu():\n    # write the two print lines here\n",
+    "tests": [
+     {
+      "name": "show_menu exists",
+      "call": "callable(show_menu)",
+      "expected": "True"
+     },
+     {
+      "name": "prints the two menu lines",
+      "call": "_qbx_out(show_menu)",
+      "expected": "'1. Tea\\n2. Coffee\\n'"
+     }
+    ],
+    "hints": [
+     {
+      "en": "Start with def show_menu(): and put the steps inside.",
+      "te": "def show_menu(): తో మొదలుపెట్టి steps లోపల రాయండి.",
+      "hi": "def show_menu(): से शुरू करके steps अंदर लिखिए।"
+     },
+     {
+      "en": "Each line inside needs four spaces in front.",
+      "te": "లోపలి ప్రతి line ముందు నాలుగు spaces కావాలి.",
+      "hi": "अंदर की हर line के आगे चार spaces चाहिए।"
+     },
+     {
+      "en": "Use two print lines: print(\"1. Tea\") and print(\"2. Coffee\").",
+      "te": "రెండు print lines వాడండి: print(\"1. Tea\"), print(\"2. Coffee\").",
+      "hi": "दो print lines लिखिए: print(\"1. Tea\") और print(\"2. Coffee\")।"
+     }
+    ],
+    "solution": "def show_menu():\n    print(\"1. Tea\")\n    print(\"2. Coffee\")"
+   },
+   "cheat": {
+    "en": [
+     "def name(): creates a function.",
+     "Steps go inside, four spaces in.",
+     "name() calls it; call as many times as you like."
+    ],
+    "te": [
+     "def name(): function ని సృష్టిస్తుంది.",
+     "Steps లోపల, నాలుగు spaces లో.",
+     "name() దాన్ని call చేస్తుంది; ఎన్నిసార్లైనా call చేయవచ్చు."
+    ],
+    "hi": [
+     "def name(): function बनाता है।",
+     "Steps अंदर, चार spaces पर।",
+     "name() उसे call करता है; जितनी बार चाहें call करें।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "In a kirana shop app, the same bill header must print for every customer. How would a function help, and how do you define and run it?",
+      "te": "కిరాణా shop app లో ప్రతి customer కి ఒకే bill header print అవ్వాలి. Function ఎలా సహాయపడుతుంది, దాన్ని ఎలా నిర్వచించి నడుపుతారు?",
+      "hi": "किराना shop app में हर customer के लिए एक ही bill header print होना है। Function कैसे मदद करेगा, और उसे कैसे बनाकर चलाएँगे?"
+     },
+     {
+      "en": "Explain the difference between writing def print_ticket(): and writing print_ticket() in a bus ticket program.",
+      "te": "Bus ticket program లో def print_ticket(): రాయడానికి, print_ticket() రాయడానికి తేడా వివరించండి.",
+      "hi": "Bus ticket program में def print_ticket(): लिखने और print_ticket() लिखने में क्या फ़र्क है, समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "def"
+     ],
+     [
+      "call",
+      "పిలు",
+      "కాల్",
+      "बुला",
+      "कॉल",
+      "()"
+     ],
+     [
+      "once",
+      "reuse",
+      "many",
+      "again",
+      "ఒకసారి",
+      "మళ్లీ",
+      "ఎన్నిసార్లు",
+      "एक बार",
+      "बार-बार",
+      "दोबारा",
+      "कई बार"
+     ]
+    ],
+    "challenge": {
+     "en": "Say in your own words why a function saves work.",
+     "te": "Function పని ఎందుకు తగ్గిస్తుందో మీ మాటల్లో చెప్పండి.",
+     "hi": "Function काम क्यों बचाता है, अपने शब्दों में बताइए।"
+    }
+   }
+  },
+  {
+   "id": "py-m3-l2",
+   "n": 2,
+   "minutes": 20,
+   "title": {
+    "en": "Parameters and arguments",
+    "te": "Parameters మరియు arguments",
+    "hi": "Parameters और arguments"
+   },
+   "oneLine": {
+    "en": "Parameters are the empty slots in a function; arguments are the values you put in them when you call it.",
+    "te": "Parameters అంటే function లోని ఖాళీ స్థానాలు; call చేసేటప్పుడు వాటిలో పెట్టే values arguments.",
+    "hi": "Parameters function की खाली जगहें हैं; call करते समय उनमें डाली गई values arguments हैं।"
+   },
+   "useCase": {
+    "en": "A railway app has one function book(name, seat) and fills in a different passenger and seat for every booking.",
+    "te": "Railway app లో ఒకే book(name, seat) function ఉంటుంది; ప్రతి booking కి వేరే passenger, seat నింపుతుంది.",
+    "hi": "Railway app में एक ही book(name, seat) function होता है; हर booking में अलग passenger और seat भरी जाती है।"
+   },
+   "explain": {
+    "en": [
+     "A tea order is not always the same. One person wants less sugar, another wants extra.",
+     "So the function needs a slot to receive that detail.",
+     "Inside the brackets of def we write names for these slots. They are called parameters.",
+     "When we call the function, we put real values in the brackets. These are arguments.",
+     "The first argument goes into the first parameter, the second into the second.",
+     "Now one function can handle every customer."
+    ],
+    "te": [
+     "టీ order ఎప్పుడూ ఒకేలా ఉండదు. ఒకరికి తక్కువ చక్కెర, ఇంకొకరికి ఎక్కువ.",
+     "అందుకే ఆ వివరం అందుకోవడానికి function కి ఒక స్థానం కావాలి.",
+     "def brackets లోపల ఈ స్థానాలకు పేర్లు రాస్తాం. వాటిని parameters అంటారు.",
+     "Function ని call చేసేటప్పుడు brackets లో నిజమైన values పెడతాం. అవే arguments.",
+     "మొదటి argument మొదటి parameter లోకి, రెండోది రెండో దానిలోకి వెళ్తుంది.",
+     "ఇప్పుడు ఒకే function ప్రతి customer ని చూసుకోగలదు."
+    ],
+    "hi": [
+     "चाय का order हमेशा एक जैसा नहीं होता। किसी को कम चीनी चाहिए, किसी को ज़्यादा।",
+     "इसलिए function को वह जानकारी लेने के लिए एक जगह चाहिए।",
+     "def के brackets में इन जगहों के नाम लिखते हैं। इन्हें parameters कहते हैं।",
+     "Function को call करते समय brackets में असली values डालते हैं। ये arguments हैं।",
+     "पहला argument पहले parameter में जाता है, दूसरा दूसरे में।",
+     "अब एक ही function हर customer को संभाल सकता है।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "Parameters are empty boxes in the recipe.",
+     "Arguments are what you put in the boxes when you cook."
+    ],
+    "te": [
+     "Parameters వంటకంలోని ఖాళీ డబ్బాలు.",
+     "వంట చేసేటప్పుడు ఆ డబ్బాల్లో పెట్టేవి arguments."
+    ],
+    "hi": [
+     "Parameters recipe के खाली डिब्बे हैं।",
+     "खाना बनाते समय डिब्बों में जो डालते हैं, वे arguments हैं।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "A greeting card function card(name, festival) prints \"Happy Diwali, Ravi\" or \"Happy Pongal, Sita\" from the same code."
+    ],
+    "te": [
+     "card(name, festival) function ఒకే code తో \"Happy Diwali, Ravi\" లేదా \"Happy Pongal, Sita\" print చేస్తుంది."
+    ],
+    "hi": [
+     "card(name, festival) function एक ही code से \"Happy Diwali, Ravi\" या \"Happy Holi, Sita\" print करता है।"
+    ]
+   },
+   "picture": "flowchart LR\n  A[\"make_tea('Ravi', 1)\"] -->|\"Ravi\"| P1[\"name\"]\n  A -->|\"1\"| P2[\"sugar\"]\n  P1 --> F[\"make_tea\"]\n  P2 --> F",
+   "code": {
+    "source": "def make_tea(name, sugar):\n    print(\"Tea for\", name)\n    print(\"Sugar spoons:\", sugar)\n\nmake_tea(\"Ravi\", 1)\nmake_tea(\"Sita\", 2)",
+    "output": "Tea for Ravi\nSugar spoons: 1\nTea for Sita\nSugar spoons: 2",
+    "notes": [
+     {
+      "line": 1,
+      "note": {
+       "en": "name and sugar are parameters: empty slots this function will receive.",
+       "te": "name, sugar parameters: ఈ function అందుకునే ఖాళీ స్థానాలు.",
+       "hi": "name और sugar parameters हैं: वे खाली जगहें जो यह function लेगा।"
+      }
+     },
+     {
+      "line": 2,
+      "note": {
+       "en": "Inside, we use name like any variable. Its value comes from the call.",
+       "te": "లోపల name ని మామూలు variable లా వాడతాం. దాని value call నుంచి వస్తుంది.",
+       "hi": "अंदर name को आम variable की तरह इस्तेमाल करते हैं। उसकी value call से आती है।"
+      }
+     },
+     {
+      "line": 3,
+      "note": {
+       "en": "sugar is used the same way.",
+       "te": "sugar కూడా అలాగే వాడతాం.",
+       "hi": "sugar भी ऐसे ही इस्तेमाल होता है।"
+      }
+     },
+     {
+      "line": 5,
+      "note": {
+       "en": "The arguments \"Ravi\" and 1 go into name and sugar, in order.",
+       "te": "Arguments \"Ravi\", 1 వరుసగా name, sugar లోకి వెళ్తాయి.",
+       "hi": "Arguments \"Ravi\" और 1 क्रम से name और sugar में जाते हैं।"
+      }
+     },
+     {
+      "line": 6,
+      "note": {
+       "en": "A new call with new arguments: the same function serves Sita.",
+       "te": "కొత్త arguments తో కొత్త call: అదే function Sita కి సేవ చేస్తుంది.",
+       "hi": "नए arguments के साथ नया call: वही function Sita के लिए काम करता है।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "make_tea(\"Ravi\")",
+     "fix": {
+      "en": "The function has two parameters, so give two arguments: make_tea(\"Ravi\", 1).",
+      "te": "Function కి రెండు parameters ఉన్నాయి, కాబట్టి రెండు arguments ఇవ్వండి: make_tea(\"Ravi\", 1).",
+      "hi": "Function में दो parameters हैं, इसलिए दो arguments दीजिए: make_tea(\"Ravi\", 1)।"
+     }
+    },
+    {
+     "wrong": "make_tea(1, \"Ravi\")",
+     "fix": {
+      "en": "Order matters: the first argument goes to the first parameter.",
+      "te": "క్రమం ముఖ్యం: మొదటి argument మొదటి parameter లోకి వెళ్తుంది.",
+      "hi": "क्रम ज़रूरी है: पहला argument पहले parameter में जाता है।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "In def add(a, b):, what are a and b?",
+      "te": "def add(a, b): లో a, b ఏమిటి?",
+      "hi": "def add(a, b): में a और b क्या हैं?"
+     },
+     "options": [
+      "arguments",
+      "parameters",
+      "variables outside"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Names inside the def brackets are parameters.",
+      "te": "def brackets లోని పేర్లు parameters.",
+      "hi": "def के brackets में लिखे नाम parameters हैं।"
+     }
+    },
+    {
+     "q": {
+      "en": "In add(3, 5), what are 3 and 5?",
+      "te": "add(3, 5) లో 3, 5 ఏమిటి?",
+      "hi": "add(3, 5) में 3 और 5 क्या हैं?"
+     },
+     "options": [
+      "arguments",
+      "parameters",
+      "functions"
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Values given in a call are arguments.",
+      "te": "Call లో ఇచ్చే values arguments.",
+      "hi": "Call में दी गई values arguments हैं।"
+     }
+    },
+    {
+     "q": {
+      "en": "def hello(name):\n    print(\"Hi\", name)\nWhat does hello(\"Anu\") print?",
+      "te": "def hello(name):\n    print(\"Hi\", name)\nhello(\"Anu\") ఏం print చేస్తుంది?",
+      "hi": "def hello(name):\n    print(\"Hi\", name)\nhello(\"Anu\") क्या print करेगा?"
+     },
+     "options": [
+      "Hi name",
+      "Hi Anu",
+      "Anu"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "\"Anu\" goes into name, so it prints Hi Anu.",
+      "te": "\"Anu\" name లోకి వెళ్తుంది, అందుకే Hi Anu print అవుతుంది.",
+      "hi": "\"Anu\" name में जाता है, इसलिए Hi Anu print होता है।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write a function welcome(name, city) that prints \"Welcome NAME from CITY\", for example welcome(\"Ravi\", \"Guntur\") prints \"Welcome Ravi from Guntur\".",
+     "te": "welcome(name, city) అనే function రాయండి. అది \"Welcome NAME from CITY\" print చేయాలి. ఉదాహరణకు welcome(\"Ravi\", \"Guntur\") \"Welcome Ravi from Guntur\" print చేయాలి.",
+     "hi": "welcome(name, city) function लिखिए जो \"Welcome NAME from CITY\" print करे, जैसे welcome(\"Ravi\", \"Indore\") \"Welcome Ravi from Indore\" print करे।"
+    },
+    "starter": "def welcome(name, city):\n    # print the message here\n",
+    "tests": [
+     {
+      "name": "welcome(\"Ravi\", \"Guntur\")",
+      "call": "_qbx_out(welcome, 'Ravi', 'Guntur')",
+      "expected": "'Welcome Ravi from Guntur\\n'"
+     },
+     {
+      "name": "another name and city",
+      "call": "_qbx_out(welcome, 'Sita', 'Nagpur')",
+      "expected": "'Welcome Sita from Nagpur\\n'",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "The function already has the two parameters you need.",
+      "te": "మీకు కావలసిన రెండు parameters function లో ఇప్పటికే ఉన్నాయి.",
+      "hi": "Function में आपके दोनों parameters पहले से हैं।"
+     },
+     {
+      "en": "print can take several values separated by commas; it puts spaces between them.",
+      "te": "print కి commas తో చాలా values ఇవ్వవచ్చు; అది మధ్యలో spaces పెడుతుంది.",
+      "hi": "print को commas से कई values दे सकते हैं; वह बीच में spaces डालता है।"
+     },
+     {
+      "en": "Try print(\"Welcome\", name, \"from\", city).",
+      "te": "print(\"Welcome\", name, \"from\", city) ప్రయత్నించండి.",
+      "hi": "print(\"Welcome\", name, \"from\", city) आज़माइए।"
+     }
+    ],
+    "solution": "def welcome(name, city):\n    print(\"Welcome\", name, \"from\", city)"
+   },
+   "cheat": {
+    "en": [
+     "def f(a, b): — a and b are parameters.",
+     "f(1, 2) — 1 and 2 are arguments.",
+     "Arguments fill parameters in order."
+    ],
+    "te": [
+     "def f(a, b): — a, b parameters.",
+     "f(1, 2) — 1, 2 arguments.",
+     "Arguments వరుసగా parameters ని నింపుతాయి."
+    ],
+    "hi": [
+     "def f(a, b): — a और b parameters हैं।",
+     "f(1, 2) — 1 और 2 arguments हैं।",
+     "Arguments क्रम से parameters भरते हैं।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A bus depot prints a ticket for each passenger with their name and stop. Explain parameters and arguments using a print_ticket function.",
+      "te": "Bus depot ప్రతి passenger కి పేరు, stop తో ticket print చేస్తుంది. print_ticket function తో parameters, arguments వివరించండి.",
+      "hi": "Bus depot हर passenger के नाम और stop के साथ ticket print करता है। print_ticket function से parameters और arguments समझाइए।"
+     },
+     {
+      "en": "Why can one function serve many customers in a recharge app? Use the words parameter and argument.",
+      "te": "Recharge app లో ఒకే function చాలా మంది customers కి ఎలా సేవ చేయగలదు? Parameter, argument పదాలు వాడండి.",
+      "hi": "Recharge app में एक ही function कई customers के लिए कैसे काम कर सकता है? Parameter और argument शब्दों का इस्तेमाल कीजिए।"
+     }
+    ],
+    "keywords": [
+     [
+      "parameter"
+     ],
+     [
+      "argument"
+     ],
+     [
+      "value",
+      "values",
+      "విలువ",
+      "మూల్యం",
+      "मान",
+      "value"
+     ]
+    ],
+    "challenge": {
+     "en": "Say what happens to the arguments when you call a function.",
+     "te": "Function ని call చేసినప్పుడు arguments కి ఏమవుతుందో చెప్పండి.",
+     "hi": "Function को call करने पर arguments के साथ क्या होता है, बताइए।"
+    }
+   }
+  },
+  {
+   "id": "py-m3-l3",
+   "n": 3,
+   "minutes": 25,
+   "title": {
+    "en": "Return values",
+    "te": "Return values",
+    "hi": "Return values"
+   },
+   "oneLine": {
+    "en": "A return statement sends a value back from a function, so the code that called it can use that value.",
+    "te": "Return statement function నుంచి ఒక value ని వెనక్కి పంపుతుంది, call చేసిన code ఆ value ని వాడుకోవచ్చు.",
+    "hi": "Return statement function से एक value वापस भेजता है, ताकि call करने वाला code उस value को इस्तेमाल कर सके।"
+   },
+   "useCase": {
+    "en": "A shopping app calls total(price, qty); the returned amount is then used for GST and the final bill.",
+    "te": "Shopping app total(price, qty) ని call చేస్తుంది; వచ్చిన amount తో GST, final bill లెక్కిస్తుంది.",
+    "hi": "Shopping app total(price, qty) को call करता है; लौटी हुई amount से GST और final bill बनता है।"
+   },
+   "explain": {
+    "en": [
+     "Imagine you ask a friend to add the cricket score of two overs.",
+     "If he only shouts the answer, you hear it, but you cannot write it in the scorebook.",
+     "If he hands you the number on a slip, you can use it again.",
+     "print is like shouting. It shows the value on the screen and the value is gone.",
+     "return is like handing over the slip. The value comes back to the line that called the function.",
+     "So we can store it in a variable, or use it in another calculation.",
+     "When Python reaches return, the function stops there."
+    ],
+    "te": [
+     "రెండు overs cricket score ని కలపమని ఒక స్నేహితుడిని అడిగారనుకోండి.",
+     "అతను జవాబు అరిచి చెబితే, మీకు వినిపిస్తుంది, కానీ scorebook లో రాయలేరు.",
+     "అదే number ని ఒక చీటీపై ఇస్తే, మళ్లీ వాడుకోవచ్చు.",
+     "print అరవడం లాంటిది. Screen పై value చూపిస్తుంది, తర్వాత ఆ value పోతుంది.",
+     "return చీటీ ఇవ్వడం లాంటిది. Function ని call చేసిన line కి value తిరిగి వస్తుంది.",
+     "కాబట్టి దాన్ని ఒక variable లో దాచుకోవచ్చు, లేదా ఇంకో లెక్కలో వాడొచ్చు.",
+     "Python return దగ్గరికి రాగానే function అక్కడే ఆగిపోతుంది."
+    ],
+    "hi": [
+     "मान लीजिए आप एक दोस्त से दो overs का cricket score जोड़ने को कहते हैं।",
+     "अगर वह सिर्फ़ जवाब चिल्लाकर बताए, तो आप सुन लेंगे, पर scorebook में नहीं लिख पाएँगे।",
+     "अगर वह वही number एक पर्ची पर दे, तो आप उसे फिर से इस्तेमाल कर सकते हैं।",
+     "print चिल्लाने जैसा है। Screen पर value दिखाता है, फिर वह value चली जाती है।",
+     "return पर्ची देने जैसा है। Value उस line पर वापस आती है जिसने function को call किया।",
+     "इसलिए हम उसे एक variable में रख सकते हैं, या किसी और हिसाब में इस्तेमाल कर सकते हैं।",
+     "Python जैसे ही return पर पहुँचता है, function वहीं रुक जाता है।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "print shows the answer. return gives the answer back.",
+     "Only a returned answer can be saved and used again."
+    ],
+    "te": [
+     "print జవాబు చూపిస్తుంది. return జవాబు వెనక్కి ఇస్తుంది.",
+     "Return అయిన జవాబుని మాత్రమే దాచుకుని మళ్లీ వాడగలం."
+    ],
+    "hi": [
+     "print जवाब दिखाता है। return जवाब वापस देता है।",
+     "सिर्फ़ return हुआ जवाब ही रखा और दोबारा इस्तेमाल किया जा सकता है।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "def square(n): return n * n. Then area = square(4) + square(3) gives 25, because each call hands back its value."
+    ],
+    "te": [
+     "def square(n): return n * n. తర్వాత area = square(4) + square(3) విలువ 25, ఎందుకంటే ప్రతి call తన value ని వెనక్కి ఇస్తుంది."
+    ],
+    "hi": [
+     "def square(n): return n * n. फिर area = square(4) + square(3) से 25 मिलता है, क्योंकि हर call अपनी value वापस देता है।"
+    ]
+   },
+   "picture": "flowchart LR\n  C[\"bill = total(50, 3)\"] -->|\"50, 3\"| F[\"total: price * qty\"]\n  F -->|\"return 150\"| C\n  C --> B[\"bill is 150\"]",
+   "code": {
+    "source": "def total(price, qty):\n    amount = price * qty\n    return amount\n\nbill = total(50, 3)\nprint(\"Bill:\", bill)\nprint(\"With GST:\", bill * 1.18)",
+    "output": "Bill: 150\nWith GST: 177.0",
+    "notes": [
+     {
+      "line": 1,
+      "note": {
+       "en": "total has two parameters: the price of one item and how many.",
+       "te": "total కి రెండు parameters: ఒక వస్తువు ధర, ఎన్ని.",
+       "hi": "total के दो parameters हैं: एक चीज़ का दाम और कितनी।"
+      }
+     },
+     {
+      "line": 2,
+      "note": {
+       "en": "Inside, we calculate the amount and keep it in a variable.",
+       "te": "లోపల amount లెక్కించి ఒక variable లో ఉంచుతాం.",
+       "hi": "अंदर amount का हिसाब करके एक variable में रखते हैं।"
+      }
+     },
+     {
+      "line": 3,
+      "note": {
+       "en": "return sends amount back to the caller. The function stops here.",
+       "te": "return amount ని call చేసిన చోటికి పంపుతుంది. Function ఇక్కడ ఆగుతుంది.",
+       "hi": "return amount को call करने वाली जगह भेजता है। Function यहीं रुकता है।"
+      }
+     },
+     {
+      "line": 5,
+      "note": {
+       "en": "The returned value, 150, is stored in bill.",
+       "te": "తిరిగి వచ్చిన value 150, bill లో దాచబడుతుంది.",
+       "hi": "लौटी हुई value 150, bill में रखी जाती है।"
+      }
+     },
+     {
+      "line": 6,
+      "note": {
+       "en": "Now we can print bill.",
+       "te": "ఇప్పుడు bill ని print చేయవచ్చు.",
+       "hi": "अब bill को print कर सकते हैं।"
+      }
+     },
+     {
+      "line": 7,
+      "note": {
+       "en": "And use it again in another calculation. This is what print alone cannot do.",
+       "te": "ఇంకో లెక్కలో మళ్లీ వాడొచ్చు. ఒక్క print తో ఇది సాధ్యం కాదు.",
+       "hi": "और दूसरे हिसाब में फिर से इस्तेमाल कर सकते हैं। सिर्फ़ print से यह नहीं हो सकता।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "def total(p, q):\n    print(p * q)\nbill = total(50, 3)   # bill is None",
+     "fix": {
+      "en": "print only shows the value. Use return p * q so the caller gets it.",
+      "te": "print value ని చూపిస్తుంది మాత్రమే. Caller కి అందాలంటే return p * q వాడండి.",
+      "hi": "print सिर्फ़ value दिखाता है। Caller को मिले, इसके लिए return p * q लिखिए।"
+     }
+    },
+    {
+     "wrong": "def total(p, q):\n    return p * q\n    print(\"done\")",
+     "fix": {
+      "en": "Lines after return never run. Put anything you need before return.",
+      "te": "return తర్వాతి lines ఎప్పటికీ నడవవు. కావలసినవన్నీ return కి ముందు రాయండి.",
+      "hi": "return के बाद की lines कभी नहीं चलतीं। ज़रूरी चीज़ें return से पहले लिखिए।"
+     }
+    },
+    {
+     "wrong": "def total(p, q):\n    return p * q\ntotal(50, 3)   # value lost",
+     "fix": {
+      "en": "The value comes back, but nobody keeps it. Store it: bill = total(50, 3).",
+      "te": "Value వెనక్కి వచ్చింది, కానీ ఎవరూ దాచుకోలేదు. దాచండి: bill = total(50, 3).",
+      "hi": "Value वापस आई, पर किसी ने रखी नहीं। रखिए: bill = total(50, 3)।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "def f():\n    return 5\nx = f()\nWhat is x?",
+      "te": "def f():\n    return 5\nx = f()\nx విలువ ఎంత?",
+      "hi": "def f():\n    return 5\nx = f()\nx क्या है?"
+     },
+     "options": [
+      "None",
+      "5",
+      "f"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "f returns 5, and the call hands 5 to x.",
+      "te": "f 5 ని return చేస్తుంది, call ఆ 5 ని x కి ఇస్తుంది.",
+      "hi": "f 5 return करता है, और call वह 5 x को देता है।"
+     }
+    },
+    {
+     "q": {
+      "en": "def f():\n    print(5)\nx = f()\nWhat is x?",
+      "te": "def f():\n    print(5)\nx = f()\nx విలువ ఎంత?",
+      "hi": "def f():\n    print(5)\nx = f()\nx क्या है?"
+     },
+     "options": [
+      "5",
+      "None",
+      "\"5\""
+     ],
+     "answer": 1,
+     "why": {
+      "en": "print shows 5 but returns nothing, so x is None.",
+      "te": "print 5 చూపిస్తుంది కానీ ఏమీ return చేయదు, అందుకే x None.",
+      "hi": "print 5 दिखाता है पर कुछ return नहीं करता, इसलिए x None है।"
+     }
+    },
+    {
+     "q": {
+      "en": "What happens to lines written after return inside a function?",
+      "te": "Function లో return తర్వాత రాసిన lines కి ఏమవుతుంది?",
+      "hi": "Function में return के बाद लिखी lines का क्या होता है?"
+     },
+     "options": [
+      {
+       "en": "They run first",
+       "te": "అవి ముందు నడుస్తాయి",
+       "hi": "वे पहले चलती हैं"
+      },
+      {
+       "en": "They never run",
+       "te": "అవి ఎప్పటికీ నడవవు",
+       "hi": "वे कभी नहीं चलतीं"
+      },
+      {
+       "en": "They run twice",
+       "te": "అవి రెండుసార్లు నడుస్తాయి",
+       "hi": "वे दो बार चलती हैं"
+      }
+     ],
+     "answer": 1,
+     "why": {
+      "en": "return ends the function at once.",
+      "te": "return వెంటనే function ని ముగిస్తుంది.",
+      "hi": "return function को तुरंत ख़त्म कर देता है।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write a function multiply(a, b) that returns the result of multiplying the two numbers. Do not print it.",
+     "te": "multiply(a, b) అనే function రాయండి. అది రెండు numbers గుణించిన ఫలితాన్ని return చేయాలి. Print చేయకండి.",
+     "hi": "multiply(a, b) function लिखिए जो दोनों numbers के गुणा का result return करे। Print मत कीजिए।"
+    },
+    "starter": "def multiply(a, b):\n    # return the result here\n    pass\n",
+    "tests": [
+     {
+      "name": "multiply(2, 3) gives 6",
+      "call": "multiply(2, 3)",
+      "expected": "6"
+     },
+     {
+      "name": "multiply(10, 0) gives 0",
+      "call": "multiply(10, 0)",
+      "expected": "0"
+     },
+     {
+      "name": "works with negative numbers",
+      "call": "multiply(-4, 5)",
+      "expected": "-20",
+      "hidden": true
+     },
+     {
+      "name": "works with decimals",
+      "call": "multiply(2.5, 4)",
+      "expected": "10.0",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "The answer must come back with return, not print.",
+      "te": "జవాబు return తో రావాలి, print తో కాదు.",
+      "hi": "जवाब return से आना चाहिए, print से नहीं।"
+     },
+     {
+      "en": "Multiplication in Python is the * sign.",
+      "te": "Python లో గుణకారం * గుర్తు.",
+      "hi": "Python में गुणा * निशान है।"
+     },
+     {
+      "en": "Replace pass with: return a * b",
+      "te": "pass బదులు ఇది రాయండి: return a * b",
+      "hi": "pass की जगह लिखिए: return a * b"
+     }
+    ],
+    "solution": "def multiply(a, b):\n    return a * b"
+   },
+   "cheat": {
+    "en": [
+     "return value sends value back to the caller.",
+     "x = f() keeps the returned value.",
+     "print shows; return gives back. A function without return gives None.",
+     "Lines after return do not run."
+    ],
+    "te": [
+     "return value, value ని caller కి పంపుతుంది.",
+     "x = f() return అయిన value ని దాచుకుంటుంది.",
+     "print చూపిస్తుంది; return వెనక్కి ఇస్తుంది. return లేని function None ఇస్తుంది.",
+     "return తర్వాతి lines నడవవు."
+    ],
+    "hi": [
+     "return value, value को caller को वापस भेजता है।",
+     "x = f() लौटी हुई value रख लेता है।",
+     "print दिखाता है; return वापस देता है। बिना return वाला function None देता है।",
+     "return के बाद की lines नहीं चलतीं।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "In a kirana billing program, function price_of(item) is used to add up the bill. Why must it use return and not print? Explain with what goes wrong otherwise.",
+      "te": "కిరాణా billing program లో price_of(item) function తో bill మొత్తం కలుపుతారు. అది print కాకుండా return ఎందుకు వాడాలి? లేకపోతే ఏం తప్పు జరుగుతుందో వివరించండి.",
+      "hi": "किराना billing program में price_of(item) function से bill जोड़ा जाता है। उसे print नहीं, return क्यों इस्तेमाल करना चाहिए? वरना क्या गड़बड़ होगी, समझाइए।"
+     },
+     {
+      "en": "A cricket app has runs_in_over(balls). The total score adds the result of many calls. Explain what return does here and what the caller receives.",
+      "te": "Cricket app లో runs_in_over(balls) ఉంది. Total score చాలా calls ఫలితాలను కలుపుతుంది. ఇక్కడ return ఏం చేస్తుంది, caller కి ఏం అందుతుందో వివరించండి.",
+      "hi": "Cricket app में runs_in_over(balls) है। Total score कई calls के results जोड़ता है। यहाँ return क्या करता है और caller को क्या मिलता है, समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "return"
+     ],
+     [
+      "value",
+      "number",
+      "result",
+      "విలువ",
+      "ఫలితం",
+      "జవాబు",
+      "मान",
+      "नतीजा",
+      "जवाब",
+      "result"
+     ],
+     [
+      "print",
+      "none",
+      "show",
+      "చూపి",
+      "दिखा"
+     ],
+     [
+      "caller",
+      "back",
+      "variable",
+      "store",
+      "వెనక్కి",
+      "దాచు",
+      "वापस",
+      "रख"
+     ]
+    ],
+    "challenge": {
+     "en": "Say in your own words the difference between return and print.",
+     "te": "return కి print కి తేడా మీ మాటల్లో చెప్పండి.",
+     "hi": "return और print का फ़र्क अपने शब्दों में बताइए।"
+    }
+   }
+  },
+  {
+   "id": "py-m3-l4",
+   "n": 4,
+   "minutes": 25,
+   "title": {
+    "en": "Scope and recursion",
+    "te": "Scope మరియు recursion",
+    "hi": "Scope और recursion"
+   },
+   "oneLine": {
+    "en": "Scope decides where a variable can be used; recursion is a function that calls itself on a smaller problem.",
+    "te": "Variable ఎక్కడ వాడొచ్చో scope నిర్ణయిస్తుంది; recursion అంటే చిన్న సమస్యపై తనను తానే call చేసుకునే function.",
+    "hi": "Scope तय करता है कि variable कहाँ इस्तेमाल हो सकता है; recursion वह function है जो छोटी समस्या पर ख़ुद को call करता है।"
+   },
+   "useCase": {
+    "en": "A file manager uses recursion to count files inside folders inside folders.",
+    "te": "File manager folders లోపల ఉన్న folders లోని files లెక్కించడానికి recursion వాడుతుంది.",
+    "hi": "File manager folders के अंदर folders में files गिनने के लिए recursion इस्तेमाल करता है।"
+   },
+   "explain": {
+    "en": [
+     "A variable made inside a function lives only inside it. This is local scope.",
+     "Like a note written inside your classroom; other classes cannot read it.",
+     "A variable made outside all functions is global. Functions can read it.",
+     "Recursion is when a function calls itself, each time with a smaller job.",
+     "Think of counting a stack of plates: take one, then count the rest the same way.",
+     "Every recursion needs a stopping point, called the base case. Without it, it never ends."
+    ],
+    "te": [
+     "Function లోపల తయారైన variable ఆ function లోపలే ఉంటుంది. ఇది local scope.",
+     "మీ classroom లో రాసిన note లాంటిది; ఇతర classes దాన్ని చదవలేవు.",
+     "అన్ని functions బయట తయారైన variable global. Functions దాన్ని చదవగలవు.",
+     "Recursion అంటే function తనను తానే call చేసుకోవడం, ప్రతిసారీ చిన్న పనితో.",
+     "Plates కుప్ప లెక్కపెట్టడం ఊహించండి: ఒకటి తీసి, మిగతావి అదే విధంగా లెక్కించండి.",
+     "ప్రతి recursion కి ఆగే చోటు కావాలి, దాన్ని base case అంటారు. అది లేకపోతే ఎప్పటికీ ఆగదు."
+    ],
+    "hi": [
+     "Function के अंदर बना variable उसी के अंदर रहता है। यह local scope है।",
+     "जैसे आपकी classroom में लिखा note; दूसरी classes उसे नहीं पढ़ सकतीं।",
+     "सारे functions के बाहर बना variable global होता है। Functions उसे पढ़ सकते हैं।",
+     "Recursion में function ख़ुद को call करता है, हर बार छोटे काम के साथ।",
+     "Plates का ढेर गिनने की सोचिए: एक उठाइए, फिर बाकी को इसी तरह गिनिए।",
+     "हर recursion को रुकने की जगह चाहिए, जिसे base case कहते हैं। उसके बिना वह कभी नहीं रुकता।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "Inside variables stay inside.",
+     "Recursion: solve a small part, call yourself for the rest, stop at the base case."
+    ],
+    "te": [
+     "లోపలి variables లోపలే ఉంటాయి.",
+     "Recursion: చిన్న భాగం పూర్తి చేసి, మిగతాదానికి తనను తానే call చేసి, base case దగ్గర ఆగుతుంది."
+    ],
+    "hi": [
+     "अंदर के variables अंदर ही रहते हैं।",
+     "Recursion: छोटा हिस्सा करो, बाकी के लिए ख़ुद को call करो, base case पर रुको।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "countdown(3) prints 3, then calls countdown(2), then 1, and stops at 0 with \"Go!\"."
+    ],
+    "te": [
+     "countdown(3) 3 print చేసి countdown(2) ని, తర్వాత 1 ని call చేసి, 0 దగ్గర \"Go!\" అని ఆగుతుంది."
+    ],
+    "hi": [
+     "countdown(3) 3 print करता है, फिर countdown(2), फिर 1 को call करता है, और 0 पर \"Go!\" कहकर रुकता है।"
+    ]
+   },
+   "picture": "flowchart TD\n  A[\"fact(3)\"] --> B[\"3 * fact(2)\"]\n  B --> C[\"2 * fact(1)\"]\n  C --> D[\"base case: 1\"]\n  D --> E[\"answer 6\"]",
+   "code": {
+    "source": "shop = \"Ravi Stores\"\n\ndef factorial(n):\n    if n == 1:\n        return 1\n    return n * factorial(n - 1)\n\nprint(shop)\nprint(factorial(4))",
+    "output": "Ravi Stores\n24",
+    "notes": [
+     {
+      "line": 1,
+      "note": {
+       "en": "shop is global: made outside every function, so any code can read it.",
+       "te": "shop global: అన్ని functions బయట తయారైంది, కాబట్టి ఏ code అయినా చదవగలదు.",
+       "hi": "shop global है: सभी functions के बाहर बना, इसलिए कोई भी code इसे पढ़ सकता है।"
+      }
+     },
+     {
+      "line": 3,
+      "note": {
+       "en": "factorial will call itself. n is local to each call.",
+       "te": "factorial తనను తానే call చేసుకుంటుంది. n ప్రతి call కి local.",
+       "hi": "factorial ख़ुद को call करेगा। n हर call का local है।"
+      }
+     },
+     {
+      "line": 4,
+      "note": {
+       "en": "The base case: when n is 1, stop.",
+       "te": "Base case: n 1 అయినప్పుడు ఆగాలి.",
+       "hi": "Base case: जब n 1 हो, रुक जाओ।"
+      }
+     },
+     {
+      "line": 5,
+      "note": {
+       "en": "Return 1 without calling again.",
+       "te": "మళ్లీ call చేయకుండా 1 return చేయాలి.",
+       "hi": "दोबारा call किए बिना 1 return करो।"
+      }
+     },
+     {
+      "line": 6,
+      "note": {
+       "en": "Otherwise multiply n by the factorial of a smaller number. Each call gets a smaller job.",
+       "te": "లేకపోతే n ని ఒక చిన్న number factorial తో గుణించాలి. ప్రతి call కి చిన్న పని.",
+       "hi": "वरना n को एक छोटे number के factorial से गुणा करो। हर call को छोटा काम मिलता है।"
+      }
+     },
+     {
+      "line": 9,
+      "note": {
+       "en": "factorial(4) is 4 × 3 × 2 × 1, which is 24.",
+       "te": "factorial(4) అంటే 4 × 3 × 2 × 1, అంటే 24.",
+       "hi": "factorial(4) यानी 4 × 3 × 2 × 1, यानी 24।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "def f():\n    total = 5\nprint(total)   # NameError",
+     "fix": {
+      "en": "total lives only inside f. Return it instead: return total, then x = f().",
+      "te": "total f లోపలే ఉంటుంది. దాన్ని return చేయండి: return total, తర్వాత x = f().",
+      "hi": "total सिर्फ़ f के अंदर है। उसे return कीजिए: return total, फिर x = f()।"
+     }
+    },
+    {
+     "wrong": "def count(n):\n    return count(n - 1)",
+     "fix": {
+      "en": "There is no base case, so it never stops. Add: if n == 0: return 0.",
+      "te": "Base case లేదు, కాబట్టి ఎప్పటికీ ఆగదు. జోడించండి: if n == 0: return 0.",
+      "hi": "Base case नहीं है, इसलिए यह कभी नहीं रुकता। जोड़िए: if n == 0: return 0।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "A variable created inside a function is…",
+      "te": "Function లోపల తయారైన variable…",
+      "hi": "Function के अंदर बना variable…"
+     },
+     "options": [
+      "global",
+      "local",
+      "shared by all files"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "It belongs to that function only.",
+      "te": "అది ఆ function కి మాత్రమే చెందినది.",
+      "hi": "वह सिर्फ़ उसी function का है।"
+     }
+    },
+    {
+     "q": {
+      "en": "What does every recursive function need?",
+      "te": "ప్రతి recursive function కి ఏం కావాలి?",
+      "hi": "हर recursive function को क्या चाहिए?"
+     },
+     "options": [
+      "a loop",
+      "a base case",
+      "a global variable"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "The base case is where it stops.",
+      "te": "Base case దగ్గర అది ఆగుతుంది.",
+      "hi": "Base case पर वह रुकता है।"
+     }
+    },
+    {
+     "q": {
+      "en": "def s(n):\n    if n == 0:\n        return 0\n    return n + s(n - 1)\nWhat is s(3)?",
+      "te": "def s(n):\n    if n == 0:\n        return 0\n    return n + s(n - 1)\ns(3) విలువ ఎంత?",
+      "hi": "def s(n):\n    if n == 0:\n        return 0\n    return n + s(n - 1)\ns(3) क्या है?"
+     },
+     "options": [
+      "3",
+      "6",
+      "0"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "3 + 2 + 1 + 0 = 6.",
+      "te": "3 + 2 + 1 + 0 = 6.",
+      "hi": "3 + 2 + 1 + 0 = 6।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write a recursive function sum_to(n) that returns 1 + 2 + … + n. sum_to(0) should return 0.",
+     "te": "sum_to(n) అనే recursive function రాయండి. అది 1 + 2 + … + n ని return చేయాలి. sum_to(0) 0 return చేయాలి.",
+     "hi": "sum_to(n) नाम का recursive function लिखिए जो 1 + 2 + … + n return करे। sum_to(0) को 0 return करना चाहिए।"
+    },
+    "starter": "def sum_to(n):\n    # base case first, then call sum_to with a smaller number\n    pass\n",
+    "tests": [
+     {
+      "name": "sum_to(0) gives 0",
+      "call": "sum_to(0)",
+      "expected": "0"
+     },
+     {
+      "name": "sum_to(4) gives 10",
+      "call": "sum_to(4)",
+      "expected": "10"
+     },
+     {
+      "name": "sum_to(10) gives 55",
+      "call": "sum_to(10)",
+      "expected": "55",
+      "hidden": true
+     },
+     {
+      "name": "uses recursion",
+      "call": "'sum_to' in sum_to.__code__.co_names",
+      "expected": "True",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "First write the stopping case: if n == 0: return 0.",
+      "te": "ముందు ఆగే case రాయండి: if n == 0: return 0.",
+      "hi": "पहले रुकने वाला case लिखिए: if n == 0: return 0।"
+     },
+     {
+      "en": "For any other n, the answer is n plus the sum up to n - 1.",
+      "te": "మిగతా ఏ n కైనా, జవాబు n ప్లస్ n - 1 వరకు మొత్తం.",
+      "hi": "बाकी किसी भी n के लिए जवाब n जमा n - 1 तक का योग है।"
+     },
+     {
+      "en": "Write: return n + sum_to(n - 1)",
+      "te": "ఇలా రాయండి: return n + sum_to(n - 1)",
+      "hi": "लिखिए: return n + sum_to(n - 1)"
+     }
+    ],
+    "solution": "def sum_to(n):\n    if n == 0:\n        return 0\n    return n + sum_to(n - 1)"
+   },
+   "cheat": {
+    "en": [
+     "Inside a function = local; outside = global.",
+     "Recursion = a function calling itself on a smaller job.",
+     "Always write the base case first."
+    ],
+    "te": [
+     "Function లోపల = local; బయట = global.",
+     "Recursion = చిన్న పనిపై తనను తానే call చేసుకునే function.",
+     "ఎప్పుడూ ముందు base case రాయండి."
+    ],
+    "hi": [
+     "Function के अंदर = local; बाहर = global।",
+     "Recursion = छोटे काम पर ख़ुद को call करने वाला function।",
+     "हमेशा पहले base case लिखिए।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A ration shop counts bags in a stack: take one bag, then count the rest. Explain how a recursive function does this and why it needs a base case.",
+      "te": "Ration shop లో bags కుప్ప లెక్కిస్తారు: ఒక bag తీసి, మిగతావి లెక్కిస్తారు. Recursive function దీన్ని ఎలా చేస్తుందో, దానికి base case ఎందుకు కావాలో వివరించండి.",
+      "hi": "Ration shop में bags का ढेर गिना जाता है: एक bag उठाओ, फिर बाकी गिनो। Recursive function यह कैसे करता है और उसे base case क्यों चाहिए, समझाइए।"
+     },
+     {
+      "en": "In a school marks program, a variable total is created inside a function. Can the rest of the program print total? Explain local and global scope.",
+      "te": "School marks program లో total అనే variable function లోపల తయారైంది. మిగతా program total ని print చేయగలదా? Local, global scope వివరించండి.",
+      "hi": "School marks program में total variable एक function के अंदर बना है। क्या बाकी program total print कर सकता है? Local और global scope समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "base case",
+      "stop",
+      "ఆగ",
+      "रुक",
+      "base"
+     ],
+     [
+      "itself",
+      "calls",
+      "smaller",
+      "తనను",
+      "చిన్న",
+      "ख़ुद",
+      "खुद",
+      "छोटा"
+     ],
+     [
+      "local",
+      "global",
+      "inside",
+      "లోపల",
+      "अंदर"
+     ]
+    ],
+    "challenge": {
+     "en": "Say what would happen to a recursive function with no base case.",
+     "te": "Base case లేని recursive function కి ఏమవుతుందో చెప్పండి.",
+     "hi": "बिना base case वाले recursive function का क्या होगा, बताइए।"
+    }
+   }
+  }
+ ],
+ "test": {
+  "pass": 4,
+  "questions": [
+   {
+    "q": {
+     "en": "Which keyword defines a function?",
+     "te": "Function ని నిర్వచించే keyword ఏది?",
+     "hi": "Function बनाने वाला keyword कौन-सा है?"
+    },
+    "options": [
+     "function",
+     "def",
+     "fun"
+    ],
+    "answer": 1,
+    "why": {
+     "en": "def starts every function.",
+     "te": "ప్రతి function def తో మొదలవుతుంది.",
+     "hi": "हर function def से शुरू होता है।"
+    }
+   },
+   {
+    "q": {
+     "en": "In area(5, 2), what are 5 and 2?",
+     "te": "area(5, 2) లో 5, 2 ఏమిటి?",
+     "hi": "area(5, 2) में 5 और 2 क्या हैं?"
+    },
+    "options": [
+     "parameters",
+     "arguments",
+     "return values"
+    ],
+    "answer": 1,
+    "why": {
+     "en": "Values in a call are arguments.",
+     "te": "Call లోని values arguments.",
+     "hi": "Call की values arguments हैं।"
+    }
+   },
+   {
+    "q": {
+     "en": "What does a function return if it has no return line?",
+     "te": "return line లేని function ఏం return చేస్తుంది?",
+     "hi": "बिना return line वाला function क्या return करता है?"
+    },
+    "options": [
+     "0",
+     "None",
+     "an error"
+    ],
+    "answer": 1,
+    "why": {
+     "en": "It returns None.",
+     "te": "అది None return చేస్తుంది.",
+     "hi": "वह None return करता है।"
+    }
+   },
+   {
+    "q": {
+     "en": "def d(x):\n    return x * 2\nWhat is d(d(3))?",
+     "te": "def d(x):\n    return x * 2\nd(d(3)) విలువ ఎంత?",
+     "hi": "def d(x):\n    return x * 2\nd(d(3)) क्या है?"
+    },
+    "options": [
+     "6",
+     "12",
+     "9"
+    ],
+    "answer": 1,
+    "why": {
+     "en": "d(3) is 6, and d(6) is 12.",
+     "te": "d(3) = 6, d(6) = 12.",
+     "hi": "d(3) = 6, और d(6) = 12।"
+    }
+   },
+   {
+    "q": {
+     "en": "What stops a recursive function?",
+     "te": "Recursive function ని ఏది ఆపుతుంది?",
+     "hi": "Recursive function को क्या रोकता है?"
+    },
+    "options": [
+     "the base case",
+     "print",
+     "a global variable"
+    ],
+    "answer": 0,
+    "why": {
+     "en": "The base case returns without calling again.",
+     "te": "Base case మళ్లీ call చేయకుండా return చేస్తుంది.",
+     "hi": "Base case दोबारा call किए बिना return करता है।"
+    }
+   }
+  ]
+ },
+ "project": {
+  "title": {
+   "en": "Marks calculator",
+   "te": "Marks calculator",
+   "hi": "Marks calculator"
+  },
+  "prompt": {
+   "en": "Write two functions. total(marks) returns the sum of a list of marks. grade(marks) returns \"A\" if the average is 75 or more, \"B\" if it is 50 or more, otherwise \"C\". Use total inside grade.",
+   "te": "రెండు functions రాయండి. total(marks) marks list మొత్తాన్ని return చేయాలి. grade(marks) సగటు 75 లేదా ఎక్కువైతే \"A\", 50 లేదా ఎక్కువైతే \"B\", లేకపోతే \"C\" return చేయాలి. grade లోపల total వాడండి.",
+   "hi": "दो functions लिखिए। total(marks) marks की list का योग return करे। grade(marks) औसत 75 या ज़्यादा हो तो \"A\", 50 या ज़्यादा हो तो \"B\", वरना \"C\" return करे। grade के अंदर total इस्तेमाल कीजिए।"
+  },
+  "starter": "def total(marks):\n    pass\n\ndef grade(marks):\n    pass\n",
+  "tests": [
+   {
+    "name": "total([50, 60, 70])",
+    "call": "total([50, 60, 70])",
+    "expected": "180"
+   },
+   {
+    "name": "grade([80, 90])",
+    "call": "grade([80, 90])",
+    "expected": "'A'"
+   },
+   {
+    "name": "grade([50, 60])",
+    "call": "grade([50, 60])",
+    "expected": "'B'",
+    "hidden": true
+   },
+   {
+    "name": "grade([20, 30])",
+    "call": "grade([20, 30])",
+    "expected": "'C'",
+    "hidden": true
+   },
+   {
+    "name": "grade uses total",
+    "call": "'total' in grade.__code__.co_names",
+    "expected": "True",
+    "hidden": true
+   }
+  ],
+  "hints": [
+   {
+    "en": "A for loop can add each mark to a running sum; or use sum(marks).",
+    "te": "for loop తో ప్రతి mark ని మొత్తానికి కలపవచ్చు; లేదా sum(marks) వాడండి.",
+    "hi": "for loop से हर mark को जोड़ सकते हैं; या sum(marks) इस्तेमाल करें।"
+   },
+   {
+    "en": "Average = total(marks) / len(marks).",
+    "te": "సగటు = total(marks) / len(marks).",
+    "hi": "औसत = total(marks) / len(marks)।"
+   },
+   {
+    "en": "Check 75 first, then 50, with if / elif / else.",
+    "te": "ముందు 75, తర్వాత 50 ని if / elif / else తో చూడండి.",
+    "hi": "पहले 75, फिर 50 को if / elif / else से जाँचिए।"
+   }
+  ],
+  "solution": "def total(marks):\n    return sum(marks)\n\ndef grade(marks):\n    avg = total(marks) / len(marks)\n    if avg >= 75:\n        return \"A\"\n    elif avg >= 50:\n        return \"B\"\n    return \"C\""
+ }
+}

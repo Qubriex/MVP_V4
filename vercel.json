@@ -7,7 +7,7 @@
   "functions": {
     "api/index.js": {
       "maxDuration": 60,
-      "includeFiles": "backend/{migrations,config,scripts,data/scripted}/**"
+      "includeFiles": "backend/{migrations,config,scripts,data/scripted,data/courses}/**"
     }
   },
   "rewrites": [

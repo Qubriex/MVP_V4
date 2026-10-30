@@ -17,6 +17,7 @@ import { emit } from '../events/outbox.js';
 import { newEvidenceId, isValidEvidenceId, normaliseEvidenceId } from '../qep/evidenceId.js';
 import { issueSdJwt, verifySdJwt } from '../qep/sdjwt.js';
 import { LABEL_FUNCTION, labelV1, missingForConfirmed } from '../qep/labelFn.js';
+import { courseSkillFacts, lessonDemos } from '../courses/learning.js';
 import * as statusList from '../qep/statusList.js';
 import { keyStatus } from './keyRegistry.js';
 import { signingKid, isDemoKid } from './signing.js';
@@ -85,9 +86,11 @@ async function demonstrationsFor(elId, nodeId) {
 /** Labels computed now (never stored). A skill shows its weakest node's label. */
 export async function skillLines(elId, skills, asOf = nowIsoFor()) {
   const p = { confirmed: params.get('label.confirmed'), foundational: params.get('label.foundational'), retention: params.get('retention') };
+  const learnerId = skills.some(s => s.nodes.some(f => f.course)) ? (await dal.one('SELECT learner_id FROM engagement_learners WHERE id = ?', elId))?.learner_id : null;
   return await mapSeq(skills, async s => {
     const nodes = await mapSeq(s.nodes, async f => {
-      const demos = await demonstrationsFor(elId, f.nodeId);
+      // A course lesson's facts come from that course's evidence (core/courses/learning.js).
+      const demos = f.course ? await lessonDemos(learnerId, f.nodeId) : await demonstrationsFor(elId, f.nodeId);
       const r = labelV1(f, demos, asOf, p);
       return { node_id: f.nodeId, node: f.label, label: r.label, evidence: r.evidence, assurance: r.assurance,
         freshness: Math.round(r.freshness * 100) / 100, last_demonstrated: r.lastDemonstrated, theta: f.theta,
@@ -96,7 +99,7 @@ export async function skillLines(elId, skills, asOf = nowIsoFor()) {
     const weakest = nodes.reduce((w, n) => (!w || LABEL_RANK[n.label] < LABEL_RANK[w.label] ? n : w), null);
     const top = (key, order) => nodes.map(n => n[key]).filter(Boolean).sort((a, b) => order.indexOf(b) - order.indexOf(a))[0] || null;
     return {
-      skill_id: s.skillId, name: s.name, label: weakest ? weakest.label : 'none',
+      skill_id: s.skillId, name: s.name, label: weakest ? weakest.label : 'none', course: s.course || null,
       evidence: top('evidence', ['L1', 'L2', 'L3', 'L4']), assurance: top('assurance', ['A1', 'A2', 'A3']),
       freshness: nodes.length ? Math.min(...nodes.map(n => n.freshness)) : 0,
       last_demonstrated: nodes.map(n => n.last_demonstrated).filter(Boolean).sort().pop() || null,
@@ -133,7 +136,8 @@ export async function issueCredential(elId, { reason = 'issue' } = {}) {
   if (!el) throw Object.assign(new Error('Unknown enrolment'), { status: 404 });
   const demo = !!(await dal.one('SELECT sandbox_id FROM institutions WHERE id = ?', el.institution_id))?.sandbox_id;
   const iss = demo ? demoIssuerDid() : issuerDid();
-  const skills = await skillFacts(elId);
+  // The college programme's skills, plus every course module the learner completed (test and project).
+  const skills = [...await skillFacts(elId), ...await courseSkillFacts(el.learner_id)];
   if (!skills.length) return null;
 
   return await dal.tx(async () => {
