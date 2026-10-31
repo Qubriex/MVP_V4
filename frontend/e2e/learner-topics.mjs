@@ -3,8 +3,11 @@
 //   1. Jobs hidden (FEATURE_LEARNER_JOBS off): no job market in the menu or
 //      on Home, and /learn/market goes Home.
 //   2. Back on every /learn page: the Back button and breadcrumb are there
-//      (not on Home), and Back opened directly goes to the logical parent;
-//      opened from a course page, Back returns to that course page.
+//      (not on Home), and Back goes one level up the breadcrumb — never
+//      forward, even after visiting other pages (Reviews from Home → Home;
+//      Explore topics → Home; a course page → Explore topics).
+//   2b. "Walk me through it" plays one clip per line, in order, never two
+//      at once, and the highlight follows; the voice session never signs out.
 //   3. Learning language: the lesson follows the picker (English, then
 //      Telugu), and Settings shows the same choice.
 //   4. Teach-first lesson "Return values" in Telugu and in English: Learn →
@@ -133,10 +136,10 @@ async function teachFirst(page, lessonId, script, label) {
 
 // path → parent, as in src/components/learn/BackBar.js
 const BACK = [
-  ['/learn/record', '/learn/dashboard'], ['/learn/history', '/learn/record'], ['/learn/reviews', '/learn/dashboard'],
+  ['/learn/record', '/learn/dashboard'], ['/learn/history', '/learn/dashboard'], ['/learn/reviews', '/learn/dashboard'],
   ['/learn/assigned', '/learn/dashboard'], ['/learn/passport', '/learn/dashboard'], ['/learn/readiness', '/learn/passport'],
-  ['/learn/courses', '/learn/dashboard'], ['/learn/courses/python', '/learn/courses'], ['/learn/lesson/py-m1-l1', '/learn/courses'],
-  ['/learn/modules/py-m3/test', '/learn/courses'], ['/learn/modules/py-m3/project', '/learn/courses'],
+  ['/learn/courses', '/learn/dashboard'], ['/learn/courses/python', '/learn/courses'], ['/learn/lesson/py-m1-l1', '/learn/courses/python'],
+  ['/learn/modules/py-m3/test', '/learn/courses/python'], ['/learn/modules/py-m3/project', '/learn/courses/python'],
   ['/learn/skill/test-node-4-4', '/learn/record'], ['/learn/profile', '/learn/dashboard'], ['/learn/resume', '/learn/profile'],
   ['/learn/settings', '/learn/profile'], ['/learn/notifications', '/learn/settings']
 ];
@@ -173,6 +176,120 @@ try {
   await me.click('[data-backbar] [data-back]');
   await me.waitForURL('**/learn/courses/python', { timeout: 10000 }).catch(() => {});
   check('Back from a lesson returns to the course page it was opened from', new URL(me.url()).pathname === '/learn/courses/python');
+
+  // Back never jumps forward: walk a trail in one tab, then go Back up it.
+  const backTo = async (want) => {
+    await me.click('[data-backbar] [data-back]');
+    await me.waitForURL(`**${want}`, { timeout: 10000 }).catch(() => {});
+    return new URL(me.url()).pathname;
+  };
+  await me.goto(`${BASE}/learn/courses`); await settle(me);
+  await me.click('[data-course="python"] a, a[href="/learn/courses/python"]');
+  await me.waitForURL('**/learn/courses/python', { timeout: 10000 });
+  let at = await backTo('/learn/courses');
+  check('Back from a course page goes to Explore topics', at === '/learn/courses', at);
+  at = await backTo('/learn/dashboard');
+  check('Back from Explore topics goes Home, not forward to the course', at === '/learn/dashboard', at);
+  await me.goto(`${BASE}/learn/record`); await settle(me);
+  await me.goto(`${BASE}/learn/reviews`); await settle(me);
+  at = await backTo('/learn/dashboard');
+  check('Reviews after Skill path: Back goes Home, not to Skill path', at === '/learn/dashboard', at);
+  await me.goto(`${BASE}/learn/dashboard`); await settle(me);
+  const toReviews = await me.$('a[href="/learn/reviews"]');
+  if (toReviews) { await toReviews.click(); await me.waitForURL('**/learn/reviews', { timeout: 10000 }).catch(() => {}); } else await me.goto(`${BASE}/learn/reviews`);
+  at = await backTo('/learn/dashboard');
+  check('Reviews opened from Home: Back goes Home', at === '/learn/dashboard', at);
+  await me.goto(`${BASE}/learn/history`); await settle(me);
+  at = await backTo('/learn/dashboard');
+  check('Attempt history: Back goes Home', at === '/learn/dashboard', at);
+
+  // 2b. "Walk me through it": one clip per line, in order, never overlapping.
+  // The voice is stubbed with a short silent clip so this runs without a key.
+  {
+    const wp = await newPage(ctx);
+    const n = 3200; const wav = Buffer.alloc(44 + n);
+    wav.write('RIFF', 0); wav.writeUInt32LE(36 + n, 4); wav.write('WAVEfmt ', 8); wav.writeUInt32LE(16, 16); wav.writeUInt16LE(1, 20); wav.writeUInt16LE(1, 22);
+    wav.writeUInt32LE(8000, 24); wav.writeUInt32LE(8000, 28); wav.writeUInt16LE(1, 32); wav.writeUInt16LE(8, 34); wav.write('data', 36); wav.writeUInt32LE(n, 40); wav.fill(128, 44);
+    let ttsCalls = 0;
+    await wp.route('**/api/learner/tts', r => { ttsCalls += 1; return r.fulfill({ status: 200, contentType: 'audio/wav', body: wav }); });
+    await wp.addInitScript(() => {
+      window.__walk = { log: [], playing: 0, overlap: false };
+      const orig = HTMLMediaElement.prototype.play;
+      HTMLMediaElement.prototype.play = function play() {
+        if (!this.__logged) {
+          this.__logged = true;
+          this.addEventListener('playing', () => { if (this.src.startsWith('data:')) return; window.__walk.playing += 1; if (window.__walk.playing > 1) window.__walk.overlap = true; });
+          ['ended', 'pause'].forEach(ev => this.addEventListener(ev, () => { window.__walk.playing = Math.max(0, window.__walk.playing - 1); }));
+        }
+        return orig.call(this);
+      };
+      new MutationObserver(() => {
+        const el = document.querySelector('[data-walk-index]');
+        const i = el?.getAttribute('data-walk-index');
+        const line = document.querySelector('.lj-code-line.is-active')?.getAttribute('data-line');
+        if (i != null && i !== '-1' && window.__walk.log[window.__walk.log.length - 1]?.i !== i) window.__walk.log.push({ i, line });
+      }).observe(document, { subtree: true, childList: true, attributes: true, attributeFilter: ['data-walk-index', 'class'] });
+    });
+    await wp.goto(`${BASE}/learn/lesson/py-m3-l3`);
+    await wp.waitForSelector('li[data-step] button', { timeout: 15000 });
+    await wp.evaluate(() => document.querySelector('li[data-step="code"] button')?.click());
+    const walkBtn = await wp.waitForSelector('[data-walk]', { timeout: 15000 }).catch(() => null);
+    const notes = await wp.$$eval('.lj-notes li', els => els.length).catch(() => 0);
+    if (walkBtn) await walkBtn.click();
+    await wp.waitForFunction(() => !document.querySelector('[data-walk-stop]') && window.__walk.log.length > 0, null, { timeout: 30000 }).catch(() => {});
+    const w = await wp.evaluate(() => window.__walk);
+    const order = w.log.map(x => Number(x.i));
+    check('Walkthrough: one clip per line, made before playback', ttsCalls === notes && notes > 0, `${ttsCalls} clips for ${notes} lines`);
+    check('Walkthrough: every line plays in order', order.length === notes && order.every((v, k) => v === k), order.join(','));
+    check('Walkthrough: never two lines at once', !w.overlap);
+    check('Walkthrough: the highlight follows each line', w.log.every(x => x.line), w.log.map(x => x.line).join(','));
+    // Controls, with 4-second clips so a line is still playing while we tap.
+    const long = Buffer.alloc(44 + 32000, 128); wav.copy(long, 0, 0, 44); long.writeUInt32LE(36 + 32000, 4); long.writeUInt32LE(32000, 40);
+    await wp.unroute('**/api/learner/tts');
+    await wp.route('**/api/learner/tts', r => r.fulfill({ status: 200, contentType: 'audio/wav', body: long }));
+    await wp.reload(); await wp.waitForSelector('li[data-step] button', { timeout: 15000 });
+    await wp.evaluate(() => document.querySelector('li[data-step="code"] button')?.click());
+    await (await wp.waitForSelector('[data-walk]', { timeout: 15000 })).click();
+    const idxIs = (v) => wp.waitForFunction(x => document.querySelector('[data-walk-index]')?.getAttribute('data-walk-index') === x, v, { timeout: 5000 }).then(() => true).catch(() => false);
+    await wp.waitForSelector('[data-walk-pause]', { timeout: 15000 }).catch(() => {});
+    await wp.click('[data-walk-next]').catch(() => {});
+    const nextOk = await idxIs('1');
+    await wp.click('[data-walk-prev]').catch(() => {});
+    const prevOk = await idxIs('0');
+    await wp.click('[data-walk-pause]').catch(() => {});
+    const paused = await wp.waitForSelector('[data-walk-state="paused"]', { timeout: 5000 }).then(() => true).catch(() => false);
+    await wp.click('[data-walk-replay]').catch(() => {});
+    const replayed = await wp.waitForSelector('[data-walk-state="playing"][data-walk-index="0"]', { timeout: 5000 }).then(() => true).catch(() => false);
+    check('Walkthrough: Next, Previous, Pause and Replay line work', nextOk && prevOk && paused && replayed, JSON.stringify({ nextOk, prevOk, paused, replayed }));
+    await wp.click('[data-walk-stop]').catch(() => {});
+    // Audio fails: the highlight stays and the text shows.
+    await wp.unroute('**/api/learner/tts');
+    await wp.route('**/api/learner/tts', r => r.fulfill({ status: 500, contentType: 'application/json', body: '{"error":"x"}' }));
+    await wp.evaluate(() => document.querySelector('li[data-step="practise"] button')?.click());
+    await wp.evaluate(() => document.querySelector('li[data-step="code"] button')?.click());
+    await wp.waitForTimeout(300);
+    await wp.reload(); await wp.waitForSelector('li[data-step] button', { timeout: 15000 });
+    await wp.evaluate(() => document.querySelector('li[data-step="code"] button')?.click());
+    await (await wp.waitForSelector('[data-walk]', { timeout: 15000 })).click();
+    const textMode = await wp.waitForSelector('[data-walk-text]', { timeout: 20000 }).catch(() => null);
+    check('Walkthrough without audio: highlight kept, text shown', !!textMode && !!(await wp.$('.lj-code-line.is-active')) && !!(await wp.$('[data-line-note]')));
+    await wp.close();
+  }
+
+  // 2c. Opening and using the voice session never signs the learner out.
+  {
+    const vp = await newPage(ctx);
+    await vp.goto(`${BASE}/learn/session`);
+    await vp.waitForTimeout(4000);
+    const typed = await vp.$('textarea, input[type=text]');
+    if (typed) { await typed.fill('I am ready for the check'); await typed.press('Enter').catch(() => {}); await vp.waitForTimeout(3000); }
+    const out = { url: new URL(vp.url()).pathname, token: await vp.evaluate(() => !!localStorage.getItem('qubirex_token')) };
+    check('Voice session: opening and using it never signs out', out.url.startsWith('/learn/') && out.token, JSON.stringify(out));
+    await vp.goto(`${BASE}/learn/dashboard`); await settle(vp);
+    check('Voice session: still signed in afterwards', new URL(vp.url()).pathname === '/learn/dashboard');
+    await vp.close();
+  }
+  await me.waitForTimeout(61000); // the learner's 30-a-minute request limit
 
   // 3. Learning language
   await me.goto(`${BASE}/learn/lesson/py-m3-l3`);

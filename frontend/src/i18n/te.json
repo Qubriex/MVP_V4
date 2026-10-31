@@ -4077,5 +4077,14 @@
   "title.learn.moduleProject": "Module project",
   "title.inst.topics": "Topics",
   "title.topics": "మా topics చూడండి",
-  "title.topicSample": "ఉచిత sample పాఠం"
+  "title.topicSample": "ఉచిత sample పాఠం",
+  "lj.walk.controls": "వివరణ నియంత్రణలు",
+  "lj.walk.preparing": "ఆడియో సిద్ధం చేస్తున్నాం…",
+  "lj.walk.prev": "ముందు లైన్",
+  "lj.walk.next": "తర్వాతి లైన్",
+  "lj.walk.finish": "ముగించు",
+  "lj.walk.pause": "ఆపు",
+  "lj.walk.resume": "కొనసాగించు",
+  "lj.walk.replay": "ఈ లైన్ మళ్ళీ",
+  "lj.walk.noAudio": "ఈ లైన్‌కి ఆడియో అందుబాటులో లేదు. చదివి, తర్వాతి లైన్ నొక్కండి."
 }

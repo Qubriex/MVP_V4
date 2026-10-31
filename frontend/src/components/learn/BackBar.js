@@ -1,10 +1,12 @@
 // src/components/learn/BackBar.js — the Back button and breadcrumb at the top
 // of every learner page except Home (rendered once by LearnerLayout).
 //   Home › Skill path › JavaScript Core › Array methods
-// Back returns to where the learner came from: the page that opened this one
-// (router state `from`, or ?from=), else the previous page in this visit,
-// else the page's logical parent (a skill page → Skill path, a lesson → its
-// course, a Passport skill → Passport). Pages name their own crumbs with
+// Back always goes one level up the breadcrumb, to the page's logical parent
+// (a lesson → its course → Explore topics → Home), never "forward". The one
+// exception is a page opened from several places (Reviews, a lesson, a skill
+// page, a module test/project): it returns to the page that opened it (router
+// state `from`, or ?from=). Back never uses browser history; the browser's
+// own back button still does. Pages name their own crumbs with
 // usePageCrumbs([...]) when the trail has names only they know.
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -15,7 +17,7 @@ import { useUiLang } from '../../context/UiLangContext';
 const ROUTES = [
   [/^\/learn\/record$/, 'nav.path', '/learn/dashboard'],
   [/^\/learn\/skill\/[^/]+$/, 'nav.skill', '/learn/record'],
-  [/^\/learn\/history$/, 'nav.history', '/learn/record'],
+  [/^\/learn\/history$/, 'nav.history', '/learn/dashboard'],
   [/^\/learn\/reviews$/, 'nav.reviews', '/learn/dashboard'],
   [/^\/learn\/assigned$/, 'nav.assigned', '/learn/dashboard'],
   [/^\/learn\/passport$/, 'nav.passport', '/learn/dashboard'],
@@ -40,6 +42,10 @@ const ROUTES = [
   [/^\/learn\/baseline$/, 'nav.baseline', '/learn/dashboard']
 ];
 const routeOf = (path) => ROUTES.find(([re]) => re.test(path)) || null;
+
+// Pages opened from several places: Back returns to the opener.
+const MULTI_ENTRY = [/^\/learn\/reviews$/, /^\/learn\/lesson\/[^/]+$/, /^\/learn\/skill\/[^/]+$/, /^\/learn\/modules\//, /^\/learn\/session$/];
+export const opensFromSeveral = (path) => MULTI_ENTRY.some(re => re.test(path));
 
 /** The parent page for a path (for Back when there is no history). */
 export function parentOf(path) {
@@ -71,16 +77,12 @@ export function usePageCrumbs(crumbs) {
   useEffect(() => { set(crumbs || null); return () => set(null); }, [key]);
 }
 
-/** Where Back goes: the opener, else the previous page, else the parent. */
-export function useBack(fallback) {
-  const navigate = useNavigate();
-  const location = useLocation();
-  return () => {
-    const from = location.state?.from || new URLSearchParams(location.search).get('from');
-    if (from && from.startsWith('/learn')) navigate(from);
-    else if ((window.history.state?.idx || 0) > 0) navigate(-1);
-    else navigate(fallback || parentOf(location.pathname));
-  };
+/** Where Back goes from a page, given its crumbs (if it set any). */
+export function backTarget(location, crumbs) {
+  const from = location.state?.from || new URLSearchParams(location.search).get('from');
+  if (from && from.startsWith('/learn') && from !== location.pathname && opensFromSeveral(location.pathname)) return from;
+  const up = crumbs && crumbs.length > 1 ? crumbs[crumbs.length - 2].to : null;
+  return up || parentOf(location.pathname);
 }
 
 export function CrumbsProvider({ children }) {
@@ -92,15 +94,15 @@ export function CrumbsProvider({ children }) {
 export default function BackBar() {
   const { t } = useUiLang();
   const location = useLocation();
+  const navigate = useNavigate();
   const { crumbs } = useContext(CrumbsContext);
-  const back = useBack();
   if (location.pathname === '/learn/dashboard') return null;
   const page = crumbs
     ? [{ key: 'nav.home', to: '/learn/dashboard' }, ...crumbs]
     : trailFor(location.pathname);
   return (
     <div className="lj-backbar" data-backbar>
-      <button type="button" className="lj-back" onClick={back} aria-label={t('nav.back')} data-back>
+      <button type="button" className="lj-back" onClick={() => navigate(backTarget(location, crumbs))} aria-label={t('nav.back')} data-back>
         <ArrowLeft size={18} aria-hidden="true" /><span className="lj-back-text">{t('nav.back')}</span>
       </button>
       <nav aria-label={t('ui.layout.breadcrumb')} className="lj-crumbs">

@@ -18,6 +18,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import api from './api';
 import { pronounce } from './pronounce';
+import { codeSpeech } from './codeSpeech';
 
 const synth = typeof window !== 'undefined' ? window.speechSynthesis : null;
 const Recognition = typeof window !== 'undefined' ? (window.SpeechRecognition || window.webkitSpeechRecognition) : null;
@@ -288,6 +289,85 @@ export function useSpeechOutput({ lang = 'te-IN', rate = 1, server = true } = {}
     speak, stop, pause, resume, replay, setRate, speakingId, paused, part,
     issue, voiceIssueKey: issue ? VOICE_ISSUE[issue] : '', hasLast: () => !!lastRef.current,
     supported: canSpeak || typeof Audio !== 'undefined'
+  };
+}
+
+// ─── "Walk me through it": one clip per code line ──────────────────────────
+// Every line's clip is fetched (and cached) before the first one plays, then
+// the clips play one after another on the one audio element, so two lines can
+// never overlap. The highlight moves when a clip actually starts. A line whose
+// audio failed keeps its highlight and shows its text; Next moves on.
+// state: idle | preparing | playing | paused | text
+export function useLineWalk({ lang = 'te-IN', rate = 1 } = {}) {
+  const [state, setState] = useState('idle');
+  const [index, setIndex] = useState(-1);
+  const clips = useRef([]);
+  const runRef = useRef(0);
+  const rateRef = useRef(rate);
+  rateRef.current = rate;
+  const ttsLang = lang.startsWith('en') ? 'english' : lang.startsWith('hi') ? 'hindi' : 'telugu';
+
+  const halt = () => { runRef.current += 1; const p = getPlayer(); if (p) { p.onended = null; p.onplaying = null; p.onerror = null; p.pause(); } };
+  useEffect(() => halt, []);
+
+  const playAt = useCallback((i) => {
+    halt();
+    const run = runRef.current;
+    const mine = () => runRef.current === run;
+    if (i < 0 || i >= clips.current.length) { setState('idle'); setIndex(-1); return; }
+    const url = clips.current[i];
+    const p = getPlayer();
+    if (!url || !p) { setIndex(i); setState('text'); return; }
+    p.src = url;
+    p.playbackRate = rateRef.current;
+    p.onplaying = () => { if (mine()) { setIndex(i); setState('playing'); } };
+    p.onended = () => { if (mine()) setTimeout(() => { if (mine()) playAt(i + 1); }, 250); };
+    p.onerror = () => { if (mine()) { setIndex(i); setState('text'); } };
+    Promise.resolve(p.play()).catch(err => {
+      if (!mine()) return;
+      setIndex(i);
+      setState(err?.name === 'NotAllowedError' ? 'paused' : 'text');
+    });
+  }, []);
+
+  /** @param {string[]} notes the line notes, in order */
+  const start = useCallback(async (notes) => {
+    halt();
+    const run = runRef.current;
+    setState('preparing'); setIndex(-1);
+    const spoken = notes.map(n => pronounce(speakable(codeSpeech(n)), lang));
+    const urls = new Array(spoken.length).fill(null);
+    if (serverVoice) {
+      let next = 0;
+      const worker = async () => {
+        while (next < spoken.length && runRef.current === run) {
+          const k = next; next += 1;
+          try { urls[k] = await fetchAudio(spoken[k], ttsLang, () => runRef.current === run); } catch { urls[k] = null; }
+        }
+      };
+      await Promise.all([worker(), worker(), worker()]);
+    }
+    if (runRef.current !== run) return;
+    clips.current = urls;
+    playAt(0);
+  }, [lang, ttsLang, playAt]);
+
+  const pause = useCallback(() => { const p = getPlayer(); if (p && !p.paused) { p.pause(); setState('paused'); } }, []);
+  const resume = useCallback(() => {
+    const p = getPlayer();
+    if (!p || !clips.current[index]) return;
+    Promise.resolve(p.play()).then(() => setState('playing')).catch(() => setState('text'));
+  }, [index]);
+  const stop = useCallback(() => { halt(); setState('idle'); setIndex(-1); }, []);
+
+  return {
+    state, index, start, pause, resume, stop,
+    active: state !== 'idle',
+    next: () => playAt(index + 1),
+    prev: () => playAt(Math.max(0, index - 1)),
+    replay: () => playAt(Math.max(0, index)),
+    // Used by the Playwright check: false when no clip could be made.
+    hasAudio: () => clips.current.some(Boolean)
   };
 }
 

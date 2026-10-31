@@ -11,13 +11,14 @@
 // The learner can ask at any time ("Why return?", "Explain in Telugu",
 // "Slower", "Another example"); the answer stays within this lesson. "I
 // already know this" (test-out) is a small link, never the start.
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
-import { Play, Square, Headphones, ThumbsUp, ThumbsDown, Lightbulb, Eye, ArrowRight, Download, Send, MessageCircleQuestion, Check, X, ShieldCheck, Gauge } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, RotateCcw, Square, Headphones, ThumbsUp, ThumbsDown, Lightbulb, Eye, ArrowRight, Download, Send, MessageCircleQuestion, Check, X, ShieldCheck, Gauge } from 'lucide-react';
 import api from '../../utils/api';
 import { errMsg } from '../../utils/errors';
 import { runCode } from '../../utils/codeRunner';
-import { useSpeechOutput } from '../../utils/voice';
+import { useSpeechOutput, useLineWalk } from '../../utils/voice';
+import { codeSpeech } from '../../utils/codeSpeech';
 import { learningSpeechTag } from '../../utils/learningLanguage';
 import { useUiLang } from '../../context/UiLangContext';
 import { LoadingRows } from '../../components/shared/EmptyState';
@@ -146,7 +147,6 @@ export default function Lesson() {
   const [extra, setExtra] = useState(null); // { kind, text }
   const [rate, setRate] = useState(1);
   const [line, setLine] = useState(null);
-  const [walking, setWalking] = useState(false);
   const [run, setRun] = useState(null);
   const [running, setRunning] = useState(false);
   const [draft, setDraft] = useState('');
@@ -161,7 +161,6 @@ export default function Lesson() {
   const [question, setQuestion] = useState('');
   const [testout, setTestout] = useState(null); // { questions, answers, result }
   const [busy, setBusy] = useState(false);
-  const walkRef = useRef(false);
   const from = location.state?.from || null;
 
   const load = useCallback(async () => {
@@ -178,12 +177,13 @@ export default function Lesson() {
 
   const lang = d?.language || 'telugu';
   const speech = useSpeechOutput({ lang: learningSpeechTag(lang), rate });
+  const walk = useLineWalk({ lang: learningSpeechTag(lang), rate });
   useEffect(() => () => speech.stop(), []);
 
   usePageCrumbs(d ? [{ key: 'nav.courses', to: '/learn/courses' }, { label: d.course.title, to: `/learn/courses/${d.course.id}` }, { label: t('lj.course.lessonN', { m: d.module_n, n: d.n }) + ` · ${d.title}` }] : null);
 
   const go = async (s) => {
-    speech.stop(); walkRef.current = false; setWalking(false);
+    speech.stop(); walk.stop();
     setStepState(s);
     if (STEPS.indexOf(s) > STEPS.indexOf(reached)) setReached(s);
     try { await api.post(`/learner/lessons/${lessonId}/step`, { step: s }); } catch { /* the page still moves on */ }
@@ -196,16 +196,11 @@ export default function Lesson() {
   const course = d.course;
   const codeLang = P?.code.language || course.language;
 
-  // Walk through the example: highlight each explained line while she says its note.
-  const walk = (i = 0) => {
-    const notes = P.code.notes;
-    if (i >= notes.length || !walkRef.current) { walkRef.current = false; setWalking(false); setLine(null); return; }
-    setLine(notes[i].line);
-    speech.speak(notes[i].note, `note-${i}`, { onEnd: () => setTimeout(() => walk(i + 1), 250) });
-    if (speech.issue === 'text' || speech.issue === 'none') setTimeout(() => walk(i + 1), 3500);
-  };
-  const startWalk = () => { walkRef.current = true; setWalking(true); walk(0); };
-  const stopWalk = () => { walkRef.current = false; setWalking(false); speech.stop(); setLine(null); };
+  // Walk through the example: one clip per explained line, played in order;
+  // the highlight follows the clip that is playing (utils/voice.js useLineWalk).
+  const startWalk = () => { speech.stop(); walk.start(P.code.notes.map(n => n.note)); };
+  const stopWalk = () => { walk.stop(); setLine(null); };
+  const shownLine = walk.active ? (walk.index >= 0 ? P.code.notes[walk.index].line : null) : line;
 
   const runExample = async () => {
     setRunning(true); setRun(null);
@@ -368,14 +363,28 @@ export default function Lesson() {
                 <div className="ln-between ln-wrap" style={{ gap: 8 }}>
                   <b>{t('lj.lesson.codeTitle')}</b>
                   <span className="ln-row" style={{ gap: 6 }}>
-                    {walking
-                      ? <button type="button" className="ln-btn ln-btn-sm" onClick={stopWalk}><Square size={14} aria-hidden="true" />{t('lj.lesson.stop')}</button>
+                    {walk.active
+                      ? <button type="button" className="ln-btn ln-btn-sm" onClick={stopWalk} data-walk-stop><Square size={14} aria-hidden="true" />{t('lj.lesson.stop')}</button>
                       : <button type="button" className="ln-btn ln-btn-sm ln-btn-primary" onClick={startWalk} data-walk><Headphones size={14} aria-hidden="true" />{t('lj.lesson.walk')}</button>}
                     <button type="button" className="ln-btn ln-btn-sm" onClick={runExample} disabled={running} data-run-example><Play size={14} aria-hidden="true" />{running ? t('lj.lesson.running') : t('lj.lesson.run')}</button>
                   </span>
                 </div>
-                <CodePanel code={P.code} active={line} onLine={(n) => { const k = P.code.notes.findIndex(x => x.line === n); if (k >= 0) { setLine(n); speech.speak(P.code.notes[k].note, `note-${k}`); } }} />
-                {line && (() => { const n = P.code.notes.find(x => x.line === line); return n ? <p className="lj-note-now" role="status" data-line-note={line}><b>{t('lj.lesson.lineN', { n: line })}</b> {n.note}{showEn && n.note_en ? <span className="lj-cap" lang="en">{n.note_en}</span> : null}</p> : null; })()}
+                {walk.active && (
+                  <div className="ln-row ln-wrap" style={{ gap: 6 }} role="group" aria-label={t('lj.walk.controls')} data-walk-state={walk.state} data-walk-index={walk.index}>
+                    {walk.state === 'preparing' && <span className="ln-small ln-muted" role="status">{t('lj.walk.preparing')}</span>}
+                    {walk.state !== 'preparing' && (<>
+                      <button type="button" className="ln-btn ln-btn-sm" onClick={walk.prev} disabled={walk.index <= 0} data-walk-prev><SkipBack size={14} aria-hidden="true" />{t('lj.walk.prev')}</button>
+                      {walk.state === 'playing'
+                        ? <button type="button" className="ln-btn ln-btn-sm" onClick={walk.pause} data-walk-pause><Pause size={14} aria-hidden="true" />{t('lj.walk.pause')}</button>
+                        : walk.state === 'paused' && <button type="button" className="ln-btn ln-btn-sm" onClick={walk.resume} data-walk-resume><Play size={14} aria-hidden="true" />{t('lj.walk.resume')}</button>}
+                      <button type="button" className="ln-btn ln-btn-sm" onClick={walk.replay} data-walk-replay><RotateCcw size={14} aria-hidden="true" />{t('lj.walk.replay')}</button>
+                      <button type="button" className="ln-btn ln-btn-sm" onClick={walk.next} data-walk-next><SkipForward size={14} aria-hidden="true" />{walk.index >= P.code.notes.length - 1 ? t('lj.walk.finish') : t('lj.walk.next')}</button>
+                    </>)}
+                    {walk.state === 'text' && <span className="ln-xs ln-muted" data-walk-text>{t('lj.walk.noAudio')}</span>}
+                  </div>
+                )}
+                <CodePanel code={P.code} active={shownLine} onLine={(n) => { const k = P.code.notes.findIndex(x => x.line === n); if (k >= 0) { walk.stop(); setLine(n); speech.speak(codeSpeech(P.code.notes[k].note), `note-${k}`); } }} />
+                {shownLine && (() => { const n = P.code.notes.find(x => x.line === shownLine); return n ? <p className="lj-note-now" role="status" data-line-note={shownLine}><b>{t('lj.lesson.lineN', { n: shownLine })}</b> {n.note}{showEn && n.note_en ? <span className="lj-cap" lang="en">{n.note_en}</span> : null}</p> : null; })()}
                 {run && (
                   <div className="lj-output" data-output>
                     <span className="ln-xs ln-muted">{t('lj.lesson.output')}</span>

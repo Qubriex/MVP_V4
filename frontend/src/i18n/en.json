@@ -4076,5 +4076,14 @@
   "title.learn.moduleProject": "Module project",
   "title.inst.topics": "Topics",
   "title.topics": "See our topics",
-  "title.topicSample": "Free sample lesson"
+  "title.topicSample": "Free sample lesson",
+  "lj.walk.controls": "Walkthrough controls",
+  "lj.walk.preparing": "Getting the audio ready…",
+  "lj.walk.prev": "Previous line",
+  "lj.walk.next": "Next line",
+  "lj.walk.finish": "Finish",
+  "lj.walk.pause": "Pause",
+  "lj.walk.resume": "Resume",
+  "lj.walk.replay": "Replay line",
+  "lj.walk.noAudio": "Audio isn't available for this line. Read it, then tap Next line."
 }

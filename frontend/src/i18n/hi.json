@@ -4077,5 +4077,14 @@
   "title.learn.moduleProject": "Module project",
   "title.inst.topics": "Topics",
   "title.topics": "हमारे topics देखिए",
-  "title.topicSample": "मुफ़्त sample पाठ"
+  "title.topicSample": "मुफ़्त sample पाठ",
+  "lj.walk.controls": "समझाने के नियंत्रण",
+  "lj.walk.preparing": "ऑडियो तैयार हो रहा है…",
+  "lj.walk.prev": "पिछली लाइन",
+  "lj.walk.next": "अगली लाइन",
+  "lj.walk.finish": "खत्म करें",
+  "lj.walk.pause": "रोकें",
+  "lj.walk.resume": "जारी रखें",
+  "lj.walk.replay": "यह लाइन फिर से",
+  "lj.walk.noAudio": "इस लाइन का ऑडियो उपलब्ध नहीं है। पढ़ें, फिर अगली लाइन दबाएँ।"
 }
