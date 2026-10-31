@@ -15,6 +15,7 @@ import { liveStatus } from './institutionActivity.js';
 import { mapSeq } from './util/seq.js';
 import { journeyStage } from './journey/stage.js';
 import { catalog } from './courses/catalog.js';
+import { native, mixed, namesIn } from './language/style.js';
 
 export const GLOSSARY = {
   A0: 'Authorship A0 — not checked yet.',
@@ -39,7 +40,7 @@ const CODE = { en: 'en', te: 'te', hi: 'hi', english: 'en', telugu: 'te', hindi:
 // the lessons themselves: the best-matching lesson's one-liner and first
 // explanation lines, in the chosen language, with a link to the lesson.
 const STOP = new Set(['what', 'is', 'a', 'an', 'the', 'how', 'do', 'does', 'i', 'in', 'of', 'to', 'and', 'ante', 'enti', 'emiti', 'kya', 'hai', 'kaise', 'explain', 'me', 'please', 'use', 'python', 'java', 'mean', 'means', 'are', 'why', 'we']);
-function lessonAnswer(q, code) {
+function lessonAnswer(q, code, chosen = '') {
   const words = String(q).toLowerCase().match(/[a-z][a-z+#]*/g) || [];
   const stem = (w) => w.replace(/(ies|y)$/, 'i').replace(/(es|s)$/, '');
   const stems = (text) => String(text).toLowerCase().match(/[a-z][a-z+#]*/g)?.map(stem) || [];
@@ -61,7 +62,9 @@ function lessonAnswer(q, code) {
   const pick = (v) => (v && (v[code] || v.en)) || '';
   const l = best.lesson;
   const explain = pick(l.explain);
-  const answer = [pick(l.oneLine), ...(Array.isArray(explain) ? explain.slice(0, 2) : [])].filter(Boolean).join(' ');
+  let answer = [pick(l.oneLine), ...(Array.isArray(explain) ? explain.slice(0, 2) : [])].filter(Boolean).join(' ');
+  // In the style of the chosen answer language: the spoken mix, or full Telugu / Hindi.
+  if (code === 'te' || code === 'hi') answer = /_en$/.test(chosen) ? mixed(answer, code) : native(answer, code, namesIn(l.code?.source, l.task?.starter));
   return { answer, links: [{ label: `${best.course.title.en}: ${l.title.en}`, href: `/learn/lesson/${l.id}` }], source: 'lessons' };
 }
 
@@ -185,7 +188,7 @@ export async function ask(req, { question, lang }) {
   const learner = req.session?.actor_type === 'learner';
   const chosen = lang && LANG[lang] ? lang : (learner ? (req.user?.learning_language || req.user?.language || 'telugu') : 'en');
   const language = LANG[chosen] || 'English';
-  const fromLessons = learner ? lessonAnswer(q, CODE[chosen] || 'en') : null;
+  const fromLessons = learner ? lessonAnswer(q, CODE[chosen] || 'en', chosen) : null;
   const allowed = new Map(links.map(l => [l.href, l]));
   try {
     const r = await generate({

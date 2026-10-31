@@ -116,7 +116,9 @@ describe('full language and the English mix are different', () => {
     const mix = (await me.agent.get(`/api/learner/skill/${node.id}`)).body;
     expect(te.concept.primer).toMatch(TELUGU);
     expect(te.concept.primer).not.toBe(mix.concept.primer);
-    expect(latin(te.concept.primer)).toBeLessThan(latin(mix.concept.primer));
+    // Clearly different, not a word or two: the mix says the common words in English.
+    expect(latin(mix.concept.primer)).toBeGreaterThanOrEqual(latin(te.concept.primer) + 5);
+    expect(mix.concept.primer).toMatch(/\bmarks\b/);
   });
   it('an open review question is kept separately for each exact mode', async () => {
     await put('/learning-language', { value: 'telugu' });
@@ -127,6 +129,9 @@ describe('full language and the English mix are different', () => {
     const keys = (await dal.all('SELECT language FROM instance_texts WHERE instance_id = ?', start.body.instance_id)).map(r => r.language);
     expect(keys).toEqual(expect.arrayContaining(['telugu', 'telugu_en']));
     expect(te.body.question).toMatch(TELUGU); expect(mix.body.question).toMatch(TELUGU);
+    // 31 Oct: the scenario slot was shown as "{సందర్భం}" — never an unfilled slot.
+    const hi = await me.agent.get(`/api/learner/reviews/instances/${start.body.instance_id}/question?language=hindi`);
+    for (const q of [te.body.question, mix.body.question, hi.body.question]) expect(q).not.toMatch(/[{}]/);
   });
   it('AI prompts are told which style: full language vs the spoken mix', () => {
     const req = { task: 'TEACH.instruction', system: 'Teach in Telugu.', input: 'x' };
