@@ -383,4 +383,4 @@ export async function courseSkillFacts(learnerId) {
   return out;
 }
 
-export const allCourses = () => catalog().courses;
+export const allCourses = () => catalog().courses.map(c => courseById(c.id));

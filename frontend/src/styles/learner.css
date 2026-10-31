@@ -422,7 +422,7 @@
 
 /* ── Learning language picker ────────────────────────────────────────────── */
 .lj-langpick { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: var(--radius-full, 999px); border: 1px solid var(--color-border); background: var(--color-surface); }
-.lj-langpick select { border: 0; background: transparent; color: var(--color-text); font: inherit; font-size: var(--fs-small); min-height: 32px; cursor: pointer; }
+.lj-langpick select { border: 0; background: transparent; color: var(--color-text); font: inherit; font-size: var(--fs-small); min-height: 32px; cursor: pointer; max-width: min(22rem, 58vw); text-overflow: ellipsis; }
 
 /* ── Courses and modules ─────────────────────────────────────────────────── */
 .lj-course { gap: 10px; }
@@ -488,3 +488,35 @@
 .lj-clear-input { min-height: 32px; width: 220px; max-width: 60vw; }
 .lj-ask { border-style: dashed; }
 .lj-testout { border: 2px solid var(--accent-700); }
+
+/* ─── Shared charts (components/shared/Charts.js) ───────────────────────────
+   Series colours passed the colour-blind checks on both surfaces. */
+:root { --viz-1: #C4302A; --viz-2: #2a78d6; --viz-3: #1baf7a; --viz-label-w: 9.5rem; }
+[data-theme='dark'] { --viz-1: #e66767; --viz-2: #3987e5; --viz-3: #199e70; }
+.viz { margin: 0; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.viz-plot { display: flex; flex-direction: column; gap: 10px; }
+.viz-row { display: grid; grid-template-columns: var(--viz-label-w) minmax(0, 1fr) 4.5rem; gap: 8px; align-items: center; }
+.viz-group { grid-template-columns: var(--viz-label-w) minmax(0, 1fr); align-items: start; }
+.viz-label { font-size: var(--fs-small); color: var(--color-text); overflow-wrap: anywhere; }
+.viz-value { font-size: var(--fs-caption); color: var(--color-text-muted); text-align: right; }
+.viz-track { position: relative; height: 18px; }
+.viz-bars { display: flex; flex-direction: column; gap: 2px; padding-right: 2rem; }
+.viz-bars .viz-track { height: 12px; }
+.viz-grid { position: absolute; top: -3px; bottom: -3px; width: 1px; background: var(--color-surface-2, #eceae6); }
+.viz-range, .viz-bar { position: absolute; top: 0; bottom: 0; padding: 0; border: 0; cursor: default; border-radius: 4px; }
+.viz-range { background: var(--viz-2); min-width: 6px; }
+.viz-bar { left: 0; min-width: 3px; border-radius: 0 4px 4px 0; }
+.viz-axis .viz-bars .viz-track { height: 14px; }
+.viz-range:focus-visible, .viz-bar:focus-visible { outline: 2px solid var(--color-text); outline-offset: 2px; }
+.viz-mid { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--color-text); border-radius: 1px; }
+.viz-barvalue { position: absolute; top: -2px; font-size: var(--fs-caption); color: var(--color-text-muted); line-height: 16px; }
+.viz-c1 { background: var(--viz-1); } .viz-c2 { background: var(--viz-2); } .viz-c3 { background: var(--viz-3); }
+.viz-axis .viz-track { height: 14px; }
+.viz-axis .viz-track span { position: absolute; transform: translateX(-50%); font-size: var(--fs-caption); color: var(--color-text-muted); white-space: nowrap; }
+.viz-axis-title { text-align: center; padding-right: 2rem; font-size: var(--fs-caption); color: var(--color-text-muted); padding-left: var(--viz-label-w); }
+.viz-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--color-text-muted); }
+.viz-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.viz-swatch { display: inline-block; width: 10px; height: 10px; border-radius: 3px; }
+.viz-tip { position: absolute; bottom: calc(100% + 6px); transform: translateX(-50%); background: var(--color-text); color: var(--color-surface); font-size: var(--fs-caption); padding: 4px 8px; border-radius: 6px; white-space: nowrap; z-index: 5; pointer-events: none; max-width: 80vw; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 560px) { :root { --viz-label-w: 6.5rem; } .viz-row { grid-template-columns: var(--viz-label-w) minmax(0, 1fr) 3.6rem; } .viz-group { grid-template-columns: var(--viz-label-w) minmax(0, 1fr); } }
+.ln-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }

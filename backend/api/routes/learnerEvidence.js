@@ -107,14 +107,14 @@ router.post('/reviews/:nodeId/start', async (req, res) => {
     inst = { id: issued.id, question_text: issued.question_text };
   }
   // An open question asked earlier in another language comes back in the current learning language.
-  const shown = await instanceIn(inst.id, elId, req.user.language);
+  const shown = await instanceIn(inst.id, elId, req.user.learning_language || req.user.language);
   res.json({ instance_id: inst.id, question: shown.question, language: shown.language, kind: recheck ? 'recheck' : 'review' });
 });
 
 // The open question in another language: same instance and values, no new attempt.
 router.get('/reviews/instances/:id/question', async (req, res) => {
   try {
-    const lang = ['english', 'telugu', 'hindi', 'telugu_en', 'hindi_en'].includes(req.query.language) ? req.query.language : req.user.language;
+    const lang = ['english', 'telugu', 'hindi', 'telugu_en', 'hindi_en'].includes(req.query.language) ? req.query.language : (req.user.learning_language || req.user.language);
     res.json(await instanceIn(req.params.id, req.user.el_id, lang));
   } catch (err) {
     res.status(err.status || 500).json({ error: err.status ? err.message : 'Could not show this question in that language.' });

@@ -170,7 +170,11 @@ export function authenticate({ errors = 'legacy', optional = false } = {}) {
     req.tenant = tenantFor(session, payload);
     req.authVia = viaCookie ? 'cookie' : 'bearer';
     // The demo teaches with the scripted tutor (instant and free) unless DEMO_TUTOR=live.
-    if (session.sandbox_id) return withContext({ sandboxId: session.sandbox_id, tutor: process.env.DEMO_TUTOR === 'live' ? null : 'scripted' }, next);
+    // The exact learning language (telugu vs telugu_en) reaches every content
+    // call and AI prompt through the request context (core/language/style.js).
+    const ctx = req.user.learning_language ? { learningMode: req.user.learning_language } : {};
+    if (session.sandbox_id) return withContext({ ...ctx, sandboxId: session.sandbox_id, tutor: process.env.DEMO_TUTOR === 'live' ? null : 'scripted' }, next);
+    if (ctx.learningMode) return withContext(ctx, next);
     next();
   };
 }

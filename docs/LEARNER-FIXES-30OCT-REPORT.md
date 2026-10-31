@@ -1,8 +1,27 @@
-# Learner fixes and learn-by-topic — 30 Oct report
+# Learner fixes and learn-by-topic — 30 Oct report (31 Oct additions in §0)
 
 Branch `claude/learner-side-updates-vthycg` (PR #20). Everything below is on this branch. Staging still runs an older build, so none of it is live there yet (see Voice).
 
-## 1. Team points
+
+## 0. 31 Oct team points
+
+| # | What was wrong | Cause | Fix | How verified | Status |
+|---|---|---|---|---|---|
+| 31-3 | Reviews → Back went to Skill path | Back used browser history when there was any | New Back rule (below): Reviews returns to its opener, else Home | e2e: Skill path → Reviews → Back = Home; Home → Reviews → Back = Home | Done |
+| 31-4 | Opening the voice session signed the learner out | Some routes passed a Google 401/403 (bad or restricted voice/AI key) straight to the app, and the app signed out on **any** 401 | Google 401/403 become 502 (original status kept for diagnosis). Every session 401 now carries a code (`unauthenticated`, `invalid_session`, `access_removed`, `moved_cohort`, `account_inactive`…); the app signs out only on those codes and shows a normal error otherwise | `upstreamErrors.test.js`, `auth.test.js` (codes); e2e: open and use `/learn/session`, still signed in afterwards | Done |
+| 31-5 | "Walk me through it" glitched (overlapping or skipped speech) | Each line was a separate speak call chained on timers; a stale "no voice" check fired the next line while the current one still played | One clip per line, all made and cached before playback; clips play one after another on one audio element (never overlapping); the highlight moves when a clip starts. Pause / Previous line / Next line / Replay line. Code is spoken as words (`a + b` → "a plus b", `#` comments read as text, `def` stays "def"). If a line's audio fails, the highlight stays and its text shows; Next moves on | `codeSpeech.test.js`; e2e with a stubbed voice: 6 clips for 6 lines, order 0–5, no overlap, highlight on each line, controls work, no-audio fallback | Done locally; Android and iPhone not tested (no devices here) |
+| 31-6 / 31-8 | "Telugu" and "Telugu + English" gave the same text (also Hindi) | The mode was reduced to the main language before any content was made | The exact mode now reaches every content call (request context) and every review-question cache key. **Telugu + English** = the lessons as written (Hyderabad spoken mix). **Telugu** = full Telugu: every English word that is not code becomes Telugu (విలువ, సంఖ్య, జాబితా) or Telugu script (ఫంక్షన్, లూప్); code and code names stay English. Same for Hindi. AI prompts get one style line for the chosen mode. The picker shows a one-line sample of each mode | `learningLanguage.test.js` (lesson, skill page Array methods, review question, AI style line); e2e: lesson text differs (16 vs 28 English words), picker samples | Done. Needs a native speaker's review (open item 1) |
+| 31-7 | Explore topics → Back went forward to Python Programming | Browser history | Back rule below | e2e: course page → Explore topics → Home | Done |
+| 31-9 | Package (salary band) charts were gone from Jobs & applications | They were only on the job market pages, now hidden | "Packages by role" on Jobs & applications, shown even with the job market hidden: one bar per role from lowest to highest ₹ LPA, a line at the middle, labelled axis, tooltip, Source · date, sample-data badge, phone layout, a table for screen readers | e2e at 1280 and 390 px: 10 roles, ₹ LPA axis, tooltip, source and date, no sideways scroll | Done |
+| 31-10 | Readiness showed a separate set of bars per skill | — | One grouped chart: per skill, You now / Your course reaches / Employers ask (horizontal grouped bars, which also fit phones), with the band, "Why this?" and a summary ("3 skills short: HTML & CSS, JavaScript, React"). The per-skill "Add to my plan" stays below the chart. Colours passed colour-blind checks in light and dark | e2e at 1280 and 390 px: one chart, 3 bars per skill, band, summary, Why this? | Done. The radar option for wide screens was not built: the grouped bars read the same at every width |
+
+**Back rule (31 Oct).**
+- Back always goes one level up the breadcrumb: lesson → its course → Explore topics → Home; Skill path, Reviews and Attempt history → Home; module test/project → its course.
+- Only pages opened from several places (Reviews, a lesson, a skill page, a module test/project, the voice session) return to the page that opened them (`from`).
+- Back never uses browser history; the browser's own back button still works.
+- e2e checks every `/learn/*` route plus the three journeys above.
+
+## 1. Team points (30 Oct)
 
 | # | What was wrong | Cause | Fix | How verified | Status |
 |---|---|---|---|---|---|
@@ -39,6 +58,8 @@ Signed-in learner requests now carry the learning language (`api/middleware/auth
 None of these hard-codes English prompts. Code, skill names and technical words stay in English inside Telugu and Hindi text.
 
 ## 2. Voice
+
+**31 Oct:** staging could not be re-checked today (this session's Vercel access does not reach the staging deployment). Nothing below changed in what the founder must add: the same names, no new ones. The voice-session sign-out (31-4) is fixed in code whatever the key does: a voice key Google rejects now shows a normal error, never a sign-out.
 
 - **Running on staging now:** the browser fallback. The last deep health check on staging showed:
   - Gemini TTS returning 404 for its model;
@@ -127,3 +148,5 @@ All results below are local runs against this branch.
 4. **Draft courses need lessons next.** SQL and JavaScript first: they appear in most roles, and their in-browser runners already work.
 5. **College programme builder:** colleges currently pick modules through a cohort brief. A pick-modules screen would make this clearer.
 6. **NumPy / pandas lesson:** the first run loads about 15 MB in the browser. On slow phones it can take a minute, and the runner allows that.
+7. **Full Telugu / Hindi wording (31 Oct):** the full-language mode is made from the reviewed mix text with a word list (`backend/core/language/style.js`, about 200 words). A native speaker should read a few lessons in "తెలుగు" and "हिंदी" and correct the list; English words not in it stay as they are.
+8. **Walkthrough on phones:** checked in Chrome desktop with a stubbed voice. Android Chrome and iPhone Safari still need a hand check: open a lesson → See the code → Walk me through it, and listen for one line at a time with the highlight following.

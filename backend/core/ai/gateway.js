@@ -26,7 +26,8 @@ import { logger } from '../logger.js';
 import * as gemini from './adapters/gemini.js';
 import * as mock from './adapters/mock.js';
 import * as scripted from './adapters/scripted.js';
-import { currentSandbox, currentTutor } from '../requestContext.js';
+import { currentSandbox, currentTutor, currentLearningMode } from '../requestContext.js';
+import { styleLine } from '../language/style.js';
 import { chargeDemoAi, DEMO_LIMIT_MESSAGE } from '../demo/budget.js';
 
 const ADAPTERS = { gemini, mock, scripted };
@@ -125,6 +126,7 @@ export const aiUnavailableMessage = (err) => (isDemoLimit(err) ? DEMO_LIMIT_MESS
 
 export async function generate(req) {
   if (!req?.task) throw new GatewayError('unknown_task', 'generate() needs a task');
+  req = withStyle(req);
   const r = route(req.task);
   const sandbox = currentSandbox();
   // The scripted tutor costs nothing, so it never counts against the demo budget.
@@ -156,6 +158,16 @@ export async function generate(req) {
     }
     throw err;
   }
+}
+
+// A learner's prompt that writes Telugu or Hindi gets one line saying which
+// of the two styles they chose (full language, or the spoken English mix).
+export function withStyle(req, mode = currentLearningMode()) {
+  const main = String(mode || '').replace(/_en$/, '');
+  const line = styleLine(mode);
+  const name = main === 'telugu' ? /Telugu/ : main === 'hindi' ? /Hindi/ : null;
+  if (!line || !name || !name.test(`${req.system || ''} ${req.input || ''}`)) return req;
+  return { ...req, system: `${req.system || ''}\n${line}`.trim() };
 }
 
 // ─── Speech ───────────────────────────────────────────────────────────────────

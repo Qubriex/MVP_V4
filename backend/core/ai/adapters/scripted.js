@@ -13,22 +13,29 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { wantsNative, nativeDeep } from '../../language/style.js';
 
 export const name = 'scripted';
 const DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../data/scripted');
 const LANGS = ['telugu', 'hindi', 'english'];
 const cache = new Map();
 
+// The scripts are written in the Telugu + English (Hindi + English) mix; a
+// learner who chose full Telugu / Hindi gets them through native().
 function load(file) {
-  if (cache.has(file)) return cache.get(file);
+  const lang = file.match(/\.(telugu|hindi)\.json$/)?.[1];
+  const full = lang && wantsNative(lang);
+  const key = full ? `${file}|full` : file;
+  if (cache.has(key)) return cache.get(key);
   let doc = null;
   try { doc = JSON.parse(fs.readFileSync(path.join(DIR, file), 'utf8')); } catch { doc = null; }
-  cache.set(file, doc);
+  if (doc && full) doc = nativeDeep(doc, lang === 'telugu' ? 'te' : 'hi');
+  cache.set(key, doc);
   return doc;
 }
 
 export const slugOf = (label) => String(label || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-const langOf = (l) => (LANGS.includes(l) ? l : 'english');
+const langOf = (l) => { const m = String(l || '').replace(/_en$/, ''); return LANGS.includes(m) ? m : 'english'; };
 const fill = (s, vars) => String(s || '').replace(/\{(\w+)\}/g, (m, k) => (vars[k] != null ? vars[k] : m));
 
 /** The common phrases for a language. */

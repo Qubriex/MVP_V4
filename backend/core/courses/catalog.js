@@ -12,6 +12,8 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { currentLearningMode } from '../requestContext.js';
+import { nativeDeep, namesIn } from '../language/style.js';
 
 const DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../data/courses');
 export const LANG_CODE = { telugu: 'te', hindi: 'hi', english: 'en' };
@@ -48,9 +50,31 @@ export function catalog() {
 }
 export const _resetCatalog = () => { cache = null; };
 
-export const courseById = (id) => catalog().byId.get(id) || null;
-export const moduleById = (id) => catalog().modules.get(id) || null;
-export const lessonById = (id) => catalog().lessons.get(id) || null;
+// A learner who chose full Telugu / Hindi (not the mix) gets every lesson,
+// module and course text in the full language (core/language/style.js); the
+// mix, staff and public pages get the text as written. Cached per mode.
+const styledCache = { te: new WeakMap(), hi: new WeakMap() };
+function codeNames(o, out = []) {
+  if (o && typeof o === 'object') {
+    for (const [k, v] of Object.entries(o)) {
+      if (typeof v === 'string' && ['source', 'starter', 'solution', 'setup', 'wrong'].includes(k)) out.push(v);
+      else codeNames(v, out);
+    }
+  }
+  return out;
+}
+function styled(item) {
+  if (!item) return null;
+  const mode = currentLearningMode();
+  if (mode !== 'telugu' && mode !== 'hindi') return item;
+  const code = mode === 'telugu' ? 'te' : 'hi';
+  const cache = styledCache[code];
+  if (!cache.has(item)) cache.set(item, nativeDeep(item, code, namesIn(...codeNames(item))));
+  return cache.get(item);
+}
+export const courseById = (id) => styled(catalog().byId.get(id));
+export const moduleById = (id) => styled(catalog().modules.get(id));
+export const lessonById = (id) => styled(catalog().lessons.get(id));
 
 /** The base language and caption language for a learning-language choice. */
 export function languagePair(learning) {

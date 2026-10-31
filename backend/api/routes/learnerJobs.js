@@ -29,6 +29,23 @@ router.use(authenticateToken, requireRole('learner'), requireActiveLearner);
 const fail = (res, e) => res.status(e.status || 500).json({ error: e.status ? e.message : 'Something went wrong.' });
 const institutionOf = async (req) => (await dal.one('SELECT institution_id FROM engagements WHERE id = ?', req.user.engagement_id))?.institution_id;
 
+// Packages (₹ LPA) by role for the chart on Jobs & applications: the lowest
+// and highest listed salary, and the middle of each listing's range. Shown
+// even while the job market pages are hidden (FEATURE_LEARNER_JOBS off).
+export function packageBands(city = '') {
+  const byRole = new Map();
+  market.JOBS.filter(j => !city || j.city === city).forEach((j) => {
+    const r = byRole.get(j.role) || { role: j.role, min: Infinity, max: 0, mids: [] };
+    r.min = Math.min(r.min, j.salary_min); r.max = Math.max(r.max, j.salary_max); r.mids.push((j.salary_min + j.salary_max) / 2);
+    byRole.set(j.role, r);
+  });
+  return [...byRole.values()].map(({ mids, ...r }) => {
+    const m = [...mids].sort((a, b) => a - b);
+    const median = m.length % 2 ? m[(m.length - 1) / 2] : (m[m.length / 2 - 1] + m[m.length / 2]) / 2;
+    return { ...r, median: Math.round(median * 10) / 10, posts: mids.length };
+  }).sort((a, b) => b.median - a.median);
+}
+
 router.get('/jobs-hub', async (req, res) => {
   const city = String(req.query.city || '');
   const db = dal.legacyHandle();
@@ -51,7 +68,8 @@ router.get('/jobs-hub', async (req, res) => {
     roles: await matchedRoles(req.user, { city }),
     applications,
     posts: posts.sort((a, b) => a.points_short - b.points_short || b.readiness - a.readiness).slice(0, 12),
-    bar: BANDS.ready, sample: true
+    packages: packageBands(city),
+    bar: BANDS.ready, sample: true, source: market.SOURCE_LABEL, updated_at: market.UPDATED_AT
   });
 });
 

@@ -12,7 +12,8 @@ import { SampleBadge } from '../../components/learn/ui';
 import EmptyState, { LoadingRows } from '../../components/shared/EmptyState';
 import { WhyThis } from '../../components/shared/Popover';
 import { Select } from '../../components/shared/ui';
-import { StatusWord, ReadinessWords } from '../../components/learn/journey';
+import { StatusWord, ReadinessWords, SourceLine } from '../../components/learn/journey';
+import { RangeBars } from '../../components/shared/Charts';
 
 import { useUiLang, uiLocale } from '../../context/UiLangContext';
 // Every item an employer can ask for, in the learner's words.
@@ -136,6 +137,19 @@ export default function Jobs() {
               </div>
             )}
           </section>
+
+          {data.packages?.length > 0 && (
+            <section className="ln-card ln-col" style={{ gap: 10 }} data-packages>
+              <div className="ln-row" style={{ gap: 8 }}><h2 className="ln-h2">{t('lj.pkg.title')}</h2>{data.sample && <SampleBadge />}</div>
+              <span className="ln-small ln-muted">{t('lj.pkg.sub')}</span>
+              <RangeBars unit="" step={2} format={(v) => `₹${v}`}
+                rows={data.packages.map(p => ({ key: p.role, label: p.role, min: p.min, max: p.max, mid: p.median, note: t('lj.pkg.posts', { n: p.posts }) }))}
+                axisLabel={t('lj.pkg.axis')}
+                ariaLabel={t('lj.pkg.aria', { list: data.packages.map(p => `${p.role} ₹${p.min}–${p.max}`).join(', ') })}
+                tableHeads={[t('lj.pkg.role'), t('lj.pkg.low'), t('lj.pkg.high'), t('lj.pkg.mid')]} />
+              <SourceLine source={data.source} date={data.updated_at} />
+            </section>
+          )}
 
           <section className="ln-col" style={{ gap: 12 }}>
             <div className="ln-row" style={{ gap: 8 }}><h2 className="ln-h2">{t('learn.jobs.jobPostsFit')}</h2><SampleBadge /></div>

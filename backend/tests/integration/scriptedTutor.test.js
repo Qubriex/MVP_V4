@@ -6,6 +6,9 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import * as dal from '../../core/db/dal.js';
 import { freshDb, makeApp, seedInstitution, seedPathway, login, PIN } from '../helpers/setup.js';
 import { lessonFor, grade, questionFor, intentOf } from '../../core/ai/adapters/scripted.js';
+import { withContext } from '../../core/requestContext.js';
+// The learner here chose full Telugu, so the scripts reach her in that style.
+const fullTelugu = (node) => withContext({ learningMode: 'telugu' }, () => lessonFor(node, 'telugu'));
 
 const typed = { mode: 'typed', pasted_chars: 0, paste_events: 0, largest_paste: 0 };
 let app; let A; let T; let real; let test;
@@ -72,7 +75,7 @@ describe('the loop through the API', () => {
     expect(start.body.message).not.toMatch(/^mock/);
     // Teach first: the opening is the explanation, never a diagnostic question.
     expect(start.body.decision).toBe('TEACH');
-    expect(start.body.message).toBe(lessonFor('SQL queries', 'telugu').turns.explain.message);
+    expect(start.body.message).toBe(fullTelugu('SQL queries').turns.explain.message);
     expect(start.body.history[0].message_type).toBe('instruction');
     const sid = start.body.session_id;
     const lesson = await post(real, '/api/learner/session/message', { content: 'I know a little', session_id: sid });
@@ -80,7 +83,7 @@ describe('the loop through the API', () => {
     expect(lesson.body.code).toMatch(/SELECT/);
     expect(lesson.body.caption_en).toBeTruthy();
     const again = await post(real, '/api/learner/session/message', { content: 'అర్థం కాలేదు', session_id: sid });
-    expect(again.body.message).toBe(lessonFor('SQL queries', 'telugu').turns.not_understood.message);
+    expect(again.body.message).toBe(fullTelugu('SQL queries').turns.not_understood.message);
 
     const ready = await post(real, '/api/learner/session/message', { request_check: true, session_id: sid });
     expect(ready.body.decision).toBe('CHECK');

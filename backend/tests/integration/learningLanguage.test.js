@@ -6,6 +6,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import * as dal from '../../core/db/dal.js';
 import { freshDb, makeApp, login } from '../helpers/setup.js';
 import { seedTestData } from '../../scripts/testData.js';
+import { withStyle } from '../../core/ai/gateway.js';
 
 let app; let me;
 const before = process.env.AI_ADAPTER;
@@ -78,5 +79,63 @@ describe('an open review question switches language in place', () => {
     const other = await login(app, '/api/auth/learner/login', { learner_ref: 'TEST-J-S5', join_code: 'QX-FSD-T01', pin: PIN });
     const inst = await dal.one("SELECT id FROM family_instances WHERE el_id = 'test-jel-s3' ORDER BY created_at DESC LIMIT 1");
     expect((await other.agent.get(`/api/learner/reviews/instances/${inst.id}/question?language=english`)).status).toBe(404);
+  });
+});
+
+// 31 Oct: "Telugu" and "Telugu + English" (and the Hindi pair) gave the same text.
+describe('full language and the English mix are different', () => {
+  const LATIN = /\b[A-Za-z]{3,}\b/g;
+  const latin = (t) => (String(t).match(LATIN) || []).length;
+  const lesson = async (mode) => { await put('/learning-language', { value: mode }); return (await me.agent.get('/api/learner/lessons/py-m3-l3')).body; };
+
+  it('a course lesson: Telugu is full Telugu, the mix keeps English words; code stays English in both', async () => {
+    const te = await lesson('telugu');
+    const mix = await lesson('telugu_en');
+    const a = te.parts.explain.join(' '); const b = mix.parts.explain.join(' ');
+    expect(a).not.toBe(b);
+    expect(a).toMatch(TELUGU); expect(b).toMatch(TELUGU);
+    expect(latin(a)).toBeLessThan(latin(b));
+    expect(b).toMatch(/\bvalue\b/); expect(a).toMatch(/విలువ/);
+    expect(a).toMatch(/\breturn\b/); expect(a).toMatch(/\bprint\b/);
+    expect(te.parts.code.source).toBe(mix.parts.code.source);
+    expect(te.parts.oneLine).not.toBe(mix.parts.oneLine);
+  });
+  it('the same for Hindi and Hindi + English', async () => {
+    const hi = await lesson('hindi');
+    const mix = await lesson('hindi_en');
+    const a = hi.parts.explain.join(' '); const b = mix.parts.explain.join(' ');
+    expect(a).not.toBe(b);
+    expect(a).toMatch(HINDI);
+    expect(latin(a)).toBeLessThan(latin(b));
+  });
+  it('a skill page (Attempt history → Array methods): Telugu and the mix differ', async () => {
+    const node = await dal.one("SELECT sn.id FROM skill_nodes sn WHERE sn.node_label = 'Array methods' AND sn.id LIKE 'test-%' LIMIT 1");
+    await put('/learning-language', { value: 'telugu' });
+    const te = (await me.agent.get(`/api/learner/skill/${node.id}`)).body;
+    await put('/learning-language', { value: 'telugu_en' });
+    const mix = (await me.agent.get(`/api/learner/skill/${node.id}`)).body;
+    expect(te.concept.primer).toMatch(TELUGU);
+    expect(te.concept.primer).not.toBe(mix.concept.primer);
+    expect(latin(te.concept.primer)).toBeLessThan(latin(mix.concept.primer));
+  });
+  it('an open review question is kept separately for each exact mode', async () => {
+    await put('/learning-language', { value: 'telugu' });
+    const due = (await me.agent.get('/api/learner/reviews/due')).body.due;
+    const start = await post(`/api/learner/reviews/${due[0].node_id}/start`);
+    const te = await me.agent.get(`/api/learner/reviews/instances/${start.body.instance_id}/question?language=telugu`);
+    const mix = await me.agent.get(`/api/learner/reviews/instances/${start.body.instance_id}/question?language=telugu_en`);
+    const keys = (await dal.all('SELECT language FROM instance_texts WHERE instance_id = ?', start.body.instance_id)).map(r => r.language);
+    expect(keys).toEqual(expect.arrayContaining(['telugu', 'telugu_en']));
+    expect(te.body.question).toMatch(TELUGU); expect(mix.body.question).toMatch(TELUGU);
+  });
+  it('AI prompts are told which style: full language vs the spoken mix', () => {
+    const req = { task: 'TEACH.instruction', system: 'Teach in Telugu.', input: 'x' };
+    const full = withStyle(req, 'telugu').system;
+    const mix = withStyle(req, 'telugu_en').system;
+    expect(full).toMatch(/full Telugu sentences/);
+    expect(mix).toMatch(/Hyderabad/);
+    expect(full).not.toBe(mix);
+    expect(withStyle({ task: 'X', system: 'Answer in English.' }, 'telugu').system).toBe('Answer in English.');
+    expect(withStyle(req, 'hindi_en').system).toBe('Teach in Telugu.');
   });
 });

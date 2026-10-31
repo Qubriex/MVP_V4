@@ -289,6 +289,34 @@ try {
     check('Voice session: still signed in afterwards', new URL(vp.url()).pathname === '/learn/dashboard');
     await vp.close();
   }
+  // 2d. 31 Oct: the package chart on Jobs & applications (job market hidden)
+  // and one grouped readiness chart — at desktop and phone width.
+  for (const width of [1280, 390]) {
+    const cp = await newPage(ctx);
+    await cp.setViewportSize({ width, height: 860 });
+    await cp.goto(`${BASE}/learn/jobs`);
+    const pk = await cp.waitForSelector('[data-packages] [data-viz-row]', { timeout: 15000 }).catch(() => null);
+    const rows = await cp.$$eval('[data-packages] [data-viz-row]', els => els.length).catch(() => 0);
+    const axis = await cp.textContent('[data-packages] .viz-axis-title').catch(() => '');
+    const src = await cp.textContent('[data-packages] [data-source-line]').catch(() => '');
+    let tip = '';
+    if (pk) { await cp.hover('[data-packages] .viz-range'); tip = await cp.textContent('[data-packages] .viz-tip').catch(() => ''); }
+    const wide = await cp.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
+    check(`Jobs & applications (${width}px): package bars by role, ₹ LPA axis, tooltip, source and date`, rows > 0 && /LPA/.test(axis) && /₹/.test(tip) && /Source/.test(src) && !wide, `${rows} roles · tip "${tip.slice(0, 40)}" · ${src.trim()}${wide ? ' · sideways scroll' : ''}`);
+    await cp.goto(`${BASE}/learn/readiness`);
+    await cp.waitForSelector('[data-readiness-chart] [data-viz-row]', { timeout: 15000 }).catch(() => null);
+    const charts = await cp.$$eval('figure.viz', els => els.length).catch(() => 0);
+    const skills = await cp.$$eval('[data-readiness-chart] [data-viz-row]', els => els.length).catch(() => 0);
+    const bars = await cp.$$eval('[data-readiness-chart] .viz-bar', els => els.length).catch(() => 0);
+    const legend = await cp.textContent('[data-readiness-chart] [data-viz-legend]').catch(() => '');
+    const summary = await cp.textContent('[data-ready-summary]').catch(() => '');
+    const band = await cp.$('.ui-band');
+    const why = await cp.$('button:has-text("Why")');
+    const wide2 = await cp.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
+    check(`Readiness (${width}px): one grouped chart, three series per skill, band, summary, Why this?`, charts === 1 && skills > 0 && bars === skills * 3 && /employers ask/i.test(legend) && /skills? short|No skills short/.test(summary) && !!band && !!why && !wide2, `${charts} chart · ${skills} skills · ${bars} bars · "${summary.trim()}"`);
+    await cp.close();
+  }
+
   await me.waitForTimeout(61000); // the learner's 30-a-minute request limit
 
   // 3. Learning language
@@ -299,6 +327,16 @@ try {
   await setLearning(me, 'telugu');
   await me.waitForFunction(() => /[\u0C00-\u0C7F]/.test(document.querySelector('[data-explain]')?.textContent || ''), null, { timeout: 15000 }).catch(() => {});
   check('Learning language Telugu: the lesson is in Telugu', TELUGU.test(await me.textContent('[data-explain]')));
+  // 31 Oct: Telugu and Telugu + English must not be the same text.
+  const teText = await me.textContent('[data-explain]');
+  await setLearning(me, 'telugu_en');
+  await me.waitForFunction((prev) => (document.querySelector('[data-explain]')?.textContent || '') !== prev, teText, { timeout: 15000 }).catch(() => {});
+  const mixText = await me.textContent('[data-explain]');
+  const latinN = (x) => (x.match(/\b[A-Za-z]{3,}\b/g) || []).length;
+  check('Telugu vs Telugu + English: the lesson text differs (full Telugu has fewer English words)', teText !== mixText && latinN(teText) < latinN(mixText), `${latinN(teText)} vs ${latinN(mixText)} English words`);
+  const samples = await me.$$eval('[data-learning-language] select option', os => os.map(o => o.getAttribute('data-sample')));
+  check('The picker shows a sample line for each mode', samples.length === 5 && samples.every(Boolean) && new Set(samples).size === 5);
+  await setLearning(me, 'telugu');
   await me.goto(`${BASE}/learn/settings`);
   const s = await me.waitForSelector('[data-settings-learning-language] [data-learning-language]', { timeout: 15000 }).then(e => e.getAttribute('data-learning-language')).catch(() => null);
   check('Settings shows the same learning language', s === 'telugu', s);

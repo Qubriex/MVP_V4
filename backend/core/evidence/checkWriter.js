@@ -17,6 +17,7 @@ import { ulid } from '../db/ulid.js';
 import { generate } from '../ai/gateway.js';
 import { logger } from '../logger.js';
 import { questionFor as scriptedQuestion } from '../ai/adapters/scripted.js';
+import { currentLearningMode, withContext } from '../requestContext.js';
 
 export const PROMPT_VERSION = 'EVIDENCE.conceptItem.v1';
 
@@ -166,11 +167,14 @@ Previous questions (do not repeat): ${previous.join(' | ') || 'none'}`
   await dal.run(`INSERT INTO family_instances (id, el_id, learner_id, node_id, family_id, family_version, purpose, attempt_no, seed, params_json, question_text, generator, prompt_version, created_at)
     VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?)`, id, elId, learnerId, nodeId, familyId, purpose, attemptNo, seed,
   JSON.stringify(params), question, generator, generator === 'model' ? PROMPT_VERSION : null, dal.nowIso());
-  await dal.run('INSERT INTO instance_texts (instance_id, language, question_text, created_at) VALUES (?, ?, ?, ?) ON CONFLICT (instance_id, language) DO NOTHING', id, language, question, dal.nowIso());
+  await dal.run('INSERT INTO instance_texts (instance_id, language, question_text, created_at) VALUES (?, ?, ?, ?) ON CONFLICT (instance_id, language) DO NOTHING', id, textKey(language), question, dal.nowIso());
   return { id, question_text: question, family_id: familyId, attempt_no: attemptNo, params, generator };
 }
 
 const MAIN_LANG = (l) => String(l || 'english').replace(/_en$/, '');
+// Kept texts are keyed by the exact learning language, so Telugu and
+// Telugu + English never share a cached question.
+const textKey = (language) => { const mode = currentLearningMode(); return mode && MAIN_LANG(mode) === language ? mode : language; };
 
 /**
  * The same question instance in another language: same seed, scenario,
@@ -179,10 +183,13 @@ const MAIN_LANG = (l) => String(l || 'english').replace(/_en$/, '');
  * @returns {Promise<{ instance_id: string, question: string, language: string }>}
  */
 export async function instanceIn(instanceId, elId, language) {
-  const lang = MAIN_LANG(language);
+  return withContext({ learningMode: language }, () => instanceInMode(instanceId, elId, language));
+}
+async function instanceInMode(instanceId, elId, mode) {
+  const lang = MAIN_LANG(mode);
   const inst = await dal.one('SELECT * FROM family_instances WHERE id = ? AND el_id = ?', instanceId, elId);
   if (!inst) throw Object.assign(new Error('No such question.'), { status: 404 });
-  const kept = await dal.one('SELECT question_text FROM instance_texts WHERE instance_id = ? AND language = ?', instanceId, lang);
+  const kept = await dal.one('SELECT question_text FROM instance_texts WHERE instance_id = ? AND language = ?', instanceId, mode);
   if (kept) return { instance_id: instanceId, question: kept.question_text, language: lang };
   const node = await nodeSpec(inst.node_id);
   const params = { ...paramsFromSeed(inst.seed, lang, node), variant: JSON.parse(inst.params_json || '{}').variant ?? paramsFromSeed(inst.seed, lang, node).variant };
@@ -203,7 +210,7 @@ export async function instanceIn(instanceId, elId, language) {
     logger.warn('evidence.item_translate_failed', { instanceId, error: err.message });
   }
   if (!question) question = templateQuestion(node, params, lang);
-  await dal.run('INSERT INTO instance_texts (instance_id, language, question_text, created_at) VALUES (?, ?, ?, ?) ON CONFLICT (instance_id, language) DO NOTHING', instanceId, lang, question, dal.nowIso());
-  const row = await dal.one('SELECT question_text FROM instance_texts WHERE instance_id = ? AND language = ?', instanceId, lang);
+  await dal.run('INSERT INTO instance_texts (instance_id, language, question_text, created_at) VALUES (?, ?, ?, ?) ON CONFLICT (instance_id, language) DO NOTHING', instanceId, mode, question, dal.nowIso());
+  const row = await dal.one('SELECT question_text FROM instance_texts WHERE instance_id = ? AND language = ?', instanceId, mode);
   return { instance_id: instanceId, question: row.question_text, language: lang };
 }
