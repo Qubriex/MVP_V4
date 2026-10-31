@@ -30,7 +30,7 @@ async function loadStaff(req, res, next) {
   const row = await db.prepare('SELECT id, name, title, role, status, department FROM institution_users WHERE id = ? AND institution_id = ?')
     .get(req.user.staff_id, req.user.id);
   db.close();
-  if (!row || row.status !== 'active') return res.status(401).json({ error: 'Your staff account is not active. Ask your institution admin.' });
+  if (!row || row.status !== 'active') return res.status(401).json({ error: 'Your staff account is not active. Ask your institution admin.', code: 'account_inactive' });
   req.staff = row;
   next();
 }

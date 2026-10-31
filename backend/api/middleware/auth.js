@@ -119,7 +119,7 @@ export function authenticate({ errors = 'legacy', optional = false } = {}) {
   return async (req, res, next) => {
     // optional: a missing, stale or revoked session is treated as signed out
     // (public forms such as Talk to us), never as an error.
-    const fail = (r, status, code, message) => (optional ? next() : r.status(status).json({ error: errors === 'v2' ? { code, message } : message }));
+    const fail = (r, status, code, message) => (optional ? next() : r.status(status).json({ error: errors === 'v2' ? { code, message } : message, code }));
     const header = req.headers.authorization || '';
     const bearer = header.startsWith('Bearer ') ? header.slice(7).trim() : null;
     const cookieToken = parseCookies(req.headers.cookie)[SESSION_COOKIE] || null;
@@ -180,7 +180,7 @@ export const authenticateToken = authenticate();
 
 export function requireRole(...roles) {
   return (req, res, next) => {
-    if (!req.user) return res.status(401).json({ error: 'Not authenticated' });
+    if (!req.user) return res.status(401).json({ error: 'Not authenticated', code: 'unauthenticated' });
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({ error: 'Insufficient permissions' });
     }
@@ -235,10 +235,10 @@ export async function requireActiveLearner(req, res, next) {
     WHERE el.id = ? AND l.id = ?
   `, req.user.el_id, req.user.id);
   if (!row || row.access_status === 'removed' || !row.is_active) {
-    return res.status(401).json({ error: 'Your access to this cohort was removed. Please contact your institution.' });
+    return res.status(401).json({ error: 'Your access to this cohort was removed. Please contact your institution.', code: 'access_removed' });
   }
   if (row.engagement_id !== req.user.engagement_id) {
-    return res.status(401).json({ error: 'You were moved to another cohort. Sign in again with its join code.' });
+    return res.status(401).json({ error: 'You were moved to another cohort. Sign in again with its join code.', code: 'moved_cohort' });
   }
   req.learnerAgeStatus = row.age_status || 'unknown';
   // A test-tenant learner: the /dev journey controls (tutor, clock offset)

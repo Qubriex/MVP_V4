@@ -23,6 +23,8 @@ const noteSaved = (res) => {
   try { window.dispatchEvent(new CustomEvent('qubirex:saved', { detail: { kind: method === 'delete' ? 'deleted' : 'saved' } })); } catch { /* old browsers */ }
 };
 
+export const SESSION_ENDED = new Set(['unauthenticated', 'invalid_session', 'signed_in_elsewhere', 'demo_ended', 'account_inactive', 'access_removed', 'moved_cohort']);
+
 api.interceptors.response.use(
   res => { noteSaved(res); return res; },
   err => {
@@ -30,7 +32,12 @@ api.interceptors.response.use(
     // that says nothing about the signed-in session.
     // The same for the demo's own calls (/demo/*).
     const devCall = /^\/(dev|demo)\//.test(String(err.config?.url || '').replace(/^https?:\/\/[^/]+/, '').replace(/^\/api/, ''));
-    if (err.response?.status === 401 && !devCall) {
+    // Sign out only when the server says the session itself has ended (one of
+    // these codes). Any other error, from a feature such as the voice or a
+    // check, is shown as a normal message and never signs anyone out.
+    const data = err.response?.data || {};
+    const code = data.code || (typeof data.error === 'object' ? data.error?.code : null);
+    if (err.response?.status === 401 && !devCall && SESSION_ENDED.has(code)) {
       const wasDev = !!localStorage.getItem('qubirex_dev');
       const wasDemo = !!localStorage.getItem('qubirex_demo');
       localStorage.removeItem('qubirex_demo');
