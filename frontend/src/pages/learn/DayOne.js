@@ -35,7 +35,7 @@ function Run({ tasks, scored, onSubmit, busy }) {
           <textarea id={`d1-${i}`} className="ln-textarea" rows={4} value={answers[i]} onChange={e => setAnswers(a => a.map((x, k) => (k === i ? e.target.value : x)))} />
         </div>
       ))}
-      <button type="button" className="ln-btn ln-btn-primary" style={{ alignSelf: 'flex-start' }} disabled={busy || answers.some(a => !a.trim())}
+      <button type="button" className="ln-btn ln-btn-primary" style={{ alignSelf: 'flex-start' }} data-dayone-submit disabled={busy || answers.some(a => !a.trim())}
         onClick={() => onSubmit(answers, { tab_hidden_ms: hidden.current.ms, minutes: Math.round((45 * 60 - left) / 60) })}>{busy ? t('lj.checking') : t('lj.dayone.submit')}</button>
     </section>
   );
@@ -108,15 +108,15 @@ export default function DayOne() {
             <label className="ln-row" style={{ gap: 8 }}><input type="checkbox" checked={checks.quiet_room} onChange={e => setChecks(c => ({ ...c, quiet_room: e.target.checked }))} /><Volume2 size={16} aria-hidden="true" />{t('lj.dayone.quiet')}</label>
             <div className="ln-row ln-wrap" style={{ gap: 8 }}>
               <span className="ln-row" style={{ gap: 8 }}><Camera size={16} aria-hidden="true" />{checks.camera ? t('lj.dayone.cameraOn') : t('lj.dayone.cameraNeeded')}</span>
-              {!checks.camera && <button type="button" className="ln-btn ln-btn-sm" onClick={tryCamera}>{t('lj.dayone.cameraTest')}</button>}
+              {!checks.camera && <button type="button" className="ln-btn ln-btn-sm" onClick={tryCamera} data-dayone-camera>{t('lj.dayone.cameraTest')}</button>}
             </div>
             <label className="ln-row" style={{ gap: 8 }}><input type="checkbox" checked={checks.minutes} onChange={e => setChecks(c => ({ ...c, minutes: e.target.checked }))} /><Clock size={16} aria-hidden="true" />{t('lj.dayone.minutes')}</label>
             <span className="ln-xs ln-muted">{t('lj.dayone.cameraWhy')}</span>
-            <button type="button" className="ln-btn" style={{ alignSelf: 'flex-start' }} onClick={savePrecheck} disabled={busy || !ready}>{t('lj.dayone.saveCheck')}</button>
+            <button type="button" className="ln-btn" style={{ alignSelf: 'flex-start' }} onClick={savePrecheck} disabled={busy || !ready} data-dayone-save>{t('lj.dayone.saveCheck')}</button>
           </section>
           <div className="ln-row ln-wrap" style={{ gap: 8 }}>
-            <button type="button" className="ln-btn" onClick={() => setMode('practice')}><Play size={16} aria-hidden="true" />{t('lj.dayone.startPractice')}</button>
-            <button type="button" className="ln-btn ln-btn-primary" onClick={() => setMode('scored')} disabled={!d.checks?.camera || !d.checks?.quiet_room || !d.checks?.minutes}><Play size={16} aria-hidden="true" />{t('lj.dayone.startScored')}</button>
+            <button type="button" className="ln-btn" onClick={() => setMode('practice')} data-dayone-practice><Play size={16} aria-hidden="true" />{t('lj.dayone.startPractice')}</button>
+            <button type="button" className="ln-btn ln-btn-primary" data-dayone-scored onClick={() => setMode('scored')} disabled={!d.checks?.camera || !d.checks?.quiet_room || !d.checks?.minutes}><Play size={16} aria-hidden="true" />{t('lj.dayone.startScored')}</button>
           </div>
           {!d.practice_at && <span className="ln-xs ln-muted">{t('lj.dayone.practiceFirst')}</span>}
         </>

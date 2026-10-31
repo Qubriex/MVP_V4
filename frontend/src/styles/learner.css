@@ -190,7 +190,7 @@
 
 /* ---- Job market ------------------------------------------------------------------------------ */
 .ln-jobcard { display: grid; grid-template-columns: 76px minmax(0, 1fr) 200px; gap: 20px; align-items: center; padding: 20px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
-@media (max-width: 760px) { .ln-jobcard { grid-template-columns: 64px minmax(0, 1fr); } .ln-jobcard > :last-child { grid-column: 1 / -1; flex-direction: row !important; } .ln-jobcard > :last-child > * { flex: 1; } }
+@media (max-width: 760px) { .ln-jobcard { grid-template-columns: 64px minmax(0, 1fr); } .ln-jobcard > :last-child { grid-column: 1 / -1; flex-direction: row !important; flex-wrap: wrap; } .ln-jobcard > :last-child > * { flex: 1 1 140px; min-width: 0; } }
 .ln-chart { display: flex; gap: 10px; height: 240px; }
 .ln-chart-axis { display: flex; flex-direction: column; justify-content: space-between; font-size: var(--fs-caption); color: var(--color-text-muted); padding-bottom: 26px; text-align: right; width: 40px; flex-shrink: 0; }
 .ln-chart-plot { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
@@ -366,3 +366,157 @@
 @media (pointer: coarse) {
   .ln-btn, .ln-btn-sm, .sk-iconbtn, .in-iconbtn { min-height: 44px; min-width: 44px; }
 }
+
+/* ─── Learner journey screens ─────────────────────────────────────────────── */
+.lj-result { display: flex; flex-direction: column; gap: 10px; border-left: 4px solid var(--color-border); color: var(--color-text); }
+.lj-result.is-pass { border-left-color: var(--status-success); }
+.lj-result.is-partial { border-left-color: var(--status-warning); }
+.lj-result.is-fail { border-left-color: var(--status-danger); }
+.lj-feedback { display: grid; grid-template-columns: minmax(110px, max-content) 1fr; gap: 4px 12px; margin: 0; }
+.lj-feedback dt { font-weight: 600; font-size: var(--fs-small); }
+.lj-feedback dd { margin: 0; }
+@media (max-width: 480px) { .lj-feedback { grid-template-columns: 1fr; } .lj-feedback dd { margin-bottom: 6px; } }
+.lj-steps { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+.lj-steps li.is-done { color: var(--status-success); }
+.lj-steps svg { vertical-align: -2px; }
+.lj-groups { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.lj-groups li { display: grid; grid-template-columns: 20px 1fr auto; gap: 8px; align-items: center; }
+.lj-bars { display: flex; flex-direction: column; gap: 4px; }
+.lj-bar-row { display: grid; grid-template-columns: minmax(120px, 34%) 1fr 32px; gap: 8px; align-items: center; }
+.lj-bar-you span { background: var(--accent-700) !important; }
+.lj-bar-course span { background: var(--status-info, #2F6FB3) !important; }
+.lj-bar-employers span { background: var(--color-text-muted) !important; }
+.lj-legend { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; color: var(--color-text-muted); }
+.lj-dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; }
+.lj-dot.lj-bar-you { background: var(--accent-700); } .lj-dot.lj-bar-course { background: var(--status-info, #2F6FB3); } .lj-dot.lj-bar-employers { background: var(--color-text-muted); }
+.lj-code { font-family: var(--font-mono, ui-monospace, monospace); font-size: var(--fs-small); }
+.lj-checks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; font-size: var(--fs-small); }
+.lj-checks .is-pass { color: var(--status-success); } .lj-checks .is-fail { color: var(--status-danger); }
+.lj-quick .ln-btn.is-right { border-color: var(--status-success); } .lj-quick .ln-btn.is-wrong { border-color: var(--status-danger); }
+.lj-guide, .lj-prefs { width: 100%; border-collapse: collapse; font-size: var(--fs-small); }
+.lj-guide th, .lj-guide td, .lj-prefs th, .lj-prefs td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--color-border); vertical-align: top; overflow-wrap: anywhere; }
+.lj-prefs td { text-align: center; white-space: nowrap; }
+.lj-history, .lj-timeline { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.lj-timeline li { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.lj-tapstart { align-self: center; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 22px 28px; border-radius: var(--radius-lg);
+  border: 2px solid var(--accent-400); background: var(--stage-surface); color: var(--stage-text); font-size: var(--fs-h3); font-weight: 700; cursor: pointer; max-width: 420px; text-align: center; }
+.lj-tapstart .ln-small { font-weight: 400; color: var(--stage-muted); }
+.lj-tapstart:focus-visible { outline: 3px solid var(--accent-400); outline-offset: 3px; }
+.lj-check-banner { flex-wrap: wrap; border-width: 2px; }
+.lj-type-toggle { min-height: 44px; background: var(--stage-surface); color: var(--stage-text); border-color: var(--stage-muted); }
+.lj-session-result .ln-card { background: var(--color-surface); }
+.lj-start { border-left: 4px solid var(--accent-700); }
+/* Passport status line and notes */
+.lj-statusline { margin: 0; font-size: var(--fs-small); color: var(--color-text); }
+.lj-note { padding: 10px 14px; border-radius: var(--radius-md); background: var(--color-surface-2, var(--color-surface)); border: 1px solid var(--color-border); font-size: var(--fs-small); }
+.lj-note.is-warn { border-color: var(--warn, var(--color-border-strong)); }
+.lj-proves summary { cursor: pointer; min-height: 32px; display: flex; align-items: center; }
+
+/* ── Back bar (every learner page except Home) ───────────────────────────── */
+.lj-backbar { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; min-width: 0; }
+.lj-back { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 12px; border-radius: var(--radius-md); border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text); font: inherit; font-size: var(--fs-small); cursor: pointer; flex-shrink: 0; }
+.lj-back:focus-visible { outline: 3px solid var(--accent-400); outline-offset: 2px; }
+.lj-crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-width: 0; color: var(--color-text-muted); }
+.lj-crumb-now { color: var(--color-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 40ch; }
+@media (max-width: 639px) { .lj-back-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); } .lj-back { padding: 0 10px; } .lj-crumbs { font-size: var(--fs-caption); } .lj-crumbs > span:not(:last-child):not(:nth-last-child(2)) { display: none; } }
+
+/* ── Learning language picker ────────────────────────────────────────────── */
+.lj-langpick { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: var(--radius-full, 999px); border: 1px solid var(--color-border); background: var(--color-surface); max-width: 100%; min-width: 0; }
+.lj-langpick select { border: 0; background: transparent; color: var(--color-text); font: inherit; font-size: var(--fs-small); min-height: 32px; cursor: pointer; max-width: min(22rem, 46vw); min-width: 0; text-overflow: ellipsis; }
+
+/* ── Courses and modules ─────────────────────────────────────────────────── */
+.lj-course { gap: 10px; }
+.lj-module { gap: 10px; padding: 0; overflow: hidden; }
+.lj-module > :not(.lj-module-head) { padding: 0 18px 16px; }
+.lj-module-head { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 18px; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; text-align: left; }
+.lj-module-head:focus-visible { outline: 3px solid var(--accent-400); outline-offset: -3px; }
+.lj-module-n { flex-shrink: 0; font-size: var(--fs-caption); font-weight: 700; padding: 4px 8px; border-radius: 6px; background: var(--color-surface-2); }
+.lj-module .lj-chev { transition: transform .15s; flex-shrink: 0; }
+.lj-module.is-open .lj-chev { transform: rotate(180deg); }
+.lj-lessons { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.lj-lessons li { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 0; border-top: 1px solid var(--color-border); }
+.lj-lessons li > a { flex: 1 1 200px; min-width: 0; }
+.lj-st.is-known, .lj-st.is-done, .lj-st.is-confirmed { color: var(--status-success); }
+.lj-st.is-in_progress { color: var(--accent-700); }
+.lj-module-end { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-top: 6px; }
+
+/* ── A lesson ────────────────────────────────────────────────────────────── */
+.lj-lesson { display: flex; flex-direction: column; gap: 14px; }
+.lj-stepper { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.lj-stepper button { width: 100%; display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 6px 10px; border-radius: var(--radius-md); border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text-muted); font: inherit; font-size: var(--fs-small); cursor: pointer; text-align: left; }
+.lj-stepper button:disabled { cursor: not-allowed; opacity: .6; }
+.lj-stepper-n { flex-shrink: 0; width: 24px; height: 24px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; background: var(--color-surface-2); font-weight: 700; font-size: var(--fs-caption); }
+.lj-stepper li.is-done button { color: var(--color-text); }
+.lj-stepper li.is-done .lj-stepper-n { background: var(--status-success); color: #fff; }
+.lj-stepper li.is-now button { border-color: var(--accent-700); color: var(--color-text); font-weight: 600; box-shadow: inset 0 -3px 0 var(--accent-700); }
+.lj-stepper li.is-now .lj-stepper-n { background: var(--accent-700); color: #fff; }
+@media (max-width: 639px) { .lj-stepper button { flex-direction: column; gap: 2px; text-align: center; font-size: var(--fs-caption); padding: 6px 2px; } }
+.lj-oneline { margin: 0; font-size: var(--fs-h3); font-weight: 600; line-height: 1.5; }
+.lj-sentence { margin: 0; line-height: 1.7; padding: 2px 6px; border-radius: 6px; transition: background .2s; }
+.lj-sentence.is-spoken { background: var(--color-surface-2); }
+.lj-cap { display: block; font-size: var(--fs-small); color: var(--color-text-muted); }
+.lj-extra { margin: 0; padding: 10px 12px; border-left: 3px solid var(--accent-700); background: var(--color-surface-2); border-radius: 6px; line-height: 1.6; }
+.lj-rates { display: inline-flex; align-items: center; gap: 2px; padding: 2px 6px; border: 1px solid var(--color-border); border-radius: 999px; }
+.lj-rates button { border: 0; background: none; font: inherit; font-size: var(--fs-caption); padding: 4px 6px; border-radius: 999px; cursor: pointer; color: var(--color-text-muted); min-height: 28px; }
+.lj-rates button[aria-pressed='true'] { background: var(--color-surface-2); color: var(--color-text); font-weight: 700; }
+.lj-mistake { display: flex; flex-direction: column; gap: 4px; padding: 8px 0; border-top: 1px solid var(--color-border); }
+.lj-code, .lj-code-small, .lj-q { margin: 0; font-family: var(--font-mono, ui-monospace, Menlo, Consolas, monospace); font-size: 13.5px; line-height: 1.6; overflow-x: auto; }
+.lj-code { padding: 10px 0; border-radius: var(--radius-md); background: #10131A; color: #E8EAF0; }
+.lj-code-line { display: flex; gap: 12px; padding: 0 12px; cursor: pointer; border-left: 3px solid transparent; }
+.lj-code-line.is-active { background: rgba(255, 214, 102, .14); border-left-color: #FFD666; }
+.lj-code-n { width: 2ch; text-align: right; color: #7D8597; user-select: none; flex-shrink: 0; }
+.lj-code-small { padding: 8px 10px; border-radius: 8px; background: var(--color-surface-2); }
+.lj-q { white-space: pre-wrap; font-family: inherit; font-size: var(--fs-body); }
+.lj-note-now { margin: 0; padding: 8px 12px; border-radius: 8px; background: var(--color-surface-2); line-height: 1.6; }
+.lj-notes { margin: 6px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+.lj-output { display: flex; flex-direction: column; gap: 4px; }
+.lj-output pre { margin: 0; padding: 8px 10px; border-radius: 8px; background: var(--color-surface-2); font-family: var(--font-mono, monospace); font-size: 13px; white-space: pre-wrap; }
+.lj-opt.is-right { border-color: var(--status-success); background: var(--ok-bg, #E7F6EC); }
+.lj-opt.is-wrong { border-color: var(--status-danger); }
+.lj-editor { width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: var(--radius-md); border: 1px solid var(--color-border-strong); background: #10131A; color: #E8EAF0; font-family: var(--font-mono, ui-monospace, Menlo, Consolas, monospace); font-size: 14px; line-height: 1.6; tab-size: 4; resize: vertical; }
+.lj-editor:focus-visible { outline: 3px solid var(--accent-400); outline-offset: 1px; }
+.lj-tests { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.lj-tests li { display: flex; gap: 8px; align-items: flex-start; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--color-border); }
+.lj-tests li.is-pass { border-color: var(--status-success); }
+.lj-tests li.is-fail { border-color: var(--status-danger); }
+.lj-tests .ln-xs { word-break: break-word; }
+.lj-hint { margin: 0; padding: 8px 12px; border-radius: 8px; background: var(--color-surface-2); }
+.lj-runerror { color: var(--status-danger); white-space: pre-wrap; word-break: break-word; }
+.lj-clear { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding-top: 4px; }
+.lj-clear > button { border: 1px solid var(--color-border); background: var(--color-surface); border-radius: 999px; min-width: 32px; min-height: 32px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: var(--color-text-muted); }
+.lj-clear > button[aria-pressed='true'] { color: var(--accent-700); border-color: var(--accent-700); }
+.lj-clear-input { min-height: 32px; width: 220px; max-width: 60vw; }
+.lj-ask { border-style: dashed; }
+.lj-testout { border: 2px solid var(--accent-700); }
+
+/* ─── Shared charts (components/shared/Charts.js) ───────────────────────────
+   Series colours passed the colour-blind checks on both surfaces. */
+:root { --viz-1: #C4302A; --viz-2: #2a78d6; --viz-3: #1baf7a; --viz-label-w: 9.5rem; }
+[data-theme='dark'] { --viz-1: #e66767; --viz-2: #3987e5; --viz-3: #199e70; }
+.viz { margin: 0; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.viz-plot { display: flex; flex-direction: column; gap: 10px; }
+.viz-row { display: grid; grid-template-columns: var(--viz-label-w) minmax(0, 1fr) 4.5rem; gap: 8px; align-items: center; }
+.viz-group { grid-template-columns: var(--viz-label-w) minmax(0, 1fr); align-items: start; }
+.viz-label { font-size: var(--fs-small); color: var(--color-text); overflow-wrap: anywhere; }
+.viz-value { font-size: var(--fs-caption); color: var(--color-text-muted); text-align: right; }
+.viz-track { position: relative; height: 18px; }
+.viz-bars { display: flex; flex-direction: column; gap: 2px; padding-right: 2rem; }
+.viz-bars .viz-track { height: 12px; }
+.viz-grid { position: absolute; top: -3px; bottom: -3px; width: 1px; background: var(--color-surface-2, #eceae6); }
+.viz-range, .viz-bar { position: absolute; top: 0; bottom: 0; padding: 0; border: 0; cursor: default; border-radius: 4px; }
+.viz-range { background: var(--viz-2); min-width: 6px; }
+.viz-bar { left: 0; min-width: 3px; border-radius: 0 4px 4px 0; }
+.viz-axis .viz-bars .viz-track { height: 14px; }
+.viz-range:focus-visible, .viz-bar:focus-visible { outline: 2px solid var(--color-text); outline-offset: 2px; }
+.viz-mid { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--color-text); border-radius: 1px; }
+.viz-barvalue { position: absolute; top: -2px; font-size: var(--fs-caption); color: var(--color-text-muted); line-height: 16px; }
+.viz-c1 { background: var(--viz-1); } .viz-c2 { background: var(--viz-2); } .viz-c3 { background: var(--viz-3); }
+.viz-axis .viz-track { height: 14px; }
+.viz-axis .viz-track span { position: absolute; transform: translateX(-50%); font-size: var(--fs-caption); color: var(--color-text-muted); white-space: nowrap; }
+.viz-axis-title { text-align: center; padding-right: 2rem; font-size: var(--fs-caption); color: var(--color-text-muted); padding-left: var(--viz-label-w); }
+.viz-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--color-text-muted); }
+.viz-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.viz-swatch { display: inline-block; width: 10px; height: 10px; border-radius: 3px; }
+.viz-tip { position: absolute; bottom: calc(100% + 6px); transform: translateX(-50%); background: var(--color-text); color: var(--color-surface); font-size: var(--fs-caption); padding: 4px 8px; border-radius: 6px; white-space: nowrap; z-index: 5; pointer-events: none; max-width: 80vw; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 560px) { :root { --viz-label-w: 6.5rem; } .viz-row { grid-template-columns: var(--viz-label-w) minmax(0, 1fr) 3.6rem; } .viz-group { grid-template-columns: var(--viz-label-w) minmax(0, 1fr); } }
+.ln-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }

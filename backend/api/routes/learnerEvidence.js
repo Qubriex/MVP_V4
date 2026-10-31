@@ -12,7 +12,7 @@ import express from 'express';
 import * as dal from '../../core/db/dal.js';
 import { authenticateToken, requireRole, requireActiveLearner } from '../middleware/auth.js';
 import { dueReviews } from '../../core/retention/schedule.js';
-import { issueInstance } from '../../core/evidence/checkWriter.js';
+import { issueInstance, instanceIn } from '../../core/evidence/checkWriter.js';
 import { answerInstance } from '../../core/evidence/answer.js';
 import { activeCredential, skillLines, skillFacts, isPublic, setPublic, publicBase } from '../../core/return/credentialEngine.js';
 import { renewalTargets, renewalCooldown, completeRenewalIfDone } from '../../core/return/renewal.js';
@@ -64,6 +64,18 @@ function prepareAhead(req, items) {
   try { waitUntil(job); } catch { /* not on Vercel: the promise just runs */ }
 }
 
+// Days in a row, up to today on this learner's clock, with at least one
+// review done. Yesterday still counts, so the streak holds until today ends.
+async function reviewStreak(elId) {
+  const rows = await dal.all("SELECT DISTINCT substr(date, 1, 10) AS d FROM demonstrations WHERE el_id = ? AND kind = 'review' ORDER BY d DESC LIMIT 400", elId);
+  const days = new Set(rows.map(r => r.d));
+  const day = (n) => new Date(Date.parse(nowIsoFor()) - n * 86400000).toISOString().slice(0, 10);
+  let n = 0;
+  let i = days.has(day(0)) ? 0 : 1;
+  while (days.has(day(i))) { n += 1; i += 1; }
+  return { days: n, today: days.has(day(0)) };
+}
+
 router.get('/reviews/due', async (req, res) => {
   const elId = req.user.el_id;
   const [due, rechecksRaw, upcoming, open] = await Promise.all([
@@ -77,7 +89,7 @@ router.get('/reviews/due', async (req, res) => {
   const reviews = due.map(r => ({ ...r, kind: 'review', open_instance: open.get(`${r.node_id}|review`) || null }));
   const rechecks = rechecksRaw.map(r => ({ ...r, kind: 'recheck', open_instance: open.get(`${r.node_id}|check`) || null }));
   const list = [...rechecks, ...reviews];
-  res.json({ due: list, upcoming, warmups: reviews.slice(0, 2).map(r => r.node_id) });
+  res.json({ due: list, upcoming, warmups: reviews.slice(0, 2).map(r => r.node_id), streak: await reviewStreak(elId) });
   prepareAhead(req, list);
 });
 
@@ -94,7 +106,19 @@ router.post('/reviews/:nodeId/start', async (req, res) => {
     const issued = await issueInstance({ elId, learnerId: req.user.id, nodeId: req.params.nodeId, language: req.user.language, purpose, institutionId: node?.institution_id });
     inst = { id: issued.id, question_text: issued.question_text };
   }
-  res.json({ instance_id: inst.id, question: inst.question_text, kind: recheck ? 'recheck' : 'review' });
+  // An open question asked earlier in another language comes back in the current learning language.
+  const shown = await instanceIn(inst.id, elId, req.user.learning_language || req.user.language);
+  res.json({ instance_id: inst.id, question: shown.question, language: shown.language, kind: recheck ? 'recheck' : 'review' });
+});
+
+// The open question in another language: same instance and values, no new attempt.
+router.get('/reviews/instances/:id/question', async (req, res) => {
+  try {
+    const lang = ['english', 'telugu', 'hindi', 'telugu_en', 'hindi_en'].includes(req.query.language) ? req.query.language : (req.user.learning_language || req.user.language);
+    res.json(await instanceIn(req.params.id, req.user.el_id, lang));
+  } catch (err) {
+    res.status(err.status || 500).json({ error: err.status ? err.message : 'Could not show this question in that language.' });
+  }
 });
 
 router.post('/reviews/instances/:id/answer', async (req, res) => {

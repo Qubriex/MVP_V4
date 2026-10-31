@@ -32,7 +32,7 @@ const PUBLIC = ['/', '/pricing', '/learners', '/colleges', '/employers', '/demo'
   '/legal/privacy', '/legal/terms', '/legal/dpdp', '/legal/grievance', '/developers', '/dev', '/login', '/learner-login', '/employer/login', '/employer/register', '/admin/login', '/verify', '/verify/QBX-DEMO-0000'];
 const ROLES = {
   learner: { login: async (p) => { await p.goto(`${BASE}/learner-login`); await p.fill('#lref', 'TEST-LRNR-001'); await p.fill('#leng', 'QX-FSD-T01'); await p.fill('#lpin', '410585'); await p.click('form button[type=submit]'); await p.waitForURL(/\/learn\//); },
-    routes: ['/learn/dashboard', '/learn/record', '/learn/reviews', '/learn/passport', '/learn/jobs', '/learn/market', '/learn/topics', '/learn/profile', '/learn/resume', '/learn/settings', '/learn/session'] },
+    routes: ['/learn/dashboard', '/learn/record', '/learn/reviews', '/learn/passport', '/learn/jobs', '/learn/courses', '/learn/courses/python', '/learn/lesson/py-m3-l3', '/learn/profile', '/learn/resume', '/learn/settings', '/learn/session'] },
   college: { login: async (p) => { await p.goto(`${BASE}/login`); await p.fill('#em', 'test.institution@qubirex.local'); await p.fill('#pw', PASSWORD); await p.click('form button[type=submit]'); await p.waitForURL(/\/institution\/(?!invite)/); },
     routes: ['/institution/home', '/institution/team', '/institution/students', '/institution/students/add', '/institution/cohorts', '/institution/cohorts/new', '/institution/curriculum', '/institution/benchmark', '/institution/review', '/institution/bridges', '/institution/placements', '/institution/board-report', '/institution/profile'],
     discover: { from: '/institution/cohorts', pattern: /^\/institution\/cohorts\/(?!new$)[^/]+$/, extra: (h) => [h, `${h}/live`] } },

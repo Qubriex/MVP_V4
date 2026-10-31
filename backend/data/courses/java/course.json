@@ -1,0 +1,30 @@
+{
+ "id": "java",
+ "order": 2,
+ "language": "java",
+ "status": "complete",
+ "level": "Beginner",
+ "hours": 50,
+ "icon": "java",
+ "title": {
+  "en": "Java Programming",
+  "te": "Java Programming",
+  "hi": "Java Programming"
+ },
+ "summary": {
+  "en": "Learn Java from the first class to a small app: types, decisions, loops, methods, arrays, strings, objects, exceptions, files, collections, lambdas and streams. Every lesson is taught first, then practised, then checked.",
+  "te": "మొదటి class నుంచి ఒక చిన్న app వరకు Java నేర్చుకోండి: types, నిర్ణయాలు, loops, methods, arrays, strings, objects, exceptions, files, collections, lambdas, streams. ప్రతి పాఠం ముందు నేర్పిస్తాం, తర్వాత సాధన, ఆ తర్వాత check.",
+  "hi": "पहली class से एक छोटे app तक Java सीखिए: types, फ़ैसले, loops, methods, arrays, strings, objects, exceptions, files, collections, lambdas और streams। हर पाठ पहले सिखाया जाता है, फिर अभ्यास, फिर check।"
+ },
+ "modules": [
+  "m1.json",
+  "m2.json",
+  "m3.json",
+  "m4.json",
+  "m5.json",
+  "m6.json",
+  "m7.json",
+  "m8.json",
+  "m9.json"
+ ]
+}

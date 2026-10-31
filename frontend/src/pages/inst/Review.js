@@ -12,6 +12,8 @@ import { useStaff } from '../../components/inst/InstitutionLayout';
 import { Select } from '../../components/shared/ui';
 
 import { useUiLang, uiLocale } from '../../context/UiLangContext';
+import { useSearchParams } from 'react-router-dom';
+import { HelpRequests } from '../../components/inst/Journey';
 const BAND_TEXT = { '0.0-0.49': 'inst.review.bandText.weak0049', '0.5-0.69': 'inst.review.bandText.partial050', '0.7-0.89': 'inst.review.bandText.good070', '0.9-1.0': 'inst.review.bandText.excellent091' };
 const CAL = { calibrated: ['inst.review.cal.calibrated', 'ln-tag-success'], rubric_under_review: ['inst.review.cal.rubricUnderReview', 'ln-tag-warning'], sampling: ['inst.review.cal.sampling', 'ln-tag-neutral'] };
 
@@ -64,7 +66,8 @@ function ReviewCard({ item, onDone, canDecide }) {
 export default function Review() {
   const { t } = useUiLang();
   const { role } = useStaff();
-  const [tab, setTab] = useState('queue');
+  const [params] = useSearchParams();
+  const [tab, setTab] = useState(params.get('tab') === 'help' ? 'help' : 'queue');
   const [cohorts, setCohorts] = useState([]);
   const [cohortId, setCohortId] = useState('');
   const [queue, setQueue] = useState(null);
@@ -100,11 +103,13 @@ export default function Review() {
         <label className="ln-selectwrap"><span>{t('inst.review.cohort')}</span>
           <Select value={cohortId} onChange={e => setCohortId(e.target.value)}>{cohorts.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}</Select></label>
         <div className="ln-pilltabs" role="tablist">
-          {[['queue', `Queue${queue ? ` · ${queue.items.length}` : ''}`], ['calibration', t('inst.review.calibration')], ['load', t('inst.review.reviewLoad')]].map(([id, label]) => (
+          {[['queue', `Queue${queue ? ` · ${queue.items.length}` : ''}`], ['calibration', t('inst.review.calibration')], ['load', t('inst.review.reviewLoad')], ['help', t('lj.inst.helpTitle')]].map(([id, label]) => (
             <button key={id} type="button" role="tab" className="ln-pilltab" aria-selected={tab === id} onClick={() => setTab(id)}>{label}</button>
           ))}
         </div>
       </div>
+
+      {tab === 'help' && <HelpRequests canAnswer={role !== 'viewer'} />}
 
       {tab === 'queue' && (
         <section className="ln-col" style={{ gap: 14 }}>

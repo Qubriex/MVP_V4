@@ -5,28 +5,36 @@
 // 640px a bottom tab bar (Home · Learn · Passport · Jobs · Me) is always in reach.
 import React, { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Mic, Route as RouteIcon, Briefcase, TrendingUp, User, FileText, Settings, LogOut, Menu, X, RotateCcw, BadgeCheck, Handshake, History as HistoryIcon, Target, School, Bell } from 'lucide-react';
+import { BookOpen, Home, Mic, Route as RouteIcon, Briefcase, TrendingUp, User, FileText, Settings, LogOut, Menu, X, RotateCcw, BadgeCheck, Handshake, History as HistoryIcon, Target, School, Bell } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useUiLang, UI_LANGS } from '../../context/UiLangContext';
 import BrandLogo from '../BrandLogo';
 import ThemeToggle from '../ThemeToggle';
 import { initials } from './ui';
 import TopActions from '../shared/TopActions';
+import api from '../../utils/api';
+import { setDeviceVoice } from '../../utils/voice';
+import BackBar, { CrumbsProvider } from './BackBar';
+import { useFeatures } from '../../utils/features';
 
 // Bottom tabs on phones; each lights up for the pages it stands for.
+// Learning first: Home · Learn (college programme) · Topics · Passport · Me.
 const TABS = [
   { to: '/learn/dashboard', label: 'nav.home', icon: Home, match: ['/learn/dashboard', '/learn/welcome', '/learn/baseline'] },
   { to: '/learn/record', label: 'nav.learn', icon: Mic, match: ['/learn/session', '/learn/record', '/learn/reviews', '/learn/skill', '/learn/history', '/learn/assigned'] },
-  { to: '/learn/passport', label: 'nav.tabPassport', icon: BadgeCheck, match: ['/learn/passport'] },
-  { to: '/learn/jobs', label: 'nav.tabJobs', icon: Handshake, match: ['/learn/jobs', '/learn/market', '/learn/topics', '/learn/readiness', '/learn/apply', '/learn/requests', '/learn/dayone'] },
-  { to: '/learn/profile', label: 'nav.me', icon: User, match: ['/learn/profile', '/learn/resume', '/learn/settings', '/learn/notifications'] }
+  { to: '/learn/courses', label: 'nav.tabTopics', icon: BookOpen, match: ['/learn/courses', '/learn/lesson', '/learn/modules'] },
+  { to: '/learn/passport', label: 'nav.tabPassport', icon: BadgeCheck, match: ['/learn/passport', '/learn/readiness'] },
+  { to: '/learn/profile', label: 'nav.me', icon: User, match: ['/learn/profile', '/learn/resume', '/learn/settings', '/learn/notifications', '/learn/jobs', '/learn/apply', '/learn/requests', '/learn/dayone', '/learn/market', '/learn/topics'] }
 ];
 
+// The job market and emerging topics show only when FEATURE_LEARNER_JOBS is on.
+const JOB_MARKET = new Set(['/learn/market', '/learn/topics']);
 const GROUPS = [
   { label: 'nav.learn', items: [
     { to: '/learn/dashboard', label: 'nav.home', icon: Home },
-    { to: '/learn/session', label: 'nav.session', icon: Mic },
     { to: '/learn/record', label: 'nav.path', icon: RouteIcon },
+    { to: '/learn/courses', label: 'nav.courses', icon: BookOpen },
+    { to: '/learn/session', label: 'nav.session', icon: Mic },
     { to: '/learn/reviews', label: 'nav.reviews', icon: RotateCcw },
     { to: '/learn/assigned', label: 'nav.assigned', icon: School },
     { to: '/learn/history', label: 'nav.history', icon: HistoryIcon },
@@ -53,7 +61,10 @@ export default function LearnerLayout() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => { setOpen(false); }, [location.pathname]);
+  // The phone's voice only if the learner chose it (Settings → voice).
+  useEffect(() => { api.get('/learner/profile').then(r => setDeviceVoice(r.data?.voice_prefs?.deviceVoice)).catch(() => {}); }, []);
 
+  const features = useFeatures();
   const langLabel = UI_LANGS.find(l => l.id === (user?.language || lang))?.label;
   const doLogout = () => { logout(); navigate('/learner-login'); };
 
@@ -88,7 +99,7 @@ export default function LearnerLayout() {
           {GROUPS.map(g => (
             <div key={g.label} className="ln-navgroup">
               <span className="ln-navlabel ln-indic">{t(g.label)}</span>
-              {g.items.map(({ to, label, icon: Icon, end }) => (
+              {g.items.filter(i => features.learner_jobs || !JOB_MARKET.has(i.to)).map(({ to, label, icon: Icon, end }) => (
                 <NavLink key={to} to={to} end={end} className={({ isActive }) => `ln-navlink ln-indic ${isActive ? 'is-active' : ''}`}>
                   <Icon size={18} strokeWidth={1.8} aria-hidden="true" />
                   <span>{t(label)}</span>
@@ -109,7 +120,9 @@ export default function LearnerLayout() {
 
       <main className="ln-main" id="main">
         <TopActions side="learner" settingsHref="/learn/settings" />
-        <div key={location.pathname} className="ln-page-fade"><Outlet /></div>
+        <CrumbsProvider>
+          <div key={location.pathname} className="ln-page-fade"><BackBar /><Outlet /></div>
+        </CrumbsProvider>
       </main>
 
       <nav className="ln-tabbar" aria-label={t('nav.tabs')}>

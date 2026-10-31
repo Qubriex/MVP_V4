@@ -1,0 +1,117 @@
+{
+ "id": "sql",
+ "order": 4,
+ "language": "sql",
+ "status": "draft",
+ "level": "Beginner",
+ "hours": 25,
+ "icon": "database",
+ "title": {
+  "en": "SQL & Databases",
+  "te": "SQL & Databases",
+  "hi": "SQL & Databases"
+ },
+ "summary": {
+  "en": "Store and ask questions of data: tables, SELECT, filtering, joins, grouping and designing a database.",
+  "te": "Data దాచి ప్రశ్నలు అడగడం: tables, SELECT, filtering, joins, grouping, database రూపకల్పన.",
+  "hi": "Data रखना और उससे सवाल पूछना: tables, SELECT, filtering, joins, grouping और database design।"
+ },
+ "modules": [
+  {
+   "id": "sql-m1",
+   "n": 1,
+   "skill": "sql-m1",
+   "title": {
+    "en": "Tables & SELECT",
+    "te": "Tables & SELECT",
+    "hi": "Tables & SELECT"
+   },
+   "summary": {
+    "en": "Rows, columns and reading data.",
+    "te": "Rows, columns, data చదవడం.",
+    "hi": "Rows, columns और data पढ़ना।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "sql-m2",
+   "n": 2,
+   "skill": "sql-m2",
+   "title": {
+    "en": "Filtering & Sorting",
+    "te": "Filtering & Sorting",
+    "hi": "Filtering & Sorting"
+   },
+   "summary": {
+    "en": "WHERE, ORDER BY, LIMIT.",
+    "te": "WHERE, ORDER BY, LIMIT.",
+    "hi": "WHERE, ORDER BY, LIMIT।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "sql-m3",
+   "n": 3,
+   "skill": "sql-m3",
+   "title": {
+    "en": "Grouping",
+    "te": "Grouping",
+    "hi": "Grouping"
+   },
+   "summary": {
+    "en": "COUNT, SUM, AVG and GROUP BY.",
+    "te": "COUNT, SUM, AVG, GROUP BY.",
+    "hi": "COUNT, SUM, AVG और GROUP BY।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "sql-m4",
+   "n": 4,
+   "skill": "sql-m4",
+   "title": {
+    "en": "Joins",
+    "te": "Joins",
+    "hi": "Joins"
+   },
+   "summary": {
+    "en": "Combine tables with JOIN.",
+    "te": "JOIN తో tables కలపడం.",
+    "hi": "JOIN से tables जोड़ना।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "sql-m5",
+   "n": 5,
+   "skill": "sql-m5",
+   "title": {
+    "en": "Changing Data",
+    "te": "Changing Data",
+    "hi": "Changing Data"
+   },
+   "summary": {
+    "en": "INSERT, UPDATE, DELETE and keys.",
+    "te": "INSERT, UPDATE, DELETE, keys.",
+    "hi": "INSERT, UPDATE, DELETE और keys।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "sql-m6",
+   "n": 6,
+   "skill": "sql-m6",
+   "title": {
+    "en": "Project",
+    "te": "Project",
+    "hi": "Project"
+   },
+   "summary": {
+    "en": "Design and query a college database.",
+    "te": "College database రూపకల్పన, query.",
+    "hi": "College database design और query करना।"
+   },
+   "lessons": []
+  }
+ ]
+}

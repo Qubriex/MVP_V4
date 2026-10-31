@@ -219,11 +219,14 @@ router.post('/skip-waits', requireUnlock, async (req, res) => {
 
 // ─── Learner journey: one test learner per stage, and the time/state controls ──
 router.get('/journey', requireUnlock, async (req, res) => {
-  const present = new Set((await dal.all('SELECT id FROM learners WHERE id = ANY(?::text[]) AND institution_id = ?', JOURNEY.map(j => j.learnerId), TEST_INSTITUTION_ID)).map(r => r.id));
+  const rows = await dal.all('SELECT id, pin_hash IS NOT NULL AS has_pin FROM learners WHERE id = ANY(?::text[]) AND institution_id = ?', JOURNEY.map(j => j.learnerId), TEST_INSTITUTION_ID);
+  const present = new Set(rows.map(r => r.id));
+  // S0 opens by its invite link until the PIN is set; after that, like the others.
+  const hasPin = new Set(rows.filter(r => r.has_pin).map(r => r.id));
   res.json({
     stages: JOURNEY.map(j => ({
       key: j.key, account_key: j.accountKey, stage: j.stage, stage_name: STAGE_NAMES[j.stage], language: j.language, name: j.name, note: j.note,
-      learner_ref: j.ref, ready: present.has(j.learnerId), home: DEV_ACCOUNTS[j.accountKey].home, invite_only: j.stage === 'S0'
+      learner_ref: j.ref, ready: present.has(j.learnerId), home: DEV_ACCOUNTS[j.accountKey].home, invite_only: j.stage === 'S0' && !hasPin.has(j.learnerId)
     }))
   });
 });

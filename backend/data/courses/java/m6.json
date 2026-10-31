@@ -1,0 +1,760 @@
+{
+ "id": "jv-m6",
+ "n": 6,
+ "skill": "java-exceptions-files",
+ "title": {
+  "en": "Exceptions & Files",
+  "te": "Exceptions & Files",
+  "hi": "Exceptions & Files"
+ },
+ "summary": {
+  "en": "Handle errors with try, catch and throw, and save and read data in files.",
+  "te": "try, catch, throw తో errors నిర్వహించడం, files లో data దాచడం, చదవడం.",
+  "hi": "try, catch और throw से errors संभालना, और files में data सहेजना और पढ़ना।"
+ },
+ "lessons": [
+  {
+   "id": "jv-m6-l1",
+   "n": 1,
+   "minutes": 20,
+   "title": {
+    "en": "Exceptions",
+    "te": "Exceptions",
+    "hi": "Exceptions"
+   },
+   "oneLine": {
+    "en": "try and catch handle an exception so the program explains the problem instead of crashing; throw reports a problem from your own code.",
+    "te": "try, catch ఒక exception ని నిర్వహించి program crash కాకుండా సమస్య చెబుతాయి; throw మీ code నుంచి సమస్యను తెలుపుతుంది.",
+    "hi": "try और catch exception संभालते हैं ताकि program crash होने की जगह समस्या बताए; throw आपके code से समस्या की सूचना देता है।"
+   },
+   "useCase": {
+    "en": "An ATM app catches NumberFormatException when someone types letters for the amount, and asks again.",
+    "te": "ఎవరైనా amount కి అక్షరాలు type చేస్తే ATM app NumberFormatException పట్టుకుని మళ్లీ అడుగుతుంది.",
+    "hi": "कोई amount में अक्षर लिखे तो ATM app NumberFormatException पकड़कर फिर पूछता है।"
+   },
+   "explain": {
+    "en": [
+     "An exception is Java's way of saying \"something went wrong here\", such as Integer.parseInt(\"abc\").",
+     "Put risky code in try { }. If it fails, Java jumps to a matching catch (NumberFormatException e) { }.",
+     "Catch the specific exception you expect; catching everything hides real bugs.",
+     "finally { } runs whether there was an error or not, which is good for closing things.",
+     "Your own method can throw new IllegalArgumentException(\"Amount must be positive\"); to refuse bad input."
+    ],
+    "te": [
+     "Exception అంటే \"ఇక్కడ ఏదో తప్పైంది\" అని Java చెప్పే పద్ధతి, Integer.parseInt(\"abc\") లాగా.",
+     "ప్రమాదకర code ని try { } లో పెట్టండి. విఫలమైతే Java సరిపోయే catch (NumberFormatException e) { } కి వెళ్తుంది.",
+     "ఊహించిన నిర్దిష్ట exception ని పట్టుకోండి; అన్నీ పట్టుకుంటే నిజమైన bugs దాగుతాయి.",
+     "Error ఉన్నా లేకపోయినా finally { } నడుస్తుంది; వస్తువులు మూసివేయడానికి మంచిది.",
+     "చెడు input ని తిరస్కరించడానికి మీ method throw new IllegalArgumentException(\"Amount must be positive\"); చేయగలదు."
+    ],
+    "hi": [
+     "Exception Java का यह कहने का तरीक़ा है कि \"यहाँ कुछ गड़बड़ हुई\", जैसे Integer.parseInt(\"abc\")।",
+     "जोखिम वाला code try { } में रखिए। Fail होने पर Java मिलते catch (NumberFormatException e) { } पर जाता है।",
+     "जिस exception की उम्मीद है वही पकड़िए; सब कुछ पकड़ने से असली bugs छिप जाते हैं।",
+     "finally { } error हो या न हो, चलता है, चीज़ें बंद करने के लिए अच्छा है।",
+     "ग़लत input मना करने के लिए आपका method throw new IllegalArgumentException(\"Amount must be positive\"); कर सकता है।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "try is the attempt, catch is the safety net, throw is raising your hand to report a problem."
+    ],
+    "te": [
+     "try ప్రయత్నం, catch రక్షణ వల, throw సమస్య చెప్పడానికి చేయి ఎత్తడం."
+    ],
+    "hi": [
+     "try कोशिश है, catch सुरक्षा जाल, throw समस्या बताने के लिए हाथ उठाना।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "Dividing marks by the number of tests: catch ArithmeticException when there are 0 tests."
+    ],
+    "te": [
+     "Marks ని tests సంఖ్యతో భాగించడం: 0 tests ఉన్నప్పుడు ArithmeticException పట్టుకోండి."
+    ],
+    "hi": [
+     "Marks को tests की संख्या से भाग देना: 0 tests होने पर ArithmeticException पकड़िए।"
+    ]
+   },
+   "picture": "flowchart TD\n  T[\"try: Integer.parseInt(text)\"] -->|ok| U[\"use the number\"]\n  T -->|NumberFormatException| C[\"catch: show message\"]\n  U --> F[\"finally\"]\n  C --> F",
+   "code": {
+    "source": "public class Main {\n    static int toAmount(String text) {\n        try {\n            return Integer.parseInt(text);\n        } catch (NumberFormatException e) {\n            System.out.println(\"Not a number: \" + text);\n            return 0;\n        }\n    }\n\n    static void withdraw(int amount) {\n        if (amount <= 0) {\n            throw new IllegalArgumentException(\"Amount must be positive\");\n        }\n        System.out.println(\"Withdrawing \" + amount);\n    }\n\n    public static void main(String[] args) {\n        System.out.println(toAmount(\"500\"));\n        System.out.println(toAmount(\"five\"));\n        try {\n            withdraw(-50);\n        } catch (IllegalArgumentException e) {\n            System.out.println(\"Refused: \" + e.getMessage());\n        }\n    }\n}",
+    "output": "500\nNot a number: five\n0\nRefused: Amount must be positive",
+    "notes": [
+     {
+      "line": 3,
+      "note": {
+       "en": "try wraps the line that may fail.",
+       "te": "విఫలం కాగల line ని try చుట్టుకుంటుంది.",
+       "hi": "try उस line को घेरता है जो fail हो सकती है।"
+      }
+     },
+     {
+      "line": 5,
+      "note": {
+       "en": "This catch runs only for NumberFormatException.",
+       "te": "ఈ catch NumberFormatException కి మాత్రమే నడుస్తుంది.",
+       "hi": "यह catch सिर्फ़ NumberFormatException पर चलता है।"
+      }
+     },
+     {
+      "line": 13,
+      "note": {
+       "en": "throw reports a problem from our own method.",
+       "te": "throw మన method నుంచి సమస్యను తెలుపుతుంది.",
+       "hi": "throw हमारे method से समस्या बताता है।"
+      }
+     },
+     {
+      "line": 23,
+      "note": {
+       "en": "The caller catches it and shows the message.",
+       "te": "Call చేసినవారు దాన్ని పట్టుకుని message చూపిస్తారు.",
+       "hi": "Call करने वाला उसे पकड़कर message दिखाता है।"
+      }
+     },
+     {
+      "line": 24,
+      "note": {
+       "en": "getMessage() gives the text we threw.",
+       "te": "getMessage() మనం throw చేసిన text ఇస్తుంది.",
+       "hi": "getMessage() हमारा throw किया text देता है।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "try { ... } catch (Exception e) { }",
+     "fix": {
+      "en": "An empty catch of everything hides bugs. Catch the specific type and say what went wrong.",
+      "te": "అన్నింటినీ పట్టుకునే ఖాళీ catch bugs ని దాస్తుంది. నిర్దిష్ట type పట్టుకుని ఏం తప్పైందో చెప్పండి.",
+      "hi": "सब कुछ पकड़ने वाला ख़ाली catch bugs छिपाता है। ख़ास type पकड़िए और बताइए क्या ग़लत हुआ।"
+     }
+    },
+    {
+     "wrong": "int avg = total / count;  // count may be 0",
+     "fix": {
+      "en": "Integer division by zero throws ArithmeticException. Check count == 0 first or catch it.",
+      "te": "Zero తో integer భాగహారం ArithmeticException ఇస్తుంది. ముందు count == 0 చూడండి లేదా పట్టుకోండి.",
+      "hi": "Zero से integer भाग ArithmeticException देता है। पहले count == 0 जाँचिए या पकड़िए।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "Integer.parseInt(\"12a\") throws…",
+      "te": "Integer.parseInt(\"12a\") ఇచ్చేది…",
+      "hi": "Integer.parseInt(\"12a\") देता है…"
+     },
+     "options": [
+      "NumberFormatException",
+      "NullPointerException",
+      "IOException"
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Not a valid number.",
+      "te": "సరైన number కాదు.",
+      "hi": "सही number नहीं।"
+     }
+    },
+    {
+     "q": {
+      "en": "finally runs…",
+      "te": "finally నడిచేది…",
+      "hi": "finally चलता है…"
+     },
+     "options": [
+      {
+       "en": "always",
+       "te": "ఎప్పుడూ",
+       "hi": "हमेशा"
+      },
+      {
+       "en": "only on error",
+       "te": "Error అప్పుడే",
+       "hi": "सिर्फ़ error पर"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Always.",
+      "te": "ఎప్పుడూ.",
+      "hi": "हमेशा।"
+     }
+    },
+    {
+     "q": {
+      "en": "Which reports a problem from your own method?",
+      "te": "మీ method నుంచి సమస్య తెలిపేది ఏది?",
+      "hi": "आपके method से समस्या कौन बताता है?"
+     },
+     "options": [
+      "catch",
+      "throw",
+      "finally"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "throw.",
+      "te": "throw.",
+      "hi": "throw।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write static int safeDivide(int a, int b) that returns a / b, or -1 when b is 0, by catching ArithmeticException.",
+     "te": "ArithmeticException పట్టుకుని a / b return చేసే, b 0 అయితే -1 return చేసే static int safeDivide(int a, int b) రాయండి.",
+     "hi": "ArithmeticException पकड़कर a / b return करने वाला, और b के 0 होने पर -1 return करने वाला static int safeDivide(int a, int b) लिखिए।"
+    },
+    "starter": "public class Main {\n    static int safeDivide(int a, int b) {\n        return a / b;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(safeDivide(10, 2));\n    }\n}\n",
+    "tests": [
+     {
+      "name": "uses try",
+      "pattern": "try\\s*\\{"
+     },
+     {
+      "name": "catches ArithmeticException",
+      "pattern": "catch\\s*\\(\\s*ArithmeticException\\s+\\w+\\s*\\)"
+     },
+     {
+      "name": "returns -1 on error",
+      "pattern": "return\\s+-1\\s*;",
+      "expected": "return -1;",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "Wrap return a / b; in try { }.",
+      "te": "return a / b; ని try { } లో పెట్టండి.",
+      "hi": "return a / b; को try { } में रखिए।"
+     },
+     {
+      "en": "catch (ArithmeticException e) { ... }",
+      "te": "catch (ArithmeticException e) { ... }",
+      "hi": "catch (ArithmeticException e) { ... }"
+     },
+     {
+      "en": "Inside catch: return -1;",
+      "te": "Catch లో: return -1;",
+      "hi": "Catch में: return -1;"
+     }
+    ],
+    "solution": "public class Main {\n    static int safeDivide(int a, int b) {\n        try {\n            return a / b;\n        } catch (ArithmeticException e) {\n            return -1;\n        }\n    }\n\n    public static void main(String[] args) {\n        System.out.println(safeDivide(10, 2) + \" \" + safeDivide(5, 0));\n    }\n}",
+    "output": "5 -1"
+   },
+   "cheat": {
+    "en": [
+     "try { risky } catch (SpecificException e) { plan B } finally { always }",
+     "NumberFormatException · ArithmeticException · NullPointerException · IOException",
+     "throw new IllegalArgumentException(\"msg\"); · e.getMessage()"
+    ],
+    "te": [
+     "try { ప్రమాదం } catch (SpecificException e) { plan B } finally { ఎప్పుడూ }",
+     "NumberFormatException · ArithmeticException · NullPointerException · IOException",
+     "throw new IllegalArgumentException(\"msg\"); · e.getMessage()"
+    ],
+    "hi": [
+     "try { जोखिम } catch (SpecificException e) { plan B } finally { हमेशा }",
+     "NumberFormatException · ArithmeticException · NullPointerException · IOException",
+     "throw new IllegalArgumentException(\"msg\"); · e.getMessage()"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "An ATM app asks for an amount. Explain how try and catch keep it running when the user types letters, and how throw refuses a negative amount.",
+      "te": "ATM app amount అడుగుతుంది. User అక్షరాలు type చేసినప్పుడు try, catch దాన్ని ఎలా నడుపుతాయో, throw ప్రతికూల amount ని ఎలా తిరస్కరిస్తుందో వివరించండి.",
+      "hi": "ATM app amount पूछता है। User अक्षर लिखे तो try और catch उसे कैसे चालू रखते हैं, और throw negative amount को कैसे मना करता है, समझाइए।"
+     },
+     {
+      "en": "Why should you catch a specific exception instead of catch (Exception e) with an empty block?",
+      "te": "ఖాళీ block తో catch (Exception e) బదులు నిర్దిష్ట exception ఎందుకు పట్టుకోవాలి?",
+      "hi": "ख़ाली block वाले catch (Exception e) की जगह ख़ास exception क्यों पकड़ना चाहिए?"
+     }
+    ],
+    "keywords": [
+     [
+      "try",
+      "catch"
+     ],
+     [
+      "exception",
+      "numberformatexception"
+     ],
+     [
+      "throw",
+      "specific",
+      "message",
+      "crash"
+     ]
+    ],
+    "challenge": {
+     "en": "Say the difference between catch and throw.",
+     "te": "catch, throw మధ్య తేడా చెప్పండి.",
+     "hi": "catch और throw का फ़र्क़ बताइए।"
+    }
+   }
+  },
+  {
+   "id": "jv-m6-l2",
+   "n": 2,
+   "minutes": 20,
+   "title": {
+    "en": "File reading and writing",
+    "te": "Files చదవడం, రాయడం",
+    "hi": "File पढ़ना और लिखना"
+   },
+   "oneLine": {
+    "en": "java.nio.file.Files writes lines to a file and reads them back, so data stays after the program ends; file errors are IOExceptions.",
+    "te": "java.nio.file.Files lines ని file లో రాసి మళ్లీ చదువుతుంది; program ముగిసినా data ఉంటుంది. File errors అంటే IOExceptions.",
+    "hi": "java.nio.file.Files lines को file में लिखता और वापस पढ़ता है, ताकि program ख़त्म होने पर भी data रहे; file errors IOException होते हैं।"
+   },
+   "useCase": {
+    "en": "A shop saves each day's sales to sales.txt and reads it next morning to show the total.",
+    "te": "Shop ప్రతి రోజు sales ని sales.txt లో దాచి, మరుసటి ఉదయం చదివి total చూపిస్తుంది.",
+    "hi": "दुकान हर दिन की sales sales.txt में सहेजती है और अगली सुबह पढ़कर total दिखाती है।"
+   },
+   "explain": {
+    "en": [
+     "Path p = Path.of(\"sales.txt\"); names the file.",
+     "Files.write(p, List.of(\"tea,15\", \"samosa,12\")); writes each item as a line.",
+     "List<String> lines = Files.readAllLines(p); reads every line back.",
+     "Files.exists(p) checks whether the file is there before reading.",
+     "File methods can throw IOException (missing file, no permission), so wrap them in try / catch or add throws IOException."
+    ],
+    "te": [
+     "Path p = Path.of(\"sales.txt\"); file కి పేరు పెడుతుంది.",
+     "Files.write(p, List.of(\"tea,15\", \"samosa,12\")); ప్రతి item ని ఒక line గా రాస్తుంది.",
+     "List<String> lines = Files.readAllLines(p); ప్రతి line ని మళ్లీ చదువుతుంది.",
+     "చదివే ముందు file ఉందో Files.exists(p) చూస్తుంది.",
+     "File methods IOException (file లేకపోవడం, అనుమతి లేకపోవడం) ఇవ్వగలవు; try / catch లో పెట్టండి లేదా throws IOException జోడించండి."
+    ],
+    "hi": [
+     "Path p = Path.of(\"sales.txt\"); file का नाम बताता है।",
+     "Files.write(p, List.of(\"tea,15\", \"samosa,12\")); हर item को एक line में लिखता है।",
+     "List<String> lines = Files.readAllLines(p); हर line वापस पढ़ता है।",
+     "पढ़ने से पहले Files.exists(p) देखता है कि file है या नहीं।",
+     "File methods IOException (file न होना, अनुमति न होना) दे सकते हैं, इसलिए try / catch में रखिए या throws IOException जोड़िए।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "A file is the program's notebook; Files is the pen that writes and reads it."
+    ],
+    "te": [
+     "File అంటే program notebook; Files దాన్ని రాసి చదివే pen."
+    ],
+    "hi": [
+     "File program की notebook है; Files उसे लिखने और पढ़ने वाली pen है।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "An attendance log: append today's line with Files.writeString(p, line, StandardOpenOption.APPEND, StandardOpenOption.CREATE)."
+    ],
+    "te": [
+     "Attendance log: Files.writeString(p, line, StandardOpenOption.APPEND, StandardOpenOption.CREATE) తో ఈరోజు line జోడించండి."
+    ],
+    "hi": [
+     "Attendance log: Files.writeString(p, line, StandardOpenOption.APPEND, StandardOpenOption.CREATE) से आज की line जोड़िए।"
+    ]
+   },
+   "picture": "flowchart LR\n  P[\"program\"] -->|\"Files.write\"| F[(\"sales.txt\")]\n  F -->|\"Files.readAllLines\"| P2[\"program later\"]",
+   "code": {
+    "source": "import java.io.IOException;\nimport java.nio.file.Files;\nimport java.nio.file.Path;\nimport java.util.List;\n\npublic class Main {\n    public static void main(String[] args) {\n        Path p = Path.of(\"sales.txt\");\n        try {\n            Files.write(p, List.of(\"tea,15\", \"samosa,12\", \"dosa,40\"));\n            int total = 0;\n            for (String line : Files.readAllLines(p)) {\n                String[] f = line.split(\",\");\n                total += Integer.parseInt(f[1]);\n            }\n            System.out.println(\"Total: \" + total);\n        } catch (IOException e) {\n            System.out.println(\"Could not use the file: \" + e.getMessage());\n        }\n    }\n}",
+    "output": "Total: 67",
+    "notes": [
+     {
+      "line": 8,
+      "note": {
+       "en": "Path names the file.",
+       "te": "Path file కి పేరు పెడుతుంది.",
+       "hi": "Path file का नाम बताता है।"
+      }
+     },
+     {
+      "line": 10,
+      "note": {
+       "en": "Each String becomes one line in the file.",
+       "te": "ప్రతి String file లో ఒక line అవుతుంది.",
+       "hi": "हर String file में एक line बनती है।"
+      }
+     },
+     {
+      "line": 12,
+      "note": {
+       "en": "readAllLines gives a List of lines.",
+       "te": "readAllLines lines List ఇస్తుంది.",
+       "hi": "readAllLines lines की List देता है।"
+      }
+     },
+     {
+      "line": 13,
+      "note": {
+       "en": "Split each line into item and price.",
+       "te": "ప్రతి line ని item, price గా విడదీయండి.",
+       "hi": "हर line को item और price में तोड़िए।"
+      }
+     },
+     {
+      "line": 17,
+      "note": {
+       "en": "File problems are IOExceptions.",
+       "te": "File సమస్యలు IOExceptions.",
+       "hi": "File की समस्याएँ IOException हैं।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "List<String> lines = Files.readAllLines(p);  // no try, no throws",
+     "fix": {
+      "en": "This does not compile: IOException must be caught or declared with throws IOException.",
+      "te": "ఇది compile కాదు: IOException ని పట్టుకోవాలి లేదా throws IOException తో ప్రకటించాలి.",
+      "hi": "यह compile नहीं होता: IOException को पकड़ना या throws IOException से घोषित करना ज़रूरी है।"
+     }
+    },
+    {
+     "wrong": "Files.write(p, newLines);  // meant to add",
+     "fix": {
+      "en": "write replaces the file. To add, pass StandardOpenOption.APPEND.",
+      "te": "write file ని మార్చివేస్తుంది. జోడించడానికి StandardOpenOption.APPEND ఇవ్వండి.",
+      "hi": "write file बदल देता है। जोड़ने के लिए StandardOpenOption.APPEND दीजिए।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "Which reads every line of a file?",
+      "te": "File లోని ప్రతి line చదివేది?",
+      "hi": "File की हर line कौन पढ़ता है?"
+     },
+     "options": [
+      "Files.readAllLines(p)",
+      "Files.write(p)",
+      "Path.of(p)"
+     ],
+     "answer": 0,
+     "why": {
+      "en": "readAllLines.",
+      "te": "readAllLines.",
+      "hi": "readAllLines।"
+     }
+    },
+    {
+     "q": {
+      "en": "File errors in Java are…",
+      "te": "Java లో file errors…",
+      "hi": "Java में file errors…"
+     },
+     "options": [
+      "IOException",
+      "ArithmeticException"
+     ],
+     "answer": 0,
+     "why": {
+      "en": "IOException.",
+      "te": "IOException.",
+      "hi": "IOException।"
+     }
+    },
+    {
+     "q": {
+      "en": "Files.write on an existing file…",
+      "te": "ఉన్న file పై Files.write…",
+      "hi": "मौजूद file पर Files.write…"
+     },
+     "options": [
+      {
+       "en": "replaces it",
+       "te": "దాన్ని మార్చివేస్తుంది",
+       "hi": "उसे बदल देता है"
+      },
+      {
+       "en": "adds to it",
+       "te": "దానికి జోడిస్తుంది",
+       "hi": "उसमें जोड़ता है"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Unless you pass APPEND.",
+      "te": "APPEND ఇవ్వకపోతే.",
+      "hi": "जब तक APPEND न दें।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write static int countLines(String fileName) that returns the number of lines in the file, or -1 if the file cannot be read. In main, write two lines to notes.txt first and print countLines(\"notes.txt\").",
+     "te": "File లోని lines సంఖ్యను return చేసే, file చదవలేకపోతే -1 return చేసే static int countLines(String fileName) రాయండి. main లో ముందుగా notes.txt లో రెండు lines రాసి countLines(\"notes.txt\") print చేయండి.",
+     "hi": "static int countLines(String fileName) लिखिए जो file की lines की संख्या return करे, या file न पढ़ पाए तो -1। main में पहले notes.txt में दो lines लिखिए और countLines(\"notes.txt\") print कीजिए।"
+    },
+    "starter": "public class Main {\n    static int countLines(String fileName) {\n        return 0;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(countLines(\"notes.txt\"));\n    }\n}\n",
+    "tests": [
+     {
+      "name": "reads the lines",
+      "pattern": "Files\\.readAllLines\\s*\\("
+     },
+     {
+      "name": "catches IOException",
+      "pattern": "catch\\s*\\(\\s*IOException\\s+\\w+\\s*\\)"
+     },
+     {
+      "name": "returns -1 on error",
+      "pattern": "return\\s+-1\\s*;"
+     },
+     {
+      "name": "writes the file first",
+      "pattern": "Files\\.write(String)?\\s*\\(",
+      "expected": "Files.write(...)",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "Import java.nio.file.Files, java.nio.file.Path, java.io.IOException and java.util.List.",
+      "te": "java.nio.file.Files, java.nio.file.Path, java.io.IOException, java.util.List import చేయండి.",
+      "hi": "java.nio.file.Files, java.nio.file.Path, java.io.IOException और java.util.List import कीजिए।"
+     },
+     {
+      "en": "try { return Files.readAllLines(Path.of(fileName)).size(); }",
+      "te": "try { return Files.readAllLines(Path.of(fileName)).size(); }",
+      "hi": "try { return Files.readAllLines(Path.of(fileName)).size(); }"
+     },
+     {
+      "en": "catch (IOException e) { return -1; }",
+      "te": "catch (IOException e) { return -1; }",
+      "hi": "catch (IOException e) { return -1; }"
+     }
+    ],
+    "solution": "import java.io.IOException;\nimport java.nio.file.Files;\nimport java.nio.file.Path;\nimport java.util.List;\n\npublic class Main {\n    static int countLines(String fileName) {\n        try {\n            return Files.readAllLines(Path.of(fileName)).size();\n        } catch (IOException e) {\n            return -1;\n        }\n    }\n\n    public static void main(String[] args) throws IOException {\n        Files.write(Path.of(\"notes.txt\"), List.of(\"first\", \"second\"));\n        System.out.println(countLines(\"notes.txt\") + \" \" + countLines(\"missing.txt\"));\n    }\n}",
+    "output": "2 -1"
+   },
+   "cheat": {
+    "en": [
+     "Path p = Path.of(\"name.txt\");",
+     "Files.write(p, list) · Files.readAllLines(p) · Files.exists(p)",
+     "catch (IOException e) or throws IOException · APPEND to add"
+    ],
+    "te": [
+     "Path p = Path.of(\"name.txt\");",
+     "Files.write(p, list) · Files.readAllLines(p) · Files.exists(p)",
+     "catch (IOException e) లేదా throws IOException · జోడించడానికి APPEND"
+    ],
+    "hi": [
+     "Path p = Path.of(\"name.txt\");",
+     "Files.write(p, list) · Files.readAllLines(p) · Files.exists(p)",
+     "catch (IOException e) या throws IOException · जोड़ने के लिए APPEND"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A shop wants to save sales to a file and read the total the next day. Explain the Java steps and what happens if the file is missing.",
+      "te": "Shop sales ని file లో దాచి మరుసటి రోజు total చదవాలనుకుంటుంది. Java steps, file లేకపోతే ఏమవుతుందో వివరించండి.",
+      "hi": "दुकान sales file में सहेजना और अगले दिन total पढ़ना चाहती है। Java steps और file न होने पर क्या होता है, समझाइए।"
+     },
+     {
+      "en": "Why does Java force you to handle IOException?",
+      "te": "IOException ని నిర్వహించాలని Java ఎందుకు బలవంతం చేస్తుంది?",
+      "hi": "Java आपको IOException संभालने के लिए क्यों मजबूर करता है?"
+     }
+    ],
+    "keywords": [
+     [
+      "files",
+      "file",
+      "path"
+     ],
+     [
+      "readalllines",
+      "write",
+      "read"
+     ],
+     [
+      "ioexception",
+      "catch",
+      "missing",
+      "throws"
+     ]
+    ],
+    "challenge": {
+     "en": "Say what Files.write does to a file that already exists.",
+     "te": "ఉన్న file కి Files.write ఏం చేస్తుందో చెప్పండి.",
+     "hi": "मौजूद file के साथ Files.write क्या करता है, बताइए।"
+    }
+   }
+  }
+ ],
+ "test": {
+  "pass": 4,
+  "questions": [
+   {
+    "q": {
+     "en": "Integer.parseInt(\"x\") throws…",
+     "te": "Integer.parseInt(\"x\") ఇచ్చేది…",
+     "hi": "Integer.parseInt(\"x\") देता है…"
+    },
+    "options": [
+     "NumberFormatException",
+     "IOException"
+    ],
+    "answer": 0,
+    "why": {
+     "en": "Not a number.",
+     "te": "Number కాదు.",
+     "hi": "Number नहीं।"
+    }
+   },
+   {
+    "q": {
+     "en": "Code after an exception inside try…",
+     "te": "try లో exception తర్వాత code…",
+     "hi": "try में exception के बाद का code…"
+    },
+    "options": [
+     {
+      "en": "is skipped",
+      "te": "దాటవేయబడుతుంది",
+      "hi": "छोड़ दिया जाता है"
+     },
+     {
+      "en": "still runs",
+      "te": "ఇంకా నడుస్తుంది",
+      "hi": "फिर भी चलता है"
+     }
+    ],
+    "answer": 0,
+    "why": {
+     "en": "Java jumps to catch.",
+     "te": "Java catch కి వెళ్తుంది.",
+     "hi": "Java catch पर जाता है।"
+    }
+   },
+   {
+    "q": {
+     "en": "throw new IllegalArgumentException(\"x\") is used to…",
+     "te": "throw new IllegalArgumentException(\"x\") ఎందుకు?",
+     "hi": "throw new IllegalArgumentException(\"x\") किसलिए?"
+    },
+    "options": [
+     {
+      "en": "report bad input",
+      "te": "చెడు input తెలపడానికి",
+      "hi": "ग़लत input बताने"
+     },
+     {
+      "en": "read a file",
+      "te": "File చదవడానికి",
+      "hi": "file पढ़ने"
+     }
+    ],
+    "answer": 0,
+    "why": {
+     "en": "Report a problem.",
+     "te": "సమస్య తెలపడం.",
+     "hi": "समस्या बताना।"
+    }
+   },
+   {
+    "q": {
+     "en": "Files.readAllLines returns…",
+     "te": "Files.readAllLines ఇచ్చేది…",
+     "hi": "Files.readAllLines देता है…"
+    },
+    "options": [
+     "a List<String>",
+     "an int"
+    ],
+    "answer": 0,
+    "why": {
+     "en": "A list of lines.",
+     "te": "Lines list.",
+     "hi": "Lines की list।"
+    }
+   },
+   {
+    "q": {
+     "en": "File methods can throw…",
+     "te": "File methods ఇవ్వగలిగేది…",
+     "hi": "File methods दे सकते हैं…"
+    },
+    "options": [
+     "IOException",
+     "ArithmeticException"
+    ],
+    "answer": 0,
+    "why": {
+     "en": "IOException.",
+     "te": "IOException.",
+     "hi": "IOException।"
+    }
+   }
+  ]
+ },
+ "project": {
+  "title": {
+   "en": "Marks file loader",
+   "te": "Marks file loader",
+   "hi": "Marks file loader"
+  },
+  "prompt": {
+   "en": "Write static double averageFromFile(String fileName) that reads lines \"name,mark\", skips lines whose mark is not a number (catch NumberFormatException), and returns the average of the good marks. Return 0 if the file is missing (catch IOException) or has no good marks. In main, write \"Ravi,80\", \"Sita,absent\", \"Anu,70\" to marks.txt and print the average, then print the average of \"nofile.txt\".",
+   "te": "\"name,mark\" lines చదివి, mark number కాని lines దాటవేసి (NumberFormatException పట్టుకుని), మంచి marks సగటు return చేసే static double averageFromFile(String fileName) రాయండి. File లేకపోతే (IOException పట్టుకుని) లేదా మంచి marks లేకపోతే 0 return చేయండి. main లో marks.txt కి \"Ravi,80\", \"Sita,absent\", \"Anu,70\" రాసి సగటు print చేయండి, తర్వాత \"nofile.txt\" సగటు print చేయండి.",
+   "hi": "static double averageFromFile(String fileName) लिखिए जो \"name,mark\" lines पढ़े, जिन lines का mark number नहीं उन्हें छोड़े (NumberFormatException पकड़कर), और अच्छे marks का औसत return करे। File न हो (IOException पकड़कर) या कोई अच्छा mark न हो तो 0 return कीजिए। main में marks.txt में \"Ravi,80\", \"Sita,absent\", \"Anu,70\" लिखिए और औसत print कीजिए, फिर \"nofile.txt\" का औसत print कीजिए।"
+  },
+  "starter": "public class Main {\n    static double averageFromFile(String fileName) {\n        return 0;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(averageFromFile(\"marks.txt\"));\n    }\n}\n",
+  "tests": [
+   {
+    "name": "reads the file",
+    "pattern": "Files\\.readAllLines\\s*\\("
+   },
+   {
+    "name": "skips bad marks",
+    "pattern": "catch\\s*\\(\\s*NumberFormatException\\s+\\w+\\s*\\)"
+   },
+   {
+    "name": "handles a missing file",
+    "pattern": "catch\\s*\\(\\s*IOException\\s+\\w+\\s*\\)"
+   },
+   {
+    "name": "parses marks",
+    "pattern": "Integer\\.parseInt|Double\\.parseDouble"
+   },
+   {
+    "name": "avoids dividing by zero",
+    "pattern": "count\\s*==\\s*0|count\\s*>\\s*0|==\\s*0\\s*\\?",
+    "expected": "count == 0 ? 0 : ...",
+    "hidden": true
+   }
+  ],
+  "hints": [
+   {
+    "en": "try { for (String line : Files.readAllLines(Path.of(fileName))) { ... } } catch (IOException e) { return 0; }",
+    "te": "try { for (String line : Files.readAllLines(Path.of(fileName))) { ... } } catch (IOException e) { return 0; }",
+    "hi": "try { for (String line : Files.readAllLines(Path.of(fileName))) { ... } } catch (IOException e) { return 0; }"
+   },
+   {
+    "en": "Inside the loop: try { total += Integer.parseInt(line.split(\",\")[1]); count++; } catch (NumberFormatException e) { }",
+    "te": "Loop లో: try { total += Integer.parseInt(line.split(\",\")[1]); count++; } catch (NumberFormatException e) { }",
+    "hi": "Loop में: try { total += Integer.parseInt(line.split(\",\")[1]); count++; } catch (NumberFormatException e) { }"
+   },
+   {
+    "en": "return count == 0 ? 0 : (double) total / count;",
+    "te": "return count == 0 ? 0 : (double) total / count;",
+    "hi": "return count == 0 ? 0 : (double) total / count;"
+   }
+  ],
+  "solution": "import java.io.IOException;\nimport java.nio.file.Files;\nimport java.nio.file.Path;\nimport java.util.List;\n\npublic class Main {\n    static double averageFromFile(String fileName) {\n        int total = 0;\n        int count = 0;\n        try {\n            for (String line : Files.readAllLines(Path.of(fileName))) {\n                String[] f = line.split(\",\");\n                if (f.length != 2) {\n                    continue;\n                }\n                try {\n                    total += Integer.parseInt(f[1].trim());\n                    count++;\n                } catch (NumberFormatException e) {\n                    // skip a line whose mark is not a number\n                }\n            }\n        } catch (IOException e) {\n            return 0;\n        }\n        return count == 0 ? 0 : (double) total / count;\n    }\n\n    public static void main(String[] args) throws IOException {\n        Files.write(Path.of(\"marks.txt\"), List.of(\"Ravi,80\", \"Sita,absent\", \"Anu,70\"));\n        System.out.println(averageFromFile(\"marks.txt\"));\n        System.out.println(averageFromFile(\"nofile.txt\"));\n    }\n}",
+  "output": "75.0\n0.0"
+ }
+}

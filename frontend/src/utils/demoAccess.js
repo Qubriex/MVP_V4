@@ -29,7 +29,18 @@ export const STORY = [
   { step: 'unlocked', who: 'recruiter', to: () => '/employer/pipeline', mark: null },
   { step: 'dayone', who: 'recruiter', to: () => '/employer/pipeline', mark: 'dayone' },
   { step: 'lesson', who: 'lakshmi', to: () => '/learn/dashboard', mark: 'lesson' },
-  { step: 'bridge', who: 'placement', to: () => '/institution/bridges', mark: 'bridge' }
+  { step: 'bridge', who: 'placement', to: () => '/institution/bridges', mark: 'bridge' },
+  { step: 'topics', who: 'professor', to: () => '/institution/topics', mark: null }
+];
+
+// The learner journey story: Lakshmi's side only, lessons use the scripted tutor.
+export const LEARNER_STORY = [
+  { step: 'lj_home', who: 'lakshmi', to: () => '/learn/dashboard', mark: () => '[data-start-here]' },
+  { step: 'lj_lesson', who: 'lakshmi', to: () => '/learn/session?mode=voice', mark: null },
+  { step: 'lj_skill', who: 'lakshmi', to: (me) => (me.lakshmi_node_id ? `/learn/skill/${me.lakshmi_node_id}` : '/learn/path'), mark: null },
+  { step: 'lj_passport', who: 'lakshmi', to: () => '/learn/passport', mark: null },
+  { step: 'lj_readiness', who: 'lakshmi', to: () => '/learn/readiness', mark: null },
+  { step: 'lj_jobs', who: 'lakshmi', to: () => '/learn/jobs', mark: null }
 ];
 
 export function readDemo() {

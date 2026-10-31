@@ -32,14 +32,20 @@ export async function curvePoints(elId) {
   const total = await totalNodes(elId) || 1;
   const mastered = await dal.all(`SELECT nm.skill_node_id AS node_id, nm.advanced_at, sn.node_label,
       COALESCE(nm.loops, (SELECT MAX(loop_count) FROM learning_sessions ls WHERE ls.engagement_learner_id = nm.engagement_learner_id AND ls.skill_node_id = nm.skill_node_id), 0) AS loops,
-      COALESCE((SELECT SUM(active_minutes) FROM learning_sessions ls WHERE ls.engagement_learner_id = nm.engagement_learner_id AND ls.skill_node_id = nm.skill_node_id), 0) AS minutes
+      COALESCE((SELECT SUM(active_minutes) FROM learning_sessions ls WHERE ls.engagement_learner_id = nm.engagement_learner_id AND ls.skill_node_id = nm.skill_node_id), 0) AS minutes,
+      COALESCE(nm.time_to_mastery_minutes, nm.active_minutes, 0) AS recorded_minutes
     FROM node_mastery nm JOIN skill_nodes sn ON sn.id = nm.skill_node_id
     WHERE nm.engagement_learner_id = ? AND nm.advanced_at IS NOT NULL ORDER BY nm.advanced_at`, elId);
+  // A node's time is its sessions' active time or, when sessions recorded
+  // none, the time to mastery kept with the mastery. Each point also carries
+  // its day, so the chart can plot by days when hours are unknown.
   let minutes = 0;
-  const points = [{ hours: 0, progress: 0 }];
+  const first = mastered.length ? Date.parse(String(mastered[0].advanced_at).replace(' ', 'T')) : 0;
+  const points = [{ hours: 0, progress: 0, day: 0 }];
   mastered.forEach((m, i) => {
-    minutes += m.minutes || 0;
-    points.push({ hours: Math.round((minutes / 60) * 100) / 100, progress: Math.round(((i + 1) / total) * 1000) / 10, node: m.node_label });
+    minutes += Number(m.minutes) > 0 ? Number(m.minutes) : Number(m.recorded_minutes) || 0;
+    const day = Math.max(0, Math.round((Date.parse(String(m.advanced_at).replace(' ', 'T')) - first) / 86400000));
+    points.push({ hours: Math.round((minutes / 60) * 100) / 100, progress: Math.round(((i + 1) / total) * 1000) / 10, node: m.node_label, day: day + 1 });
   });
   return { points, mastered };
 }

@@ -20,6 +20,7 @@ import AnswerBox from '../../components/learn/AnswerBox';
 import { ResultCard, LabelTag, ConfirmedSteps } from '../../components/learn/journey';
 import { fmtDate } from '../../components/learn/evidenceText';
 import { newTracker, recordPaste, provenanceFor } from '../../utils/provenance';
+import LearningLangPicker from '../../components/learn/LearningLangPicker';
 
 const TABS = ['concept', 'lesson', 'practice', 'apply', 'progress'];
 
@@ -137,7 +138,7 @@ export default function Skill() {
   const [busy, setBusy] = useState(false);
   const load = useCallback(() => api.get(`/learner/skill/${nodeId}`).then(r => setData(r.data)).catch(e => setError(errMsg(e))), [nodeId]);
   useEffect(() => { load(); }, [load]);
-  const setTab = (id) => (id === 'lesson' ? navigate('/learn/session') : setParams({ tab: id }, { replace: true }));
+  const setTab = (id) => (id === 'lesson' ? navigate('/learn/session', { state: { from: `/learn/skill/${nodeId}` } }) : setParams({ tab: id }, { replace: true }));
   const openTask = async () => { setBusy(true); try { await api.post(`/learner/skill/${nodeId}/task`); await load(); } catch (e) { setError(errMsg(e)); } setBusy(false); };
 
   if (!data) return error ? <div className="ln-error" role="alert">{error}</div> : <Skeleton lines={6} card />;
@@ -150,6 +151,7 @@ export default function Skill() {
           <h1 className="ln-title">{data.node.label}</h1>
           <span className="ln-row ln-wrap" style={{ gap: 8 }}><LabelTag label={p.label} /><span className="ln-small ln-muted">{t('lj.skill.about', { n: data.node.minutes })}</span></span>
         </div>
+        <LearningLangPicker onChange={load} />
       </header>
       <Tabs tabs={TABS.map(id => ({ id, label: t(`lj.skill.tab.${id}`) }))} value={tab} onChange={setTab} label={t('lj.skill.steps')} />
       {error && <div className="ln-error" role="alert">{error}</div>}
@@ -166,7 +168,7 @@ export default function Skill() {
             <p className="ln-indic" style={{ margin: 0 }}>{data.concept.example}</p>
             {data.concept.code && <pre className="ln-code"><code>{data.concept.code}</code></pre>}
           </div>
-          <button type="button" className="ln-btn ln-btn-primary" style={{ alignSelf: 'flex-start' }} onClick={() => navigate('/learn/session')}><Mic size={16} aria-hidden="true" />{t('lj.skill.toLesson')}</button>
+          <button type="button" className="ln-btn ln-btn-primary" style={{ alignSelf: 'flex-start' }} onClick={() => navigate('/learn/session', { state: { from: `/learn/skill/${nodeId}` } })}><Mic size={16} aria-hidden="true" />{t('lj.skill.toLesson')}</button>
         </section>
       )}
 
@@ -234,7 +236,7 @@ export default function Skill() {
             <span className="ln-small"><b>{t('lj.whatNext')}</b> {t(`lj.skill.next.${p.next.key}`)}</span>
             {p.next.href ? <Link className="ln-btn ln-btn-primary" to={p.next.href}>{t('lj.go')}</Link> : p.next.tab ? <button type="button" className="ln-btn ln-btn-primary" onClick={() => setTab(p.next.tab)}>{t('lj.go')}</button> : null}
           </div>
-          {!data.mastered && <Link className="ln-link ln-small" to="/learn/session"><MessageCircleQuestion size={14} aria-hidden="true" /> {t('lj.skill.stuck')}</Link>}
+          {!data.mastered && <Link className="ln-link ln-small" to="/learn/session" state={{ from: `/learn/skill/${nodeId}` }}><MessageCircleQuestion size={14} aria-hidden="true" /> {t('lj.skill.stuck')}</Link>}
         </section>
       )}
     </>

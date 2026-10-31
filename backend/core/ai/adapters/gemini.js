@@ -21,9 +21,19 @@ export async function generate(req) {
   try {
     return await call(req);
   } catch (err) {
-    if (err?.status === 404 && req.model !== FALLBACK_MODEL) return call({ ...req, model: FALLBACK_MODEL });
-    throw err;
+    if (err?.status === 404 && req.model !== FALLBACK_MODEL) {
+      try { return await call({ ...req, model: FALLBACK_MODEL }); } catch (e2) { throw upstream(e2); }
+    }
+    throw upstream(err);
   }
+}
+
+// Google's 401 / 403 (key not valid, API not enabled) are about our key, not
+// the person signed in: they must never reach the browser as 401 or 403,
+// which would look like their own session ending.
+export function upstream(err) {
+  if (err && (err.status === 401 || err.status === 403)) return Object.assign(err, { status: 502, upstreamStatus: err.status, upstream: true });
+  return err;
 }
 
 // thinking: false asks the model not to spend output tokens "thinking" first
@@ -88,7 +98,7 @@ async function ttsOnce(model, { text, voice, style }) {
   });
   if (!res.ok) {
     const body = await res.text().catch(() => '');
-    throw Object.assign(new Error(`TTS ${res.status}: ${body.slice(0, 200)}`), { status: res.status, retryAfter: retryAfter(res, body) });
+    throw upstream(Object.assign(new Error(`TTS ${res.status}: ${body.slice(0, 200)}`), { status: res.status, retryAfter: retryAfter(res, body) }));
   }
   const json = await res.json();
   const part = json.candidates?.[0]?.content?.parts?.find(p => p.inlineData?.data);
@@ -112,7 +122,7 @@ async function cloudOnce(name, languageCode, text) {
   });
   if (!res.ok) {
     const body = await res.text().catch(() => '');
-    throw Object.assign(new Error(`Cloud TTS ${res.status}: ${body.slice(0, 200)}`), { status: res.status, retryAfter: retryAfter(res, body) });
+    throw upstream(Object.assign(new Error(`Cloud TTS ${res.status}: ${body.slice(0, 200)}`), { status: res.status, retryAfter: retryAfter(res, body) }));
   }
   const json = await res.json();
   if (!json.audioContent) throw Object.assign(new Error('Cloud TTS returned no audio'), { status: 502 });
@@ -142,7 +152,7 @@ function retryAfter(res, body) {
 const resting = new Map(); // engine → time it may be tried again
 const restFor = (err) => {
   if (err.status === 429) return (err.retryAfter || 60) * 1000;
-  if (err.status === 401 || err.status === 403) return 10 * 60 * 1000;
+  if (err.upstreamStatus === 401 || err.upstreamStatus === 403 || err.status === 401 || err.status === 403) return 10 * 60 * 1000;
   if (err.status === 400 || err.status === 404) return 60 * 60 * 1000;
   return 0;
 };
@@ -154,12 +164,29 @@ export const _resetTtsEngines = () => resting.clear();
  * changes to another voice to get past a failure.
  * @param {{model: string, text: string, voice: string, language?: string, style?: string}} req
  */
+// The Gemini speech models this key can use, read from the model list once an
+// hour, so a renamed or retired model (a 404) never silences her.
+let ttsModels = { at: 0, list: [] };
+export async function availableTtsModels() {
+  if (Date.now() - ttsModels.at < 3600000) return ttsModels.list;
+  try {
+    const res = await fetch(`${TTS_ENDPOINT}?pageSize=200`, { headers: { 'x-goog-api-key': process.env.GEMINI_API_KEY } });
+    const json = res.ok ? await res.json() : { models: [] };
+    const list = (json.models || []).filter(m => /tts/i.test(m.name) && (m.supportedGenerationMethods || []).includes('generateContent')).map(m => m.name.replace(/^models\//, ''));
+    ttsModels = { at: Date.now(), list };
+  } catch { ttsModels = { at: Date.now(), list: [] }; }
+  return ttsModels.list;
+}
+
+async function engineList(req) {
+  const found = await availableTtsModels();
+  const models = [...new Set([req.model, ...found, ...TTS_FALLBACK_MODELS].filter(Boolean))];
+  return [['cloud-tts', () => cloudSpeak(req)], ...models.map(m => [m, () => ttsOnce(m, req)])];
+}
+
 export async function speak(req) {
   if (!process.env.GEMINI_API_KEY) throw Object.assign(new Error('GEMINI_API_KEY is not set'), { status: 503 });
-  const engines = [
-    ['cloud-tts', () => cloudSpeak(req)],
-    ...[req.model, ...TTS_FALLBACK_MODELS.filter(m => m !== req.model)].map(m => [m, () => ttsOnce(m, req)])
-  ];
+  const engines = await engineList(req);
   const now = Date.now();
   let last = null;
   for (const [name, run] of engines) {
@@ -177,3 +204,20 @@ export async function speak(req) {
   }
   throw last;
 }
+
+/**
+ * Every voice engine tried once, for /api/health: which answered, and why the
+ * others did not. Error text is Google's, trimmed; it never holds the key.
+ */
+export async function voiceDiagnosis(req) {
+  if (!process.env.GEMINI_API_KEY) return { engines: [], models: [] };
+  const engines = await engineList(req);
+  const out = [];
+  for (const [name, run] of engines) {
+    try { const r = await run(); out.push({ engine: name, ok: true, voice: r.modelVersion }); } catch (err) {
+      out.push({ engine: name, ok: false, status: err.upstreamStatus || err.status || null, error: String(err.message).replace(/key=[^&\s]+/g, 'key=…').slice(0, 160) });
+    }
+  }
+  return { engines: out, models: await availableTtsModels() };
+}
+

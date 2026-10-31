@@ -1,0 +1,1037 @@
+{
+ "id": "py-m7",
+ "n": 7,
+ "skill": "python-libraries",
+ "title": {
+  "en": "Modules & Libraries",
+  "te": "Modules & Libraries",
+  "hi": "Modules & Libraries"
+ },
+ "summary": {
+  "en": "Use ready-made code: import, your own modules, pip packages, and a first look at NumPy and pandas.",
+  "te": "సిద్ధమైన code వాడడం: import, మీ సొంత modules, pip packages, NumPy, pandas పరిచయం.",
+  "hi": "तैयार code इस्तेमाल करना: import, अपने modules, pip packages, और NumPy और pandas की पहली झलक।"
+ },
+ "lessons": [
+  {
+   "id": "py-m7-l1",
+   "n": 1,
+   "minutes": 20,
+   "title": {
+    "en": "Import and your own modules",
+    "te": "Import, మీ సొంత modules",
+    "hi": "Import और अपने modules"
+   },
+   "oneLine": {
+    "en": "import brings in ready-made code, like math for square roots and random for picking at random.",
+    "te": "import సిద్ధంగా ఉన్న code ని తెస్తుంది: square roots కోసం math, యాదృచ్ఛికంగా ఎంచుకోవడానికి random.",
+    "hi": "import तैयार code लाता है, जैसे square root के लिए math और random चुनने के लिए random।"
+   },
+   "useCase": {
+    "en": "A quiz app uses random.shuffle to mix the question order for every student.",
+    "te": "Quiz app ప్రతి విద్యార్థికి ప్రశ్నల క్రమం కలపడానికి random.shuffle వాడుతుంది.",
+    "hi": "Quiz app हर छात्र के लिए प्रश्नों का क्रम मिलाने के लिए random.shuffle इस्तेमाल करता है।"
+   },
+   "explain": {
+    "en": [
+     "Python comes with a large library of modules. A module is a file of useful functions.",
+     "import math loads the math module; use its tools with a dot: math.sqrt(16).",
+     "from math import sqrt brings in just one name, so you can write sqrt(16).",
+     "import random gives random.randint(1, 6) for a dice roll and random.choice(list) to pick one item.",
+     "Your own file is a module too: save helpers in fees.py, then write import fees and call fees.total(...). Keep the file in the same folder."
+    ],
+    "te": [
+     "Python తో పాటు modules పెద్ద library వస్తుంది. Module అంటే ఉపయోగపడే functions ఉన్న file.",
+     "import math, math module ని load చేస్తుంది; dot తో వాడండి: math.sqrt(16).",
+     "from math import sqrt ఒక్క పేరు మాత్రమే తెస్తుంది, sqrt(16) అని రాయవచ్చు.",
+     "import random తో dice కోసం random.randint(1, 6), ఒక item ఎంచుకోవడానికి random.choice(list) వస్తాయి.",
+     "మీ సొంత file కూడా ఒక module: helpers ని fees.py లో దాచి, import fees రాసి fees.total(...) call చేయండి. File అదే folder లో ఉంచండి."
+    ],
+    "hi": [
+     "Python के साथ modules की बड़ी library आती है। Module काम के functions वाली file है।",
+     "import math, math module load करता है; dot से इस्तेमाल कीजिए: math.sqrt(16)।",
+     "from math import sqrt सिर्फ़ एक नाम लाता है, ताकि sqrt(16) लिख सकें।",
+     "import random से dice के लिए random.randint(1, 6) और एक item चुनने के लिए random.choice(list) मिलते हैं।",
+     "आपकी अपनी file भी एक module है: helpers को fees.py में रखिए, फिर import fees लिखकर fees.total(...) call कीजिए। File उसी folder में रखिए।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "import is borrowing a tool from Python's toolbox."
+    ],
+    "te": [
+     "import అంటే Python toolbox నుంచి ఒక పనిముట్టు తీసుకోవడం."
+    ],
+    "hi": [
+     "import मतलब Python के toolbox से औज़ार लेना।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "A college project keeps grade rules in grades.py; app.py does from grades import grade_of and uses it for every student."
+    ],
+    "te": [
+     "College project grade నియమాలను grades.py లో ఉంచుతుంది; app.py లో from grades import grade_of రాసి ప్రతి విద్యార్థికి వాడుతుంది."
+    ],
+    "hi": [
+     "College project grade के नियम grades.py में रखता है; app.py में from grades import grade_of लिखकर हर छात्र के लिए इस्तेमाल करता है।"
+    ]
+   },
+   "picture": "flowchart LR\n  P[\"your program\"] -->|import math| M[\"math: sqrt, ceil, pi\"]\n  P -->|import random| R[\"random: randint, choice\"]",
+   "code": {
+    "source": "import math\nfrom random import randint\n\nprint(math.sqrt(144))\nprint(math.ceil(7 / 2))\nroll = randint(1, 6)\nprint(1 <= roll <= 6)",
+    "output": "12.0\n4\nTrue",
+    "notes": [
+     {
+      "line": 1,
+      "note": {
+       "en": "Load the whole math module.",
+       "te": "math module మొత్తం load చేయండి.",
+       "hi": "पूरा math module load कीजिए।"
+      }
+     },
+     {
+      "line": 2,
+      "note": {
+       "en": "Bring in only randint from random.",
+       "te": "random నుంచి randint మాత్రమే తీసుకురండి.",
+       "hi": "random से सिर्फ़ randint लाइए।"
+      }
+     },
+     {
+      "line": 4,
+      "note": {
+       "en": "Use module tools with a dot.",
+       "te": "Module పనిముట్లను dot తో వాడండి.",
+       "hi": "Module के tools dot से इस्तेमाल कीजिए।"
+      }
+     },
+     {
+      "line": 5,
+      "note": {
+       "en": "ceil rounds up: 3.5 becomes 4, handy for counting buses or pages.",
+       "te": "ceil పైకి round చేస్తుంది: 3.5 → 4; buses, pages లెక్కించడానికి ఉపయోగం.",
+       "hi": "ceil ऊपर round करता है: 3.5 → 4, buses या pages गिनने में काम का।"
+      }
+     },
+     {
+      "line": 6,
+      "note": {
+       "en": "A random whole number from 1 to 6, both included.",
+       "te": "1 నుంచి 6 వరకు ఒక random పూర్ణ సంఖ్య, రెండూ కలిపి.",
+       "hi": "1 से 6 तक एक random पूर्ण संख्या, दोनों शामिल।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "import math\nprint(sqrt(9))",
+     "fix": {
+      "en": "After import math, write math.sqrt(9), or use from math import sqrt.",
+      "te": "import math తర్వాత math.sqrt(9) రాయండి, లేదా from math import sqrt వాడండి.",
+      "hi": "import math के बाद math.sqrt(9) लिखिए, या from math import sqrt।"
+     }
+    },
+    {
+     "wrong": "# saved my file as random.py\nimport random",
+     "fix": {
+      "en": "Your own file named random.py hides the real module. Rename your file.",
+      "te": "మీ file పేరు random.py అయితే అసలు module కనిపించదు. File పేరు మార్చండి.",
+      "hi": "आपकी file का नाम random.py हो तो असली module छिप जाता है। File का नाम बदलिए।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "After import math, how do you get pi?",
+      "te": "import math తర్వాత pi ఎలా?",
+      "hi": "import math के बाद pi कैसे?"
+     },
+     "options": [
+      "pi",
+      "math.pi",
+      "math(pi)"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Use the dot.",
+      "te": "Dot వాడండి.",
+      "hi": "Dot लगाइए।"
+     }
+    },
+    {
+     "q": {
+      "en": "random.randint(1, 3) can give…",
+      "te": "random.randint(1, 3) ఇవ్వగలిగేది…",
+      "hi": "random.randint(1, 3) दे सकता है…"
+     },
+     "options": [
+      "0",
+      "3",
+      "4"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Both ends are included.",
+      "te": "రెండు చివర్లూ కలిపి.",
+      "hi": "दोनों सिरे शामिल।"
+     }
+    },
+    {
+     "q": {
+      "en": "math.ceil(2.1) is…",
+      "te": "math.ceil(2.1) ఎంత?",
+      "hi": "math.ceil(2.1) क्या है?"
+     },
+     "options": [
+      "2",
+      "3",
+      "2.1"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Rounds up.",
+      "te": "పైకి round.",
+      "hi": "ऊपर round।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write buses_needed(students, seats) that returns how many buses are needed, using math.ceil.",
+     "te": "math.ceil వాడి ఎన్ని buses కావాలో return చేసే buses_needed(students, seats) రాయండి.",
+     "hi": "math.ceil से कितनी buses चाहिए यह return करने वाला buses_needed(students, seats) लिखिए।"
+    },
+    "starter": "import math\n\ndef buses_needed(students, seats):\n    return students // seats\n",
+    "tests": [
+     {
+      "name": "buses_needed(100, 40)",
+      "call": "buses_needed(100, 40)",
+      "expected": "3"
+     },
+     {
+      "name": "exact fit",
+      "call": "buses_needed(80, 40)",
+      "expected": "2"
+     },
+     {
+      "name": "one student",
+      "call": "buses_needed(1, 50)",
+      "expected": "1",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "students / seats may be 2.5; you need 3 buses.",
+      "te": "students / seats 2.5 కావచ్చు; 3 buses కావాలి.",
+      "hi": "students / seats 2.5 हो सकता है; 3 buses चाहिए।"
+     },
+     {
+      "en": "math.ceil rounds up.",
+      "te": "math.ceil పైకి round చేస్తుంది.",
+      "hi": "math.ceil ऊपर round करता है।"
+     },
+     {
+      "en": "return math.ceil(students / seats)",
+      "te": "return math.ceil(students / seats)",
+      "hi": "return math.ceil(students / seats)"
+     }
+    ],
+    "solution": "import math\n\ndef buses_needed(students, seats):\n    return math.ceil(students / seats)"
+   },
+   "cheat": {
+    "en": [
+     "import math → math.sqrt(x)",
+     "from random import choice → choice(list)",
+     "Own module: fees.py → import fees → fees.total()"
+    ],
+    "te": [
+     "import math → math.sqrt(x)",
+     "from random import choice → choice(list)",
+     "సొంత module: fees.py → import fees → fees.total()"
+    ],
+    "hi": [
+     "import math → math.sqrt(x)",
+     "from random import choice → choice(list)",
+     "अपना module: fees.py → import fees → fees.total()"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A quiz app must mix questions and pick a lucky winner. Explain which module and which functions you would import and how you would call them.",
+      "te": "Quiz app ప్రశ్నలను కలిపి ఒక lucky winner ని ఎంచుకోవాలి. ఏ module, ఏ functions import చేస్తారో, ఎలా call చేస్తారో వివరించండి.",
+      "hi": "Quiz app को प्रश्न मिलाने और एक lucky winner चुनना है। कौन-सा module और कौन-से functions import करेंगे और कैसे call करेंगे, समझाइए।"
+     },
+     {
+      "en": "Explain the difference between import math and from math import sqrt.",
+      "te": "import math, from math import sqrt మధ్య తేడా వివరించండి.",
+      "hi": "import math और from math import sqrt का फ़र्क़ समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "import"
+     ],
+     [
+      "random",
+      "math",
+      "module"
+     ],
+     [
+      "choice",
+      "shuffle",
+      "sqrt",
+      "dot",
+      "."
+     ]
+    ],
+    "challenge": {
+     "en": "Say what a module is.",
+     "te": "Module అంటే ఏమిటో చెప్పండి.",
+     "hi": "Module क्या है, बताइए।"
+    }
+   }
+  },
+  {
+   "id": "py-m7-l2",
+   "n": 2,
+   "minutes": 20,
+   "title": {
+    "en": "pip and packages",
+    "te": "pip, packages",
+    "hi": "pip और packages"
+   },
+   "oneLine": {
+    "en": "pip installs packages that other people wrote, and the standard library already has many ready tools such as collections and statistics.",
+    "te": "pip ఇతరులు రాసిన packages install చేస్తుంది; standard library లో collections, statistics లాంటి ఎన్నో సిద్ధమైన పనిముట్లు ఇప్పటికే ఉన్నాయి.",
+    "hi": "pip दूसरों के लिखे packages install करता है, और standard library में collections और statistics जैसे कई तैयार tools पहले से हैं।"
+   },
+   "useCase": {
+    "en": "A data analyst counts the most common complaint types with collections.Counter, then installs pandas with pip for bigger reports.",
+    "te": "Data analyst ఎక్కువగా వచ్చే complaint రకాలను collections.Counter తో లెక్కించి, పెద్ద reports కోసం pip తో pandas install చేస్తారు.",
+    "hi": "Data analyst सबसे आम complaint प्रकार collections.Counter से गिनता है, फिर बड़ी reports के लिए pip से pandas install करता है।"
+   },
+   "explain": {
+    "en": [
+     "Before writing a tool yourself, check if Python already has it.",
+     "collections.Counter counts items for you: Counter(words).most_common(2).",
+     "statistics.mean and statistics.median give averages in one line.",
+     "For tools outside Python, type pip install requests in the terminal. pip downloads the package from PyPI.",
+     "Keep a requirements.txt list of packages so others can install the same ones."
+    ],
+    "te": [
+     "మీరే పనిముట్టు రాసే ముందు Python లో అది ఇప్పటికే ఉందో చూడండి.",
+     "collections.Counter మీ కోసం items లెక్కిస్తుంది: Counter(words).most_common(2).",
+     "statistics.mean, statistics.median ఒక్క line లో సగటులు ఇస్తాయి.",
+     "Python బయటి పనిముట్లకు terminal లో pip install requests type చేయండి. pip, PyPI నుంచి package download చేస్తుంది.",
+     "ఇతరులు అవే install చేసుకునేలా packages ని requirements.txt list లో ఉంచండి."
+    ],
+    "hi": [
+     "ख़ुद tool लिखने से पहले देखिए कि Python में वह पहले से है या नहीं।",
+     "collections.Counter आपके लिए items गिनता है: Counter(words).most_common(2)।",
+     "statistics.mean और statistics.median एक line में औसत देते हैं।",
+     "Python के बाहर के tools के लिए terminal में pip install requests लिखिए। pip, PyPI से package download करता है।",
+     "Packages की सूची requirements.txt में रखिए ताकि दूसरे वही install कर सकें।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "pip is an app store for Python code."
+    ],
+    "te": [
+     "pip అంటే Python code కోసం app store."
+    ],
+    "hi": [
+     "pip, Python code का app store है।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "Median house rent in an area: statistics.median([12000, 15000, 9000, 30000]) is 13500."
+    ],
+    "te": [
+     "ఒక ప్రాంతంలో median ఇంటి అద్దె: statistics.median([12000, 15000, 9000, 30000]) 13500."
+    ],
+    "hi": [
+     "किसी इलाक़े का median किराया: statistics.median([12000, 15000, 9000, 30000]) 13500 है।"
+    ]
+   },
+   "picture": "flowchart LR\n  S[\"standard library: collections, statistics, json\"] --> P[\"your program\"]\n  I[\"PyPI\"] -->|pip install| P",
+   "code": {
+    "source": "from collections import Counter\nimport statistics\n\ncomplaints = [\"late\", \"cold\", \"late\", \"wrong\", \"late\", \"cold\"]\nprint(Counter(complaints).most_common(2))\n\nwaits = [10, 25, 15, 40]\nprint(statistics.mean(waits))\nprint(statistics.median(waits))",
+    "output": "[('late', 3), ('cold', 2)]\n22.5\n20.0",
+    "notes": [
+     {
+      "line": 1,
+      "note": {
+       "en": "Counter comes from the collections module.",
+       "te": "Counter, collections module నుంచి వస్తుంది.",
+       "hi": "Counter, collections module से आता है।"
+      }
+     },
+     {
+      "line": 5,
+      "note": {
+       "en": "Counter counts each item; most_common(2) gives the top two.",
+       "te": "Counter ప్రతి item లెక్కిస్తుంది; most_common(2) పైన రెండు ఇస్తుంది.",
+       "hi": "Counter हर item गिनता है; most_common(2) ऊपर के दो देता है।"
+      }
+     },
+     {
+      "line": 8,
+      "note": {
+       "en": "mean is the average.",
+       "te": "mean అంటే సగటు.",
+       "hi": "mean औसत है।"
+      }
+     },
+     {
+      "line": 9,
+      "note": {
+       "en": "median is the middle value, less affected by one big number.",
+       "te": "median మధ్య value; ఒక పెద్ద number వల్ల తక్కువగా మారుతుంది.",
+       "hi": "median बीच की value है, एक बड़े number से कम प्रभावित।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": ">>> pip install requests",
+     "fix": {
+      "en": "pip runs in the terminal, not inside Python. Open a terminal and type it there.",
+      "te": "pip terminal లో నడుస్తుంది, Python లోపల కాదు. Terminal తెరిచి అక్కడ type చేయండి.",
+      "hi": "pip terminal में चलता है, Python के अंदर नहीं। Terminal खोलकर वहाँ लिखिए।"
+     }
+    },
+    {
+     "wrong": "counts = {}\nfor w in words:\n    ...  # 10 lines",
+     "fix": {
+      "en": "Counter(words) does this in one line. Check the standard library first.",
+      "te": "Counter(words) ఇది ఒక్క line లో చేస్తుంది. ముందు standard library చూడండి.",
+      "hi": "Counter(words) यह एक line में करता है। पहले standard library देखिए।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "Where do you type pip install?",
+      "te": "pip install ఎక్కడ type చేస్తారు?",
+      "hi": "pip install कहाँ लिखते हैं?"
+     },
+     "options": [
+      {
+       "en": "Terminal",
+       "te": "Terminal",
+       "hi": "Terminal"
+      },
+      {
+       "en": "Inside a .py file",
+       "te": ".py file లో",
+       "hi": ".py file के अंदर"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "In the terminal.",
+      "te": "Terminal లో.",
+      "hi": "Terminal में।"
+     }
+    },
+    {
+     "q": {
+      "en": "Counter([\"a\", \"b\", \"a\"])[\"a\"] is…",
+      "te": "Counter([\"a\", \"b\", \"a\"])[\"a\"] ఎంత?",
+      "hi": "Counter([\"a\", \"b\", \"a\"])[\"a\"] क्या है?"
+     },
+     "options": [
+      "1",
+      "2",
+      "3"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "a appears twice.",
+      "te": "a రెండుసార్లు.",
+      "hi": "a दो बार।"
+     }
+    },
+    {
+     "q": {
+      "en": "statistics.median([1, 2, 100]) is…",
+      "te": "statistics.median([1, 2, 100]) ఎంత?",
+      "hi": "statistics.median([1, 2, 100]) क्या है?"
+     },
+     "options": [
+      "2",
+      "34.33",
+      "100"
+     ],
+     "answer": 0,
+     "why": {
+      "en": "The middle value.",
+      "te": "మధ్య value.",
+      "hi": "बीच की value।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write top_word(text) that returns the most common word in a sentence (lower case), using collections.Counter.",
+     "te": "collections.Counter వాడి ఒక వాక్యంలో ఎక్కువగా వచ్చే పదాన్ని (lower case) return చేసే top_word(text) రాయండి.",
+     "hi": "collections.Counter से वाक्य का सबसे आम शब्द (lower case) return करने वाला top_word(text) लिखिए।"
+    },
+    "starter": "from collections import Counter\n\ndef top_word(text):\n    pass\n",
+    "tests": [
+     {
+      "name": "top_word(\"tea tea coffee\")",
+      "call": "top_word(\"tea tea coffee\")",
+      "expected": "'tea'"
+     },
+     {
+      "name": "ignores case",
+      "call": "top_word(\"Late late LATE cold\")",
+      "expected": "'late'"
+     },
+     {
+      "name": "uses Counter",
+      "call": "'Counter' in top_word.__code__.co_names",
+      "expected": "True",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "text.lower().split() gives the words.",
+      "te": "text.lower().split() పదాలు ఇస్తుంది.",
+      "hi": "text.lower().split() शब्द देता है।"
+     },
+     {
+      "en": "Counter(words).most_common(1) gives [(word, count)].",
+      "te": "Counter(words).most_common(1) [(word, count)] ఇస్తుంది.",
+      "hi": "Counter(words).most_common(1) देता है [(word, count)]।"
+     },
+     {
+      "en": "return Counter(text.lower().split()).most_common(1)[0][0]",
+      "te": "return Counter(text.lower().split()).most_common(1)[0][0]",
+      "hi": "return Counter(text.lower().split()).most_common(1)[0][0]"
+     }
+    ],
+    "solution": "from collections import Counter\n\ndef top_word(text):\n    return Counter(text.lower().split()).most_common(1)[0][0]"
+   },
+   "cheat": {
+    "en": [
+     "from collections import Counter · .most_common(n)",
+     "statistics.mean · statistics.median",
+     "Terminal: pip install name · requirements.txt"
+    ],
+    "te": [
+     "from collections import Counter · .most_common(n)",
+     "statistics.mean · statistics.median",
+     "Terminal: pip install name · requirements.txt"
+    ],
+    "hi": [
+     "from collections import Counter · .most_common(n)",
+     "statistics.mean · statistics.median",
+     "Terminal: pip install name · requirements.txt"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A canteen has a list of complaints. Explain how you would find the top two complaints with the standard library.",
+      "te": "Canteen కి complaints list ఉంది. Standard library తో పైన రెండు complaints ఎలా కనుక్కుంటారో వివరించండి.",
+      "hi": "Canteen के पास complaints की list है। Standard library से सबसे ऊपर की दो complaints कैसे निकालेंगे, समझाइए।"
+     },
+     {
+      "en": "Explain what pip and requirements.txt are for in a team project.",
+      "te": "Team project లో pip, requirements.txt ఎందుకో వివరించండి.",
+      "hi": "Team project में pip और requirements.txt किसलिए हैं, समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "counter",
+      "most_common",
+      "collections"
+     ],
+     [
+      "pip",
+      "install",
+      "package"
+     ],
+     [
+      "requirements",
+      "standard",
+      "library",
+      "terminal"
+     ]
+    ],
+    "challenge": {
+     "en": "Say where pip install is typed and what it does.",
+     "te": "pip install ఎక్కడ type చేస్తారో, అది ఏం చేస్తుందో చెప్పండి.",
+     "hi": "pip install कहाँ लिखते हैं और क्या करता है, बताइए।"
+    }
+   }
+  },
+  {
+   "id": "py-m7-l3",
+   "n": 3,
+   "minutes": 20,
+   "title": {
+    "en": "First look at NumPy and pandas",
+    "te": "NumPy, pandas పరిచయం",
+    "hi": "NumPy और pandas की पहली झलक"
+   },
+   "oneLine": {
+    "en": "NumPy does maths on whole lists of numbers at once, and pandas holds tables of data you can filter and summarise in one line.",
+    "te": "NumPy మొత్తం numbers list పై ఒకేసారి లెక్కలు చేస్తుంది; pandas data tables ని ఉంచి ఒక్క line లో filter, సారాంశం చేస్తుంది.",
+    "hi": "NumPy पूरी numbers list पर एक साथ गणित करता है, और pandas data की tables रखता है जिन्हें एक line में filter और सारांश कर सकते हैं।"
+   },
+   "useCase": {
+    "en": "A placement cell loads every student's marks into a pandas table and finds the class average and the toppers in seconds.",
+    "te": "Placement cell ప్రతి విద్యార్థి marks ని pandas table లోకి తెచ్చి class సగటు, toppers ని క్షణాల్లో కనుక్కుంటుంది.",
+    "hi": "Placement cell हर छात्र के marks pandas table में लाकर class का औसत और toppers सेकंडों में निकालता है।"
+   },
+   "explain": {
+    "en": [
+     "With plain lists you need a loop to add 5 grace marks to everyone.",
+     "NumPy makes an array: marks = np.array([62, 75, 48]). Now marks + 5 adds 5 to every value at once.",
+     "np.mean, np.max and comparisons like marks >= 50 also work on the whole array.",
+     "pandas makes a DataFrame: a table with named columns, like a spreadsheet.",
+     "df[df[\"marks\"] >= 50] keeps the rows that pass; df[\"marks\"].mean() gives the average. Install both with pip install numpy pandas."
+    ],
+    "te": [
+     "సాధారణ lists తో అందరికీ 5 grace marks కలపడానికి loop కావాలి.",
+     "NumPy array చేస్తుంది: marks = np.array([62, 75, 48]). ఇప్పుడు marks + 5 ప్రతి value కి ఒకేసారి 5 కలుపుతుంది.",
+     "np.mean, np.max, marks >= 50 లాంటి పోలికలు కూడా మొత్తం array పై పనిచేస్తాయి.",
+     "pandas ఒక DataFrame చేస్తుంది: spreadsheet లాగా పేర్లున్న columns ఉన్న table.",
+     "df[df[\"marks\"] >= 50] pass అయిన rows ఉంచుతుంది; df[\"marks\"].mean() సగటు ఇస్తుంది. రెండింటినీ pip install numpy pandas తో install చేయండి."
+    ],
+    "hi": [
+     "सादी lists में सबको 5 grace marks देने के लिए loop चाहिए।",
+     "NumPy array बनाता है: marks = np.array([62, 75, 48])। अब marks + 5 हर value में एक साथ 5 जोड़ता है।",
+     "np.mean, np.max और marks >= 50 जैसी तुलनाएँ भी पूरे array पर चलती हैं।",
+     "pandas एक DataFrame बनाता है: spreadsheet जैसी नाम वाले columns की table।",
+     "df[df[\"marks\"] >= 50] पास होने वाली rows रखता है; df[\"marks\"].mean() औसत देता है। दोनों को pip install numpy pandas से install कीजिए।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "NumPy is a calculator for whole columns; pandas is Excel inside Python."
+    ],
+    "te": [
+     "NumPy మొత్తం columns కి calculator; pandas అంటే Python లోపల Excel."
+    ],
+    "hi": [
+     "NumPy पूरे columns का calculator है; pandas, Python के अंदर Excel।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "Monthly electricity units: np.array([120, 95, 140]).sum() is 355, and .mean() is about 118.3."
+    ],
+    "te": [
+     "నెలవారీ కరెంట్ units: np.array([120, 95, 140]).sum() 355, .mean() సుమారు 118.3."
+    ],
+    "hi": [
+     "मासिक बिजली units: np.array([120, 95, 140]).sum() 355 है, और .mean() लगभग 118.3।"
+    ]
+   },
+   "picture": "flowchart LR\n  L[\"[62, 75, 48]\"] -->|\"np.array + 5\"| A[\"[67, 80, 53]\"]\n  T[\"DataFrame name | marks\"] -->|\"df[df.marks >= 50]\"| P[\"rows that pass\"]",
+   "code": {
+    "source": "import numpy as np\nimport pandas as pd\n\nmarks = np.array([62, 75, 48])\nprint((marks + 5).tolist())\nprint(int(marks.max()), float(marks.mean()))\n\ndf = pd.DataFrame({\"name\": [\"Ravi\", \"Sita\", \"Anu\"], \"marks\": [62, 75, 48]})\npassed = df[df[\"marks\"] >= 50]\nprint(passed[\"name\"].tolist())\nprint(float(df[\"marks\"].mean()))",
+    "output": "[67, 80, 53]\n75 61.666666666666664\n['Ravi', 'Sita']\n61.666666666666664",
+    "notes": [
+     {
+      "line": 1,
+      "note": {
+       "en": "The usual short names: np and pd.",
+       "te": "సాధారణ చిన్న పేర్లు: np, pd.",
+       "hi": "आम छोटे नाम: np और pd।"
+      }
+     },
+     {
+      "line": 4,
+      "note": {
+       "en": "A NumPy array of marks.",
+       "te": "Marks NumPy array.",
+       "hi": "Marks का NumPy array।"
+      }
+     },
+     {
+      "line": 5,
+      "note": {
+       "en": "Adds 5 to every value, no loop.",
+       "te": "Loop లేకుండా ప్రతి value కి 5 కలుపుతుంది.",
+       "hi": "बिना loop हर value में 5 जोड़ता है।"
+      }
+     },
+     {
+      "line": 8,
+      "note": {
+       "en": "A table with two named columns.",
+       "te": "పేర్లున్న రెండు columns table.",
+       "hi": "दो नाम वाले columns की table।"
+      }
+     },
+     {
+      "line": 9,
+      "note": {
+       "en": "Keep only the rows where marks >= 50.",
+       "te": "marks >= 50 ఉన్న rows మాత్రమే ఉంచండి.",
+       "hi": "सिर्फ़ marks >= 50 वाली rows रखिए।"
+      }
+     },
+     {
+      "line": 11,
+      "note": {
+       "en": "The average of the column.",
+       "te": "Column సగటు.",
+       "hi": "Column का औसत।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "marks = [62, 75]\nprint(marks + 5)",
+     "fix": {
+      "en": "A plain list cannot add a number: TypeError. Make it np.array(marks) first.",
+      "te": "సాధారణ list కి number కలపలేం: TypeError. ముందు np.array(marks) చేయండి.",
+      "hi": "सादी list में number नहीं जुड़ता: TypeError। पहले np.array(marks) बनाइए।"
+     }
+    },
+    {
+     "wrong": "df[df[\"marks\"] >= 50 and df[\"marks\"] < 90]",
+     "fix": {
+      "en": "Use & with brackets for tables: (df[\"marks\"] >= 50) & (df[\"marks\"] < 90).",
+      "te": "Tables కి brackets తో & వాడండి: (df[\"marks\"] >= 50) & (df[\"marks\"] < 90).",
+      "hi": "Tables के लिए brackets के साथ & लिखिए: (df[\"marks\"] >= 50) & (df[\"marks\"] < 90)।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "np.array([1, 2]) * 3 gives…",
+      "te": "np.array([1, 2]) * 3 ఇచ్చేది…",
+      "hi": "np.array([1, 2]) * 3 देता है…"
+     },
+     "options": [
+      "[3, 6]",
+      "[1, 2, 1, 2, 1, 2]",
+      "error"
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Each value times 3.",
+      "te": "ప్రతి value × 3.",
+      "hi": "हर value × 3।"
+     }
+    },
+    {
+     "q": {
+      "en": "A pandas DataFrame is like…",
+      "te": "pandas DataFrame దేనిలాంటిది…",
+      "hi": "pandas DataFrame किसके जैसा है…"
+     },
+     "options": [
+      {
+       "en": "a table with columns",
+       "te": "Columns ఉన్న table",
+       "hi": "columns वाली table"
+      },
+      {
+       "en": "a single number",
+       "te": "ఒక్క number",
+       "hi": "एक number"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Rows and named columns.",
+      "te": "Rows, పేర్లున్న columns.",
+      "hi": "Rows और नाम वाले columns।"
+     }
+    },
+    {
+     "q": {
+      "en": "How do you install them?",
+      "te": "వాటిని ఎలా install చేస్తారు?",
+      "hi": "इन्हें कैसे install करें?"
+     },
+     "options": [
+      "pip install numpy pandas",
+      "import install numpy",
+      "python numpy"
+     ],
+     "answer": 0,
+     "why": {
+      "en": "With pip, in the terminal.",
+      "te": "Terminal లో pip తో.",
+      "hi": "Terminal में pip से।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write class_report(names, marks) that uses pandas to return a tuple (average rounded to 1 decimal, list of names with marks >= 75).",
+     "te": "pandas వాడి (1 decimal కి round చేసిన సగటు, marks >= 75 ఉన్న పేర్ల list) tuple return చేసే class_report(names, marks) రాయండి.",
+     "hi": "class_report(names, marks) लिखिए जो pandas से tuple (1 decimal तक round किया औसत, marks >= 75 वाले नामों की list) return करे।"
+    },
+    "starter": "import pandas as pd\n\ndef class_report(names, marks):\n    pass\n",
+    "tests": [
+     {
+      "name": "class_report",
+      "call": "class_report([\"Ravi\", \"Sita\", \"Anu\"], [62, 81, 75])",
+      "expected": "(72.7, ['Sita', 'Anu'])"
+     },
+     {
+      "name": "nobody above 75",
+      "call": "class_report([\"A\"], [40])",
+      "expected": "(40.0, [])"
+     },
+     {
+      "name": "uses pandas",
+      "call": "'pd' in class_report.__code__.co_names",
+      "expected": "True",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "df = pd.DataFrame({\"name\": names, \"marks\": marks})",
+      "te": "df = pd.DataFrame({\"name\": names, \"marks\": marks})",
+      "hi": "df = pd.DataFrame({\"name\": names, \"marks\": marks})"
+     },
+     {
+      "en": "avg = round(float(df[\"marks\"].mean()), 1)",
+      "te": "avg = round(float(df[\"marks\"].mean()), 1)",
+      "hi": "avg = round(float(df[\"marks\"].mean()), 1)"
+     },
+     {
+      "en": "top = df[df[\"marks\"] >= 75][\"name\"].tolist(); return (avg, top)",
+      "te": "top = df[df[\"marks\"] >= 75][\"name\"].tolist(); return (avg, top)",
+      "hi": "top = df[df[\"marks\"] >= 75][\"name\"].tolist(); return (avg, top)"
+     }
+    ],
+    "solution": "import pandas as pd\n\ndef class_report(names, marks):\n    df = pd.DataFrame({\"name\": names, \"marks\": marks})\n    avg = round(float(df[\"marks\"].mean()), 1)\n    top = df[df[\"marks\"] >= 75][\"name\"].tolist()\n    return (avg, top)"
+   },
+   "cheat": {
+    "en": [
+     "import numpy as np · np.array(list) · arr + 5 · arr.mean() · arr.max()",
+     "import pandas as pd · pd.DataFrame({...}) · df[\"col\"]",
+     "df[df[\"col\"] >= x] · df[\"col\"].mean() · .tolist()"
+    ],
+    "te": [
+     "import numpy as np · np.array(list) · arr + 5 · arr.mean() · arr.max()",
+     "import pandas as pd · pd.DataFrame({...}) · df[\"col\"]",
+     "df[df[\"col\"] >= x] · df[\"col\"].mean() · .tolist()"
+    ],
+    "hi": [
+     "import numpy as np · np.array(list) · arr + 5 · arr.mean() · arr.max()",
+     "import pandas as pd · pd.DataFrame({...}) · df[\"col\"]",
+     "df[df[\"col\"] >= x] · df[\"col\"].mean() · .tolist()"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A placement cell has every student's marks. Explain how pandas finds the class average and the students who scored 75 or more.",
+      "te": "Placement cell దగ్గర ప్రతి విద్యార్థి marks ఉన్నాయి. pandas class సగటు, 75 లేదా ఎక్కువ వచ్చిన విద్యార్థులను ఎలా కనుక్కుంటుందో వివరించండి.",
+      "hi": "Placement cell के पास हर छात्र के marks हैं। pandas class का औसत और 75 या ज़्यादा वाले छात्र कैसे निकालता है, समझाइए।"
+     },
+     {
+      "en": "Explain why marks + 5 works on a NumPy array but not on a plain list.",
+      "te": "marks + 5 NumPy array పై ఎందుకు పనిచేస్తుంది, సాధారణ list పై ఎందుకు కాదో వివరించండి.",
+      "hi": "marks + 5 NumPy array पर क्यों चलता है पर सादी list पर क्यों नहीं, समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "pandas",
+      "dataframe",
+      "numpy",
+      "array"
+     ],
+     [
+      "mean",
+      "average",
+      "సగటు",
+      "औसत",
+      "filter"
+     ],
+     [
+      "column",
+      "table",
+      "whole",
+      "every",
+      "loop"
+     ]
+    ],
+    "challenge": {
+     "en": "Say what a pandas DataFrame is in one line.",
+     "te": "pandas DataFrame అంటే ఏమిటో ఒక్క line లో చెప్పండి.",
+     "hi": "pandas DataFrame क्या है, एक line में बताइए।"
+    }
+   }
+  }
+ ],
+ "test": {
+  "pass": 4,
+  "questions": [
+   {
+    "q": {
+     "en": "import math then…",
+     "te": "import math తర్వాత…",
+     "hi": "import math के बाद…"
+    },
+    "options": [
+     "sqrt(4)",
+     "math.sqrt(4)",
+     "math[sqrt](4)"
+    ],
+    "answer": 1,
+    "why": {
+     "en": "Use the dot.",
+     "te": "Dot వాడండి.",
+     "hi": "Dot लगाइए।"
+    }
+   },
+   {
+    "q": {
+     "en": "Which picks one random item from a list?",
+     "te": "List నుంచి ఒక random item ఎంచుకునేది ఏది?",
+     "hi": "List से एक random item कौन चुनता है?"
+    },
+    "options": [
+     "random.choice",
+     "random.pick",
+     "math.random"
+    ],
+    "answer": 0,
+    "why": {
+     "en": "choice.",
+     "te": "choice.",
+     "hi": "choice।"
+    }
+   },
+   {
+    "q": {
+     "en": "np.array([2, 4]).mean() is…",
+     "te": "np.array([2, 4]).mean() ఎంత?",
+     "hi": "np.array([2, 4]).mean() क्या है?"
+    },
+    "options": [
+     "3.0",
+     "6",
+     "[2, 4]"
+    ],
+    "answer": 0,
+    "why": {
+     "en": "The average.",
+     "te": "సగటు.",
+     "hi": "औसत।"
+    }
+   },
+   {
+    "q": {
+     "en": "Counter is in…",
+     "te": "Counter ఉండేది…",
+     "hi": "Counter कहाँ है…"
+    },
+    "options": [
+     "math",
+     "collections",
+     "json"
+    ],
+    "answer": 1,
+    "why": {
+     "en": "collections.",
+     "te": "collections.",
+     "hi": "collections।"
+    }
+   },
+   {
+    "q": {
+     "en": "pip install runs in…",
+     "te": "pip install నడిచేది…",
+     "hi": "pip install चलता है…"
+    },
+    "options": [
+     {
+      "en": "the terminal",
+      "te": "Terminal లో",
+      "hi": "Terminal में"
+     },
+     {
+      "en": "a Python function",
+      "te": "Python function లో",
+      "hi": "Python function में"
+     }
+    ],
+    "answer": 0,
+    "why": {
+     "en": "The terminal.",
+     "te": "Terminal.",
+     "hi": "Terminal।"
+    }
+   }
+  ]
+ },
+ "project": {
+  "title": {
+   "en": "Shop sales summary",
+   "te": "Shop sales summary",
+   "hi": "Shop sales summary"
+  },
+  "prompt": {
+   "en": "A shop logs each sale as an item name. Write summary(sales, prices) that returns a dict with \"total\" (sum of prices of all sales), \"top\" (the item sold most, using collections.Counter) and \"per_item\" (a dict of item → count). Use math.ceil to round the total up to whole rupees.",
+   "te": "Shop ప్రతి sale ని item పేరుగా నమోదు చేస్తుంది. \"total\" (అన్ని sales ధరల మొత్తం), \"top\" (collections.Counter తో ఎక్కువగా అమ్మిన item), \"per_item\" (item → count dict) ఉన్న dict return చేసే summary(sales, prices) రాయండి. Total ని పూర్తి రూపాయలకు పైకి round చేయడానికి math.ceil వాడండి.",
+   "hi": "दुकान हर sale को item के नाम से दर्ज करती है। summary(sales, prices) लिखिए जो dict return करे: \"total\" (सभी sales के दामों का जोड़), \"top\" (collections.Counter से सबसे ज़्यादा बिका item) और \"per_item\" (item → count का dict)। Total को पूरे रुपयों तक ऊपर round करने के लिए math.ceil लीजिए।"
+  },
+  "starter": "import math\nfrom collections import Counter\n\ndef summary(sales, prices):\n    return {}\n",
+  "tests": [
+   {
+    "name": "summary",
+    "call": "summary([\"tea\", \"samosa\", \"tea\"], {\"tea\": 12.5, \"samosa\": 15})",
+    "expected": "{'total': 40, 'top': 'tea', 'per_item': {'tea': 2, 'samosa': 1}}"
+   },
+   {
+    "name": "one sale",
+    "call": "summary([\"dosa\"], {\"dosa\": 39.2})[\"total\"]",
+    "expected": "40"
+   },
+   {
+    "name": "uses Counter",
+    "call": "'Counter' in summary.__code__.co_names",
+    "expected": "True",
+    "hidden": true
+   }
+  ],
+  "hints": [
+   {
+    "en": "counts = Counter(sales)",
+    "te": "counts = Counter(sales)",
+    "hi": "counts = Counter(sales)"
+   },
+   {
+    "en": "total = math.ceil(sum(prices[s] for s in sales))",
+    "te": "total = math.ceil(sum(prices[s] for s in sales))",
+    "hi": "total = math.ceil(sum(prices[s] for s in sales))"
+   },
+   {
+    "en": "return {\"total\": total, \"top\": counts.most_common(1)[0][0], \"per_item\": dict(counts)}",
+    "te": "return {\"total\": total, \"top\": counts.most_common(1)[0][0], \"per_item\": dict(counts)}",
+    "hi": "return {\"total\": total, \"top\": counts.most_common(1)[0][0], \"per_item\": dict(counts)}"
+   }
+  ],
+  "solution": "import math\nfrom collections import Counter\n\ndef summary(sales, prices):\n    counts = Counter(sales)\n    total = math.ceil(sum(prices[s] for s in sales))\n    return {\"total\": total, \"top\": counts.most_common(1)[0][0], \"per_item\": dict(counts)}"
+ }
+}

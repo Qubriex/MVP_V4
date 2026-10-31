@@ -14,6 +14,7 @@ import { useSpeechOutput } from '../../utils/voice';
 import { NAME_OPTIONS } from '../../utils/pronounce';
 import { useProfileDraft, Section, LowBandwidthToggle } from '../../components/learn/ProfileSections';
 import { errMsg } from '../../utils/errors';
+import LearningLangPicker from '../../components/learn/LearningLangPicker';
 
 const UI_LANGS = [{ id: 'telugu', label: 'తెలుగు' }, { id: 'hindi', label: 'हिंदी' }, { id: 'english', label: 'English' }];
 const when = (t) => (t ? new Date(t).toLocaleString(uiLocale(), { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) : '—');
@@ -38,8 +39,9 @@ function VoiceAndLanguage({ form, language }) {
           <div className="ln-seg" role="group" aria-labelledby="rate-pick">
             {[0.8, 1, 1.2].map(r => <button key={r} type="button" aria-pressed={(prefs.rate || 1) === r} onClick={() => setPref('rate', r)}>{r.toFixed(1)}×</button>)}
           </div></div>
-        <div className="ln-field"><span className="ln-label">{t('learn.settings.teachingLanguage')}</span>
-          <span className="ln-tile ln-indic" style={{ fontSize: 'var(--fs-body)', padding: '12px 14px' }}>{language === 'hindi' ? 'हिंदी' : 'తెలుగు'} <span className="ln-muted">{t('learn.settings.setByInstitution')}</span></span></div>
+        <div className="ln-field" data-settings-learning-language><span className="ln-label">{t('lang.learningLanguage')}</span>
+          <LearningLangPicker />
+          <span className="ln-xs ln-muted">{t('lang.learningDefault', { lang: language === 'hindi' ? 'हिंदी' : 'తెలుగు' })}</span></div>
         <div className="ln-field"><span className="ln-label" id="ui-lang">{t('learn.settings.interfaceLanguage')}</span>
           <div className="ln-seg ln-indic" role="group" aria-labelledby="ui-lang">
             {UI_LANGS.map(l => <button key={l.id} type="button" aria-pressed={draft.ui_language === l.id} onClick={() => { set('ui_language', l.id); setLang(l.id); }}>{l.label}</button>)}
@@ -160,26 +162,61 @@ function Security({ settings, reload }) {
   );
 }
 
-function MyData({ settings, reload }) {
+function MyData() {
   const { t } = useUiLang();
   const [msg, setMsg] = useState('');
+  const [del, setDel] = useState(null);
+  const [code, setCode] = useState('');
+  const [busy, setBusy] = useState(false);
+  useEffect(() => { api.get('/learner/account-deletion').then(r => setDel(r.data)).catch(() => setDel({ status: 'none' })); }, []);
+  // Saves a real file: the server names it, the browser keeps it.
   const download = async () => {
+    setMsg('');
     try {
       const r = await api.get('/learner/my-data', { responseType: 'blob' });
-      const a = document.createElement('a'); a.href = URL.createObjectURL(r.data); a.download = 'qubirex-my-data.json'; a.click();
+      const name = /filename="([^"]+)"/.exec(r.headers?.['content-disposition'] || '')?.[1] || 'qubirex-my-data.json';
+      const url = URL.createObjectURL(r.data);
+      const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+      setMsg(t('lj.settings.downloaded', { name }));
     } catch (e) { setMsg(errMsg(e, t('learn.settings.couldnTPrepareData'))); }
   };
-  const requestDelete = async () => {
-    if (!window.confirm(t('learn.settings.askInstitutionDeleteQubirex'))) return;
-    try { const r = await api.post('/learner/delete-request', {}); setMsg(r.data.message); reload(); } catch (e) { setMsg(errMsg(e, t('learn.settings.couldnTSendRequest'))); }
+  const step = async (path, body) => {
+    setBusy(true); setMsg('');
+    try { setDel((await api.post(`/learner/account-deletion/${path}`, body || {})).data); setCode(''); } catch (e) { setMsg(errMsg(e)); }
+    setBusy(false);
   };
   return (
     <Section id="data" title={t('learn.settings.yourData')}>
       <div className="ln-row ln-wrap" style={{ gap: 10 }}>
-        <button type="button" className="ln-btn" onClick={download}><Download size={16} aria-hidden="true" />{t('learn.settings.downloadMyData')}</button>
-        <button type="button" className="ln-btn" style={{ color: 'var(--status-danger)' }} onClick={requestDelete} disabled={!!settings.deletion_requested_at}><Trash2 size={16} aria-hidden="true" />{settings.deletion_requested_at ? t('learn.settings.deletionRequested') : t('learn.settings.askDeleteMyData')}</button>
+        <button type="button" className="ln-btn" onClick={download} data-download-data><Download size={16} aria-hidden="true" />{t('learn.settings.downloadMyData')}</button>
       </div>
-      <span className="ln-xs ln-muted">{t('learn.settings.downloadHasProfileSessions')}{settings.deletion_requested_at ? ` ${t('learn.settings.deletionRequestedOn', { date: when(settings.deletion_requested_at) })}` : ''}</span>
+      <span className="ln-xs ln-muted">{t('learn.settings.downloadHasProfileSessions')}</span>
+
+      <div className="ln-col lj-delete" style={{ gap: 8 }} data-delete-state={del?.status || 'loading'}>
+        <b>{t('lj.settings.deleteTitle')}</b>
+        {del?.status === 'scheduled' ? (
+          <>
+            <span className="ln-small">{t('lj.settings.deleteScheduled', { date: when(del.purge_after) })}</span>
+            <button type="button" className="ln-btn ln-btn-sm" style={{ alignSelf: 'flex-start' }} onClick={() => step('cancel')} disabled={busy}>{t('lj.settings.deleteCancel')}</button>
+          </>
+        ) : del?.status === 'otp_sent' ? (
+          <>
+            <span className="ln-small">{del.sent_to ? t('lj.settings.codeSentTo', { to: del.sent_to }) : t('lj.settings.codeSent')}</span>
+            {del.dev_code && <span className="ln-xs ln-muted">{t('lj.settings.testCode', { code: del.dev_code })}</span>}
+            <div className="ln-row ln-wrap" style={{ gap: 8 }}>
+              <input className="ln-input" inputMode="numeric" maxLength={6} value={code} onChange={e => setCode(e.target.value.replace(/\D/g, ''))} aria-label={t('lj.settings.codeLabel')} placeholder="000000" style={{ width: 120 }} />
+              <button type="button" className="ln-btn ln-btn-sm" style={{ color: 'var(--status-danger)' }} onClick={() => step('confirm', { otp: code })} disabled={busy || code.length !== 6}>{t('lj.settings.deleteConfirm')}</button>
+              <button type="button" className="ln-btn ln-btn-sm ln-btn-ghost" onClick={() => step('cancel')} disabled={busy}>{t('lj.settings.deleteCancel')}</button>
+            </div>
+          </>
+        ) : (
+          <>
+            <span className="ln-small ln-muted">{t('lj.settings.deleteHow')}</span>
+            <button type="button" className="ln-btn ln-btn-sm" style={{ color: 'var(--status-danger)', alignSelf: 'flex-start' }} onClick={() => step('request')} disabled={busy || !del}><Trash2 size={16} aria-hidden="true" />{t('lj.settings.deleteStart')}</button>
+          </>
+        )}
+      </div>
       {msg && <span className="ln-small" role="status">{msg}</span>}
     </Section>
   );
@@ -215,7 +252,7 @@ export default function Settings() {
             <Privacy settings={settings} reload={reload} />
             <Security settings={settings} reload={reload} />
             <Alerts />
-            <MyData settings={settings} reload={reload} />
+            <MyData />
             <Grievance />
           </>
         ) : !error && <div className="ln-card ln-skeleton" style={{ height: 320 }} aria-hidden="true" />}

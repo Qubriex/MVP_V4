@@ -1,0 +1,784 @@
+{
+ "id": "jv-m8",
+ "n": 8,
+ "skill": "java-lambdas-streams",
+ "title": {
+  "en": "Lambdas & Streams",
+  "te": "Lambdas & Streams",
+  "hi": "Lambdas & Streams"
+ },
+ "summary": {
+  "en": "Write short functions with lambdas and process collections with filter, map and collect.",
+  "te": "Lambdas తో చిన్న functions రాయడం, filter, map, collect తో collections ప్రాసెస్ చేయడం.",
+  "hi": "Lambdas से छोटे functions लिखना, और filter, map और collect से collections process करना।"
+ },
+ "lessons": [
+  {
+   "id": "jv-m8-l1",
+   "n": 1,
+   "minutes": 20,
+   "title": {
+    "en": "Lambdas",
+    "te": "Lambdas",
+    "hi": "Lambdas"
+   },
+   "oneLine": {
+    "en": "A lambda is a short, nameless function such as x -> x * 2 that you can pass to methods like forEach, removeIf and sort.",
+    "te": "Lambda అంటే x -> x * 2 లాంటి చిన్న, పేరులేని function; forEach, removeIf, sort లాంటి methods కి పంపవచ్చు.",
+    "hi": "Lambda, x -> x * 2 जैसा छोटा, बिना नाम का function है जिसे forEach, removeIf और sort जैसे methods को दे सकते हैं।"
+   },
+   "useCase": {
+    "en": "A job portal sorts candidates by score with one line: list.sort((a, b) -> b.score - a.score).",
+    "te": "Job portal ఒక్క line తో candidates ని score బట్టి sort చేస్తుంది: list.sort((a, b) -> b.score - a.score).",
+    "hi": "Job portal एक line में candidates को score से sort करता है: list.sort((a, b) -> b.score - a.score)।"
+   },
+   "explain": {
+    "en": [
+     "Some methods want a small piece of behaviour, not a value: \"remove the ones that…\", \"sort by…\".",
+     "A lambda writes that behaviour inline: parameters, an arrow ->, then the result.",
+     "name -> name.isEmpty() takes one parameter; (a, b) -> a - b takes two.",
+     "list.removeIf(m -> m < 35) removes failing marks; list.forEach(m -> System.out.println(m)) prints each.",
+     "Comparator.comparing(Student::getName) sorts by a field; :: is a method reference, a shorter lambda."
+    ],
+    "te": [
+     "కొన్ని methods కి value కాదు, చిన్న ప్రవర్తన కావాలి: \"…వాటిని తీసేయి\", \"…బట్టి sort చేయి\".",
+     "Lambda ఆ ప్రవర్తనను అక్కడే రాస్తుంది: parameters, arrow ->, తర్వాత ఫలితం.",
+     "name -> name.isEmpty() ఒక parameter తీసుకుంటుంది; (a, b) -> a - b రెండు తీసుకుంటుంది.",
+     "list.removeIf(m -> m < 35) fail marks తీసేస్తుంది; list.forEach(m -> System.out.println(m)) ప్రతిది print చేస్తుంది.",
+     "Comparator.comparing(Student::getName) ఒక field బట్టి sort చేస్తుంది; :: అంటే method reference, చిన్న lambda."
+    ],
+    "hi": [
+     "कुछ methods को value नहीं, थोड़ा व्यवहार चाहिए: \"जो… उन्हें हटाओ\", \"…से sort करो\"।",
+     "Lambda वह व्यवहार वहीं लिखता है: parameters, arrow ->, फिर result।",
+     "name -> name.isEmpty() एक parameter लेता है; (a, b) -> a - b दो लेता है।",
+     "list.removeIf(m -> m < 35) fail marks हटाता है; list.forEach(m -> System.out.println(m)) हर एक print करता है।",
+     "Comparator.comparing(Student::getName) एक field से sort करता है; :: method reference है, छोटा lambda।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "A lambda is a tiny rule you hand to a method."
+    ],
+    "te": [
+     "Lambda అంటే method కి ఇచ్చే చిన్న నియమం."
+    ],
+    "hi": [
+     "Lambda एक छोटा नियम है जो आप method को देते हैं।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "Sorting train names by length: names.sort((a, b) -> a.length() - b.length());"
+    ],
+    "te": [
+     "Train పేర్లను పొడవు బట్టి sort: names.sort((a, b) -> a.length() - b.length());"
+    ],
+    "hi": [
+     "Train के नाम लंबाई से sort: names.sort((a, b) -> a.length() - b.length());"
+    ]
+   },
+   "picture": "flowchart LR\n  L[\"[72, 30, 88, 20]\"] -->|\"removeIf(m -> m < 35)\"| R[\"[72, 88]\"] -->|\"sort((a, b) -> b - a)\"| S[\"[88, 72]\"]",
+   "code": {
+    "source": "import java.util.ArrayList;\nimport java.util.List;\n\npublic class Main {\n    public static void main(String[] args) {\n        List<Integer> marks = new ArrayList<>(List.of(72, 30, 88, 20));\n        marks.removeIf(m -> m < 35);\n        marks.sort((a, b) -> b - a);\n        System.out.println(marks);\n        List<String> names = new ArrayList<>(List.of(\"Sita\", \"Ravi\", \"Anu\"));\n        names.sort(String::compareTo);\n        names.forEach(n -> System.out.print(n + \" \"));\n        System.out.println();\n    }\n}",
+    "output": "[88, 72]\nAnu Ravi Sita ",
+    "notes": [
+     {
+      "line": 7,
+      "note": {
+       "en": "The lambda m -> m < 35 says which marks to remove.",
+       "te": "m -> m < 35 lambda ఏ marks తీసేయాలో చెబుతుంది.",
+       "hi": "m -> m < 35 lambda बताता है कौन-से marks हटाने हैं।"
+      }
+     },
+     {
+      "line": 8,
+      "note": {
+       "en": "Two parameters: b - a sorts from high to low.",
+       "te": "రెండు parameters: b - a ఎక్కువ నుంచి తక్కువకు sort.",
+       "hi": "दो parameters: b - a ऊँचे से नीचे sort करता है।"
+      }
+     },
+     {
+      "line": 11,
+      "note": {
+       "en": "A method reference: sort in alphabetical order.",
+       "te": "Method reference: అక్షర క్రమంలో sort.",
+       "hi": "Method reference: वर्णमाला के क्रम में sort।"
+      }
+     },
+     {
+      "line": 12,
+      "note": {
+       "en": "forEach runs the lambda for every name.",
+       "te": "forEach ప్రతి పేరుకు lambda నడుపుతుంది.",
+       "hi": "forEach हर नाम के लिए lambda चलाता है।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "int limit = 35;\nlimit = 40;\nmarks.removeIf(m -> m < limit);",
+     "fix": {
+      "en": "A lambda can only use local variables that never change. Do not reassign limit.",
+      "te": "Lambda మారని local variables మాత్రమే వాడగలదు. limit ని మళ్లీ assign చేయకండి.",
+      "hi": "Lambda सिर्फ़ न बदलने वाले local variables इस्तेमाल कर सकता है। limit को दोबारा assign मत कीजिए।"
+     }
+    },
+    {
+     "wrong": "List.of(1, 2).removeIf(x -> x > 1);",
+     "fix": {
+      "en": "List.of makes an unchangeable list (UnsupportedOperationException). Copy it: new ArrayList<>(List.of(...)).",
+      "te": "List.of మార్చలేని list చేస్తుంది (UnsupportedOperationException). Copy చేయండి: new ArrayList<>(List.of(...)).",
+      "hi": "List.of न बदलने वाली list बनाता है (UnsupportedOperationException)। Copy कीजिए: new ArrayList<>(List.of(...))।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "x -> x * 2 given 5 returns…",
+      "te": "x -> x * 2 కి 5 ఇస్తే…",
+      "hi": "x -> x * 2 को 5 दें तो…"
+     },
+     "options": [
+      "5",
+      "10",
+      "25"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "5 × 2.",
+      "te": "5 × 2.",
+      "hi": "5 × 2।"
+     }
+    },
+    {
+     "q": {
+      "en": "removeIf(n -> n < 0) removes…",
+      "te": "removeIf(n -> n < 0) తీసేది…",
+      "hi": "removeIf(n -> n < 0) हटाता है…"
+     },
+     "options": [
+      {
+       "en": "negative numbers",
+       "te": "ప్రతికూల numbers",
+       "hi": "negative numbers"
+      },
+      {
+       "en": "all numbers",
+       "te": "అన్ని numbers",
+       "hi": "सारे numbers"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Those matching the rule.",
+      "te": "నియమానికి సరిపోయేవి.",
+      "hi": "नियम से मेल खाने वाले।"
+     }
+    },
+    {
+     "q": {
+      "en": "String::length is…",
+      "te": "String::length అంటే…",
+      "hi": "String::length है…"
+     },
+     "options": [
+      {
+       "en": "a method reference",
+       "te": "Method reference",
+       "hi": "method reference"
+      },
+      {
+       "en": "a field",
+       "te": "Field",
+       "hi": "field"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "A short lambda.",
+      "te": "చిన్న lambda.",
+      "hi": "छोटा lambda।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write static List<String> tidy(List<String> names) that returns a new list without empty names, sorted by length (shortest first), using removeIf and sort with lambdas.",
+     "te": "removeIf, sort, lambdas వాడి ఖాళీ పేర్లు లేని, పొడవు బట్టి (చిన్నది ముందు) sort అయిన కొత్త list return చేసే static List<String> tidy(List<String> names) రాయండి.",
+     "hi": "removeIf और sort को lambdas के साथ इस्तेमाल करके static List<String> tidy(List<String> names) लिखिए जो ख़ाली नामों के बिना, लंबाई से (सबसे छोटा पहले) sort की हुई नई list return करे।"
+    },
+    "starter": "import java.util.ArrayList;\nimport java.util.List;\n\npublic class Main {\n    static List<String> tidy(List<String> names) {\n        return names;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(tidy(List.of(\"Sita\", \"\", \"Anu\", \"Ravindra\")));\n    }\n}\n",
+    "tests": [
+     {
+      "name": "copies the list",
+      "pattern": "new\\s+ArrayList\\s*<\\s*>?\\s*\\(\\s*names\\s*\\)"
+     },
+     {
+      "name": "removeIf with a lambda",
+      "pattern": "removeIf\\s*\\(\\s*\\w+\\s*->"
+     },
+     {
+      "name": "sorts with a lambda or comparator",
+      "pattern": "sort\\s*\\(\\s*(\\(\\s*\\w+\\s*,\\s*\\w+\\s*\\)\\s*->|Comparator\\.)"
+     },
+     {
+      "name": "sorts by length",
+      "pattern": "length\\s*\\(\\s*\\)|String::length",
+      "expected": "by length",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "List<String> out = new ArrayList<>(names);",
+      "te": "List<String> out = new ArrayList<>(names);",
+      "hi": "List<String> out = new ArrayList<>(names);"
+     },
+     {
+      "en": "out.removeIf(n -> n.isEmpty());",
+      "te": "out.removeIf(n -> n.isEmpty());",
+      "hi": "out.removeIf(n -> n.isEmpty());"
+     },
+     {
+      "en": "out.sort((a, b) -> a.length() - b.length()); return out;",
+      "te": "out.sort((a, b) -> a.length() - b.length()); return out;",
+      "hi": "out.sort((a, b) -> a.length() - b.length()); return out;"
+     }
+    ],
+    "solution": "import java.util.ArrayList;\nimport java.util.List;\n\npublic class Main {\n    static List<String> tidy(List<String> names) {\n        List<String> out = new ArrayList<>(names);\n        out.removeIf(n -> n.isEmpty());\n        out.sort((a, b) -> a.length() - b.length());\n        return out;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(tidy(List.of(\"Sita\", \"\", \"Anu\", \"Ravindra\")));\n    }\n}",
+    "output": "[Anu, Sita, Ravindra]"
+   },
+   "cheat": {
+    "en": [
+     "x -> expr · (a, b) -> expr · x -> { statements; return v; }",
+     "list.forEach · list.removeIf · list.sort((a, b) -> ...)",
+     "Comparator.comparing(T::getX) · Type::method"
+    ],
+    "te": [
+     "x -> expr · (a, b) -> expr · x -> { statements; return v; }",
+     "list.forEach · list.removeIf · list.sort((a, b) -> ...)",
+     "Comparator.comparing(T::getX) · Type::method"
+    ],
+    "hi": [
+     "x -> expr · (a, b) -> expr · x -> { statements; return v; }",
+     "list.forEach · list.removeIf · list.sort((a, b) -> ...)",
+     "Comparator.comparing(T::getX) · Type::method"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A job portal wants to remove candidates below 50 and sort the rest by score. Explain how lambdas with removeIf and sort do this.",
+      "te": "Job portal 50 కంటే తక్కువ candidates ని తీసేసి మిగతావారిని score బట్టి sort చేయాలనుకుంటుంది. removeIf, sort తో lambdas దీన్ని ఎలా చేస్తాయో వివరించండి.",
+      "hi": "Job portal 50 से कम वाले candidates हटाकर बाक़ी को score से sort करना चाहता है। removeIf और sort के साथ lambdas यह कैसे करते हैं, समझाइए।"
+     },
+     {
+      "en": "Explain what x -> x * 2 means, part by part.",
+      "te": "x -> x * 2 అర్థాన్ని భాగం భాగంగా వివరించండి.",
+      "hi": "x -> x * 2 का मतलब हिस्सा-हिस्सा समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "lambda",
+      "->"
+     ],
+     [
+      "removeif",
+      "sort",
+      "foreach"
+     ],
+     [
+      "parameter",
+      "comparator",
+      "rule",
+      "function"
+     ]
+    ],
+    "challenge": {
+     "en": "Say what goes on each side of the arrow in a lambda.",
+     "te": "Lambda లో arrow కి ఇరువైపులా ఏం ఉంటుందో చెప్పండి.",
+     "hi": "Lambda में arrow के दोनों तरफ़ क्या होता है, बताइए।"
+    }
+   }
+  },
+  {
+   "id": "jv-m8-l2",
+   "n": 2,
+   "minutes": 20,
+   "title": {
+    "en": "Streams",
+    "te": "Streams",
+    "hi": "Streams"
+   },
+   "oneLine": {
+    "en": "A stream processes a collection step by step: filter keeps some items, map changes each one, and collect, sum or count gives the result.",
+    "te": "Stream ఒక collection ని step by step ప్రాసెస్ చేస్తుంది: filter కొన్నింటిని ఉంచుతుంది, map ప్రతిదాన్ని మారుస్తుంది, collect, sum, count ఫలితం ఇస్తాయి.",
+    "hi": "Stream किसी collection को step by step process करता है: filter कुछ items रखता है, map हर एक बदलता है, और collect, sum या count result देते हैं।"
+   },
+   "useCase": {
+    "en": "An e-commerce report finds the total of all orders above Rs 500 in one readable line using a stream.",
+    "te": "E-commerce report Rs 500 పైబడిన అన్ని orders మొత్తాన్ని stream తో ఒక్క చదవగలిగే line లో కనుక్కుంటుంది.",
+    "hi": "E-commerce report Rs 500 से ऊपर के सभी orders का जोड़ stream से एक पढ़ने लायक़ line में निकालता है।"
+   },
+   "explain": {
+    "en": [
+     "list.stream() starts a pipeline. Nothing changes the original list.",
+     "filter(x -> condition) keeps only items that pass.",
+     "map(x -> newValue) turns each item into something else, like a name into upper case.",
+     "Finish with a terminal step: collect(Collectors.toList()), count(), or mapToInt(...).sum() and average().",
+     "Read it like a sentence: \"from orders, keep those over 500, take the amounts, add them\"."
+    ],
+    "te": [
+     "list.stream() ఒక pipeline మొదలుపెడుతుంది. అసలు list మారదు.",
+     "filter(x -> condition) పాసయ్యే items ని మాత్రమే ఉంచుతుంది.",
+     "map(x -> newValue) ప్రతి item ని వేరే దానిగా మారుస్తుంది, పేరును upper case చేసినట్లు.",
+     "చివరి step తో ముగించండి: collect(Collectors.toList()), count(), లేదా mapToInt(...).sum(), average().",
+     "దాన్ని వాక్యంలా చదవండి: \"orders నుంచి 500 పైబడినవి ఉంచు, amounts తీసుకో, కలుపు\"."
+    ],
+    "hi": [
+     "list.stream() एक pipeline शुरू करता है। असली list नहीं बदलती।",
+     "filter(x -> condition) सिर्फ़ पास होने वाले items रखता है।",
+     "map(x -> newValue) हर item को कुछ और बनाता है, जैसे नाम को upper case।",
+     "आख़िरी step से ख़त्म कीजिए: collect(Collectors.toList()), count(), या mapToInt(...).sum() और average()।",
+     "इसे वाक्य की तरह पढ़िए: \"orders में से 500 से ऊपर वाले रखो, amounts लो, जोड़ो\"।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "A stream is a conveyor belt: filter removes, map changes, the end collects."
+    ],
+    "te": [
+     "Stream అంటే conveyor belt: filter తీసేస్తుంది, map మారుస్తుంది, చివర సేకరిస్తుంది."
+    ],
+    "hi": [
+     "Stream एक conveyor belt है: filter हटाता है, map बदलता है, आख़िर में इकट्ठा होता है।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "Names of students who passed, in capitals: students.stream().filter(s -> s.marks >= 35).map(s -> s.name.toUpperCase()).collect(Collectors.toList())"
+    ],
+    "te": [
+     "Pass అయిన విద్యార్థుల పేర్లు capitals లో: students.stream().filter(s -> s.marks >= 35).map(s -> s.name.toUpperCase()).collect(Collectors.toList())"
+    ],
+    "hi": [
+     "Pass हुए छात्रों के नाम capitals में: students.stream().filter(s -> s.marks >= 35).map(s -> s.name.toUpperCase()).collect(Collectors.toList())"
+    ]
+   },
+   "picture": "flowchart LR\n  O[\"orders: 300, 650, 900, 120\"] -->|\"filter > 500\"| F[\"650, 900\"] -->|\"sum\"| S[\"1550\"]",
+   "code": {
+    "source": "import java.util.List;\nimport java.util.stream.Collectors;\n\npublic class Main {\n    public static void main(String[] args) {\n        List<Integer> orders = List.of(300, 650, 900, 120);\n        int bigTotal = orders.stream()\n            .filter(o -> o > 500)\n            .mapToInt(o -> o)\n            .sum();\n        System.out.println(\"Big orders total: \" + bigTotal);\n\n        List<String> names = List.of(\"ravi\", \"sita\", \"anu\");\n        List<String> shout = names.stream()\n            .filter(n -> n.length() > 3)\n            .map(n -> n.toUpperCase())\n            .collect(Collectors.toList());\n        System.out.println(shout);\n        System.out.println(orders.stream().filter(o -> o < 500).count());\n    }\n}",
+    "output": "Big orders total: 1550\n[RAVI, SITA]\n2",
+    "notes": [
+     {
+      "line": 7,
+      "note": {
+       "en": "stream() starts the pipeline.",
+       "te": "stream() pipeline మొదలుపెడుతుంది.",
+       "hi": "stream() pipeline शुरू करता है।"
+      }
+     },
+     {
+      "line": 8,
+      "note": {
+       "en": "filter keeps orders above 500.",
+       "te": "filter 500 పైబడిన orders ఉంచుతుంది.",
+       "hi": "filter 500 से ऊपर के orders रखता है।"
+      }
+     },
+     {
+      "line": 9,
+      "note": {
+       "en": "mapToInt gives plain ints so we can sum.",
+       "te": "mapToInt సాధారణ ints ఇస్తుంది, sum చేయవచ్చు.",
+       "hi": "mapToInt सादे ints देता है ताकि sum कर सकें।"
+      }
+     },
+     {
+      "line": 16,
+      "note": {
+       "en": "map turns each name into capitals.",
+       "te": "map ప్రతి పేరును capitals గా మారుస్తుంది.",
+       "hi": "map हर नाम को capitals में बदलता है।"
+      }
+     },
+     {
+      "line": 17,
+      "note": {
+       "en": "collect gathers the results into a List.",
+       "te": "collect ఫలితాలను List లో సేకరిస్తుంది.",
+       "hi": "collect results को List में इकट्ठा करता है।"
+      }
+     },
+     {
+      "line": 19,
+      "note": {
+       "en": "count gives how many passed the filter.",
+       "te": "Filter పాస్ అయినవి ఎన్నో count చెబుతుంది.",
+       "hi": "count बताता है कितने filter से पास हुए।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "names.stream().map(n -> n.toUpperCase());\nSystem.out.println(names);",
+     "fix": {
+      "en": "Streams do not change the original list, and nothing runs without a terminal step. Collect the result.",
+      "te": "Streams అసలు list ని మార్చవు, terminal step లేకపోతే ఏమీ నడవదు. ఫలితాన్ని collect చేయండి.",
+      "hi": "Streams असली list नहीं बदलते, और terminal step के बिना कुछ नहीं चलता। Result collect कीजिए।"
+     }
+    },
+    {
+     "wrong": "Stream<Integer> s = list.stream();\ns.count();\ns.count();",
+     "fix": {
+      "en": "A stream can be used only once. Call list.stream() again for a new pipeline.",
+      "te": "Stream ని ఒక్కసారే వాడవచ్చు. కొత్త pipeline కి మళ్లీ list.stream() call చేయండి.",
+      "hi": "Stream एक ही बार इस्तेमाल होता है। नई pipeline के लिए फिर list.stream() call कीजिए।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "filter(x -> x > 10) keeps…",
+      "te": "filter(x -> x > 10) ఉంచేది…",
+      "hi": "filter(x -> x > 10) रखता है…"
+     },
+     "options": [
+      {
+       "en": "items above 10",
+       "te": "10 పైబడినవి",
+       "hi": "10 से ऊपर वाले"
+      },
+      {
+       "en": "the first 10 items",
+       "te": "మొదటి 10 items",
+       "hi": "पहले 10 items"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Those that pass.",
+      "te": "పాస్ అయ్యేవి.",
+      "hi": "जो पास हों।"
+     }
+    },
+    {
+     "q": {
+      "en": "map(s -> s.length()) turns names into…",
+      "te": "map(s -> s.length()) పేర్లను మార్చేది…",
+      "hi": "map(s -> s.length()) नामों को बदलता है…"
+     },
+     "options": [
+      {
+       "en": "their lengths",
+       "te": "వాటి పొడవులు",
+       "hi": "उनकी लंबाई में"
+      },
+      {
+       "en": "upper case",
+       "te": "Upper case",
+       "hi": "upper case में"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Lengths.",
+      "te": "పొడవులు.",
+      "hi": "लंबाई।"
+     }
+    },
+    {
+     "q": {
+      "en": "Does a stream change the original list?",
+      "te": "Stream అసలు list ని మారుస్తుందా?",
+      "hi": "क्या stream असली list बदलता है?"
+     },
+     "options": [
+      {
+       "en": "Yes",
+       "te": "అవును",
+       "hi": "हाँ"
+      },
+      {
+       "en": "No",
+       "te": "లేదు",
+       "hi": "नहीं"
+      }
+     ],
+     "answer": 1,
+     "why": {
+      "en": "It builds a new result.",
+      "te": "కొత్త ఫలితం తయారుచేస్తుంది.",
+      "hi": "नया result बनाता है।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write static double averageOfPassed(List<Integer> marks) that returns the average of marks that are 35 or more, using a stream (filter, mapToInt, average). Return 0 if none passed.",
+     "te": "35 లేదా ఎక్కువ ఉన్న marks సగటును stream (filter, mapToInt, average) తో return చేసే static double averageOfPassed(List<Integer> marks) రాయండి. ఎవరూ pass కాకపోతే 0 return చేయండి.",
+     "hi": "static double averageOfPassed(List<Integer> marks) लिखिए जो stream (filter, mapToInt, average) से 35 या ज़्यादा वाले marks का औसत return करे। कोई पास न हो तो 0 return कीजिए।"
+    },
+    "starter": "import java.util.List;\n\npublic class Main {\n    static double averageOfPassed(List<Integer> marks) {\n        return 0;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(averageOfPassed(List.of(20, 60, 80, 30)));\n    }\n}\n",
+    "tests": [
+     {
+      "name": "uses a stream",
+      "pattern": "\\.stream\\s*\\(\\s*\\)"
+     },
+     {
+      "name": "filters 35 and above",
+      "pattern": "filter\\s*\\(\\s*\\w+\\s*->\\s*\\w+\\s*>=\\s*35\\s*\\)"
+     },
+     {
+      "name": "averages",
+      "pattern": "\\.average\\s*\\(\\s*\\)"
+     },
+     {
+      "name": "handles no passes",
+      "pattern": "orElse\\s*\\(\\s*0",
+      "expected": "orElse(0)",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "marks.stream().filter(m -> m >= 35)",
+      "te": "marks.stream().filter(m -> m >= 35)",
+      "hi": "marks.stream().filter(m -> m >= 35)"
+     },
+     {
+      "en": ".mapToInt(m -> m).average()",
+      "te": ".mapToInt(m -> m).average()",
+      "hi": ".mapToInt(m -> m).average()"
+     },
+     {
+      "en": "average() gives an OptionalDouble: finish with .orElse(0)",
+      "te": "average() OptionalDouble ఇస్తుంది: .orElse(0) తో ముగించండి",
+      "hi": "average() OptionalDouble देता है: .orElse(0) से ख़त्म कीजिए"
+     }
+    ],
+    "solution": "import java.util.List;\n\npublic class Main {\n    static double averageOfPassed(List<Integer> marks) {\n        return marks.stream()\n            .filter(m -> m >= 35)\n            .mapToInt(m -> m)\n            .average()\n            .orElse(0);\n    }\n\n    public static void main(String[] args) {\n        System.out.println(averageOfPassed(List.of(20, 60, 80, 30)) + \" \" + averageOfPassed(List.of(10)));\n    }\n}",
+    "output": "70.0 0.0"
+   },
+   "cheat": {
+    "en": [
+     "list.stream().filter(x -> ...).map(x -> ...).collect(Collectors.toList())",
+     "mapToInt(x -> x).sum() / .average().orElse(0) · count()",
+     "Original unchanged · one use per stream"
+    ],
+    "te": [
+     "list.stream().filter(x -> ...).map(x -> ...).collect(Collectors.toList())",
+     "mapToInt(x -> x).sum() / .average().orElse(0) · count()",
+     "అసలు మారదు · ప్రతి stream ఒక్కసారే"
+    ],
+    "hi": [
+     "list.stream().filter(x -> ...).map(x -> ...).collect(Collectors.toList())",
+     "mapToInt(x -> x).sum() / .average().orElse(0) · count()",
+     "असली नहीं बदलता · हर stream एक बार"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "An online shop wants the total of all orders above Rs 500. Explain, step by step, how a stream with filter and sum gets it.",
+      "te": "Online shop Rs 500 పైబడిన అన్ని orders మొత్తం కావాలనుకుంటుంది. filter, sum ఉన్న stream దాన్ని ఎలా పొందుతుందో step by step వివరించండి.",
+      "hi": "Online shop को Rs 500 से ऊपर के सभी orders का जोड़ चाहिए। filter और sum वाला stream इसे कैसे निकालता है, step by step समझाइए।"
+     },
+     {
+      "en": "Explain the difference between filter and map with an example.",
+      "te": "filter, map మధ్య తేడా ఉదాహరణతో వివరించండి.",
+      "hi": "filter और map का फ़र्क़ उदाहरण से समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "stream"
+     ],
+     [
+      "filter",
+      "map"
+     ],
+     [
+      "sum",
+      "collect",
+      "count",
+      "average"
+     ]
+    ],
+    "challenge": {
+     "en": "Say whether a stream changes the original list.",
+     "te": "Stream అసలు list ని మారుస్తుందో లేదో చెప్పండి.",
+     "hi": "Stream असली list बदलता है या नहीं, बताइए।"
+    }
+   }
+  }
+ ],
+ "test": {
+  "pass": 4,
+  "questions": [
+   {
+    "q": {
+     "en": "Which is a lambda?",
+     "te": "Lambda ఏది?",
+     "hi": "Lambda कौन-सा है?"
+    },
+    "options": [
+     "x -> x + 1",
+     "int x = 1;"
+    ],
+    "answer": 0,
+    "why": {
+     "en": "Parameter, arrow, result.",
+     "te": "Parameter, arrow, ఫలితం.",
+     "hi": "Parameter, arrow, result।"
+    }
+   },
+   {
+    "q": {
+     "en": "list.removeIf(x -> x == 0) removes…",
+     "te": "list.removeIf(x -> x == 0) తీసేది…",
+     "hi": "list.removeIf(x -> x == 0) हटाता है…"
+    },
+    "options": [
+     {
+      "en": "zeros",
+      "te": "సున్నాలు",
+      "hi": "शून्य"
+     },
+     {
+      "en": "everything",
+      "te": "అన్నీ",
+      "hi": "सब कुछ"
+     }
+    ],
+    "answer": 0,
+    "why": {
+     "en": "Zeros.",
+     "te": "సున్నాలు.",
+     "hi": "शून्य।"
+    }
+   },
+   {
+    "q": {
+     "en": "Which keeps only some items?",
+     "te": "కొన్నింటిని మాత్రమే ఉంచేది?",
+     "hi": "सिर्फ़ कुछ items कौन रखता है?"
+    },
+    "options": [
+     "map",
+     "filter"
+    ],
+    "answer": 1,
+    "why": {
+     "en": "filter.",
+     "te": "filter.",
+     "hi": "filter।"
+    }
+   },
+   {
+    "q": {
+     "en": "Which changes each item?",
+     "te": "ప్రతి item ని మార్చేది?",
+     "hi": "हर item कौन बदलता है?"
+    },
+    "options": [
+     "map",
+     "count"
+    ],
+    "answer": 0,
+    "why": {
+     "en": "map.",
+     "te": "map.",
+     "hi": "map।"
+    }
+   },
+   {
+    "q": {
+     "en": "A stream without a terminal step…",
+     "te": "Terminal step లేని stream…",
+     "hi": "Terminal step के बिना stream…"
+    },
+    "options": [
+     {
+      "en": "does nothing",
+      "te": "ఏమీ చేయదు",
+      "hi": "कुछ नहीं करता"
+     },
+     {
+      "en": "prints the list",
+      "te": "List print చేస్తుంది",
+      "hi": "list print करता है"
+     }
+    ],
+    "answer": 0,
+    "why": {
+     "en": "It needs collect, sum, count…",
+     "te": "collect, sum, count… కావాలి.",
+     "hi": "उसे collect, sum, count… चाहिए।"
+    }
+   }
+  ]
+ },
+ "project": {
+  "title": {
+   "en": "Placement shortlist",
+   "te": "Placement shortlist",
+   "hi": "Placement shortlist"
+  },
+  "prompt": {
+   "en": "Given record Candidate(String name, String branch, int score), write static List<String> shortlist(List<Candidate> all, String branch, int minScore) that returns the names of candidates from that branch with score at least minScore, highest score first, using one stream (filter, sorted, map, collect).",
+   "te": "record Candidate(String name, String branch, int score) ఇచ్చాం; ఆ branch నుంచి కనీసం minScore ఉన్న candidates పేర్లను, ఎక్కువ score ముందు, ఒక్క stream (filter, sorted, map, collect) తో return చేసే static List<String> shortlist(List<Candidate> all, String branch, int minScore) రాయండి.",
+   "hi": "record Candidate(String name, String branch, int score) दिया है; static List<String> shortlist(List<Candidate> all, String branch, int minScore) लिखिए जो उस branch के कम से कम minScore वाले candidates के नाम, सबसे ज़्यादा score पहले, एक stream (filter, sorted, map, collect) से return करे।"
+  },
+  "starter": "import java.util.List;\n\nrecord Candidate(String name, String branch, int score) { }\n\npublic class Main {\n    static List<String> shortlist(List<Candidate> all, String branch, int minScore) {\n        return List.of();\n    }\n\n    public static void main(String[] args) {\n        List<Candidate> all = List.of(\n            new Candidate(\"Ravi\", \"CSE\", 78),\n            new Candidate(\"Sita\", \"CSE\", 91),\n            new Candidate(\"Anu\", \"ECE\", 88),\n            new Candidate(\"Kiran\", \"CSE\", 55));\n        System.out.println(shortlist(all, \"CSE\", 60));\n    }\n}\n",
+  "tests": [
+   {
+    "name": "uses a stream",
+    "pattern": "all\\.stream\\s*\\(\\s*\\)"
+   },
+   {
+    "name": "filters by branch with equals",
+    "pattern": "filter\\s*\\([\\s\\S]*branch\\s*\\(\\s*\\)\\s*\\.equals\\s*\\(\\s*branch\\s*\\)|filter\\s*\\([\\s\\S]*branch\\.equals\\s*\\("
+   },
+   {
+    "name": "filters by score",
+    "pattern": "score\\s*\\(\\s*\\)\\s*>=\\s*minScore"
+   },
+   {
+    "name": "sorts highest first",
+    "pattern": "sorted\\s*\\("
+   },
+   {
+    "name": "maps to names and collects",
+    "pattern": "map\\s*\\(\\s*(\\w+\\s*->\\s*\\w+\\.name\\s*\\(\\s*\\)|Candidate::name)\\s*\\)[\\s\\S]*(collect|toList)",
+    "expected": "map(Candidate::name) ... toList()",
+    "hidden": true
+   }
+  ],
+  "hints": [
+   {
+    "en": "all.stream().filter(c -> c.branch().equals(branch) && c.score() >= minScore)",
+    "te": "all.stream().filter(c -> c.branch().equals(branch) && c.score() >= minScore)",
+    "hi": "all.stream().filter(c -> c.branch().equals(branch) && c.score() >= minScore)"
+   },
+   {
+    "en": ".sorted((a, b) -> b.score() - a.score())",
+    "te": ".sorted((a, b) -> b.score() - a.score())",
+    "hi": ".sorted((a, b) -> b.score() - a.score())"
+   },
+   {
+    "en": ".map(Candidate::name).collect(Collectors.toList())",
+    "te": ".map(Candidate::name).collect(Collectors.toList())",
+    "hi": ".map(Candidate::name).collect(Collectors.toList())"
+   }
+  ],
+  "solution": "import java.util.List;\nimport java.util.stream.Collectors;\n\nrecord Candidate(String name, String branch, int score) { }\n\npublic class Main {\n    static List<String> shortlist(List<Candidate> all, String branch, int minScore) {\n        return all.stream()\n            .filter(c -> c.branch().equals(branch) && c.score() >= minScore)\n            .sorted((a, b) -> b.score() - a.score())\n            .map(Candidate::name)\n            .collect(Collectors.toList());\n    }\n\n    public static void main(String[] args) {\n        List<Candidate> all = List.of(\n            new Candidate(\"Ravi\", \"CSE\", 78),\n            new Candidate(\"Sita\", \"CSE\", 91),\n            new Candidate(\"Anu\", \"ECE\", 88),\n            new Candidate(\"Kiran\", \"CSE\", 55));\n        System.out.println(shortlist(all, \"CSE\", 60));\n    }\n}",
+  "output": "[Sita, Ravi]"
+ }
+}

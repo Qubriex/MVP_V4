@@ -1,0 +1,1596 @@
+{
+ "id": "py-m4",
+ "n": 4,
+ "skill": "python-data-structures",
+ "title": {
+  "en": "Data Structures",
+  "te": "Data Structures",
+  "hi": "Data Structures"
+ },
+ "summary": {
+  "en": "Keep many values together: lists, tuples, sets, dictionaries, and working with text.",
+  "te": "చాలా values కలిపి ఉంచడం: lists, tuples, sets, dictionaries, text తో పని.",
+  "hi": "कई values साथ रखना: lists, tuples, sets, dictionaries, और text के साथ काम।"
+ },
+ "lessons": [
+  {
+   "id": "py-m4-l1",
+   "n": 1,
+   "minutes": 20,
+   "title": {
+    "en": "Lists",
+    "te": "Lists",
+    "hi": "Lists"
+   },
+   "oneLine": {
+    "en": "A list keeps many values in order, in square brackets, and you can add, change or remove items.",
+    "te": "List చాలా values ని క్రమంలో square brackets లో ఉంచుతుంది; items జోడించవచ్చు, మార్చవచ్చు, తీసేయవచ్చు.",
+    "hi": "List कई values को क्रम से square brackets में रखती है, और आप items जोड़, बदल या हटा सकते हैं।"
+   },
+   "useCase": {
+    "en": "A shopping cart is a list of items that grows as the customer adds products.",
+    "te": "Shopping cart అంటే customer products జోడించే కొద్దీ పెరిగే items list.",
+    "hi": "Shopping cart items की list है जो customer के products जोड़ने पर बढ़ती है।"
+   },
+   "explain": {
+    "en": [
+     "A ration list on paper has items in order: rice, dal, oil.",
+     "A Python list is the same: items = [\"rice\", \"dal\", \"oil\"].",
+     "Each item has a position called an index. The first is 0, not 1.",
+     "items[0] is rice. items[-1] is the last item.",
+     "append adds to the end, remove takes an item out, and len tells you how many there are."
+    ],
+    "te": [
+     "కాగితంపై ration list లో items క్రమంలో ఉంటాయి: బియ్యం, పప్పు, నూనె.",
+     "Python list కూడా అంతే: items = [\"rice\", \"dal\", \"oil\"].",
+     "ప్రతి item కి index అనే స్థానం ఉంటుంది. మొదటిది 0, 1 కాదు.",
+     "items[0] అంటే rice. items[-1] అంటే చివరి item.",
+     "append చివర జోడిస్తుంది, remove ఒక item తీసేస్తుంది, len ఎన్ని ఉన్నాయో చెబుతుంది."
+    ],
+    "hi": [
+     "काग़ज़ पर ration की list में items क्रम से होते हैं: चावल, दाल, तेल।",
+     "Python list भी ऐसी ही है: items = [\"rice\", \"dal\", \"oil\"]।",
+     "हर item की जगह को index कहते हैं। पहला 0 है, 1 नहीं।",
+     "items[0] है rice। items[-1] आख़िरी item है।",
+     "append आख़िर में जोड़ता है, remove एक item हटाता है, और len बताता है कितने हैं।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "A list is a row of boxes, counted from 0."
+    ],
+    "te": [
+     "List అంటే 0 నుంచి లెక్కించే డబ్బాల వరుస."
+    ],
+    "hi": [
+     "List 0 से गिने जाने वाले डिब्बों की कतार है।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "Cricket scores per over: runs = [4, 10, 2]; runs.append(7); sum(runs) is 23."
+    ],
+    "te": [
+     "ప్రతి over cricket scores: runs = [4, 10, 2]; runs.append(7); sum(runs) 23."
+    ],
+    "hi": [
+     "हर over के cricket scores: runs = [4, 10, 2]; runs.append(7); sum(runs) 23 है।"
+    ]
+   },
+   "picture": "flowchart LR\n  I0[\"0: rice\"] --- I1[\"1: dal\"] --- I2[\"2: oil\"] --- N[\"append: sugar → 3\"]",
+   "code": {
+    "source": "items = [\"rice\", \"dal\", \"oil\"]\nprint(items[0], items[-1])\nitems.append(\"sugar\")\nitems.remove(\"dal\")\nprint(items, len(items))",
+    "output": "rice oil\n['rice', 'oil', 'sugar'] 3",
+    "notes": [
+     {
+      "line": 1,
+      "note": {
+       "en": "Square brackets make a list of three items.",
+       "te": "Square brackets మూడు items ఉన్న list చేస్తాయి.",
+       "hi": "Square brackets तीन items की list बनाते हैं।"
+      }
+     },
+     {
+      "line": 2,
+      "note": {
+       "en": "Index 0 is the first item; -1 is the last.",
+       "te": "Index 0 మొదటి item; -1 చివరిది.",
+       "hi": "Index 0 पहला item है; -1 आख़िरी।"
+      }
+     },
+     {
+      "line": 3,
+      "note": {
+       "en": "append adds sugar at the end.",
+       "te": "append చివర sugar జోడిస్తుంది.",
+       "hi": "append आख़िर में sugar जोड़ता है।"
+      }
+     },
+     {
+      "line": 4,
+      "note": {
+       "en": "remove takes dal out.",
+       "te": "remove dal ని తీసేస్తుంది.",
+       "hi": "remove dal को हटाता है।"
+      }
+     },
+     {
+      "line": 5,
+      "note": {
+       "en": "len counts the items: 3.",
+       "te": "len items లెక్కిస్తుంది: 3.",
+       "hi": "len items गिनता है: 3।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "items = [\"a\", \"b\", \"c\"]\nprint(items[3])",
+     "fix": {
+      "en": "Three items have indexes 0, 1 and 2. items[3] gives IndexError.",
+      "te": "మూడు items కి indexes 0, 1, 2. items[3] IndexError ఇస్తుంది.",
+      "hi": "तीन items के index 0, 1 और 2 हैं। items[3] IndexError देता है।"
+     }
+    },
+    {
+     "wrong": "items.append(\"x\", \"y\")",
+     "fix": {
+      "en": "append adds one item. Call it twice, or use extend([\"x\", \"y\"]).",
+      "te": "append ఒక్క item జోడిస్తుంది. రెండుసార్లు call చేయండి, లేదా extend([\"x\", \"y\"]) వాడండి.",
+      "hi": "append एक item जोड़ता है। दो बार call कीजिए, या extend([\"x\", \"y\"]) लिखिए।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "nums = [5, 8, 2]\nWhat is nums[1]?",
+      "te": "nums = [5, 8, 2]\nnums[1] ఎంత?",
+      "hi": "nums = [5, 8, 2]\nnums[1] क्या है?"
+     },
+     "options": [
+      "5",
+      "8",
+      "2"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Index 1 is the second item.",
+      "te": "Index 1 రెండో item.",
+      "hi": "Index 1 दूसरा item है।"
+     }
+    },
+    {
+     "q": {
+      "en": "Which adds an item to the end?",
+      "te": "చివర item జోడించేది ఏది?",
+      "hi": "आख़िर में item कौन जोड़ता है?"
+     },
+     "options": [
+      "add()",
+      "append()",
+      "push()"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "append adds at the end.",
+      "te": "append చివర జోడిస్తుంది.",
+      "hi": "append आख़िर में जोड़ता है।"
+     }
+    },
+    {
+     "q": {
+      "en": "len([\"a\", \"b\"]) is…",
+      "te": "len([\"a\", \"b\"]) ఎంత?",
+      "hi": "len([\"a\", \"b\"]) क्या है?"
+     },
+     "options": [
+      "1",
+      "2",
+      "3"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "It counts two items.",
+      "te": "రెండు items లెక్కిస్తుంది.",
+      "hi": "यह दो items गिनता है।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write a function top_three(scores) that returns the three highest scores, highest first. Hint: sorted(scores, reverse=True).",
+     "te": "top_three(scores) function రాయండి: అత్యధిక మూడు scores ని, ఎక్కువది ముందు, return చేయాలి. సూచన: sorted(scores, reverse=True).",
+     "hi": "top_three(scores) function लिखिए जो सबसे ज़्यादा तीन scores, सबसे बड़ा पहले, return करे। संकेत: sorted(scores, reverse=True)।"
+    },
+    "starter": "def top_three(scores):\n    pass\n",
+    "tests": [
+     {
+      "name": "top_three([50, 90, 70, 80])",
+      "call": "top_three([50, 90, 70, 80])",
+      "expected": "[90, 80, 70]"
+     },
+     {
+      "name": "exactly three",
+      "call": "top_three([1, 3, 2])",
+      "expected": "[3, 2, 1]"
+     },
+     {
+      "name": "does not change the list",
+      "call": "(lambda s: (top_three(s), s)[1])([5, 1, 9, 7])",
+      "expected": "[5, 1, 9, 7]",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "sorted makes a new sorted list.",
+      "te": "sorted కొత్త sorted list చేస్తుంది.",
+      "hi": "sorted नई sorted list बनाता है।"
+     },
+     {
+      "en": "reverse=True puts the biggest first.",
+      "te": "reverse=True పెద్దది ముందు పెడుతుంది.",
+      "hi": "reverse=True सबसे बड़ा पहले रखता है।"
+     },
+     {
+      "en": "Take the first three with [:3]: return sorted(scores, reverse=True)[:3]",
+      "te": "మొదటి మూడు [:3] తో: return sorted(scores, reverse=True)[:3]",
+      "hi": "पहले तीन [:3] से: return sorted(scores, reverse=True)[:3]"
+     }
+    ],
+    "solution": "def top_three(scores):\n    return sorted(scores, reverse=True)[:3]"
+   },
+   "cheat": {
+    "en": [
+     "[a, b, c] · index from 0 · [-1] is last",
+     "append · remove · len · sorted",
+     "list[:3] takes the first three."
+    ],
+    "te": [
+     "[a, b, c] · index 0 నుంచి · [-1] చివరిది",
+     "append · remove · len · sorted",
+     "list[:3] మొదటి మూడు తీసుకుంటుంది."
+    ],
+    "hi": [
+     "[a, b, c] · index 0 से · [-1] आख़िरी",
+     "append · remove · len · sorted",
+     "list[:3] पहले तीन लेता है।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A canteen keeps today's orders in a list. Explain how to get the first and last order, add a new one and count them.",
+      "te": "Canteen ఈరోజు orders ని ఒక list లో ఉంచుతుంది. మొదటి, చివరి order ఎలా తీయాలి, కొత్తది ఎలా జోడించాలి, ఎలా లెక్కించాలో వివరించండి.",
+      "hi": "Canteen आज के orders एक list में रखती है। पहला और आख़िरी order कैसे निकालें, नया कैसे जोड़ें और गिनती कैसे करें, समझाइए।"
+     },
+     {
+      "en": "Why does a list of 5 items have no item at index 5? Explain indexing with an example.",
+      "te": "5 items ఉన్న list లో index 5 వద్ద item ఎందుకు ఉండదు? ఉదాహరణతో indexing వివరించండి.",
+      "hi": "5 items वाली list में index 5 पर कोई item क्यों नहीं होता? उदाहरण से indexing समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "index",
+      "[0]",
+      "0",
+      "ఇండెక్స్"
+     ],
+     [
+      "append",
+      "add",
+      "జోడ",
+      "जोड़"
+     ],
+     [
+      "len",
+      "count",
+      "-1",
+      "last",
+      "చివరి",
+      "आख़िरी",
+      "లెక్క",
+      "गिन"
+     ]
+    ],
+    "challenge": {
+     "en": "Say why list indexes start at 0.",
+     "te": "List indexes 0 నుంచి ఎందుకు మొదలవుతాయో చెప్పండి.",
+     "hi": "List के index 0 से क्यों शुरू होते हैं, बताइए।"
+    }
+   }
+  },
+  {
+   "id": "py-m4-l2",
+   "n": 2,
+   "minutes": 20,
+   "title": {
+    "en": "Tuples",
+    "te": "Tuples",
+    "hi": "Tuples"
+   },
+   "oneLine": {
+    "en": "A tuple is like a list in round brackets that cannot be changed after it is made.",
+    "te": "Tuple round brackets లోని list లాంటిది; తయారైన తర్వాత మార్చలేం.",
+    "hi": "Tuple round brackets वाली list जैसा है जिसे बनने के बाद बदला नहीं जा सकता।"
+   },
+   "useCase": {
+    "en": "A maps app stores a location as a tuple (latitude, longitude) so it is never changed by mistake.",
+    "te": "Maps app ఒక స్థానాన్ని (latitude, longitude) tuple గా ఉంచుతుంది, పొరపాటున మారకుండా.",
+    "hi": "Maps app जगह को (latitude, longitude) tuple के रूप में रखता है ताकि गलती से न बदले।"
+   },
+   "explain": {
+    "en": [
+     "Some facts never change: your date of birth, a train's route stations.",
+     "For such data we use a tuple: dob = (15, 8, 2005).",
+     "You read a tuple just like a list, with indexes.",
+     "But you cannot append, remove or change an item. Python stops you with an error.",
+     "You can unpack a tuple into variables in one line: day, month, year = dob."
+    ],
+    "te": [
+     "కొన్ని వాస్తవాలు ఎప్పుడూ మారవు: మీ పుట్టిన తేదీ, ఒక train route stations.",
+     "అలాంటి data కి tuple వాడతాం: dob = (15, 8, 2005).",
+     "Tuple ని list లాగే indexes తో చదువుతాం.",
+     "కానీ append, remove చేయలేం, item మార్చలేం. Python error తో ఆపుతుంది.",
+     "ఒక్క line లో tuple ని variables లోకి విప్పవచ్చు: day, month, year = dob."
+    ],
+    "hi": [
+     "कुछ बातें कभी नहीं बदलतीं: आपकी जन्मतिथि, किसी train के route के stations।",
+     "ऐसे data के लिए tuple इस्तेमाल करते हैं: dob = (15, 8, 2005)।",
+     "Tuple को list की तरह index से पढ़ते हैं।",
+     "पर append, remove या item बदल नहीं सकते। Python error से रोक देता है।",
+     "एक line में tuple को variables में खोल सकते हैं: day, month, year = dob।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "A tuple is a list you cannot change."
+    ],
+    "te": [
+     "Tuple అంటే మార్చలేని list."
+    ],
+    "hi": [
+     "Tuple एक ऐसी list है जिसे बदल नहीं सकते।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "A shop's opening hours: hours = (\"9 AM\", \"9 PM\"); open_at, close_at = hours."
+    ],
+    "te": [
+     "Shop పని వేళలు: hours = (\"9 AM\", \"9 PM\"); open_at, close_at = hours."
+    ],
+    "hi": [
+     "दुकान का समय: hours = (\"9 AM\", \"9 PM\"); open_at, close_at = hours।"
+    ]
+   },
+   "picture": "flowchart LR\n  T[\"dob = (15, 8, 2005)\"] --> R[\"read dob[0] → 15\"]\n  T -.->|\"change? no\"| X[\"TypeError\"]",
+   "code": {
+    "source": "point = (17.38, 78.48)\nprint(point[0])\nlat, lng = point\nprint(\"Lat:\", lat, \"Lng:\", lng)\nprint(len(point))",
+    "output": "17.38\nLat: 17.38 Lng: 78.48\n2",
+    "notes": [
+     {
+      "line": 1,
+      "note": {
+       "en": "Round brackets make a tuple: a fixed pair of numbers.",
+       "te": "Round brackets tuple చేస్తాయి: స్థిరమైన numbers జత.",
+       "hi": "Round brackets tuple बनाते हैं: numbers का तय जोड़ा।"
+      }
+     },
+     {
+      "line": 2,
+      "note": {
+       "en": "Read it with an index, like a list.",
+       "te": "List లాగే index తో చదవండి.",
+       "hi": "List की तरह index से पढ़िए।"
+      }
+     },
+     {
+      "line": 3,
+      "note": {
+       "en": "Unpacking puts each value into its own variable.",
+       "te": "Unpacking ప్రతి value ని దాని variable లో పెడుతుంది.",
+       "hi": "Unpacking हर value को अपने variable में रखता है।"
+      }
+     },
+     {
+      "line": 5,
+      "note": {
+       "en": "len works on tuples too.",
+       "te": "len tuples పై కూడా పనిచేస్తుంది.",
+       "hi": "len tuples पर भी चलता है।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "point = (1, 2)\npoint[0] = 5",
+     "fix": {
+      "en": "Tuples cannot be changed. Make a new tuple: point = (5, 2).",
+      "te": "Tuples మార్చలేం. కొత్త tuple చేయండి: point = (5, 2).",
+      "hi": "Tuple नहीं बदलते। नया tuple बनाइए: point = (5, 2)।"
+     }
+    },
+    {
+     "wrong": "one = (5)",
+     "fix": {
+      "en": "A single item needs a comma: (5,). Without it, it is just the number 5.",
+      "te": "ఒక్క item కి comma కావాలి: (5,). లేకపోతే అది number 5 మాత్రమే.",
+      "hi": "एक item के लिए comma चाहिए: (5,)। उसके बिना यह सिर्फ़ number 5 है।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "Which is a tuple?",
+      "te": "ఏది tuple?",
+      "hi": "कौन-सा tuple है?"
+     },
+     "options": [
+      "[1, 2]",
+      "(1, 2)",
+      "{1, 2}"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Round brackets.",
+      "te": "Round brackets.",
+      "hi": "Round brackets।"
+     }
+    },
+    {
+     "q": {
+      "en": "Can you append to a tuple?",
+      "te": "Tuple కి append చేయగలమా?",
+      "hi": "क्या tuple में append कर सकते हैं?"
+     },
+     "options": [
+      {
+       "en": "Yes",
+       "te": "అవును",
+       "hi": "हाँ"
+      },
+      {
+       "en": "No",
+       "te": "లేదు",
+       "hi": "नहीं"
+      }
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Tuples cannot change.",
+      "te": "Tuples మారవు.",
+      "hi": "Tuple नहीं बदलते।"
+     }
+    },
+    {
+     "q": {
+      "en": "a, b = (3, 4)\nWhat is b?",
+      "te": "a, b = (3, 4)\nb ఎంత?",
+      "hi": "a, b = (3, 4)\nb क्या है?"
+     },
+     "options": [
+      "3",
+      "4",
+      "(3, 4)"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Values unpack in order.",
+      "te": "Values క్రమంలో విప్పబడతాయి.",
+      "hi": "Values क्रम से खुलती हैं।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write a function min_max(nums) that returns a tuple (smallest, largest) of a list of numbers.",
+     "te": "min_max(nums) function రాయండి: numbers list లోని (చిన్నది, పెద్దది) tuple return చేయాలి.",
+     "hi": "min_max(nums) function लिखिए जो numbers की list का (सबसे छोटा, सबसे बड़ा) tuple return करे।"
+    },
+    "starter": "def min_max(nums):\n    pass\n",
+    "tests": [
+     {
+      "name": "min_max([4, 9, 1])",
+      "call": "min_max([4, 9, 1])",
+      "expected": "(1, 9)"
+     },
+     {
+      "name": "returns a tuple",
+      "call": "type(min_max([2, 3])).__name__",
+      "expected": "'tuple'"
+     },
+     {
+      "name": "one number",
+      "call": "min_max([7])",
+      "expected": "(7, 7)",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "min() and max() find the smallest and largest.",
+      "te": "min(), max() చిన్నది, పెద్దది కనుక్కుంటాయి.",
+      "hi": "min() और max() सबसे छोटा और बड़ा ढूँढते हैं।"
+     },
+     {
+      "en": "Return two values in round brackets.",
+      "te": "Round brackets లో రెండు values return చేయండి.",
+      "hi": "Round brackets में दो values return कीजिए।"
+     },
+     {
+      "en": "return (min(nums), max(nums))",
+      "te": "return (min(nums), max(nums))",
+      "hi": "return (min(nums), max(nums))"
+     }
+    ],
+    "solution": "def min_max(nums):\n    return (min(nums), max(nums))"
+   },
+   "cheat": {
+    "en": [
+     "(a, b) is a tuple; it cannot change.",
+     "Read with t[0]; unpack with x, y = t.",
+     "One item: (5,)."
+    ],
+    "te": [
+     "(a, b) tuple; మారదు.",
+     "t[0] తో చదవండి; x, y = t తో విప్పండి.",
+     "ఒక్క item: (5,)."
+    ],
+    "hi": [
+     "(a, b) tuple है; बदलता नहीं।",
+     "t[0] से पढ़िए; x, y = t से खोलिए।",
+     "एक item: (5,)।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A railway app stores a train's fixed route as a tuple of stations. Explain why a tuple fits better than a list here.",
+      "te": "Railway app ఒక train స్థిర route ని stations tuple గా ఉంచుతుంది. ఇక్కడ list కంటే tuple ఎందుకు సరిపోతుందో వివరించండి.",
+      "hi": "Railway app किसी train के तय route को stations के tuple में रखता है। यहाँ list से tuple बेहतर क्यों है, समझाइए।"
+     },
+     {
+      "en": "Explain what unpacking a tuple means, using a date of birth stored as (day, month, year).",
+      "te": "(day, month, year) గా దాచిన పుట్టిన తేదీతో tuple unpacking అంటే ఏమిటో వివరించండి.",
+      "hi": "(day, month, year) में रखी जन्मतिथि से tuple unpacking का मतलब समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "tuple"
+     ],
+     [
+      "change",
+      "fixed",
+      "cannot",
+      "immutable",
+      "మార",
+      "स्थिर",
+      "बदल",
+      "స్థిర"
+     ],
+     [
+      "unpack",
+      "variable",
+      "index",
+      "విప్ప",
+      "खोल"
+     ]
+    ],
+    "challenge": {
+     "en": "Say when you would use a tuple instead of a list.",
+     "te": "List బదులు tuple ఎప్పుడు వాడతారో చెప్పండి.",
+     "hi": "List की जगह tuple कब इस्तेमाल करेंगे, बताइए।"
+    }
+   }
+  },
+  {
+   "id": "py-m4-l3",
+   "n": 3,
+   "minutes": 20,
+   "title": {
+    "en": "Sets",
+    "te": "Sets",
+    "hi": "Sets"
+   },
+   "oneLine": {
+    "en": "A set holds unique values with no order, so duplicates disappear and checking \"is this in it?\" is fast.",
+    "te": "Set ఏ క్రమం లేని ప్రత్యేక values ని ఉంచుతుంది; duplicates పోతాయి, \"ఇది ఉందా?\" అని చూడడం వేగం.",
+    "hi": "Set बिना क्रम के अनोखी values रखता है, इसलिए दोहराव मिट जाते हैं और \"क्या यह इसमें है?\" जल्दी पता चलता है।"
+   },
+   "useCase": {
+    "en": "An attendance app uses a set so a student scanned twice is still counted once.",
+    "te": "Attendance app set వాడుతుంది, రెండుసార్లు scan అయిన విద్యార్థి ఒక్కసారే లెక్కలోకి వస్తారు.",
+    "hi": "Attendance app set इस्तेमाल करता है, ताकि दो बार scan हुआ छात्र एक ही बार गिना जाए।"
+   },
+   "explain": {
+    "en": [
+     "Imagine a guest register where each name may appear only once.",
+     "A set works like that: set([\"Ravi\", \"Sita\", \"Ravi\"]) keeps Ravi once.",
+     "Sets have no index, because they have no order.",
+     "Use in to check membership: \"Sita\" in guests.",
+     "Sets can be combined: | joins two sets, & keeps what is common."
+    ],
+    "te": [
+     "ప్రతి పేరు ఒక్కసారే ఉండగలిగే అతిథుల register ఊహించండి.",
+     "Set అలాగే పనిచేస్తుంది: set([\"Ravi\", \"Sita\", \"Ravi\"]) Ravi ని ఒక్కసారే ఉంచుతుంది.",
+     "Sets కి క్రమం లేదు, అందుకే index ఉండదు.",
+     "ఉందో లేదో చూడడానికి in వాడండి: \"Sita\" in guests.",
+     "Sets కలపవచ్చు: | రెండింటినీ కలుపుతుంది, & ఉమ్మడివి ఉంచుతుంది."
+    ],
+    "hi": [
+     "ऐसा guest register सोचिए जिसमें हर नाम एक ही बार हो सकता है।",
+     "Set ऐसा ही है: set([\"Ravi\", \"Sita\", \"Ravi\"]) में Ravi एक बार रहता है।",
+     "Set में क्रम नहीं होता, इसलिए index भी नहीं।",
+     "है या नहीं जाँचने के लिए in लिखिए: \"Sita\" in guests।",
+     "Sets जोड़े जा सकते हैं: | दोनों मिलाता है, & साझा वाले रखता है।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "A set is a bag where every item appears once."
+    ],
+    "te": [
+     "Set అంటే ప్రతి item ఒక్కసారే ఉండే సంచి."
+    ],
+    "hi": [
+     "Set एक थैला है जिसमें हर item एक ही बार होता है।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "Students in both the cricket and chess clubs: cricket & chess."
+    ],
+    "te": [
+     "Cricket, chess రెండు clubs లోనూ ఉన్న విద్యార్థులు: cricket & chess."
+    ],
+    "hi": [
+     "Cricket और chess दोनों clubs वाले छात्र: cricket & chess।"
+    ]
+   },
+   "picture": "flowchart LR\n  A[\"Ravi, Sita, Ravi, Anu\"] --> S[\"set\"] --> B[\"Ravi, Sita, Anu\"]",
+   "code": {
+    "source": "scans = [\"Ravi\", \"Sita\", \"Ravi\", \"Anu\"]\npresent = set(scans)\nprint(len(present))\nprint(\"Sita\" in present)\ncricket = {\"Ravi\", \"Anu\"}\nprint(sorted(present & cricket))",
+    "output": "3\nTrue\n['Anu', 'Ravi']",
+    "notes": [
+     {
+      "line": 2,
+      "note": {
+       "en": "set() removes the duplicate Ravi.",
+       "te": "set() రెండో Ravi ని తీసేస్తుంది.",
+       "hi": "set() दोहराए गए Ravi को हटाता है।"
+      }
+     },
+     {
+      "line": 3,
+      "note": {
+       "en": "Three different people were present.",
+       "te": "ముగ్గురు వేర్వేరు వ్యక్తులు ఉన్నారు.",
+       "hi": "तीन अलग लोग मौजूद थे।"
+      }
+     },
+     {
+      "line": 4,
+      "note": {
+       "en": "in checks membership: True or False.",
+       "te": "in ఉందో లేదో చూస్తుంది: True లేదా False.",
+       "hi": "in जाँचता है: True या False।"
+      }
+     },
+     {
+      "line": 5,
+      "note": {
+       "en": "Curly brackets also make a set.",
+       "te": "Curly brackets కూడా set చేస్తాయి.",
+       "hi": "Curly brackets भी set बनाते हैं।"
+      }
+     },
+     {
+      "line": 6,
+      "note": {
+       "en": "& keeps the names in both sets; sorted gives a neat list.",
+       "te": "& రెండు sets లోని పేర్లు ఉంచుతుంది; sorted చక్కని list ఇస్తుంది.",
+       "hi": "& दोनों sets वाले नाम रखता है; sorted साफ़ list देता है।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "s = {\"a\", \"b\"}\nprint(s[0])",
+     "fix": {
+      "en": "Sets have no index. Use a list if you need order.",
+      "te": "Sets కి index లేదు. క్రమం కావాలంటే list వాడండి.",
+      "hi": "Set में index नहीं होता। क्रम चाहिए तो list लिखिए।"
+     }
+    },
+    {
+     "wrong": "empty = {}",
+     "fix": {
+      "en": "{} is an empty dictionary. Use set() for an empty set.",
+      "te": "{} ఖాళీ dictionary. ఖాళీ set కి set() వాడండి.",
+      "hi": "{} ख़ाली dictionary है। ख़ाली set के लिए set() लिखिए।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "len(set([1, 1, 2]))",
+      "te": "len(set([1, 1, 2]))",
+      "hi": "len(set([1, 1, 2]))"
+     },
+     "options": [
+      "3",
+      "2",
+      "1"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Duplicates are removed.",
+      "te": "Duplicates పోతాయి.",
+      "hi": "दोहराव हटते हैं।"
+     }
+    },
+    {
+     "q": {
+      "en": "Which checks if x is in s?",
+      "te": "s లో x ఉందో చూసేది ఏది?",
+      "hi": "s में x है, कौन जाँचता है?"
+     },
+     "options": [
+      "s[x]",
+      "x in s",
+      "s.has(x)"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Use in.",
+      "te": "in వాడండి.",
+      "hi": "in लिखिए।"
+     }
+    },
+    {
+     "q": {
+      "en": "{1, 2} & {2, 3} is…",
+      "te": "{1, 2} & {2, 3} ఏమిటి?",
+      "hi": "{1, 2} & {2, 3} क्या है?"
+     },
+     "options": [
+      "{2}",
+      "{1, 2, 3}",
+      "{1, 3}"
+     ],
+     "answer": 0,
+     "why": {
+      "en": "& keeps what is common.",
+      "te": "& ఉమ్మడివి ఉంచుతుంది.",
+      "hi": "& साझा वाले रखता है।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write a function unique_count(names) that returns how many different names are in the list.",
+     "te": "unique_count(names) function రాయండి: list లో ఎన్ని వేర్వేరు పేర్లు ఉన్నాయో return చేయాలి.",
+     "hi": "unique_count(names) function लिखिए जो बताए कि list में कितने अलग नाम हैं।"
+    },
+    "starter": "def unique_count(names):\n    pass\n",
+    "tests": [
+     {
+      "name": "unique_count([\"a\", \"b\", \"a\"])",
+      "call": "unique_count([\"a\", \"b\", \"a\"])",
+      "expected": "2"
+     },
+     {
+      "name": "empty list",
+      "call": "unique_count([])",
+      "expected": "0"
+     },
+     {
+      "name": "all the same",
+      "call": "unique_count([\"x\", \"x\", \"x\"])",
+      "expected": "1",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "A set keeps each name once.",
+      "te": "Set ప్రతి పేరును ఒక్కసారే ఉంచుతుంది.",
+      "hi": "Set हर नाम एक बार रखता है।"
+     },
+     {
+      "en": "len counts the items in a set.",
+      "te": "len set లోని items లెక్కిస్తుంది.",
+      "hi": "len set के items गिनता है।"
+     },
+     {
+      "en": "return len(set(names))",
+      "te": "return len(set(names))",
+      "hi": "return len(set(names))"
+     }
+    ],
+    "solution": "def unique_count(names):\n    return len(set(names))"
+   },
+   "cheat": {
+    "en": [
+     "set(list) removes duplicates.",
+     "x in s · s | t joins · s & t common",
+     "No index; empty set is set()."
+    ],
+    "te": [
+     "set(list) duplicates తీసేస్తుంది.",
+     "x in s · s | t కలుపు · s & t ఉమ్మడి",
+     "Index లేదు; ఖాళీ set అంటే set()."
+    ],
+    "hi": [
+     "set(list) दोहराव हटाता है।",
+     "x in s · s | t जोड़ो · s & t साझा",
+     "Index नहीं; ख़ाली set है set()।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "An exam hall scanner records some students twice. Explain how a set gives the true number present and how to check if one student came.",
+      "te": "Exam hall scanner కొంతమంది విద్యార్థులను రెండుసార్లు నమోదు చేస్తుంది. Set నిజమైన హాజరు సంఖ్య ఎలా ఇస్తుందో, ఒక విద్యార్థి వచ్చారో ఎలా చూడాలో వివరించండి.",
+      "hi": "Exam hall scanner कुछ छात्रों को दो बार दर्ज करता है। Set असली हाज़िरी कैसे देता है, और कोई छात्र आया या नहीं कैसे जाँचें, समझाइए।"
+     },
+     {
+      "en": "Two clubs have member sets. Explain how to find students in both clubs and in either club.",
+      "te": "రెండు clubs కి members sets ఉన్నాయి. రెండింటిలోనూ, ఏదో ఒకదానిలో ఉన్న విద్యార్థులను ఎలా కనుక్కోవాలో వివరించండి.",
+      "hi": "दो clubs के members के sets हैं। दोनों clubs और किसी भी club वाले छात्र कैसे निकालें, समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "set"
+     ],
+     [
+      "duplicate",
+      "unique",
+      "once",
+      "ఒక్కసారి",
+      "ప్రత్యేక",
+      "एक बार",
+      "अनोख"
+     ],
+     [
+      "in",
+      "&",
+      "|",
+      "common",
+      "ఉమ్మడి",
+      "साझा"
+     ]
+    ],
+    "challenge": {
+     "en": "Say what a set does with duplicates.",
+     "te": "Set duplicates తో ఏం చేస్తుందో చెప్పండి.",
+     "hi": "Set दोहराव के साथ क्या करता है, बताइए।"
+    }
+   }
+  },
+  {
+   "id": "py-m4-l4",
+   "n": 4,
+   "minutes": 20,
+   "title": {
+    "en": "Dictionaries",
+    "te": "Dictionaries",
+    "hi": "Dictionaries"
+   },
+   "oneLine": {
+    "en": "A dictionary stores key: value pairs, so you look a value up by its key, like a phone number by a name.",
+    "te": "Dictionary key: value జతలను ఉంచుతుంది; పేరుతో phone number లాగా key తో value వెతుకుతాం.",
+    "hi": "Dictionary key: value जोड़े रखती है, ताकि key से value ढूँढें, जैसे नाम से phone number।"
+   },
+   "useCase": {
+    "en": "A shop's price list maps each item to its price: prices[\"tea\"] gives 15.",
+    "te": "Shop ధరల జాబితా ప్రతి item కి దాని ధర కలుపుతుంది: prices[\"tea\"] 15 ఇస్తుంది.",
+    "hi": "दुकान की price list हर item को उसके दाम से जोड़ती है: prices[\"tea\"] 15 देता है।"
+   },
+   "explain": {
+    "en": [
+     "Your phone contacts are a dictionary: a name leads to a number.",
+     "In Python: phone = {\"Ravi\": \"98480\", \"Sita\": \"99000\"}.",
+     "phone[\"Ravi\"] gives Ravi's number. The key goes in square brackets.",
+     "Adding or changing is the same line: phone[\"Anu\"] = \"97000\".",
+     ".get(key, default) gives a safe answer when the key is missing, and .items() lets you loop over pairs."
+    ],
+    "te": [
+     "మీ phone contacts ఒక dictionary: పేరు నుంచి number కి.",
+     "Python లో: phone = {\"Ravi\": \"98480\", \"Sita\": \"99000\"}.",
+     "phone[\"Ravi\"] Ravi number ఇస్తుంది. Key square brackets లో ఉంటుంది.",
+     "జోడించడం, మార్చడం ఒకే line: phone[\"Anu\"] = \"97000\".",
+     "Key లేనప్పుడు .get(key, default) సురక్షిత జవాబు ఇస్తుంది, .items() తో జతలపై loop చేయవచ్చు."
+    ],
+    "hi": [
+     "आपके phone के contacts एक dictionary हैं: नाम से number।",
+     "Python में: phone = {\"Ravi\": \"98480\", \"Sita\": \"99000\"}।",
+     "phone[\"Ravi\"] Ravi का number देता है। Key square brackets में होती है।",
+     "जोड़ना या बदलना एक ही line है: phone[\"Anu\"] = \"97000\"।",
+     "Key न हो तो .get(key, default) सुरक्षित जवाब देता है, और .items() से जोड़ों पर loop कर सकते हैं।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "A dictionary is a list of labels and their answers."
+    ],
+    "te": [
+     "Dictionary అంటే labels, వాటి జవాబుల జాబితా."
+    ],
+    "hi": [
+     "Dictionary labels और उनके जवाबों की सूची है।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "Counting votes: votes = {}; for each name, votes[name] = votes.get(name, 0) + 1."
+    ],
+    "te": [
+     "Votes లెక్కించడం: votes = {}; ప్రతి పేరుకు votes[name] = votes.get(name, 0) + 1."
+    ],
+    "hi": [
+     "Votes गिनना: votes = {}; हर नाम के लिए votes[name] = votes.get(name, 0) + 1।"
+    ]
+   },
+   "picture": "flowchart LR\n  K1[\"\\\"tea\\\"\"] --> V1[\"15\"]\n  K2[\"\\\"coffee\\\"\"] --> V2[\"20\"]\n  K3[\"\\\"samosa\\\"\"] --> V3[\"12\"]",
+   "code": {
+    "source": "prices = {\"tea\": 15, \"coffee\": 20}\nprices[\"samosa\"] = 12\nprint(prices[\"tea\"])\nprint(prices.get(\"lassi\", 0))\nfor item, cost in prices.items():\n    print(item, cost)",
+    "output": "15\n0\ntea 15\ncoffee 20\nsamosa 12",
+    "notes": [
+     {
+      "line": 1,
+      "note": {
+       "en": "Curly brackets with key: value pairs.",
+       "te": "Key: value జతలతో curly brackets.",
+       "hi": "key: value जोड़ों के साथ curly brackets।"
+      }
+     },
+     {
+      "line": 2,
+      "note": {
+       "en": "A new key with its value is added.",
+       "te": "కొత్త key దాని value తో జోడించబడుతుంది.",
+       "hi": "नई key अपनी value के साथ जुड़ती है।"
+      }
+     },
+     {
+      "line": 3,
+      "note": {
+       "en": "Look up by key: 15.",
+       "te": "Key తో వెతకండి: 15.",
+       "hi": "Key से खोजिए: 15।"
+      }
+     },
+     {
+      "line": 4,
+      "note": {
+       "en": "lassi is missing, so get gives the default 0 instead of an error.",
+       "te": "lassi లేదు, కాబట్టి get error బదులు default 0 ఇస్తుంది.",
+       "hi": "lassi नहीं है, इसलिए get error की जगह default 0 देता है।"
+      }
+     },
+     {
+      "line": 5,
+      "note": {
+       "en": "items() gives each key and value together.",
+       "te": "items() ప్రతి key, value కలిపి ఇస్తుంది.",
+       "hi": "items() हर key और value साथ देता है।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "prices = {\"tea\": 15}\nprint(prices[\"lassi\"])",
+     "fix": {
+      "en": "A missing key gives KeyError. Use prices.get(\"lassi\", 0).",
+      "te": "లేని key KeyError ఇస్తుంది. prices.get(\"lassi\", 0) వాడండి.",
+      "hi": "न होने वाली key KeyError देती है। prices.get(\"lassi\", 0) लिखिए।"
+     }
+    },
+    {
+     "wrong": "prices = {\"tea\": 15}\nprint(prices[0])",
+     "fix": {
+      "en": "Dictionaries are looked up by key, not position.",
+      "te": "Dictionaries ని key తో వెతుకుతాం, స్థానంతో కాదు.",
+      "hi": "Dictionary key से खोजी जाती है, जगह से नहीं।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "d = {\"a\": 1}\nWhat is d[\"a\"]?",
+      "te": "d = {\"a\": 1}\nd[\"a\"] ఎంత?",
+      "hi": "d = {\"a\": 1}\nd[\"a\"] क्या है?"
+     },
+     "options": [
+      "\"a\"",
+      "1",
+      "None"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "The value for key a.",
+      "te": "Key a value.",
+      "hi": "Key a की value।"
+     }
+    },
+    {
+     "q": {
+      "en": "How do you add key \"b\" with value 2?",
+      "te": "Key \"b\" ని value 2 తో ఎలా జోడిస్తారు?",
+      "hi": "Key \"b\" को value 2 के साथ कैसे जोड़ेंगे?"
+     },
+     "options": [
+      "d.add(\"b\", 2)",
+      "d[\"b\"] = 2",
+      "d.append(b=2)"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Assign to the key.",
+      "te": "Key కి assign చేయండి.",
+      "hi": "Key को assign कीजिए।"
+     }
+    },
+    {
+     "q": {
+      "en": "d.get(\"x\", 5) when x is missing gives…",
+      "te": "x లేనప్పుడు d.get(\"x\", 5) ఇచ్చేది…",
+      "hi": "x न हो तो d.get(\"x\", 5) देता है…"
+     },
+     "options": [
+      "KeyError",
+      "5",
+      "None"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "The default.",
+      "te": "Default.",
+      "hi": "Default।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write a function count_votes(votes) that takes a list of names and returns a dictionary of how many votes each name got.",
+     "te": "count_votes(votes) function రాయండి: పేర్ల list తీసుకుని ప్రతి పేరుకు ఎన్ని votes వచ్చాయో dictionary return చేయాలి.",
+     "hi": "count_votes(votes) function लिखिए जो नामों की list लेकर हर नाम के votes की dictionary return करे।"
+    },
+    "starter": "def count_votes(votes):\n    counts = {}\n    # loop over votes and add one for each name\n    return counts\n",
+    "tests": [
+     {
+      "name": "count_votes([\"Ravi\", \"Sita\", \"Ravi\"])",
+      "call": "count_votes([\"Ravi\", \"Sita\", \"Ravi\"])",
+      "expected": "{'Ravi': 2, 'Sita': 1}"
+     },
+     {
+      "name": "no votes",
+      "call": "count_votes([])",
+      "expected": "{}"
+     },
+     {
+      "name": "one name many times",
+      "call": "count_votes([\"A\", \"A\", \"A\"])",
+      "expected": "{'A': 3}",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "Loop with for name in votes:",
+      "te": "for name in votes: తో loop చేయండి.",
+      "hi": "for name in votes: से loop कीजिए।"
+     },
+     {
+      "en": "counts.get(name, 0) gives the count so far.",
+      "te": "counts.get(name, 0) ఇప్పటి వరకు లెక్క ఇస్తుంది.",
+      "hi": "counts.get(name, 0) अब तक की गिनती देता है।"
+     },
+     {
+      "en": "counts[name] = counts.get(name, 0) + 1",
+      "te": "counts[name] = counts.get(name, 0) + 1",
+      "hi": "counts[name] = counts.get(name, 0) + 1"
+     }
+    ],
+    "solution": "def count_votes(votes):\n    counts = {}\n    for name in votes:\n        counts[name] = counts.get(name, 0) + 1\n    return counts"
+   },
+   "cheat": {
+    "en": [
+     "{\"key\": value} · d[\"key\"] · d[\"new\"] = v",
+     "d.get(k, default) avoids KeyError.",
+     "for k, v in d.items(): loops over pairs."
+    ],
+    "te": [
+     "{\"key\": value} · d[\"key\"] · d[\"new\"] = v",
+     "d.get(k, default) KeyError రాకుండా చూస్తుంది.",
+     "for k, v in d.items(): జతలపై loop."
+    ],
+    "hi": [
+     "{\"key\": value} · d[\"key\"] · d[\"new\"] = v",
+     "d.get(k, default) KeyError से बचाता है।",
+     "for k, v in d.items(): जोड़ों पर loop।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A tea stall wants to look up prices by item name and add new items. Explain how a dictionary does this, and what happens when an item is missing.",
+      "te": "టీ కొట్టు item పేరుతో ధరలు వెతికి కొత్త items జోడించాలనుకుంటుంది. Dictionary దీన్ని ఎలా చేస్తుందో, item లేనప్పుడు ఏమవుతుందో వివరించండి.",
+      "hi": "चाय की दुकान item के नाम से दाम देखना और नए items जोड़ना चाहती है। Dictionary यह कैसे करती है, और item न हो तो क्या होता है, समझाइए।"
+     },
+     {
+      "en": "Explain how you would count votes for class representative using a dictionary.",
+      "te": "Class representative ఎన్నికల votes ని dictionary తో ఎలా లెక్కిస్తారో వివరించండి.",
+      "hi": "Class representative के votes dictionary से कैसे गिनेंगे, समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "key"
+     ],
+     [
+      "value",
+      "విలువ",
+      "मान",
+      "value"
+     ],
+     [
+      "get",
+      "keyerror",
+      "missing",
+      "లేని",
+      "नहीं",
+      "["
+     ]
+    ],
+    "challenge": {
+     "en": "Say what a key and a value are in a dictionary.",
+     "te": "Dictionary లో key, value అంటే ఏమిటో చెప్పండి.",
+     "hi": "Dictionary में key और value क्या हैं, बताइए।"
+    }
+   }
+  },
+  {
+   "id": "py-m4-l5",
+   "n": 5,
+   "minutes": 20,
+   "title": {
+    "en": "Strings in depth",
+    "te": "Strings లోతుగా",
+    "hi": "Strings गहराई से"
+   },
+   "oneLine": {
+    "en": "A string is text, and Python gives you tools to slice it, change its case, split it into words and join words back.",
+    "te": "String అంటే text; దాన్ని కోయడానికి, అక్షరాల రూపం మార్చడానికి, పదాలుగా విడదీయడానికి, మళ్లీ కలపడానికి Python పరికరాలు ఇస్తుంది.",
+    "hi": "String text है, और Python उसे काटने, अक्षरों का रूप बदलने, शब्दों में तोड़ने और फिर जोड़ने के tools देता है।"
+   },
+   "useCase": {
+    "en": "A sign-up form tidies a name: strip spaces, make it Title Case, and check the email has an @.",
+    "te": "Sign-up form ఒక పేరును శుభ్రం చేస్తుంది: spaces తీసి, Title Case చేసి, email లో @ ఉందో చూస్తుంది.",
+    "hi": "Sign-up form नाम को साफ़ करता है: spaces हटाकर, Title Case बनाकर, और email में @ है या नहीं देखकर।"
+   },
+   "explain": {
+    "en": [
+     "A string is a row of characters, so it works a bit like a list.",
+     "name[0] is the first letter, and name[0:3] is a slice of the first three.",
+     "Methods change how text looks: upper(), lower(), title(), strip() to remove extra spaces.",
+     "split() breaks a sentence into a list of words; \" \".join(words) puts them back.",
+     "f-strings put values into text: f\"Hello {name}\". Strings cannot be changed in place; methods return a new string."
+    ],
+    "te": [
+     "String అక్షరాల వరుస, అందుకే కొంచెం list లాగా పనిచేస్తుంది.",
+     "name[0] మొదటి అక్షరం, name[0:3] మొదటి మూడు అక్షరాల ముక్క.",
+     "Methods text రూపం మారుస్తాయి: upper(), lower(), title(), అదనపు spaces తీయడానికి strip().",
+     "split() వాక్యాన్ని పదాల list గా విడదీస్తుంది; \" \".join(words) వాటిని మళ్లీ కలుపుతుంది.",
+     "f-strings values ని text లో పెడతాయి: f\"Hello {name}\". Strings అక్కడే మారవు; methods కొత్త string ఇస్తాయి."
+    ],
+    "hi": [
+     "String अक्षरों की कतार है, इसलिए कुछ-कुछ list जैसी चलती है।",
+     "name[0] पहला अक्षर है, और name[0:3] पहले तीन अक्षरों का टुकड़ा।",
+     "Methods text का रूप बदलते हैं: upper(), lower(), title(), और फ़ालतू spaces हटाने के लिए strip()।",
+     "split() वाक्य को शब्दों की list में तोड़ता है; \" \".join(words) उन्हें फिर जोड़ता है।",
+     "f-strings text में values रखते हैं: f\"Hello {name}\"। String अपनी जगह नहीं बदलती; methods नई string देते हैं।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "Text can be cut, tidied, split and joined."
+    ],
+    "te": [
+     "Text ని కోయవచ్చు, శుభ్రం చేయవచ్చు, విడదీయవచ్చు, కలపవచ్చు."
+    ],
+    "hi": [
+     "Text को काटा, साफ़ किया, तोड़ा और जोड़ा जा सकता है।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "An SMS template: f\"Dear {name}, your bill of Rs {amount} is due.\""
+    ],
+    "te": [
+     "SMS template: f\"Dear {name}, your bill of Rs {amount} is due.\""
+    ],
+    "hi": [
+     "SMS template: f\"Dear {name}, your bill of Rs {amount} is due.\""
+    ]
+   },
+   "picture": "flowchart LR\n  A[\"\\\"  ravi kumar \\\"\"] -->|strip| B[\"\\\"ravi kumar\\\"\"] -->|title| C[\"\\\"Ravi Kumar\\\"\"] -->|split| D[\"[\\\"Ravi\\\", \\\"Kumar\\\"]\"]",
+   "code": {
+    "source": "raw = \"  ravi kumar  \"\nname = raw.strip().title()\nprint(name)\nprint(name[0:4])\nwords = name.split()\nprint(words, len(words))\nprint(f\"Welcome, {words[0]}!\")",
+    "output": "Ravi Kumar\nRavi\n['Ravi', 'Kumar'] 2\nWelcome, Ravi!",
+    "notes": [
+     {
+      "line": 2,
+      "note": {
+       "en": "strip removes outer spaces; title capitalises each word. Methods can be chained.",
+       "te": "strip బయటి spaces తీస్తుంది; title ప్రతి పదాన్ని పెద్ద అక్షరంతో మొదలుపెడుతుంది. Methods వరుసగా వాడవచ్చు.",
+       "hi": "strip बाहर के spaces हटाता है; title हर शब्द को बड़े अक्षर से शुरू करता है। Methods एक के बाद एक लगाए जा सकते हैं।"
+      }
+     },
+     {
+      "line": 4,
+      "note": {
+       "en": "A slice from 0 up to (not including) 4.",
+       "te": "0 నుంచి 4 వరకు (4 కాకుండా) ముక్క.",
+       "hi": "0 से 4 तक (4 छोड़कर) टुकड़ा।"
+      }
+     },
+     {
+      "line": 5,
+      "note": {
+       "en": "split breaks the text at spaces into a list.",
+       "te": "split text ని spaces వద్ద list గా విడదీస్తుంది.",
+       "hi": "split text को spaces पर list में तोड़ता है।"
+      }
+     },
+     {
+      "line": 7,
+      "note": {
+       "en": "An f-string puts the first word into the message.",
+       "te": "f-string మొదటి పదాన్ని సందేశంలో పెడుతుంది.",
+       "hi": "f-string पहला शब्द संदेश में रखती है।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "name = \"ravi\"\nname.upper()\nprint(name)   # still ravi",
+     "fix": {
+      "en": "Methods return a new string. Save it: name = name.upper().",
+      "te": "Methods కొత్త string ఇస్తాయి. దాచండి: name = name.upper().",
+      "hi": "Methods नई string देते हैं। रखिए: name = name.upper()।"
+     }
+    },
+    {
+     "wrong": "print(\"Total: \" + 50)",
+     "fix": {
+      "en": "Use an f-string: f\"Total: {50}\".",
+      "te": "f-string వాడండి: f\"Total: {50}\".",
+      "hi": "f-string लिखिए: f\"Total: {50}\"।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "\"Python\"[0:2] is…",
+      "te": "\"Python\"[0:2] ఏమిటి?",
+      "hi": "\"Python\"[0:2] क्या है?"
+     },
+     "options": [
+      "\"Py\"",
+      "\"Pyt\"",
+      "\"P\""
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Index 0 and 1.",
+      "te": "Index 0, 1.",
+      "hi": "Index 0 और 1।"
+     }
+    },
+    {
+     "q": {
+      "en": "\"a b c\".split() gives…",
+      "te": "\"a b c\".split() ఇచ్చేది…",
+      "hi": "\"a b c\".split() देता है…"
+     },
+     "options": [
+      "\"abc\"",
+      "['a', 'b', 'c']",
+      "3"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "A list of words.",
+      "te": "పదాల list.",
+      "hi": "शब्दों की list।"
+     }
+    },
+    {
+     "q": {
+      "en": "\"  hi \".strip() gives…",
+      "te": "\"  hi \".strip() ఇచ్చేది…",
+      "hi": "\"  hi \".strip() देता है…"
+     },
+     "options": [
+      "\"hi\"",
+      "\"  hi\"",
+      "\"hi \""
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Outer spaces removed.",
+      "te": "బయటి spaces పోయాయి.",
+      "hi": "बाहर के spaces हटे।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write a function initials(full_name) that returns the capital initials with dots, for example initials(\"ravi kumar\") returns \"R.K.\".",
+     "te": "initials(full_name) function రాయండి: పెద్ద అక్షరాల initials ని చుక్కలతో return చేయాలి, ఉదాహరణకు initials(\"ravi kumar\") \"R.K.\" ఇవ్వాలి.",
+     "hi": "initials(full_name) function लिखिए जो बड़े अक्षरों के initials बिंदुओं के साथ return करे, जैसे initials(\"ravi kumar\") से \"R.K.\"।"
+    },
+    "starter": "def initials(full_name):\n    pass\n",
+    "tests": [
+     {
+      "name": "initials(\"ravi kumar\")",
+      "call": "initials(\"ravi kumar\")",
+      "expected": "'R.K.'"
+     },
+     {
+      "name": "three names",
+      "call": "initials(\"sita devi rao\")",
+      "expected": "'S.D.R.'"
+     },
+     {
+      "name": "extra spaces",
+      "call": "initials(\"  anu   priya \")",
+      "expected": "'A.P.'",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "split() gives the words, and ignores extra spaces.",
+      "te": "split() పదాలు ఇస్తుంది, అదనపు spaces పట్టించుకోదు.",
+      "hi": "split() शब्द देता है, फ़ालतू spaces छोड़ देता है।"
+     },
+     {
+      "en": "For each word take word[0].upper() + \".\".",
+      "te": "ప్రతి పదానికి word[0].upper() + \".\" తీసుకోండి.",
+      "hi": "हर शब्द के लिए word[0].upper() + \".\" लीजिए।"
+     },
+     {
+      "en": "return \"\".join(w[0].upper() + \".\" for w in full_name.split())",
+      "te": "return \"\".join(w[0].upper() + \".\" for w in full_name.split())",
+      "hi": "return \"\".join(w[0].upper() + \".\" for w in full_name.split())"
+     }
+    ],
+    "solution": "def initials(full_name):\n    result = \"\"\n    for w in full_name.split():\n        result = result + w[0].upper() + \".\"\n    return result"
+   },
+   "cheat": {
+    "en": [
+     "s[0] · s[a:b] slice · len(s)",
+     "strip · upper · lower · title · split · join",
+     "f\"text {value}\"; methods return new strings."
+    ],
+    "te": [
+     "s[0] · s[a:b] ముక్క · len(s)",
+     "strip · upper · lower · title · split · join",
+     "f\"text {value}\"; methods కొత్త strings ఇస్తాయి."
+    ],
+    "hi": [
+     "s[0] · s[a:b] टुकड़ा · len(s)",
+     "strip · upper · lower · title · split · join",
+     "f\"text {value}\"; methods नई strings देते हैं।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A college form receives names like \"  sita DEVI \". Explain the steps and string methods to store it as \"Sita Devi\".",
+      "te": "College form కి \"  sita DEVI \" లాంటి పేర్లు వస్తాయి. దాన్ని \"Sita Devi\" గా ఉంచడానికి steps, string methods వివరించండి.",
+      "hi": "College form में \"  sita DEVI \" जैसे नाम आते हैं। इसे \"Sita Devi\" के रूप में रखने के steps और string methods समझाइए।"
+     },
+     {
+      "en": "Explain split and join with an example of a bus route string \"Ameerpet-Kukatpally-Miyapur\".",
+      "te": "\"Ameerpet-Kukatpally-Miyapur\" bus route string ఉదాహరణతో split, join వివరించండి.",
+      "hi": "\"Kashmere Gate-Rajiv Chowk-Saket\" bus route string के उदाहरण से split और join समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "strip",
+      "split",
+      "slice"
+     ],
+     [
+      "title",
+      "upper",
+      "lower",
+      "join"
+     ],
+     [
+      "string",
+      "text",
+      "new",
+      "list",
+      "టెక్స్ట్",
+      "टेक्स्ट"
+     ]
+    ],
+    "challenge": {
+     "en": "Say why name.upper() alone does not change name.",
+     "te": "ఒక్క name.upper() name ని ఎందుకు మార్చదో చెప్పండి.",
+     "hi": "सिर्फ़ name.upper() से name क्यों नहीं बदलता, बताइए।"
+    }
+   }
+  }
+ ],
+ "test": {
+  "pass": 4,
+  "questions": [
+   {
+    "q": {
+     "en": "Which keeps order and can change?",
+     "te": "క్రమం ఉంచి మారగలిగేది ఏది?",
+     "hi": "कौन क्रम रखता है और बदल सकता है?"
+    },
+    "options": [
+     "tuple",
+     "list",
+     "set"
+    ],
+    "answer": 1,
+    "why": {
+     "en": "A list.",
+     "te": "List.",
+     "hi": "List।"
+    }
+   },
+   {
+    "q": {
+     "en": "Which removes duplicates?",
+     "te": "Duplicates తీసేది ఏది?",
+     "hi": "दोहराव कौन हटाता है?"
+    },
+    "options": [
+     "list",
+     "set",
+     "tuple"
+    ],
+    "answer": 1,
+    "why": {
+     "en": "A set keeps each value once.",
+     "te": "Set ప్రతి value ని ఒక్కసారే ఉంచుతుంది.",
+     "hi": "Set हर value एक बार रखता है।"
+    }
+   },
+   {
+    "q": {
+     "en": "d = {\"x\": 3}\nd.get(\"y\", 0) gives…",
+     "te": "d = {\"x\": 3}\nd.get(\"y\", 0) ఇచ్చేది…",
+     "hi": "d = {\"x\": 3}\nd.get(\"y\", 0) देता है…"
+    },
+    "options": [
+     "KeyError",
+     "0",
+     "3"
+    ],
+    "answer": 1,
+    "why": {
+     "en": "The default.",
+     "te": "Default.",
+     "hi": "Default।"
+    }
+   },
+   {
+    "q": {
+     "en": "\"a,b\".split(\",\") gives…",
+     "te": "\"a,b\".split(\",\") ఇచ్చేది…",
+     "hi": "\"a,b\".split(\",\") देता है…"
+    },
+    "options": [
+     "['a', 'b']",
+     "\"ab\"",
+     "['a,b']"
+    ],
+    "answer": 0,
+    "why": {
+     "en": "Split at the comma.",
+     "te": "Comma వద్ద విడదీస్తుంది.",
+     "hi": "Comma पर तोड़ता है।"
+    }
+   },
+   {
+    "q": {
+     "en": "t = (1, 2)\nt[0] = 9 gives…",
+     "te": "t = (1, 2)\nt[0] = 9 ఇచ్చేది…",
+     "hi": "t = (1, 2)\nt[0] = 9 देता है…"
+    },
+    "options": [
+     "(9, 2)",
+     "TypeError",
+     "9"
+    ],
+    "answer": 1,
+    "why": {
+     "en": "Tuples cannot change.",
+     "te": "Tuples మారవు.",
+     "hi": "Tuple नहीं बदलते।"
+    }
+   }
+  ]
+ },
+ "project": {
+  "title": {
+   "en": "Expense tracker",
+   "te": "Expense tracker",
+   "hi": "Expense tracker"
+  },
+  "prompt": {
+   "en": "Write a function by_category(expenses) that takes a list of (category, amount) tuples and returns a dictionary with the total per category. Also write top_category(expenses) that returns the category with the highest total.",
+   "te": "by_category(expenses) function రాయండి: (category, amount) tuples list తీసుకుని ప్రతి category మొత్తం ఉన్న dictionary return చేయాలి. top_category(expenses) అత్యధిక మొత్తం ఉన్న category return చేయాలి.",
+   "hi": "by_category(expenses) function लिखिए जो (category, amount) tuples की list लेकर हर category के total की dictionary return करे। top_category(expenses) सबसे ज़्यादा total वाली category return करे।"
+  },
+  "starter": "def by_category(expenses):\n    totals = {}\n    return totals\n\ndef top_category(expenses):\n    pass\n",
+  "tests": [
+   {
+    "name": "by_category",
+    "call": "by_category([(\"food\", 100), (\"travel\", 50), (\"food\", 30)])",
+    "expected": "{'food': 130, 'travel': 50}"
+   },
+   {
+    "name": "top_category",
+    "call": "top_category([(\"food\", 100), (\"travel\", 150), (\"food\", 30)])",
+    "expected": "'travel'"
+   },
+   {
+    "name": "empty",
+    "call": "by_category([])",
+    "expected": "{}",
+    "hidden": true
+   },
+   {
+    "name": "top uses by_category",
+    "call": "'by_category' in top_category.__code__.co_names",
+    "expected": "True",
+    "hidden": true
+   }
+  ],
+  "hints": [
+   {
+    "en": "Loop: for cat, amt in expenses:",
+    "te": "Loop: for cat, amt in expenses:",
+    "hi": "Loop: for cat, amt in expenses:"
+   },
+   {
+    "en": "totals[cat] = totals.get(cat, 0) + amt",
+    "te": "totals[cat] = totals.get(cat, 0) + amt",
+    "hi": "totals[cat] = totals.get(cat, 0) + amt"
+   },
+   {
+    "en": "t = by_category(expenses); return max(t, key=t.get)",
+    "te": "t = by_category(expenses); return max(t, key=t.get)",
+    "hi": "t = by_category(expenses); return max(t, key=t.get)"
+   }
+  ],
+  "solution": "def by_category(expenses):\n    totals = {}\n    for cat, amt in expenses:\n        totals[cat] = totals.get(cat, 0) + amt\n    return totals\n\ndef top_category(expenses):\n    t = by_category(expenses)\n    return max(t, key=t.get)"
+ }
+}

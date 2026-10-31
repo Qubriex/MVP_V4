@@ -18,6 +18,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import api from './api';
 import { pronounce } from './pronounce';
+import { codeSpeech } from './codeSpeech';
 
 const synth = typeof window !== 'undefined' ? window.speechSynthesis : null;
 const Recognition = typeof window !== 'undefined' ? (window.SpeechRecognition || window.webkitSpeechRecognition) : null;
@@ -111,6 +112,12 @@ if (typeof document !== 'undefined') {
 // is not worth it mid-lesson, so the reply is shown as text instead.
 let serverVoice = true;
 export const usingServerVoice = () => serverVoice;
+// The phone's own voice is robotic in Telugu and Hindi, so it is used only
+// when the learner chose it in Settings ("Use my phone's voice"). Otherwise a
+// lesson she cannot speak is read as text, with a notice.
+let deviceVoice = false;
+export const setDeviceVoice = (on) => { deviceVoice = !!on; };
+export const deviceVoiceChosen = () => deviceVoice;
 const audioCache = new Map(); // lang|text → object URL
 const wait = (ms) => new Promise(r => setTimeout(r, ms));
 async function fetchAudio(text, lang, isCurrent) {
@@ -144,11 +151,8 @@ function reportVoiceMetric(body) {
   api.post('/learner/voice-metrics', body).catch(() => {});
 }
 
-export const VOICE_ISSUE = {
-  busy: 'Professor Qubirex’s voice is busy right now, so this one is shown as text. The next reply will be spoken again.',
-  tap: 'Your browser paused the voice. Tap Replay to hear it.',
-  none: 'Professor Qubirex’s voice is not available on this deployment, so replies show as text.'
-};
+// Translation keys for why she is silent (components/learn/VoiceStatus.js).
+export const VOICE_ISSUE = { busy: 'voice.issue.busy', tap: 'voice.issue.tap', none: 'voice.issue.none', text: 'voice.issue.text' };
 
 /**
  * @param {{ lang?: string, rate?: number, server?: boolean }} opts
@@ -183,12 +187,13 @@ export function useSpeechOutput({ lang = 'te-IN', rate = 1, server = true } = {}
     setPart(null);
   }, []);
 
-  // Browser fallback: a female voice only, otherwise the reply stays as text.
+  // The phone's voice, only when chosen in Settings and only a female one;
+  // otherwise the reply stays as text with a notice.
   const speakBrowser = useCallback((text, run, opts) => {
     const l = opts.lang || lang;
-    const voice = synth ? pickVoice(l) : null;
+    const voice = deviceVoice && synth ? pickVoice(l) : null;
     if (!voice) {
-      if (runRef.current === run) { setSpeakingId(null); setPart(null); if (!opts.quiet) setIssue(serverVoice ? 'busy' : 'none'); }
+      if (runRef.current === run) { setSpeakingId(null); setPart(null); if (!opts.quiet) setIssue(deviceVoice ? (serverVoice ? 'busy' : 'none') : 'text'); }
       return;
     }
     const chunks = parts(pronounce(text, l), 200, 240);
@@ -220,7 +225,8 @@ export function useSpeechOutput({ lang = 'te-IN', rate = 1, server = true } = {}
     const spoken = pronounce(clean, l);
     const chunks = parts(spoken);
     const shown = parts(clean); // same sentence boundaries, without spelling changes
-    const ttsLang = l.startsWith('en') ? 'english' : null; // otherwise the learner's own language
+    // Spoken in the language of the text: the learning language, or English captions.
+    const ttsLang = l.startsWith('en') ? 'english' : l.startsWith('hi') ? 'hindi' : 'telugu';
     const t0 = Date.now();
     let next = fetchAudio(chunks[0], ttsLang, isCurrent);
     const p = getPlayer();
@@ -281,8 +287,87 @@ export function useSpeechOutput({ lang = 'te-IN', rate = 1, server = true } = {}
 
   return {
     speak, stop, pause, resume, replay, setRate, speakingId, paused, part,
-    issue, voiceIssue: issue ? VOICE_ISSUE[issue] : '', hasLast: () => !!lastRef.current,
+    issue, voiceIssueKey: issue ? VOICE_ISSUE[issue] : '', hasLast: () => !!lastRef.current,
     supported: canSpeak || typeof Audio !== 'undefined'
+  };
+}
+
+// ─── "Walk me through it": one clip per code line ──────────────────────────
+// Every line's clip is fetched (and cached) before the first one plays, then
+// the clips play one after another on the one audio element, so two lines can
+// never overlap. The highlight moves when a clip actually starts. A line whose
+// audio failed keeps its highlight and shows its text; Next moves on.
+// state: idle | preparing | playing | paused | text
+export function useLineWalk({ lang = 'te-IN', rate = 1 } = {}) {
+  const [state, setState] = useState('idle');
+  const [index, setIndex] = useState(-1);
+  const clips = useRef([]);
+  const runRef = useRef(0);
+  const rateRef = useRef(rate);
+  rateRef.current = rate;
+  const ttsLang = lang.startsWith('en') ? 'english' : lang.startsWith('hi') ? 'hindi' : 'telugu';
+
+  const halt = () => { runRef.current += 1; const p = getPlayer(); if (p) { p.onended = null; p.onplaying = null; p.onerror = null; p.pause(); } };
+  useEffect(() => halt, []);
+
+  const playAt = useCallback((i) => {
+    halt();
+    const run = runRef.current;
+    const mine = () => runRef.current === run;
+    if (i < 0 || i >= clips.current.length) { setState('idle'); setIndex(-1); return; }
+    const url = clips.current[i];
+    const p = getPlayer();
+    if (!url || !p) { setIndex(i); setState('text'); return; }
+    p.src = url;
+    p.playbackRate = rateRef.current;
+    p.onplaying = () => { if (mine()) { setIndex(i); setState('playing'); } };
+    p.onended = () => { if (mine()) setTimeout(() => { if (mine()) playAt(i + 1); }, 250); };
+    p.onerror = () => { if (mine()) { setIndex(i); setState('text'); } };
+    Promise.resolve(p.play()).catch(err => {
+      if (!mine()) return;
+      setIndex(i);
+      setState(err?.name === 'NotAllowedError' ? 'paused' : 'text');
+    });
+  }, []);
+
+  /** @param {string[]} notes the line notes, in order */
+  const start = useCallback(async (notes) => {
+    halt();
+    const run = runRef.current;
+    setState('preparing'); setIndex(-1);
+    const spoken = notes.map(n => pronounce(speakable(codeSpeech(n)), lang));
+    const urls = new Array(spoken.length).fill(null);
+    if (serverVoice) {
+      let next = 0;
+      const worker = async () => {
+        while (next < spoken.length && runRef.current === run) {
+          const k = next; next += 1;
+          try { urls[k] = await fetchAudio(spoken[k], ttsLang, () => runRef.current === run); } catch { urls[k] = null; }
+        }
+      };
+      await Promise.all([worker(), worker(), worker()]);
+    }
+    if (runRef.current !== run) return;
+    clips.current = urls;
+    playAt(0);
+  }, [lang, ttsLang, playAt]);
+
+  const pause = useCallback(() => { const p = getPlayer(); if (p && !p.paused) { p.pause(); setState('paused'); } }, []);
+  const resume = useCallback(() => {
+    const p = getPlayer();
+    if (!p || !clips.current[index]) return;
+    Promise.resolve(p.play()).then(() => setState('playing')).catch(() => setState('text'));
+  }, [index]);
+  const stop = useCallback(() => { halt(); setState('idle'); setIndex(-1); }, []);
+
+  return {
+    state, index, start, pause, resume, stop,
+    active: state !== 'idle',
+    next: () => playAt(index + 1),
+    prev: () => playAt(Math.max(0, index - 1)),
+    replay: () => playAt(Math.max(0, index)),
+    // Used by the Playwright check: false when no clip could be made.
+    hasAudio: () => clips.current.some(Boolean)
   };
 }
 

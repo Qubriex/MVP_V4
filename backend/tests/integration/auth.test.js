@@ -21,6 +21,17 @@ beforeEach(() => resetRateLimits());
 
 const cookieOf = (res, name) => (res.headers['set-cookie'] || []).find(c => c.startsWith(`${name}=`));
 
+describe('session errors carry a code, so only a real session end signs the browser out', () => {
+  it('no token, a bad token and a missing session each answer 401 with a session code', async () => {
+    const none = await request(app).get('/api/institution/me');
+    expect(none.status).toBe(401);
+    expect(none.body.code).toBe('unauthenticated');
+    const bad = await request(app).get('/api/institution/me').set('Authorization', 'Bearer not-a-token');
+    expect(bad.status).toBe(401);
+    expect(bad.body.code).toBe('invalid_session');
+  });
+});
+
 describe('staff', () => {
   it('logs in with an httpOnly SameSite=Strict session cookie and a readable CSRF cookie', async () => {
     const { res } = await login(app, '/api/auth/institution/login', { email: A.adminEmail, password: PASSWORD });

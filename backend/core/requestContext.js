@@ -22,3 +22,5 @@ export const nowIsoFor = () => new Date(nowMs()).toISOString();
 /** True when the signed-in learner is in the test tenant (#pass/#fail and /dev controls work). */
 export const isTestLearner = () => !!store.getStore()?.testLearner;
 
+/** The signed-in learner's learning language, exactly as chosen (telugu, telugu_en, …), else null. */
+export const currentLearningMode = () => store.getStore()?.learningMode || null;

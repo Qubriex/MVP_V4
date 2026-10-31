@@ -1,0 +1,1333 @@
+{
+ "id": "jv-m1",
+ "n": 1,
+ "skill": "java-fundamentals",
+ "title": {
+  "en": "Fundamentals",
+  "te": "Fundamentals",
+  "hi": "Fundamentals"
+ },
+ "summary": {
+  "en": "Introduction, the JDK and JVM, variables and types, operators, and input and output.",
+  "te": "పరిచయం, JDK, JVM, variables, types, operators, input, output.",
+  "hi": "परिचय, JDK और JVM, variables और types, operators, और input और output।"
+ },
+ "lessons": [
+  {
+   "id": "jv-m1-l1",
+   "n": 1,
+   "minutes": 20,
+   "title": {
+    "en": "Introduction, JDK and JVM",
+    "te": "పరిచయం, JDK, JVM",
+    "hi": "परिचय, JDK और JVM"
+   },
+   "oneLine": {
+    "en": "Every Java program lives in a class, starts at the main method, and prints with System.out.println.",
+    "te": "ప్రతి Java program ఒక class లో ఉంటుంది, main method వద్ద మొదలవుతుంది, System.out.println తో print చేస్తుంది.",
+    "hi": "हर Java program एक class में रहता है, main method से शुरू होता है, और System.out.println से print करता है।"
+   },
+   "useCase": {
+    "en": "Banking apps, Android apps and big company back-ends are written in Java, and every one of them starts from a main method or a framework that calls one.",
+    "te": "Banking apps, Android apps, పెద్ద కంపెనీల back-ends Java లో రాస్తారు; ప్రతి దానికీ main method లేదా దాన్ని call చేసే framework మొదలు.",
+    "hi": "Banking apps, Android apps और बड़ी कंपनियों के back-ends Java में लिखे जाते हैं, और सब main method या उसे call करने वाले framework से शुरू होते हैं।"
+   },
+   "explain": {
+    "en": [
+     "You install the JDK (Java Development Kit). It has javac, the compiler, which turns your .java file into bytecode; the JVM (Java Virtual Machine) then runs that bytecode on any computer.",
+     "All code sits inside a class: public class Main { ... }. The file name must match: Main.java.",
+     "public static void main(String[] args) is where the program starts.",
+     "System.out.println(\"text\") prints a line; System.out.print prints without a new line.",
+     "Every statement ends with a semicolon, and curly braces { } group code together."
+    ],
+    "te": [
+     "మీరు JDK (Java Development Kit) install చేస్తారు. అందులో javac అనే compiler ఉంటుంది; అది మీ .java file ని bytecode గా మారుస్తుంది; తర్వాత JVM (Java Virtual Machine) ఆ bytecode ని ఏ computer లోనైనా నడుపుతుంది.",
+     "మొత్తం code ఒక class లోపల ఉంటుంది: public class Main { ... }. File పేరు సరిపోవాలి: Main.java.",
+     "public static void main(String[] args) వద్ద program మొదలవుతుంది.",
+     "System.out.println(\"text\") ఒక line print చేస్తుంది; System.out.print కొత్త line లేకుండా print చేస్తుంది.",
+     "ప్రతి statement semicolon తో ముగుస్తుంది; curly braces { } code ని కలిపి ఉంచుతాయి."
+    ],
+    "hi": [
+     "आप JDK (Java Development Kit) install करते हैं। उसमें javac, यानी compiler, होता है जो आपकी .java file को bytecode में बदलता है; फिर JVM (Java Virtual Machine) उस bytecode को किसी भी computer पर चलाता है।",
+     "सारा code एक class के अंदर होता है: public class Main { ... }। File का नाम मेल खाना चाहिए: Main.java।",
+     "public static void main(String[] args) से program शुरू होता है।",
+     "System.out.println(\"text\") एक line print करता है; System.out.print बिना नई line के print करता है।",
+     "हर statement semicolon से ख़त्म होता है, और curly braces { } code को एक साथ रखते हैं।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "A class is the box, main is the door, println is the voice."
+    ],
+    "te": [
+     "Class అంటే డబ్బా, main అంటే తలుపు, println అంటే గొంతు."
+    ],
+    "hi": [
+     "Class डिब्बा है, main दरवाज़ा, println आवाज़।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "A welcome screen for a college app: three println lines show the college name, the date and \"Welcome\"."
+    ],
+    "te": [
+     "College app welcome screen: మూడు println lines college పేరు, తేదీ, \"Welcome\" చూపిస్తాయి."
+    ],
+    "hi": [
+     "College app की welcome screen: तीन println lines college का नाम, तारीख़ और \"Welcome\" दिखाती हैं।"
+    ]
+   },
+   "picture": "flowchart LR\n  S[\"Main.java\"] -->|javac| B[\"Main.class (bytecode)\"] -->|java / JVM| O[\"output\"]",
+   "code": {
+    "source": "public class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Namaste, Java!\");\n        System.out.print(\"Learning \");\n        System.out.println(\"with Qubirex\");\n    }\n}",
+    "output": "Namaste, Java!\nLearning with Qubirex",
+    "notes": [
+     {
+      "line": 1,
+      "note": {
+       "en": "Everything lives inside a class named Main.",
+       "te": "అంతా Main అనే class లోపల ఉంటుంది.",
+       "hi": "सब कुछ Main नाम की class के अंदर है।"
+      }
+     },
+     {
+      "line": 2,
+      "note": {
+       "en": "main is where Java starts running.",
+       "te": "Java నడవడం main వద్ద మొదలవుతుంది.",
+       "hi": "Java, main से चलना शुरू करता है।"
+      }
+     },
+     {
+      "line": 3,
+      "note": {
+       "en": "println prints the text and moves to a new line.",
+       "te": "println text print చేసి కొత్త line కి వెళ్తుంది.",
+       "hi": "println text print करके नई line पर जाता है।"
+      }
+     },
+     {
+      "line": 4,
+      "note": {
+       "en": "print stays on the same line.",
+       "te": "print అదే line లో ఉంటుంది.",
+       "hi": "print उसी line पर रहता है।"
+      }
+     },
+     {
+      "line": 5,
+      "note": {
+       "en": "So this finishes the second line.",
+       "te": "కాబట్టి ఇది రెండో line ని పూర్తి చేస్తుంది.",
+       "hi": "इसलिए यह दूसरी line पूरी करता है।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "System.out.println(\"Hi\")",
+     "fix": {
+      "en": "Missing semicolon. Java needs ; at the end: System.out.println(\"Hi\");",
+      "te": "Semicolon లేదు. Java కి చివర ; కావాలి: System.out.println(\"Hi\");",
+      "hi": "Semicolon नहीं है। Java को आख़िर में ; चाहिए: System.out.println(\"Hi\");"
+     }
+    },
+    {
+     "wrong": "system.out.println(\"Hi\");",
+     "fix": {
+      "en": "Java is case-sensitive: write System with a capital S.",
+      "te": "Java case-sensitive: System ని పెద్ద S తో రాయండి.",
+      "hi": "Java case-sensitive है: System बड़े S से लिखिए।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "Where does a Java program start?",
+      "te": "Java program ఎక్కడ మొదలవుతుంది?",
+      "hi": "Java program कहाँ से शुरू होता है?"
+     },
+     "options": [
+      "class",
+      "main",
+      "println"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "The main method.",
+      "te": "main method.",
+      "hi": "main method।"
+     }
+    },
+    {
+     "q": {
+      "en": "public class Main must be saved in…",
+      "te": "public class Main ని దాయాల్సిన file…",
+      "hi": "public class Main किस file में रखें…"
+     },
+     "options": [
+      "main.java",
+      "Main.java",
+      "Main.txt"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "The name must match exactly.",
+      "te": "పేరు ఖచ్చితంగా సరిపోవాలి.",
+      "hi": "नाम बिल्कुल मेल खाना चाहिए।"
+     }
+    },
+    {
+     "q": {
+      "en": "Which prints and moves to a new line?",
+      "te": "Print చేసి కొత్త line కి వెళ్లేది ఏది?",
+      "hi": "कौन print करके नई line पर जाता है?"
+     },
+     "options": [
+      "System.out.print",
+      "System.out.println"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "println adds the new line.",
+      "te": "println కొత్త line జోడిస్తుంది.",
+      "hi": "println नई line जोड़ता है।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write a program that prints your name on the first line and your college on the second line, using two println statements.",
+     "te": "రెండు println statements తో మొదటి line లో మీ పేరు, రెండో line లో మీ college print చేసే program రాయండి.",
+     "hi": "दो println statements से पहली line में अपना नाम और दूसरी line में अपना college print करने वाला program लिखिए।"
+    },
+    "starter": "public class Main {\n    public static void main(String[] args) {\n        // print your name, then your college\n    }\n}\n",
+    "tests": [
+     {
+      "name": "has a main method",
+      "pattern": "public\\s+static\\s+void\\s+main\\s*\\(\\s*String\\s*\\[\\]\\s*\\w+\\s*\\)"
+     },
+     {
+      "name": "two println lines",
+      "pattern": "(System\\.out\\.println\\s*\\(.*\\)\\s*;[\\s\\S]*){2}",
+      "expected": "System.out.println(...); twice"
+     },
+     {
+      "name": "each line ends with ;",
+      "pattern": "println\\s*\\(\"[^\"]*\"\\)\\s*;",
+      "expected": "println(\"...\");",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "Inside main, write System.out.println(\"...\");",
+      "te": "main లోపల System.out.println(\"...\"); రాయండి.",
+      "hi": "main के अंदर System.out.println(\"...\"); लिखिए।"
+     },
+     {
+      "en": "Put your name between the quotes.",
+      "te": "Quotes మధ్య మీ పేరు పెట్టండి.",
+      "hi": "Quotes के बीच अपना नाम रखिए।"
+     },
+     {
+      "en": "Add a second println with your college, and end both with ;",
+      "te": "మీ college తో రెండో println జోడించి, రెండింటినీ ; తో ముగించండి.",
+      "hi": "College के साथ दूसरा println जोड़िए, और दोनों को ; से ख़त्म कीजिए।"
+     }
+    ],
+    "solution": "public class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Ravi Kumar\");\n        System.out.println(\"Govt Degree College\");\n    }\n}",
+    "output": "Ravi Kumar\nGovt Degree College"
+   },
+   "cheat": {
+    "en": [
+     "public class Main { public static void main(String[] args) { ... } }",
+     "System.out.println(x); new line · System.out.print(x); same line",
+     "File name = class name · every statement ends with ;"
+    ],
+    "te": [
+     "public class Main { public static void main(String[] args) { ... } }",
+     "System.out.println(x); కొత్త line · System.out.print(x); అదే line",
+     "File పేరు = class పేరు · ప్రతి statement ; తో ముగుస్తుంది"
+    ],
+    "hi": [
+     "public class Main { public static void main(String[] args) { ... } }",
+     "System.out.println(x); नई line · System.out.print(x); वही line",
+     "File का नाम = class का नाम · हर statement ; से ख़त्म"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "Explain the parts of a Java hello program: the class, the main method and println, and what each one does.",
+      "te": "Java hello program భాగాలను వివరించండి: class, main method, println; ప్రతిది ఏం చేస్తుందో.",
+      "hi": "Java hello program के हिस्से समझाइए: class, main method और println, और हर एक क्या करता है।"
+     },
+     {
+      "en": "Explain what javac and the JVM do, and why Java runs on many computers.",
+      "te": "javac, JVM ఏం చేస్తాయో, Java చాలా computers లో ఎందుకు నడుస్తుందో వివరించండి.",
+      "hi": "javac और JVM क्या करते हैं, और Java कई computers पर क्यों चलता है, समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "class"
+     ],
+     [
+      "main"
+     ],
+     [
+      "println",
+      "print",
+      "jvm",
+      "javac",
+      "bytecode"
+     ]
+    ],
+    "challenge": {
+     "en": "Say where a Java program starts running.",
+     "te": "Java program ఎక్కడ నడవడం మొదలవుతుందో చెప్పండి.",
+     "hi": "Java program कहाँ से चलना शुरू होता है, बताइए।"
+    }
+   }
+  },
+  {
+   "id": "jv-m1-l2",
+   "n": 2,
+   "minutes": 20,
+   "title": {
+    "en": "Variables and data types",
+    "te": "Variables, data types",
+    "hi": "Variables और data types"
+   },
+   "oneLine": {
+    "en": "In Java every variable has a fixed type, such as int for whole numbers, double for decimals, boolean for true/false and String for text.",
+    "te": "Java లో ప్రతి variable కి స్థిరమైన type ఉంటుంది: పూర్ణ సంఖ్యలకు int, decimals కి double, true/false కి boolean, text కి String.",
+    "hi": "Java में हर variable का तय type होता है, जैसे पूर्ण संख्या के लिए int, decimal के लिए double, true/false के लिए boolean और text के लिए String।"
+   },
+   "useCase": {
+    "en": "A shopping app keeps quantity as int, price as double, inStock as boolean and the product name as String.",
+    "te": "Shopping app quantity ని int గా, price ని double గా, inStock ని boolean గా, product పేరును String గా ఉంచుతుంది.",
+    "hi": "Shopping app quantity को int, price को double, inStock को boolean और product का नाम String में रखता है।"
+   },
+   "explain": {
+    "en": [
+     "A variable is a named box. In Java you must say what kind of box it is.",
+     "int count = 3; makes a whole-number box. double price = 49.5; holds decimals.",
+     "boolean paid = true; holds true or false. char grade = 'A'; holds one character.",
+     "String name = \"Ravi\"; holds text. String starts with a capital S because it is a class.",
+     "Once a type is set it cannot change: you cannot put text into an int."
+    ],
+    "te": [
+     "Variable అంటే పేరున్న డబ్బా. Java లో అది ఏ రకం డబ్బానో చెప్పాలి.",
+     "int count = 3; పూర్ణ సంఖ్య డబ్బా చేస్తుంది. double price = 49.5; decimals ఉంచుతుంది.",
+     "boolean paid = true; true లేదా false ఉంచుతుంది. char grade = 'A'; ఒక్క అక్షరం ఉంచుతుంది.",
+     "String name = \"Ravi\"; text ఉంచుతుంది. String ఒక class కాబట్టి పెద్ద S తో మొదలవుతుంది.",
+     "Type ఒకసారి నిర్ణయించాక మారదు: int లో text పెట్టలేం."
+    ],
+    "hi": [
+     "Variable एक नाम वाला डिब्बा है। Java में बताना पड़ता है कि डिब्बा किस तरह का है।",
+     "int count = 3; पूर्ण संख्या का डिब्बा बनाता है। double price = 49.5; decimals रखता है।",
+     "boolean paid = true; true या false रखता है। char grade = 'A'; एक अक्षर रखता है।",
+     "String name = \"Ravi\"; text रखता है। String बड़े S से शुरू होता है क्योंकि वह एक class है।",
+     "Type एक बार तय होने पर बदलता नहीं: int में text नहीं रख सकते।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "Each box has a label for what it can hold: numbers, decimals, yes/no or text."
+    ],
+    "te": [
+     "ప్రతి డబ్బాకు అది ఏం ఉంచగలదో label ఉంటుంది: numbers, decimals, అవును/కాదు, text."
+    ],
+    "hi": [
+     "हर डिब्बे पर लिखा होता है कि उसमें क्या रख सकते हैं: numbers, decimals, हाँ/ना या text।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "A bus ticket: String route = \"Hyderabad-Warangal\"; int seats = 2; double fare = 230.0; boolean ac = false;"
+    ],
+    "te": [
+     "Bus ticket: String route = \"Hyderabad-Warangal\"; int seats = 2; double fare = 230.0; boolean ac = false;"
+    ],
+    "hi": [
+     "Bus ticket: String route = \"Delhi-Agra\"; int seats = 2; double fare = 230.0; boolean ac = false;"
+    ]
+   },
+   "picture": "flowchart LR\n  I[\"int qty = 3\"] --- D[\"double price = 49.5\"] --- B[\"boolean inStock = true\"] --- S[\"String name = \\\"Pen\\\"\"]",
+   "code": {
+    "source": "public class Main {\n    public static void main(String[] args) {\n        String item = \"Notebook\";\n        int qty = 3;\n        double price = 45.5;\n        boolean inStock = true;\n        double total = qty * price;\n        System.out.println(item + \" x\" + qty + \" = \" + total);\n        System.out.println(\"In stock: \" + inStock);\n    }\n}",
+    "output": "Notebook x3 = 136.5\nIn stock: true",
+    "notes": [
+     {
+      "line": 3,
+      "note": {
+       "en": "String holds text, in double quotes.",
+       "te": "String text ఉంచుతుంది, double quotes లో.",
+       "hi": "String text रखता है, double quotes में।"
+      }
+     },
+     {
+      "line": 4,
+      "note": {
+       "en": "int holds a whole number.",
+       "te": "int పూర్ణ సంఖ్య ఉంచుతుంది.",
+       "hi": "int पूर्ण संख्या रखता है।"
+      }
+     },
+     {
+      "line": 5,
+      "note": {
+       "en": "double holds a decimal number.",
+       "te": "double decimal number ఉంచుతుంది.",
+       "hi": "double decimal number रखता है।"
+      }
+     },
+     {
+      "line": 6,
+      "note": {
+       "en": "boolean is true or false.",
+       "te": "boolean అంటే true లేదా false.",
+       "hi": "boolean, true या false है।"
+      }
+     },
+     {
+      "line": 7,
+      "note": {
+       "en": "int times double gives a double.",
+       "te": "int × double = double.",
+       "hi": "int गुणा double = double।"
+      }
+     },
+     {
+      "line": 8,
+      "note": {
+       "en": "+ joins text and numbers into one line.",
+       "te": "+ text, numbers ని ఒక line గా కలుపుతుంది.",
+       "hi": "+ text और numbers को एक line में जोड़ता है।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "int price = 49.5;",
+     "fix": {
+      "en": "An int cannot hold decimals. Use double price = 49.5;",
+      "te": "int decimals ఉంచలేదు. double price = 49.5; వాడండి.",
+      "hi": "int में decimal नहीं आ सकता। double price = 49.5; लिखिए।"
+     }
+    },
+    {
+     "wrong": "String name = 'Ravi';",
+     "fix": {
+      "en": "Single quotes are for one char. Text needs double quotes: \"Ravi\".",
+      "te": "Single quotes ఒక్క char కోసం. Text కి double quotes: \"Ravi\".",
+      "hi": "Single quotes एक char के लिए हैं। Text को double quotes चाहिए: \"Ravi\"।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "Which type holds 49.99?",
+      "te": "49.99 ని ఉంచే type ఏది?",
+      "hi": "49.99 कौन-सा type रखता है?"
+     },
+     "options": [
+      "int",
+      "double",
+      "boolean"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Decimals use double.",
+      "te": "Decimals కి double.",
+      "hi": "Decimal के लिए double।"
+     }
+    },
+    {
+     "q": {
+      "en": "Which type holds true or false?",
+      "te": "true లేదా false ని ఉంచేది?",
+      "hi": "true या false कौन रखता है?"
+     },
+     "options": [
+      "String",
+      "boolean",
+      "char"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "boolean.",
+      "te": "boolean.",
+      "hi": "boolean।"
+     }
+    },
+    {
+     "q": {
+      "en": "Text uses…",
+      "te": "Text కి…",
+      "hi": "Text के लिए…"
+     },
+     "options": [
+      "'single quotes'",
+      "\"double quotes\""
+     ],
+     "answer": 1,
+     "why": {
+      "en": "String needs double quotes.",
+      "te": "String కి double quotes.",
+      "hi": "String को double quotes चाहिए।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Make variables for a phone recharge: String plan = \"Talk 299\", int days = 28 and double price = 299.0. Print \"Talk 299: 28 days for Rs 299.0\" using the variables.",
+     "te": "Phone recharge కోసం variables చేయండి: String plan = \"Talk 299\", int days = 28, double price = 299.0. Variables వాడి \"Talk 299: 28 days for Rs 299.0\" print చేయండి.",
+     "hi": "Phone recharge के लिए variables बनाइए: String plan = \"Talk 299\", int days = 28 और double price = 299.0। Variables से \"Talk 299: 28 days for Rs 299.0\" print कीजिए।"
+    },
+    "starter": "public class Main {\n    public static void main(String[] args) {\n        // make plan, days and price, then print the line\n    }\n}\n",
+    "tests": [
+     {
+      "name": "String plan",
+      "pattern": "String\\s+plan\\s*=\\s*\"Talk 299\"\\s*;"
+     },
+     {
+      "name": "int days",
+      "pattern": "int\\s+days\\s*=\\s*28\\s*;"
+     },
+     {
+      "name": "double price",
+      "pattern": "double\\s+price\\s*=\\s*299(\\.0)?\\s*;"
+     },
+     {
+      "name": "prints using the variables",
+      "pattern": "println\\s*\\([^;]*plan[^;]*days[^;]*price[^;]*\\)\\s*;",
+      "expected": "println(plan + ... + days + ... + price)",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "Declare each with its type: String, int, double.",
+      "te": "ప్రతి దాన్ని దాని type తో declare చేయండి: String, int, double.",
+      "hi": "हर एक को उसके type से declare कीजिए: String, int, double।"
+     },
+     {
+      "en": "Join with +: plan + \": \" + days + ...",
+      "te": "+ తో కలపండి: plan + \": \" + days + ...",
+      "hi": "+ से जोड़िए: plan + \": \" + days + ..."
+     },
+     {
+      "en": "System.out.println(plan + \": \" + days + \" days for Rs \" + price);",
+      "te": "System.out.println(plan + \": \" + days + \" days for Rs \" + price);",
+      "hi": "System.out.println(plan + \": \" + days + \" days for Rs \" + price);"
+     }
+    ],
+    "solution": "public class Main {\n    public static void main(String[] args) {\n        String plan = \"Talk 299\";\n        int days = 28;\n        double price = 299.0;\n        System.out.println(plan + \": \" + days + \" days for Rs \" + price);\n    }\n}",
+    "output": "Talk 299: 28 days for Rs 299.0"
+   },
+   "cheat": {
+    "en": [
+     "int 5 · double 5.5 · boolean true · char 'A' · String \"text\"",
+     "type name = value;",
+     "The type of a variable never changes."
+    ],
+    "te": [
+     "int 5 · double 5.5 · boolean true · char 'A' · String \"text\"",
+     "type name = value;",
+     "Variable type ఎప్పుడూ మారదు."
+    ],
+    "hi": [
+     "int 5 · double 5.5 · boolean true · char 'A' · String \"text\"",
+     "type name = value;",
+     "Variable का type कभी नहीं बदलता।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A shopping app stores an item's name, quantity, price and whether it is in stock. Explain which Java type you would use for each and why.",
+      "te": "Shopping app ఒక item పేరు, quantity, price, stock లో ఉందా అనేది దాస్తుంది. ప్రతి దానికి ఏ Java type వాడతారో, ఎందుకో వివరించండి.",
+      "hi": "Shopping app किसी item का नाम, quantity, price और stock में है या नहीं, रखता है। हर एक के लिए कौन-सा Java type लेंगे और क्यों, समझाइए।"
+     },
+     {
+      "en": "Why does int price = 49.5; give an error? Explain how to fix it.",
+      "te": "int price = 49.5; ఎందుకు error ఇస్తుంది? ఎలా సరిచేయాలో వివరించండి.",
+      "hi": "int price = 49.5; error क्यों देता है? कैसे ठीक करें, समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "int"
+     ],
+     [
+      "double",
+      "decimal"
+     ],
+     [
+      "string",
+      "boolean",
+      "type"
+     ]
+    ],
+    "challenge": {
+     "en": "Say the difference between int and double.",
+     "te": "int, double మధ్య తేడా చెప్పండి.",
+     "hi": "int और double का फ़र्क़ बताइए।"
+    }
+   }
+  },
+  {
+   "id": "jv-m1-l3",
+   "n": 3,
+   "minutes": 20,
+   "title": {
+    "en": "Operators",
+    "te": "Operators",
+    "hi": "Operators"
+   },
+   "oneLine": {
+    "en": "Operators do the work on values: + - * / % for maths, == != < > for comparing, and && || ! for joining conditions.",
+    "te": "Operators values పై పని చేస్తాయి: లెక్కలకు + - * / %, పోల్చడానికి == != < >, conditions కలపడానికి && || !.",
+    "hi": "Operators values पर काम करते हैं: गणित के लिए + - * / %, तुलना के लिए == != < >, और conditions जोड़ने के लिए && || !।"
+   },
+   "useCase": {
+    "en": "A restaurant app splits a bill with /, finds the leftover rupees with %, and checks \"total > 500 && member\" for a discount.",
+    "te": "Restaurant app / తో bill పంచుతుంది, % తో మిగిలిన రూపాయలు కనుక్కుంటుంది, discount కోసం \"total > 500 && member\" చూస్తుంది.",
+    "hi": "Restaurant app / से bill बाँटता है, % से बचे रुपये निकालता है, और छूट के लिए \"total > 500 && member\" जाँचता है।"
+   },
+   "explain": {
+    "en": [
+     "+ - * work as in school maths. / divides, and % gives the remainder: 7 % 2 is 1.",
+     "Careful: when both sides are int, / drops the decimal. 7 / 2 is 3, but 7 / 2.0 is 3.5.",
+     "Comparisons give true or false: ==, !=, <, >, <=, >=.",
+     "&& means both must be true, || means at least one, ! flips true and false.",
+     "Short forms: count++ adds 1, total += price adds price to total."
+    ],
+    "te": [
+     "+ - * పాఠశాల గణితంలాగే. / భాగిస్తుంది, % శేషం ఇస్తుంది: 7 % 2 = 1.",
+     "జాగ్రత్త: రెండూ int అయితే / decimal వదిలేస్తుంది. 7 / 2 = 3, కానీ 7 / 2.0 = 3.5.",
+     "పోలికలు true లేదా false ఇస్తాయి: ==, !=, <, >, <=, >=.",
+     "&& అంటే రెండూ true కావాలి, || అంటే కనీసం ఒకటి, ! true, false ని తిప్పుతుంది.",
+     "చిన్న రూపాలు: count++ 1 కలుపుతుంది, total += price, price ని total కి కలుపుతుంది."
+    ],
+    "hi": [
+     "+ - * स्कूल के गणित जैसे। / भाग देता है, और % शेषफल देता है: 7 % 2 = 1।",
+     "सावधान: दोनों तरफ़ int हों तो / decimal हटा देता है। 7 / 2 = 3, पर 7 / 2.0 = 3.5।",
+     "तुलनाएँ true या false देती हैं: ==, !=, <, >, <=, >=।",
+     "&& मतलब दोनों true, || मतलब कम से कम एक, ! true और false को उलटता है।",
+     "छोटे रूप: count++ 1 जोड़ता है, total += price, price को total में जोड़ता है।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "Operators are the calculator buttons of Java."
+    ],
+    "te": [
+     "Operators అంటే Java calculator buttons."
+    ],
+    "hi": [
+     "Operators, Java के calculator buttons हैं।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "A leap-year check: (year % 4 == 0 && year % 100 != 0) || year % 400 == 0."
+    ],
+    "te": [
+     "Leap year check: (year % 4 == 0 && year % 100 != 0) || year % 400 == 0."
+    ],
+    "hi": [
+     "Leap year जाँच: (year % 4 == 0 && year % 100 != 0) || year % 400 == 0।"
+    ]
+   },
+   "picture": "flowchart LR\n  A[\"1000 / 3\"] --> B[\"333\"]\n  C[\"1000 % 3\"] --> D[\"1\"]\n  E[\"total > 500 && member\"] --> F[\"true / false\"]",
+   "code": {
+    "source": "public class Main {\n    public static void main(String[] args) {\n        int total = 1000;\n        int people = 3;\n        System.out.println(total / people);\n        System.out.println(total % people);\n        System.out.println(total / 3.0);\n        boolean member = true;\n        System.out.println(total > 500 && member);\n        int count = 0;\n        count++;\n        count += 5;\n        System.out.println(count);\n    }\n}",
+    "output": "333\n1\n333.3333333333333\ntrue\n6",
+    "notes": [
+     {
+      "line": 5,
+      "note": {
+       "en": "int / int drops the decimal: 333.",
+       "te": "int / int decimal వదిలేస్తుంది: 333.",
+       "hi": "int / int decimal हटाता है: 333।"
+      }
+     },
+     {
+      "line": 6,
+      "note": {
+       "en": "% gives the remainder: 1 rupee left over.",
+       "te": "% శేషం: 1 రూపాయి మిగులుతుంది.",
+       "hi": "% शेषफल: 1 रुपया बचा।"
+      }
+     },
+     {
+      "line": 7,
+      "note": {
+       "en": "Dividing by a double keeps the decimals.",
+       "te": "Double తో భాగిస్తే decimals ఉంటాయి.",
+       "hi": "Double से भाग देने पर decimals रहते हैं।"
+      }
+     },
+     {
+      "line": 9,
+      "note": {
+       "en": "&&: both must be true.",
+       "te": "&&: రెండూ true కావాలి.",
+       "hi": "&&: दोनों true होने चाहिए।"
+      }
+     },
+     {
+      "line": 11,
+      "note": {
+       "en": "count++ adds one.",
+       "te": "count++ ఒకటి కలుపుతుంది.",
+       "hi": "count++ एक जोड़ता है।"
+      }
+     },
+     {
+      "line": 12,
+      "note": {
+       "en": "+= adds 5 more: 6.",
+       "te": "+= ఇంకా 5 కలుపుతుంది: 6.",
+       "hi": "+= 5 और जोड़ता है: 6।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "double avg = (70 + 85) / 2;",
+     "fix": {
+      "en": "Both sides are int, so 77 not 77.5. Write / 2.0.",
+      "te": "రెండూ int, కాబట్టి 77.5 కాదు 77. / 2.0 రాయండి.",
+      "hi": "दोनों int हैं, इसलिए 77.5 नहीं 77। / 2.0 लिखिए।"
+     }
+    },
+    {
+     "wrong": "if (age > 18 & < 60)",
+     "fix": {
+      "en": "Each side needs its own comparison: age > 18 && age < 60.",
+      "te": "ప్రతి వైపుకు సొంత పోలిక కావాలి: age > 18 && age < 60.",
+      "hi": "हर तरफ़ अपनी तुलना चाहिए: age > 18 && age < 60।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "17 % 5 is…",
+      "te": "17 % 5…",
+      "hi": "17 % 5…"
+     },
+     "options": [
+      "3",
+      "2",
+      "3.4"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "17 = 3 × 5 + 2.",
+      "te": "17 = 3 × 5 + 2.",
+      "hi": "17 = 3 × 5 + 2।"
+     }
+    },
+    {
+     "q": {
+      "en": "9 / 2 with ints is…",
+      "te": "Ints తో 9 / 2…",
+      "hi": "Ints के साथ 9 / 2…"
+     },
+     "options": [
+      "4",
+      "4.5",
+      "5"
+     ],
+     "answer": 0,
+     "why": {
+      "en": "The decimal is dropped.",
+      "te": "Decimal పోతుంది.",
+      "hi": "Decimal हटता है।"
+     }
+    },
+    {
+     "q": {
+      "en": "true && false is…",
+      "te": "true && false…",
+      "hi": "true && false…"
+     },
+     "options": [
+      "true",
+      "false"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "&& needs both.",
+      "te": "&& కి రెండూ కావాలి.",
+      "hi": "&& को दोनों चाहिए।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write static boolean isLeap(int year) that returns true for leap years: divisible by 4 and not by 100, or divisible by 400.",
+     "te": "Leap years కి true ఇచ్చే static boolean isLeap(int year) రాయండి: 4 తో భాగించగలిగి 100 తో కాకపోవడం, లేదా 400 తో భాగించగలగడం.",
+     "hi": "static boolean isLeap(int year) लिखिए जो leap years पर true दे: 4 से बँटे और 100 से नहीं, या 400 से बँटे।"
+    },
+    "starter": "public class Main {\n    static boolean isLeap(int year) {\n        return year % 4 == 0;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(isLeap(2024));\n    }\n}",
+    "tests": [
+     {
+      "name": "uses % 4",
+      "pattern": "year\\s*%\\s*4\\s*==\\s*0"
+     },
+     {
+      "name": "uses % 100",
+      "pattern": "year\\s*%\\s*100\\s*!=\\s*0"
+     },
+     {
+      "name": "uses % 400",
+      "pattern": "year\\s*%\\s*400\\s*==\\s*0"
+     },
+     {
+      "name": "joins with && and ||",
+      "pattern": "&&[\\s\\S]*\\|\\||\\|\\|[\\s\\S]*&&",
+      "expected": "&& and ||",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "Divisible by 4 means year % 4 == 0.",
+      "te": "4 తో భాగించగలగడం అంటే year % 4 == 0.",
+      "hi": "4 से बँटना मतलब year % 4 == 0।"
+     },
+     {
+      "en": "\"Not by 100\" is year % 100 != 0; join with &&.",
+      "te": "\"100 తో కాదు\" అంటే year % 100 != 0; && తో కలపండి.",
+      "hi": "\"100 से नहीं\" मतलब year % 100 != 0; && से जोड़िए।"
+     },
+     {
+      "en": "return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;",
+      "te": "return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;",
+      "hi": "return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;"
+     }
+    ],
+    "solution": "public class Main {\n    static boolean isLeap(int year) {\n        return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(isLeap(2024) + \" \" + isLeap(1900) + \" \" + isLeap(2000));\n    }\n}",
+    "output": "true false true"
+   },
+   "cheat": {
+    "en": [
+     "+ - * / % · int / int drops decimals · use 2.0",
+     "== != < > <= >= give true / false",
+     "&& both · || either · ! not · x++ · x += n"
+    ],
+    "te": [
+     "+ - * / % · int / int decimals వదిలేస్తుంది · 2.0 వాడండి",
+     "== != < > <= >= true / false ఇస్తాయి",
+     "&& రెండూ · || ఏదో ఒకటి · ! కాదు · x++ · x += n"
+    ],
+    "hi": [
+     "+ - * / % · int / int decimals हटाता है · 2.0 लिखिए",
+     "== != < > <= >= true / false देते हैं",
+     "&& दोनों · || कोई एक · ! नहीं · x++ · x += n"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "Three friends split a Rs 1000 bill. Explain what 1000 / 3, 1000 % 3 and 1000 / 3.0 give in Java and why.",
+      "te": "ముగ్గురు స్నేహితులు Rs 1000 bill పంచుకుంటారు. Java లో 1000 / 3, 1000 % 3, 1000 / 3.0 ఏం ఇస్తాయో, ఎందుకో వివరించండి.",
+      "hi": "तीन दोस्त Rs 1000 का bill बाँटते हैं। Java में 1000 / 3, 1000 % 3 और 1000 / 3.0 क्या देते हैं और क्यों, समझाइए।"
+     },
+     {
+      "en": "Explain && and || with a discount rule like \"total above 500 and a member\".",
+      "te": "\"total 500 పైన, member\" లాంటి discount నియమంతో &&, || వివరించండి.",
+      "hi": "\"total 500 से ऊपर और member\" जैसे छूट नियम से && और || समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "%",
+      "remainder",
+      "శేషం",
+      "शेष"
+     ],
+     [
+      "/",
+      "int",
+      "double",
+      "decimal"
+     ],
+     [
+      "&&",
+      "||",
+      "and",
+      "or",
+      "true"
+     ]
+    ],
+    "challenge": {
+     "en": "Say why 7 / 2 gives 3 in Java.",
+     "te": "Java లో 7 / 2 ఎందుకు 3 ఇస్తుందో చెప్పండి.",
+     "hi": "Java में 7 / 2 से 3 क्यों आता है, बताइए।"
+    }
+   }
+  },
+  {
+   "id": "jv-m1-l4",
+   "n": 4,
+   "minutes": 20,
+   "title": {
+    "en": "Input and output (Scanner)",
+    "te": "Input, output (Scanner)",
+    "hi": "Input और output (Scanner)"
+   },
+   "oneLine": {
+    "en": "System.out prints to the screen, and a Scanner reads what the user types: numbers with nextInt or nextDouble, text with nextLine.",
+    "te": "System.out screen పై print చేస్తుంది; Scanner user type చేసేదాన్ని చదువుతుంది: numbers కి nextInt లేదా nextDouble, text కి nextLine.",
+    "hi": "System.out screen पर print करता है, और Scanner user का लिखा पढ़ता है: numbers के लिए nextInt या nextDouble, text के लिए nextLine।"
+   },
+   "useCase": {
+    "en": "A fee calculator asks for the number of months, reads it with Scanner and prints the fee neatly with printf.",
+    "te": "Fee calculator నెలల సంఖ్య అడిగి Scanner తో చదివి printf తో చక్కగా fee print చేస్తుంది.",
+    "hi": "Fee calculator महीनों की संख्या पूछता है, Scanner से पढ़ता है और printf से fee साफ़ print करता है।"
+   },
+   "explain": {
+    "en": [
+     "Output: println prints and moves to a new line; print stays on the same line.",
+     "printf formats numbers: System.out.printf(\"%.2f%n\", 12.5) prints 12.50.",
+     "Input needs import java.util.Scanner; at the top of the file, then Scanner sc = new Scanner(System.in);",
+     "sc.nextInt() reads a whole number, sc.nextDouble() a decimal, sc.next() one word, sc.nextLine() a full line.",
+     "After nextInt, a leftover Enter stays behind; call sc.nextLine() once before reading a full line of text."
+    ],
+    "te": [
+     "Output: println print చేసి కొత్త line కి వెళ్తుంది; print అదే line లో ఉంటుంది.",
+     "printf numbers ని format చేస్తుంది: System.out.printf(\"%.2f%n\", 12.5) 12.50 print చేస్తుంది.",
+     "Input కి file పైన import java.util.Scanner; కావాలి, తర్వాత Scanner sc = new Scanner(System.in);",
+     "sc.nextInt() పూర్ణ సంఖ్య, sc.nextDouble() decimal, sc.next() ఒక పదం, sc.nextLine() పూర్తి line చదువుతాయి.",
+     "nextInt తర్వాత మిగిలిన Enter ఉంటుంది; పూర్తి text line చదివే ముందు ఒకసారి sc.nextLine() call చేయండి."
+    ],
+    "hi": [
+     "Output: println print करके नई line पर जाता है; print उसी line पर रहता है।",
+     "printf numbers format करता है: System.out.printf(\"%.2f%n\", 12.5) से 12.50 छपता है।",
+     "Input के लिए file में सबसे ऊपर import java.util.Scanner; चाहिए, फिर Scanner sc = new Scanner(System.in);",
+     "sc.nextInt() पूर्ण संख्या, sc.nextDouble() decimal, sc.next() एक शब्द और sc.nextLine() पूरी line पढ़ता है।",
+     "nextInt के बाद बचा हुआ Enter रह जाता है; पूरी text line पढ़ने से पहले एक बार sc.nextLine() call कीजिए।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "System.out is Java's mouth; Scanner is its ear."
+    ],
+    "te": [
+     "System.out Java నోరు; Scanner దాని చెవి."
+    ],
+    "hi": [
+     "System.out, Java का मुँह है; Scanner उसका कान।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "A mobile recharge: read the amount with nextDouble and print \"Recharged Rs 299.00\" with printf."
+    ],
+    "te": [
+     "Mobile recharge: nextDouble తో amount చదివి printf తో \"Recharged Rs 299.00\" print చేయండి."
+    ],
+    "hi": [
+     "Mobile recharge: nextDouble से amount पढ़िए और printf से \"Recharged Rs 299.00\" print कीजिए।"
+    ]
+   },
+   "picture": "flowchart LR\n  K[\"keyboard: 6\"] --> S[\"sc.nextInt()\"] --> M[\"months = 6\"] --> C[\"fee = months * 1500.0\"] --> O[\"printf: Fee: 9000.00\"]",
+   "code": {
+    "source": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(\"6\\nRavi Kumar\");\n        int months = sc.nextInt();\n        sc.nextLine();\n        String name = sc.nextLine();\n        double fee = months * 1500.0;\n        System.out.print(\"Hello \" + name + \". \");\n        System.out.printf(\"Fee: %.2f%n\", fee);\n    }\n}",
+    "output": "Hello Ravi Kumar. Fee: 9000.00",
+    "notes": [
+     {
+      "line": 1,
+      "note": {
+       "en": "Scanner comes from java.util.",
+       "te": "Scanner java.util నుంచి వస్తుంది.",
+       "hi": "Scanner, java.util से आता है।"
+      }
+     },
+     {
+      "line": 5,
+      "note": {
+       "en": "Here the Scanner reads from a sample text so the example runs on its own; in a real program use System.in.",
+       "te": "Example స్వయంగా నడవడానికి ఇక్కడ Scanner sample text నుంచి చదువుతుంది; నిజమైన program లో System.in వాడండి.",
+       "hi": "यहाँ Scanner एक sample text से पढ़ता है ताकि example अपने-आप चले; असली program में System.in लीजिए।"
+      }
+     },
+     {
+      "line": 6,
+      "note": {
+       "en": "nextInt reads the number 6.",
+       "te": "nextInt 6 అనే number చదువుతుంది.",
+       "hi": "nextInt number 6 पढ़ता है।"
+      }
+     },
+     {
+      "line": 7,
+      "note": {
+       "en": "This skips the leftover Enter.",
+       "te": "ఇది మిగిలిన Enter ని దాటవేస్తుంది.",
+       "hi": "यह बचा हुआ Enter छोड़ता है।"
+      }
+     },
+     {
+      "line": 8,
+      "note": {
+       "en": "nextLine reads the full name with the space.",
+       "te": "nextLine space తో సహా పూర్తి పేరు చదువుతుంది.",
+       "hi": "nextLine space समेत पूरा नाम पढ़ता है।"
+      }
+     },
+     {
+      "line": 11,
+      "note": {
+       "en": "printf shows two decimals; %n is a new line.",
+       "te": "printf రెండు decimals చూపిస్తుంది; %n కొత్త line.",
+       "hi": "printf दो decimals दिखाता है; %n नई line है।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "Scanner sc = new Scanner(System.in);  // no import",
+     "fix": {
+      "en": "Add import java.util.Scanner; at the very top of the file.",
+      "te": "File పైభాగంలో import java.util.Scanner; జోడించండి.",
+      "hi": "File में सबसे ऊपर import java.util.Scanner; जोड़िए।"
+     }
+    },
+    {
+     "wrong": "int age = sc.nextInt();\nString name = sc.nextLine();  // name is empty",
+     "fix": {
+      "en": "nextLine reads the leftover Enter. Call sc.nextLine() once first.",
+      "te": "nextLine మిగిలిన Enter ని చదువుతుంది. ముందు ఒకసారి sc.nextLine() call చేయండి.",
+      "hi": "nextLine बचा हुआ Enter पढ़ता है। पहले एक बार sc.nextLine() call कीजिए।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "Which reads a whole number?",
+      "te": "పూర్ణ సంఖ్య చదివేది?",
+      "hi": "पूर्ण संख्या कौन पढ़ता है?"
+     },
+     "options": [
+      "sc.nextLine()",
+      "sc.nextInt()",
+      "sc.read()"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "nextInt.",
+      "te": "nextInt.",
+      "hi": "nextInt।"
+     }
+    },
+    {
+     "q": {
+      "en": "printf(\"%.2f\", 3.5) prints…",
+      "te": "printf(\"%.2f\", 3.5) print చేసేది…",
+      "hi": "printf(\"%.2f\", 3.5) छापता है…"
+     },
+     "options": [
+      "3.5",
+      "3.50",
+      "4"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Two decimals.",
+      "te": "రెండు decimals.",
+      "hi": "दो decimals।"
+     }
+    },
+    {
+     "q": {
+      "en": "Which stays on the same line?",
+      "te": "అదే line లో ఉండేది?",
+      "hi": "उसी line पर कौन रहता है?"
+     },
+     "options": [
+      "print",
+      "println"
+     ],
+     "answer": 0,
+     "why": {
+      "en": "print.",
+      "te": "print.",
+      "hi": "print।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Read the number of months with a Scanner and print the total fee at Rs 1500 per month, like \"Fee: 9000\".",
+     "te": "Scanner తో నెలల సంఖ్య చదివి, నెలకు Rs 1500 చొప్పున మొత్తం fee \"Fee: 9000\" లా print చేయండి.",
+     "hi": "Scanner से महीनों की संख्या पढ़िए और Rs 1500 प्रति माह की दर से कुल fee \"Fee: 9000\" जैसे print कीजिए।"
+    },
+    "starter": "public class Main {\n    public static void main(String[] args) {\n        int months = 6;\n        System.out.println(\"Fee: \" + months);\n    }\n}\n",
+    "tests": [
+     {
+      "name": "imports Scanner",
+      "pattern": "import\\s+java\\.util\\.(Scanner|\\*)\\s*;"
+     },
+     {
+      "name": "creates a Scanner on System.in",
+      "pattern": "new\\s+Scanner\\s*\\(\\s*System\\.in\\s*\\)"
+     },
+     {
+      "name": "reads an int",
+      "pattern": "\\.nextInt\\s*\\(\\s*\\)"
+     },
+     {
+      "name": "multiplies by 1500",
+      "pattern": "\\*\\s*1500|1500\\s*\\*",
+      "expected": "months * 1500",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "Start with import java.util.Scanner; above the class.",
+      "te": "Class పైన import java.util.Scanner; తో మొదలుపెట్టండి.",
+      "hi": "Class के ऊपर import java.util.Scanner; से शुरू कीजिए।"
+     },
+     {
+      "en": "Scanner sc = new Scanner(System.in); int months = sc.nextInt();",
+      "te": "Scanner sc = new Scanner(System.in); int months = sc.nextInt();",
+      "hi": "Scanner sc = new Scanner(System.in); int months = sc.nextInt();"
+     },
+     {
+      "en": "System.out.println(\"Fee: \" + months * 1500);",
+      "te": "System.out.println(\"Fee: \" + months * 1500);",
+      "hi": "System.out.println(\"Fee: \" + months * 1500);"
+     }
+    ],
+    "solution": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int months = sc.nextInt();\n        System.out.println(\"Fee: \" + months * 1500);\n    }\n}",
+    "stdin": "6",
+    "output": "Fee: 9000"
+   },
+   "cheat": {
+    "en": [
+     "println new line · print same line · printf(\"%.2f%n\", x)",
+     "import java.util.Scanner; · Scanner sc = new Scanner(System.in);",
+     "nextInt · nextDouble · next · nextLine (skip the leftover Enter)"
+    ],
+    "te": [
+     "println కొత్త line · print అదే line · printf(\"%.2f%n\", x)",
+     "import java.util.Scanner; · Scanner sc = new Scanner(System.in);",
+     "nextInt · nextDouble · next · nextLine (మిగిలిన Enter దాటవేయండి)"
+    ],
+    "hi": [
+     "println नई line · print वही line · printf(\"%.2f%n\", x)",
+     "import java.util.Scanner; · Scanner sc = new Scanner(System.in);",
+     "nextInt · nextDouble · next · nextLine (बचा Enter छोड़िए)"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "Explain the steps to read a number typed by the user in Java and print a fee with two decimals.",
+      "te": "Java లో user type చేసిన number చదివి రెండు decimals తో fee print చేసే steps వివరించండి.",
+      "hi": "Java में user का लिखा number पढ़कर दो decimals के साथ fee print करने के steps समझाइए।"
+     },
+     {
+      "en": "Why does nextLine sometimes return an empty string after nextInt, and how do you fix it?",
+      "te": "nextInt తర్వాత nextLine కొన్నిసార్లు ఖాళీ string ఎందుకు ఇస్తుంది, ఎలా సరిచేయాలి?",
+      "hi": "nextInt के बाद nextLine कभी-कभी ख़ाली string क्यों देता है, और कैसे ठीक करें?"
+     }
+    ],
+    "keywords": [
+     [
+      "scanner",
+      "import"
+     ],
+     [
+      "nextint",
+      "nextline",
+      "nextdouble"
+     ],
+     [
+      "printf",
+      "println",
+      "enter",
+      "leftover",
+      "మిగిలిన",
+      "बचा"
+     ]
+    ],
+    "challenge": {
+     "en": "Say the difference between print and println.",
+     "te": "print, println మధ్య తేడా చెప్పండి.",
+     "hi": "print और println का फ़र्क़ बताइए।"
+    }
+   }
+  }
+ ],
+ "test": {
+  "pass": 4,
+  "questions": [
+   {
+    "q": {
+     "en": "Java starts running at…",
+     "te": "Java నడవడం మొదలయ్యేది…",
+     "hi": "Java चलना शुरू करता है…"
+    },
+    "options": [
+     "main",
+     "class",
+     "import"
+    ],
+    "answer": 0,
+    "why": {
+     "en": "main.",
+     "te": "main.",
+     "hi": "main।"
+    }
+   },
+   {
+    "q": {
+     "en": "Which type for 9.5?",
+     "te": "9.5 కి ఏ type?",
+     "hi": "9.5 के लिए कौन-सा type?"
+    },
+    "options": [
+     "int",
+     "double",
+     "char"
+    ],
+    "answer": 1,
+    "why": {
+     "en": "double.",
+     "te": "double.",
+     "hi": "double।"
+    }
+   },
+   {
+    "q": {
+     "en": "9 / 2 with ints is…",
+     "te": "Ints తో 9 / 2…",
+     "hi": "Ints के साथ 9 / 2…"
+    },
+    "options": [
+     "4",
+     "4.5",
+     "5"
+    ],
+    "answer": 0,
+    "why": {
+     "en": "Decimals dropped.",
+     "te": "Decimals పోతాయి.",
+     "hi": "Decimals हटते हैं।"
+    }
+   },
+   {
+    "q": {
+     "en": "9 % 2 is…",
+     "te": "9 % 2…",
+     "hi": "9 % 2…"
+    },
+    "options": [
+     "1",
+     "4",
+     "0"
+    ],
+    "answer": 0,
+    "why": {
+     "en": "Remainder 1.",
+     "te": "శేషం 1.",
+     "hi": "शेषफल 1।"
+    }
+   },
+   {
+    "q": {
+     "en": "Every Java statement ends with…",
+     "te": "ప్రతి Java statement ముగిసేది…",
+     "hi": "हर Java statement ख़त्म होता है…"
+    },
+    "options": [
+     ".",
+     ";",
+     ":"
+    ],
+    "answer": 1,
+    "why": {
+     "en": "A semicolon.",
+     "te": "Semicolon.",
+     "hi": "Semicolon।"
+    }
+   }
+  ]
+ },
+ "project": {
+  "title": {
+   "en": "Electricity bill",
+   "te": "Electricity bill",
+   "hi": "Electricity bill"
+  },
+  "prompt": {
+   "en": "Read the units used with a Scanner. The bill is units × 6.5 plus a fixed charge of Rs 50. Print \"Units: <units>\" and \"Bill: Rs <amount>\" on two lines.",
+   "te": "Scanner తో వాడిన units చదవండి. Bill = units × 6.5 + స్థిర charge Rs 50. \"Units: <units>\", \"Bill: Rs <amount>\" రెండు lines లో print చేయండి.",
+   "hi": "Scanner से इस्तेमाल हुई units पढ़िए। Bill = units × 6.5 + तय charge Rs 50। \"Units: <units>\" और \"Bill: Rs <amount>\" दो lines में print कीजिए।"
+  },
+  "starter": "public class Main {\n    public static void main(String[] args) {\n        // read units, work out the bill, print two lines\n    }\n}\n",
+  "tests": [
+   {
+    "name": "imports Scanner",
+    "pattern": "import\\s+java\\.util\\.(Scanner|\\*)\\s*;"
+   },
+   {
+    "name": "reads the units",
+    "pattern": "\\.next(Int|Double)\\s*\\(\\s*\\)"
+   },
+   {
+    "name": "uses a double for the bill",
+    "pattern": "double\\s+\\w+\\s*="
+   },
+   {
+    "name": "rate 6.5 and fixed charge 50",
+    "pattern": "6\\.5[\\s\\S]*50|50[\\s\\S]*6\\.5",
+    "expected": "units * 6.5 + 50"
+   },
+   {
+    "name": "prints both lines",
+    "pattern": "(println[\\s\\S]*){2}",
+    "expected": "two println lines",
+    "hidden": true
+   }
+  ],
+  "hints": [
+   {
+    "en": "Read with int units = sc.nextInt();",
+    "te": "int units = sc.nextInt(); తో చదవండి.",
+    "hi": "int units = sc.nextInt(); से पढ़िए।"
+   },
+   {
+    "en": "double bill = units * 6.5 + 50;",
+    "te": "double bill = units * 6.5 + 50;",
+    "hi": "double bill = units * 6.5 + 50;"
+   },
+   {
+    "en": "println(\"Units: \" + units); then println(\"Bill: Rs \" + bill);",
+    "te": "println(\"Units: \" + units); తర్వాత println(\"Bill: Rs \" + bill);",
+    "hi": "println(\"Units: \" + units); फिर println(\"Bill: Rs \" + bill);"
+   }
+  ],
+  "solution": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int units = sc.nextInt();\n        double bill = units * 6.5 + 50;\n        System.out.println(\"Units: \" + units);\n        System.out.println(\"Bill: Rs \" + bill);\n    }\n}",
+  "stdin": "120",
+  "output": "Units: 120\nBill: Rs 830.0"
+ }
+}

@@ -7,7 +7,7 @@ import cors from 'cors';
 import crypto from 'crypto';
 import { logger } from '../core/logger.js';
 import * as dal from '../core/db/dal.js';
-import { generate, synthesize } from '../core/ai/gateway.js';
+import { generate, synthesize, voiceStatus } from '../core/ai/gateway.js';
 import params from '../config/params.js';
 import authRoutes from './routes/auth.js';
 import institutionRoutes from './routes/institution.js';
@@ -26,6 +26,9 @@ import learnerJobsRoutes from './routes/learnerJobs.js';
 import learnerJourneyRoutes from './routes/learnerJourney.js';
 import learnerEvidenceRoutes from './routes/learnerEvidence.js';
 import learnerSettingsRoutes from './routes/learnerSettings.js';
+import learnerCoursesRoutes from './routes/learnerCourses.js';
+import institutionTopicsRoutes from './routes/institutionTopics.js';
+import catalogRoutes from './routes/catalog.js';
 import sharedRoutes from './routes/shared.js';
 import verifyRoutes from './routes/verify.js';
 import { didDocument } from '../core/return/keyRegistry.js';
@@ -45,6 +48,7 @@ export const MOUNTS = [
   ['/api/institution', institutionReviewRoutes],    // faculty review queue, κ, review load
   ['/api/institution', institutionActivityRoutes],  // live status, activity, exports, evidence report
   ['/api/institution', institutionLoopRoutes],      // command centre, grid, bridges, placements
+  ['/api/institution', institutionTopicsRoutes],    // topics: catalog, content review, students' extra topics
   ['/api', sharedRoutes],                           // notifications, Ask Qubirex, help, glossary
   ['/api/learner', learnerRoutes],
   ['/api/learner', portfolioRoutes],                // profile, resume, skill requests, transcribe
@@ -52,6 +56,8 @@ export const MOUNTS = [
   ['/api/learner', learnerSettingsRoutes],          // settings: devices, consent, my data
   ['/api/learner', learnerJobsRoutes],              // jobs & applications, employer requests
   ['/api/learner', learnerJourneyRoutes],           // journey: baseline, skill tabs, readiness, Day-One, apply, requests
+  ['/api/learner', learnerCoursesRoutes],           // topics: courses, lessons, practice, checks, module test and project
+  ['/api/catalog', catalogRoutes],                  // public "See our topics" and free sample lessons
   ['/api/market', marketRoutes],                    // job market, JD gap, emerging topics
   ['/api/employer', employerRoutes],
   ['/api/employer', employerHiringRoutes],           // roles, candidates, pipeline, sponsor, colleges, bulk verify
@@ -126,6 +132,12 @@ export function createApp({ drainOutbox = null } = {}) {
       body.params = params.source();
       body.secrets = process.env.QBX_SECRETS_SOURCE || 'environment';
       body.ai = { adapter: process.env.AI_ADAPTER || (process.env.NODE_ENV === 'test' ? 'mock' : 'gemini'), key_set: !!process.env.GEMINI_API_KEY };
+      // Which voice learners hear: server | browser-fallback | off (cached ten minutes; &ai=1 checks afresh).
+      try {
+        const v = await voiceStatus({ fresh: req.query.ai === '1' });
+        body.voice = v.voice;
+        body.voice_detail = { engine: v.engine || null, missing: v.missing || [], engines: v.engines || [], models: v.models || [] };
+      } catch (err) { body.voice = 'browser-fallback'; body.voice_detail = { error: String(err.message).slice(0, 200) }; }
       // &ai=1 makes one tiny live model call, so a deployment can confirm its key and model.
       if (req.query.ai === '1') {
         const started = Date.now();

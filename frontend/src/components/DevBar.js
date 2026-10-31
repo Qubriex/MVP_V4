@@ -15,6 +15,7 @@ import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { useUiLang, UI_LANGS } from '../context/UiLangContext';
 import { DEV_CARDS, JOURNEY_KEYS, cardFor, journeyFor, isDevLearner, openDevAccount, endDevSession, journeyControl } from '../utils/devAccess';
+import { useBarHeight } from '../utils/barHeight';
 
 // Controls whose effect needs fresh data on the page: reload after them.
 const RELOAD = new Set(['time', 'request', 'bridge', 'ready', 'tutor']);
@@ -81,6 +82,7 @@ export default function DevBar() {
     document.body.classList.toggle('has-devbar', !!dev);
     return () => document.body.classList.remove('has-devbar');
   }, [dev]);
+  useBarHeight('.dx-bar', '--dx-bar-h', !!dev);
   if (!dev) return null;
 
   const card = cardFor(dev.account_key);

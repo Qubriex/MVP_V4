@@ -9,6 +9,8 @@ import api from '../../utils/api';
 import { useSpeechInput } from '../../utils/voice';
 import { errMsg } from '../../utils/errors';
 import Drawer from './Drawer';
+import { useLearningLanguage } from '../../utils/learningLanguage';
+import { LEARNING_LABEL } from '../learn/LearningLangPicker';
 
 import { useUiLang } from '../../context/UiLangContext';
 const SUGGEST = {
@@ -29,47 +31,74 @@ const SUGGEST = {
   }
 };
 const LANGS = [['en', 'EN', 'en-IN'], ['te', 'తెలుగు', 'te-IN'], ['hi', 'हिंदी', 'hi-IN']];
+// Learners pick the answer language from their learning languages; it starts
+// on their current learning language, not on the screen language.
+const LEARNER_LANGS = ['telugu', 'hindi', 'english', 'telugu_en', 'hindi_en'];
+const SUGGEST_CODE = { telugu: 'te', hindi: 'hi', english: 'en', telugu_en: 'te', hindi_en: 'hi', en: 'en', te: 'te', hi: 'hi' };
+const BCP47 = { te: 'te-IN', hi: 'hi-IN', en: 'en-IN' };
 
 export default function AskQubirex({ side = 'learner', onClose, initialLang = 'en', initialQuestion = '' }) {
   const { t } = useUiLang();
-  const [lang, setLang] = useState(initialLang);
+  const learner = side === 'learner';
+  const [learning] = useLearningLanguage(learner);
+  const [lang, setLang] = useState(learner ? null : initialLang);
+  const current = lang || learning || 'telugu';
   const [q, setQ] = useState('');
   const [thread, setThread] = useState([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const bcp47 = LANGS.find(l => l[0] === lang)[2];
+  const code = SUGGEST_CODE[current] || 'en';
+  const bcp47 = BCP47[code];
 
-  const askIt = async (question) => {
+  const askIt = async (question, { as = current, again = false } = {}) => {
     const text = String(question || '').trim();
     if (!text || busy) return;
     setQ(''); setError(''); setBusy(true);
-    setThread(t => [...t, { who: 'you', text }]);
+    if (!again) setThread(t => [...t, { who: 'you', text }]);
     try {
-      const r = await api.post('/assist/ask', { question: text, lang });
+      const r = await api.post('/assist/ask', { question: text, lang: as });
       setThread(t => [...t, { who: 'qbx', text: r.data.answer, links: r.data.links || [] }]);
     } catch (e) { setError(errMsg(e, t('shared.askQubirex.askQubirexCouldNot'))); }
     setBusy(false);
   };
   const mic = useSpeechInput({ lang: bcp47, onFinal: (text) => askIt(text) });
-  // Opened from a page's command box with a question already typed.
+  // Opened from a page's command box with a question already typed (learners:
+  // once their learning language is known, so the answer comes in it).
   const asked = React.useRef(false);
-  React.useEffect(() => { if (initialQuestion && !asked.current) { asked.current = true; askIt(initialQuestion); } }, []); // eslint-disable-line
+  React.useEffect(() => {
+    if (initialQuestion && !asked.current && (!learner || learning)) { asked.current = true; askIt(initialQuestion); }
+  }, [learning]); // eslint-disable-line
+  // Changing the language answers the last question again in the new one.
+  const changeLang = (v) => {
+    setLang(v);
+    const last = [...thread].reverse().find(m => m.who === 'you');
+    if (last) askIt(last.text, { as: v, again: true });
+  };
 
   return (
     <Drawer title={t('shared.askQubirex.askQubirex')} onClose={onClose}>
-      <div className="ln-seg sk-langs" role="group" aria-label={t('shared.askQubirex.answerLanguage')}>
-        {LANGS.map(([id, label]) => <button key={id} type="button" aria-pressed={lang === id} onClick={() => setLang(id)} className="ln-indic">{label}</button>)}
-      </div>
+      {learner ? (
+        <label className="lj-langpick" data-ask-language={current}>
+          <span className="ln-xs">{t('shared.askQubirex.answerIn')}</span>
+          <select value={current} onChange={e => changeLang(e.target.value)} aria-label={t('shared.askQubirex.answerLanguage')}>
+            {LEARNER_LANGS.map(v => <option key={v} value={v}>{LEARNING_LABEL[v]}</option>)}
+          </select>
+        </label>
+      ) : (
+        <div className="ln-seg sk-langs" role="group" aria-label={t('shared.askQubirex.answerLanguage')}>
+          {LANGS.map(([id, label]) => <button key={id} type="button" aria-pressed={current === id} onClick={() => changeLang(id)} className="ln-indic">{label}</button>)}
+        </div>
+      )}
       {thread.length === 0 && (
         <div className="ln-col" style={{ gap: 8 }}>
           <span className="ln-kicker">{t('shared.askQubirex.tryAsking')}</span>
-          {(SUGGEST[side][lang] || SUGGEST[side].en).map(s => <button key={s} type="button" className="sk-suggest ln-indic" onClick={() => askIt(t(s))}>{t(s)}</button>)}
+          {(SUGGEST[side][code] || SUGGEST[side].en).map(s => <button key={s} type="button" className="sk-suggest ln-indic" onClick={() => askIt(t(s))}>{t(s)}</button>)}
         </div>
       )}
       <div className="ln-col sk-thread" aria-live="polite">
         {thread.map((m, i) => (
           <div key={i} className={`sk-msg ${m.who === 'you' ? 'is-you' : ''}`}>
-            <span className="ln-indic">{m.text}</span>
+            <span className="ln-indic" data-ask-msg={m.who}>{m.text}</span>
             {m.links?.length > 0 && <span className="ln-row ln-wrap" style={{ gap: 10 }}>{m.links.map(l => <Link key={l.href} to={l.href} className="ln-link" onClick={onClose}>{l.label}</Link>)}</span>}
           </div>
         ))}

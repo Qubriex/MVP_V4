@@ -13,7 +13,7 @@ api.interceptors.request.use(config => {
 // "qubirex:saved" event; the ToastProvider turns it into a short toast.
 // Previews, AI calls, transcription, heartbeats, sign-in and reads sent as
 // POST are left out — they are not changes the person made.
-const TOAST_SKIP = /\/(parse|preview|transcribe|tts|heartbeat|voice-metrics|session\/|summary-from-speech|tailor|login|logout|verify\/|verify-domain\/request|bulk|ask|assist|read-all|path\/node|doubts|help\/contact|passport\/|reviews\/instances)/;
+const TOAST_SKIP = /\/(parse|preview|transcribe|tts|heartbeat|voice-metrics|session\/|summary-from-speech|tailor|login|logout|verify\/|verify-domain\/request|bulk|ask|assist|read-all|path\/node|doubts|help\/contact|passport\/|reviews\/instances|lessons\/|modules\/|learning-language)/;
 const TOAST_SCOPE = /^\/(institution|employer|admin|learner|notifications|market\/jobs)\//;
 const noteSaved = (res) => {
   const { method, url = '' } = res.config || {};
@@ -23,6 +23,8 @@ const noteSaved = (res) => {
   try { window.dispatchEvent(new CustomEvent('qubirex:saved', { detail: { kind: method === 'delete' ? 'deleted' : 'saved' } })); } catch { /* old browsers */ }
 };
 
+export const SESSION_ENDED = new Set(['unauthenticated', 'invalid_session', 'signed_in_elsewhere', 'demo_ended', 'account_inactive', 'access_removed', 'moved_cohort']);
+
 api.interceptors.response.use(
   res => { noteSaved(res); return res; },
   err => {
@@ -30,7 +32,12 @@ api.interceptors.response.use(
     // that says nothing about the signed-in session.
     // The same for the demo's own calls (/demo/*).
     const devCall = /^\/(dev|demo)\//.test(String(err.config?.url || '').replace(/^https?:\/\/[^/]+/, '').replace(/^\/api/, ''));
-    if (err.response?.status === 401 && !devCall) {
+    // Sign out only when the server says the session itself has ended (one of
+    // these codes). Any other error, from a feature such as the voice or a
+    // check, is shown as a normal message and never signs anyone out.
+    const data = err.response?.data || {};
+    const code = data.code || (typeof data.error === 'object' ? data.error?.code : null);
+    if (err.response?.status === 401 && !devCall && SESSION_ENDED.has(code)) {
       const wasDev = !!localStorage.getItem('qubirex_dev');
       const wasDemo = !!localStorage.getItem('qubirex_demo');
       localStorage.removeItem('qubirex_demo');

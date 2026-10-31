@@ -46,7 +46,7 @@ export function SignInMenu() {
   );
 }
 
-const NAV = [['/learners', 'nav.learners'], ['/colleges', 'nav.colleges'], ['/employers', 'nav.employers'], ['/verify', 'nav.verify'], ['/pricing', 'nav.pricing'], ['/demo', 'nav.demo']];
+const NAV = [['/learners', 'nav.learners'], ['/colleges', 'nav.colleges'], ['/employers', 'nav.employers'], ['/verify', 'nav.verify'], ['/topics', 'nav.topicsPublic'], ['/pricing', 'nav.pricing'], ['/demo', 'nav.demo']];
 
 export default function PublicShell({ children, demo = false }) {
   const { t } = useUiLang();

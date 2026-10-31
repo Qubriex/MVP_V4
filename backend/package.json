@@ -1,7 +1,7 @@
 {
   "name": "qubirex-backend",
   "version": "2.0.0",
-  "description": "Qubirex — RAG Multi-Brain V2 Instruction Engine Backend (Inferexaa Private Limited)",
+  "description": "Qubirex \u2014 RAG Multi-Brain V2 Instruction Engine Backend (Inferexaa Private Limited)",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -14,7 +14,9 @@
     "test:rest": "vitest run tests/unit tests/integration tests/property",
     "check:secrets": "node scripts/check-secrets.js",
     "openapi": "node scripts/openapi.js",
-    "secrets:generate": "node scripts/generate-secrets.js"
+    "secrets:generate": "node scripts/generate-secrets.js",
+    "topics:check": "node scripts/topics-check.js",
+    "topics:code": "python3 scripts/course-code-check.py"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.8",

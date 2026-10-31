@@ -1,0 +1,29 @@
+{
+ "id": "python",
+ "order": 1,
+ "language": "python",
+ "status": "complete",
+ "level": "Beginner",
+ "hours": 40,
+ "icon": "python",
+ "title": {
+  "en": "Python Programming",
+  "te": "Python Programming",
+  "hi": "Python Programming"
+ },
+ "summary": {
+  "en": "Learn Python from the first line to a small app: variables, decisions, loops, functions, data, files, classes and libraries. Every lesson is taught first, then practised, then checked.",
+  "te": "మొదటి line నుంచి ఒక చిన్న app వరకు Python నేర్చుకోండి: variables, నిర్ణయాలు, loops, functions, data, files, classes, libraries. ప్రతి పాఠం ముందు నేర్పిస్తాం, తర్వాత సాధన, ఆ తర్వాత check.",
+  "hi": "पहली line से एक छोटे app तक Python सीखिए: variables, फ़ैसले, loops, functions, data, files, classes और libraries। हर पाठ पहले सिखाया जाता है, फिर अभ्यास, फिर check।"
+ },
+ "modules": [
+  "m1.json",
+  "m2.json",
+  "m3.json",
+  "m4.json",
+  "m5.json",
+  "m6.json",
+  "m7.json",
+  "m8.json"
+ ]
+}

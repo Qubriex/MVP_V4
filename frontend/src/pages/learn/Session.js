@@ -18,16 +18,22 @@
 // a 30-second heartbeat that counts only while the page is visible and the
 // learner gave input in the last 3 minutes (§6); offline beats are queued.
 //
+// Before the first spoken turn the page shows a big "Tap to start", so the
+// browser never blocks the voice. A check is its own step (attempt number,
+// a fresh question each time); its result is a screen of its own: pass or
+// not yet, what was good / missing / next time, the label change, and the
+// next steps (continue, review, explain another way, ask my professor).
+//
 // Desktop: stage + side panel. Phone (≤900px): full-screen stage, the panel
 // becomes a bottom sheet (see learner.css).
 // ─────────────────────────────────────────────────────────────────────────────
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Clock, Mic, Keyboard, RotateCcw, Pause, Play, Volume2, Award } from 'lucide-react';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { ArrowLeft, Clock, Mic, Keyboard, RotateCcw, Pause, Play, Volume2, Award, MessageCircleQuestion, Repeat, ListChecks } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useUiLang, speechTag } from '../../context/UiLangContext';
 import api, { getOr } from '../../utils/api';
-import { useSpeechInput, useSpeechOutput, speechParts } from '../../utils/voice';
+import { useSpeechInput, useSpeechOutput, speechParts, setDeviceVoice } from '../../utils/voice';
 import VoiceStatus from '../../components/learn/VoiceStatus';
 import { playCue, useBargeIn, parseVoiceCommand, FILLER } from '../../utils/voiceMode';
 import { MOCK_SESSION_START, MOCK_PROFILE, MOCK_LEARNER_DASHBOARD } from '../../utils/learnerMockData';
@@ -36,6 +42,8 @@ import { newTracker, recordPaste, provenanceFor } from '../../utils/provenance';
 import { enqueue, flush } from '../../utils/offlineQueue';
 import { useLowBandwidth, recorderOptions } from '../../utils/lowBandwidth';
 import { errMsg } from '../../utils/errors';
+import { ResultCard, cleanAiText } from '../../components/learn/journey';
+import LearningLangPicker from '../../components/learn/LearningLangPicker';
 
 const APPROACH_NAMES = { native_concept: 'learn.session.approachNames.nativeConcept', analogy: 'learn.session.approachNames.analogy', worked_example: 'learn.session.approachNames.workedExample', decomposition: 'learn.session.approachNames.buildingBlocks', socratic: 'learn.session.approachNames.socratic' };
 const LANG_LABEL = { telugu: 'తెలుగు', hindi: 'हिंदी' };
@@ -44,13 +52,14 @@ const WAVE = [8, 14, 22, 30, 18, 26, 34, 20, 12, 24, 32, 16, 10, 22, 28, 14, 20,
 
 let nextId = 0;
 const withId = (m) => ({ id: `m${nextId += 1}`, ...m });
-const fromHistory = (h) => withId({ role: h.role, content: h.content, type: h.message_type || h.type, caption_en: h.caption_en, mermaid: h.mermaid, code: h.code, input_mode: h.input_mode });
+const fromHistory = (h) => withId({ role: h.role, content: cleanAiText(h.content, (k) => k), type: h.message_type || h.type, caption_en: h.caption_en, mermaid: h.mermaid, code: h.code, input_mode: h.input_mode });
 
 export default function Session() {
   const { user } = useAuth();
   const { t } = useUiLang();
   const navigate = useNavigate();
   const [params] = useSearchParams();
+  const location = useLocation();
   const language = user?.language || 'telugu';
   const bcp47 = speechTag(language);
 
@@ -76,6 +85,12 @@ export default function Session() {
   const [transcribing, setTranscribing] = useState(false);
   const [notice, setNotice] = useState('');
   const [warmups, setWarmups] = useState(0);
+  const [started, setStarted] = useState(false);   // the learner tapped "Tap to start" (voice may play)
+  const [checkAt, setCheckAt] = useState(null);    // when the current check started, for its timer
+  const [attempt, setAttempt] = useState(1);
+  const [helpSent, setHelpSent] = useState(false);
+  const startedRef = useRef(false);
+  startedRef.current = started;
   const [lowBw] = useLowBandwidth();
   const endRef = useRef(null);
   const modeRef = useRef(mode);
@@ -94,6 +109,7 @@ export default function Session() {
   const turnRef = useRef(null);       // when the learner finished their turn (speed metric)
   const spokenRef = useRef(null);     // { id, text } of what she is saying, for highlighting
   const lastAiRef = useRef(null);
+  const welcomeRef = useRef(''); // welcome-back line said before an open check question
   const handsFreeRef = useRef(false);
   handsFreeRef.current = handsFree;
 
@@ -130,17 +146,28 @@ export default function Session() {
     setApproach(data.approach || 'native_concept');
     setLoopCount(data.loop_count || 0);
     const history = (data.history || []).map(fromHistory);
-    setMessages(history);
     const last = [...history].reverse().find(m => m.role === 'ai');
-    if (last?.type === 'mastery_check') setPhase('mastery_check');
+    if (last?.type === 'mastery_check') { setPhase('mastery_check'); setCheckAt(Date.now()); }
+    // Coming back: old messages stay in the transcript (each with Replay);
+    // she says a short welcome-back line instead of replaying them.
+    const welcome = data.resumed && data.welcome_back ? withId({ role: 'ai', content: data.welcome_back.message, caption_en: data.welcome_back.caption_en, type: 'welcome' }) : null;
+    // During a check the question stays the current line: the welcome goes just before it.
+    const inCheck = last?.type === 'mastery_check';
+    const at = inCheck ? history.lastIndexOf(last) : history.length;
+    setMessages(welcome ? [...history.slice(0, at), welcome, ...history.slice(at)] : history);
     setBusy(false);
-    if (last && !lowBwRef.current) say(last.content, last.id);
+    setHelpSent(false);
+    welcomeRef.current = welcome && inCheck ? welcome.content : '';
+    // Speak only after a tap: browsers block sound that starts on its own.
+    const first = inCheck ? last : (welcome || last);
+    if (first && !lowBwRef.current && startedRef.current) say(welcomeRef.current ? `${welcomeRef.current} ${first.content}` : first.content, first.id);
   }, [say]);
 
   useEffect(() => {
     startSession();
     getOr('/learner/profile', MOCK_PROFILE, d => d && d.voice_prefs).then(p => {
       const v = p.voice_prefs || {};
+      setDeviceVoice(v.deviceVoice);
       setShowEnglish(v.showEnglishCaptions !== false);
       if (RATES.includes(v.rate)) setRate(v.rate);
       setHandsFree(!!v.handsFree);
@@ -187,7 +214,7 @@ export default function Session() {
 
   // ── Turn handling ───────────────────────────────────────────────────────────
   const applyResponse = useCallback((data) => {
-    const ai = withId({ role: 'ai', content: data.message, caption_en: data.caption_en, mermaid: data.mermaid, code: data.code });
+    const ai = withId({ role: 'ai', content: cleanAiText(data.message, t), caption_en: data.caption_en, mermaid: data.mermaid, code: data.code });
     const extra = [];
     setNotice('');
     if (data.result === 'hold') {
@@ -204,13 +231,17 @@ export default function Session() {
       ai.type = 'loop_trigger';
       setLoopCount(data.loop_count);
       if (data.next_approach) setApproach(data.next_approach);
-      setPhase('instruction');
+      setResult(data);
+      setPhase('result');
+      setAttempt(a => (a % 2) + 1);
     } else {
       ai.type = 'instruction';
       if (data.approach) setApproach(data.approach);
       if (data.decision === 'CHECK' && data.check_question) {
         extra.push(withId({ role: 'ai', content: data.check_question, type: 'mastery_check' }));
         trackerRef.current = newTracker();
+        setCheckAt(Date.now());
+        setResult(null);
       }
       setPhase(data.decision === 'CHECK' ? 'mastery_check' : 'instruction');
     }
@@ -360,13 +391,27 @@ export default function Session() {
   const spoken = spokenRef.current;
   const speakingParts = !mic.listening && speech.part && spoken && speech.part.id === spoken.id ? speechParts(spoken.text) : null;
 
-  const endSession = () => { speech.stop(); if (mic.listening) mic.stop(); navigate('/learn/dashboard'); };
+  // Back and End session return to the page that opened the lesson (Skill path,
+  // a skill page, Reviews, Home…), not always Home.
+  const backTo = (location.state?.from || params.get('from') || '').startsWith('/learn') ? (location.state?.from || params.get('from')) : '/learn/dashboard';
+  const endSession = () => { speech.stop(); if (mic.listening) mic.stop(); navigate(backTo); };
+  const tapToStart = () => {
+    setStarted(true);
+    if (lastAi && !lowBw) say(welcomeRef.current ? `${welcomeRef.current} ${lastAi.content}` : lastAi.content, lastAi.id);
+  };
+  const askProfessor = async () => {
+    if (!result?.node?.id) return;
+    try { await api.post(`/learner/skill/${result.node.id}/help`, { message: draft || '' }); setHelpSent(true); } catch (e) { setError(errMsg(e)); }
+  };
+  const anotherWay = () => { setPhase('instruction'); setResult(null); send(t('lj.session.anotherWayAsk'), 'text'); };
+  const retryCheck = () => { setPhase('instruction'); setResult(null); send('', 'text', { requestCheck: true }); };
+  const checkSecs = checkAt ? Math.max(0, Math.floor((Date.now() - checkAt) / 1000)) : 0;
 
   return (
     <div className="ln-session">
       <header className="ln-session-head">
-        <Link to="/learn/dashboard" className="ln-btn ln-btn-sm ln-hide-phone" onClick={() => speech.stop()}><ArrowLeft size={16} aria-hidden="true" />{t('nav.home')}</Link>
-        <Link to="/learn/dashboard" className="ln-roundbtn ln-show-phone" aria-label={t('learn.session.backHome')} onClick={() => speech.stop()}><ArrowLeft size={18} aria-hidden="true" /></Link>
+        <Link to={backTo} className="ln-btn ln-btn-sm ln-hide-phone" onClick={() => speech.stop()} data-back><ArrowLeft size={16} aria-hidden="true" />{t('nav.back')}</Link>
+        <Link to={backTo} className="ln-roundbtn ln-show-phone" aria-label={t('nav.back')} onClick={() => speech.stop()} data-back><ArrowLeft size={18} aria-hidden="true" /></Link>
         <div className="ln-col" style={{ flex: 1, minWidth: 0 }}>
           <span className="ln-session-title" style={{ fontSize: 'var(--fs-h3)', fontWeight: 600 }}>{nodeLabel || '…'}</span>
           <span className="ln-small ln-session-sub-desk" style={{ opacity: 0.75 }}>
@@ -376,7 +421,7 @@ export default function Session() {
         </div>
         <div className="ln-row ln-wrap" style={{ gap: 8 }}>
           <span className="ln-tag ln-tag-lg ln-tag-info ln-hide-phone">{t('learn.session.approach')}{' '} {APPROACH_NAMES[approach] ? t(APPROACH_NAMES[approach]) : approach}</span>
-          <span className="ln-tag ln-tag-lg ln-tag-accent ln-indic ln-hide-phone">{langName}</span>
+          <LearningLangPicker compact onChange={() => { speech.stop(); window.location.reload(); }} />
           {loopCount > 0 && <span className="ln-tag ln-tag-lg ln-tag-warning ln-hide-phone">{t('learn.session.loopLoopcount', { loopCount })}</span>}
           <span className="ln-row ln-small" style={{ gap: 6, opacity: 0.75 }} aria-label={t('learn.session.sessionTimeClock', { clock })}><Clock size={16} aria-hidden="true" />{clock}</span>
           <button type="button" className="ln-btn ln-btn-sm ln-hide-phone ln-indic" onClick={endSession}>{t('session.end')}</button>
@@ -386,7 +431,18 @@ export default function Session() {
       <div className="ln-session-body">
         <section className="ln-stage" aria-label={t('learn.session.voiceStage')}>
           {phase === 'mastery_check' && (
-            <div className="ln-banner-check ln-indic" role="status"><Award size={18} aria-hidden="true" /><span>{t('session.check')}</span></div>
+            <div className="ln-banner-check lj-check-banner ln-indic" role="status" data-check-state>
+              <Award size={18} aria-hidden="true" />
+              <span><b>{t('lj.session.checkTitle')}</b> · {t('lj.session.attempt', { n: attempt })} · {t('lj.session.fresh')}</span>
+              <span className="ln-row" style={{ gap: 4 }}><Clock size={14} aria-hidden="true" />{Math.floor(checkSecs / 60)}:{String(checkSecs % 60).padStart(2, '0')}</span>
+            </div>
+          )}
+          {!started && !lowBw && phase !== 'result' && (
+            <button type="button" className="lj-tapstart" onClick={tapToStart} data-tap-start>
+              <Play size={40} aria-hidden="true" />
+              <span>{t('lj.session.tapToStart')}</span>
+              <span className="ln-small">{t('lj.session.tapToStartWhy')}</span>
+            </button>
           )}
           {warmups > 0 && (
             <div className="ln-banner-check" role="status" style={{ flexWrap: 'wrap', gap: 10 }}>
@@ -408,9 +464,27 @@ export default function Session() {
               {WAVE.map((h, i) => <span key={i} style={{ '--h': `${h}px`, animationDelay: `${(i % 7) * 0.09}s` }} />)}
             </div>
 
-            {phase === 'result' ? (
+            {phase === 'result' && result && !result.passed ? (
+              <div className="ln-col lj-session-result" style={{ gap: 12, width: '100%', maxWidth: 560 }} data-result-screen>
+                <ResultCard result={result.result_band || 'fail'} feedback={result.feedback_parts} labelChange={result.label_change}>
+                  {result.forced && <span className="ln-xs ln-muted">{t('lj.session.forced')}</span>}
+                </ResultCard>
+                <div className="ln-row ln-wrap" style={{ gap: 8, justifyContent: 'center' }}>
+                  <button type="button" className="ln-btn ln-btn-primary" onClick={anotherWay} disabled={busy}><Repeat size={16} aria-hidden="true" />{t('lj.session.anotherWay')}</button>
+                  <button type="button" className="ln-btn" onClick={retryCheck} disabled={busy}><Award size={16} aria-hidden="true" />{t('lj.session.tryAgain')}</button>
+                  <button type="button" className="ln-btn" onClick={askProfessor} disabled={helpSent}><MessageCircleQuestion size={16} aria-hidden="true" />{helpSent ? t('lj.session.helpSent') : t('lj.session.askProfessor')}</button>
+                </div>
+              </div>
+            ) : phase === 'result' ? (
               <div className="ln-col ln-indic" style={{ alignItems: 'center', gap: 12, textAlign: 'center' }}>
                 <p className="ln-caption-te">{lastAi?.content}</p>
+                {result?.feedback_parts && (
+                  <div style={{ width: '100%', maxWidth: 560, textAlign: 'left' }}>
+                    <ResultCard result="pass" feedback={result.feedback_parts} labelChange={result.label_change}>
+                      {result.forced && <span className="ln-xs ln-muted">{t('lj.session.forced')}</span>}
+                    </ResultCard>
+                  </div>
+                )}
                 {result?.programme_complete ? (
                   <>
                     <strong style={{ fontSize: 'var(--fs-h2)', color: 'var(--stage-listen)' }}>{t('session.complete')}</strong>
@@ -420,7 +494,11 @@ export default function Session() {
                   <>
                     <strong style={{ fontSize: 'var(--fs-h2)', color: 'var(--stage-listen)' }}>✓ {t('session.advance')}</strong>
                     <span style={{ color: 'var(--stage-muted)' }}>{t('session.nextSkill')}: <b style={{ color: 'var(--stage-text)' }}>{result?.next_node?.label}</b></span>
-                    <button type="button" className="ln-btn ln-btn-primary ln-btn-lg" onClick={() => startSession()}>{t('session.next')} →</button>
+                    <div className="ln-row ln-wrap" style={{ gap: 8, justifyContent: 'center' }}>
+                      <button type="button" className="ln-btn ln-btn-primary ln-btn-lg" onClick={() => startSession()} data-next-lesson>{t('session.next')} →</button>
+                      <Link className="ln-btn" to="/learn/reviews"><ListChecks size={16} aria-hidden="true" />{t('lj.session.review')}</Link>
+                      {result?.node?.id && <Link className="ln-btn" to={`/learn/skill/${result.node.id}?tab=progress`}>{t('lj.session.skillPage')}</Link>}
+                    </div>
                   </>
                 )}
               </div>
@@ -472,7 +550,9 @@ export default function Session() {
                 onClick={() => (speech.paused ? speech.resume() : speech.pause())}>
                 {speech.paused ? <Play size={20} aria-hidden="true" /> : <Pause size={20} aria-hidden="true" />}
               </button>
-              <button type="button" className="ln-roundbtn" aria-label={t('learn.session.switchTyping')} aria-pressed={mode === 'typing'} onClick={toggleTyping}><Keyboard size={20} aria-hidden="true" /></button>
+              <button type="button" className="ln-btn lj-type-toggle" aria-pressed={mode === 'typing'} onClick={toggleTyping} data-type-toggle>
+                {mode === 'typing' ? <Mic size={18} aria-hidden="true" /> : <Keyboard size={18} aria-hidden="true" />}{mode === 'typing' ? t('lj.session.speakInstead') : t('lj.session.typeInstead')}
+              </button>
             </div>
           )}
         </section>

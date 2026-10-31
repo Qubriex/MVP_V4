@@ -7,6 +7,8 @@
 //   GET  /calibration             weighted κ per node with its 90% interval
 //   GET  /review-load             weekly minutes forecast vs the contract
 //   PUT  /review-contract         contracted review minutes per 100 learners (admin)
+//   GET  /help-requests?status=   students who asked for help after a check
+//   POST /help-requests/:id/answer { reply } — the student is notified
 import express from 'express';
 import * as dal from '../../core/db/dal.js';
 import { authenticateToken, requireRole } from '../middleware/auth.js';
@@ -16,6 +18,7 @@ import { BANDS } from '../../core/evidence/calibration.js';
 import { retrieveRubric } from '../../core/stores/rubricStore.js';
 import params from '../../config/params.js';
 import { mapSeq } from '../../core/util/seq.js';
+import { helpRequests, answerHelp } from '../../core/journey/college.js';
 
 const router = express.Router();
 router.use(authenticateToken, requireRole('institution', 'admin'), ...staffMiddleware);
@@ -99,6 +102,18 @@ router.put('/review-contract', requireStaffRole('admin'), async (req, res) => {
   if (!Number.isFinite(v) || v < 0 || v > 100000) return res.status(400).json({ error: 'Enter minutes per 100 learners per week.' });
   await dal.run('UPDATE institutions SET review_minutes_per_100 = ? WHERE id = ?', Math.round(v), req.user.id);
   res.json({ ok: true, review_minutes_per_100: Math.round(v) });
+});
+
+// ─── Help requests ("Ask my professor" after a check that did not pass) ─────────
+router.get('/help-requests', async (req, res) => {
+  const scope = await scopeClause(dal.legacyHandle(), req, 'el.engagement_id');
+  res.json({ items: await helpRequests(req.user.id, scope, { status: req.query.status }) });
+});
+router.post('/help-requests/:id/answer', requireStaffRole('admin', 'professor'), async (req, res) => {
+  try {
+    const scope = await scopeClause(dal.legacyHandle(), req, 'el.engagement_id');
+    res.json(await answerHelp(req.user.id, scope, req.params.id, { reply: req.body?.reply, staffId: req.staff?.id }));
+  } catch (e) { res.status(e.status || 500).json({ error: e.status ? e.message : 'Something went wrong.' }); }
 });
 
 export default router;

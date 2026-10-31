@@ -1,38 +1,42 @@
 // src/pages/learn/Dashboard.js — /learn/dashboard
-// Home: continue learning (voice first), progress and streak, jobs that fit,
-// skills worth learning next, topics creating jobs, recently mastered, and a
-// nudge to finish the profile.
+// Home: one "Start here" driven by the learner's journey stage (GET
+// /learner/journey: the one next real step, and why), "Today", continue
+// learning (voice first), progress in plain measures ("Skills done 8 of 20",
+// "How well you know them"), jobs that fit, skills worth learning next,
+// topics creating jobs and recently mastered.
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mic, Keyboard, Check, Flame, CheckCircle2, Circle, Route as RouteIcon, Building2, RotateCcw } from 'lucide-react';
+import { Mic, Keyboard, Check, Flame, Route as RouteIcon, Building2, RotateCcw } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useUiLang } from '../../context/UiLangContext';
+import { useFeatures } from '../../utils/features';
 import api, { getOr } from '../../utils/api';
 import { MOCK_LEARNER_DASHBOARD, MOCK_MARKET_SNAPSHOT, MOCK_PROFILE_BASICS } from '../../utils/learnerMockData';
 import { Bar, SampleBadge, StatusTag, salary, minutes, RequestButton, useSkillRequests } from '../../components/learn/ui';
 import { useLowBandwidth, slowConnection, cacheOutlines, cachedOutlines } from '../../utils/lowBandwidth';
 import CommandBox from '../../components/shared/CommandBox';
 import { ProgressRing } from '../../components/shared/ui';
+import { WhyThis } from '../../components/shared/Popover';
 
-// "Start here" for a new student, and "Today": practice from the college,
-// employer requests and reviews due, each one tap away (v4.3 canvas L1).
-function StartHere({ s }) {
+// "Start here": the one next real step for this learner's journey stage,
+// and "Today": practice from the college, employer requests and reviews due,
+// each one tap away (v4.3 canvas L1).
+function StartHere({ j }) {
   const { t } = useUiLang();
-  const steps = [
-    [t('learn.dashboard.tellUsAboutYourself'), s.profile, '/learn/welcome'],
-    [t('learn.dashboard.doYourFirstLesson'), s.first_lesson, '/learn/session?mode=voice'],
-    [t('learn.dashboard.letEmployersFindYou'), s.discoverable, '/learn/settings#privacy']
-  ];
-  if (steps.every(x => x[1])) return null;
+  if (!j) return null;
+  const k = j.next.key;
   return (
-    <section className="ln-card ln-card-warm" style={{ gap: 10 }} aria-label={t('learn.dashboard.startHere')}>
-      <div className="ln-between"><h2 className="ln-h2">{t('learn.dashboard.startHere')}</h2><span className="ln-small ln-muted">{t('learn.dashboard.length3Done', { length: steps.filter(x => x[1]).length })}</span></div>
-      {steps.map(([label, done, href]) => (
-        <div key={label} className="ln-row" style={{ gap: 10 }}>
-          {done ? <CheckCircle2 size={18} style={{ color: 'var(--status-success)' }} aria-label={t('learn.dashboard.done')} /> : <Circle size={18} aria-label={t('learn.dashboard.notDone')} />}
-          {done ? <span className="ln-small ln-muted" style={{ textDecoration: 'line-through' }}>{label}</span> : <Link to={href} className="ln-link ln-small">{label} →</Link>}
-        </div>
-      ))}
+    <section className="ln-card ln-card-warm lj-start" style={{ gap: 8 }} aria-label={t('lj.startHere')} data-stage={j.stage}>
+      <div className="ln-between ln-wrap" style={{ gap: 8 }}>
+        <span className="ln-kicker">{t('lj.startHere')}</span>
+        <span className="ln-small ln-muted">{t(`devx.stage.${j.stage}`)}</span>
+      </div>
+      <b style={{ fontSize: 'var(--fs-h3)' }}>{t(`lj.home.next.${k}`, { skill: j.next.label || '', group: j.facts?.group_done?.label || '' })}</b>
+      <span className="ln-small">{t(`lj.home.nextWhy.${k}`)}</span>
+      <div className="ln-row ln-wrap" style={{ gap: 10 }}>
+        <Link to={j.next.href} className="ln-btn ln-btn-primary" data-start-here>{t(`lj.home.nextGo.${k}`)}</Link>
+        <WhyThis title={t('lj.home.whyTitle')}>{t('lj.home.why')}</WhyThis>
+      </div>
     </section>
   );
 }
@@ -44,10 +48,10 @@ function Today({ today }) {
   const items = [];
   today.bridges.forEach(b => {
     const next = b.skills.find(x => !x.mastered);
-    items.push({ key: b.id, icon: RouteIcon, title: t('learn.dashboard.practiceFromCollegeJoin', { join: b.skills.filter(x => !x.mastered).map(x => x.label).join(', ') }), body: [b.note, t('learn.dashboard.retestBy', { date: fmtDay(b.retest_at) })].filter(Boolean).join(' · '), action: <button type="button" className="ln-btn ln-btn-sm ln-btn-primary" onClick={() => start(next.id)}>{t('learn.dashboard.start')}</button> });
+    items.push({ key: b.id, icon: RouteIcon, title: t('lj.today.practise', { skills: b.skills.filter(x => !x.mastered).map(x => x.label).join(', '), date: fmtDay(b.retest_at) }), body: [b.note, <Link key="a" className="ln-link" to="/learn/assigned">{t('lj.today.seeAssigned')}</Link>], action: <button type="button" className="ln-btn ln-btn-sm ln-btn-primary" onClick={() => start(next.id)}>{t('learn.dashboard.start')}</button> });
   });
   if (today.requests_waiting) items.push({ key: 'req', icon: Building2, title: t('learn.dashboard.employersAsked', { n: today.requests_waiting }), body: t('learn.dashboard.decideWhatShare'), action: <Link to="/learn/jobs" className="ln-btn ln-btn-sm ln-btn-primary">{t('learn.dashboard.answer')}</Link> });
-  if (today.reviews_due) items.push({ key: 'rev', icon: RotateCcw, title: t('learn.dashboard.reviewsDue', { n: today.reviews_due }), body: t('learn.dashboard.shortQuestionsKeepSkills'), action: <Link to="/learn/reviews" className="ln-btn ln-btn-sm ln-btn-primary">{t('learn.dashboard.reviewNow')}</Link> });
+  if (today.reviews_due) items.push({ key: 'rev', icon: RotateCcw, title: t('learn.dashboard.reviewsDue', { n: today.reviews_due }), body: [t('lj.today.reviewTime'), <WhyThis key="w" title={t('lj.today.reviewWhyTitle')}>{t('lj.today.reviewWhy')}</WhyThis>], action: <Link to="/learn/reviews" className="ln-btn ln-btn-sm ln-btn-primary">{t('learn.dashboard.reviewNow')}</Link> });
   if (!items.length) return null;
   return (
     <section className="ln-card" style={{ gap: 4 }} aria-label={t('learn.dashboard.today')}>
@@ -56,7 +60,7 @@ function Today({ today }) {
         {items.map(({ key, icon: Icon, title, body, action }) => (
           <div key={key} className="ln-row ln-wrap" style={{ gap: 12, padding: '10px 0' }}>
             <Icon size={18} aria-hidden="true" />
-            <span className="ln-col" style={{ flex: 1, gap: 2, minWidth: 200 }}><b style={{ fontSize: 'var(--fs-body)' }}>{title}</b><span className="ln-xs ln-muted">{body}</span></span>
+            <span className="ln-col" style={{ flex: 1, gap: 2, minWidth: 200 }}><b style={{ fontSize: 'var(--fs-body)' }}>{title}</b><span className="ln-xs ln-muted">{Array.isArray(body) ? body.filter(Boolean).map((x, i) => <React.Fragment key={i}>{i ? ' · ' : ''}{x}</React.Fragment>) : body}</span></span>
             {action}
           </div>
         ))}
@@ -69,6 +73,38 @@ const fmtDay = (iso) => new Date(iso).toLocaleDateString(document.documentElemen
 const APPROACH_NAMES = { native_concept: 'learn.dashboard.approachNames.nativeConcept', analogy: 'learn.dashboard.approachNames.analogy', worked_example: 'learn.dashboard.approachNames.workedExample', decomposition: 'learn.dashboard.approachNames.buildingBlocks', socratic: 'learn.dashboard.approachNames.socratic' };
 const SECTION_NAMES = { personal: 'learn.dashboard.sectionNames.yourDetails', education: 'learn.dashboard.sectionNames.education', projects: 'learn.dashboard.sectionNames.yourProjects', skills: 'learn.dashboard.sectionNames.skills', goals: 'learn.dashboard.sectionNames.careerGoals' };
 
+// Continue learning in the topics this learner picked: the last course they
+// were on first, each with its progress and next lesson.
+function MyTopics({ topics }) {
+  const { t } = useUiLang();
+  if (!topics) return null;
+  if (!topics.length) {
+    return (
+      <section className="ln-card ln-between ln-wrap" style={{ gap: 10 }} aria-label={t('lj.home.topicsTitle')} data-home-topics="empty">
+        <span className="ln-col" style={{ gap: 2 }}><b>{t('lj.home.topicsTitle')}</b><span className="ln-small">{t('lj.home.topicsEmpty')}</span></span>
+        <Link className="ln-btn ln-btn-sm" to="/learn/courses">{t('lj.home.topicsExplore')}</Link>
+      </section>
+    );
+  }
+  const [last, ...rest] = topics;
+  return (
+    <section className="ln-card" style={{ gap: 10 }} aria-label={t('lj.home.topicsTitle')} data-home-topics>
+      <div className="ln-between ln-wrap"><b>{t('lj.home.topicsTitle')}</b><Link className="ln-link ln-small" to="/learn/courses">{t('lj.home.topicsAll')}</Link></div>
+      <div className="ln-col" style={{ gap: 8 }}>
+        {[last, ...rest.slice(0, 2)].map((c, i) => (
+          <div key={c.course_id} className="ln-row ln-wrap" style={{ gap: 12 }}>
+            <span className="ln-col" style={{ gap: 4, flex: '1 1 200px', minWidth: 0 }}>
+              <span className="ln-small"><b>{c.title}</b> · {t('lj.course.done', { n: c.done, total: c.total })}</span>
+              <span className="ln-bar" role="progressbar" aria-valuenow={c.pct} aria-valuemin={0} aria-valuemax={100} aria-label={c.course_id}><span style={{ width: `${c.pct}%` }} /></span>
+            </span>
+            {c.next_lesson_id && <Link className={`ln-btn ln-btn-sm ${i === 0 ? 'ln-btn-primary' : ''}`} to={`/learn/lesson/${c.next_lesson_id}`} state={{ from: '/learn/dashboard' }} data-continue-topic={c.course_id}>{t('lj.home.topicsContinue')}</Link>}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default function Dashboard() {
   const { user } = useAuth();
   const { t } = useUiLang();
@@ -78,15 +114,20 @@ export default function Dashboard() {
   const [professors, setProfessors] = useState([]);
   const requests = useSkillRequests();
   const [today, setToday] = useState(null);
+  const [journey, setJourney] = useState(null);
+  const [topics, setTopics] = useState(null);
+  const features = useFeatures();
+  useEffect(() => { if (features.learner_jobs) getOr('/market/snapshot', MOCK_MARKET_SNAPSHOT, d => d && Array.isArray(d.jobs)).then(setMarket); }, [features.learner_jobs]);
   const [lowBw, setLowBw] = useLowBandwidth();
   const suggestLowBw = !lowBw && slowConnection();
 
   useEffect(() => {
     getOr('/learner/dashboard', MOCK_LEARNER_DASHBOARD, d => d && typeof d.progress_pct !== 'undefined').then(setData);
-    getOr('/market/snapshot', MOCK_MARKET_SNAPSHOT, d => d && Array.isArray(d.jobs)).then(setMarket);
+    api.get('/learner/courses/mine').then(r => setTopics(r.data.courses)).catch(() => setTopics([]));
     getOr('/learner/profile', MOCK_PROFILE_BASICS, d => d && d.completeness).then(setProfile);
     getOr('/learner/professors', [], Array.isArray).then(setProfessors);
     api.get('/learner/today').then(r => setToday(r.data)).catch(() => {});
+    api.get('/learner/journey').then(r => setJourney(r.data)).catch(() => {});
     // Low-bandwidth mode (v4.3 §19): keep the next two lessons' outlines on the device.
     api.get('/learner/path').then(r => {
       const nodes = (r.data.clusters || []).flatMap(c => c.nodes.map(n => ({ ...n, cluster: c.label })));
@@ -121,9 +162,10 @@ export default function Dashboard() {
           <span className="ln-xs ln-muted">{t('learn.dashboard.lessonsChecksNeedConnection')}</span>
         </section>
       )}
-      <CommandBox side="learner" placeholder={t('learn.dashboard.askOrSearch')} searchHref="/learn/market" />
-      {today && <StartHere s={today.start_here} />}
+      <CommandBox side="learner" placeholder={t('learn.dashboard.askOrSearch')} searchHref={features.learner_jobs ? '/learn/market' : '/learn/courses'} />
+      <StartHere j={journey} />
       {today && <Today today={today} />}
+      <MyTopics topics={topics} />
 
       <div className="ln-grid ln-g-hero">
         <section className="ln-card ln-card-dark" style={{ gap: 18, padding: 28 }}>
@@ -160,10 +202,11 @@ export default function Dashboard() {
 
         <section className="ln-card">
           <div className="ln-row" style={{ gap: 16 }}>
-            <ProgressRing pct={data?.progress_pct} size={104} label={t('learn.dashboard.ringLabel', { pct: data?.progress_pct ?? 0 })} />
-            <div className="ln-col" style={{ gap: 4 }}>
-              <span className="ln-indic" style={{ fontSize: 'var(--fs-body)', fontWeight: 600 }}>{t('dash.progress')}</span>
-              <span className="ln-small ln-muted">{t('learn.dashboard.skillsDone', { n: data?.nodes_mastered ?? 0, total: data?.total_nodes ?? 0 })}</span>
+            <ProgressRing pct={data?.progress_pct} size={104} label={t('lj.home.skillsDone', { n: data?.nodes_mastered ?? 0, total: data?.total_nodes ?? 0 })} />
+            <div className="ln-col" style={{ gap: 6 }}>
+              <span className="ln-indic" style={{ fontSize: 'var(--fs-body)', fontWeight: 600 }} data-measure="done">{t('lj.home.skillsDone', { n: data?.nodes_mastered ?? 0, total: data?.total_nodes ?? 0 })}</span>
+              <span className="ln-small" data-measure="how-well">{t('lj.home.howWell', { pct: data?.avg_mastery ?? 0 })}</span>
+              <WhyThis title={t('lj.home.measuresTitle')}>{t('lj.home.measures')}</WhyThis>
             </div>
           </div>
           <div className="ln-grid ln-g-3" style={{ gap: 10, gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}>
@@ -174,6 +217,8 @@ export default function Dashboard() {
         </section>
       </div>
 
+      {/* Jobs, skills worth learning and emerging topics: only with FEATURE_LEARNER_JOBS. */}
+      {features.learner_jobs && (<>
       <section className="ln-col" style={{ gap: 14 }}>
         <div className="ln-between ln-wrap">
           <div className="ln-row"><h2 className="ln-h2 ln-indic" style={{ fontSize: 'var(--fs-h2)' }}>{t('dash.jobs')}</h2>{market?.sample && <SampleBadge />}</div>
@@ -227,6 +272,8 @@ export default function Dashboard() {
         </section>
       </div>
 
+      </>)}
+
       <div className="ln-grid ln-g-hero">
         <section className="ln-card">
           <div className="ln-between"><h2 className="ln-h2 ln-indic">{t('dash.recent')}</h2><Link to="/learn/record" className="ln-link">{t('learn.dashboard.fullRecord')}</Link></div>
@@ -252,13 +299,13 @@ export default function Dashboard() {
             ))}
           </section>
         )}
-        {profile?.completeness && profile.completeness.pct < 100 && (
+        {profile?.completeness && profile.completeness.pct < 100 && journey && !['S0', 'S1'].includes(journey.stage) && (
           <section className="ln-card ln-card-warm" style={{ gap: 12 }}>
             <span style={{ fontSize: 'var(--fs-body)', fontWeight: 600 }}>{t('learn.dashboard.profilePctComplete', { pct: profile.completeness.pct })}</span>
             <span style={{ fontSize: 'var(--fs-body)', lineHeight: 1.55 }}>
               {missing.length ? t('learn.dashboard.addSections', { sections: missing.map(k => t(SECTION_NAMES[k])).join(', ') }) : t('learn.dashboard.finishProfileDraftFirst')}
             </span>
-            <Link to="/learn/profile" className="ln-btn ln-btn-primary" style={{ alignSelf: 'flex-start' }}>{t('learn.dashboard.completeProfile')}</Link>
+            <Link to="/learn/welcome" className="ln-btn ln-btn-primary" style={{ alignSelf: 'flex-start' }}>{t('learn.dashboard.completeProfile')}</Link>
           </section>
         )}
       </div>

@@ -6,6 +6,9 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import * as dal from '../../core/db/dal.js';
 import { freshDb, makeApp, seedInstitution, seedPathway, login, PIN } from '../helpers/setup.js';
 import { lessonFor, grade, questionFor, intentOf } from '../../core/ai/adapters/scripted.js';
+import { withContext } from '../../core/requestContext.js';
+// The learner here chose full Telugu, so the scripts reach her in that style.
+const fullTelugu = (node) => withContext({ learningMode: 'telugu' }, () => lessonFor(node, 'telugu'));
 
 const typed = { mode: 'typed', pasted_chars: 0, paste_events: 0, largest_paste: 0 };
 let app; let A; let T; let real; let test;
@@ -70,14 +73,17 @@ describe('the loop through the API', () => {
     const start = await post(real, '/api/learner/session/start', {});
     expect(start.status).toBe(200);
     expect(start.body.message).not.toMatch(/^mock/);
-    expect(start.body.message).toMatch(/SQL queries/);
+    // Teach first: the opening is the explanation, never a diagnostic question.
+    expect(start.body.decision).toBe('TEACH');
+    expect(start.body.message).toBe(fullTelugu('SQL queries').turns.explain.message);
+    expect(start.body.history[0].message_type).toBe('instruction');
     const sid = start.body.session_id;
     const lesson = await post(real, '/api/learner/session/message', { content: 'I know a little', session_id: sid });
     expect(lesson.body.decision).toBe('CONTINUE');
     expect(lesson.body.code).toMatch(/SELECT/);
     expect(lesson.body.caption_en).toBeTruthy();
     const again = await post(real, '/api/learner/session/message', { content: 'అర్థం కాలేదు', session_id: sid });
-    expect(again.body.message).toBe(lessonFor('SQL queries', 'telugu').turns.not_understood.message);
+    expect(again.body.message).toBe(fullTelugu('SQL queries').turns.not_understood.message);
 
     const ready = await post(real, '/api/learner/session/message', { request_check: true, session_id: sid });
     expect(ready.body.decision).toBe('CHECK');
@@ -94,6 +100,36 @@ describe('the loop through the API', () => {
     expect(pass.body).toMatchObject({ passed: true, result_band: 'pass', forced: false });
     expect(pass.body.label_change).toMatchObject({ from: 'none', to: 'Partial' });
     expect(pass.body.next_node.label).toBe('Joins');
+  });
+
+  it('coming back never replays the opening: a short welcome-back line instead', async () => {
+    const first = await post(real, '/api/learner/session/start', {});
+    const again = await post(real, '/api/learner/session/start', {});
+    expect(again.body.session_id).toBe(first.body.session_id);
+    expect(again.body.resumed).toBe(true);
+    expect(again.body.message).toBeUndefined();
+    expect(again.body.welcome_back.message).toMatch(new RegExp(first.body.node_label));
+    expect(again.body.welcome_back.message).not.toBe(first.body.history[0].content);
+  });
+
+  it('"I\'m ready for the check" always gives a check question, even before much teaching; asking again shows the same one', async () => {
+    const start = await post(real, '/api/learner/session/start', {});
+    const ready = await post(real, '/api/learner/session/message', { request_check: true, session_id: start.body.session_id });
+    expect(ready.body.decision).toBe('CHECK');
+    expect(ready.body.check_question).toBeTruthy();
+    const typed = await post(real, '/api/learner/session/message', { content: "I'm ready for the test", session_id: start.body.session_id });
+    expect(typed.body.decision).toBe('CHECK');
+    expect(typed.body.check_question).toBe(ready.body.check_question);
+  });
+
+  it('the tutor follows the learning language chosen in Settings, not only the cohort default', async () => {
+    const set = await test.agent.put('/api/learner/learning-language').set('X-CSRF-Token', test.csrf).send({ value: 'english' });
+    expect(set.body.value).toBe('english');
+    const s = await post(test, '/api/learner/session/start', {});
+    expect(s.body.language).toBe('english');
+    await test.agent.put('/api/learner/learning-language').set('X-CSRF-Token', test.csrf).send({ value: 'telugu_en' });
+    expect((await post(test, '/api/learner/session/start', {})).body.language).toBe('telugu');
+    await dal.run('UPDATE learners SET learning_language = NULL WHERE id = ?', test.user?.id || (await dal.one("SELECT id FROM learners WHERE learning_language = 'telugu_en'")).id);
   });
 
   it('#pass is only a code word for test-tenant learners', async () => {

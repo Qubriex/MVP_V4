@@ -14,6 +14,7 @@ import { cohortReadiness, summarise, BAND_LABEL, BANDS } from './readiness/cohor
 import { liveStatus } from './institutionActivity.js';
 import { mapSeq } from './util/seq.js';
 import { journeyStage } from './journey/stage.js';
+import { catalog } from './courses/catalog.js';
 
 export const GLOSSARY = {
   A0: 'Authorship A0 — not checked yet.',
@@ -30,7 +31,39 @@ export const GLOSSARY = {
   passport: 'Capability Passport — the learner\'s signed record of what they proved. Anyone can check it with the Evidence ID; the learner chooses who sees the details.'
 };
 
-const LANG = { en: 'English', te: 'Telugu', hi: 'Hindi', english: 'English', telugu: 'Telugu', hindi: 'Hindi' };
+const LANG = { en: 'English', te: 'Telugu', hi: 'Hindi', english: 'English', telugu: 'Telugu', hindi: 'Hindi',
+  telugu_en: 'Telugu, keeping English technical words as they are (Telugu + English mix)', hindi_en: 'Hindi, keeping English technical words as they are (Hindi + English mix)' };
+const CODE = { en: 'en', te: 'te', hi: 'hi', english: 'en', telugu: 'te', hindi: 'hi', telugu_en: 'te', hindi_en: 'hi' };
+
+// A study question ("loop ante enti?", "what is a dictionary") answered from
+// the lessons themselves: the best-matching lesson's one-liner and first
+// explanation lines, in the chosen language, with a link to the lesson.
+const STOP = new Set(['what', 'is', 'a', 'an', 'the', 'how', 'do', 'does', 'i', 'in', 'of', 'to', 'and', 'ante', 'enti', 'emiti', 'kya', 'hai', 'kaise', 'explain', 'me', 'please', 'use', 'python', 'java', 'mean', 'means', 'are', 'why', 'we']);
+function lessonAnswer(q, code) {
+  const words = String(q).toLowerCase().match(/[a-z][a-z+#]*/g) || [];
+  const stem = (w) => w.replace(/(ies|y)$/, 'i').replace(/(es|s)$/, '');
+  const stems = (text) => String(text).toLowerCase().match(/[a-z][a-z+#]*/g)?.map(stem) || [];
+  const wanted = words.filter(w => w.length > 2 && !STOP.has(w)).map(stem);
+  if (!wanted.length) return null;
+  let best = null;
+  for (const c of catalog().courses) {
+    if (c.status !== 'complete') continue;
+    for (const m of c.modules) {
+      for (const l of m.lessons) {
+        const title = stems(l.title.en);
+        const body = stems(`${l.oneLine.en} ${(l.cheat?.en || []).join(' ')}`);
+        const score = wanted.reduce((a, w) => a + (title.includes(w) ? 3 : 0) + (body.includes(w) ? 1 : 0), 0) + (/python/i.test(q) && c.id === 'python' ? 1 : 0) + (/java\b/i.test(q) && c.id === 'java' ? 1 : 0);
+        if (score >= 3 && (!best || score > best.score)) best = { score, lesson: l, course: c };
+      }
+    }
+  }
+  if (!best) return null;
+  const pick = (v) => (v && (v[code] || v.en)) || '';
+  const l = best.lesson;
+  const explain = pick(l.explain);
+  const answer = [pick(l.oneLine), ...(Array.isArray(explain) ? explain.slice(0, 2) : [])].filter(Boolean).join(' ');
+  return { answer, links: [{ label: `${best.course.title.en}: ${l.title.en}`, href: `/learn/lesson/${l.id}` }], source: 'lessons' };
+}
 
 async function learnerFacts(req) {
   const el = await dal.one(`SELECT el.id, el.current_node_id, el.overall_status, e.id AS engagement_id, e.title, e.capability_target_id, e.institution_id, sn.node_label AS current_node
@@ -144,17 +177,22 @@ function quickAnswer(q, facts, links) {
 /**
  * @returns {Promise<{answer: string, links: {label: string, href: string}[], source: 'model'|'facts'}>}
  */
-export async function ask(req, { question, lang = 'en' }) {
+export async function ask(req, { question, lang }) {
   const q = String(question || '').trim().slice(0, 500);
   const { facts, links } = await contextFor(req);
-  const language = LANG[lang] || 'English';
+  // Learners: the answer follows their learning language unless they pick
+  // another in the Ask box. The question may be in any language or script.
+  const learner = req.session?.actor_type === 'learner';
+  const chosen = lang && LANG[lang] ? lang : (learner ? (req.user?.learning_language || req.user?.language || 'telugu') : 'en');
+  const language = LANG[chosen] || 'English';
+  const fromLessons = learner ? lessonAnswer(q, CODE[chosen] || 'en') : null;
   const allowed = new Map(links.map(l => [l.href, l]));
   try {
     const r = await generate({
       task: 'ASSIST.ask', thinking: false, maxTokens: 1500, temperature: 0.2, institutionId: req.session?.institution_id || null,
       schema: { required: ['answer'] },
-      system: `You are Ask Qubirex, the help box inside the Qubirex app. Answer in ${language}, in two to four short, plain sentences.
-Use ONLY the facts below and the glossary. If the facts do not answer the question, say so plainly and suggest where to look. Never invent names, numbers or people.
+      system: `You are Ask Qubirex, the help box inside the Qubirex app. Answer in ${language}, in two to four short, plain sentences, whatever language or script the question is written in (it may be Telugu or Hindi typed in English letters). Keep code, skill names and English technical words (loop, function, JOIN) in English.
+${fromLessons ? `If the question is about a study topic, explain it simply using this lesson text: ${fromLessons.answer} — and include the lesson link ${fromLessons.links[0].href}.\n` : ''}For questions about the learner's progress or the app, use ONLY the facts below and the glossary. If the facts do not answer the question, say so plainly and suggest where to look. Never invent names, numbers or people.
 Plain words: no jargon. Groups smaller than 5 people: say "too few to show" instead of naming them, except a staff member's own students.
 Links: you may include up to 2, chosen ONLY from this list (copy href exactly): ${JSON.stringify(links)}
 Respond ONLY with JSON: {"answer": "...", "links": [{"label": "...", "href": "..."}]}
@@ -163,9 +201,11 @@ FACTS: ${JSON.stringify(facts)}
 GLOSSARY: ${JSON.stringify(GLOSSARY)}`,
       input: q
     });
+    if (fromLessons) allowed.set(fromLessons.links[0].href, fromLessons.links[0]);
     const out = (r.json.links || []).filter(l => allowed.has(l?.href)).slice(0, 2).map(l => allowed.get(l.href));
-    return { answer: String(r.json.answer || '').trim(), links: out, source: 'model' };
+    return { answer: String(r.json.answer || '').trim(), links: out, source: 'model', language: chosen };
   } catch (err) {
+    if (fromLessons) return { ...fromLessons, language: chosen };
     const quick = quickAnswer(q, facts, links);
     if (quick) return { ...quick, source: 'facts' };
     if (err?.code === 'demo_limit') return { answer: aiUnavailableMessage(err), links: [], source: 'facts' };

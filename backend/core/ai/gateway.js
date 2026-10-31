@@ -18,6 +18,7 @@
 // Phase 0 (foundation) scope: routing, fallback, schema repair and logging.
 // The prompt registry, cost meter, lesson cache and canary arrive with the
 // Quality step. Eval routes will pin exact model versions there.
+import crypto from 'crypto';
 import * as dal from '../db/dal.js';
 import { ulid } from '../db/ulid.js';
 import params from '../../config/params.js';
@@ -25,7 +26,8 @@ import { logger } from '../logger.js';
 import * as gemini from './adapters/gemini.js';
 import * as mock from './adapters/mock.js';
 import * as scripted from './adapters/scripted.js';
-import { currentSandbox, currentTutor } from '../requestContext.js';
+import { currentSandbox, currentTutor, currentLearningMode } from '../requestContext.js';
+import { styleLine } from '../language/style.js';
 import { chargeDemoAi, DEMO_LIMIT_MESSAGE } from '../demo/budget.js';
 
 const ADAPTERS = { gemini, mock, scripted };
@@ -124,6 +126,7 @@ export const aiUnavailableMessage = (err) => (isDemoLimit(err) ? DEMO_LIMIT_MESS
 
 export async function generate(req) {
   if (!req?.task) throw new GatewayError('unknown_task', 'generate() needs a task');
+  req = withStyle(req);
   const r = route(req.task);
   const sandbox = currentSandbox();
   // The scripted tutor costs nothing, so it never counts against the demo budget.
@@ -157,6 +160,16 @@ export async function generate(req) {
   }
 }
 
+// A learner's prompt that writes Telugu or Hindi gets one line saying which
+// of the two styles they chose (full language, or the spoken English mix).
+export function withStyle(req, mode = currentLearningMode()) {
+  const main = String(mode || '').replace(/_en$/, '');
+  const line = styleLine(mode);
+  const name = main === 'telugu' ? /Telugu/ : main === 'hindi' ? /Hindi/ : null;
+  if (!line || !name || !name.test(`${req.system || ''} ${req.input || ''}`)) return req;
+  return { ...req, system: `${req.system || ''}\n${line}`.trim() };
+}
+
 // ─── Speech ───────────────────────────────────────────────────────────────────
 // Professor Qubirex's voice (docs/AI-VOICE-SPEC.md): one female prebuilt
 // voice, Kore, for every learner, page and reply. GEMINI_TTS_MODEL and
@@ -165,17 +178,77 @@ export const TTS_VOICE = 'Kore';
 const TTS_MODEL = () => process.env.GEMINI_TTS_MODEL || 'gemini-2.5-flash-preview-tts';
 const ttsCache = new Map(); // per instance; replays and repeated lines cost nothing
 const TTS_CACHE_MAX = 64;
+// Lines up to this length (greetings, lesson explanations, scripted tutor
+// lines) are also kept in the database, so every instance starts them at once.
+const STORED_SPEECH_MAX_CHARS = 600;
+const STORED_SPEECH_MAX_ROWS = 5000;
+const speechKey = (key) => crypto.createHash('sha256').update(key).digest('hex');
+
+async function storedSpeech(key) {
+  try {
+    const row = await dal.one('SELECT mime, audio_b64, engine FROM tts_cache WHERE key = ?', speechKey(key));
+    if (!row) return null;
+    dal.run('UPDATE tts_cache SET hits = hits + 1 WHERE key = ?', speechKey(key)).catch(() => {});
+    return { audio: Buffer.from(row.audio_b64, 'base64'), mimeType: row.mime, engine: row.engine };
+  } catch { return null; }
+}
+
+async function storeSpeech(key, entry, text) {
+  if (String(text).length > STORED_SPEECH_MAX_CHARS || entry.engine === 'mock') return;
+  try {
+    await dal.run('INSERT INTO tts_cache (key, mime, audio_b64, engine, bytes, created_at) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT (key) DO NOTHING',
+      speechKey(key), entry.mimeType, entry.audio.toString('base64'), entry.engine, entry.audio.length, dal.nowIso());
+    const n = await dal.one('SELECT COUNT(*) AS n FROM tts_cache');
+    if (Number(n.n) > STORED_SPEECH_MAX_ROWS) {
+      await dal.run('DELETE FROM tts_cache WHERE key IN (SELECT key FROM tts_cache ORDER BY hits, created_at LIMIT ?)', Number(n.n) - STORED_SPEECH_MAX_ROWS);
+    }
+  } catch (err) { logger.warn('tts.cache_store_failed', { error: err.message }); }
+}
+
+// Speech always uses the real voice when a key is set, even for learners on
+// the scripted tutor: the tutor's words are fixed, her voice is not.
+function speechRoute() {
+  const r = route('TEACH.speak');
+  if (r.adapter === 'scripted' && process.env.GEMINI_API_KEY) return { ...r, adapter: 'gemini', model: DEFAULT_MODEL.gemini };
+  return r;
+}
+
+/**
+ * Which voice learners hear, for /api/health: 'server' (her natural voice
+ * works), 'browser-fallback' (the server voice fails; learners who chose
+ * their phone's voice hear it, the others read text) or 'off' (no voice set
+ * up). Engine detail and what is missing, by name only. Cached ten minutes.
+ */
+let voiceStatusCache = { at: 0, value: null };
+export async function voiceStatus({ fresh = false } = {}) {
+  if (!fresh && voiceStatusCache.value && Date.now() - voiceStatusCache.at < 600000) return voiceStatusCache.value;
+  const r = speechRoute();
+  let value;
+  if (r.adapter === 'mock') value = { voice: 'off', reason: 'test adapter', missing: [] };
+  else if (!process.env.GEMINI_API_KEY) value = { voice: 'off', missing: ['GEMINI_API_KEY'], engines: [] };
+  else {
+    const d = await gemini.voiceDiagnosis({ text: 'నమస్కారం', voice: process.env.GEMINI_TTS_VOICE || TTS_VOICE, language: 'telugu', model: TTS_MODEL() });
+    const ok = d.engines.find(e => e.ok);
+    const missing = [];
+    const cloud = d.engines.find(e => e.engine === 'cloud-tts');
+    if (cloud && !cloud.ok && [401, 403].includes(cloud.status)) missing.push('Cloud Text-to-Speech API turned on for the Google Cloud project that owns GEMINI_API_KEY');
+    if (!d.engines.some(e => e.ok && e.engine !== 'cloud-tts')) missing.push(d.models.length ? `GEMINI_TTS_MODEL (this key offers: ${d.models.join(', ')})` : 'a Gemini speech model for this key (none listed)');
+    value = { voice: ok ? 'server' : 'browser-fallback', engine: ok?.voice || null, engines: d.engines, models: d.models, missing: ok ? [] : missing };
+  }
+  voiceStatusCache = { at: Date.now(), value };
+  return value;
+}
 
 /**
  * @param {{ text: string, language?: string, institutionId?: string|null }} req
  * @returns {Promise<{ audio: Buffer, mimeType: string, engine: string, cached: boolean }>}
  */
 export async function synthesize({ text, language = 'telugu', institutionId = null }) {
-  const r = route('TEACH.speak');
+  const r = speechRoute();
   const voice = process.env.GEMINI_TTS_VOICE || TTS_VOICE;
   const key = `${r.adapter}|${voice}|${language}|${text}`;
-  const hit = ttsCache.get(key);
-  if (hit) return { ...hit, cached: true };
+  const hit = ttsCache.get(key) || await storedSpeech(key);
+  if (hit) { ttsCache.set(key, hit); return { ...hit, cached: true }; }
   // About 14 spoken characters a second, for the demo's voice budget.
   const sandbox = currentSandbox();
   if (sandbox) await chargeDemoAi(sandbox, { voiceSeconds: Math.max(1, Math.ceil(String(text).length / 14)) });
@@ -187,6 +260,7 @@ export async function synthesize({ text, language = 'telugu', institutionId = nu
     const entry = { audio: out.audio, mimeType: out.mimeType, engine: out.modelVersion };
     ttsCache.set(key, entry);
     if (ttsCache.size > TTS_CACHE_MAX) ttsCache.delete(ttsCache.keys().next().value);
+    await storeSpeech(key, entry, text);
     return { ...entry, cached: false };
   } catch (err) {
     await logCall({ task: 'TEACH.speak', adapter: r.adapter, model, ms: Date.now() - started, status: 'error', institutionId, error: String(err.message).slice(0, 300) });

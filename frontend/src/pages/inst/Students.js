@@ -16,6 +16,7 @@ import { errMsg } from '../../utils/errors';
 import { Select } from '../../components/shared/ui';
 
 import { useUiLang, uiLocale } from '../../context/UiLangContext';
+import { StageTag } from '../../components/inst/Journey';
 export const ACCESS = { active: 'inst.students.access.active', invited: 'inst.students.access.invited', never_signed_in: 'inst.students.access.neverSignedIn', locked: 'inst.students.access.locked', removed: 'inst.students.access.removed' };
 const FILTERS = [['all', 'inst.students.filters.all'], ['active', 'inst.students.filters.active'], ['invited', 'inst.students.filters.invited'], ['never_signed_in', 'inst.students.filters.neverSignedIn'], ['locked', 'inst.students.filters.locked'], ['removed', 'inst.students.filters.removed'], ['reset_requested', 'inst.students.filters.pinResetRequested']];
 const EVENT = {
@@ -57,6 +58,23 @@ function ActionModal({ action, count, cohorts, onCancel, onConfirm }) {
           <button type="button" className="ln-btn ln-btn-primary" onClick={() => onConfirm({ target_engagement_id: target, delivery })}>{action === 'remove' ? t('inst.students.removeAccess') : t('inst.students.confirm')}</button>
         </div>
       </div>
+    </div>
+  );
+}
+
+// A student's own topics (courses they chose themselves), shown only when the
+// student shares their record with the college.
+function ExtraTopics({ elId }) {
+  const { t } = useUiLang();
+  const [d, setD] = useState(null);
+  useEffect(() => { setD(null); api.get(`/institution/students/${elId}/extra-topics`).then(r => setD(r.data)).catch(() => setD({ shared: false, courses: [] })); }, [elId]);
+  if (!d) return null;
+  return (
+    <div className="ln-col" style={{ gap: 6 }} data-extra-topics>
+      <span className="ln-kicker">{t('inst.students.extraTopics')}</span>
+      {!d.shared && <span className="ln-small ln-muted">{t('inst.students.extraNotShared')}</span>}
+      {d.shared && d.courses.length === 0 && <span className="ln-small ln-muted">{t('inst.students.extraNone')}</span>}
+      {d.courses.map(c => <div key={c.course_id} className="ln-between ln-small"><span>{c.title}</span><span className="ln-muted">{t('inst.students.extraProgress', { done: c.lessons_done, total: c.lessons_total })}</span></div>)}
     </div>
   );
 }
@@ -187,11 +205,11 @@ export default function Students() {
             <table className="ln-table">
               <thead><tr style={{ background: 'var(--color-bg-alt)' }}>
                 {canManage && <th style={{ paddingLeft: 16, width: 36 }}><input type="checkbox" aria-label={t('inst.students.selectAll')} checked={allOn} onChange={() => setSelected(allOn ? [] : rows.map(r => r.el_id))} /></th>}
-                <th style={canManage ? {} : { paddingLeft: 16 }}>{t('inst.students.student')}</th><th>{t('inst.students.cohort')}</th><th>{t('inst.students.access')}</th><th>{t('inst.students.lastSign')}</th><th>{t('inst.students.progress')}</th>
+                <th style={canManage ? {} : { paddingLeft: 16 }}>{t('inst.students.student')}</th><th>{t('inst.students.cohort')}</th><th>{t('inst.students.access')}</th><th>{t('inst.students.lastSign')}</th><th>{t('inst.students.progress')}</th><th>{t('lj.inst.stage')}</th>
               </tr></thead>
               <tbody>
-                {!data && <tr><td colSpan={6} style={{ paddingLeft: 16 }} className="ln-muted">{t('inst.students.loading')}</td></tr>}
-                {data && rows.length === 0 && <tr><td colSpan={6} style={{ paddingLeft: 16 }} className="ln-muted">{t('inst.students.noStudentsHere')}{canManage && t('inst.students.useAddStudentsGive')}</td></tr>}
+                {!data && <tr><td colSpan={7} style={{ paddingLeft: 16 }} className="ln-muted">{t('inst.students.loading')}</td></tr>}
+                {data && rows.length === 0 && <tr><td colSpan={7} style={{ paddingLeft: 16 }} className="ln-muted">{t('inst.students.noStudentsHere')}{canManage && t('inst.students.useAddStudentsGive')}</td></tr>}
                 {rows.map(r => (
                   <tr key={r.el_id} className={detail?.el_id === r.el_id ? 'is-selected' : ''} onClick={() => openDetail(r.el_id)}>
                     {canManage && <td style={{ paddingLeft: 16 }} onClick={e => e.stopPropagation()}><input type="checkbox" aria-label={t('inst.students.selectName', { name: r.name })} checked={selected.includes(r.el_id)} onChange={() => toggle(r.el_id)} /></td>}
@@ -204,6 +222,7 @@ export default function Students() {
                     <td><div className="ln-row" style={{ gap: 6 }}><AccessTag state={r.access} />{r.reset_requested && <span title={t('inst.students.askedPinReset')}><KeyRound size={15} color="var(--status-info)" aria-label={t('inst.students.pinResetRequested')} /></span>}</div></td>
                     <td className="ln-small">{r.last_login_at ? when(r.last_login_at) : '—'}</td>
                     <td className="ln-small">{r.progress}%</td>
+                    <td><StageTag stage={r.stage} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -239,6 +258,7 @@ export default function Students() {
                   ))}
                 </div>
               </div>
+              <ExtraTopics elId={detail.el_id} />
               <button type="button" className="ln-btn" onClick={() => api.get(`/institution/students/${detail.el_id}/learning-curve`).then(r => setCurve(r.data)).catch(() => setCurve({ error: true }))}>{t('inst.students.learningCurve')}</button>
               {canManage && (
                 <div className="ln-col" style={{ gap: 8 }}>

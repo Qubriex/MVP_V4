@@ -119,7 +119,7 @@ export function authenticate({ errors = 'legacy', optional = false } = {}) {
   return async (req, res, next) => {
     // optional: a missing, stale or revoked session is treated as signed out
     // (public forms such as Talk to us), never as an error.
-    const fail = (r, status, code, message) => (optional ? next() : r.status(status).json({ error: errors === 'v2' ? { code, message } : message }));
+    const fail = (r, status, code, message) => (optional ? next() : r.status(status).json({ error: errors === 'v2' ? { code, message } : message, code }));
     const header = req.headers.authorization || '';
     const bearer = header.startsWith('Bearer ') ? header.slice(7).trim() : null;
     const cookieToken = parseCookies(req.headers.cookie)[SESSION_COOKIE] || null;
@@ -157,11 +157,24 @@ export function authenticate({ errors = 'legacy', optional = false } = {}) {
       if (Date.now() - new Date(sb.last_active_at).getTime() > 60000) await dal.run('UPDATE demo_sandboxes SET last_active_at = ? WHERE id = ?', nowIso, session.sandbox_id);
     }
     req.user = payload;
+    // Learners: everything taught (sessions, concept notes, practice, reviews,
+    // topic intros, Ask Qubirex) follows the learning language they chose in
+    // Settings or on any learning screen; the cohort's language is the default.
+    if (session.actor_type === 'learner') {
+      const ll = await dal.one('SELECT learning_language FROM learners WHERE id = ?', session.actor_id);
+      req.user = { ...payload, cohort_language: payload.language };
+      if (ll?.learning_language) req.user.language = String(ll.learning_language).replace(/_en$/, '');
+      req.user.learning_language = ll?.learning_language || payload.language;
+    }
     req.session = session;
     req.tenant = tenantFor(session, payload);
     req.authVia = viaCookie ? 'cookie' : 'bearer';
     // The demo teaches with the scripted tutor (instant and free) unless DEMO_TUTOR=live.
-    if (session.sandbox_id) return withContext({ sandboxId: session.sandbox_id, tutor: process.env.DEMO_TUTOR === 'live' ? null : 'scripted' }, next);
+    // The exact learning language (telugu vs telugu_en) reaches every content
+    // call and AI prompt through the request context (core/language/style.js).
+    const ctx = req.user.learning_language ? { learningMode: req.user.learning_language } : {};
+    if (session.sandbox_id) return withContext({ ...ctx, sandboxId: session.sandbox_id, tutor: process.env.DEMO_TUTOR === 'live' ? null : 'scripted' }, next);
+    if (ctx.learningMode) return withContext(ctx, next);
     next();
   };
 }
@@ -171,7 +184,7 @@ export const authenticateToken = authenticate();
 
 export function requireRole(...roles) {
   return (req, res, next) => {
-    if (!req.user) return res.status(401).json({ error: 'Not authenticated' });
+    if (!req.user) return res.status(401).json({ error: 'Not authenticated', code: 'unauthenticated' });
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({ error: 'Insufficient permissions' });
     }
@@ -226,10 +239,10 @@ export async function requireActiveLearner(req, res, next) {
     WHERE el.id = ? AND l.id = ?
   `, req.user.el_id, req.user.id);
   if (!row || row.access_status === 'removed' || !row.is_active) {
-    return res.status(401).json({ error: 'Your access to this cohort was removed. Please contact your institution.' });
+    return res.status(401).json({ error: 'Your access to this cohort was removed. Please contact your institution.', code: 'access_removed' });
   }
   if (row.engagement_id !== req.user.engagement_id) {
-    return res.status(401).json({ error: 'You were moved to another cohort. Sign in again with its join code.' });
+    return res.status(401).json({ error: 'You were moved to another cohort. Sign in again with its join code.', code: 'moved_cohort' });
   }
   req.learnerAgeStatus = row.age_status || 'unknown';
   // A test-tenant learner: the /dev journey controls (tutor, clock offset)

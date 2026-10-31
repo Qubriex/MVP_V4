@@ -1,0 +1,1408 @@
+{
+ "id": "py-m2",
+ "n": 2,
+ "skill": "python-control-flow",
+ "title": {
+  "en": "Control Flow",
+  "te": "Control Flow",
+  "hi": "Control Flow"
+ },
+ "summary": {
+  "en": "Make decisions with if, repeat work with for and while, and control loops with break and continue.",
+  "te": "if తో నిర్ణయాలు, for, while తో పనిని మళ్లీ చేయడం, break, continue తో loops నియంత్రణ.",
+  "hi": "if से फ़ैसले, for और while से काम दोहराना, और break, continue से loops पर नियंत्रण।"
+ },
+ "lessons": [
+  {
+   "id": "py-m2-l1",
+   "n": 1,
+   "minutes": 20,
+   "title": {
+    "en": "If / else",
+    "te": "If / else",
+    "hi": "If / else"
+   },
+   "oneLine": {
+    "en": "if runs a block of code only when a condition is True; elif checks another condition; else runs when none of them are True.",
+    "te": "Condition True అయినప్పుడే if ఒక code భాగాన్ని నడుపుతుంది; elif ఇంకో condition చూస్తుంది; ఏదీ True కాకపోతే else నడుస్తుంది.",
+    "hi": "if किसी code हिस्से को तभी चलाता है जब condition True हो; elif दूसरी condition देखता है; कोई True न हो तो else चलता है।"
+   },
+   "useCase": {
+    "en": "An exam result app prints \"Distinction\", \"Pass\" or \"Try again\" depending on the marks.",
+    "te": "Exam result app marks ని బట్టి \"Distinction\", \"Pass\" లేదా \"Try again\" print చేస్తుంది.",
+    "hi": "Exam result app marks के हिसाब से \"Distinction\", \"Pass\" या \"Try again\" print करता है।"
+   },
+   "explain": {
+    "en": [
+     "Every day we decide: if it rains, take an umbrella, else leave it.",
+     "Python decides the same way with if.",
+     "After if comes a condition and a colon. The block below, four spaces in, runs only when the condition is True.",
+     "elif means \"else if\": it is checked only when the conditions above were False.",
+     "else catches everything left. Python checks from the top and runs only the first True block."
+    ],
+    "te": [
+     "మనం రోజూ నిర్ణయిస్తాం: వర్షం పడితే గొడుగు తీసుకెళ్లు, లేకపోతే వదిలేయి.",
+     "Python కూడా if తో అలాగే నిర్ణయిస్తుంది.",
+     "if తర్వాత ఒక condition, colon వస్తాయి. కింద నాలుగు spaces లోపల ఉన్న భాగం condition True అయితేనే నడుస్తుంది.",
+     "elif అంటే \"లేకపోతే if\": పై conditions False అయినప్పుడే దీన్ని చూస్తారు.",
+     "else మిగిలిన అన్నింటినీ పట్టుకుంటుంది. Python పై నుంచి చూసి మొదటి True భాగాన్ని మాత్రమే నడుపుతుంది."
+    ],
+    "hi": [
+     "हम रोज़ तय करते हैं: बारिश हो तो छाता लो, वरना छोड़ दो।",
+     "Python भी if से ऐसे ही तय करता है।",
+     "if के बाद condition और colon आता है। नीचे चार spaces अंदर वाला हिस्सा तभी चलता है जब condition True हो।",
+     "elif का मतलब \"वरना if\": इसे तभी देखा जाता है जब ऊपर की conditions False हों।",
+     "else बाकी सब पकड़ता है। Python ऊपर से जाँचता है और सिर्फ़ पहला True हिस्सा चलाता है।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "if: when this is true, do that.",
+     "else: otherwise, do this."
+    ],
+    "te": [
+     "if: ఇది నిజమైతే అది చేయి.",
+     "else: లేకపోతే ఇది చేయి."
+    ],
+    "hi": [
+     "if: यह सच हो तो वह करो।",
+     "else: वरना यह करो।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "A metro gate: if balance >= 10 open the gate, else show \"Please recharge\"."
+    ],
+    "te": [
+     "Metro gate: balance >= 10 అయితే gate తెరువు, లేకపోతే \"Please recharge\" చూపించు."
+    ],
+    "hi": [
+     "Metro gate: balance >= 10 हो तो gate खोलो, वरना \"Please recharge\" दिखाओ।"
+    ]
+   },
+   "picture": "flowchart TD\n  A[\"marks\"] --> B{\"marks >= 75 ?\"}\n  B -->|yes| C[\"Distinction\"]\n  B -->|no| D{\"marks >= 35 ?\"}\n  D -->|yes| E[\"Pass\"]\n  D -->|no| F[\"Try again\"]",
+   "code": {
+    "source": "marks = 62\nif marks >= 75:\n    print(\"Distinction\")\nelif marks >= 35:\n    print(\"Pass\")\nelse:\n    print(\"Try again\")",
+    "output": "Pass",
+    "notes": [
+     {
+      "line": 2,
+      "note": {
+       "en": "First question: is it 75 or more? 62 is not, so this block is skipped.",
+       "te": "మొదటి ప్రశ్న: 75 లేదా ఎక్కువా? 62 కాదు, కాబట్టి ఈ భాగం దాటవేయబడుతుంది.",
+       "hi": "पहला सवाल: क्या 75 या ज़्यादा है? 62 नहीं है, इसलिए यह हिस्सा छूट जाता है।"
+      }
+     },
+     {
+      "line": 4,
+      "note": {
+       "en": "elif asks the next question: 35 or more? Yes.",
+       "te": "elif తర్వాతి ప్రశ్న: 35 లేదా ఎక్కువా? అవును.",
+       "hi": "elif अगला सवाल पूछता है: 35 या ज़्यादा? हाँ।"
+      }
+     },
+     {
+      "line": 5,
+      "note": {
+       "en": "So this line runs and prints Pass.",
+       "te": "కాబట్టి ఈ line నడిచి Pass print చేస్తుంది.",
+       "hi": "इसलिए यह line चलती है और Pass print करती है।"
+      }
+     },
+     {
+      "line": 6,
+      "note": {
+       "en": "else would run only if nothing above was True.",
+       "te": "పైనవేవీ True కాకపోతేనే else నడుస్తుంది.",
+       "hi": "else तभी चलता जब ऊपर कुछ True न होता।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "if marks >= 35\n    print(\"Pass\")",
+     "fix": {
+      "en": "The condition must end with a colon.",
+      "te": "Condition colon తో ముగియాలి.",
+      "hi": "Condition colon से ख़त्म होनी चाहिए।"
+     }
+    },
+    {
+     "wrong": "if marks >= 35:\nprint(\"Pass\")",
+     "fix": {
+      "en": "The block must be pushed in by four spaces.",
+      "te": "ఆ భాగం నాలుగు spaces లోపలికి ఉండాలి.",
+      "hi": "वह हिस्सा चार spaces अंदर होना चाहिए।"
+     }
+    },
+    {
+     "wrong": "if marks >= 35:\n    print(\"Pass\")\nif marks >= 75:\n    print(\"Distinction\")",
+     "fix": {
+      "en": "Two separate ifs can both run. Check the highest first and use elif.",
+      "te": "రెండు వేర్వేరు if లు రెండూ నడవచ్చు. ఎక్కువది ముందు చూసి elif వాడండి.",
+      "hi": "दो अलग if दोनों चल सकते हैं। सबसे ऊँचा पहले जाँचिए और elif लिखिए।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "x = 5\nif x > 3:\n    print(\"A\")\nelse:\n    print(\"B\")\nWhat prints?",
+      "te": "x = 5\nif x > 3:\n    print(\"A\")\nelse:\n    print(\"B\")\nఏం print అవుతుంది?",
+      "hi": "x = 5\nif x > 3:\n    print(\"A\")\nelse:\n    print(\"B\")\nक्या print होगा?"
+     },
+     "options": [
+      "A",
+      "B",
+      "A and B"
+     ],
+     "answer": 0,
+     "why": {
+      "en": "5 > 3 is True.",
+      "te": "5 > 3 True.",
+      "hi": "5 > 3 True है।"
+     }
+    },
+    {
+     "q": {
+      "en": "When is elif checked?",
+      "te": "elif ఎప్పుడు చూస్తారు?",
+      "hi": "elif कब जाँचा जाता है?"
+     },
+     "options": [
+      {
+       "en": "Always",
+       "te": "ఎప్పుడూ",
+       "hi": "हमेशा"
+      },
+      {
+       "en": "Only when the conditions above were False",
+       "te": "పైవి False అయినప్పుడు మాత్రమే",
+       "hi": "सिर्फ़ जब ऊपर की conditions False हों"
+      },
+      {
+       "en": "Never",
+       "te": "ఎప్పుడూ కాదు",
+       "hi": "कभी नहीं"
+      }
+     ],
+     "answer": 1,
+     "why": {
+      "en": "elif means else-if.",
+      "te": "elif అంటే else-if.",
+      "hi": "elif का मतलब else-if।"
+     }
+    },
+    {
+     "q": {
+      "en": "How many blocks run in one if / elif / else?",
+      "te": "ఒక if / elif / else లో ఎన్ని భాగాలు నడుస్తాయి?",
+      "hi": "एक if / elif / else में कितने हिस्से चलते हैं?"
+     },
+     "options": [
+      "all True ones",
+      "exactly one",
+      "none"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "Only the first True block, or else.",
+      "te": "మొదటి True భాగం లేదా else మాత్రమే.",
+      "hi": "सिर्फ़ पहला True हिस्सा, या else।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write a function ticket(age) that returns \"Child\" for ages under 12, \"Senior\" for 60 and above, and \"Adult\" for everyone else.",
+     "te": "ticket(age) function రాయండి: 12 కంటే తక్కువ వయసుకు \"Child\", 60 మరియు ఎక్కువకు \"Senior\", మిగతా అందరికీ \"Adult\" return చేయాలి.",
+     "hi": "ticket(age) function लिखिए जो 12 से कम उम्र पर \"Child\", 60 और ज़्यादा पर \"Senior\", और बाकी सबके लिए \"Adult\" return करे।"
+    },
+    "starter": "def ticket(age):\n    pass\n",
+    "tests": [
+     {
+      "name": "ticket(8)",
+      "call": "ticket(8)",
+      "expected": "'Child'"
+     },
+     {
+      "name": "ticket(30)",
+      "call": "ticket(30)",
+      "expected": "'Adult'"
+     },
+     {
+      "name": "ticket(60)",
+      "call": "ticket(60)",
+      "expected": "'Senior'"
+     },
+     {
+      "name": "edge at 12",
+      "call": "ticket(12)",
+      "expected": "'Adult'",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "Start with if age < 12: return \"Child\".",
+      "te": "if age < 12: return \"Child\" తో మొదలుపెట్టండి.",
+      "hi": "if age < 12: return \"Child\" से शुरू कीजिए।"
+     },
+     {
+      "en": "Then elif age >= 60: return \"Senior\".",
+      "te": "తర్వాత elif age >= 60: return \"Senior\".",
+      "hi": "फिर elif age >= 60: return \"Senior\"।"
+     },
+     {
+      "en": "Finish with else: return \"Adult\".",
+      "te": "చివరిగా else: return \"Adult\".",
+      "hi": "अंत में else: return \"Adult\"।"
+     }
+    ],
+    "solution": "def ticket(age):\n    if age < 12:\n        return \"Child\"\n    elif age >= 60:\n        return \"Senior\"\n    else:\n        return \"Adult\""
+   },
+   "cheat": {
+    "en": [
+     "if cond: … elif cond: … else: …",
+     "Colon at the end, block four spaces in.",
+     "Only the first True block runs."
+    ],
+    "te": [
+     "if cond: … elif cond: … else: …",
+     "చివర colon, భాగం నాలుగు spaces లోపల.",
+     "మొదటి True భాగం మాత్రమే నడుస్తుంది."
+    ],
+    "hi": [
+     "if cond: … elif cond: … else: …",
+     "अंत में colon, हिस्सा चार spaces अंदर।",
+     "सिर्फ़ पहला True हिस्सा चलता है।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "An auto fare app charges 30 rupees up to 2 km, 15 per km up to 10 km, and a fixed 200 above that. Explain how if, elif and else choose the fare.",
+      "te": "Auto fare app 2 km వరకు 30 రూపాయలు, 10 km వరకు km కి 15, ఆపై స్థిరంగా 200. if, elif, else fare ని ఎలా ఎంచుకుంటాయో వివరించండి.",
+      "hi": "Auto fare app 2 km तक 30 रुपये, 10 km तक 15 रुपये प्रति km, और उससे ऊपर तय 200 लेता है। if, elif और else किराया कैसे चुनते हैं, समझाइए।"
+     },
+     {
+      "en": "Why does the order of conditions matter in an if / elif chain for exam grades? Give an example of the wrong order.",
+      "te": "Exam grades if / elif లో conditions క్రమం ఎందుకు ముఖ్యం? తప్పు క్రమానికి ఉదాహరణ ఇవ్వండి.",
+      "hi": "Exam grades के if / elif में conditions का क्रम क्यों ज़रूरी है? गलत क्रम का उदाहरण दीजिए।"
+     }
+    ],
+    "keywords": [
+     [
+      "if"
+     ],
+     [
+      "elif",
+      "else if"
+     ],
+     [
+      "else"
+     ],
+     [
+      "true",
+      "condition",
+      "first",
+      "order",
+      "షరతు",
+      "క్రమ",
+      "शर्त",
+      "क्रम"
+     ]
+    ],
+    "challenge": {
+     "en": "Say how Python decides which block to run.",
+     "te": "ఏ భాగాన్ని నడపాలో Python ఎలా నిర్ణయిస్తుందో చెప్పండి.",
+     "hi": "Python कैसे तय करता है कि कौन-सा हिस्सा चले, बताइए।"
+    }
+   }
+  },
+  {
+   "id": "py-m2-l2",
+   "n": 2,
+   "minutes": 20,
+   "title": {
+    "en": "For loops",
+    "te": "For loops",
+    "hi": "For loops"
+   },
+   "oneLine": {
+    "en": "A for loop repeats a block once for each item in a list, or for each number in a range.",
+    "te": "For loop ఒక list లోని ప్రతి item కి, లేదా range లోని ప్రతి number కి ఒక భాగాన్ని మళ్లీ మళ్లీ నడుపుతుంది.",
+    "hi": "For loop किसी list की हर item, या range के हर number के लिए एक हिस्से को दोहराता है।"
+   },
+   "useCase": {
+    "en": "A payroll program loops over every employee to calculate each salary.",
+    "te": "Payroll program ప్రతి ఉద్యోగి జీతం లెక్కించడానికి అందరిపై loop చేస్తుంది.",
+    "hi": "Payroll program हर कर्मचारी की तनख़्वाह निकालने के लिए सब पर loop करता है।"
+   },
+   "explain": {
+    "en": [
+     "A teacher calls each name on the attendance list, one by one.",
+     "A for loop does that: for name in names takes each item in turn.",
+     "The block inside runs once for every item.",
+     "range(5) gives the numbers 0, 1, 2, 3, 4; range(1, 6) gives 1 to 5.",
+     "A loop is often used with a running total, like adding marks one by one."
+    ],
+    "te": [
+     "Teacher attendance list లోని ప్రతి పేరును ఒక్కొక్కటిగా పిలుస్తారు.",
+     "For loop అదే చేస్తుంది: for name in names ప్రతి item ని వంతుల వారీగా తీసుకుంటుంది.",
+     "లోపలి భాగం ప్రతి item కి ఒకసారి నడుస్తుంది.",
+     "range(5) అంటే 0, 1, 2, 3, 4; range(1, 6) అంటే 1 నుంచి 5.",
+     "Marks ఒక్కొక్కటిగా కలపడం లాంటి running total తో loop తరచూ వాడతారు."
+    ],
+    "hi": [
+     "Teacher attendance list का हर नाम एक-एक करके पुकारते हैं।",
+     "For loop यही करता है: for name in names हर item को बारी-बारी लेता है।",
+     "अंदर का हिस्सा हर item के लिए एक बार चलता है।",
+     "range(5) से 0, 1, 2, 3, 4 मिलते हैं; range(1, 6) से 1 से 5।",
+     "Loop अक्सर running total के साथ आता है, जैसे marks एक-एक करके जोड़ना।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "for x in list: do this for every x.",
+     "range(n) counts from 0 up to n - 1."
+    ],
+    "te": [
+     "for x in list: ప్రతి x కి ఇది చేయి.",
+     "range(n) 0 నుంచి n - 1 వరకు లెక్కిస్తుంది."
+    ],
+    "hi": [
+     "for x in list: हर x के लिए यह करो।",
+     "range(n) 0 से n - 1 तक गिनता है।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "Printing the 5 times table: for i in range(1, 11): print(5, \"x\", i, \"=\", 5 * i)."
+    ],
+    "te": [
+     "5 ఎక్కం print చేయడం: for i in range(1, 11): print(5, \"x\", i, \"=\", 5 * i)."
+    ],
+    "hi": [
+     "5 का पहाड़ा: for i in range(1, 11): print(5, \"x\", i, \"=\", 5 * i)।"
+    ]
+   },
+   "picture": "flowchart TD\n  A[\"marks = [70, 85, 60]\"] --> B[\"take next mark\"]\n  B --> C[\"total = total + mark\"]\n  C --> D{\"more marks?\"}\n  D -->|yes| B\n  D -->|no| E[\"print total\"]",
+   "code": {
+    "source": "marks = [70, 85, 60]\ntotal = 0\nfor m in marks:\n    total = total + m\nprint(\"Total:\", total)\nfor i in range(1, 4):\n    print(\"Round\", i)",
+    "output": "Total: 215\nRound 1\nRound 2\nRound 3",
+    "notes": [
+     {
+      "line": 2,
+      "note": {
+       "en": "Start the running total at zero.",
+       "te": "Running total ని సున్నా నుంచి మొదలుపెట్టండి.",
+       "hi": "Running total शून्य से शुरू कीजिए।"
+      }
+     },
+     {
+      "line": 3,
+      "note": {
+       "en": "m takes each mark in turn: 70, then 85, then 60.",
+       "te": "m వరుసగా ప్రతి mark తీసుకుంటుంది: 70, తర్వాత 85, తర్వాత 60.",
+       "hi": "m बारी-बारी हर mark लेता है: 70, फिर 85, फिर 60।"
+      }
+     },
+     {
+      "line": 4,
+      "note": {
+       "en": "Each time, add the mark to the total.",
+       "te": "ప్రతిసారీ mark ని total కి కలపండి.",
+       "hi": "हर बार mark को total में जोड़िए।"
+      }
+     },
+     {
+      "line": 5,
+      "note": {
+       "en": "After the loop ends, print once: 215.",
+       "te": "Loop అయిపోయాక ఒకసారి print: 215.",
+       "hi": "Loop ख़त्म होने के बाद एक बार print: 215।"
+      }
+     },
+     {
+      "line": 6,
+      "note": {
+       "en": "range(1, 4) gives 1, 2 and 3.",
+       "te": "range(1, 4) అంటే 1, 2, 3.",
+       "hi": "range(1, 4) से 1, 2 और 3 मिलते हैं।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "for i in range(1, 5):\n    print(i)   # expected 1 to 5",
+     "fix": {
+      "en": "range stops before the end number: use range(1, 6).",
+      "te": "range చివరి number కి ముందే ఆగుతుంది: range(1, 6) వాడండి.",
+      "hi": "range आख़िरी number से पहले रुकता है: range(1, 6) लिखिए।"
+     }
+    },
+    {
+     "wrong": "for m in marks:\n    total = 0\n    total = total + m",
+     "fix": {
+      "en": "Set total = 0 before the loop, or it resets every time.",
+      "te": "total = 0 loop కి ముందు పెట్టండి, లేకపోతే ప్రతిసారీ reset అవుతుంది.",
+      "hi": "total = 0 loop से पहले रखिए, वरना हर बार reset होगा।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "What does range(3) give?",
+      "te": "range(3) ఏమి ఇస్తుంది?",
+      "hi": "range(3) क्या देता है?"
+     },
+     "options": [
+      "1, 2, 3",
+      "0, 1, 2",
+      "0, 1, 2, 3"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "It starts at 0 and stops before 3.",
+      "te": "0 నుంచి మొదలై 3 కి ముందు ఆగుతుంది.",
+      "hi": "0 से शुरू होकर 3 से पहले रुकता है।"
+     }
+    },
+    {
+     "q": {
+      "en": "for c in \"abc\":\n    print(c)\nHow many lines print?",
+      "te": "for c in \"abc\":\n    print(c)\nఎన్ని lines print అవుతాయి?",
+      "hi": "for c in \"abc\":\n    print(c)\nकितनी lines print होंगी?"
+     },
+     "options": [
+      "1",
+      "3",
+      "0"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "A string is a sequence of 3 letters.",
+      "te": "String 3 అక్షరాల వరుస.",
+      "hi": "String 3 अक्षरों का क्रम है।"
+     }
+    },
+    {
+     "q": {
+      "en": "Where should total = 0 go?",
+      "te": "total = 0 ఎక్కడ ఉండాలి?",
+      "hi": "total = 0 कहाँ होना चाहिए?"
+     },
+     "options": [
+      {
+       "en": "Before the loop",
+       "te": "Loop ముందు",
+       "hi": "Loop से पहले"
+      },
+      {
+       "en": "Inside the loop",
+       "te": "Loop లోపల",
+       "hi": "Loop के अंदर"
+      },
+      {
+       "en": "After the loop",
+       "te": "Loop తర్వాత",
+       "hi": "Loop के बाद"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "So it starts once and keeps adding.",
+      "te": "ఒకసారి మొదలై కలుపుతూ ఉండడానికి.",
+      "hi": "ताकि एक बार शुरू होकर जुड़ता रहे।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write a function total_sales(sales) that uses a for loop to add up a list of daily sales and returns the total.",
+     "te": "total_sales(sales) function రాయండి. అది for loop తో రోజువారీ sales list ని కలిపి total return చేయాలి.",
+     "hi": "total_sales(sales) function लिखिए जो for loop से रोज़ की sales की list जोड़कर total return करे।"
+    },
+    "starter": "def total_sales(sales):\n    total = 0\n    # loop over sales and add each one\n    return total\n",
+    "tests": [
+     {
+      "name": "total_sales([100, 250, 50])",
+      "call": "total_sales([100, 250, 50])",
+      "expected": "400"
+     },
+     {
+      "name": "empty list gives 0",
+      "call": "total_sales([])",
+      "expected": "0"
+     },
+     {
+      "name": "one day",
+      "call": "total_sales([999])",
+      "expected": "999",
+      "hidden": true
+     },
+     {
+      "name": "uses a for loop",
+      "call": "'sum' not in total_sales.__code__.co_names",
+      "expected": "True",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "Write for s in sales: inside the function.",
+      "te": "Function లోపల for s in sales: రాయండి.",
+      "hi": "Function के अंदर for s in sales: लिखिए।"
+     },
+     {
+      "en": "Inside the loop, add s to total.",
+      "te": "Loop లోపల s ని total కి కలపండి.",
+      "hi": "Loop के अंदर s को total में जोड़िए।"
+     },
+     {
+      "en": "total = total + s, then return total after the loop.",
+      "te": "total = total + s, loop తర్వాత return total.",
+      "hi": "total = total + s, फिर loop के बाद return total।"
+     }
+    ],
+    "solution": "def total_sales(sales):\n    total = 0\n    for s in sales:\n        total = total + s\n    return total"
+   },
+   "cheat": {
+    "en": [
+     "for item in items: … runs once per item.",
+     "range(a, b) gives a up to b - 1.",
+     "Start totals before the loop."
+    ],
+    "te": [
+     "for item in items: … ప్రతి item కి ఒకసారి.",
+     "range(a, b) a నుంచి b - 1 వరకు.",
+     "Totals ని loop ముందు మొదలుపెట్టండి."
+    ],
+    "hi": [
+     "for item in items: … हर item के लिए एक बार।",
+     "range(a, b) a से b - 1 तक।",
+     "Totals loop से पहले शुरू कीजिए।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A kirana shop has a list of today's bill amounts. Explain how a for loop finds the day's total and why the total starts at zero before the loop.",
+      "te": "కిరాణా shop లో ఈరోజు bills list ఉంది. రోజు total ని for loop ఎలా కనుక్కుంటుందో, loop ముందు total సున్నా ఎందుకో వివరించండి.",
+      "hi": "किराना shop में आज के bills की list है। For loop दिन का total कैसे निकालता है और loop से पहले total शून्य क्यों होता है, समझाइए।"
+     },
+     {
+      "en": "Explain what range(1, 11) gives and how you would use it to print a multiplication table.",
+      "te": "range(1, 11) ఏమి ఇస్తుందో, ఎక్కం print చేయడానికి దాన్ని ఎలా వాడతారో వివరించండి.",
+      "hi": "range(1, 11) क्या देता है और पहाड़ा print करने में इसे कैसे इस्तेमाल करेंगे, समझाइए।"
+     }
+    ],
+    "keywords": [
+     [
+      "for"
+     ],
+     [
+      "each",
+      "item",
+      "every",
+      "ప్రతి",
+      "हर"
+     ],
+     [
+      "range",
+      "total",
+      "list",
+      "zero",
+      "సున్నా",
+      "शून्य",
+      "list"
+     ]
+    ],
+    "challenge": {
+     "en": "Say what a for loop does with a list.",
+     "te": "For loop list తో ఏం చేస్తుందో చెప్పండి.",
+     "hi": "For loop list के साथ क्या करता है, बताइए।"
+    }
+   }
+  },
+  {
+   "id": "py-m2-l3",
+   "n": 3,
+   "minutes": 20,
+   "title": {
+    "en": "While loops",
+    "te": "While loops",
+    "hi": "While loops"
+   },
+   "oneLine": {
+    "en": "A while loop keeps repeating as long as its condition stays True, so something inside must change to end it.",
+    "te": "While loop దాని condition True గా ఉన్నంత వరకు మళ్లీ మళ్లీ నడుస్తుంది, అందుకే ఆపడానికి లోపల ఏదో మారాలి.",
+    "hi": "While loop तब तक दोहराता है जब तक condition True रहे, इसलिए उसे रोकने के लिए अंदर कुछ बदलना चाहिए।"
+   },
+   "useCase": {
+    "en": "An ATM keeps asking for the PIN while the attempts are fewer than three.",
+    "te": "ATM ప్రయత్నాలు మూడు కంటే తక్కువ ఉన్నంత వరకు PIN అడుగుతూ ఉంటుంది.",
+    "hi": "ATM तब तक PIN पूछता रहता है जब तक प्रयास तीन से कम हों।"
+   },
+   "explain": {
+    "en": [
+     "A for loop is for a known list. A while loop is for \"keep going until something happens\".",
+     "Think of filling a water tank: while the tank is not full, keep the motor on.",
+     "Python checks the condition before each round. If it is True, the block runs again.",
+     "Inside, something must change, like a counter going up. Otherwise the loop never stops.",
+     "When the condition becomes False, Python moves to the line after the loop."
+    ],
+    "te": [
+     "For loop తెలిసిన list కోసం. While loop \"ఏదో జరిగే వరకు కొనసాగు\" కోసం.",
+     "Water tank నింపడం ఊహించండి: tank నిండనంత వరకు motor ఆన్‌లో ఉంచు.",
+     "ప్రతి round ముందు Python condition చూస్తుంది. True అయితే భాగం మళ్లీ నడుస్తుంది.",
+     "లోపల ఏదో మారాలి, counter పెరగడం లాంటిది. లేకపోతే loop ఎప్పటికీ ఆగదు.",
+     "Condition False అయినప్పుడు Python loop తర్వాతి line కి వెళ్తుంది."
+    ],
+    "hi": [
+     "For loop तय list के लिए है। While loop \"जब तक कुछ न हो, चलते रहो\" के लिए है।",
+     "पानी की टंकी भरना सोचिए: जब तक टंकी भरी नहीं, motor चालू रखो।",
+     "हर round से पहले Python condition जाँचता है। True हो तो हिस्सा फिर चलता है।",
+     "अंदर कुछ बदलना चाहिए, जैसे counter बढ़ना। वरना loop कभी नहीं रुकेगा।",
+     "Condition False होते ही Python loop के बाद की line पर जाता है।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "while this is true, keep doing it.",
+     "Change something inside so it stops."
+    ],
+    "te": [
+     "ఇది నిజమైనంత వరకు చేస్తూనే ఉండు.",
+     "ఆగడానికి లోపల ఏదో మార్చండి."
+    ],
+    "hi": [
+     "जब तक यह सच है, करते रहो।",
+     "रुकने के लिए अंदर कुछ बदलिए।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "Saving for a phone: while savings < 15000, add 2000 each month and count the months."
+    ],
+    "te": [
+     "Phone కోసం పొదుపు: savings < 15000 ఉన్నంత వరకు నెలకు 2000 కలిపి నెలలు లెక్కించండి."
+    ],
+    "hi": [
+     "Phone के लिए बचत: जब तक savings < 15000, हर महीने 2000 जोड़िए और महीने गिनिए।"
+    ]
+   },
+   "picture": "flowchart TD\n  A[\"water = 0\"] --> B{\"water < 100 ?\"}\n  B -->|yes| C[\"water = water + 25\"]\n  C --> B\n  B -->|no| D[\"tank full\"]",
+   "code": {
+    "source": "water = 0\nwhile water < 100:\n    water = water + 25\n    print(\"Water:\", water)\nprint(\"Tank full\")",
+    "output": "Water: 25\nWater: 50\nWater: 75\nWater: 100\nTank full",
+    "notes": [
+     {
+      "line": 1,
+      "note": {
+       "en": "The tank starts empty.",
+       "te": "Tank ఖాళీగా మొదలవుతుంది.",
+       "hi": "टंकी ख़ाली शुरू होती है।"
+      }
+     },
+     {
+      "line": 2,
+      "note": {
+       "en": "Before each round: is water still less than 100?",
+       "te": "ప్రతి round ముందు: water ఇంకా 100 కంటే తక్కువా?",
+       "hi": "हर round से पहले: क्या पानी अभी 100 से कम है?"
+      }
+     },
+     {
+      "line": 3,
+      "note": {
+       "en": "This change is what will end the loop.",
+       "te": "ఈ మార్పే loop ని ముగిస్తుంది.",
+       "hi": "यही बदलाव loop को ख़त्म करेगा।"
+      }
+     },
+     {
+      "line": 5,
+      "note": {
+       "en": "At 100 the condition is False, so we leave the loop.",
+       "te": "100 వద్ద condition False, కాబట్టి loop నుంచి బయటకు.",
+       "hi": "100 पर condition False है, इसलिए loop से बाहर।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "count = 0\nwhile count < 5:\n    print(count)",
+     "fix": {
+      "en": "count never changes, so it never ends. Add count = count + 1.",
+      "te": "count మారదు, అందుకే ఎప్పటికీ ఆగదు. count = count + 1 జోడించండి.",
+      "hi": "count कभी नहीं बदलता, इसलिए यह नहीं रुकता। count = count + 1 जोड़िए।"
+     }
+    },
+    {
+     "wrong": "while n > 0\n    n = n - 1",
+     "fix": {
+      "en": "The condition needs a colon at the end.",
+      "te": "Condition చివర colon కావాలి.",
+      "hi": "Condition के अंत में colon चाहिए।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "n = 3\nwhile n > 0:\n    n = n - 1\nWhat is n after the loop?",
+      "te": "n = 3\nwhile n > 0:\n    n = n - 1\nLoop తర్వాత n ఎంత?",
+      "hi": "n = 3\nwhile n > 0:\n    n = n - 1\nLoop के बाद n क्या है?"
+     },
+     "options": [
+      "3",
+      "0",
+      "-1"
+     ],
+     "answer": 1,
+     "why": {
+      "en": "It stops when n reaches 0.",
+      "te": "n 0 అయినప్పుడు ఆగుతుంది.",
+      "hi": "n 0 होने पर रुकता है।"
+     }
+    },
+    {
+     "q": {
+      "en": "What makes a while loop never end?",
+      "te": "While loop ఎప్పటికీ ఆగకుండా చేసేది ఏది?",
+      "hi": "While loop को कभी न रुकने वाला क्या बनाता है?"
+     },
+     "options": [
+      {
+       "en": "Nothing changes the condition",
+       "te": "Condition ని ఏదీ మార్చకపోవడం",
+       "hi": "Condition को कुछ न बदले"
+      },
+      {
+       "en": "Using print",
+       "te": "print వాడడం",
+       "hi": "print इस्तेमाल करना"
+      },
+      {
+       "en": "A colon",
+       "te": "Colon",
+       "hi": "Colon"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Something inside must change.",
+      "te": "లోపల ఏదో మారాలి.",
+      "hi": "अंदर कुछ बदलना चाहिए।"
+     }
+    },
+    {
+     "q": {
+      "en": "When is the condition checked?",
+      "te": "Condition ఎప్పుడు చూస్తారు?",
+      "hi": "Condition कब जाँची जाती है?"
+     },
+     "options": [
+      {
+       "en": "Before each round",
+       "te": "ప్రతి round ముందు",
+       "hi": "हर round से पहले"
+      },
+      {
+       "en": "Only once",
+       "te": "ఒకసారి మాత్రమే",
+       "hi": "सिर्फ़ एक बार"
+      },
+      {
+       "en": "After the loop",
+       "te": "Loop తర్వాత",
+       "hi": "Loop के बाद"
+      }
+     ],
+     "answer": 0,
+     "why": {
+      "en": "Every round starts with the check.",
+      "te": "ప్రతి round check తో మొదలవుతుంది.",
+      "hi": "हर round जाँच से शुरू होता है।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write a function months_to_save(goal, per_month) that uses a while loop to count how many months it takes for the savings to reach the goal.",
+     "te": "months_to_save(goal, per_month) function రాయండి. పొదుపు goal చేరడానికి ఎన్ని నెలలు పడుతుందో while loop తో లెక్కించాలి.",
+     "hi": "months_to_save(goal, per_month) function लिखिए जो while loop से गिने कि बचत को goal तक पहुँचने में कितने महीने लगेंगे।"
+    },
+    "starter": "def months_to_save(goal, per_month):\n    saved = 0\n    months = 0\n    # use a while loop\n    return months\n",
+    "tests": [
+     {
+      "name": "months_to_save(10000, 2500)",
+      "call": "months_to_save(10000, 2500)",
+      "expected": "4"
+     },
+     {
+      "name": "months_to_save(5000, 2000)",
+      "call": "months_to_save(5000, 2000)",
+      "expected": "3"
+     },
+     {
+      "name": "goal already met",
+      "call": "months_to_save(0, 500)",
+      "expected": "0",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "Loop while saved < goal.",
+      "te": "saved < goal ఉన్నంత వరకు loop చేయండి.",
+      "hi": "जब तक saved < goal, loop कीजिए।"
+     },
+     {
+      "en": "Each round: add per_month to saved and 1 to months.",
+      "te": "ప్రతి round: saved కి per_month, months కి 1 కలపండి.",
+      "hi": "हर round: saved में per_month और months में 1 जोड़िए।"
+     },
+     {
+      "en": "while saved < goal:\n    saved = saved + per_month\n    months = months + 1",
+      "te": "while saved < goal:\n    saved = saved + per_month\n    months = months + 1",
+      "hi": "while saved < goal:\n    saved = saved + per_month\n    months = months + 1"
+     }
+    ],
+    "solution": "def months_to_save(goal, per_month):\n    saved = 0\n    months = 0\n    while saved < goal:\n        saved = saved + per_month\n        months = months + 1\n    return months"
+   },
+   "cheat": {
+    "en": [
+     "while cond: … repeats while cond is True.",
+     "Change something inside, or it never ends.",
+     "Use for for lists, while for \"until\"."
+    ],
+    "te": [
+     "while cond: … cond True ఉన్నంత వరకు.",
+     "లోపల ఏదో మార్చండి, లేకపోతే ఆగదు.",
+     "Lists కి for, \"వరకు\" కి while."
+    ],
+    "hi": [
+     "while cond: … cond True रहने तक दोहराता है।",
+     "अंदर कुछ बदलिए, वरना नहीं रुकेगा।",
+     "Lists के लिए for, \"जब तक\" के लिए while।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "An ATM allows three PIN tries. Explain how a while loop would keep asking and what makes it stop.",
+      "te": "ATM మూడు PIN ప్రయత్నాలు ఇస్తుంది. While loop ఎలా అడుగుతూ ఉంటుందో, దాన్ని ఏది ఆపుతుందో వివరించండి.",
+      "hi": "ATM तीन PIN प्रयास देता है। While loop कैसे पूछता रहेगा और उसे क्या रोकेगा, समझाइए।"
+     },
+     {
+      "en": "When would you choose a while loop instead of a for loop? Use the water tank example.",
+      "te": "For loop బదులు while loop ఎప్పుడు ఎంచుకుంటారు? Water tank ఉదాహరణ వాడండి.",
+      "hi": "For loop की जगह while loop कब चुनेंगे? पानी की टंकी का उदाहरण दीजिए।"
+     }
+    ],
+    "keywords": [
+     [
+      "while"
+     ],
+     [
+      "condition",
+      "true",
+      "false",
+      "షరతు",
+      "शर्त"
+     ],
+     [
+      "stop",
+      "change",
+      "counter",
+      "until",
+      "ఆగ",
+      "మార్చ",
+      "रुक",
+      "बदल"
+     ]
+    ],
+    "challenge": {
+     "en": "Say why a while loop needs something to change inside it.",
+     "te": "While loop లోపల ఏదో ఎందుకు మారాలో చెప్పండి.",
+     "hi": "While loop के अंदर कुछ क्यों बदलना चाहिए, बताइए।"
+    }
+   }
+  },
+  {
+   "id": "py-m2-l4",
+   "n": 4,
+   "minutes": 20,
+   "title": {
+    "en": "Break, continue and nested loops",
+    "te": "Break, continue మరియు nested loops",
+    "hi": "Break, continue और nested loops"
+   },
+   "oneLine": {
+    "en": "break leaves a loop at once, continue skips to the next round, and a nested loop is a loop inside another loop.",
+    "te": "break వెంటనే loop నుంచి బయటకు వెళ్తుంది, continue తర్వాతి round కి దాటుతుంది, nested loop అంటే loop లోపల loop.",
+    "hi": "break loop से तुरंत बाहर निकलता है, continue अगले round पर कूदता है, और nested loop एक loop के अंदर दूसरा loop है।"
+   },
+   "useCase": {
+    "en": "A search in a contact list stops with break as soon as the number is found.",
+    "te": "Contact list లో వెతకడం number దొరకగానే break తో ఆగుతుంది.",
+    "hi": "Contact list में खोज number मिलते ही break से रुक जाती है।"
+   },
+   "explain": {
+    "en": [
+     "Sometimes you finish early. If you find your friend's name halfway, you stop searching.",
+     "break does that: it leaves the loop immediately.",
+     "continue is different: it skips the rest of this round and goes to the next item.",
+     "A nested loop puts one loop inside another, like rows and seats in a cinema hall.",
+     "For every row, the inner loop goes through every seat."
+    ],
+    "te": [
+     "కొన్నిసార్లు ముందే ముగిస్తాం. స్నేహితుడి పేరు మధ్యలోనే దొరికితే వెతకడం ఆపేస్తాం.",
+     "break అదే చేస్తుంది: వెంటనే loop నుంచి బయటకు వెళ్తుంది.",
+     "continue వేరు: ఈ round లో మిగిలినది దాటి తర్వాతి item కి వెళ్తుంది.",
+     "Nested loop ఒక loop ని ఇంకో దానిలో పెడుతుంది, cinema hall లోని rows, seats లాగా.",
+     "ప్రతి row కి లోపలి loop ప్రతి seat ని చూస్తుంది."
+    ],
+    "hi": [
+     "कभी-कभी काम जल्दी पूरा हो जाता है। दोस्त का नाम बीच में मिल जाए तो खोजना बंद।",
+     "break यही करता है: loop से तुरंत बाहर।",
+     "continue अलग है: इस round का बाकी हिस्सा छोड़कर अगली item पर जाता है।",
+     "Nested loop एक loop के अंदर दूसरा loop है, जैसे cinema hall की rows और seats।",
+     "हर row के लिए अंदर वाला loop हर seat से गुज़रता है।"
+    ]
+   },
+   "simpler": {
+    "en": [
+     "break: stop the loop now.",
+     "continue: skip this one, go on."
+    ],
+    "te": [
+     "break: loop ఇప్పుడే ఆపు.",
+     "continue: ఇది దాటి ముందుకు."
+    ],
+    "hi": [
+     "break: loop अभी रोको।",
+     "continue: यह छोड़ो, आगे बढ़ो।"
+    ]
+   },
+   "anotherExample": {
+    "en": [
+     "Counting only paid bills: if a bill is unpaid, continue; when you reach a \"STOP\" marker, break."
+    ],
+    "te": [
+     "కట్టిన bills మాత్రమే లెక్కించడం: bill కట్టకపోతే continue; \"STOP\" గుర్తు వస్తే break."
+    ],
+    "hi": [
+     "सिर्फ़ भरे गए bills गिनना: bill बाकी हो तो continue; \"STOP\" निशान आए तो break।"
+    ]
+   },
+   "picture": "flowchart TD\n  A[\"next number\"] --> B{\"negative?\"}\n  B -->|yes| C[\"continue: skip\"]\n  C --> A\n  B -->|no| D{\"is 0?\"}\n  D -->|yes| E[\"break: stop\"]\n  D -->|no| F[\"add to total\"]\n  F --> A",
+   "code": {
+    "source": "numbers = [5, -2, 7, 0, 9]\ntotal = 0\nfor n in numbers:\n    if n < 0:\n        continue\n    if n == 0:\n        break\n    total = total + n\nprint(\"Total:\", total)",
+    "output": "Total: 12",
+    "notes": [
+     {
+      "line": 4,
+      "note": {
+       "en": "A negative number: skip it.",
+       "te": "Negative number: దాటేయండి.",
+       "hi": "Negative number: छोड़ दीजिए।"
+      }
+     },
+     {
+      "line": 5,
+      "note": {
+       "en": "continue jumps straight to the next number.",
+       "te": "continue నేరుగా తర్వాతి number కి వెళ్తుంది.",
+       "hi": "continue सीधे अगले number पर जाता है।"
+      }
+     },
+     {
+      "line": 6,
+      "note": {
+       "en": "A zero means stop.",
+       "te": "సున్నా అంటే ఆపు.",
+       "hi": "शून्य का मतलब रुको।"
+      }
+     },
+     {
+      "line": 7,
+      "note": {
+       "en": "break leaves the loop, so 9 is never added.",
+       "te": "break loop వదిలేస్తుంది, అందుకే 9 ఎప్పుడూ కలవదు.",
+       "hi": "break loop छोड़ देता है, इसलिए 9 कभी नहीं जुड़ता।"
+      }
+     },
+     {
+      "line": 9,
+      "note": {
+       "en": "Only 5 and 7 were added: 12.",
+       "te": "5, 7 మాత్రమే కలిశాయి: 12.",
+       "hi": "सिर्फ़ 5 और 7 जुड़े: 12।"
+      }
+     }
+    ]
+   },
+   "mistakes": [
+    {
+     "wrong": "for n in nums:\n    break\n    print(n)",
+     "fix": {
+      "en": "Lines after break in the same block never run.",
+      "te": "అదే భాగంలో break తర్వాతి lines నడవవు.",
+      "hi": "उसी हिस्से में break के बाद की lines नहीं चलतीं।"
+     }
+    },
+    {
+     "wrong": "# expecting break to leave both loops\nfor r in rows:\n    for s in seats:\n        break",
+     "fix": {
+      "en": "break leaves only the inner loop it is in.",
+      "te": "break తాను ఉన్న లోపలి loop నుంచి మాత్రమే బయటకు వస్తుంది.",
+      "hi": "break सिर्फ़ उसी अंदर वाले loop से निकलता है जिसमें वह है।"
+     }
+    }
+   ],
+   "quick": [
+    {
+     "q": {
+      "en": "What does continue do?",
+      "te": "continue ఏం చేస్తుంది?",
+      "hi": "continue क्या करता है?"
+     },
+     "options": [
+      {
+       "en": "Stops the loop",
+       "te": "Loop ఆపుతుంది",
+       "hi": "Loop रोकता है"
+      },
+      {
+       "en": "Skips to the next round",
+       "te": "తర్వాతి round కి దాటుతుంది",
+       "hi": "अगले round पर जाता है"
+      },
+      {
+       "en": "Restarts the program",
+       "te": "Program మళ్లీ మొదలుపెడుతుంది",
+       "hi": "Program दोबारा शुरू करता है"
+      }
+     ],
+     "answer": 1,
+     "why": {
+      "en": "The rest of this round is skipped.",
+      "te": "ఈ round మిగిలినది దాటుతుంది.",
+      "hi": "इस round का बाकी छूट जाता है।"
+     }
+    },
+    {
+     "q": {
+      "en": "for i in range(5):\n    if i == 2:\n        break\n    print(i)\nWhat prints?",
+      "te": "for i in range(5):\n    if i == 2:\n        break\n    print(i)\nఏం print అవుతుంది?",
+      "hi": "for i in range(5):\n    if i == 2:\n        break\n    print(i)\nक्या print होगा?"
+     },
+     "options": [
+      "0 1",
+      "0 1 2",
+      "2"
+     ],
+     "answer": 0,
+     "why": {
+      "en": "It stops when i is 2.",
+      "te": "i 2 అయినప్పుడు ఆగుతుంది.",
+      "hi": "i 2 होने पर रुकता है।"
+     }
+    },
+    {
+     "q": {
+      "en": "2 rows with 3 seats each: how many times does the inner loop run in total?",
+      "te": "ఒక్కోదానిలో 3 seats ఉన్న 2 rows: లోపలి loop మొత్తం ఎన్నిసార్లు నడుస్తుంది?",
+      "hi": "3-3 seats वाली 2 rows: अंदर वाला loop कुल कितनी बार चलेगा?"
+     },
+     "options": [
+      "3",
+      "5",
+      "6"
+     ],
+     "answer": 2,
+     "why": {
+      "en": "3 seats for each of 2 rows.",
+      "te": "2 rows కి ఒక్కోదానికి 3 seats.",
+      "hi": "2 rows में हर एक की 3 seats।"
+     }
+    }
+   ],
+   "task": {
+    "prompt": {
+     "en": "Write a function first_big(prices, limit) that returns the first price greater than limit, using a loop with break. If none is greater, return None.",
+     "te": "first_big(prices, limit) function రాయండి: limit కంటే ఎక్కువైన మొదటి price ని break ఉన్న loop తో return చేయాలి. ఏదీ ఎక్కువ కాకపోతే None return.",
+     "hi": "first_big(prices, limit) function लिखिए जो break वाले loop से limit से बड़ा पहला price return करे। कोई बड़ा न हो तो None return करे।"
+    },
+    "starter": "def first_big(prices, limit):\n    found = None\n    for p in prices:\n        pass\n    return found\n",
+    "tests": [
+     {
+      "name": "first_big([40, 90, 120, 300], 100)",
+      "call": "first_big([40, 90, 120, 300], 100)",
+      "expected": "120"
+     },
+     {
+      "name": "none above",
+      "call": "first_big([10, 20], 50)",
+      "expected": "None"
+     },
+     {
+      "name": "first one",
+      "call": "first_big([500, 600], 100)",
+      "expected": "500",
+      "hidden": true
+     }
+    ],
+    "hints": [
+     {
+      "en": "Inside the loop, check if p > limit.",
+      "te": "Loop లోపల p > limit అని చూడండి.",
+      "hi": "Loop के अंदर देखिए कि p > limit है या नहीं।"
+     },
+     {
+      "en": "When it is, save it in found and break.",
+      "te": "అయితే, found లో పెట్టి break చేయండి.",
+      "hi": "हो तो found में रखिए और break कीजिए।"
+     },
+     {
+      "en": "if p > limit:\n            found = p\n            break",
+      "te": "if p > limit:\n            found = p\n            break",
+      "hi": "if p > limit:\n            found = p\n            break"
+     }
+    ],
+    "solution": "def first_big(prices, limit):\n    found = None\n    for p in prices:\n        if p > limit:\n            found = p\n            break\n    return found"
+   },
+   "cheat": {
+    "en": [
+     "break: leave the loop now.",
+     "continue: skip to the next round.",
+     "Nested: inner loop runs fully for each outer round."
+    ],
+    "te": [
+     "break: loop ఇప్పుడే వదులు.",
+     "continue: తర్వాతి round కి.",
+     "Nested: ప్రతి బయటి round కి లోపలి loop పూర్తిగా నడుస్తుంది."
+    ],
+    "hi": [
+     "break: loop अभी छोड़ो।",
+     "continue: अगले round पर।",
+     "Nested: बाहरी हर round में अंदर वाला loop पूरा चलता है।"
+    ]
+   },
+   "check": {
+    "questions": [
+     {
+      "en": "A railway app searches a list of trains for the first one with free seats. Explain how break saves time here, and when you would use continue instead.",
+      "te": "Railway app ఖాళీ seats ఉన్న మొదటి train కోసం trains list లో వెతుకుతుంది. ఇక్కడ break ఎలా సమయం ఆదా చేస్తుందో, బదులుగా continue ఎప్పుడు వాడతారో వివరించండి.",
+      "hi": "Railway app trains की list में खाली seats वाली पहली train खोजता है। यहाँ break समय कैसे बचाता है, और बदले में continue कब इस्तेमाल करेंगे, समझाइए।"
+     },
+     {
+      "en": "Explain a nested loop using the rows and seats of a bus, and how many times the inner block runs for 10 rows of 4 seats.",
+      "te": "Bus లోని rows, seats తో nested loop వివరించండి; 4 seats ఉన్న 10 rows కి లోపలి భాగం ఎన్నిసార్లు నడుస్తుంది?",
+      "hi": "Bus की rows और seats से nested loop समझाइए, और 4 seats वाली 10 rows के लिए अंदर वाला हिस्सा कितनी बार चलेगा।"
+     }
+    ],
+    "keywords": [
+     [
+      "break",
+      "nested"
+     ],
+     [
+      "continue",
+      "skip",
+      "inner",
+      "దాట",
+      "లోపలి",
+      "छोड़",
+      "अंदर"
+     ],
+     [
+      "stop",
+      "leave",
+      "next",
+      "ఆగ",
+      "తర్వాత",
+      "रुक",
+      "अगल",
+      "40"
+     ]
+    ],
+    "challenge": {
+     "en": "Say the difference between break and continue.",
+     "te": "break కి continue కి తేడా చెప్పండి.",
+     "hi": "break और continue का फ़र्क बताइए।"
+    }
+   }
+  }
+ ],
+ "test": {
+  "pass": 4,
+  "questions": [
+   {
+    "q": {
+     "en": "Which runs when no if or elif is True?",
+     "te": "ఏ if, elif True కాకపోతే ఏది నడుస్తుంది?",
+     "hi": "कोई if या elif True न हो तो क्या चलता है?"
+    },
+    "options": [
+     "elif",
+     "else",
+     "nothing ever"
+    ],
+    "answer": 1,
+    "why": {
+     "en": "else catches the rest.",
+     "te": "else మిగిలినవి పట్టుకుంటుంది.",
+     "hi": "else बाकी पकड़ता है।"
+    }
+   },
+   {
+    "q": {
+     "en": "What does range(2, 5) give?",
+     "te": "range(2, 5) ఏమి ఇస్తుంది?",
+     "hi": "range(2, 5) क्या देता है?"
+    },
+    "options": [
+     "2, 3, 4",
+     "2, 3, 4, 5",
+     "3, 4, 5"
+    ],
+    "answer": 0,
+    "why": {
+     "en": "It stops before 5.",
+     "te": "5 కి ముందు ఆగుతుంది.",
+     "hi": "5 से पहले रुकता है।"
+    }
+   },
+   {
+    "q": {
+     "en": "Which loop fits \"keep asking until the PIN is right\"?",
+     "te": "\"PIN సరైనది అయ్యే వరకు అడుగు\" కి ఏ loop?",
+     "hi": "\"PIN सही होने तक पूछते रहो\" के लिए कौन-सा loop?"
+    },
+    "options": [
+     "for",
+     "while",
+     "neither"
+    ],
+    "answer": 1,
+    "why": {
+     "en": "while repeats until a condition changes.",
+     "te": "while condition మారే వరకు నడుస్తుంది.",
+     "hi": "while condition बदलने तक दोहराता है।"
+    }
+   },
+   {
+    "q": {
+     "en": "What does break do?",
+     "te": "break ఏం చేస్తుంది?",
+     "hi": "break क्या करता है?"
+    },
+    "options": [
+     {
+      "en": "Skips one round",
+      "te": "ఒక round దాటుతుంది",
+      "hi": "एक round छोड़ता है"
+     },
+     {
+      "en": "Leaves the loop",
+      "te": "Loop వదిలేస్తుంది",
+      "hi": "Loop छोड़ देता है"
+     },
+     {
+      "en": "Ends the program",
+      "te": "Program ముగిస్తుంది",
+      "hi": "Program ख़त्म करता है"
+     }
+    ],
+    "answer": 1,
+    "why": {
+     "en": "It leaves the loop it is in.",
+     "te": "తాను ఉన్న loop నుంచి బయటకు వస్తుంది.",
+     "hi": "जिस loop में है उससे निकलता है।"
+    }
+   },
+   {
+    "q": {
+     "en": "i = 0\nwhile i < 3:\n    i = i + 1\nWhat is i?",
+     "te": "i = 0\nwhile i < 3:\n    i = i + 1\ni ఎంత?",
+     "hi": "i = 0\nwhile i < 3:\n    i = i + 1\ni क्या है?"
+    },
+    "options": [
+     "2",
+     "3",
+     "4"
+    ],
+    "answer": 1,
+    "why": {
+     "en": "It stops when i reaches 3.",
+     "te": "i 3 అయినప్పుడు ఆగుతుంది.",
+     "hi": "i 3 होने पर रुकता है।"
+    }
+   }
+  ]
+ },
+ "project": {
+  "title": {
+   "en": "Class results",
+   "te": "తరగతి ఫలితాలు",
+   "hi": "कक्षा के नतीजे"
+  },
+  "prompt": {
+   "en": "Write a function grade_all(marks) that returns a list with \"Distinction\" for 75 or more, \"Pass\" for 35 or more, and \"Try again\" otherwise, one result per mark, in order. Skip any negative mark (it is a data error) using continue.",
+   "te": "grade_all(marks) function రాయండి: ప్రతి mark కి, క్రమంలో, 75 లేదా ఎక్కువైతే \"Distinction\", 35 లేదా ఎక్కువైతే \"Pass\", లేకపోతే \"Try again\" ఉన్న list return చేయాలి. Negative mark (data తప్పు) ఉంటే continue తో దాటేయండి.",
+   "hi": "grade_all(marks) function लिखिए जो हर mark के लिए क्रम से 75 या ज़्यादा पर \"Distinction\", 35 या ज़्यादा पर \"Pass\", वरना \"Try again\" वाली list return करे। Negative mark (data की गलती) को continue से छोड़ दीजिए।"
+  },
+  "starter": "def grade_all(marks):\n    results = []\n    # loop over marks; skip negatives; append a grade for each\n    return results\n",
+  "tests": [
+   {
+    "name": "grade_all([80, 40, 10])",
+    "call": "grade_all([80, 40, 10])",
+    "expected": "['Distinction', 'Pass', 'Try again']"
+   },
+   {
+    "name": "skips a negative mark",
+    "call": "grade_all([90, -5, 35])",
+    "expected": "['Distinction', 'Pass']"
+   },
+   {
+    "name": "empty list",
+    "call": "grade_all([])",
+    "expected": "[]",
+    "hidden": true
+   },
+   {
+    "name": "edge at 75",
+    "call": "grade_all([75, 74])",
+    "expected": "['Distinction', 'Pass']",
+    "hidden": true
+   }
+  ],
+  "hints": [
+   {
+    "en": "Use for m in marks:",
+    "te": "for m in marks: వాడండి",
+    "hi": "for m in marks: लिखिए"
+   },
+   {
+    "en": "if m < 0: continue",
+    "te": "if m < 0: continue",
+    "hi": "if m < 0: continue"
+   },
+   {
+    "en": "Then if / elif / else with results.append(...)",
+    "te": "తర్వాత results.append(...) తో if / elif / else",
+    "hi": "फिर results.append(...) के साथ if / elif / else"
+   }
+  ],
+  "solution": "def grade_all(marks):\n    results = []\n    for m in marks:\n        if m < 0:\n            continue\n        if m >= 75:\n            results.append(\"Distinction\")\n        elif m >= 35:\n            results.append(\"Pass\")\n        else:\n            results.append(\"Try again\")\n    return results"
+ }
+}

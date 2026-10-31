@@ -1,0 +1,133 @@
+{
+ "id": "c",
+ "order": 5,
+ "language": "c",
+ "status": "draft",
+ "level": "Beginner",
+ "hours": 35,
+ "icon": "code",
+ "title": {
+  "en": "C Programming",
+  "te": "C Programming",
+  "hi": "C Programming"
+ },
+ "summary": {
+  "en": "Learn how computers really work with C: types, control flow, functions, arrays, pointers, structures and files.",
+  "te": "C తో computers నిజంగా ఎలా పనిచేస్తాయో నేర్చుకోండి: types, control flow, functions, arrays, pointers, structures, files.",
+  "hi": "C से सीखिए कि computer असल में कैसे काम करते हैं: types, control flow, functions, arrays, pointers, structures और files।"
+ },
+ "modules": [
+  {
+   "id": "c-m1",
+   "n": 1,
+   "skill": "c-m1",
+   "title": {
+    "en": "Basics",
+    "te": "Basics",
+    "hi": "Basics"
+   },
+   "summary": {
+    "en": "printf, scanf, types and operators.",
+    "te": "printf, scanf, types, operators.",
+    "hi": "printf, scanf, types और operators।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "c-m2",
+   "n": 2,
+   "skill": "c-m2",
+   "title": {
+    "en": "Control Flow",
+    "te": "Control Flow",
+    "hi": "Control Flow"
+   },
+   "summary": {
+    "en": "if, switch and loops.",
+    "te": "if, switch, loops.",
+    "hi": "if, switch और loops।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "c-m3",
+   "n": 3,
+   "skill": "c-m3",
+   "title": {
+    "en": "Functions",
+    "te": "Functions",
+    "hi": "Functions"
+   },
+   "summary": {
+    "en": "Functions and recursion.",
+    "te": "Functions, recursion.",
+    "hi": "Functions और recursion।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "c-m4",
+   "n": 4,
+   "skill": "c-m4",
+   "title": {
+    "en": "Arrays & Strings",
+    "te": "Arrays & Strings",
+    "hi": "Arrays & Strings"
+   },
+   "summary": {
+    "en": "Arrays and character strings.",
+    "te": "Arrays, character strings.",
+    "hi": "Arrays और character strings।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "c-m5",
+   "n": 5,
+   "skill": "c-m5",
+   "title": {
+    "en": "Pointers",
+    "te": "Pointers",
+    "hi": "Pointers"
+   },
+   "summary": {
+    "en": "Addresses, pointers and memory.",
+    "te": "Addresses, pointers, memory.",
+    "hi": "Addresses, pointers और memory।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "c-m6",
+   "n": 6,
+   "skill": "c-m6",
+   "title": {
+    "en": "Structures & Files",
+    "te": "Structures & Files",
+    "hi": "Structures & Files"
+   },
+   "summary": {
+    "en": "struct and file input/output.",
+    "te": "struct, file input/output.",
+    "hi": "struct और file input/output।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "c-m7",
+   "n": 7,
+   "skill": "c-m7",
+   "title": {
+    "en": "Project",
+    "te": "Project",
+    "hi": "Project"
+   },
+   "summary": {
+    "en": "A small record-keeping program.",
+    "te": "చిన్న record-keeping program.",
+    "hi": "एक छोटा record-keeping program।"
+   },
+   "lessons": []
+  }
+ ]
+}

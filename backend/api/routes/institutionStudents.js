@@ -21,6 +21,8 @@ import { staffMiddleware, requireStaffRole, findScopedEngagement, scopeClause } 
 import { generatePin, hashPin, createLearnerInvite, logEvent, accessState, openResetRequest, resolvePinResetRequests } from '../../core/access.js';
 import { queueEmail, appUrl } from '../../core/outboundMail.js';
 import { eachSeq, mapSeq } from '../../core/util/seq.js';
+import { collegeStages, stuckAtCheck } from '../../core/journey/college.js';
+import * as dal from '../../core/db/dal.js';
 
 const router = express.Router();
 router.use(authenticateToken);
@@ -83,11 +85,21 @@ router.get('/students', async (req, res) => {
     const searched = needle ? all.filter(r => r.name.toLowerCase().includes(needle) || r.learner_ref.toLowerCase().includes(needle) || (r.email || '').toLowerCase().includes(needle)) : all;
     const counts = { all: searched.length, reset_requested: searched.filter(r => r.reset_requested).length };
     ['active', 'invited', 'never_signed_in', 'locked', 'removed'].forEach(s => { counts[s] = searched.filter(r => r.access === s).length; });
-    const rows = status === 'all' ? searched : status === 'reset_requested' ? searched.filter(r => r.reset_requested) : searched.filter(r => r.access === status);
-    res.json({ counts, rows });
+    const listed = status === 'all' ? searched : status === 'reset_requested' ? searched.filter(r => r.reset_requested) : searched.filter(r => r.access === status);
+    // Journey stage per student (hiring stages show as Ready: they are the student's own).
+    const stages = await collegeStages(listed.map(r => r.el_id));
+    const rows = listed.map(r => ({ ...r, ...(stages.get(r.el_id) || { stage: null, stage_name: null }) }));
+    const stage_counts = rows.reduce((m, r) => { if (r.stage) m[r.stage] = (m[r.stage] || 0) + 1; return m; }, {});
+    res.json({ counts, rows, stage_counts });
   } finally {
     db.close();
   }
+});
+
+// "Stuck at check": students whose last check on a skill has not passed yet.
+router.get('/students-stuck', async (req, res) => {
+  const scope = await scopeClause(dal.legacyHandle(), req, 'el.engagement_id');
+  res.json({ rows: await stuckAtCheck(req.user.id, scope, { engagementId: req.query.engagement_id || null }) });
 });
 
 router.get('/students/:elId', async (req, res) => {

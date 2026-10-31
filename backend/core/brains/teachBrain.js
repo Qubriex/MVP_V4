@@ -27,6 +27,16 @@ const LANGUAGE_CONTEXTS = {
     check_prompt: 'क्या आप इसे समझ गए?',
     still_confused: 'अभी भी उलझन में हैं?',
     region: 'North India'
+  },
+  english: {
+    lang_name: 'English',
+    script_note: 'Use simple Indian English, short sentences',
+    greeting: 'Hello',
+    advance_message: 'You have got it. Let us move on.',
+    loop_message: 'Good try. Let us look at it another way.',
+    check_prompt: 'Does that make sense?',
+    still_confused: 'Still unsure?',
+    region: 'India'
   }
 };
 
@@ -116,7 +126,7 @@ async function generateInstruction({
   nodeLabel, clusterLabel, language, approach = 'native_concept',
   approachesAlreadyUsed = [], conversationHistory = [], loopCount = 0,
   behaviourSignal = 'engaged', learnerContext = {}, culturalExamples = [], nodeSpec = null,
-  learnerRequestedCheck = false
+  learnerRequestedCheck = false, opening = false
 }) {
   const ctx = LANGUAGE_CONTEXTS[language];
   const approachGuide = (APPROACH_GUIDES[approach] || APPROACH_GUIDES.native_concept)(ctx.region);
@@ -151,7 +161,8 @@ SYSTEM PROMPT RULES:
 
 ${spokenStyleBlock(ctx)}
 
-${CAPTION_RULES}${learnerRequestedCheck ? `
+${CAPTION_RULES}${opening ? `
+- THIS IS THE FIRST TURN OF THE LESSON. Teach first: greet in one short line, then explain the core idea with the everyday example. Do not ask what the learner already knows, do not quiz, and do not offer options. End by inviting them to ask anything or to say when they are ready for the check. Set decision to CONTINUE.` : ''}${learnerRequestedCheck ? `
 - THE LEARNER HAS SAID THEY ARE READY FOR THE MASTERY CHECK. Set decision to CHECK this turn. If you have not yet taught the core idea in this conversation, first give a compact explanation of it (within the word limit); then say in one short encouraging line that the check is next (no question).` : ''}
 
 CONVERSATION HISTORY (last 6 turns):

@@ -11,6 +11,7 @@ import { ToastProvider, TableLabels } from './components/shared/ui';
 // Pages
 import PublicHome from './pages/public/Home';
 import Pricing from './pages/public/Pricing';
+import PublicTopics, { TopicSample } from './pages/public/Topics';
 import Demo from './pages/public/Demo';
 import Audience from './pages/public/Audience';
 import SignIn from './pages/public/SignIn';
@@ -33,6 +34,7 @@ import Cohort from './pages/inst/Cohort';
 import CohortLive from './pages/inst/CohortLive';
 import EvidenceReport from './pages/inst/EvidenceReport';
 import Curriculum from './pages/inst/Curriculum';
+import InstTopics from './pages/inst/Topics';
 import Standing from './pages/inst/Standing';
 import FacultyReview from './pages/inst/Review';
 import { BridgeList, BridgeDetail } from './pages/inst/Bridges';
@@ -61,6 +63,11 @@ import Assigned from './pages/learn/Assigned';
 import DayOne from './pages/learn/DayOne';
 import ApplyRole from './pages/learn/Apply';
 import RequestDetail from './pages/learn/RequestDetail';
+import Courses from './pages/learn/Courses';
+import CoursePage from './pages/learn/Course';
+import Lesson from './pages/learn/Lesson';
+import { ModuleTest, ModuleProject } from './pages/learn/Module';
+import JobsFlag from './components/learn/JobsFlag';
 import NotificationPrefs from './pages/learn/NotificationPrefs';
 import Verify from './pages/Verify';
 import EmployerLogin from './pages/employer/Login';
@@ -114,6 +121,8 @@ export default function App() {
             <Routes>
               <Route path="/" element={<PublicHome />} />
               <Route path="/pricing" element={<Pricing />} />
+              <Route path="/topics" element={<PublicTopics />} />
+              <Route path="/topics/sample/:lessonId" element={<TopicSample />} />
               <Route path="/learners" element={<Audience side="learners" />} />
               <Route path="/colleges" element={<Audience side="colleges" />} />
               <Route path="/employers" element={<Audience side="employers" />} />
@@ -188,6 +197,7 @@ export default function App() {
                       <Route path="cohorts/:id/live" element={<CohortLive />} />
                       <Route path="cohorts/:id/report" element={<EvidenceReport />} />
                       <Route path="curriculum" element={<Curriculum />} />
+                      <Route path="topics" element={<InstTopics />} />
                       <Route path="benchmark" element={<Standing />} />
                       <Route path="review" element={<FacultyReview />} />
                       <Route path="bridges" element={<BridgeList />} />
@@ -217,10 +227,15 @@ export default function App() {
                       <Route path="welcome" element={<Welcome />} />
                       <Route path="record" element={<SkillRecord />} />
                       <Route path="jobs" element={<LearnerJobs />} />
-                      <Route path="market" element={<JobMarket />} />
-                      <Route path="market/:jobId" element={<JobDetail />} />
-                      <Route path="market/:jobId/interview" element={<InterviewPractice />} />
-                      <Route path="topics" element={<EmergingTopics />} />
+                      <Route path="market" element={<JobsFlag><JobMarket /></JobsFlag>} />
+                      <Route path="market/:jobId" element={<JobsFlag><JobDetail /></JobsFlag>} />
+                      <Route path="market/:jobId/interview" element={<JobsFlag><InterviewPractice /></JobsFlag>} />
+                      <Route path="topics" element={<JobsFlag><EmergingTopics /></JobsFlag>} />
+                      <Route path="courses" element={<Courses />} />
+                      <Route path="courses/:courseId" element={<CoursePage />} />
+                      <Route path="lesson/:lessonId" element={<Lesson />} />
+                      <Route path="modules/:moduleId/test" element={<ModuleTest />} />
+                      <Route path="modules/:moduleId/project" element={<ModuleProject />} />
                       <Route path="profile" element={<LearnerProfile />} />
                       <Route path="settings" element={<LearnerSettings />} />
                       <Route path="resume" element={<ResumeBuilder />} />

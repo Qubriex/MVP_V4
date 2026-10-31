@@ -9,12 +9,12 @@ import { RotateCcw } from 'lucide-react';
 import { useUiLang } from '../../context/UiLangContext';
 export default function VoiceStatus({ speech, text, dark = false, lang }) {
   const { t } = useUiLang();
-  if (!speech.voiceIssue) return null;
+  if (!speech.voiceIssueKey) return null;
   const canReplay = speech.issue !== 'none' && speech.hasLast();
   return (
     <div className={`ln-voice-status ${dark ? 'is-dark' : ''}`} role="status">
       <div className="ln-row" style={{ gap: 10, alignItems: 'flex-start' }}>
-        <span style={{ flex: 1 }}>{speech.voiceIssue}</span>
+        <span style={{ flex: 1 }}>{t(speech.voiceIssueKey)}</span>
         {canReplay && <button type="button" className={`ln-btn ln-btn-sm ${dark ? 'ln-btn-ghost-dark' : ''}`} onClick={speech.replay}><RotateCcw size={14} aria-hidden="true" />{t('learn.voiceStatus.replay')}</button>}
       </div>
       {text && speech.issue !== 'tap' && <p lang={lang} className="ln-indic" style={{ margin: 0, lineHeight: 1.6 }}>{text}</p>}

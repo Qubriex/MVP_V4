@@ -219,3 +219,73 @@ describe('settings and records', () => {
     expect(p.labels_changed_since_share).toBe(true);
   });
 });
+
+describe('the journey on the college and employer side', () => {
+  const college = () => login(app, '/api/auth/institution/login', { email: 'test.institution@qubirex.local', password: 'QubirexTest2026!' });
+
+  it('Students shows each journey stage; hiring stages stay the student\'s own and read as Ready', async () => {
+    const c = await college();
+    const r = await c.agent.get('/api/institution/students');
+    const stageOfRow = (elId) => r.body.rows.find(x => x.el_id === elId)?.stage;
+    expect(stageOfRow('test-jel-s3')).toBe('S3');
+    expect(stageOfRow('test-jel-s4')).toBe('S4');
+    expect(['S7', 'S11']).toContain(stageOfRow('test-jel-s8'));
+    expect(r.body.rows.some(x => ['S8', 'S9', 'S10'].includes(x.stage))).toBe(false);
+    expect(r.body.stage_counts.S4).toBeGreaterThan(0);
+  });
+
+  it('"Stuck at check" lists students whose last check has not passed, and help requests reach the professor', async () => {
+    const c = await college();
+    const stuck = await c.agent.get('/api/institution/students-stuck');
+    const row = stuck.body.rows.find(x => x.el_id === 'test-jel-s4');
+    // The S4 seed already asked for help on this skill; asking again keeps one open request.
+    expect(row).toMatchObject({ node_label: 'Array methods', asked_for_help: true });
+    expect(row.failed_tries).toBeGreaterThan(0);
+
+    const s4 = await as('s4');
+    expect((await s4.post(`/skill/${row.node_id}/help`, { message: 'Again' })).body).toMatchObject({ ok: true, already_open: true });
+    const open = await c.agent.get('/api/institution/help-requests');
+    const h = open.body.items.filter(x => x.el_id === 'test-jel-s4');
+    expect(h).toHaveLength(1);
+    expect(h[0]).toMatchObject({ node_label: 'Array methods', status: 'open' });
+    expect(h[0].failed_tries).toBe(row.failed_tries);
+
+    const ans = await c.agent.post(`/api/institution/help-requests/${h[0].id}/answer`).set('X-CSRF-Token', c.csrf).send({ reply: 'map changes each item; filter keeps some.' });
+    expect(ans.status).toBe(200);
+    expect((await c.agent.get('/api/institution/help-requests?status=answered')).body.items.some(x => x.id === h[0].id)).toBe(true);
+    expect((await c.agent.get('/api/institution/students-stuck')).body.rows.find(x => x.el_id === 'test-jel-s4').asked_for_help).toBe(false);
+    const note = await dal.one("SELECT title, href FROM notifications WHERE actor_type = 'learner' AND actor_id = ? AND kind = 'help_answered'", s4.j.learnerId);
+    expect(note.href).toBe(`/learn/skill/${row.node_id}`);
+  });
+
+  it('the employer sees how skills were shown and whose answer it was, never failed tries', async () => {
+    const emp = await login(app, '/api/auth/employer/login', { email: 'test.employer.verified@qubirex.local', password: 'QubirexTest2026!' });
+    const c = (await emp.agent.get('/api/employer/candidates/test-j-s8-pipe')).body;
+    expect(c.evidence_summary.kinds.length).toBeGreaterThan(0);
+    expect(c.evidence_summary.kinds.every(k => k.count > 0)).toBe(true);
+    expect(Object.keys(c.evidence_summary.authorship).length).toBeGreaterThan(0);
+    expect(JSON.stringify(c)).not.toMatch(/failed_tries|attempt_count|loops/);
+    const pipe = (await emp.agent.get('/api/employer/pipeline')).body.rows;
+    const applied = pipe.find(r => r.source === 'apply');
+    expect(applied.shared.length).toBeGreaterThan(0);
+  });
+
+  it('Reviews gives a streak', async () => {
+    const s12 = await as('s12');
+    const r = await s12.get('/reviews/due');
+    expect(r.body.streak).toMatchObject({ days: expect.any(Number), today: expect.any(Boolean) });
+  });
+});
+
+describe('developer controls', () => {
+  it('Make me Ready gives every skill and Confirmed labels, and the learner is at S7', async () => {
+    const { runControl } = await import('../../core/journey/controls.js');
+    const { skillLines, skillFacts } = await import('../../core/return/credentialEngine.js');
+    const out = await runControl('test-jel-s5', { action: 'ready' });
+    expect(out.message).toMatch(/Ready/);
+    const lines = await skillLines('test-jel-s5', await skillFacts('test-jel-s5'));
+    expect(lines.length).toBeGreaterThan(0);
+    expect(lines.filter(l => l.label !== 'Confirmed').map(l => l.name)).toEqual([]);
+    expect(stageOf(await journeyFacts('test-jel-s5'))).toBe('S7');
+  });
+});

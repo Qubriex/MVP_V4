@@ -6,7 +6,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle2, CircleDashed, XCircle, ArrowRight } from 'lucide-react';
 import { useUiLang } from '../../context/UiLangContext';
-import { LABEL, MISSING } from './evidenceText';
+import { LABEL, MISSING, fmtDate } from './evidenceText';
+import api from '../../utils/api';
 
 /** A learner-facing text with the test tutor's placeholder replaced. */
 export const cleanAiText = (text, t) => (/^mock[:-]/.test(String(text || '')) ? t('lj.testMode') : text);
@@ -95,5 +96,28 @@ export function ThreeBars({ skill }) {
       {row('lj.bars.course', skill.course, 'lj-bar-course')}
       {row('lj.bars.employers', skill.employers, 'lj-bar-employers')}
     </div>
+  );
+}
+
+/** "Source · date" under a market figure. */
+export function SourceLine({ source, date }) {
+  const { t } = useUiLang();
+  if (!source && !date) return null;
+  return <span className="ln-xs ln-muted" data-source-line>{t('lj.source', { source: source || t('learn.jobMarket.sampleFeed'), date: fmtDate(date) })}</span>;
+}
+
+/** "Add this skill to my plan": saves the skill to the learner's own plan. */
+export function AddToPlan({ skill, source, dark }) {
+  const { t } = useUiLang();
+  const [state, setState] = React.useState('idle');
+  const add = async () => {
+    setState('busy');
+    try { await api.post('/learner/plan', { skill, source }); setState('done'); } catch { setState('error'); }
+  };
+  if (state === 'done') return <span className={`ln-xs ${dark ? '' : 'ln-muted'}`} role="status"><CheckCircle2 size={12} aria-hidden="true" style={{ verticalAlign: -2 }} /> {t('lj.plan.added')} · <Link className="ln-link" to="/learn/readiness">{t('lj.plan.see')}</Link></span>;
+  return (
+    <button type="button" className="ln-link ln-xs" onClick={add} disabled={state === 'busy'} aria-label={t('lj.plan.addAria', { skill })} data-add-plan={skill}>
+      {state === 'error' ? t('lj.plan.failed') : t('lj.plan.add')}
+    </button>
   );
 }

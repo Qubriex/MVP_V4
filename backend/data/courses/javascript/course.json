@@ -1,0 +1,133 @@
+{
+ "id": "javascript",
+ "order": 3,
+ "language": "javascript",
+ "status": "draft",
+ "level": "Beginner",
+ "hours": 35,
+ "icon": "code",
+ "title": {
+  "en": "JavaScript",
+  "te": "JavaScript",
+  "hi": "JavaScript"
+ },
+ "summary": {
+  "en": "Make web pages interactive: values, functions, arrays and objects, the DOM, events and fetching data.",
+  "te": "Web pages ని interactive చేయడం: values, functions, arrays, objects, DOM, events, data తెచ్చుకోవడం.",
+  "hi": "Web pages को interactive बनाना: values, functions, arrays और objects, DOM, events और data लाना।"
+ },
+ "modules": [
+  {
+   "id": "javascript-m1",
+   "n": 1,
+   "skill": "javascript-m1",
+   "title": {
+    "en": "Basics",
+    "te": "Basics",
+    "hi": "Basics"
+   },
+   "summary": {
+    "en": "Variables, types, operators and console.log.",
+    "te": "Variables, types, operators, console.log.",
+    "hi": "Variables, types, operators और console.log।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "javascript-m2",
+   "n": 2,
+   "skill": "javascript-m2",
+   "title": {
+    "en": "Control Flow",
+    "te": "Control Flow",
+    "hi": "Control Flow"
+   },
+   "summary": {
+    "en": "if, switch and loops.",
+    "te": "if, switch, loops.",
+    "hi": "if, switch और loops।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "javascript-m3",
+   "n": 3,
+   "skill": "javascript-m3",
+   "title": {
+    "en": "Functions",
+    "te": "Functions",
+    "hi": "Functions"
+   },
+   "summary": {
+    "en": "Functions, arrow functions and scope.",
+    "te": "Functions, arrow functions, scope.",
+    "hi": "Functions, arrow functions और scope।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "javascript-m4",
+   "n": 4,
+   "skill": "javascript-m4",
+   "title": {
+    "en": "Arrays & Objects",
+    "te": "Arrays & Objects",
+    "hi": "Arrays & Objects"
+   },
+   "summary": {
+    "en": "Arrays, objects, map, filter and reduce.",
+    "te": "Arrays, objects, map, filter, reduce.",
+    "hi": "Arrays, objects, map, filter और reduce।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "javascript-m5",
+   "n": 5,
+   "skill": "javascript-m5",
+   "title": {
+    "en": "DOM & Events",
+    "te": "DOM & Events",
+    "hi": "DOM & Events"
+   },
+   "summary": {
+    "en": "Change the page and respond to clicks and typing.",
+    "te": "Page మార్చడం, clicks, typing కి స్పందించడం.",
+    "hi": "Page बदलना और clicks और typing पर प्रतिक्रिया देना।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "javascript-m6",
+   "n": 6,
+   "skill": "javascript-m6",
+   "title": {
+    "en": "Async & Fetch",
+    "te": "Async & Fetch",
+    "hi": "Async & Fetch"
+   },
+   "summary": {
+    "en": "Promises, async/await and calling APIs.",
+    "te": "Promises, async/await, APIs call చేయడం.",
+    "hi": "Promises, async/await और APIs call करना।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "javascript-m7",
+   "n": 7,
+   "skill": "javascript-m7",
+   "title": {
+    "en": "Project",
+    "te": "Project",
+    "hi": "Project"
+   },
+   "summary": {
+    "en": "A small interactive web app.",
+    "te": "చిన్న interactive web app.",
+    "hi": "एक छोटा interactive web app।"
+   },
+   "lessons": []
+  }
+ ]
+}

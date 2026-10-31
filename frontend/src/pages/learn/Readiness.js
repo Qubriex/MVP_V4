@@ -1,8 +1,9 @@
 // src/pages/learn/Readiness.js — /learn/readiness: readiness for a role and
-// the bridge plan. Pick a role; each skill shows three bars (where you are,
-// where your course takes you, what employers ask), the hours to close the
-// gap, the skills your course won't cover, the best-fitting roles and
-// "Add to my plan".
+// the bridge plan. Pick a role; one grouped chart shows every skill's three
+// bars (where you are, where your course takes you, what employers ask) with
+// the band and a one-line summary ("2 skills short: SQL joins, pandas"); below
+// it, per skill, the hours to close the gap and "Add to my plan". Also the
+// skills your course won't cover and the best-fitting roles.
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Plus, Check, Clock } from 'lucide-react';
@@ -11,7 +12,8 @@ import { errMsg } from '../../utils/errors';
 import { useUiLang } from '../../context/UiLangContext';
 import { PageHeader, Skeleton, Select, BandPill } from '../../components/shared/ui';
 import { WhyThis } from '../../components/shared/Popover';
-import { ThreeBars, ReadinessWords } from '../../components/learn/journey';
+import { ReadinessWords } from '../../components/learn/journey';
+import { GroupedBars } from '../../components/shared/Charts';
 
 export default function Readiness() {
   const { t } = useUiLang();
@@ -40,6 +42,7 @@ export default function Readiness() {
               <div className="ln-col" style={{ gap: 2 }}>
                 <b>{r.title}{r.employer ? ` · ${r.employer}` : ''}</b>
                 <span className="ln-small"><ReadinessWords band={r.band} short={r.short.length} /></span>
+                <span className="ln-small" data-ready-summary><b>{r.short.length === 0 ? t('lj.ready.summaryNone') : t(r.short.length === 1 ? 'lj.ready.summaryOne' : 'lj.ready.summaryShort', { n: r.short.length, list: r.short.join(', ') })}</b></span>
               </div>
               <BandPill band={r.band} score={r.readiness} />
             </div>
@@ -49,7 +52,12 @@ export default function Readiness() {
           </section>
           <section className="ln-col" style={{ gap: 8 }} aria-labelledby="skills-h">
             <h2 id="skills-h" className="ln-h2">{t('lj.ready.skills')}</h2>
-            <div className="lj-legend ln-xs"><span className="lj-dot lj-bar-you" />{t('lj.bars.you')} <span className="lj-dot lj-bar-course" />{t('lj.bars.course')} <span className="lj-dot lj-bar-employers" />{t('lj.bars.employers')}</div>
+            <div className="ln-card" data-readiness-chart>
+              <GroupedBars series={[{ key: 'you', label: t('lj.bars.you') }, { key: 'course', label: t('lj.bars.course') }, { key: 'employers', label: t('lj.bars.employers') }]}
+                rows={r.skills.map(s => ({ key: s.key, label: s.name, values: { you: s.you, course: s.course, employers: s.employers } }))}
+                axisLabel={t('lj.ready.chartAxis')} ariaLabel={t('lj.ready.chartAria')} />
+            </div>
+            <h3 className="ln-small ln-muted">{t('lj.ready.actions')}</h3>
             {r.skills.map(s => (
               <div key={s.key} className="ln-card ln-col" style={{ gap: 6 }} data-skill={s.key}>
                 <div className="ln-between ln-wrap" style={{ gap: 8 }}>
@@ -60,7 +68,6 @@ export default function Readiness() {
                     </button>
                   )}
                 </div>
-                <ThreeBars skill={s} />
                 {!s.verified && <span className="ln-xs ln-muted">{s.not_in_course ? t('lj.ready.notInCourse', { h: s.hours_to_close }) : t('lj.ready.leftInCourse', { n: s.nodes_left, h: s.hours_to_close })}</span>}
               </div>
             ))}

@@ -7,11 +7,12 @@ import { Mic, Play, Plus, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useUiLang, UI_LANGS, speechTag } from '../../context/UiLangContext';
 import api, { getOr } from '../../utils/api';
-import { useSpeechInput, useSpeechOutput } from '../../utils/voice';
+import { useSpeechInput, useSpeechOutput, setDeviceVoice } from '../../utils/voice';
 import { MOCK_PROFILE } from '../../utils/learnerMockData';
 import { useLowBandwidth } from '../../utils/lowBandwidth';
 import { errMsg } from '../../utils/errors';
 import { Select } from '../shared/ui';
+import LearningLangPicker from './LearningLangPicker';
 
 const EDITABLE = ['email', 'phone', 'city', 'link_url', 'headline', 'about', 'target_roles', 'preferred_cities', 'graduation_year',
   'expected_salary', 'self_skills', 'experience', 'certifications', 'ui_language', 'voice_prefs', 'education', 'projects',
@@ -326,8 +327,9 @@ export function VoiceSection({ form }) {
   return (
     <Section id="preferences" title={t('learn.profileSections.learningVoicePreferences')}>
       <div className="ln-grid ln-g-2" style={{ gap: 16 }}>
-        <div className="ln-field"><span className="ln-label">{t('learn.profileSections.teachingLanguage')}</span>
-          <span className="ln-tile ln-indic" style={{ fontSize: 'var(--fs-body)', padding: '12px 14px' }}>{language === 'hindi' ? 'हिंदी' : 'తెలుగు'} <span className="ln-muted">{t('learn.profileSections.setByInstitution')}</span></span></div>
+        <div className="ln-field" data-settings-learning-language><span className="ln-label">{t('lang.learningLanguage')}</span>
+          <LearningLangPicker />
+          <span className="ln-xs ln-muted">{t('lang.learningDefault', { lang: language === 'hindi' ? 'हिंदी' : 'తెలుగు' })}</span></div>
         <div className="ln-field"><span className="ln-label" id="ui-lang">{t('learn.profileSections.interfaceLanguage')}</span>
           <div className="ln-seg ln-indic" role="group" aria-labelledby="ui-lang">
             {UI_LANGS.map(l => <button key={l.id} type="button" aria-pressed={draft.ui_language === l.id} onClick={() => { set('ui_language', l.id); setLang(l.id); }}>{l.label}</button>)}
@@ -345,6 +347,10 @@ export function VoiceSection({ form }) {
         <label className="ln-toggle-row"><span>{t('learn.profileSections.startSessionsVoiceMode')}</span><input type="checkbox" checked={prefs.startInVoice !== false} onChange={e => setPref('startInVoice', e.target.checked)} /></label>
         <label className="ln-toggle-row"><span>{t('learn.profileSections.showEnglishCaptionsUnder')}{' '} {language === 'hindi' ? t('learn.profileSections.hindi') : t('learn.profileSections.telugu')} {' '}{t('learn.profileSections.speech')}</span><input type="checkbox" checked={prefs.showEnglishCaptions !== false} onChange={e => setPref('showEnglishCaptions', e.target.checked)} /></label>
         <label className="ln-toggle-row"><span>{t('learn.profileSections.dailyStudyReminder')}</span><input type="checkbox" checked={!!prefs.dailyReminder} onChange={e => setPref('dailyReminder', e.target.checked)} /></label>
+        <label className="ln-toggle-row" style={{ alignItems: 'flex-start' }}>
+          <span className="ln-col" style={{ gap: 2 }}><span>{t('voice.deviceChoice')}</span><span className="ln-xs ln-muted">{t('voice.deviceChoiceHelp')}</span></span>
+          <input type="checkbox" checked={!!prefs.deviceVoice} onChange={e => { setPref('deviceVoice', e.target.checked); setDeviceVoice(e.target.checked); }} data-device-voice />
+        </label>
         <LowBandwidthToggle />
       </div>
     </Section>

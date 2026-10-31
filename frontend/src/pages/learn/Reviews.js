@@ -6,13 +6,15 @@
 // session warm-ups (up to 2 due reviews) and then returns to the lesson.
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { RotateCcw, CalendarClock, CheckCircle2 } from 'lucide-react';
+import { RotateCcw, CalendarClock, CheckCircle2, Flame, Timer } from 'lucide-react';
+import { WhyThis } from '../../components/shared/Popover';
 import api from '../../utils/api';
 import { errMsg } from '../../utils/errors';
 import AnswerBox from '../../components/learn/AnswerBox';
 import { fmtDate } from '../../components/learn/evidenceText';
 
 import { useUiLang } from '../../context/UiLangContext';
+import LearningLangPicker from '../../components/learn/LearningLangPicker';
 export default function Reviews() {
   const { t } = useUiLang();
   const [params] = useSearchParams();
@@ -64,9 +66,22 @@ export default function Reviews() {
           <h1 className="ln-title">{warmup ? t('learn.reviews.warmUp') : t('learn.reviews.reviews')}</h1>
           <span className="ln-sub">{warmup ? t('learn.reviews.twoMinutesEarlierSkills') : t('learn.reviews.shortQuestionsKeepSkills')}</span>
         </div>
-        {warmup && <button type="button" className="ln-btn ln-btn-primary" onClick={() => navigate('/learn/session')}>{warmupsLeft ? t('learn.reviews.skipLesson') : t('learn.reviews.continueLesson')}</button>}
+        <LearningLangPicker onChange={(v) => {
+          load();
+          // An open question switches language in place: same question, no new attempt.
+          if (active?.instance_id) api.get(`/learner/reviews/instances/${active.instance_id}/question?language=${v}`).then(r => setActive(a => (a && a.instance_id === r.data.instance_id ? { ...a, question: r.data.question } : a))).catch(() => {});
+        }} />
+        {warmup && <button type="button" className="ln-btn ln-btn-primary" onClick={() => navigate('/learn/session', { state: { from: '/learn/reviews' } })}>{warmupsLeft ? t('learn.reviews.skipLesson') : t('learn.reviews.continueLesson')}</button>}
       </header>
       {error && <div className="ln-error" role="alert">{error}</div>}
+      {!warmup && data && (
+        <div className="ln-card ln-card-sm ln-row ln-wrap" style={{ gap: 14 }} data-review-facts>
+          <span className="ln-row ln-small" style={{ gap: 6 }}><Timer size={16} aria-hidden="true" />{t('lj.reviews.time')}</span>
+          <span className="ln-row ln-small" style={{ gap: 6 }}><Flame size={16} aria-hidden="true" />{data.streak?.days ? t('lj.reviews.streak', { n: data.streak.days }) : t('lj.reviews.noStreak')}</span>
+          <WhyThis title={t('lj.reviews.whyTitle')}>{t('lj.reviews.why')}</WhyThis>
+          <WhyThis title={t('lj.reviews.skipTitle')} label={t('lj.reviews.skipTitle')}>{t('lj.reviews.skip')}</WhyThis>
+        </div>
+      )}
 
       {outcome && (
         <div className={`ln-card ${outcome.kind === 'pass' ? 'ln-card-warm' : ''}`} role="status" style={{ gap: 6 }}>
@@ -85,7 +100,7 @@ export default function Reviews() {
         <section className="ln-card" style={{ gap: 14 }} aria-label={t('learn.reviews.reviewQuestion')}>
           <div className="ln-between ln-wrap"><span className="ln-kicker">{active.kind === 'recheck' ? t('learn.reviews.recheck') : t('learn.reviews.review')} · {active.node_label}</span>
             <button type="button" className="ln-link" onClick={() => setActive(null)}>{t('learn.reviews.backList')}</button></div>
-          <p className="ln-indic" style={{ fontSize: 'var(--fs-h3)', lineHeight: 1.6 }}>{active.question}</p>
+          <p className="ln-indic" style={{ fontSize: 'var(--fs-h3)', lineHeight: 1.6 }} data-review-question={active.instance_id}>{active.question}</p>
           <AnswerBox onSubmit={answer} busy={busy} />
         </section>
       ) : (

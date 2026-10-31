@@ -5,11 +5,12 @@
 // Until now only the institution could see this.
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Check, Copy, Lock, Play } from 'lucide-react';
+import { Check, Copy, Lock, Play, History as HistoryIcon, RotateCcw, School } from 'lucide-react';
 import api, { getOr } from '../../utils/api';
 import { MOCK_PATH } from '../../utils/learnerMockData';
 import { minutes } from '../../components/learn/ui';
 import LearningCurve from '../../components/learn/LearningCurve';
+import { WhyThis } from '../../components/shared/Popover';
 
 import { useUiLang } from '../../context/UiLangContext';
 import { LoadingRows } from '../../components/shared/EmptyState';
@@ -18,9 +19,9 @@ const CONFIDENCE = { high: 'learn.record.confidence.high', solid: 'learn.record.
 
 function NodePill({ n }) {
   const { t } = useUiLang();
-  if (n.status === 'mastered') return <span className="ln-chip ln-tag-success" style={{ padding: '7px 12px' }}><Check size={13} aria-hidden="true" />{n.label}<span className="ln-sr"> {' '}{t('learn.record.mastered')}</span></span>;
-  if (n.status === 'current') return <Link to="/learn/session" className="ln-chip ln-tag-accent" style={{ padding: '7px 12px', fontWeight: 600, border: '1.5px solid var(--accent-800)' }}>● {n.label}<span className="ln-sr"> {' '}{t('learn.record.currentContinue')}</span></Link>;
-  return <span className="ln-chip" style={{ padding: '7px 12px', background: 'transparent', border: '1px solid var(--color-border-strong)', color: 'var(--color-text-muted)' }}>{n.label}</span>;
+  if (n.status === 'mastered') return <Link to={`/learn/skill/${n.id}`} className="ln-chip ln-tag-success" style={{ padding: '7px 12px' }}><Check size={13} aria-hidden="true" />{n.label}<span className="ln-sr"> {' '}{t('learn.record.mastered')}</span></Link>;
+  if (n.status === 'current') return <Link to="/learn/session" state={{ from: '/learn/record' }} className="ln-chip ln-tag-accent" style={{ padding: '7px 12px', fontWeight: 600, border: '1.5px solid var(--accent-800)' }}>● {n.label}<span className="ln-sr"> {' '}{t('learn.record.currentContinue')}</span></Link>;
+  return <Link to={`/learn/skill/${n.id}`} className="ln-chip" style={{ padding: '7px 12px', background: 'transparent', border: '1px solid var(--color-border-strong)', color: 'var(--color-text-muted)' }}>{n.label}</Link>;
 }
 
 export default function Record() {
@@ -32,7 +33,7 @@ export default function Record() {
   // Start another section: its first skill not yet mastered becomes current.
   const startSection = async (c) => {
     setSwitching(c.id); setSwitchError('');
-    try { await api.post('/learner/path/start', { cluster_id: c.id }); navigate('/learn/session'); } catch (e) {
+    try { await api.post('/learner/path/start', { cluster_id: c.id }); navigate('/learn/session', { state: { from: '/learn/record' } }); } catch (e) {
       setSwitchError(e.response?.data?.error || t('learn.record.couldnTSwitchSections'));
     }
     setSwitching('');
@@ -69,10 +70,16 @@ export default function Record() {
 
       <div className="ln-grid ln-g-4" style={{ gap: 16 }}>
         <div className="ln-card ln-card-sm"><span className="ln-small ln-muted">{t('learn.record.nodesMastered')}</span><span className="ln-stat">{s.nodes_mastered} / {s.total_nodes}</span></div>
-        <div className="ln-card ln-card-sm"><span className="ln-small ln-muted">{t('learn.record.averageMastery')}</span><span className="ln-stat">{s.average_mastery_pct != null ? `${s.average_mastery_pct}%` : '—'}</span></div>
-        <div className="ln-card ln-card-sm"><span className="ln-small ln-muted">{t('learn.record.activeLearningTime')}</span><span className="ln-stat">{minutes(s.active_minutes)}</span></div>
+        <div className="ln-card ln-card-sm"><span className="ln-small ln-muted">{t('learn.record.averageMastery')}</span><span className="ln-stat">{s.average_mastery_pct != null ? `${s.average_mastery_pct}%` : '—'}</span><span className="ln-xs ln-muted">{t('lj.record.avgExplain')}</span></div>
+        <div className="ln-card ln-card-sm"><span className="ln-small ln-muted">{t('learn.record.activeLearningTime')}</span><span className="ln-stat">{minutes(s.active_minutes)}</span><WhyThis title={t('learn.record.activeLearningTime')}>{t('lj.record.timeExplain')}</WhyThis></div>
         <div className="ln-card ln-card-sm"><span className="ln-small ln-muted">{t('learn.record.clusterCertificates')}</span><span className="ln-stat">{s.cluster_certificates}</span></div>
       </div>
+
+      <nav className="ln-row ln-wrap" style={{ gap: 8 }} aria-label={t('lj.record.more')}>
+        <Link className="ln-btn ln-btn-sm" to="/learn/reviews"><RotateCcw size={14} aria-hidden="true" />{t('nav.reviews')}</Link>
+        <Link className="ln-btn ln-btn-sm" to="/learn/assigned"><School size={14} aria-hidden="true" />{t('nav.assigned')}</Link>
+        <Link className="ln-btn ln-btn-sm" to="/learn/history"><HistoryIcon size={14} aria-hidden="true" />{t('nav.history')}</Link>
+      </nav>
 
       {curve && curve.points.length > 1 && (
         <section className="ln-card" style={{ gap: 12 }} aria-label={t('learn.record.learningCurve')}>
@@ -100,7 +107,7 @@ export default function Record() {
             <div className="ln-row ln-wrap" style={{ gap: 8 }}>{c.nodes.map(n => <NodePill key={n.id} n={n} />)}</div>
             {c.status !== 'done' && (
               <div className="ln-row ln-wrap" style={{ gap: 10 }}>
-                {c.current ? <Link to="/learn/session" className="ln-btn ln-btn-sm ln-btn-primary"><Play size={14} aria-hidden="true" />{t('learn.record.continueSection')}</Link>
+                {c.current ? <Link to="/learn/session" state={{ from: '/learn/record' }} className="ln-btn ln-btn-sm ln-btn-primary"><Play size={14} aria-hidden="true" />{t('learn.record.continueSection')}</Link>
                   : c.can_start ? <button type="button" className="ln-btn ln-btn-sm" disabled={switching === c.id} onClick={() => startSection(c)}><Play size={14} aria-hidden="true" />{switching === c.id ? t('learn.record.switching') : c.mastered ? t('learn.record.continueSection') : t('learn.record.startThisSection')}</button>
                     : c.locked_by?.length ? <span className="ln-small ln-muted ln-row" style={{ gap: 6 }}><Lock size={14} aria-hidden="true" />{t('learn.record.lockedFinishJoinFirst', { join: c.locked_by.map(x => x.label).join(' and ') })}</span> : null}
               </div>

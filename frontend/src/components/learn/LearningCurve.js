@@ -1,31 +1,36 @@
 // src/components/learn/LearningCurve.js — learning-curve signals (v4.3 §12.3):
 // progress vs active hours against the cohort median, loops per node with
 // its trend, and the test-out / review / assurance rates. Plain SVG.
+// When active hours are not known (all near zero), progress is plotted over
+// days instead, so the line never collapses into one vertical stroke.
 import React from 'react';
 
 import { useUiLang } from '../../context/UiLangContext';
 const W = 560; const H = 220; const PAD = { l: 40, r: 12, t: 12, b: 30 };
 
-function Line({ points, maxX, color, dash }) {
+function Line({ points, maxX, color, dash, xKey = 'hours' }) {
   if (!points || points.length < 2) return null;
   const x = (h) => PAD.l + (h / maxX) * (W - PAD.l - PAD.r);
   const y = (p) => PAD.t + (1 - p / 100) * (H - PAD.t - PAD.b);
-  const d = points.map((pt, i) => `${i ? 'L' : 'M'}${x(pt.hours).toFixed(1)},${y(pt.progress).toFixed(1)}`).join(' ');
+  const d = points.map((pt, i) => `${i ? 'L' : 'M'}${x(pt[xKey] || 0).toFixed(1)},${y(pt.progress).toFixed(1)}`).join(' ');
   return <path d={d} fill="none" stroke={color} strokeWidth={2.5} strokeDasharray={dash} strokeLinejoin="round" />;
 }
 
 export default function LearningCurve({ data }) {
   const { t } = useUiLang();
   if (!data) return null;
-  const maxX = Math.max(1, ...data.points.map(p => p.hours), ...(data.cohort_median?.points || []).map(p => p.hours));
+  const byDays = data.points[data.points.length - 1].hours < 0.1 && data.points.some(p => p.day);
+  const xKey = byDays ? 'day' : 'hours';
+  const maxX = byDays ? Math.max(1, ...data.points.map(p => p.day || 0)) : Math.max(1, ...data.points.map(p => p.hours), ...(data.cohort_median?.points || []).map(p => p.hours));
   const ticks = [0, 0.25, 0.5, 0.75, 1].map(f => Math.round(maxX * f * 10) / 10);
+  const unit = byDays ? t('lj.curve.dayUnit') : 'h';
   const maxLoops = Math.max(1, ...data.loops.map(l => l.loops));
   const rate = (v) => (v == null ? '—' : `${v}%`);
   return (
     <div className="ln-col" style={{ gap: 18 }}>
       <figure className="ln-col" style={{ gap: 8, margin: 0 }}>
         <figcaption className="ln-between ln-wrap" style={{ gap: 8 }}>
-          <span style={{ fontWeight: 600 }}>{t('learn.learningCurve.pathMasteredVsActive')}</span>
+          <span style={{ fontWeight: 600 }}>{byDays ? t('lj.curve.overDays') : t('learn.learningCurve.pathMasteredVsActive')}</span>
           <span className="ln-row ln-small" style={{ gap: 14 }}>
             <span className="ln-row" style={{ gap: 6 }}><span aria-hidden="true" style={{ width: 18, height: 3, background: 'var(--accent-700)', display: 'inline-block' }} />{t('learn.learningCurve.thisLearner')}</span>
             <span className="ln-row" style={{ gap: 6 }}><span aria-hidden="true" style={{ width: 18, height: 0, borderTop: '2px dashed var(--color-text-muted)', display: 'inline-block' }} />{t('learn.learningCurve.cohortMedian')}{data.cohort_median?.learners || 0})</span>
@@ -36,9 +41,9 @@ export default function LearningCurve({ data }) {
             const yy = PAD.t + (1 - p / 100) * (H - PAD.t - PAD.b);
             return <g key={p}><line x1={PAD.l} x2={W - PAD.r} y1={yy} y2={yy} stroke="var(--color-border)" /><text x={PAD.l - 6} y={yy + 4} textAnchor="end" fontSize="11" fill="var(--color-text-muted)">{p}%</text></g>;
           })}
-          {ticks.map(t => <text key={t} x={PAD.l + (t / maxX) * (W - PAD.l - PAD.r)} y={H - 10} textAnchor="middle" fontSize="11" fill="var(--color-text-muted)">{t}h</text>)}
-          <Line points={data.cohort_median?.points} maxX={maxX} color="var(--color-text-muted)" dash="5 4" />
-          <Line points={data.points} maxX={maxX} color="var(--accent-700)" />
+          {ticks.map(tk => <text key={tk} x={PAD.l + (tk / maxX) * (W - PAD.l - PAD.r)} y={H - 10} textAnchor="middle" fontSize="11" fill="var(--color-text-muted)">{tk}{unit}</text>)}
+          {!byDays && <Line points={data.cohort_median?.points} maxX={maxX} color="var(--color-text-muted)" dash="5 4" />}
+          <Line points={data.points} maxX={maxX} color="var(--accent-700)" xKey={xKey} />
         </svg>
       </figure>
 

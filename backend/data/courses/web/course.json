@@ -1,0 +1,101 @@
+{
+ "id": "web",
+ "order": 7,
+ "language": "javascript",
+ "status": "draft",
+ "level": "Beginner",
+ "hours": 20,
+ "icon": "globe",
+ "title": {
+  "en": "Web Basics",
+  "te": "Web Basics",
+  "hi": "Web Basics"
+ },
+ "summary": {
+  "en": "Build web pages with HTML and CSS, make them work on phones, and publish them.",
+  "te": "HTML, CSS తో web pages తయారీ, phones లో పనిచేసేలా చేయడం, publish చేయడం.",
+  "hi": "HTML और CSS से web pages बनाना, उन्हें phones पर चलाना, और publish करना।"
+ },
+ "modules": [
+  {
+   "id": "web-m1",
+   "n": 1,
+   "skill": "web-m1",
+   "title": {
+    "en": "HTML",
+    "te": "HTML",
+    "hi": "HTML"
+   },
+   "summary": {
+    "en": "Headings, text, links, images, lists and forms.",
+    "te": "Headings, text, links, images, lists, forms.",
+    "hi": "Headings, text, links, images, lists और forms।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "web-m2",
+   "n": 2,
+   "skill": "web-m2",
+   "title": {
+    "en": "CSS",
+    "te": "CSS",
+    "hi": "CSS"
+   },
+   "summary": {
+    "en": "Colours, fonts, spacing and the box model.",
+    "te": "Colours, fonts, spacing, box model.",
+    "hi": "Colours, fonts, spacing और box model।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "web-m3",
+   "n": 3,
+   "skill": "web-m3",
+   "title": {
+    "en": "Layout",
+    "te": "Layout",
+    "hi": "Layout"
+   },
+   "summary": {
+    "en": "Flexbox, grid and responsive pages.",
+    "te": "Flexbox, grid, responsive pages.",
+    "hi": "Flexbox, grid और responsive pages।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "web-m4",
+   "n": 4,
+   "skill": "web-m4",
+   "title": {
+    "en": "Accessibility",
+    "te": "Accessibility",
+    "hi": "Accessibility"
+   },
+   "summary": {
+    "en": "Pages everyone can use.",
+    "te": "అందరూ వాడగలిగే pages.",
+    "hi": "सबके इस्तेमाल लायक़ pages।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "web-m5",
+   "n": 5,
+   "skill": "web-m5",
+   "title": {
+    "en": "Project",
+    "te": "Project",
+    "hi": "Project"
+   },
+   "summary": {
+    "en": "A personal portfolio page.",
+    "te": "Personal portfolio page.",
+    "hi": "Personal portfolio page।"
+   },
+   "lessons": []
+  }
+ ]
+}

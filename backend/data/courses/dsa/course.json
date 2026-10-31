@@ -1,0 +1,133 @@
+{
+ "id": "dsa",
+ "order": 6,
+ "language": "python",
+ "status": "draft",
+ "level": "Beginner",
+ "hours": 45,
+ "icon": "tree",
+ "title": {
+  "en": "Data Structures & Algorithms",
+  "te": "Data Structures & Algorithms",
+  "hi": "Data Structures & Algorithms"
+ },
+ "summary": {
+  "en": "Solve problems efficiently: complexity, arrays, linked lists, stacks, queues, trees, graphs, sorting and searching.",
+  "te": "సమస్యలను సమర్థంగా పరిష్కరించడం: complexity, arrays, linked lists, stacks, queues, trees, graphs, sorting, searching.",
+  "hi": "समस्याएँ कुशलता से हल करना: complexity, arrays, linked lists, stacks, queues, trees, graphs, sorting और searching।"
+ },
+ "modules": [
+  {
+   "id": "dsa-m1",
+   "n": 1,
+   "skill": "dsa-m1",
+   "title": {
+    "en": "Complexity",
+    "te": "Complexity",
+    "hi": "Complexity"
+   },
+   "summary": {
+    "en": "Big-O and counting steps.",
+    "te": "Big-O, steps లెక్కించడం.",
+    "hi": "Big-O और steps गिनना।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "dsa-m2",
+   "n": 2,
+   "skill": "dsa-m2",
+   "title": {
+    "en": "Arrays & Strings",
+    "te": "Arrays & Strings",
+    "hi": "Arrays & Strings"
+   },
+   "summary": {
+    "en": "Two pointers and sliding windows.",
+    "te": "Two pointers, sliding windows.",
+    "hi": "Two pointers और sliding windows।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "dsa-m3",
+   "n": 3,
+   "skill": "dsa-m3",
+   "title": {
+    "en": "Linked Lists, Stacks & Queues",
+    "te": "Linked Lists, Stacks & Queues",
+    "hi": "Linked Lists, Stacks & Queues"
+   },
+   "summary": {
+    "en": "Linear structures and their uses.",
+    "te": "Linear structures, వాటి ఉపయోగాలు.",
+    "hi": "Linear structures और उनके उपयोग।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "dsa-m4",
+   "n": 4,
+   "skill": "dsa-m4",
+   "title": {
+    "en": "Searching & Sorting",
+    "te": "Searching & Sorting",
+    "hi": "Searching & Sorting"
+   },
+   "summary": {
+    "en": "Binary search, merge sort, quick sort.",
+    "te": "Binary search, merge sort, quick sort.",
+    "hi": "Binary search, merge sort, quick sort।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "dsa-m5",
+   "n": 5,
+   "skill": "dsa-m5",
+   "title": {
+    "en": "Trees",
+    "te": "Trees",
+    "hi": "Trees"
+   },
+   "summary": {
+    "en": "Binary trees and binary search trees.",
+    "te": "Binary trees, binary search trees.",
+    "hi": "Binary trees और binary search trees।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "dsa-m6",
+   "n": 6,
+   "skill": "dsa-m6",
+   "title": {
+    "en": "Graphs",
+    "te": "Graphs",
+    "hi": "Graphs"
+   },
+   "summary": {
+    "en": "BFS, DFS and shortest paths.",
+    "te": "BFS, DFS, shortest paths.",
+    "hi": "BFS, DFS और shortest paths।"
+   },
+   "lessons": []
+  },
+  {
+   "id": "dsa-m7",
+   "n": 7,
+   "skill": "dsa-m7",
+   "title": {
+    "en": "Dynamic Programming",
+    "te": "Dynamic Programming",
+    "hi": "Dynamic Programming"
+   },
+   "summary": {
+    "en": "Breaking problems into overlapping parts.",
+    "te": "సమస్యలను overlapping భాగాలుగా విభజించడం.",
+    "hi": "समस्याओं को overlapping हिस्सों में बाँटना।"
+   },
+   "lessons": []
+  }
+ ]
+}

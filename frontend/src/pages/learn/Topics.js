@@ -14,9 +14,11 @@ import { MOCK_TOPICS } from '../../utils/learnerMockData';
 import VoiceStatus from '../../components/learn/VoiceStatus';
 import { errMsg } from '../../utils/errors';
 import { Bar, SampleBadge, useSkillRequests, REQUEST_STATUS } from '../../components/learn/ui';
+import { SourceLine, AddToPlan } from '../../components/learn/journey';
 
 import { useUiLang } from '../../context/UiLangContext';
 import { enumText } from '../../i18n/enums';
+import LearningLangPicker from '../../components/learn/LearningLangPicker';
 export default function Topics() {
   const { t } = useUiLang();
   const { user } = useAuth();
@@ -67,7 +69,9 @@ export default function Topics() {
           <h1 className="ln-title">{t('learn.topics.topicsCreatingNewJobs')}</h1>
           <span className="ln-sub">{t('learn.topics.whereNewRolesAppearing')}</span>
         </div>
+        <LearningLangPicker />
         <SampleBadge />
+        <SourceLine source={live?.source} date={live?.updated_at} />
       </header>
 
       <div className="ln-pilltabs" role="tablist" aria-label={t('learn.topics.sector')}>
@@ -122,7 +126,7 @@ export default function Topics() {
               return (
                 <div key={st.name} className="ln-step">
                   <span className={`ln-stepdot ${done ? 'is-done' : ''}`}>{done ? '✓' : st.n}</span>
-                  <div className="ln-col" style={{ flex: 1 }}><span style={{ fontSize: 'var(--fs-body)', fontWeight: 600 }}>{st.name}</span><span className="ln-xs" style={{ color: 'var(--stage-muted)' }}>{note}</span></div>
+                  <div className="ln-col" style={{ flex: 1 }}><span style={{ fontSize: 'var(--fs-body)', fontWeight: 600 }}>{st.name}</span><span className="ln-xs" style={{ color: 'var(--stage-muted)' }}>{note}</span>{!done && <AddToPlan skill={st.name} source={`topic:${featured.id}`} dark />}</div>
                 </div>
               );
             })}

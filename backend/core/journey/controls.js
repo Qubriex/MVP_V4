@@ -7,7 +7,7 @@
 //   tutor       scripted or live tutor for this learner
 //   request     a verified test employer asks to see the Passport (interview promised)
 //   bridge      the college assigns a bridge programme of the next two skills
-//   ready       fill the evidence for the rest of the programme, so the learner is Ready
+//   ready       fill the evidence for the rest of the programme, so the learner is Ready (and Confirmed)
 import crypto from 'crypto';
 import * as dal from '../db/dal.js';
 import { ulid } from '../db/ulid.js';
@@ -87,15 +87,21 @@ async function assignBridge(l) {
   return `Your college assigned a bridge programme: ${next.map(n => n.node_label).join(', ')}.`;
 }
 
-// Mastery, a practice item and a review for every remaining skill, dated in the
-// last few days of this learner's clock; then a new Mastery Log and Passport.
+// Mastery for every remaining skill, then the same evidence the S7 seed has
+// for every skill (a review, the spoken challenge, a work task and a later
+// review, spread over four weeks of this learner's clock), so the learner is
+// Ready and the Passport shows Confirmed; then a new Mastery Log and Passport.
 async function makeReady(l) {
   const todo = await unmastered(l);
+  const all = await dal.all(`SELECT sn.id FROM skill_nodes sn JOIN skill_clusters sc ON sc.id = sn.cluster_id WHERE sc.capability_target_id = ?`, l.capability_target_id);
   const base = Date.now() + await offsetMs(l.el_id);
   const at = (d) => new Date(base - d * DAY).toISOString();
+  const demo = (nodeId, kind, d, { score = 0.9, level = 'L1', assurance = 'A1' } = {}) => dal.run(
+    'INSERT INTO demonstrations (id, el_id, node_id, kind, date, passed, score, level, assurance, created_at) VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?)',
+    ulid(), l.el_id, nodeId, kind, at(d), score, level, assurance, at(d));
   await dal.tx(async () => {
     for (const [i, n] of todo.entries()) {
-      const d = 3 + (todo.length - i) * 0.2;
+      const d = 30 + (todo.length - i) * 0.2;
       const ev = ulid();
       await dal.run(`INSERT INTO evidence_records (id, el_id, node_id, family_id, purpose, answer_hash, r_c, passed, level, assurance, authentic, provisional, theta, created_at)
         VALUES (?, ?, ?, ?, 'check', ?, 0.88, 1, 'L1', 'A1', 1, 0, 0.7, ?)`, ev, l.el_id, n.id, `gen:${n.id}`, crypto.createHash('sha256').update(ev).digest('hex'), at(d));
@@ -103,16 +109,25 @@ async function makeReady(l) {
         VALUES (?, ?, ?, 0.88, 1, 22, ?, 0.7, 'L1', 0, 22, 0, 0)
         ON CONFLICT (engagement_learner_id, skill_node_id) DO UPDATE SET advanced_at = excluded.advanced_at`, ulid(), l.el_id, n.id, at(d));
       await dal.run(`INSERT INTO demonstrations (id, el_id, node_id, kind, date, passed, score, level, assurance, evidence_id, created_at) VALUES (?, ?, ?, 'mastery', ?, 1, 0.88, 'L1', 'A1', ?, ?)`, ulid(), l.el_id, n.id, at(d), ev, at(d));
-      await dal.run(`INSERT INTO demonstrations (id, el_id, node_id, kind, date, passed, score, level, assurance, created_at) VALUES (?, ?, ?, 'practice', ?, 1, 0.9, 'L2', 'A1', ?)`, ulid(), l.el_id, n.id, at(d - 1), at(d - 1));
-      await dal.run(`INSERT INTO node_retention (el_id, node_id, interval_days, due_at, reviews_passed, reviews_failed, updated_at) VALUES (?, ?, 3, ?, 0, 0, ?)
-        ON CONFLICT (el_id, node_id) DO NOTHING`, l.el_id, n.id, new Date(base + 5 * DAY).toISOString(), at(d));
+    }
+    // Evidence only counts after mastery: skills mastered in the last four
+    // weeks have their mastery date moved to 30 days ago (test learners only;
+    // demonstrations themselves are append-only and never change).
+    await dal.run('UPDATE node_mastery SET advanced_at = ? WHERE engagement_learner_id = ? AND advanced_at > ?', at(30), l.el_id, at(30));
+    for (const n of all) {
+      await demo(n.id, 'review', 28, { score: 0.86 });
+      await demo(n.id, 'challenge', 16, { assurance: 'A2' });
+      await demo(n.id, 'task', 12, { level: 'L2', assurance: 'A2' });
+      await demo(n.id, 'review', 4, { score: 0.92 });
+      await dal.run(`INSERT INTO node_retention (el_id, node_id, interval_days, due_at, reviews_passed, reviews_failed, updated_at) VALUES (?, ?, 14, ?, 2, 0, ?)
+        ON CONFLICT (el_id, node_id) DO UPDATE SET due_at = excluded.due_at, interval_days = excluded.interval_days`, l.el_id, n.id, new Date(base + 10 * DAY).toISOString(), at(4));
     }
     const last = (await dal.all(`SELECT sn.id, sn.cluster_id FROM skill_nodes sn JOIN skill_clusters sc ON sc.id = sn.cluster_id WHERE sc.capability_target_id = ? ORDER BY sc.sequence_order DESC, sn.sequence_order DESC LIMIT 1`, l.capability_target_id))[0];
     if (last) await dal.run("UPDATE engagement_learners SET current_node_id = ?, current_cluster_id = ?, overall_status = 'completed' WHERE id = ?", last.id, last.cluster_id, l.el_id);
   });
   await saveMasteryLog(l.engagement_id, l.learner_id, await produceLearnerMasteryLog(l.engagement_id, l.learner_id));
   await issueCredential(l.el_id, { reason: 'dev_make_ready' });
-  return todo.length ? `Filled the evidence for ${todo.length} skill${todo.length === 1 ? '' : 's'}: this learner is Ready.` : 'This learner already had every skill; Passport refreshed.';
+  return todo.length ? `Filled the evidence for ${todo.length} skill${todo.length === 1 ? '' : 's'}: this learner is Ready, with Confirmed skills.` : 'This learner already had every skill; the evidence and Passport are refreshed.';
 }
 
 /**
