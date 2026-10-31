@@ -421,8 +421,8 @@
 @media (max-width: 639px) { .lj-back-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); } .lj-back { padding: 0 10px; } .lj-crumbs { font-size: var(--fs-caption); } .lj-crumbs > span:not(:last-child):not(:nth-last-child(2)) { display: none; } }
 
 /* ── Learning language picker ────────────────────────────────────────────── */
-.lj-langpick { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: var(--radius-full, 999px); border: 1px solid var(--color-border); background: var(--color-surface); }
-.lj-langpick select { border: 0; background: transparent; color: var(--color-text); font: inherit; font-size: var(--fs-small); min-height: 32px; cursor: pointer; max-width: min(22rem, 58vw); text-overflow: ellipsis; }
+.lj-langpick { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: var(--radius-full, 999px); border: 1px solid var(--color-border); background: var(--color-surface); max-width: 100%; min-width: 0; }
+.lj-langpick select { border: 0; background: transparent; color: var(--color-text); font: inherit; font-size: var(--fs-small); min-height: 32px; cursor: pointer; max-width: min(22rem, 46vw); min-width: 0; text-overflow: ellipsis; }
 
 /* ── Courses and modules ─────────────────────────────────────────────────── */
 .lj-course { gap: 10px; }

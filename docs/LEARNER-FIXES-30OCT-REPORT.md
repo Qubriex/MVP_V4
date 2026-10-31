@@ -126,19 +126,19 @@ None of these hard-codes English prompts. Code, skill names and technical words 
 
 ## 4. Tests
 
-All results below are local runs against this branch.
+All results below are local runs against this branch on 31 Oct.
 
 - **Backend:**
   - structural: 24 passed;
-  - REST and integration: 305 passed, including the new `learningLanguage.test.js`, `marketSearch.test.js` and courses tests.
-- **Frontend:** 20 unit tests passed; `i18n:check` OK (4078 keys).
+  - REST and integration: 313 passed. New: `upstreamErrors.test.js` and session codes in `auth.test.js` (31-4), and full language vs mix in `learningLanguage.test.js` (31-6/8).
+- **Frontend:** 23 unit tests passed, including `codeSpeech.test.js` (31-5); `i18n:check` OK (4102 keys).
 - **Browser (Playwright):**
-  - learner-topics: 66/66;
+  - learner-topics: 85/85. New: Back from Reviews, Explore topics, a course page and Attempt history with no forward jumps; the walkthrough plays every line in order with no overlap and its controls work; the voice session never signs out; Telugu vs mix text differs; the package chart shows; readiness shows one grouped chart (both at 1280 and 390 px);
   - learner journey: 35/35;
   - dev login: 20/20;
   - demo: 20/20;
   - smoke: passed (no console errors, no sideways scroll, no duplicate titles);
-  - team points: 12/13, failing only the voice check above.
+  - team points: 12/13, failing only the voice check (no voice key locally, see Voice).
 
 ## 5. Open items
 
