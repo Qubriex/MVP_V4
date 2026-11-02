@@ -7,6 +7,7 @@
 import { answerDoubt } from '../brains/teachBrain.js';
 import { currentTutor } from '../requestContext.js';
 import { languagePair } from './catalog.js';
+import { hasGeminiKey } from '../ai/keyPool.js';
 
 const INTENTS = [
   ['simpler', /simpl|easy|easier|సులభ|సింపుల్|आसान|सरल/i],
@@ -45,7 +46,7 @@ export async function askLesson(lesson, question, learning) {
     return { kind: 'language', language: { te: 'telugu', hi: 'hindi', en: 'english' }[code], answer: (lesson.explain?.[code] || []).join(' '), source: 'lesson' };
   }
   const language = { te: 'telugu', hi: 'hindi', en: 'english' }[main];
-  if (currentTutor() !== 'scripted' && LIVE_LANGS.has(language) && process.env.GEMINI_API_KEY) {
+  if (currentTutor() !== 'scripted' && LIVE_LANGS.has(language) && hasGeminiKey()) {
     try {
       const plan = `${lesson.title.en}. Lesson plan: ${(lesson.explain?.en || []).join(' ')} Code: ${lesson.code?.source || ''}`;
       const r = await answerDoubt({ questionText: `${question}\n\n(Answer only about this lesson. ${plan})`, nodeLabel: lesson.title.en, clusterLabel: lesson.module_id, language });

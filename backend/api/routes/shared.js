@@ -18,6 +18,7 @@ import { ask, GLOSSARY } from '../../core/assist.js';
 import { aiNotConfigured, aiUnavailableMessage, synthesize } from '../../core/ai/gateway.js';
 import { hit, clientIp } from '../middleware/rateLimit.js';
 import { SAMPLE_LESSON } from '../../core/sampleLesson.js';
+import { hasGeminiKey } from '../../core/ai/keyPool.js';
 
 const router = express.Router();
 const signedIn = authenticate();
@@ -73,7 +74,7 @@ router.get('/help/status', async (req, res) => {
   let db = false;
   try { await dal.one('SELECT 1 AS ok'); db = true; } catch { db = false; }
   res.set('Cache-Control', 'no-store');
-  res.json({ ok: db, database: db, ai: !!process.env.GEMINI_API_KEY, checked_at: new Date().toISOString() });
+  res.json({ ok: db, database: db, ai: hasGeminiKey(), checked_at: new Date().toISOString() });
 });
 
 router.get('/glossary', (req, res) => res.json(GLOSSARY));

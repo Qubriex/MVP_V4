@@ -1,6 +1,6 @@
 // Secrets separation (spec §10): no secure-config content in this repository.
 import { describe, it, expect } from 'vitest';
-import { checkRepository, findViolations, PLACEHOLDER_MARKER } from '../../scripts/check-secrets.js';
+import { checkRepository, findViolations, findKeys, PLACEHOLDER_MARKER } from '../../scripts/check-secrets.js';
 
 describe('secrets separation', () => {
   it('the repository holds no secure-config, rubric, mutant or prompt content', () => {
@@ -26,5 +26,15 @@ describe('secrets separation', () => {
       'backend/fixtures/sql_joins.rubric.json',
       'secure-config/params.json'
     ].sort());
+  });
+});
+
+// A Gemini key must never be committed or shipped in the frontend build.
+describe('no Google API key in the repository', () => {
+  it('flags AIza… and AQ.… key shapes, and nothing else', async () => {
+    const files = { 'a.js': `const k = "${'AQ' + '.' + 'k'.repeat(50)}";`, 'b.md': `key: ${'AI' + 'za' + 'z'.repeat(35)}`, 'c.js': 'GEMINI_API_KEY=', 'd.png': 'AQ.' + 'x'.repeat(60) };
+    const out = findKeys(Object.keys(files), (f) => files[f]);
+    expect(out.map(x => x.split(':')[0])).toEqual(['a.js', 'b.md']);
+    expect(out.join(' ')).not.toMatch(/kkkk|zzzz/); // the key itself is never echoed
   });
 });

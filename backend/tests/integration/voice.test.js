@@ -71,6 +71,26 @@ describe('the Gemini speech adapter keeps one female voice', () => {
     expect(calls.filter(c => c.url.includes('texttospeech'))).toHaveLength(1); // resting, not asked again
   });
 
+  it('voice uses the voice key (key 2); if Google rejects it, the backup key (key 3) speaks', async () => {
+    Object.assign(process.env, { GEMINI_API_KEY: 'fake-text', GEMINI_API_KEY_2: 'fake-voice', GEMINI_API_KEY_3: 'fake-backup' });
+    const g = await import('../../core/ai/adapters/gemini.js');
+    g._resetTtsEngines();
+    const used = [];
+    globalThis.fetch = async (url, init) => {
+      const key = init?.headers?.['x-goog-api-key'];
+      if (String(url).includes('texttospeech')) used.push(key);
+      if (!init?.body) return ok({ models: [] });
+      return key === 'fake-voice' ? fail(403, 'API key not valid') : ok({ audioContent: Buffer.from('mp3').toString('base64') });
+    };
+    try {
+      const out = await g.speak({ model: 'gemini-2.5-flash-preview-tts', text: 'హలో', voice: 'Kore', language: 'telugu' });
+      expect(out.mimeType).toBe('audio/mpeg');
+      expect(used[0]).toBe('fake-voice');
+      expect(used).toContain('fake-backup');
+      expect(used).not.toContain('fake-text');
+    } finally { delete process.env.GEMINI_API_KEY_2; delete process.env.GEMINI_API_KEY_3; }
+  });
+
   it('reports 429 with a wait when every engine is out of quota', async () => {
     process.env.GEMINI_API_KEY = 'test-key';
     const g = await import('../../core/ai/adapters/gemini.js');

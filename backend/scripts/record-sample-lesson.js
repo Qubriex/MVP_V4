@@ -13,13 +13,14 @@ import { fileURLToPath } from 'url';
 import * as gemini from '../core/ai/adapters/gemini.js';
 import { TTS_VOICE } from '../core/ai/gateway.js';
 import { SAMPLE_LESSON } from '../core/sampleLesson.js';
+import { hasGeminiKey } from '../core/ai/keyPool.js';
 
 const OUT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../frontend/public/audio');
 const MANIFEST = path.join(OUT, 'sample-lesson.json');
 const EXT = { 'audio/wav': 'wav', 'audio/mpeg': 'mp3' };
 
 export async function recordSampleLesson({ force = false, log = console.log } = {}) {
-  if (!process.env.GEMINI_API_KEY) { log('record-sample-lesson: GEMINI_API_KEY is not set; skipped.'); return false; }
+  if (!hasGeminiKey()) { log('record-sample-lesson: GEMINI_API_KEY is not set; skipped.'); return false; }
   if (!force && fs.existsSync(MANIFEST)) { log('record-sample-lesson: a recording is already present; skipped (use --force to re-record).'); return false; }
   fs.mkdirSync(OUT, { recursive: true });
   const manifest = {};

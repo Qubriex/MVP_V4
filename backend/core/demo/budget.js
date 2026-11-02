@@ -7,6 +7,7 @@
 // key (code 'demo_limit'), and the pages fall back to their ready-made sample
 // lessons, checks and role profiles: the demo keeps working, just not live.
 import * as dal from '../db/dal.js';
+import { hasGeminiKey } from '../ai/keyPool.js';
 
 const num = (v, d) => (Number.isFinite(Number(v)) && Number(v) >= 0 && v !== '' && v != null ? Number(v) : d);
 export const demoLimits = (env = process.env) => ({
@@ -36,7 +37,7 @@ export async function demoAiState(sandboxId) {
   const L = demoLimits();
   const sb = await dal.one('SELECT ai_calls, voice_seconds FROM demo_sandboxes WHERE id = ?', sandboxId);
   const day = await dal.one('SELECT calls FROM demo_ai_usage WHERE day = ?', today());
-  const noKey = !process.env.GEMINI_API_KEY && (process.env.AI_ADAPTER || 'gemini') !== 'mock';
+  const noKey = !hasGeminiKey() && (process.env.AI_ADAPTER || 'gemini') !== 'mock';
   const dailyOut = Number(day?.calls || 0) >= L.dailyCalls;
   const sandboxOut = Number(sb?.ai_calls || 0) >= L.perSandboxCalls;
   return {
