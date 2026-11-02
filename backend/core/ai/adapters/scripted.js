@@ -13,23 +13,23 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { wantsNative, nativeDeep } from '../../language/style.js';
+import { styleOf, styleDeep } from '../../language/style.js';
 
 export const name = 'scripted';
 const DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../data/scripted');
 const LANGS = ['telugu', 'hindi', 'english'];
 const cache = new Map();
 
-// The scripts are written in the Telugu + English (Hindi + English) mix; a
-// learner who chose full Telugu / Hindi gets them through native().
+// A learner gets the scripts in the style they chose: full Telugu / Hindi, or
+// the spoken mix with English words (core/language/style.js).
 function load(file) {
   const lang = file.match(/\.(telugu|hindi)\.json$/)?.[1];
-  const full = lang && wantsNative(lang);
-  const key = full ? `${file}|full` : file;
+  const style = lang ? styleOf(lang) : null;
+  const key = style ? `${file}|${style}` : file;
   if (cache.has(key)) return cache.get(key);
   let doc = null;
   try { doc = JSON.parse(fs.readFileSync(path.join(DIR, file), 'utf8')); } catch { doc = null; }
-  if (doc && full) doc = nativeDeep(doc, lang === 'telugu' ? 'te' : 'hi');
+  if (doc && style) doc = styleDeep(doc, lang === 'telugu' ? 'te' : 'hi', style);
   cache.set(key, doc);
   return doc;
 }

@@ -15,7 +15,7 @@
 // styleLine(mode) so a live model writes in the chosen style from the start.
 import { currentLearningMode } from '../requestContext.js';
 
-export const MIX = new Set(['telugu_en', 'hindi_en']);
+const MIX_MODES = new Set(['telugu_en', 'hindi_en']);
 const CODE_OF = { telugu: 'te', hindi: 'hi', telugu_en: 'te', hindi_en: 'hi' };
 
 /** One line for an AI system prompt, or '' when the mode needs none. */
@@ -60,7 +60,7 @@ const WORDS = {
   app: ['యాప్', 'ऐप'], array: ['అర్రే', 'ऐरे'], arrays: ['అర్రేలు', 'ऐरे'],
   call: ['కాల్', 'कॉल'], case: ['సందర్భం', 'केस'], cases: ['సందర్భాలు', 'केस'],
   test: ['పరీక్ష', 'टेस्ट'], tests: ['పరీక్షలు', 'टेस्ट'],
-  key: ['కీ', 'की'], keys: ['కీలు', 'कीज़'],
+  key: ['కీ', 'कुंजी'], keys: ['కీలు', 'कुंजियाँ'],
   parent: ['పేరెంట్', 'पैरेंट'], child: ['చైల్డ్', 'चाइल्ड'],
   parameter: ['పారామీటర్', 'पैरामीटर'], parameters: ['పారామీటర్లు', 'पैरामीटर'],
   argument: ['ఆర్గ్యుమెంట్', 'आर्ग्युमेंट'], arguments: ['ఆర్గ్యుమెంట్లు', 'आर्ग्युमेंट'],
@@ -102,6 +102,11 @@ const WORDS = {
   statement: ['స్టేట్‌మెంట్', 'स्टेटमेंट'], statements: ['స్టేట్‌మెంట్‌లు', 'स्टेटमेंट'],
   database: ['డేటాబేస్', 'डेटाबेस'], chart: ['చార్ట్', 'चार्ट'], reservation: ['రిజర్వేషన్', 'रिज़र्वेशन'], status: ['స్థితి', 'स्टेटस'],
   query: ['క్వెరీ', 'क्वेरी'], queries: ['క్వెరీలు', 'क्वेरी'], train: ['రైలు', 'ट्रेन'], date: ['తేదీ', 'तारीख़'],
+  steel: ['స్టీల్', 'स्टील'], fees: ['ఫీజులు', 'फ़ीस'], passed: ['పాస్ అయిన', 'पास'], overs: ['ఓవర్లు', 'ओवर'], scorebook: ['స్కోర్‌బుక్', 'स्कोरबुक'],
+  teacher: ['టీచర్', 'टीचर'], attendance: ['హాజరు', 'हाज़िरी'], running: ['నడుస్తున్న', 'चलता'], capacity: ['సామర్థ్యం', 'क्षमता'], copy: ['కాపీ', 'कॉपी'],
+  element: ['ఎలిమెంట్', 'एलिमेंट'], elements: ['ఎలిమెంట్లు', 'एलिमेंट'],
+  callback: ['కాల్‌బ్యాక్', 'कॉलबैक'], website: ['వెబ్‌సైట్', 'वेबसाइट'], tags: ['ట్యాగ్‌లు', 'टैग'], tag: ['ట్యాగ్', 'टैग'], browser: ['బ్రౌజర్', 'ब्राउज़र'],
+  problems: ['సమస్యలు', 'समस्याएँ'], friend: ['స్నేహితుడు', 'दोस्त'], fest: ['ఫెస్ట్', 'फ़ेस्ट'], new: ['కొత్త', 'नया'],
   skill: ['నైపుణ్యం', 'कौशल'], project: ['ప్రాజెక్ట్', 'प्रोजेक्ट'], context: ['సందర్భం', 'संदर्भ'], size: ['పరిమాణం', 'साइज़']
 };
 
@@ -128,7 +133,7 @@ export function native(text, code, keep = new Set()) {
   // Code in backticks stays exactly as it is.
   return text.split(/(`[^`]*`)/).map((seg) => {
     if (seg.startsWith('`')) return seg;
-    let out = seg.replace(/(?<![\w.(`'"/-])([A-Za-z][a-z]+)(?![\w(`'"/=-]|\.\w)/g, (m, w, off, all) => {
+    let out = seg.replace(/(?<![\w.(`'"/{-])([A-Za-z][a-z]+)(?![\w(`'"/=}-]|\.\w)/g, (m, w, off, all) => {
       if (keep.has(w)) return m;
       const say = WORDS[w.toLowerCase()];
       if (!say) return m;
@@ -139,13 +144,56 @@ export function native(text, code, keep = new Set()) {
   }).join('');
 }
 
-/** native() over every string inside a JSON-like value. */
-export function nativeDeep(value, code, keep) {
-  if (typeof value === 'string') return native(value, code, keep);
-  if (Array.isArray(value)) return value.map(v => nativeDeep(v, code, keep));
-  if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([key, v]) => [key, nativeDeep(v, code, keep)]));
+// ─── The spoken mix: Telugu / Hindi words → the English a student would say ──
+// The reverse of WORDS, for the words people in Hyderabad (or a Hindi-medium
+// classroom) usually say in English. Very basic native words stay native.
+// key/bus: కీ, की and बस are also everyday words ('of', 'just').
+const MIX_SKIP = new Set(`key keys bus new case context running passed space spaces box title step steps count index scope word words idea rule rules friend amount exam subject result results average zero message month months year age city shop room tea fare payment percent capacity decimal decimals row rows column columns problem problems question example examples condition conditions error errors name names student students book books`.split(' '));
+const TE_ENDINGS = 'ను|ని|లో|కి|కు|తో|గా|పై|లను|లకు|లలో|ల';
+const MIX = { te: [], hi: [] };
+for (const [en, [te, hi]] of Object.entries(WORDS)) {
+  if (MIX_SKIP.has(en)) continue;
+  MIX.te.push([te, en]); MIX.hi.push([hi, en]);
+}
+const byLength = (a, b) => b[0].length - a[0].length;
+MIX.te.sort(byLength); MIX.hi.sort(byLength);
+const esc = (x) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const MIX_RE = {
+  te: MIX.te.map(([te, en]) => {
+    // మార్కులు, మార్కులలో, విలువను, విలువని … (a plural's ending drops its ు)
+    const stem = /లు$/.test(te) ? `(?:${esc(te)}|${esc(te.replace(/ు$/, ''))}(?=${TE_ENDINGS}))` : esc(te);
+    return [new RegExp(`(?<![\u0C00-\u0C7F])${stem}(?:\u200C?(${TE_ENDINGS}))?(?![\u0C00-\u0C7F])`, 'g'), en];
+  }),
+  hi: MIX.hi.map(([hi, en]) => [new RegExp(`(?<![\u0900-\u097F])${esc(hi)}(?![\u0900-\u097F])`, 'g'), en])
+};
+
+/** The Hyderabad-style spoken mix of a Telugu / Hindi text. */
+export function mixed(text, code) {
+  if (typeof text !== 'string' || !SCRIPT[code]?.test(text)) return text;
+  let t = text;
+  for (const [re, en] of MIX_RE[code]) {
+    t = code === 'te'
+      ? t.replace(re, (m, ending) => (ending ? `${en} ${ending === 'ను' ? 'ని' : ending}` : en))
+      : t.replace(re, en);
+  }
+  return t;
+}
+
+/** The text in the style this learner chose: 'full' (native) or 'mix'; null leaves it as written. */
+export function styleOf(lang, mode = currentLearningMode()) {
+  const main = String(lang || '').replace(/_en$/, '');
+  if (!mode || main !== String(mode).replace(/_en$/, '') || !CODE_OF[mode] || main === 'english') return null;
+  return MIX_MODES.has(mode) ? 'mix' : 'full';
+}
+
+/** native() or mixed() over every string inside a JSON-like value. */
+export function styleDeep(value, code, style, keep) {
+  if (typeof value === 'string') return style === 'mix' ? mixed(value, code) : native(value, code, keep);
+  if (Array.isArray(value)) return value.map(v => styleDeep(v, code, style, keep));
+  if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([key, v]) => [key, styleDeep(v, code, style, keep)]));
   return value;
 }
+export const nativeDeep = (value, code, keep) => styleDeep(value, code, 'full', keep);
 
 export const codeOf = (mode) => CODE_OF[mode] || null;
 

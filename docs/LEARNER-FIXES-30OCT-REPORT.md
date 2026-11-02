@@ -15,6 +15,12 @@ Branch `claude/learner-side-updates-vthycg` (PR #20). Everything below is on thi
 | 31-9 | Package (salary band) charts were gone from Jobs & applications | They were only on the job market pages, now hidden | "Packages by role" on Jobs & applications, shown even with the job market hidden: one bar per role from lowest to highest ₹ LPA, a line at the middle, labelled axis, tooltip, Source · date, sample-data badge, phone layout, a table for screen readers | e2e at 1280 and 390 px: 10 roles, ₹ LPA axis, tooltip, source and date, no sideways scroll | Done |
 | 31-10 | Readiness showed a separate set of bars per skill | — | One grouped chart: per skill, You now / Your course reaches / Employers ask (horizontal grouped bars, which also fit phones), with the band, "Why this?" and a summary ("3 skills short: HTML & CSS, JavaScript, React"). The per-skill "Add to my plan" stays below the chart. Colours passed colour-blind checks in light and dark | e2e at 1280 and 390 px: one chart, 3 bars per skill, band, summary, Why this? | Done. The radar option for wide screens was not built: the grouped bars read the same at every width |
 
+**Re-test of the same points (31 Oct, later).** Each point was walked again in a browser from the exact place named:
+- **Home "Ask anything":** answers in the learning language, with an "Answer in" picker. Answers taken from the lessons now also follow the full / mix style.
+- **Reviews → Due now → Continue:** switching language works, but Telugu and Hindi questions showed a raw slot ("{సందర్భం}"). Fixed: the converter never touches `{…}` slots. Tested.
+- **Telugu vs Telugu + English (Python course; Attempt history → Array methods):** the two differed by only a word or two. The written Telugu is already nearly full Telugu, so making "Telugu" fuller could not separate them. Now "Telugu + English" also says the common words in English ("ఒక teacher దగ్గర answer పత్రాల… ఐదు grace marks"), while "Telugu" stays full Telugu ("ఒక టీచర్… మార్కులు"). Words that are also everyday Hindi or Telugu ("की", "बस", "पास") are never changed. Tested.
+- **Back, voice session, walkthrough, package chart, readiness chart:** pass in the browser test (85/85).
+
 **Back rule (31 Oct).**
 - Back always goes one level up the breadcrumb: lesson → its course → Explore topics → Home; Skill path, Reviews and Attempt history → Home; module test/project → its course.
 - Only pages opened from several places (Reviews, a lesson, a skill page, a module test/project, the voice session) return to the page that opened them (`from`).
