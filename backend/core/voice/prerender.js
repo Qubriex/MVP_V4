@@ -28,7 +28,13 @@ const TURNS = ['explain', 'example', 'another_way', 'not_understood'];
  * Same text in two modes (English parts, code-only lines) is listed once.
  * @param {{ kinds?: string[] }} [opts] listen | notes | scripted
  */
+const listCache = new Map(); // the lesson content is fixed for a deployment
 export function clips({ kinds = ['listen', 'notes', 'scripted'] } = {}) {
+  const key = kinds.join(',');
+  if (!listCache.has(key)) listCache.set(key, buildClips(kinds));
+  return listCache.get(key);
+}
+function buildClips(kinds) {
   const out = [];
   const seen = new Set();
   const add = (c) => { const k = `${c.language}|${c.text}`; if (c.text && !seen.has(k)) { seen.add(k); out.push(c); } };
