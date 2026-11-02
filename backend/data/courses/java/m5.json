@@ -1598,7 +1598,7 @@
      "private marks वाला Student: setMarks(int m) 0 से कम या 100 से ज़्यादा को मना करता है।"
     ]
    },
-   "picture": "flowchart LR\n  N[\"new Account(\\\"Ravi\\\")\"] --> C[\"constructor\"] --> O[\"owner=Ravi, balance=0 (private)\"]\n  D[\"deposit(500)\"] --> O\n  G[\"getBalance()\"] --> O",
+   "picture": "flowchart LR\n  N[\"new Account(#quot;Ravi#quot;)\"] --> C[\"constructor\"] --> O[\"owner=Ravi, balance=0 (private)\"]\n  D[\"deposit(500)\"] --> O\n  G[\"getBalance()\"] --> O",
    "code": {
     "source": "class Account {\n    private String owner;\n    private double balance;\n\n    Account(String owner) {\n        this.owner = owner;\n        this.balance = 0;\n    }\n\n    void deposit(double amount) {\n        if (amount > 0) {\n            balance += amount;\n        }\n    }\n\n    double getBalance() {\n        return balance;\n    }\n\n    String getOwner() {\n        return owner;\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        Account acc = new Account(\"Ravi\");\n        acc.deposit(500);\n        acc.deposit(-200);\n        System.out.println(acc.getOwner() + \": \" + acc.getBalance());\n    }\n}",
     "output": "Ravi: 500.0",

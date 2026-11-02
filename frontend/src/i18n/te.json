@@ -4101,5 +4101,7 @@
   "lj.ready.summaryShort": "{n} నైపుణ్యాలు తక్కువ: {list}",
   "lj.ready.summaryOne": "1 నైపుణ్యం తక్కువ: {list}",
   "lj.ready.summaryNone": "ఏ నైపుణ్యమూ తక్కువ లేదు: యజమానులు అడిగేది మీ దగ్గర ఉంది.",
-  "lj.ready.actions": "ప్రతి నైపుణ్యానికి ఏం చేయాలి"
+  "lj.ready.actions": "ప్రతి నైపుణ్యానికి ఏం చేయాలి",
+  "ui.section.failed": "ఈ భాగం లోడ్ కాలేదు.",
+  "ui.section.retry": "మళ్ళీ ప్రయత్నించండి"
 }

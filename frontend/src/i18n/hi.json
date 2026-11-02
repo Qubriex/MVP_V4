@@ -4101,5 +4101,7 @@
   "lj.ready.summaryShort": "{n} कौशल कम: {list}",
   "lj.ready.summaryOne": "1 कौशल कम: {list}",
   "lj.ready.summaryNone": "कोई कौशल कम नहीं: नियोक्ता जो माँगते हैं वह आपके पास है।",
-  "lj.ready.actions": "हर कौशल के लिए क्या करें"
+  "lj.ready.actions": "हर कौशल के लिए क्या करें",
+  "ui.section.failed": "यह हिस्सा लोड नहीं हुआ।",
+  "ui.section.retry": "फिर से कोशिश करें"
 }

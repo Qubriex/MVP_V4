@@ -8941,6 +8941,36 @@
         }
       }
     },
+    "/api/ui-errors": {
+      "post": {
+        "tags": [
+          null
+        ],
+        "operationId": "post_ui_errors",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CsrfToken"
+          }
+        ]
+      }
+    },
     "/api/verify/jwks.json": {
       "get": {
         "tags": [

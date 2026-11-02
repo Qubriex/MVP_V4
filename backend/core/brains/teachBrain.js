@@ -5,6 +5,7 @@
 // examples when retrieval returns results.
 import { callAI, safeParseJSON } from '../instructionEngine.js';
 import { personaBlock, spokenStyleBlock, CAPTION_RULES } from './persona.js';
+import { safeDiagram } from '../util/diagram.js';
 
 // ─── LANGUAGE_CONTEXTS ─────────────────────────────────────────────────────────
 const LANGUAGE_CONTEXTS = {
@@ -196,6 +197,8 @@ Respond ONLY with JSON:
   // model puts in a question field is dropped here, whatever the prompt said.
   delete out.checkQuestion;
   delete out.check_question;
+  // A diagram that cannot be drawn never reaches the learner.
+  out.mermaid = safeDiagram(out.mermaid, `TEACH ${nodeLabel}`);
   return out;
 }
 

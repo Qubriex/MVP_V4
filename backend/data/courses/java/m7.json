@@ -370,7 +370,7 @@
      "Votes गिनना: votes.put(name, votes.getOrDefault(name, 0) + 1);"
     ]
    },
-   "picture": "flowchart LR\n  K1[\"\\\"tea\\\"\"] --> V1[\"15\"]\n  K2[\"\\\"coffee\\\"\"] --> V2[\"20\"]\n  K3[\"\\\"samosa\\\"\"] --> V3[\"12\"]",
+   "picture": "flowchart LR\n  K1[\"#quot;tea#quot;\"] --> V1[\"15\"]\n  K2[\"#quot;coffee#quot;\"] --> V2[\"20\"]\n  K3[\"#quot;samosa#quot;\"] --> V3[\"12\"]",
    "code": {
     "source": "import java.util.HashMap;\nimport java.util.TreeMap;\n\npublic class Main {\n    public static void main(String[] args) {\n        HashMap<String, Integer> prices = new HashMap<>();\n        prices.put(\"tea\", 15);\n        prices.put(\"coffee\", 20);\n        System.out.println(prices.get(\"tea\") + \" \" + prices.getOrDefault(\"lassi\", 0));\n        String[] sold = {\"tea\", \"samosa\", \"tea\"};\n        HashMap<String, Integer> count = new HashMap<>();\n        for (String s : sold) {\n            count.put(s, count.getOrDefault(s, 0) + 1);\n        }\n        System.out.println(new TreeMap<>(count));\n    }\n}",
     "output": "15 0\n{samosa=1, tea=2}",

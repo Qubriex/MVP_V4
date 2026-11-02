@@ -663,7 +663,7 @@
      "Phone number छिपाना: \"98\" + \"*\".repeat(6) + phone.substring(8) से 98******10 दिखता है।"
     ]
    },
-   "picture": "flowchart LR\n  A[\"\\\"  Ravi@Mail.com \\\"\"] -->|trim| B[\"\\\"Ravi@Mail.com\\\"\"] -->|toLowerCase| C[\"\\\"ravi@mail.com\\\"\"] -->|\"indexOf(\\\"@\\\")\"| D[\"4\"]",
+   "picture": "flowchart LR\n  A[\"#quot;  Ravi@Mail.com #quot;\"] -->|trim| B[\"#quot;Ravi@Mail.com#quot;\"] -->|toLowerCase| C[\"#quot;ravi@mail.com#quot;\"] -->|\"indexOf(#quot;@#quot;)\"| D[\"4\"]",
    "code": {
     "source": "public class Main {\n    public static void main(String[] args) {\n        String email = \"  Ravi@Mail.com \".trim().toLowerCase();\n        System.out.println(email + \" \" + email.length());\n        int at = email.indexOf(\"@\");\n        System.out.println(email.substring(0, at));\n        String[] parts = \"tea,coffee,lassi\".split(\",\");\n        StringBuilder sb = new StringBuilder();\n        for (String p : parts) {\n            sb.append(p.toUpperCase()).append(\";\");\n        }\n        System.out.println(sb.toString());\n    }\n}",
     "output": "ravi@mail.com 13\nravi\nTEA;COFFEE;LASSI;",

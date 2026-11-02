@@ -162,7 +162,7 @@ export default function Skill() {
             <p className="ln-indic" style={{ margin: 0, lineHeight: 1.7 }}>{data.concept.primer}</p>
             {data.concept.caption_en && <p className="ln-small ln-muted" lang="en" style={{ margin: 0 }}>{data.concept.caption_en}</p>}
           </div>
-          {data.concept.mermaid && <div className="ln-card"><MermaidDiagram source={data.concept.mermaid} /></div>}
+          {data.concept.mermaid && <div className="ln-card"><MermaidDiagram source={data.concept.mermaid} where={`skill ${data.node?.id || ''}`} /></div>}
           <div className="ln-card ln-col" style={{ gap: 8 }}>
             <b>{t('lj.skill.workedExample')}</b>
             <p className="ln-indic" style={{ margin: 0 }}>{data.concept.example}</p>

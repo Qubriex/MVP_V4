@@ -22,7 +22,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "i18n:check": "node scripts/i18n-check.js",
-    "check:build": "node scripts/check-build.js"
+    "check:build": "node scripts/check-build.js",
+    "diagrams:check": "node scripts/diagrams-check.mjs"
   },
   "proxy": "http://localhost:3001",
   "browserslist": {

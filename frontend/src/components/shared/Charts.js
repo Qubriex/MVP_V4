@@ -5,6 +5,7 @@
 // view for screen readers. Series colours (--viz-1..3 in learner.css) passed
 // the colour-blind checks in light and dark.
 import React, { useState } from 'react';
+import SafeSection from './SafeSection';
 
 const ticksFor = (max, step) => Array.from({ length: Math.floor(max / step) + 1 }, (_, i) => i * step);
 
@@ -17,7 +18,7 @@ function Tip({ tip }) {
  * Floating bars from min to max on one value axis, with a tick at the middle.
  * rows: [{ key, label, min, max, mid, note }]
  */
-export function RangeBars({ rows, axisLabel, unit = '', step = 2, ariaLabel, format = (v) => `${v}${unit}`, tableHeads }) {
+function RangeBarsChart({ rows, axisLabel, unit = '', step = 2, ariaLabel, format = (v) => `${v}${unit}`, tableHeads }) {
   const [tip, setTip] = useState(null);
   const top = Math.max(step, Math.ceil(Math.max(...rows.map(r => r.max)) / step) * step);
   const pct = (v) => (v / top) * 100;
@@ -64,7 +65,7 @@ export function RangeBars({ rows, axisLabel, unit = '', step = 2, ariaLabel, for
  * Grouped horizontal bars: one group per row, one bar per series, on a 0–max axis.
  * series: [{ key, label }]; rows: [{ key, label, values: { [seriesKey]: number } }]
  */
-export function GroupedBars({ rows, series, max = 100, step = 25, axisLabel, ariaLabel }) {
+function GroupedBarsChart({ rows, series, max = 100, step = 25, axisLabel, ariaLabel }) {
   const [tip, setTip] = useState(null);
   const pct = (v) => (Math.min(max, Math.max(0, v)) / max) * 100;
   return (
@@ -108,3 +109,7 @@ export function GroupedBars({ rows, series, max = 100, step = 25, axisLabel, ari
     </figure>
   );
 }
+
+// A chart that breaks shows one friendly line with Try again, never an error.
+export const RangeBars = (props) => <SafeSection name="chart"><RangeBarsChart {...props} /></SafeSection>;
+export const GroupedBars = (props) => <SafeSection name="chart"><GroupedBarsChart {...props} /></SafeSection>;

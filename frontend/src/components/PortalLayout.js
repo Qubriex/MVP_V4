@@ -10,6 +10,7 @@ import { useAuth } from '../context/AuthContext';
 import BrandLogo from './BrandLogo';
 import ThemeToggle from './ThemeToggle';
 import TopActions from './shared/TopActions';
+import SafeSection from './shared/SafeSection';
 
 export default function PortalLayout({ kicker, org, account, items, loginPath, context, side = null }) {
   const { t } = useUiLang();
@@ -53,7 +54,7 @@ export default function PortalLayout({ kicker, org, account, items, loginPath, c
         </div>
       </nav>
 
-      <main className="ln-main" id="main">{side && <TopActions side={side} />}<div key={location.pathname} className="ln-page-fade"><Outlet context={context} /></div></main>
+      <main className="ln-main" id="main">{side && <TopActions side={side} />}<div key={location.pathname} className="ln-page-fade"><SafeSection name="portal page" resetKey={location.pathname}><Outlet context={context} /></SafeSection></div></main>
     </div>
   );
 }

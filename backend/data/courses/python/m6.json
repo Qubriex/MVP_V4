@@ -77,7 +77,7 @@
      "Book class: Book(\"Wings of Fire\", \"Kalam\") और Book(\"Gitanjali\", \"Tagore\") अपने title और author वाले दो objects हैं।"
     ]
    },
-   "picture": "flowchart TD\n  C[\"class Student\"] --> A[\"Student(\\\"Ravi\\\", 12)\"]\n  C --> B[\"Student(\\\"Sita\\\", 7)\"]",
+   "picture": "flowchart TD\n  C[\"class Student\"] --> A[\"Student(#quot;Ravi#quot;, 12)\"]\n  C --> B[\"Student(#quot;Sita#quot;, 7)\"]",
    "code": {
     "source": "class Student:\n    def __init__(self, name, roll):\n        self.name = name\n        self.roll = roll\n\na = Student(\"Ravi\", 12)\nb = Student(\"Sita\", 7)\nprint(a.name, a.roll)\nprint(b.name, b.roll)",
     "output": "Ravi 12\nSita 7",

@@ -15,6 +15,7 @@ import BrandLogo from '../BrandLogo';
 import ThemeToggle from '../ThemeToggle';
 import { initials } from '../learn/ui';
 import TopActions from '../shared/TopActions';
+import SafeSection from '../shared/SafeSection';
 
 const StaffContext = createContext(null);
 export const useStaff = () => useContext(StaffContext);
@@ -120,7 +121,7 @@ export default function InstitutionLayout() {
           </div>
         </nav>
 
-        <main className="ln-main" id="main"><TopActions side="staff" /><div key={location.pathname} className="ln-page-fade"><Outlet /></div></main>
+        <main className="ln-main" id="main"><TopActions side="staff" /><div key={location.pathname} className="ln-page-fade"><SafeSection name="college page" resetKey={location.pathname}><Outlet /></SafeSection></div></main>
       </div>
     </StaffContext.Provider>
   );
