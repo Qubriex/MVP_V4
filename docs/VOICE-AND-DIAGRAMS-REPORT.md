@@ -84,12 +84,71 @@ Production (the 30 Oct build) also had no key pool, so keys 2 and 3 were never u
 
 ## 5. Founder steps still needed
 
-Pending: filled in after the preview check.
+The health check now says exactly what is needed. On the preview (2 Nov) it shows:
+
+1. **The voice works now without any change from you.** It uses key 2 with `gemini-3.8-flash-tts` in Telugu, Hindi and English. It falls back to key 3, then key 1.
+2. **To make Cloud TTS (Chirp 3 HD, small MP3s, much larger quota) the main voice, you need a different kind of key.** Google AI Studio keys (like the three you added) can never call Cloud Text-to-Speech; Google answers "API keys are not supported by this API".
+   1. Google Cloud Console → project 711146201037 → **APIs & Services → Enable APIs and services** → search **Cloud Text-to-Speech API** → **Enable**.
+   2. **Billing** → make sure a billing account is linked. Chirp 3 HD needs billing, even within the free monthly allowance.
+   3. **APIs & Services → Credentials → Create credentials → API key.** This makes a standard Google Cloud key.
+   4. Open the new key → **API restrictions → Restrict key** → tick **Generative Language API** and **Cloud Text-to-Speech API** → **Save**.
+   5. In Vercel → mvp-v4 → Settings → Environment Variables → **GEMINI_API_KEY_2** → Edit → paste the new key → Save. Do the same for key 3 if you want the backup on Cloud TTS too.
+   6. Redeploy, then open `/api/health?deep=1` (or **Admin → Voice check**). `voice_detail.engine` should read `cloud-tts:te-IN-Chirp3-HD-Kore`.
+3. **Then run Record lesson audio once** (`/dev → Tools`, staging), or `npm run voice:prerender` with the deployment's database. It records MP3s (about 90 MB). Re-run it after it stops for quota; it resumes where it stopped.
+4. **Replace the three keys.** They were pasted into a chat. Create new ones and delete the old ones in Google, then paste the new ones straight into Vercel.
+5. **For a real backup against quota limits,** create key 3 in a separate Google Cloud project. Keys in the same project share one quota.
+6. **Your decision:** Gemini's voice returns uncompressed WAV, about 10× larger than MP3. If you prefer to stay on the AI Studio keys, the server can compress it to MP3 with an open-source encoder. The only ones available (lamejs) are LGPL-licensed, so I have not added one without your OK.
 
 ## 6. Tests
 
-Pending: filled in after the preview check.
+All run locally on this branch on 2 Nov:
+
+- **Backend:** structural 28/28; REST and integration 350/350. These include:
+  - key pool: order per job; every failover case; Google reasons; shared key health; no key text in logs, health or errors; streaming never switches mid-stream;
+  - voice chain: a Cloud TTS refusal does not disable the key; model 404 → next model; quota → backup key; byte splitting (a 6,000-byte Telugu text becomes 2 parts under 5,000); one-engine parts joined into one clip; a pre-recorded clip served without a live call; newer models' WAV not wrapped twice;
+  - TEACH diagrams that cannot be drawn are dropped;
+  - the server's speech-text files match the browser's.
+- **Frontend:** unit tests 29/29, including:
+  - the diagram component renders nothing and leaves no error element;
+  - at most 2 voice requests in flight;
+  - a quiet retry on 429;
+  - giving up after about 6 s.
+
+  Also: `i18n:check` OK (4139 keys); `npm run diagrams:check` 238/238; build OK.
+- **Browser (Playwright):**
+  - no-ugly-errors sweep 450/450;
+  - learner-topics 85/85;
+  - learner journey 35/35;
+  - dev login 20/20;
+  - demo 20/20;
+  - smoke passed;
+  - team points 12/13, failing only the sample-lesson voice check, because no key is set locally on purpose. Tests never see the real keys.
 
 ## 7. Learner check on the preview (Part 3)
 
-Pending: the preview for this commit is building.
+Done against the preview `mvp-v4-gfeiq5icf` (commit 9a90daa) with the real keys:
+
+- **Voice check (`/api/health?deep=1&ai=1`):**
+  - voice `server`, engine `gemini-3.8-flash-tts`, key 2;
+  - live text AI OK on key 1 (`gemini-3.6-flash`, 1.2 s);
+  - live voice OK (64 KB in 2.2 s);
+  - all three keys `ok`; migration 12 applied.
+
+  Per key:
+
+  | Engine | Result |
+  |---|---|
+  | Cloud TTS te/hi/en | 401 `API_KEYS_NOT_SUPPORTED` |
+  | `gemini-3.8-flash-tts` | works, about 2 s |
+  | `gemini-3.1-flash-tts-preview` | works |
+  | `gemini-3.8-flash-lite-tts` | works |
+  | `gemini-2.5-pro-preview-tts` | 429 `RESOURCE_EXHAUSTED` |
+  | `gemini-2.5-flash-preview-tts` | fails |
+- **Sample lesson (Telugu, public `/api/sample-lesson`):** 200, `audio/wav`, 465 KB of speech. This showed newer models send a finished WAV that the server wrapped a second time (a click at the start). Fixed in this commit, including clips already stored.
+- **Not done:**
+  - **Browser walk-through on the preview** ("Listen" in te/hi/en at 0.8/1.0/1.2×, "Walk me through it", a full voice session, diagrams in every lesson): this cloud workspace's network policy blocks `*.vercel.app`, so no browser could open the preview from here. The same flows pass locally in Chromium: learner-topics, team points, and the no-ugly-errors sweep (every Python and Java lesson with a picture, in three languages and two widths, shows its diagram or nothing).
+  - **Failover with key 2 made invalid:** I can add a branch-only override in Vercel but cannot remove it from here, so I did not leave one behind. The automated tests cover it. To try it yourself:
+    1. Vercel → Settings → Environment Variables → Add `GEMINI_API_KEY_2` = `invalid`, Environment **Preview**, Branch `claude/learner-side-updates-vthycg`.
+    2. Redeploy that branch → **Admin → Voice check** → Play test. It should answer from key 3, and key 2 shows `disabled`.
+    3. Delete that variable and redeploy.
+  - **iPhone Safari and Android Chrome:** no devices here. Please check one lesson's "Listen" and "Walk me through it" on each.

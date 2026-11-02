@@ -105,6 +105,20 @@ function wav(pcm, sampleRate = 24000) {
 }
 export { wav as wavFromPcm };
 
+/** The PCM samples and rate inside a WAV (any chunk layout). */
+export function pcmOf(buf) {
+  if (buf.subarray(0, 4).toString() !== 'RIFF') return { pcm: buf, rate: 24000 };
+  let rate = 24000;
+  for (let i = 12; i + 8 <= buf.length;) {
+    const id = buf.subarray(i, i + 4).toString();
+    const size = buf.readUInt32LE(i + 4);
+    if (id === 'fmt ') rate = buf.readUInt32LE(i + 12);
+    if (id === 'data') return { pcm: buf.subarray(i + 8, Math.min(buf.length, i + 8 + size)), rate };
+    i += 8 + size + (size % 2);
+  }
+  return { pcm: buf.subarray(44), rate };
+}
+
 // Google's reason for an error, from the JSON body: details[].reason
 // (SERVICE_DISABLED, API_KEY_SERVICE_BLOCKED, BILLING_DISABLED,
 // API_KEY_INVALID…) or error.status (RESOURCE_EXHAUSTED, NOT_FOUND…).
@@ -139,8 +153,12 @@ async function ttsOnce(key, model, { text, voice, style }) {
   const json = await res.json();
   const part = json.candidates?.[0]?.content?.parts?.find(p => p.inlineData?.data);
   if (!part) throw Object.assign(new Error('TTS returned no audio'), { status: 502 });
+  // Older speech models send raw 16-bit PCM (audio/L16;rate=24000); newer
+  // ones send a finished WAV. A WAV is never wrapped twice.
+  const raw = Buffer.from(part.inlineData.data, 'base64');
+  if (raw.subarray(0, 4).toString() === 'RIFF') return { audio: raw, mimeType: 'audio/wav', modelVersion: model };
   const rate = Number(/rate=(\d+)/.exec(part.inlineData.mimeType || '')?.[1]) || 24000;
-  return { audio: wav(Buffer.from(part.inlineData.data, 'base64'), rate), mimeType: 'audio/wav', modelVersion: model };
+  return { audio: wav(raw, rate), mimeType: 'audio/wav', modelVersion: model };
 }
 
 // Cloud Text-to-Speech: Chirp 3 HD has the same prebuilt voices as Gemini

@@ -156,3 +156,21 @@ describe('key health is shared between instances', () => {
     expect(JSON.stringify(rows)).not.toContain('fake-text');
   });
 });
+
+describe('WAV from the newer speech models', () => {
+  it('a model that already sends a WAV is not wrapped twice, and WAV parts join into one clean WAV', async () => {
+    const finished = g.wavFromPcm(Buffer.alloc(100, 1), 24000);
+    install((url) => {
+      if (url.includes('texttospeech')) return res(401, notSupported);
+      if (url.endsWith('pageSize=200')) return res(200, { models: [{ name: 'models/gemini-3.8-flash-tts', supportedGenerationMethods: ['generateContent'] }] });
+      return res(200, { candidates: [{ content: { parts: [{ inlineData: { data: finished.toString('base64'), mimeType: 'audio/wav' } }] } }] });
+    });
+    const one = await g.speak({ text: 'హలో', voice: 'Kore', language: 'telugu' });
+    expect(one.audio.equals(finished)).toBe(true);
+    expect(one.audio.indexOf('RIFF', 4)).toBe(-1);
+    const { joinAudio } = await import('../../core/ai/gateway.js');
+    const joined = joinAudio([{ audio: finished, mimeType: 'audio/wav' }, { audio: finished, mimeType: 'audio/wav' }]);
+    expect(joined.audio.indexOf('RIFF', 4)).toBe(-1);
+    expect(g.pcmOf(joined.audio).pcm.length).toBe(200);
+  });
+});

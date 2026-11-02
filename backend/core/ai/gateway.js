@@ -199,7 +199,10 @@ async function storedSpeech(key) {
     const row = await dal.one('SELECT mime, audio_b64, engine FROM tts_cache WHERE key = ?', speechKey(key));
     if (!row) return null;
     dal.run('UPDATE tts_cache SET hits = hits + 1 WHERE key = ?', speechKey(key)).catch(() => {});
-    return { audio: Buffer.from(row.audio_b64, 'base64'), mimeType: row.mime, engine: row.engine };
+    let audio = Buffer.from(row.audio_b64, 'base64');
+    // Clips stored before 2 Nov could hold a WAV inside a WAV (a click at the start).
+    if (row.mime === 'audio/wav' && audio.indexOf('RIFF', 4) === 44) audio = audio.subarray(44);
+    return { audio, mimeType: row.mime, engine: row.engine };
   } catch { return null; }
 }
 
@@ -293,8 +296,8 @@ export function joinAudio(outs) {
   const mime = outs[0].mimeType;
   if (outs.some(o => o.mimeType !== mime)) throw new GatewayError('upstream', 'Speech parts came back in different formats');
   if (mime !== 'audio/wav') return { audio: Buffer.concat(outs.map(o => o.audio)), mimeType: mime };
-  const rate = outs[0].audio.readUInt32LE(24);
-  return { audio: gemini.wavFromPcm(Buffer.concat(outs.map(o => o.audio.subarray(44))), rate), mimeType: mime };
+  const parts = outs.map(o => gemini.pcmOf(o.audio));
+  return { audio: gemini.wavFromPcm(Buffer.concat(parts.map(p => p.pcm)), parts[0].rate), mimeType: mime };
 }
 
 async function synthesizeOne({ text, language = 'telugu', institutionId = null, prefer = null, pinned = false, fresh = false }) {
