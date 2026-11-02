@@ -116,6 +116,9 @@ jobs:
       - name: Working demo
         working-directory: frontend
         run: NODE_PATH="$(npm root -g)" node e2e/demo.mjs
+      - name: No error graphics, raw codes or diagram source on any page
+        working-directory: frontend
+        run: NODE_PATH="$(npm root -g)" node e2e/no-ugly-errors.mjs
       - name: Backend log on failure
         if: failure()
         run: tail -n 80 "$RUNNER_TEMP/backend.log"

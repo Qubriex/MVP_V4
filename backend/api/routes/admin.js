@@ -83,6 +83,30 @@ router.get('/mastery-logs/:id', async (req, res) => {
 });
 
 // ─── Instruction quality report ───────────────────────────────────────────────
+// ─── Voice check ───────────────────────────────────────────────────────────────
+// Every voice key × engine with Google's reason and what to do (slots by
+// fingerprint only), the key pool's state, and a Play test per language that
+// speaks one sentence through the real chain.
+router.get('/voice-check', async (req, res) => {
+  const { voiceStatus } = await import('../../core/ai/gateway.js');
+  const { keyStatus } = await import('../../core/ai/keyPool.js');
+  res.json({ voice: await voiceStatus({ fresh: req.query.fresh === '1' }), keys: keyStatus() });
+});
+const PLAY_TEST = { telugu: 'నమస్కారం! నేను ప్రొఫెసర్ క్యూబిరెక్స్. ఈ రోజు మనం కలిసి నేర్చుకుందాం.', hindi: 'नमस्ते! मैं प्रोफ़ेसर क्यूबिरेक्स हूँ। आज हम साथ में सीखेंगे।', english: 'Hello! I am Professor Qubirex. Let us learn together today.' };
+router.post('/voice-check/play', async (req, res) => {
+  const language = PLAY_TEST[req.body?.language] ? req.body.language : 'telugu';
+  const { synthesize } = await import('../../core/ai/gateway.js');
+  const started = Date.now();
+  try {
+    // Never from the cache: the chain is really tested each time.
+    const out = await synthesize({ text: PLAY_TEST[language], language, fresh: true });
+    res.json({ ok: true, language, engine: out.engine, slot: out.slot || null, cached: out.cached, ms: Date.now() - started, mime: out.mimeType, audio: out.audio.toString('base64') });
+  } catch (err) {
+    const cause = err.cause || err;
+    res.json({ ok: false, language, ms: Date.now() - started, status: cause.status || null, reason: cause.reason || null });
+  }
+});
+
 router.get('/quality-report', async (req, res) => {
   const db = getDb();
   const nodeStats = await mapSeq(await db.prepare(`

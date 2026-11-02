@@ -93,6 +93,7 @@ import AdminOverview from './pages/admin/Overview';
 import AdminEmployers from './pages/admin/Employers';
 import AdminOntology from './pages/admin/Ontology';
 import AdminQuality from './pages/admin/Quality';
+import AdminVoiceCheck from './pages/admin/VoiceCheck';
 
 const LOGIN_FOR = { learner: '/learner-login', employer: '/employer/login', admin: '/admin/login' };
 
@@ -173,6 +174,7 @@ export default function App() {
                       <Route path="employers" element={<AdminEmployers />} />
                       <Route path="ontology" element={<AdminOntology />} />
                       <Route path="quality" element={<AdminQuality />} />
+                      <Route path="voice" element={<AdminVoiceCheck />} />
                       <Route path="messages" element={<AdminMessages />} />
                       <Route path="*" element={<Navigate to="/admin/overview" replace />} />
                     </Route>

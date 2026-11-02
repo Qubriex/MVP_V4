@@ -193,6 +193,21 @@ router.post('/reset-test-data', requireUnlock, async (req, res) => {
 });
 
 // Every wait a tester would otherwise sit through, for test rows only.
+// Tools → Record lesson audio: records the fixed lesson audio a batch at a
+// time (about 40 s per call); the page calls again until done. Recorded clips
+// are skipped, so it resumes where it stopped.
+router.get('/voice-prerender', requireUnlock, async (req, res) => {
+  const { clips: list, stored } = await import('../../core/voice/prerender.js');
+  const all = list();
+  res.json({ total: all.length, chars: all.reduce((a, c) => a + c.text.length, 0), stored: await stored(), key_set: hasGeminiKey() });
+});
+router.post('/voice-prerender', requireUnlock, async (req, res) => {
+  if (!hasGeminiKey()) return res.status(503).json({ error: 'No Gemini key is set on this deployment.' });
+  const { run, stored } = await import('../../core/voice/prerender.js');
+  const out = await run({ from: Math.max(0, Number(req.body?.from) || 0), budgetMs: 40000 });
+  res.json({ ...out, stored: await stored() });
+});
+
 router.post('/skip-waits', requireUnlock, async (req, res) => {
   const now = dal.nowIso();
   const inst = inList(TEST_INSTITUTION_IDS);

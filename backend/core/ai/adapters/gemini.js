@@ -5,6 +5,7 @@
 // key 3 as the backup for both.
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { withGeminiKey, hasGeminiKey, _resetKeyPool } from '../keyPool.js';
+import * as dal from '../../db/dal.js';
 
 const clients = new Map(); // slot → client (one per key, never shared)
 const clientFor = (key, slot) => {
@@ -81,11 +82,18 @@ async function callOnce(client, { model, system, input, audio, temperature = 0.7
 }
 
 // ─── Speech (text → audio) ────────────────────────────────────────────────────
-// Gemini's TTS models return 24 kHz 16-bit mono PCM; it is wrapped as WAV so
-// any browser can play it. One prebuilt voice per persona keeps Professor
-// Qubirex sounding the same on every device (docs/AI-VOICE-SPEC.md).
+// One voice for Professor Qubirex (Kore, female) in every language. Engines,
+// in order, on the voice key (keyPool: 2 → 3 → 1):
+//   1. Cloud Text-to-Speech, Chirp 3 HD (small MP3s, its own large quota);
+//   2. the Gemini speech models this key offers, newest Flash first, then
+//      Pro (read from the model list every hour; the model that last worked
+//      for this key is tried first; GEMINI_TTS_MODEL is an optional override).
+// An engine that fails on a key rests for that key only: a model that is not
+// found or out of quota never stops the others, and a Cloud TTS refusal does
+// not take the key away from the Gemini voice.
 const TTS_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models';
-const TTS_FALLBACK_MODELS = ['gemini-2.5-flash-preview-tts', 'gemini-2.5-flash-tts'];
+const TTS_FALLBACK_MODELS = ['gemini-2.5-flash-preview-tts'];
+const CLOUD = 'cloud-tts';
 
 function wav(pcm, sampleRate = 24000) {
   const h = Buffer.alloc(44);
@@ -94,6 +102,28 @@ function wav(pcm, sampleRate = 24000) {
   h.writeUInt32LE(sampleRate, 24); h.writeUInt32LE(sampleRate * 2, 28); h.writeUInt16LE(2, 32); h.writeUInt16LE(16, 34);
   h.write('data', 36); h.writeUInt32LE(pcm.length, 40);
   return Buffer.concat([h, pcm]);
+}
+export { wav as wavFromPcm };
+
+// Google's reason for an error, from the JSON body: details[].reason
+// (SERVICE_DISABLED, API_KEY_SERVICE_BLOCKED, BILLING_DISABLED,
+// API_KEY_INVALID…) or error.status (RESOURCE_EXHAUSTED, NOT_FOUND…).
+export function googleReason(status, body) {
+  let j = null;
+  try { j = JSON.parse(body); } catch { j = null; }
+  const e = j?.error || {};
+  const msg = String(e.message || body || '');
+  if (/API keys are not supported by this API/i.test(msg)) return { reason: 'API_KEYS_NOT_SUPPORTED', message: msg };
+  const details = Array.isArray(e.details) ? e.details : [];
+  const reason = details.map(d => d.reason).find(Boolean) || e.status || (status === 429 ? 'RESOURCE_EXHAUSTED' : status === 404 ? 'NOT_FOUND' : null);
+  const project = details.map(d => d.metadata?.consumer || d.metadata?.containerInfo).find(Boolean) || (/projects\/(\d+)/.exec(msg)?.[0] ?? null);
+  return { reason, project: project ? String(project).replace(/^projects\//, '') : null, message: msg };
+}
+
+function failure(label, res, body) {
+  const g = googleReason(res.status, body);
+  return upstream(Object.assign(new Error(`${label} ${res.status}${g.reason ? ` ${g.reason}` : ''}: ${g.message.slice(0, 160)}`),
+    { status: res.status, retryAfter: retryAfter(res, body), reason: g.reason, project: g.project }));
 }
 
 async function ttsOnce(key, model, { text, voice, style }) {
@@ -105,10 +135,7 @@ async function ttsOnce(key, model, { text, voice, style }) {
       generationConfig: { responseModalities: ['AUDIO'], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } } }
     })
   });
-  if (!res.ok) {
-    const body = await res.text().catch(() => '');
-    throw upstream(Object.assign(new Error(`TTS ${res.status}: ${body.slice(0, 200)}`), { status: res.status, retryAfter: retryAfter(res, body) }));
-  }
+  if (!res.ok) throw failure('TTS', res, await res.text().catch(() => ''));
   const json = await res.json();
   const part = json.candidates?.[0]?.content?.parts?.find(p => p.inlineData?.data);
   if (!part) throw Object.assign(new Error('TTS returned no audio'), { status: 502 });
@@ -116,12 +143,10 @@ async function ttsOnce(key, model, { text, voice, style }) {
   return { audio: wav(Buffer.from(part.inlineData.data, 'base64'), rate), mimeType: 'audio/wav', modelVersion: model };
 }
 
-// Google Cloud Text-to-Speech with the same key: Chirp 3 HD has the same
-// prebuilt voices as Gemini (Kore, Aoede), so she sounds the same, returns
-// small MP3s, and has its own, much larger quota. Standard-A is the female
-// Standard voice for each locale, used only if the HD voice is not offered.
+// Cloud Text-to-Speech: Chirp 3 HD has the same prebuilt voices as Gemini
+// (Kore), so she sounds the same. Standard-A (female) only if HD is not offered.
 const CLOUD_TTS = 'https://texttospeech.googleapis.com/v1/text:synthesize';
-const LOCALES = { telugu: 'te-IN', hindi: 'hi-IN', english: 'en-IN' };
+export const LOCALES = { telugu: 'te-IN', hindi: 'hi-IN', english: 'en-IN' };
 
 async function cloudOnce(key, name, languageCode, text) {
   const res = await fetch(CLOUD_TTS, {
@@ -129,13 +154,10 @@ async function cloudOnce(key, name, languageCode, text) {
     headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
     body: JSON.stringify({ input: { text }, voice: { languageCode, name }, audioConfig: { audioEncoding: 'MP3' } })
   });
-  if (!res.ok) {
-    const body = await res.text().catch(() => '');
-    throw upstream(Object.assign(new Error(`Cloud TTS ${res.status}: ${body.slice(0, 200)}`), { status: res.status, retryAfter: retryAfter(res, body) }));
-  }
+  if (!res.ok) throw failure('Cloud TTS', res, await res.text().catch(() => ''));
   const json = await res.json();
   if (!json.audioContent) throw Object.assign(new Error('Cloud TTS returned no audio'), { status: 502 });
-  return { audio: Buffer.from(json.audioContent, 'base64'), mimeType: 'audio/mpeg', modelVersion: `cloud-tts:${name}` };
+  return { audio: Buffer.from(json.audioContent, 'base64'), mimeType: 'audio/mpeg', modelVersion: `${CLOUD}:${name}` };
 }
 
 async function cloudSpeak(key, { text, voice, language }) {
@@ -155,90 +177,158 @@ function retryAfter(res, body) {
   return m ? Number(m[1]) : null;
 }
 
-// An engine that is out of quota, switched off for this key, or unknown is
-// skipped for a while instead of being asked again on every sentence.
-const resting = new Map(); // slot:engine → time it may be tried again
-const restFor = (err) => {
+const KEY_LEVEL = new Set(['API_KEY_INVALID', 'API_KEY_SERVICE_BLOCKED', 'SERVICE_DISABLED', 'BILLING_DISABLED', 'PERMISSION_DENIED']);
+const isKeyLevel = (err) => err.upstreamStatus === 401 || err.upstreamStatus === 403 || err.status === 401 || err.status === 403 || KEY_LEVEL.has(err.reason);
+
+// How long an engine rests on one key after it failed there.
+const resting = new Map(); // fingerprint:engine → time it may be tried again
+export function restFor(err) {
+  if (err.reason === 'API_KEYS_NOT_SUPPORTED') return 6 * 3600 * 1000; // this key type can never call it
   if (err.status === 429) return (err.retryAfter || 60) * 1000;
-  if (err.upstreamStatus === 401 || err.upstreamStatus === 403 || err.status === 401 || err.status === 403) return 10 * 60 * 1000;
+  if (isKeyLevel(err)) return 30 * 60 * 1000;
   if (err.status === 400 || err.status === 404) return 60 * 60 * 1000;
   return 0;
-};
-export const _resetTtsEngines = () => { resting.clear(); ttsModels.clear(); _resetKeyPool(); };
+}
+const ttsModels = new Map(); // slot → { fingerprint, at, list }
+const remembered = new Map(); // fingerprint → { model, at }
+export const _resetTtsEngines = () => { resting.clear(); ttsModels.clear(); remembered.clear(); _resetKeyPool(); };
 
-/**
- * Speech in Professor Qubirex's one voice. Tries Cloud TTS (Chirp 3 HD),
- * then the Gemini TTS models, all with the same female voice; it never
- * changes to another voice to get past a failure.
- * @param {{model: string, text: string, voice: string, language?: string, style?: string}} req
- */
-// The Gemini speech models this key can use, read from the model list once an
-// hour, so a renamed or retired model (a 404) never silences her.
-const ttsModels = new Map(); // slot → { at, list }
-async function modelsFor(key, slot) {
+/** Newest Flash speech model first, then Flash-Lite, then Pro; non-preview before preview. */
+export function rankTtsModels(list) {
+  const family = (m) => (/pro/.test(m) ? 2 : /lite/.test(m) ? 1 : /flash/.test(m) ? 0 : 3);
+  const version = (m) => Number(/(\d+(?:\.\d+)?)/.exec(m)?.[1] || 0);
+  return [...new Set(list)].sort((a, b) => family(a) - family(b) || version(b) - version(a) || (/preview/.test(a) ? 1 : 0) - (/preview/.test(b) ? 1 : 0));
+}
+
+async function modelsFor(key, slot, fingerprint) {
   const c = ttsModels.get(slot);
-  if (c && c.key === key && Date.now() - c.at < 3600000) return c.list;
+  if (c && c.fingerprint === fingerprint && Date.now() - c.at < 3600000) return c.list;
   let list = [];
   try {
     const res = await fetch(`${TTS_ENDPOINT}?pageSize=200`, { headers: { 'x-goog-api-key': key } });
     const json = res.ok ? await res.json() : { models: [] };
     list = (json.models || []).filter(m => /tts/i.test(m.name) && (m.supportedGenerationMethods || []).includes('generateContent')).map(m => m.name.replace(/^models\//, ''));
   } catch { list = []; }
-  ttsModels.set(slot, { key, at: Date.now(), list });
+  ttsModels.set(slot, { fingerprint, at: Date.now(), list: rankTtsModels(list) });
+  return ttsModels.get(slot).list;
+}
+/** The speech models the first voice key offers, best first. */
+export const availableTtsModels = () => (hasGeminiKey() ? withGeminiKey((key, { slot, fingerprint }) => modelsFor(key, slot, fingerprint), { purpose: 'voice', label: 'tts-models' }).catch(() => []) : Promise.resolve([]));
+
+// The model that last spoke for this key, kept in the database so a new
+// instance starts with a model that works.
+async function rememberedModel(fingerprint) {
+  const m = remembered.get(fingerprint);
+  if (m && Date.now() - m.at < 600000) return m.model;
+  let model = m?.model || null;
+  try { model = (await dal.one('SELECT model FROM ai_voice_models WHERE fingerprint = ? ORDER BY worked_at DESC LIMIT 1', fingerprint))?.model || model; } catch { /* no table yet */ }
+  remembered.set(fingerprint, { model, at: Date.now() });
+  return model;
+}
+function rememberModel(slot, fingerprint, model) {
+  if (remembered.get(fingerprint)?.model === model) return;
+  remembered.set(fingerprint, { model, at: Date.now() });
+  dal.run(`INSERT INTO ai_voice_models (slot, fingerprint, model, worked_at) VALUES (?, ?, ?, ?)
+    ON CONFLICT (slot, fingerprint) DO UPDATE SET model = excluded.model, worked_at = excluded.worked_at`, slot, fingerprint, model, new Date().toISOString()).catch(() => {});
+}
+
+async function engineList(key, slot, fingerprint, req) {
+  const found = await modelsFor(key, slot, fingerprint);
+  const models = [...new Set([process.env.GEMINI_TTS_MODEL, await rememberedModel(fingerprint), ...found, ...TTS_FALLBACK_MODELS].filter(Boolean))];
+  const list = [[CLOUD, () => cloudSpeak(key, req)], ...models.map(m => [m, () => ttsOnce(key, m, req)])];
+  // A long text spoken in parts keeps one engine, so the parts join cleanly.
+  if (req.prefer) list.sort((a, b) => (b[0] === req.prefer) - (a[0] === req.prefer));
   return list;
 }
-/** The speech models the voice key offers. */
-export const availableTtsModels = () => (hasGeminiKey() ? withGeminiKey((key, { slot }) => modelsFor(key, slot), { purpose: 'voice', label: 'tts-models' }).catch(() => []) : Promise.resolve([]));
 
-async function engineList(key, slot, req) {
-  const found = await modelsFor(key, slot);
-  const models = [...new Set([req.model, ...found, ...TTS_FALLBACK_MODELS].filter(Boolean))];
-  return [['cloud-tts', () => cloudSpeak(key, req)], ...models.map(m => [m, () => ttsOnce(key, m, req)])];
-}
-
-// Every engine on one key; the pool moves to the backup key when this key is
-// rejected, out of quota or not answering.
-async function speakWithKey(key, slot, req) {
-  const engines = await engineList(key, slot, req);
+// Every engine on one key. When none answers, the error says why: a rate
+// limit (429, with the wait), a key problem (the pool disables the key), or
+// "nothing here works" (the pool moves to the next key without retrying).
+async function speakWithKey(key, slot, fingerprint, req) {
+  const engines = await engineList(key, slot, fingerprint, req);
   const now = Date.now();
-  let last = null;
+  const errors = [];
   for (const [name, run] of engines) {
-    if ((resting.get(`${slot}:${name}`) || 0) > now) continue;
-    try { return await run(); } catch (err) {
-      last = err;
+    if ((resting.get(`${fingerprint}:${name}`) || 0) > now) continue;
+    try {
+      const out = await run();
+      if (name !== CLOUD) rememberModel(slot, fingerprint, name);
+      return { ...out, engine: name, slot };
+    } catch (err) {
+      errors.push([name, err]);
       const ms = restFor(err);
-      if (ms) resting.set(`${slot}:${name}`, Date.now() + ms);
+      if (ms) resting.set(`${fingerprint}:${name}`, Date.now() + ms);
+      if (err.status === 429 && name !== CLOUD) break; // a Gemini quota is per project: the other models share it
     }
   }
-  if (!last) {
-    // Every engine is resting: report a rate limit so the page waits and retries.
-    const soonest = Math.min(...engines.map(([n]) => resting.get(`${slot}:${n}`) || now));
-    throw Object.assign(new Error('All voice engines are resting'), { status: 429, retryAfter: Math.max(1, Math.ceil((soonest - now) / 1000)) });
+  const limited = errors.filter(([, e]) => e.status === 429);
+  if (limited.length || !errors.length) {
+    const waits = errors.length ? limited.map(([, e]) => e.retryAfter || 60) : engines.map(([n]) => Math.ceil(((resting.get(`${fingerprint}:${n}`) || now) - now) / 1000));
+    throw Object.assign(new Error('The voice is busy on this key'), { status: 429, retryAfter: Math.max(1, Math.min(...waits.filter(w => w > 0), 60)) });
   }
-  throw last;
+  const gemini = errors.filter(([n]) => n !== CLOUD).map(([, e]) => e);
+  if (gemini.length && gemini.every(isKeyLevel)) throw gemini[0];
+  throw Object.assign(new Error('No voice engine answered on this key'), { status: 502, nextKey: true });
 }
 
 export async function speak(req) {
-  return withGeminiKey((key, { slot }) => speakWithKey(key, slot, req), { purpose: 'voice', label: 'speak' });
+  return withGeminiKey((key, { slot, fingerprint }) => speakWithKey(key, slot, fingerprint, req), { purpose: 'voice', label: 'speak' });
+}
+
+// ─── Voice check (health, Admin → Voice check) ─────────────────────────────────
+// Every engine on every voice key, once, with Google's reason and what to do.
+// Results are kept for an hour (a fresh check is asked for explicitly), so
+// health checks do not use up the speech quota.
+const WHAT_TO_DO = {
+  API_KEYS_NOT_SUPPORTED: 'This kind of key (from Google AI Studio) cannot call Cloud Text-to-Speech. In Google Cloud Console → APIs & Services → Credentials → Create credentials → API key, make a standard key, allow Generative Language API and Cloud Text-to-Speech API, and use it in this slot.',
+  SERVICE_DISABLED: 'Enable {api} in Google Cloud project {project}: APIs & Services → Enable APIs and services → search "{api}" → Enable.',
+  API_KEY_SERVICE_BLOCKED: 'Allow {api} for this key: APIs & Services → Credentials → this key → API restrictions → tick {api} → Save.',
+  BILLING_DISABLED: 'Turn on billing for Google Cloud project {project}: Billing → Link a billing account.',
+  API_KEY_INVALID: 'This key is not valid (deleted or mistyped). Create a new key and replace it in Vercel.',
+  PERMISSION_DENIED: 'This key may not use {api}. Check the key\'s API restrictions and that {api} is enabled in project {project}.',
+  RESOURCE_EXHAUSTED: 'The daily or per-minute quota for {engine} is used up for this Google project. It comes back by itself; for more, raise the quota or use a key from another Google Cloud project.',
+  NOT_FOUND: '{engine} is not available to this key; the other models are used instead.'
+};
+export function whatToDo(engine, err) {
+  const api = engine.startsWith(CLOUD) ? 'Cloud Text-to-Speech API' : 'Generative Language API';
+  const reason = err.reason || (err.status === 429 ? 'RESOURCE_EXHAUSTED' : err.status === 404 ? 'NOT_FOUND' : (err.upstreamStatus || err.status) === 401 ? 'API_KEY_INVALID' : null);
+  const text = WHAT_TO_DO[reason] || 'Try again later; if it keeps failing, check the key in Google Cloud Console.';
+  return { reason, todo: text.replace(/\{api\}/g, api).replace(/\{project\}/g, err.project || 'that owns this key').replace(/\{engine\}/g, engine) };
+}
+
+const checked = new Map(); // fingerprint:engine:language → { at, row }
+async function probe(fingerprint, engine, language, run, fresh) {
+  const k = `${fingerprint}:${engine}:${language}`;
+  const c = checked.get(k);
+  if (!fresh && c && Date.now() - c.at < 3600000) return c.row;
+  const t0 = Date.now();
+  let row;
+  try { const r = await run(); row = { engine, language, ok: true, voice: r.modelVersion, ms: Date.now() - t0 }; } catch (err) {
+    const w = whatToDo(engine, err);
+    row = { engine, language, ok: false, status: err.upstreamStatus || err.status || null, reason: w.reason, todo: w.todo };
+  }
+  checked.set(k, { at: Date.now(), row });
+  return row;
 }
 
 /**
- * Every voice engine tried once, for /api/health: which answered, and why the
- * others did not. Error text is Google's, trimmed; it never holds the key.
+ * Every voice key × engine: Cloud TTS Chirp 3 HD in te-IN / hi-IN / en-IN and
+ * each Gemini speech model the key offers. Slots by fingerprint, never keys.
  */
-export async function voiceDiagnosis(req) {
-  if (!hasGeminiKey()) return { engines: [], models: [] };
-  return withGeminiKey((key, { slot }) => diagnose(key, slot, req), { purpose: 'voice', label: 'voice-check' })
-    .catch(() => ({ engines: [], models: [] }));
-}
-async function diagnose(key, slot, req) {
-  const engines = await engineList(key, slot, req);
-  const out = [];
-  for (const [name, run] of engines) {
-    try { const r = await run(); out.push({ engine: name, ok: true, voice: r.modelVersion }); } catch (err) {
-      out.push({ engine: name, ok: false, status: err.upstreamStatus || err.status || null, error: String(err.message).replace(/key=[^&\s]+/g, 'key=…').slice(0, 160) });
+export async function voiceDiagnosis({ voice = 'Kore', fresh = false } = {}) {
+  const { orderFor } = await import('../keyPool.js');
+  const SAY = { telugu: 'నమస్కారం', hindi: 'नमस्ते', english: 'Hello' };
+  const slots = [];
+  for (const s of orderFor('voice')) {
+    const models = await modelsFor(s.key, s.slot, s.fingerprint);
+    const engines = [];
+    for (const language of ['telugu', 'hindi', 'english']) {
+      engines.push(await probe(s.fingerprint, `${CLOUD}:${LOCALES[language]}-Chirp3-HD-${voice}`, language, () => cloudOnce(s.key, `${LOCALES[language]}-Chirp3-HD-${voice}`, LOCALES[language], SAY[language]), fresh));
     }
+    for (const m of [...new Set([process.env.GEMINI_TTS_MODEL, ...models].filter(Boolean))]) {
+      engines.push(await probe(s.fingerprint, m, 'telugu', () => ttsOnce(s.key, m, { text: SAY.telugu, voice }), fresh));
+    }
+    slots.push({ slot: s.slot, fingerprint: s.fingerprint, models, engines });
   }
-  return { engines: out, models: await modelsFor(key, slot), slot };
+  return { slots };
 }
-

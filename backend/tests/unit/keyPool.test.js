@@ -59,6 +59,35 @@ describe('each job has its own key', () => {
   });
 });
 
+describe('the order of keys for each job', () => {
+  it('defaults: text 1 → 3 → 2, voice 2 → 3 → 1', async () => {
+    const { orderFor } = await import('../../core/ai/keyPool.js');
+    expect(orderFor('text').map(s => s.slot)).toEqual([1, 3, 2]);
+    expect(orderFor('voice').map(s => s.slot)).toEqual([2, 3, 1]);
+    expect(keyStatus().order).toEqual({ text: [1, 3, 2], voice: [2, 3, 1] });
+  });
+  it('QBX_KEYS_TEXT and QBX_KEYS_VOICE change the order', async () => {
+    const { orderFor } = await import('../../core/ai/keyPool.js');
+    process.env.QBX_KEYS_TEXT = '3,1'; process.env.QBX_KEYS_VOICE = '1, 2';
+    try {
+      expect(orderFor('text').map(s => s.slot)).toEqual([3, 1]);
+      expect(orderFor('voice').map(s => s.slot)).toEqual([1, 2]);
+    } finally { delete process.env.QBX_KEYS_TEXT; delete process.env.QBX_KEYS_VOICE; }
+  });
+  it('when the main key and the backup both fail, the third key answers', async () => {
+    const fn = fake({ [K1]: [err(401)], [K3]: [err(429)] });
+    expect((await withGeminiKey(fn, { purpose: 'text' })).servedBy).toBe(K2);
+    _resetKeyPool(); // key 1 was disabled above
+    const v = fake({ [K2]: [err(403)], [K3]: [err(503), err(503)] });
+    expect((await withGeminiKey(v, { purpose: 'voice' })).servedBy).toBe(K1);
+  });
+  it('Google\'s SERVICE_DISABLED / API_KEY_SERVICE_BLOCKED count as a key problem', async () => {
+    const r = await withGeminiKey(fake({ [K2]: [err(400, { message: 'API_KEY_SERVICE_BLOCKED: requests to this API are blocked' })] }), { purpose: 'voice' });
+    expect(r.servedBy).toBe(K3);
+    expect(keyStatus().slots[1].status).toBe('disabled');
+  });
+});
+
 describe('failover to the backup key', () => {
   it('401 on the text key → backup serves; key 1 disabled for 30 min', async () => {
     const r = await withGeminiKey(fake({ [K1]: [err(401)] }), { purpose: 'text' });
@@ -105,7 +134,7 @@ describe('failover to the backup key', () => {
     expect(fn).toHaveBeenCalledTimes(1);
   });
   it('every key rate-limited → 429 with a wait (the voice player waits, it does not switch off)', async () => {
-    const e = await withGeminiKey(fake({ [K2]: [err(429, { retryAfter: 20 })], [K3]: [err(429, { retryAfter: 30 })] }), { purpose: 'voice' }).catch(x => x);
+    const e = await withGeminiKey(fake({ [K2]: [err(429, { retryAfter: 20 })], [K3]: [err(429, { retryAfter: 30 })], [K1]: [err(429, { retryAfter: 40 })] }), { purpose: 'voice' }).catch(x => x);
     expect(e).toMatchObject({ status: 429, code: 'ai_unavailable' });
     expect(e.retryAfter).toBeGreaterThan(0);
     // Both still cooling: the next call does not even try, and still says 429.
@@ -113,7 +142,7 @@ describe('failover to the backup key', () => {
     expect(again).toMatchObject({ status: 429 });
   });
   it('every key fails → ai_unavailable (503, never 401), with the friendly message', async () => {
-    const e = await withGeminiKey(fake({ [K1]: [err(401)], [K3]: [err(403)] }), { purpose: 'text' }).catch(x => x);
+    const e = await withGeminiKey(fake({ [K1]: [err(401)], [K3]: [err(403)], [K2]: [err(401)] }), { purpose: 'text' }).catch(x => x);
     expect(e).toMatchObject({ status: 503, code: 'ai_unavailable' });
     expect(e.message).toMatch(/busy/i);
   });
@@ -145,7 +174,7 @@ describe('keys are never shown', () => {
     expect(keyStatus().roles).toEqual({ 1: 'text', 2: 'voice', 3: 'backup' });
   });
   it('logs and the final error never hold a key', async () => {
-    const e = await withGeminiKey(fake({ [K1]: [err(401)], [K3]: [err(401)] }), { purpose: 'text' }).catch(x => x);
+    const e = await withGeminiKey(fake({ [K1]: [err(401)], [K3]: [err(401)], [K2]: [err(401)] }), { purpose: 'text' }).catch(x => x);
     const all = logs.join('\n') + JSON.stringify({ message: e.message, ...e });
     for (const k of [K1, K2, K3]) expect(all).not.toContain(k);
   });

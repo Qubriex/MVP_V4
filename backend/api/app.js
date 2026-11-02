@@ -139,7 +139,8 @@ export function createApp({ drainOutbox = null } = {}) {
       try {
         const v = await voiceStatus({ fresh: req.query.ai === '1' });
         body.voice = v.voice;
-        body.voice_detail = { engine: v.engine || null, missing: v.missing || [], engines: v.engines || [], models: v.models || [] };
+        // Per voice key (slot + fingerprint) and engine: ok, HTTP status, Google's reason, what to do.
+        body.voice_detail = { engine: v.engine || null, slot: v.slot || null, missing: v.missing || [], todo: v.todo || [], slots: v.slots || [] };
       } catch (err) { body.voice = 'browser-fallback'; body.voice_detail = { error: String(err.message).slice(0, 200) }; }
       // &ai=1 makes one tiny live model call, so a deployment can confirm its key and model.
       if (req.query.ai === '1') {
