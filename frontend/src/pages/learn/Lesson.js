@@ -29,6 +29,7 @@ import AnswerBox from '../../components/learn/AnswerBox';
 import VoiceStatus from '../../components/learn/VoiceStatus';
 import { ResultCard } from '../../components/learn/journey';
 import usePageTitle from '../../hooks/usePageTitle';
+import SafeSection from '../../components/shared/SafeSection';
 
 const STEPS = ['learn', 'code', 'practise', 'check'];
 const RATES = [0.8, 1, 1.2];
@@ -302,7 +303,7 @@ export default function Lesson() {
           <Stepper step={step} reached={reached} onGo={go} />
           {d.prev && !d.prev.done && step === 'learn' && <div className="ln-note" role="note">{t('lj.lesson.suggestPrev')} <Link className="ln-link" to={`/learn/lesson/${d.prev.id}`} state={{ from }}>{d.prev.title}</Link></div>}
           {error && <div className="ln-error" role="alert">{error}</div>}
-          <VoiceStatus speech={speech} />
+          <SafeSection name="voice" quiet><VoiceStatus speech={speech} /></SafeSection>
 
           {step === 'learn' && (
             <section className="ln-col" style={{ gap: 14 }} data-step-panel="learn">
@@ -340,7 +341,7 @@ export default function Lesson() {
               </div>
               <div className="ln-card ln-col" style={{ gap: 8 }}>
                 <b>{t('lj.lesson.picture')}</b>
-                <MermaidDiagram source={P.picture} />
+                <MermaidDiagram source={P.picture} where={d.id} />
                 <Clear lessonId={d.id} part="picture" />
               </div>
               <div className="ln-card ln-col" style={{ gap: 8 }}>
@@ -383,7 +384,7 @@ export default function Lesson() {
                     {walk.state === 'text' && <span className="ln-xs ln-muted" data-walk-text>{t('lj.walk.noAudio')}</span>}
                   </div>
                 )}
-                <CodePanel code={P.code} active={shownLine} onLine={(n) => { const k = P.code.notes.findIndex(x => x.line === n); if (k >= 0) { walk.stop(); setLine(n); speech.speak(codeSpeech(P.code.notes[k].note), `note-${k}`); } }} />
+                <SafeSection name="code panel"><CodePanel code={P.code} active={shownLine} onLine={(n) => { const k = P.code.notes.findIndex(x => x.line === n); if (k >= 0) { walk.stop(); setLine(n); speech.speak(codeSpeech(P.code.notes[k].note), `note-${k}`); } }} /></SafeSection>
                 {shownLine && (() => { const n = P.code.notes.find(x => x.line === shownLine); return n ? <p className="lj-note-now" role="status" data-line-note={shownLine}><b>{t('lj.lesson.lineN', { n: shownLine })}</b> {n.note}{showEn && n.note_en ? <span className="lj-cap" lang="en">{n.note_en}</span> : null}</p> : null; })()}
                 {run && (
                   <div className="lj-output" data-output>

@@ -942,7 +942,7 @@
      "Votes गिनना: votes = {}; हर नाम के लिए votes[name] = votes.get(name, 0) + 1।"
     ]
    },
-   "picture": "flowchart LR\n  K1[\"\\\"tea\\\"\"] --> V1[\"15\"]\n  K2[\"\\\"coffee\\\"\"] --> V2[\"20\"]\n  K3[\"\\\"samosa\\\"\"] --> V3[\"12\"]",
+   "picture": "flowchart LR\n  K1[\"#quot;tea#quot;\"] --> V1[\"15\"]\n  K2[\"#quot;coffee#quot;\"] --> V2[\"20\"]\n  K3[\"#quot;samosa#quot;\"] --> V3[\"12\"]",
    "code": {
     "source": "prices = {\"tea\": 15, \"coffee\": 20}\nprices[\"samosa\"] = 12\nprint(prices[\"tea\"])\nprint(prices.get(\"lassi\", 0))\nfor item, cost in prices.items():\n    print(item, cost)",
     "output": "15\n0\ntea 15\ncoffee 20\nsamosa 12",
@@ -1227,7 +1227,7 @@
      "SMS template: f\"Dear {name}, your bill of Rs {amount} is due.\""
     ]
    },
-   "picture": "flowchart LR\n  A[\"\\\"  ravi kumar \\\"\"] -->|strip| B[\"\\\"ravi kumar\\\"\"] -->|title| C[\"\\\"Ravi Kumar\\\"\"] -->|split| D[\"[\\\"Ravi\\\", \\\"Kumar\\\"]\"]",
+   "picture": "flowchart LR\n  A[\"#quot;  ravi kumar #quot;\"] -->|strip| B[\"#quot;ravi kumar#quot;\"] -->|title| C[\"#quot;Ravi Kumar#quot;\"] -->|split| D[\"[#quot;Ravi#quot;, #quot;Kumar#quot;]\"]",
    "code": {
     "source": "raw = \"  ravi kumar  \"\nname = raw.strip().title()\nprint(name)\nprint(name[0:4])\nwords = name.split()\nprint(words, len(words))\nprint(f\"Welcome, {words[0]}!\")",
     "output": "Ravi Kumar\nRavi\n['Ravi', 'Kumar'] 2\nWelcome, Ravi!",

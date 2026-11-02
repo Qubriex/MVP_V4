@@ -4100,5 +4100,7 @@
   "lj.ready.summaryShort": "{n} skills short: {list}",
   "lj.ready.summaryOne": "1 skill short: {list}",
   "lj.ready.summaryNone": "No skills short: you meet what employers ask.",
-  "lj.ready.actions": "What to do per skill"
+  "lj.ready.actions": "What to do per skill",
+  "ui.section.failed": "This part didn't load.",
+  "ui.section.retry": "Try again"
 }

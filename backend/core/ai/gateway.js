@@ -29,6 +29,7 @@ import * as scripted from './adapters/scripted.js';
 import { currentSandbox, currentTutor, currentLearningMode } from '../requestContext.js';
 import { styleLine } from '../language/style.js';
 import { chargeDemoAi, DEMO_LIMIT_MESSAGE } from '../demo/budget.js';
+import { hasGeminiKey } from './keyPool.js';
 
 const ADAPTERS = { gemini, mock, scripted };
 const DEFAULT_MODEL = { gemini: process.env.GEMINI_MODEL || 'gemini-3.6-flash', mock: 'mock', scripted: 'scripted' };
@@ -209,7 +210,7 @@ async function storeSpeech(key, entry, text) {
 // the scripted tutor: the tutor's words are fixed, her voice is not.
 function speechRoute() {
   const r = route('TEACH.speak');
-  if (r.adapter === 'scripted' && process.env.GEMINI_API_KEY) return { ...r, adapter: 'gemini', model: DEFAULT_MODEL.gemini };
+  if (r.adapter === 'scripted' && hasGeminiKey()) return { ...r, adapter: 'gemini', model: DEFAULT_MODEL.gemini };
   return r;
 }
 
@@ -225,13 +226,13 @@ export async function voiceStatus({ fresh = false } = {}) {
   const r = speechRoute();
   let value;
   if (r.adapter === 'mock') value = { voice: 'off', reason: 'test adapter', missing: [] };
-  else if (!process.env.GEMINI_API_KEY) value = { voice: 'off', missing: ['GEMINI_API_KEY'], engines: [] };
+  else if (!hasGeminiKey()) value = { voice: 'off', missing: ['GEMINI_API_KEY'], engines: [] };
   else {
     const d = await gemini.voiceDiagnosis({ text: 'నమస్కారం', voice: process.env.GEMINI_TTS_VOICE || TTS_VOICE, language: 'telugu', model: TTS_MODEL() });
     const ok = d.engines.find(e => e.ok);
     const missing = [];
     const cloud = d.engines.find(e => e.engine === 'cloud-tts');
-    if (cloud && !cloud.ok && [401, 403].includes(cloud.status)) missing.push('Cloud Text-to-Speech API turned on for the Google Cloud project that owns GEMINI_API_KEY');
+    if (cloud && !cloud.ok && [401, 403].includes(cloud.status)) missing.push('Cloud Text-to-Speech API turned on for the Google Cloud project that owns the voice key (GEMINI_API_KEY_2)');
     if (!d.engines.some(e => e.ok && e.engine !== 'cloud-tts')) missing.push(d.models.length ? `GEMINI_TTS_MODEL (this key offers: ${d.models.join(', ')})` : 'a Gemini speech model for this key (none listed)');
     value = { voice: ok ? 'server' : 'browser-fallback', engine: ok?.voice || null, engines: d.engines, models: d.models, missing: ok ? [] : missing };
   }

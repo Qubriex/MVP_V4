@@ -33,6 +33,7 @@ import {
 import { JOURNEY, STAGE_NAMES } from '../../core/journey/accounts.js';
 import { runControl, controlsFor, testLearner } from '../../core/journey/controls.js';
 import { createLearnerInvite } from '../../core/access.js';
+import { hasGeminiKey } from '../../core/ai/keyPool.js';
 
 const router = express.Router();
 const UNLOCK_TRIES = 5;
@@ -306,7 +307,7 @@ router.get('/build-info', requireUnlock, (req, res) => {
     instance_started_at: STARTED_AT,
     environment: process.env.VERCEL_ENV || process.env.NODE_ENV || 'development',
     region: process.env.VERCEL_REGION || null,
-    ai: adapter === 'mock' && process.env.NODE_ENV === 'test' ? 'mock' : ['mock', 'scripted'].includes(adapter) ? 'scripted tutor (no model)' : process.env.GEMINI_API_KEY ? 'live' : 'live (no key set: AI answers 503)',
+    ai: adapter === 'mock' && process.env.NODE_ENV === 'test' ? 'mock' : ['mock', 'scripted'].includes(adapter) ? 'scripted tutor (no model)' : hasGeminiKey() ? 'live' : 'live (no key set: AI answers 503)',
     test_tutor: testTutor
   });
 });

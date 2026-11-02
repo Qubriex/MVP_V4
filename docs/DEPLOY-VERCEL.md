@@ -72,6 +72,29 @@ passport, verification, employer and admin portals) works.
 To turn it on, go to Settings → Environment Variables → add `GEMINI_API_KEY`
 (from https://aistudio.google.com/app/apikey), marked Sensitive, then redeploy.
 
+**One key per job (optional, recommended).** `core/ai/keyPool.js` gives each
+key its own work, so voice and text never use up each other's limits:
+
+| Variable | Used for |
+|---|---|
+| `GEMINI_API_KEY` | text: tutor, checks, Ask Qubirex, helpers |
+| `GEMINI_API_KEY_2` | voice: spoken replies and transcribing speech |
+| `GEMINI_API_KEY_3` | backup for both, used only when the main key for that job fails or does not answer |
+
+- Add each one as Sensitive, for Production and Preview. Paste the value
+  straight from Google into Vercel, never through chat, email or files.
+- With only `GEMINI_API_KEY` set, everything works on that one key, as before.
+- **How failover works.** A key Google rejects (401/403) is skipped for 30
+  minutes. A rate-limited key (429) rests for the time Google asks. A key that
+  does not answer (5xx or timeout) is tried once more, then the backup takes over.
+- **Checking it.** Open `/api/health?deep=1`: `ai_keys` lists each slot with
+  its role, a 6-character fingerprint, status (`ok`, `cooling`, `disabled`,
+  `missing`), failovers in the last 24 hours and the slot that served the last
+  request. It never shows a key.
+- **Shared quota.** Keys from the same Google Cloud project share one quota
+  and one bill. For a backup that still works when the project hits its limit,
+  create key 3 in a separate Google Cloud project.
+
 ### Optional: test accounts
 
 Add the environment variable `QBX_SEED_TEST_DATA` = `1` (Production and

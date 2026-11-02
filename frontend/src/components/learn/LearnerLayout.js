@@ -16,6 +16,7 @@ import api from '../../utils/api';
 import { setDeviceVoice } from '../../utils/voice';
 import BackBar, { CrumbsProvider } from './BackBar';
 import { useFeatures } from '../../utils/features';
+import SafeSection from '../shared/SafeSection';
 
 // Bottom tabs on phones; each lights up for the pages it stands for.
 // Learning first: Home · Learn (college programme) · Topics · Passport · Me.
@@ -121,7 +122,7 @@ export default function LearnerLayout() {
       <main className="ln-main" id="main">
         <TopActions side="learner" settingsHref="/learn/settings" />
         <CrumbsProvider>
-          <div key={location.pathname} className="ln-page-fade"><BackBar /><Outlet /></div>
+          <div key={location.pathname} className="ln-page-fade"><BackBar /><SafeSection name="learner page" resetKey={location.pathname}><Outlet /></SafeSection></div>
         </CrumbsProvider>
       </main>
 

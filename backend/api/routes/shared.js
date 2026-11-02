@@ -18,6 +18,8 @@ import { ask, GLOSSARY } from '../../core/assist.js';
 import { aiNotConfigured, aiUnavailableMessage, synthesize } from '../../core/ai/gateway.js';
 import { hit, clientIp } from '../middleware/rateLimit.js';
 import { SAMPLE_LESSON } from '../../core/sampleLesson.js';
+import { hasGeminiKey } from '../../core/ai/keyPool.js';
+import { logger } from '../../core/logger.js';
 
 const router = express.Router();
 const signedIn = authenticate();
@@ -52,6 +54,15 @@ router.post('/assist/ask', signedIn, withStaff, askLimit, async (req, res) => {
 
 const REPLY_RE = /^([^\s@]+@[^\s@]+\.[^\s@]+|\+?[\d\s-]{7,20})$/;
 const contactLimit = rateLimit({ name: 'help:contact', limit: 10, windowMs: 3600000 });
+
+// Something on a page could not be shown (a diagram that did not draw, a
+// section that failed). Logged for admins; the learner sees no error.
+const uiErrorLimit = rateLimit({ name: 'ui:errors', limit: 60, windowMs: 3600000 });
+router.post('/ui-errors', uiErrorLimit, maybeSignedIn, (req, res) => {
+  const clip = (v, n) => String(v || '').replace(/[\r\n]+/g, ' ').slice(0, n);
+  logger.warn('ui_error', { kind: clip(req.body?.kind, 30), where: clip(req.body?.where, 120), message: clip(req.body?.message, 200), actor: req.session?.actor_type || 'public' });
+  res.status(204).end();
+});
 // Sign-in is optional: a stale token from an old visit must not block (or
 // redirect) a visitor who only wants to send a message.
 router.post('/help/contact', contactLimit, maybeSignedIn, async (req, res) => {
@@ -73,7 +84,7 @@ router.get('/help/status', async (req, res) => {
   let db = false;
   try { await dal.one('SELECT 1 AS ok'); db = true; } catch { db = false; }
   res.set('Cache-Control', 'no-store');
-  res.json({ ok: db, database: db, ai: !!process.env.GEMINI_API_KEY, checked_at: new Date().toISOString() });
+  res.json({ ok: db, database: db, ai: hasGeminiKey(), checked_at: new Date().toISOString() });
 });
 
 router.get('/glossary', (req, res) => res.json(GLOSSARY));

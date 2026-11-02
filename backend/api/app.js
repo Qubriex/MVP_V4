@@ -37,6 +37,7 @@ import adminRoutes from './routes/admin.js';
 import devRoutes from './routes/dev.js';
 import demoRoutes from './routes/demo.js';
 import { deleteExpired } from '../core/demo/cleanup.js';
+import { hasGeminiKey, keyStatus } from '../core/ai/keyPool.js';
 
 // Mount table; scripts/openapi.js reads it to generate openapi.json.
 export const MOUNTS = [
@@ -131,7 +132,9 @@ export function createApp({ drainOutbox = null } = {}) {
       }
       body.params = params.source();
       body.secrets = process.env.QBX_SECRETS_SOURCE || 'environment';
-      body.ai = { adapter: process.env.AI_ADAPTER || (process.env.NODE_ENV === 'test' ? 'mock' : 'gemini'), key_set: !!process.env.GEMINI_API_KEY };
+      body.ai = { adapter: process.env.AI_ADAPTER || (process.env.NODE_ENV === 'test' ? 'mock' : 'gemini'), key_set: hasGeminiKey() };
+      // Gemini keys by slot (1 text, 2 voice, 3 backup): fingerprints and status only, never values.
+      if (req.query.deep === '1') body.ai_keys = keyStatus();
       // Which voice learners hear: server | browser-fallback | off (cached ten minutes; &ai=1 checks afresh).
       try {
         const v = await voiceStatus({ fresh: req.query.ai === '1' });

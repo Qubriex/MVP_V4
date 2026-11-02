@@ -1,12 +1,17 @@
 // core/ai/adapters/gemini.js
 // Google Gemini adapter. Model SDKs may be imported only under
 // core/ai/adapters/ (tests/structural/sdk.test.js).
+// Keys come only from core/ai/keyPool.js: text on key 1, voice on key 2,
+// key 3 as the backup for both.
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { withGeminiKey, hasGeminiKey, _resetKeyPool } from '../keyPool.js';
 
-let client = null;
-const getClient = () => {
-  if (!process.env.GEMINI_API_KEY) throw Object.assign(new Error('GEMINI_API_KEY is not set'), { status: 503 });
-  client = client || new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const clients = new Map(); // slot → client (one per key, never shared)
+const clientFor = (key, slot) => {
+  const c = clients.get(slot);
+  if (c && c.key === key) return c.client;
+  const client = new GoogleGenerativeAI(key);
+  clients.set(slot, { key, client });
   return client;
 };
 
@@ -17,15 +22,20 @@ export const name = 'gemini';
 // this key (404), so a renamed or retired model does not take the tutor down.
 const FALLBACK_MODEL = 'gemini-flash-latest';
 
+// Transcribing speech (audio in) is a voice job; everything else is text.
 export async function generate(req) {
-  try {
-    return await call(req);
-  } catch (err) {
-    if (err?.status === 404 && req.model !== FALLBACK_MODEL) {
-      try { return await call({ ...req, model: FALLBACK_MODEL }); } catch (e2) { throw upstream(e2); }
+  const purpose = req.purpose || (req.audio ? 'voice' : 'text');
+  return withGeminiKey(async (key, { slot }) => {
+    const client = clientFor(key, slot);
+    try {
+      return await call(client, req);
+    } catch (err) {
+      if (err?.status === 404 && req.model !== FALLBACK_MODEL) {
+        try { return await call(client, { ...req, model: FALLBACK_MODEL }); } catch (e2) { throw upstream(e2); }
+      }
+      throw upstream(err);
     }
-    throw upstream(err);
-  }
+  }, { purpose, label: req.task || purpose });
 }
 
 // Google's 401 / 403 (key not valid, API not enabled) are about our key, not
@@ -39,17 +49,17 @@ export function upstream(err) {
 // thinking: false asks the model not to spend output tokens "thinking" first
 // (spoken replies, JSON helpers). Models that cannot turn thinking off answer
 // 400; the call is then repeated without the setting.
-async function call(req) {
+async function call(client, req) {
   try {
-    return await callOnce(req, req.thinking === false);
+    return await callOnce(client, req, req.thinking === false);
   } catch (err) {
-    if (req.thinking === false && err?.status === 400 && /thinking/i.test(String(err.message))) return callOnce(req, false);
+    if (req.thinking === false && err?.status === 400 && /thinking/i.test(String(err.message))) return callOnce(client, req, false);
     throw err;
   }
 }
 
-async function callOnce({ model, system, input, audio, temperature = 0.7, maxTokens = 1024, json = false }, noThinking) {
-  const m = getClient().getGenerativeModel({
+async function callOnce(client, { model, system, input, audio, temperature = 0.7, maxTokens = 1024, json = false }, noThinking) {
+  const m = client.getGenerativeModel({
     model,
     systemInstruction: system,
     generationConfig: {
@@ -86,11 +96,10 @@ function wav(pcm, sampleRate = 24000) {
   return Buffer.concat([h, pcm]);
 }
 
-async function ttsOnce(model, { text, voice, style }) {
-  if (!process.env.GEMINI_API_KEY) throw Object.assign(new Error('GEMINI_API_KEY is not set'), { status: 503 });
+async function ttsOnce(key, model, { text, voice, style }) {
   const res = await fetch(`${TTS_ENDPOINT}/${encodeURIComponent(model)}:generateContent`, {
     method: 'POST',
-    headers: { 'content-type': 'application/json', 'x-goog-api-key': process.env.GEMINI_API_KEY },
+    headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
     body: JSON.stringify({
       contents: [{ parts: [{ text: style ? `${style}\n${text}` : text }] }],
       generationConfig: { responseModalities: ['AUDIO'], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } } }
@@ -114,10 +123,10 @@ async function ttsOnce(model, { text, voice, style }) {
 const CLOUD_TTS = 'https://texttospeech.googleapis.com/v1/text:synthesize';
 const LOCALES = { telugu: 'te-IN', hindi: 'hi-IN', english: 'en-IN' };
 
-async function cloudOnce(name, languageCode, text) {
+async function cloudOnce(key, name, languageCode, text) {
   const res = await fetch(CLOUD_TTS, {
     method: 'POST',
-    headers: { 'content-type': 'application/json', 'x-goog-api-key': process.env.GEMINI_API_KEY },
+    headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
     body: JSON.stringify({ input: { text }, voice: { languageCode, name }, audioConfig: { audioEncoding: 'MP3' } })
   });
   if (!res.ok) {
@@ -129,12 +138,11 @@ async function cloudOnce(name, languageCode, text) {
   return { audio: Buffer.from(json.audioContent, 'base64'), mimeType: 'audio/mpeg', modelVersion: `cloud-tts:${name}` };
 }
 
-async function cloudSpeak({ text, voice, language }) {
-  if (!process.env.GEMINI_API_KEY) throw Object.assign(new Error('GEMINI_API_KEY is not set'), { status: 503 });
+async function cloudSpeak(key, { text, voice, language }) {
   const lc = LOCALES[language] || LOCALES.telugu;
-  try { return await cloudOnce(`${lc}-Chirp3-HD-${voice}`, lc, text); } catch (err) {
+  try { return await cloudOnce(key, `${lc}-Chirp3-HD-${voice}`, lc, text); } catch (err) {
     if (err.status !== 400 && err.status !== 404) throw err;
-    return cloudOnce(`${lc}-Standard-A`, lc, text);
+    return cloudOnce(key, `${lc}-Standard-A`, lc, text);
   }
 }
 
@@ -149,14 +157,14 @@ function retryAfter(res, body) {
 
 // An engine that is out of quota, switched off for this key, or unknown is
 // skipped for a while instead of being asked again on every sentence.
-const resting = new Map(); // engine → time it may be tried again
+const resting = new Map(); // slot:engine → time it may be tried again
 const restFor = (err) => {
   if (err.status === 429) return (err.retryAfter || 60) * 1000;
   if (err.upstreamStatus === 401 || err.upstreamStatus === 403 || err.status === 401 || err.status === 403) return 10 * 60 * 1000;
   if (err.status === 400 || err.status === 404) return 60 * 60 * 1000;
   return 0;
 };
-export const _resetTtsEngines = () => resting.clear();
+export const _resetTtsEngines = () => { resting.clear(); ttsModels.clear(); _resetKeyPool(); };
 
 /**
  * Speech in Professor Qubirex's one voice. Tries Cloud TTS (Chirp 3 HD),
@@ -166,43 +174,52 @@ export const _resetTtsEngines = () => resting.clear();
  */
 // The Gemini speech models this key can use, read from the model list once an
 // hour, so a renamed or retired model (a 404) never silences her.
-let ttsModels = { at: 0, list: [] };
-export async function availableTtsModels() {
-  if (Date.now() - ttsModels.at < 3600000) return ttsModels.list;
+const ttsModels = new Map(); // slot → { at, list }
+async function modelsFor(key, slot) {
+  const c = ttsModels.get(slot);
+  if (c && c.key === key && Date.now() - c.at < 3600000) return c.list;
+  let list = [];
   try {
-    const res = await fetch(`${TTS_ENDPOINT}?pageSize=200`, { headers: { 'x-goog-api-key': process.env.GEMINI_API_KEY } });
+    const res = await fetch(`${TTS_ENDPOINT}?pageSize=200`, { headers: { 'x-goog-api-key': key } });
     const json = res.ok ? await res.json() : { models: [] };
-    const list = (json.models || []).filter(m => /tts/i.test(m.name) && (m.supportedGenerationMethods || []).includes('generateContent')).map(m => m.name.replace(/^models\//, ''));
-    ttsModels = { at: Date.now(), list };
-  } catch { ttsModels = { at: Date.now(), list: [] }; }
-  return ttsModels.list;
+    list = (json.models || []).filter(m => /tts/i.test(m.name) && (m.supportedGenerationMethods || []).includes('generateContent')).map(m => m.name.replace(/^models\//, ''));
+  } catch { list = []; }
+  ttsModels.set(slot, { key, at: Date.now(), list });
+  return list;
 }
+/** The speech models the voice key offers. */
+export const availableTtsModels = () => (hasGeminiKey() ? withGeminiKey((key, { slot }) => modelsFor(key, slot), { purpose: 'voice', label: 'tts-models' }).catch(() => []) : Promise.resolve([]));
 
-async function engineList(req) {
-  const found = await availableTtsModels();
+async function engineList(key, slot, req) {
+  const found = await modelsFor(key, slot);
   const models = [...new Set([req.model, ...found, ...TTS_FALLBACK_MODELS].filter(Boolean))];
-  return [['cloud-tts', () => cloudSpeak(req)], ...models.map(m => [m, () => ttsOnce(m, req)])];
+  return [['cloud-tts', () => cloudSpeak(key, req)], ...models.map(m => [m, () => ttsOnce(key, m, req)])];
 }
 
-export async function speak(req) {
-  if (!process.env.GEMINI_API_KEY) throw Object.assign(new Error('GEMINI_API_KEY is not set'), { status: 503 });
-  const engines = await engineList(req);
+// Every engine on one key; the pool moves to the backup key when this key is
+// rejected, out of quota or not answering.
+async function speakWithKey(key, slot, req) {
+  const engines = await engineList(key, slot, req);
   const now = Date.now();
   let last = null;
   for (const [name, run] of engines) {
-    if ((resting.get(name) || 0) > now) continue;
+    if ((resting.get(`${slot}:${name}`) || 0) > now) continue;
     try { return await run(); } catch (err) {
       last = err;
       const ms = restFor(err);
-      if (ms) resting.set(name, Date.now() + ms);
+      if (ms) resting.set(`${slot}:${name}`, Date.now() + ms);
     }
   }
   if (!last) {
     // Every engine is resting: report a rate limit so the page waits and retries.
-    const soonest = Math.min(...engines.map(([n]) => resting.get(n) || now));
+    const soonest = Math.min(...engines.map(([n]) => resting.get(`${slot}:${n}`) || now));
     throw Object.assign(new Error('All voice engines are resting'), { status: 429, retryAfter: Math.max(1, Math.ceil((soonest - now) / 1000)) });
   }
   throw last;
+}
+
+export async function speak(req) {
+  return withGeminiKey((key, { slot }) => speakWithKey(key, slot, req), { purpose: 'voice', label: 'speak' });
 }
 
 /**
@@ -210,14 +227,18 @@ export async function speak(req) {
  * others did not. Error text is Google's, trimmed; it never holds the key.
  */
 export async function voiceDiagnosis(req) {
-  if (!process.env.GEMINI_API_KEY) return { engines: [], models: [] };
-  const engines = await engineList(req);
+  if (!hasGeminiKey()) return { engines: [], models: [] };
+  return withGeminiKey((key, { slot }) => diagnose(key, slot, req), { purpose: 'voice', label: 'voice-check' })
+    .catch(() => ({ engines: [], models: [] }));
+}
+async function diagnose(key, slot, req) {
+  const engines = await engineList(key, slot, req);
   const out = [];
   for (const [name, run] of engines) {
     try { const r = await run(); out.push({ engine: name, ok: true, voice: r.modelVersion }); } catch (err) {
       out.push({ engine: name, ok: false, status: err.upstreamStatus || err.status || null, error: String(err.message).replace(/key=[^&\s]+/g, 'key=…').slice(0, 160) });
     }
   }
-  return { engines: out, models: await availableTtsModels() };
+  return { engines: out, models: await modelsFor(key, slot), slot };
 }
 

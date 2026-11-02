@@ -357,7 +357,7 @@
      "Bus ticket: String route = \"Delhi-Agra\"; int seats = 2; double fare = 230.0; boolean ac = false;"
     ]
    },
-   "picture": "flowchart LR\n  I[\"int qty = 3\"] --- D[\"double price = 49.5\"] --- B[\"boolean inStock = true\"] --- S[\"String name = \\\"Pen\\\"\"]",
+   "picture": "flowchart LR\n  I[\"int qty = 3\"] --- D[\"double price = 49.5\"] --- B[\"boolean inStock = true\"] --- S[\"String name = #quot;Pen#quot;\"]",
    "code": {
     "source": "public class Main {\n    public static void main(String[] args) {\n        String item = \"Notebook\";\n        int qty = 3;\n        double price = 45.5;\n        boolean inStock = true;\n        double total = qty * price;\n        System.out.println(item + \" x\" + qty + \" = \" + total);\n        System.out.println(\"In stock: \" + inStock);\n    }\n}",
     "output": "Notebook x3 = 136.5\nIn stock: true",

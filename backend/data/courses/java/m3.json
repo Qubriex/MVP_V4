@@ -366,7 +366,7 @@
      "Greeting card: static void card(String name, String festival) \"Happy Diwali, Sita!\" print करता है।"
     ]
    },
-   "picture": "flowchart LR\n  M[\"main\"] -->|\"slip(\\\"Ravi\\\", 30000)\"| S[\"slip(name, salary)\"]\n  M -->|\"slip(\\\"Sita\\\", 42000)\"| S",
+   "picture": "flowchart LR\n  M[\"main\"] -->|\"slip(#quot;Ravi#quot;, 30000)\"| S[\"slip(name, salary)\"]\n  M -->|\"slip(#quot;Sita#quot;, 42000)\"| S",
    "code": {
     "source": "public class Main {\n    static void slip(String name, int salary) {\n        int pf = salary * 12 / 100;\n        System.out.println(name + \": gross \" + salary + \", PF \" + pf + \", net \" + (salary - pf));\n    }\n\n    public static void main(String[] args) {\n        slip(\"Ravi\", 30000);\n        slip(\"Sita\", 42000);\n    }\n}",
     "output": "Ravi: gross 30000, PF 3600, net 26400\nSita: gross 42000, PF 5040, net 36960",

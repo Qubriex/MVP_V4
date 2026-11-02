@@ -598,7 +598,7 @@ export default function Session() {
                 {board.length === 0 && <div className="ln-tile ln-small ln-muted" style={{ padding: 20, textAlign: 'center' }}>{t('learn.session.nothingBoardYet')}</div>}
                 {[...board].reverse().map(m => (
                   <div key={m.id} className="ln-col" style={{ gap: 10 }}>
-                    {m.mermaid && <MermaidDiagram source={m.mermaid} />}
+                    {m.mermaid && <MermaidDiagram source={m.mermaid} where="session" />}
                     {m.code && <pre className="ln-board-code"><code>{m.code}</code></pre>}
                   </div>
                 ))}

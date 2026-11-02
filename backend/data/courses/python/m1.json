@@ -83,7 +83,7 @@
      "Bus display board program \"Next stop: Kashmere Gate\" और फिर \"Mind the gap\" print करता है।"
     ]
    },
-   "picture": "flowchart TD\n  A[\"line 1: print(\\\"Namaste\\\")\"] --> B[\"line 2: print(\\\"I am learning Python\\\")\"]\n  B --> C[\"screen shows both lines\"]",
+   "picture": "flowchart TD\n  A[\"line 1: print(#quot;Namaste#quot;)\"] --> B[\"line 2: print(#quot;I am learning Python#quot;)\"]\n  B --> C[\"screen shows both lines\"]",
    "code": {
     "source": "print(\"Namaste\")\nprint(\"I am learning Python\")\nprint(2 + 3)",
     "output": "Namaste\nI am learning Python\n5",
@@ -362,7 +362,7 @@
      "Mobile recharge: balance = 199.0 float है, plan = \"Unlimited\" str है, active = True bool है।"
     ]
    },
-   "picture": "flowchart LR\n  A[\"name\"] --> A1[\"\\\"Sita\\\" (str)\"]\n  B[\"age\"] --> B1[\"19 (int)\"]\n  C[\"height\"] --> C1[\"5.4 (float)\"]\n  D[\"passed\"] --> D1[\"True (bool)\"]",
+   "picture": "flowchart LR\n  A[\"name\"] --> A1[\"#quot;Sita#quot; (str)\"]\n  B[\"age\"] --> B1[\"19 (int)\"]\n  C[\"height\"] --> C1[\"5.4 (float)\"]\n  D[\"passed\"] --> D1[\"True (bool)\"]",
    "code": {
     "source": "name = \"Sita\"\nage = 19\nfees = 2500.50\npassed = True\nprint(name, age, fees, passed)\nprint(type(age), type(fees))",
     "output": "Sita 19 2500.5 True\n<class 'int'> <class 'float'>",
@@ -950,7 +950,7 @@
      "age = int(input(\"Your age: \")) फिर print(\"Next year you will be\", age + 1)।"
     ]
    },
-   "picture": "flowchart LR\n  U[\"user types 40\"] --> I[\"input(): \\\"40\\\" text\"]\n  I --> C[\"int(): 40 number\"]\n  C --> P[\"print(total)\"]",
+   "picture": "flowchart LR\n  U[\"user types 40\"] --> I[\"input(): #quot;40#quot; text\"]\n  I --> C[\"int(): 40 number\"]\n  C --> P[\"print(total)\"]",
    "code": {
     "source": "price = int(input(\"Price: \"))\nqty = int(input(\"Quantity: \"))\ntotal = price * qty\nprint(\"Total:\", total)",
     "output": "Price: 40\nQuantity: 3\nTotal: 120",
