@@ -11,6 +11,11 @@ import { lowerThird, phoneBackground, phoneBezel, PHONE_SCREEN } from './cards.m
 import { duration } from './narration.mjs';
 
 export const XFADE = 0.3;
+/** Length of a clip's video stream (what the crossfades are timed on). */
+function vdur(file) {
+  const out = execFileSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=duration', '-of', 'default=nw=1:nk=1', file]).toString().trim();
+  return Number(out) || duration(file);
+}
 const ENC = ['-c:v', 'libx264', '-preset', 'medium', '-crf', '18', '-pix_fmt', 'yuv420p', '-r', String(FPS), '-movflags', '+faststart'];
 const AENC = ['-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-ac', '2'];
 
@@ -164,11 +169,13 @@ export async function sceneClip(id) {
   } else {
     filters.push(`${silence}anull[aout]`);
   }
-  ff([...inputs, '-filter_complex', filters.join(';'), '-map', v, '-map', '[aout]', '-t', total.toFixed(3), ...ENC, ...AENC, out], `scene ${id}`);
+  // Built already from this recording: keep it.
+  const fresh = fs.existsSync(out) && fs.statSync(out).mtimeMs > fs.statSync(path.join(dir, 'events.json')).mtimeMs && fs.statSync(out).mtimeMs > fs.statSync(new URL(import.meta.url)).mtimeMs;
+  if (!fresh) ff([...inputs, '-filter_complex', filters.join(';'), '-map', v, '-map', '[aout]', '-t', total.toFixed(3), ...ENC, ...AENC, out], `scene ${id}`);
 
   const cues = ev.says.flatMap(s => cuesFor(s, at(s.at), s.dur));
   const highlights = ev.says.map(s => ({ id: s.id, start: at(s.at), dur: s.dur }));
-  return { file: out, dur: duration(out), cues, marks: [], highlights, title: ev.title, chapter: ev.chapter, id };
+  return { file: out, dur: vdur(out), cues, marks: [], highlights, title: ev.title, chapter: ev.chapter, id };
 }
 
 /** A still card as a clip (silent, or under music later). */
@@ -177,10 +184,10 @@ export function cardClip(png, name, secs = 3.2, { fadeIn = false } = {}) {
   const out = path.join(WORK, `card-${name}.mp4`);
   const fade = fadeIn ? `,fade=in:st=0:d=0.6` : '';
   // A slow, gentle push-in keeps a still card alive.
-  ff(['-loop', '1', '-t', String(secs), '-i', png, '-f', 'lavfi', '-t', String(secs), '-i', 'anullsrc=r=48000:cl=stereo',
+  ff(['-loop', '1', '-framerate', String(FPS), '-t', String(secs), '-i', png, '-f', 'lavfi', '-t', String(secs), '-i', 'anullsrc=r=48000:cl=stereo',
     '-filter_complex', `[0:v]scale=2112:1188,zoompan=z='min(1+0.0009*on,1.1)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=1920x1080:fps=${FPS},format=yuv420p${fade}[v]`,
     '-map', '[v]', '-map', '1:a', '-t', String(secs), ...ENC, ...AENC, out], `card ${name}`);
-  return { file: out, dur: duration(out), cues: [], marks: [], highlights: [], id: `card-${name}` };
+  return { file: out, dur: vdur(out), cues: [], marks: [], highlights: [], id: `card-${name}` };
 }
 
 /** A piece of a clip (for the highlights). */
@@ -188,7 +195,7 @@ export function trimClip(clip, start, dur, name) {
   const out = path.join(WORK, `cut-${name}.mp4`);
   ff(['-ss', start.toFixed(3), '-i', clip.file, '-t', dur.toFixed(3), '-af', `afade=t=in:st=0:d=0.15,afade=t=out:st=${Math.max(0, dur - 0.25).toFixed(3)}:d=0.25`, ...ENC, ...AENC, out], `trim ${name}`);
   const cues = clip.cues.filter(c => c.end > start && c.start < start + dur).map(c => ({ ...c, start: Math.max(0, c.start - start), end: Math.min(dur, c.end - start) }));
-  return { file: out, dur: duration(out), cues, marks: [], highlights: [], id: name };
+  return { file: out, dur: vdur(out), cues, marks: [], highlights: [], id: name };
 }
 
 /** Joins clips with 300 ms crossfades (video and audio); shifts cues and marks. */
@@ -197,7 +204,12 @@ export function join(clips, name) {
   if (clips.length === 1) { fs.copyFileSync(clips[0].file, out); return { ...clips[0], file: out }; }
   const inputs = clips.flatMap(c => ['-i', c.file]);
   const f = [];
-  let v = '[0:v]'; let a = '[0:a]'; let offset = 0;
+  // Every input cut or padded to exactly its video length, so audio and video stay together.
+  clips.forEach((c, i) => {
+    f.push(`[${i}:v]trim=duration=${c.dur.toFixed(3)},setpts=PTS-STARTPTS,fps=${FPS},format=yuv420p,setsar=1[iv${i}]`);
+    f.push(`[${i}:a]aresample=48000,apad,atrim=duration=${c.dur.toFixed(3)},asetpts=PTS-STARTPTS[ia${i}]`);
+  });
+  let v = '[iv0]'; let a = '[ia0]'; let offset = 0;
   const cues = []; const marks = [];
   clips.forEach((c, i) => {
     const start = i === 0 ? 0 : offset;
@@ -205,13 +217,13 @@ export function join(clips, name) {
     marks.push(...(c.marks || []).map(m => ({ ...m, t: m.t + start })));
     if (c.markTitle) marks.push({ t: start, title: c.markTitle });
     if (i === 0) { offset = c.dur - XFADE; return; }
-    f.push(`${v}[${i}:v]xfade=transition=fade:duration=${XFADE}:offset=${offset.toFixed(3)}[v${i}]`);
-    f.push(`${a}[${i}:a]acrossfade=d=${XFADE}:c1=tri:c2=tri[a${i}]`);
+    f.push(`${v}[iv${i}]xfade=transition=fade:duration=${XFADE}:offset=${offset.toFixed(3)}[v${i}]`);
+    f.push(`${a}[ia${i}]acrossfade=d=${XFADE}:c1=tri:c2=tri[a${i}]`);
     v = `[v${i}]`; a = `[a${i}]`;
     offset += c.dur - XFADE;
   });
   ff([...inputs, '-filter_complex', f.join(';'), '-map', v, '-map', a, ...ENC, ...AENC, out], `join ${name}`);
-  return { file: out, dur: duration(out), cues, marks, highlights: [], id: name };
+  return { file: out, dur: vdur(out), cues, marks, highlights: [], id: name };
 }
 
 /** Runs ffmpeg and returns its stderr (for measurements). */
@@ -237,7 +249,7 @@ export function finish(clip, out, { music = null, burn = null } = {}) {
     ? `loudnorm=I=-16:TP=-1.5:LRA=11:measured_I=${m.input_i}:measured_TP=${m.input_tp}:measured_LRA=${m.input_lra}:measured_thresh=${m.input_thresh}:offset=${m.target_offset}:linear=true`
     : 'loudnorm=I=-16:TP=-1.5:LRA=11';
   const af = `${bed}${pre}${ln},aresample=48000[a]`;
-  const vf = burn ? `[0:v]subtitles='${burn.replace(/'/g, "\\'")}':force_style='FontName=Inter,FontSize=15,Bold=1,PrimaryColour=&H00FFFFFF,BackColour=&H90000000,BorderStyle=4,Outline=0,Shadow=0,MarginV=36,Alignment=2'[v]` : null;
+  const vf = burn ? `[0:v]subtitles='${burn.replace(/'/g, "\\'")}':force_style='FontName=Inter,FontSize=12,Bold=1,PrimaryColour=&H00FFFFFF,BackColour=&H38000000,BorderStyle=4,Outline=0,Shadow=0,MarginV=52,MarginL=60,MarginR=60,Alignment=2'[v]` : null;
   ff([...inputs, '-filter_complex', vf ? `${vf};${af}` : af, '-map', vf ? '[v]' : '0:v', '-map', '[a]', ...(vf ? ENC : ['-c:v', 'copy']), ...AENC, '-movflags', '+faststart', out], `finish ${path.basename(out)}`);
   return { ...clip, file: out, dur: duration(out) };
 }

@@ -12,7 +12,10 @@ const LOGO = path.join(ROOT, 'frontend/public/brand/qubirex-logo-notag-1280.png'
 const LOGO_DARK = path.join(ROOT, 'frontend/public/brand/qubirex-logo-notag-on-dark-1280.png');
 const MARK = path.join(ROOT, 'frontend/public/brand/qubirex-mark.png');
 const DIR = path.join(CACHE, 'cards');
-const url = (f) => pathToFileURL(f).href;
+// Embedded as data URIs: a page set with setContent cannot load file:// URLs.
+const MIME = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', woff2: 'font/woff2' };
+const url = (f) => `data:${MIME[path.extname(f).slice(1).toLowerCase()] || 'application/octet-stream'};base64,${fs.readFileSync(f).toString('base64')}`;
+void pathToFileURL;
 const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 const face = (family, file, weight) => `@font-face { font-family: '${family}'; src: url('${url(path.join(FONTS, file))}') format('woff2'); font-weight: ${weight}; }`;
