@@ -18,7 +18,7 @@ export function BulkVerify() {
   const [out, setOut] = useState(null);
   const [msg, setMsg] = useState('');
   const [busy, setBusy] = useState(false);
-  const ids = [...new Set(text.split(/[\s,;]+/).map(s => s.trim()).filter(s => /^QBX-|^qbx-|\w{6,}/.test(s)))];
+  const ids = [...new Set(text.split(/[\s,;]+/).map(s => s.trim()).filter(s => /^QBX-|^qbx-|\w{6,}/.test(s) && !/^(evidence[_ -]?id|id)$/i.test(s)))];
   const load = (file) => { const r = new FileReader(); r.onload = () => setText(String(r.result || '')); r.readAsText(file); };
   const run = async () => {
     setBusy(true); setMsg('');

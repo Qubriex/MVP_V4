@@ -9,6 +9,7 @@ import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import { useUiLang } from '../../context/UiLangContext';
 import { JOURNEY_STEPS, openDevAccount, openInviteLink } from '../../utils/devAccess';
+import { isRecording } from '../../utils/recording';
 
 const STORE = 'qbx_dev_journey_checklist';
 const readStore = () => { try { return JSON.parse(localStorage.getItem(STORE) || '{}') || {}; } catch { return {}; } };
@@ -43,7 +44,7 @@ export default function DevJourney() {
     <div className="dx-page">
       <header className="dx-head">
         <BrandLogo height={36} tagline={false} />
-        <span className="dx-badge">{t('devx.badge')}</span>
+        {!isRecording() && <span className="dx-badge">{t('devx.badge')}</span>}
       </header>
       <main className="dx-main ln-col" style={{ gap: 16 }}>
         <Link to="/dev" className="ln-link ln-row" style={{ gap: 6 }}><ArrowLeft size={16} aria-hidden="true" />{t('devx.journey.back')}</Link>

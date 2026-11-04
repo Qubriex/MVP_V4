@@ -66,7 +66,7 @@ async function sendRequest(l) {
       VALUES (?, ?, ?, ?, ?, 'requested', ?, 1, ?, ?, 'request', ?)`, ulid(), EMPLOYER, role, l.el_id, l.learner_id, share, now, now, history);
   }
   const title = (await dal.one('SELECT title FROM employer_roles WHERE id = ?', role))?.title || 'a role';
-  await notify({ to: { type: 'learner', id: l.learner_id }, kind: 'employer_request', title: '[Company name] verified (test) would like to see your Passport', body: `For ${title} · interview promised if you say yes. You choose what to share.`, href: '/learn/jobs' });
+  await notify({ to: { type: 'learner', id: l.learner_id }, kind: 'employer_request', title: 'Kaveri Software (sample) would like to see your Passport', body: `For ${title} · interview promised if you say yes. You choose what to share.`, href: '/learn/jobs' });
   return `A test employer asked to see this learner's Passport (${title}).`;
 }
 
@@ -82,7 +82,7 @@ async function assignBridge(l) {
   const engagement = await dal.one('SELECT * FROM engagements WHERE id = ?', l.engagement_id);
   await createBridge({
     engagement, title: `Practice: ${next.map(n => n.node_label).join(' and ')}`, nodeIds: next.map(n => n.id), scope: 'students', elIds: [l.el_id],
-    retestAt: new Date(Date.now() + 14 * DAY).toISOString().slice(0, 10), note: 'Assigned from the developer bar (test)', staffId: PROFESSOR
+    retestAt: new Date(Date.now() + 14 * DAY).toISOString().slice(0, 10), note: 'Assigned from the developer bar', staffId: PROFESSOR
   });
   return `Your college assigned a bridge programme: ${next.map(n => n.node_label).join(', ')}.`;
 }

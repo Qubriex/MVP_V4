@@ -11,6 +11,7 @@ import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import { useUiLang } from '../../context/UiLangContext';
 import { DEV_CARDS, ALL_PAGES, fillPath, openDevAccount, openInviteLink } from '../../utils/devAccess';
+import { isRecording } from '../../utils/recording';
 
 const ICONS = { learner_te: GraduationCap, learner_hi: GraduationCap, learner_new: GraduationCap, college_admin: Building2, professor: BookOpen, employer_verified: Briefcase, employer_pending: Briefcase, admin: ShieldCheck };
 const errText = (e, fallback) => e?.response?.data?.error?.message || fallback;
@@ -272,7 +273,7 @@ export default function DevAccess() {
     <div className="dx-page">
       <header className="dx-head">
         <BrandLogo height={36} tagline={false} />
-        <span className="dx-badge">{t('devx.badge')}</span>
+        {!isRecording() && <span className="dx-badge">{t('devx.badge')}</span>}
       </header>
       <main className="dx-main ln-col" style={{ gap: 20 }}>
         <div className="ln-col" style={{ gap: 6 }}>
