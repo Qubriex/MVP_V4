@@ -73,8 +73,8 @@ const byChapter = (n) => external.filter(s => s.chapter === n);
 
 try {
   // Cards.
-  const intro = cardClip(await introCard(), 'intro', 4.0, { fadeIn: true });
-  const closing = cardClip(await closingCard(), 'closing', 5.0);
+  const intro = cardClip(await introCard(), 'intro', 5.0, { fadeIn: true });
+  const closing = cardClip(await closingCard(), 'closing', 7.0);
   const shortIntro = cardClip(await introCard(), 'intro-short', 2.4, { fadeIn: true });
   const shortClosing = cardClip(await closingCard(), 'closing-short', 3.2);
 

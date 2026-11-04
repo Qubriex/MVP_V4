@@ -249,7 +249,7 @@ export function finish(clip, out, { music = null, burn = null } = {}) {
     ? `loudnorm=I=-16:TP=-1.5:LRA=11:measured_I=${m.input_i}:measured_TP=${m.input_tp}:measured_LRA=${m.input_lra}:measured_thresh=${m.input_thresh}:offset=${m.target_offset}:linear=true`
     : 'loudnorm=I=-16:TP=-1.5:LRA=11';
   const af = `${bed}${pre}${ln},aresample=48000[a]`;
-  const vf = burn ? `[0:v]subtitles='${burn.replace(/'/g, "\\'")}':force_style='FontName=Inter,FontSize=15,Bold=1,PrimaryColour=&H00FFFFFF,BackColour=&H90000000,BorderStyle=4,Outline=0,Shadow=0,MarginV=36,Alignment=2'[v]` : null;
+  const vf = burn ? `[0:v]subtitles='${burn.replace(/'/g, "\\'")}':force_style='FontName=Inter,FontSize=12,Bold=1,PrimaryColour=&H00FFFFFF,BackColour=&H38000000,BorderStyle=4,Outline=0,Shadow=0,MarginV=52,MarginL=60,MarginR=60,Alignment=2'[v]` : null;
   ff([...inputs, '-filter_complex', vf ? `${vf};${af}` : af, '-map', vf ? '[v]' : '0:v', '-map', '[a]', ...(vf ? ENC : ['-c:v', 'copy']), ...AENC, '-movflags', '+faststart', out], `finish ${path.basename(out)}`);
   return { ...clip, file: out, dur: duration(out) };
 }
