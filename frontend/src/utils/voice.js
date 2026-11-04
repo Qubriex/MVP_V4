@@ -18,7 +18,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import api from './api';
 import { pronounce } from './pronounce';
-import { codeSpeech } from './codeSpeech';
+import { speakable, splitParts, walkLine, ttsLanguage } from './speechText.js';
 
 const synth = typeof window !== 'undefined' ? window.speechSynthesis : null;
 const Recognition = typeof window !== 'undefined' ? (window.SpeechRecognition || window.webkitSpeechRecognition) : null;
@@ -51,39 +51,11 @@ function pickVoice(bcp47) {
   return ranked[0] || null;
 }
 
-// What is said aloud: no markdown or symbols, and no English glosses in
-// brackets inside Telugu/Hindi text — switching languages mid-sentence is
-// what makes a voice stumble.
-export function speakable(text) {
-  let t = String(text || '');
-  const native = /[ऀ-ॿఀ-౿]/.test(t);
-  if (native) t = t.replace(/\s*\(([A-Za-z0-9 ,.'’&/-]+)\)/g, '');
-  return t
-    .replace(/```[\s\S]*?```/g, ' ')
-    .replace(/`([^`]*)`/g, '$1')
-    .replace(/[*_#>|~]+/g, ' ')
-    .replace(/[()[\]{}"“”]/g, ' ')
-    .replace(/\s*[→←↔⇒]\s*/g, ', ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-// Sentences grouped into parts of about 400 characters (a short first part
-// so speech starts quickly). Each part is one voice request; the next part
-// downloads while the current one plays. Smaller parts come back faster.
+// What is said aloud and in which pieces: utils/speechText.js (shared with
+// the server's pre-recording, so stored lesson audio matches these requests).
 /** The parts a reply is spoken in (for highlighting the part being spoken). */
-export const speechParts = (text) => parts(speakable(text));
-function parts(text, firstMax = 180, max = 400) {
-  const sentences = text.match(/[^.!?।\n]+[.!?।]*\s*/g)?.map(x => x.trim()).filter(Boolean) || [];
-  const out = [];
-  let cur = '';
-  for (const s of sentences) {
-    const limit = out.length ? max : firstMax;
-    if (cur && (cur.length + s.length + 1) > limit) { out.push(cur); cur = s; } else cur = cur ? `${cur} ${s}` : s;
-  }
-  if (cur) out.push(cur);
-  return out.flatMap(p => (p.length > 600 ? p.match(/[\s\S]{1,500}(\s|$)/g).map(x => x.trim()) : [p]));
-}
+export const speechParts = (text) => splitParts(speakable(text));
+export { speakable };
 
 // ─── One audio element for the whole visit ─────────────────────────────────
 // iPhone Safari blocks audio that starts long after a tap (a reply that takes
@@ -118,31 +90,55 @@ export const usingServerVoice = () => serverVoice;
 let deviceVoice = false;
 export const setDeviceVoice = (on) => { deviceVoice = !!on; };
 export const deviceVoiceChosen = () => deviceVoice;
-const audioCache = new Map(); // lang|text → object URL
+const audioCache = new Map(); // lang|text → object URL (or the request on its way)
 const wait = (ms) => new Promise(r => setTimeout(r, ms));
-async function fetchAudio(text, lang, isCurrent) {
+
+// At most two voice requests on their way at once for this learner: the line
+// playing now and the next one. More only queue up behind them, so a lesson
+// never floods a small speech quota.
+export const MAX_IN_FLIGHT = 2;
+let inFlight = 0;
+const queue = [];
+const slot = () => (inFlight < MAX_IN_FLIGHT ? Promise.resolve(inFlight += 1) : new Promise(r => queue.push(r)));
+const release = () => { const next = queue.shift(); if (next) next(); else inFlight -= 1; };
+export const _voiceInFlight = () => inFlight; // tests
+
+// A busy voice (429) is retried quietly for up to QUIET_MS; only then does the
+// page show text with a notice. "Not set up" (503) turns the voice off for the
+// visit; other errors are retried once.
+export const QUIET_MS = 6000;
+export async function fetchAudio(text, lang, isCurrent = () => true) {
   const key = `${lang || ''}|${text}`;
   if (audioCache.has(key)) return audioCache.get(key);
-  let lastErr;
-  for (let attempt = 0; attempt < 2; attempt += 1) {
-    try {
-      const res = await api.post('/learner/tts', { text, ...(lang ? { lang } : {}) }, { responseType: 'blob', timeout: 30000 });
-      const url = URL.createObjectURL(res.data);
-      audioCache.set(key, url);
-      if (audioCache.size > 60) { const [k, u] = audioCache.entries().next().value; URL.revokeObjectURL(u); audioCache.delete(k); }
-      return url;
-    } catch (err) {
-      lastErr = err;
-      const status = err.response?.status;
+  const p = (async () => {
+    const started = Date.now();
+    let lastErr;
+    for (let attempt = 0; attempt < 6; attempt += 1) {
+      await slot();
+      try {
+        const res = await api.post('/learner/tts', { text, ...(lang ? { lang } : {}) }, { responseType: 'blob', timeout: 30000 });
+        return URL.createObjectURL(res.data);
+      } catch (err) {
+        lastErr = err;
+      } finally { release(); }
+      const status = lastErr.response?.status;
       if (status === 503) { serverVoice = false; break; }
       if ([400, 401, 413].includes(status) || !isCurrent()) break;
-      const after = Number(err.response?.headers?.['retry-after']) || 0;
-      if (status === 429 && after > 6) break;
-      await wait(status === 429 ? Math.min(Math.max(after, 1), 3) * 1000 : 800);
+      const after = Number(lastErr.response?.headers?.['retry-after']) || 1;
+      const pause = status === 429 ? Math.min(Math.max(after, 1), 2) * 1000 : 800;
+      if (Date.now() - started + pause > QUIET_MS || (status !== 429 && attempt >= 1)) break;
+      await wait(pause);
       if (!isCurrent()) break;
     }
-  }
-  throw lastErr;
+    throw lastErr;
+  })();
+  audioCache.set(key, p);
+  try {
+    const url = await p;
+    audioCache.set(key, url);
+    if (audioCache.size > 60) { const [k, u] = audioCache.entries().next().value; if (typeof u === 'string') URL.revokeObjectURL(u); audioCache.delete(k); }
+    return url;
+  } catch (err) { audioCache.delete(key); throw err; }
 }
 
 // Speed telemetry (admin → Quality): time to first audio and, when the page
@@ -196,7 +192,7 @@ export function useSpeechOutput({ lang = 'te-IN', rate = 1, server = true } = {}
       if (runRef.current === run) { setSpeakingId(null); setPart(null); if (!opts.quiet) setIssue(deviceVoice ? (serverVoice ? 'busy' : 'none') : 'text'); }
       return;
     }
-    const chunks = parts(pronounce(text, l), 200, 240);
+    const chunks = splitParts(pronounce(text, l), 200, 240);
     chunks.forEach((p, i) => {
       const u = new SpeechSynthesisUtterance(p);
       u.lang = l;
@@ -223,8 +219,8 @@ export function useSpeechOutput({ lang = 'te-IN', rate = 1, server = true } = {}
     setSpeakingId(id);
     if (!(server && serverVoice)) { speakBrowser(clean, run, o); return; }
     const spoken = pronounce(clean, l);
-    const chunks = parts(spoken);
-    const shown = parts(clean); // same sentence boundaries, without spelling changes
+    const chunks = splitParts(spoken);
+    const shown = splitParts(clean); // same sentence boundaries, without spelling changes
     // Spoken in the language of the text: the learning language, or English captions.
     const ttsLang = l.startsWith('en') ? 'english' : l.startsWith('hi') ? 'hindi' : 'telugu';
     const t0 = Date.now();
@@ -301,21 +297,36 @@ export function useSpeechOutput({ lang = 'te-IN', rate = 1, server = true } = {}
 export function useLineWalk({ lang = 'te-IN', rate = 1 } = {}) {
   const [state, setState] = useState('idle');
   const [index, setIndex] = useState(-1);
-  const clips = useRef([]);
+  const lines = useRef([]); // what each line says aloud
+  const clips = useRef([]); // line → Promise of its clip URL (null when it failed)
   const runRef = useRef(0);
   const rateRef = useRef(rate);
   rateRef.current = rate;
-  const ttsLang = lang.startsWith('en') ? 'english' : lang.startsWith('hi') ? 'hindi' : 'telugu';
+  const ttsLang = ttsLanguage(lang);
 
   const halt = () => { runRef.current += 1; const p = getPlayer(); if (p) { p.onended = null; p.onplaying = null; p.onerror = null; p.pause(); } };
   useEffect(() => halt, []);
 
-  const playAt = useCallback((i) => {
+  // One line's clip, asked for once; the two-at-a-time limit applies.
+  const clipFor = useCallback((i) => {
+    if (i < 0 || i >= lines.current.length) return Promise.resolve(null);
+    if (!clips.current[i]) {
+      clips.current[i] = serverVoice
+        ? fetchAudio(lines.current[i], ttsLang, () => true).catch(() => null)
+        : Promise.resolve(null);
+    }
+    return clips.current[i];
+  }, [ttsLang]);
+
+  const playAt = useCallback(async (i) => {
     halt();
     const run = runRef.current;
     const mine = () => runRef.current === run;
-    if (i < 0 || i >= clips.current.length) { setState('idle'); setIndex(-1); return; }
-    const url = clips.current[i];
+    if (i < 0 || i >= lines.current.length) { setState('idle'); setIndex(-1); return; }
+    setState(s => (s === 'idle' ? 'preparing' : s));
+    const url = await clipFor(i);
+    if (!mine()) return;
+    clipFor(i + 1); // the next line downloads while this one plays
     const p = getPlayer();
     if (!url || !p) { setIndex(i); setState('text'); return; }
     p.src = url;
@@ -328,36 +339,23 @@ export function useLineWalk({ lang = 'te-IN', rate = 1 } = {}) {
       setIndex(i);
       setState(err?.name === 'NotAllowedError' ? 'paused' : 'text');
     });
-  }, []);
+  }, [clipFor]);
 
   /** @param {string[]} notes the line notes, in order */
-  const start = useCallback(async (notes) => {
+  const start = useCallback((notes) => {
     halt();
-    const run = runRef.current;
+    lines.current = notes.map(n => walkLine(n, lang));
+    clips.current = [];
     setState('preparing'); setIndex(-1);
-    const spoken = notes.map(n => pronounce(speakable(codeSpeech(n)), lang));
-    const urls = new Array(spoken.length).fill(null);
-    if (serverVoice) {
-      let next = 0;
-      const worker = async () => {
-        while (next < spoken.length && runRef.current === run) {
-          const k = next; next += 1;
-          try { urls[k] = await fetchAudio(spoken[k], ttsLang, () => runRef.current === run); } catch { urls[k] = null; }
-        }
-      };
-      await Promise.all([worker(), worker(), worker()]);
-    }
-    if (runRef.current !== run) return;
-    clips.current = urls;
     playAt(0);
-  }, [lang, ttsLang, playAt]);
+  }, [lang, playAt]);
 
   const pause = useCallback(() => { const p = getPlayer(); if (p && !p.paused) { p.pause(); setState('paused'); } }, []);
   const resume = useCallback(() => {
     const p = getPlayer();
-    if (!p || !clips.current[index]) return;
+    if (!p || !p.src) return;
     Promise.resolve(p.play()).then(() => setState('playing')).catch(() => setState('text'));
-  }, [index]);
+  }, []);
   const stop = useCallback(() => { halt(); setState('idle'); setIndex(-1); }, []);
 
   return {
@@ -365,9 +363,7 @@ export function useLineWalk({ lang = 'te-IN', rate = 1 } = {}) {
     active: state !== 'idle',
     next: () => playAt(index + 1),
     prev: () => playAt(Math.max(0, index - 1)),
-    replay: () => playAt(Math.max(0, index)),
-    // Used by the Playwright check: false when no clip could be made.
-    hasAudio: () => clips.current.some(Boolean)
+    replay: () => playAt(Math.max(0, index))
   };
 }
 

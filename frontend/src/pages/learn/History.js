@@ -37,7 +37,7 @@ export default function History() {
             </div>
             <span className="ln-small ln-muted ln-row ln-wrap" style={{ gap: 8 }}>
               <span>{t(`lj.kind.${a.kind}`)}</span><span>{fmtDate(a.date)}</span>
-              <CodeTag code={a.evidence} /><CodeTag code={a.authorship} />
+              {a.evidence && <CodeTag code={a.evidence} label={t(`level.${a.evidence}`)} />}{a.authorship && <CodeTag code={a.authorship} label={t(`assure.${a.authorship}`)} />}
             </span>
             {a.feedback && (a.feedback.good || a.feedback.missing || a.feedback.next) && (
               <dl className="lj-feedback ln-small">

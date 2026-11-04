@@ -6,6 +6,10 @@
 //   GEMINI_API_KEY_2  slot 2 — voice (spoken replies, transcribing speech)
 //   GEMINI_API_KEY_3  slot 3 — backup for both, used only when the main key
 //                              for that job fails or does not answer
+// Order per job (configurable): text 1 → 3 → 2 (QBX_KEYS_TEXT), voice
+// 2 → 3 → 1 (QBX_KEYS_VOICE). Slot health is kept in memory and in the
+// ai_key_health table, read at most every 30 s, so every instance skips a
+// broken key quickly.
 // GEMINI_API_KEYS (comma-separated) replaces the three when set. Empty slots
 // are skipped; with a single key everything works as before.
 //
@@ -22,10 +26,13 @@
 // SHA-256). Key values are never logged, returned or put in errors.
 import crypto from 'crypto';
 import { logger } from '../logger.js';
+import * as dal from '../db/dal.js';
 
 const DISABLED_MS = 30 * 60 * 1000;
 const COOL_MS = 60 * 1000;
-const ROLE = { text: [1, 3], voice: [2, 3] };
+const DEFAULT_ORDER = { text: '1,3,2', voice: '2,3,1' };
+const SHARED_READ_MS = 30 * 1000;
+const orderSetting = (purpose) => (purpose === 'voice' ? process.env.QBX_KEYS_VOICE : process.env.QBX_KEYS_TEXT) || DEFAULT_ORDER[purpose] || DEFAULT_ORDER.text;
 const BUDGET = { text: 25000, voice: 40000 };
 
 /** The configured slots: [{ slot, key, fingerprint }] (missing slots left out). */
@@ -46,7 +53,29 @@ export const hasGeminiKey = () => slots().length > 0;
 const health = new Map();
 let lastServed = null;
 const failovers = []; // times of failovers in the last 24 h
-export const _resetKeyPool = () => { health.clear(); failovers.length = 0; lastServed = null; };
+let sharedReadAt = 0;
+export const _resetKeyPool = () => { health.clear(); failovers.length = 0; lastServed = null; sharedReadAt = Date.now() + 365 * 86400000; };
+// Tests that check the shared table turn reading back on.
+export const _readSharedAgain = () => { sharedReadAt = 0; };
+
+// What other instances learned (a disabled or cooling key), at most every 30 s.
+async function readShared() {
+  if (Date.now() - sharedReadAt < SHARED_READ_MS) return;
+  sharedReadAt = Date.now();
+  try {
+    const rows = await dal.all('SELECT slot, fingerprint, status, until, last_error_code, updated_at FROM ai_key_health WHERE until > ?', new Date().toISOString());
+    for (const r of rows) {
+      const until = new Date(r.until).getTime();
+      const h = health.get(Number(r.slot));
+      if (!h || h.fingerprint !== r.fingerprint || h.until < until) health.set(Number(r.slot), { status: r.status, until, lastError: r.last_error_code, lastErrorAt: r.updated_at, fingerprint: r.fingerprint });
+    }
+  } catch { /* no table yet (a fresh database): memory only */ }
+}
+function writeShared(s, h) {
+  dal.run(`INSERT INTO ai_key_health (slot, fingerprint, status, until, last_error_code, updated_at) VALUES (?, ?, ?, ?, ?, ?)
+    ON CONFLICT (slot, fingerprint) DO UPDATE SET status = excluded.status, until = excluded.until, last_error_code = excluded.last_error_code, updated_at = excluded.updated_at`,
+  s.slot, s.fingerprint, h.status, new Date(h.until).toISOString(), String(h.lastError ?? ''), h.lastErrorAt).catch(() => {});
+}
 
 function usable(s, now = Date.now()) {
   const h = health.get(s.slot);
@@ -54,22 +83,22 @@ function usable(s, now = Date.now()) {
   return !(h.until > now);
 }
 function mark(s, status, ms, code) {
-  health.set(s.slot, { status, until: Date.now() + ms, lastError: code, lastErrorAt: new Date().toISOString(), fingerprint: s.fingerprint });
+  const h = { status, until: Date.now() + ms, lastError: code, lastErrorAt: new Date().toISOString(), fingerprint: s.fingerprint };
+  health.set(s.slot, h);
+  writeShared(s, h);
 }
 
-/**
- * The order to try keys in for a job: its main key, then the backup. If
- * neither is set (a one-key setup), any key that is set.
- */
-function orderFor(purpose) {
+/** The order to try keys in for a job (slots that are not set are skipped; the same key twice is tried once). */
+export function orderFor(purpose) {
   const all = slots();
-  const want = (ROLE[purpose] || ROLE.text).map(n => all.find(s => s.slot === n)).filter(Boolean);
+  const nums = orderSetting(purpose).split(',').map(x => Number(x.trim())).filter(n => n >= 1 && n <= 3);
+  const want = nums.map(n => all.find(s => s.slot === n)).filter(Boolean);
   const seen = new Set();
   return (want.length ? want : all).filter(s => (seen.has(s.key) ? false : seen.add(s.key)));
 }
 
 const statusOf = (err) => err?.upstreamStatus || err?.status || null;
-const KEY_PROBLEM = /api key (not valid|expired|disabled|restricted|invalid)|API_KEY_INVALID|permission denied/i;
+const KEY_PROBLEM = /api key (not valid|expired|disabled|restricted|invalid)|API_KEY_INVALID|API_KEY_SERVICE_BLOCKED|SERVICE_DISABLED|permission denied/i;
 const wait = (ms) => new Promise(r => setTimeout(r, ms));
 
 function classify(err) {
@@ -83,13 +112,14 @@ function classify(err) {
 /**
  * Run fn with the job's key, failing over to the backup.
  * @template T
- * @param {(apiKey: string, info: { slot: number }) => Promise<T>} fn
+ * @param {(apiKey: string, info: { slot: number, fingerprint: string }) => Promise<T>} fn
  * @param {{ purpose?: 'text'|'voice', label?: string, budgetMs?: number }} [opts]
  * @returns {Promise<T>}
  */
 export async function withGeminiKey(fn, { purpose = 'text', label = purpose, budgetMs } = {}) {
   const order = orderFor(purpose);
   if (!order.length) throw Object.assign(new Error('GEMINI_API_KEY is not set'), { status: 503 });
+  await readShared();
   const started = Date.now();
   const budget = budgetMs || BUDGET[purpose] || BUDGET.text;
   let last = null;
@@ -103,12 +133,13 @@ export async function withGeminiKey(fn, { purpose = 'text', label = purpose, bud
     for (let attempt = 0; attempt < 2; attempt += 1) {
       if (Date.now() - started > budget) break;
       try {
-        const out = await fn(s.key, { slot: s.slot });
+        const out = await fn(s.key, { slot: s.slot, fingerprint: s.fingerprint });
         lastServed = { slot: s.slot, purpose, at: new Date().toISOString() };
         if (health.get(s.slot)?.fingerprint === s.fingerprint) health.delete(s.slot);
         return out;
       } catch (err) {
         last = err;
+        if (err?.nextKey) break; // nothing on this key can answer: next key, no retry
         const kind = classify(err);
         if (kind === 'request') throw err;
         if (kind === 'invalid') { mark(s, 'disabled', DISABLED_MS, statusOf(err) || 'key'); logger.warn('key_invalid', { slot: s.slot, fingerprint: s.fingerprint }); break; }
@@ -139,6 +170,7 @@ export function keyStatus() {
   while (failovers.length && failovers[0] < now - 86400000) failovers.shift();
   return {
     roles: { 1: 'text', 2: 'voice', 3: 'backup' },
+    order: { text: orderFor('text').map(s => s.slot), voice: orderFor('voice').map(s => s.slot) },
     slots: [1, 2, 3].map((n) => {
       const s = set.get(n);
       if (!s) return { slot: n, status: 'missing' };

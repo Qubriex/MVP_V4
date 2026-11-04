@@ -11,6 +11,7 @@ import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import { useUiLang } from '../../context/UiLangContext';
 import { DEV_CARDS, ALL_PAGES, fillPath, openDevAccount, openInviteLink } from '../../utils/devAccess';
+import { isRecording } from '../../utils/recording';
 
 const ICONS = { learner_te: GraduationCap, learner_hi: GraduationCap, learner_new: GraduationCap, college_admin: Building2, professor: BookOpen, employer_verified: Briefcase, employer_pending: Briefcase, admin: ShieldCheck };
 const errText = (e, fallback) => e?.response?.data?.error?.message || fallback;
@@ -83,6 +84,7 @@ function Tools({ sampleEvidenceId, onChanged }) {
           <span className="ln-small ln-muted">{sampleEvidenceId ? t('devx.passportText') : t('devx.passportNone')}</span>
           <a className="ln-btn" href={`/verify/${sampleEvidenceId || 'QBX-DEMO-0000'}`} target="_blank" rel="noopener noreferrer">{t('devx.passportOpen')}</a>
         </div>
+        <RecordAudio />
         <div className="ln-card ln-col" style={{ gap: 6 }}>
           <b className="ln-row" style={{ gap: 8 }}><Info size={18} aria-hidden="true" />{t('devx.build')}</b>
           {build ? (
@@ -98,6 +100,48 @@ function Tools({ sampleEvidenceId, onChanged }) {
       </div>
       {note && <p className="ln-small" role="status" style={{ margin: 0 }}>{note}</p>}
     </section>
+  );
+}
+
+// Tools → Record lesson audio: the fixed lesson audio, a batch per call, with
+// progress; it resumes where it stopped (quota, storage cap, or a closed tab).
+function RecordAudio() {
+  const { t } = useUiLang();
+  const [info, setInfo] = useState(null);
+  const [prog, setProg] = useState(null); // { next, total, recorded, chars, stopped }
+  const [running, setRunning] = useState(false);
+  const stopRef = React.useRef(false);
+  const load = () => api.get('/dev/voice-prerender').then(r => setInfo(r.data)).catch(() => {});
+  useEffect(() => { load(); }, []);
+  const go = async () => {
+    stopRef.current = false; setRunning(true);
+    let from = 0; let recorded = 0; let chars = 0;
+    for (;;) {
+      let data;
+      try { ({ data } = await api.post('/dev/voice-prerender', { from }, { timeout: 90000 })); } catch (e) { setProg(p => ({ ...(p || {}), stopped: 'error' })); break; }
+      recorded += data.recorded; chars += data.chars; from = data.next;
+      setProg({ next: data.next, total: data.total, recorded, chars, stopped: data.stopped === 'time' ? null : data.stopped });
+      setInfo(i => ({ ...(i || {}), stored: data.stored }));
+      if (data.stopped !== 'time' || stopRef.current) break;
+    }
+    setRunning(false);
+  };
+  const pct = prog ? Math.round((prog.next / Math.max(1, prog.total)) * 100) : 0;
+  return (
+    <div className="ln-card ln-col" style={{ gap: 8 }} data-record-audio>
+      <b className="ln-row" style={{ gap: 8 }}><Info size={18} aria-hidden="true" />{t('devx.audio')}</b>
+      <span className="ln-small ln-muted">{t('devx.audioText', { n: info?.total ?? '…', chars: info?.chars ?? '…' })}</span>
+      {info?.stored && <span className="ln-xs ln-muted">{t('devx.audioStored', { n: info.stored.clips, mb: (info.stored.bytes / 1048576).toFixed(1) })}</span>}
+      {prog && (
+        <>
+          <div className="ln-bar" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}><span style={{ width: `${pct}%` }} /></div>
+          <span className="ln-xs" role="status">{t('devx.audioProgress', { done: prog.next, total: prog.total, recorded: prog.recorded, chars: prog.chars })}{prog.stopped ? ` · ${t(`devx.audioStopped.${prog.stopped}`)}` : ''}</span>
+        </>
+      )}
+      {running
+        ? <button type="button" className="ln-btn" onClick={() => { stopRef.current = true; }}>{t('devx.audioPause')}</button>
+        : <button type="button" className="ln-btn" onClick={go} disabled={info && !info.key_set}>{prog ? t('devx.audioResume') : t('devx.audioStart')}</button>}
+    </div>
   );
 }
 
@@ -229,7 +273,7 @@ export default function DevAccess() {
     <div className="dx-page">
       <header className="dx-head">
         <BrandLogo height={36} tagline={false} />
-        <span className="dx-badge">{t('devx.badge')}</span>
+        {!isRecording() && <span className="dx-badge">{t('devx.badge')}</span>}
       </header>
       <main className="dx-main ln-col" style={{ gap: 20 }}>
         <div className="ln-col" style={{ gap: 6 }}>

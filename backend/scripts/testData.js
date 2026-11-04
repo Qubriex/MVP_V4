@@ -12,19 +12,19 @@ import { eachSeq } from '../core/util/seq.js';
 
 const INSTITUTION = { id: 'test-inst-0001', name: 'Qubirex Test Institution', email: 'test.institution@qubirex.local', password: 'QubirexTest2026!' };
 const ENGAGEMENT_ID = '4a4c13c4-989e-4c03-b636-3bdba7fd1025';
-const LEARNER = { id: 'test-learner-0001', name: 'Test Learner', ref: 'TEST-LRNR-001', pin: '410585', language: 'telugu' };
+const LEARNER = { id: 'test-learner-0001', name: 'Arun Kumar', ref: 'TEST-LRNR-001', pin: '410585', language: 'telugu' };
 const CT_ID = 'test-ct-0001';
 const EL_ID = 'test-el-0001';
 const JOIN_CODE = 'QX-FSD-T01';
 const PROFESSOR = { id: 'test-staff-prof-0001', email: 'test.professor@qubirex.local', name: 'Lakshmi Rao' };
-const EMPLOYER = { id: 'test-employer-0001', userId: 'test-employer-user-0001', name: '[Company name] (test)', domain: 'qubirex.local', email: 'test.employer@qubirex.local', userName: 'Test Hiring Lead' };
+const EMPLOYER = { id: 'test-employer-0001', userId: 'test-employer-user-0001', name: 'Nimbus Labs (sample)', domain: 'qubirex.local', email: 'test.employer@qubirex.local', userName: 'Arjun Mehta' };
 // A second test company whose verification (KYB) is already approved, so the
 // verified employer screens can be tried without waiting.
-const EMPLOYER_VERIFIED = { id: 'test-employer-0002', userId: 'test-employer-user-0002', name: '[Company name] verified (test)', domain: 'qubirex.local', email: 'test.employer.verified@qubirex.local', userName: 'Test Recruiter' };
+const EMPLOYER_VERIFIED = { id: 'test-employer-0002', userId: 'test-employer-user-0002', name: 'Kaveri Software (sample)', domain: 'qubirex.local', email: 'test.employer.verified@qubirex.local', userName: 'Meera Iyer' };
 // A Hindi cohort with one learner, and a learner who has not been through
 // the first-run welcome yet (both sign in with the same public PIN).
-const HINDI = { engagementId: 'test-eng-hindi-0001', joinCode: 'QX-FSD-T02', learnerId: 'test-learner-hi01', elId: 'test-el-hi01', ref: 'TEST-LRNR-HI1', name: 'Test Learner (Hindi)' };
-const FIRST_TIME = { learnerId: 'test-learner-new1', elId: 'test-el-new1', ref: 'TEST-LRNR-NEW', name: 'Test Learner (first time)' };
+const HINDI = { engagementId: 'test-eng-hindi-0001', joinCode: 'QX-FSD-T02', learnerId: 'test-learner-hi01', elId: 'test-el-hi01', ref: 'TEST-LRNR-HI1', name: 'Neha Gupta' };
+const FIRST_TIME = { learnerId: 'test-learner-new1', elId: 'test-el-new1', ref: 'TEST-LRNR-NEW', name: 'Sneha Reddy' };
 
 // Classmates in different access states, so Students & access has something
 // to show. None of them can sign in with a known PIN.
@@ -183,7 +183,7 @@ export async function seedTestData({ log = console.log } = {}) {
     // ── Engagement (fixed ID — it is part of the learner login) ─────────────
     await db.prepare(`
       INSERT OR IGNORE INTO engagements (id, institution_id, capability_target_id, title, language, status, started_at, join_code)
-      VALUES (?, ?, ?, 'Full-Stack Developer Programme — Test Batch', 'telugu', 'active', datetime('now'), ?)
+      VALUES (?, ?, ?, 'Full-Stack Developer Programme — CSE-A 2026', 'telugu', 'active', datetime('now'), ?)
     `).run(ENGAGEMENT_ID, INSTITUTION.id, CT_ID, JOIN_CODE);
     await db.prepare('UPDATE engagements SET join_code = ? WHERE id = ?').run(JOIN_CODE, ENGAGEMENT_ID);
 
@@ -200,7 +200,7 @@ export async function seedTestData({ log = console.log } = {}) {
     await db.prepare("INSERT OR IGNORE INTO staff_cohorts (staff_id, engagement_id, cohort_role) VALUES (?, ?, 'lead')").run(profId, ENGAGEMENT_ID);
     await db.prepare(`
       INSERT INTO institution_users (id, institution_id, email, password_hash, role, status, name, department, profile_completed)
-      VALUES ('test-staff-admin-0001', ?, ?, ?, 'admin', 'active', 'Test Coordinator', 'Administration', 1)
+      VALUES ('test-staff-admin-0001', ?, ?, ?, 'admin', 'active', 'Priya Nair', 'Administration', 1)
       ON CONFLICT(email) DO UPDATE SET password_hash = excluded.password_hash, status = 'active', role = 'admin'
     `).run(INSTITUTION.id, INSTITUTION.email, pwHash);
 
@@ -269,7 +269,7 @@ export async function seedTestData({ log = console.log } = {}) {
     // ── Hindi cohort and learner; a first-time learner in the Telugu cohort ──
     await db.prepare(`
       INSERT OR IGNORE INTO engagements (id, institution_id, capability_target_id, title, language, status, started_at, join_code)
-      VALUES (?, ?, ?, 'Full-Stack Developer Programme — Hindi Test Batch', 'hindi', 'active', datetime('now'), ?)
+      VALUES (?, ?, ?, 'Full-Stack Developer Programme — Hindi batch 2026', 'hindi', 'active', datetime('now'), ?)
     `).run(HINDI.engagementId, INSTITUTION.id, CT_ID, HINDI.joinCode);
     const firstLabels = Object.keys(nodeIds);
     await eachSeq([[HINDI, HINDI.engagementId, 'hindi', 4], [FIRST_TIME, ENGAGEMENT_ID, 'telugu', 0]], async ([who, engId, language, mastered]) => {
@@ -338,13 +338,13 @@ export async function seedTestData({ log = console.log } = {}) {
   // programme for the test cohort, so every page with an id (role,
   // candidate, bridge) has something to open from /dev → All pages.
   await db.prepare(`INSERT OR IGNORE INTO employer_roles (id, employer_id, title, city, jd_text, skills_json, bar, status, published, interview_promise, created_by, created_at)
-    VALUES ('test-role-0001', ?, 'Frontend developer (test)', 'Hyderabad', 'Test role: HTML, CSS, JavaScript, React.', ?, 70, 'open', 1, 1, ?, ?)`)
+    VALUES ('test-role-0001', ?, 'Frontend developer', 'Hyderabad', 'Test role: HTML, CSS, JavaScript, React.', ?, 70, 'open', 1, 1, ?, ?)`)
     .run(EMPLOYER_VERIFIED.id, JSON.stringify([{ key: 'html_css', name: 'HTML & CSS', required: true }, { key: 'javascript', name: 'JavaScript', required: true }, { key: 'react', name: 'React', required: true }]), EMPLOYER_VERIFIED.userId, now);
   await db.prepare(`INSERT OR IGNORE INTO employer_pipeline (id, employer_id, role_id, el_id, learner_id, stage, share_json, interview_promised, created_at, updated_at)
     VALUES ('test-pipe-0001', ?, 'test-role-0001', ?, ?, 'access_granted', ?, 1, ?, ?)`)
     .run(EMPLOYER_VERIFIED.id, EL_ID, LEARNER.id, JSON.stringify({ asked: ['skills', 'resume', 'contact'], granted: ['skills', 'resume'] }), now, now);
   await db.prepare(`INSERT OR IGNORE INTO bridge_programmes (id, institution_id, engagement_id, title, node_ids_json, scope, note, retest_at, status, created_by, created_at)
-    VALUES ('test-bridge-0001', ?, ?, 'JavaScript events refresher (test)', '["test-node-2-4"]', 'cohort', 'Practise this before the re-test', ?, 'open', 'test-staff-admin-0001', ?)`)
+    VALUES ('test-bridge-0001', ?, ?, 'JavaScript events refresher', '["test-node-2-4"]', 'cohort', 'Practise this before the re-test', ?, 'open', 'test-staff-admin-0001', ?)`)
     .run(INSTITUTION.id, ENGAGEMENT_ID, new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10), now);
   await db.prepare(`INSERT OR IGNORE INTO bridge_assignments (id, bridge_id, el_id, baseline_readiness, baseline_mastered_json, assigned_at)
     VALUES ('test-bridge-0001-a1', 'test-bridge-0001', ?, 40, '[]', ?)`).run(EL_ID, now);

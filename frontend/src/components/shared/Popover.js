@@ -55,9 +55,11 @@ export function Term({ k, children }) {
 
 /** An evidence (L1–L4) or authorship (A0–A3) level: plain words on the tag,
  *  the code and its glossary meaning in the popover. */
-export function CodeTag({ code, label }) {
+export function CodeTag({ code, label: given }) {
   const { t } = useUiLang();
   const g = GLOSSARY[code];
+  // Never an empty tag or "undefined": without a label, the glossary's words (or the code).
+  const label = given || (g ? t(g[0]) : code);
   return (
     <Popover trigger={label} triggerClass="ln-tag ln-tag-neutral sk-codetag" title={code} label={t('shared.popover.valueWhatMeans', { value: `${label} (${code})` })}>
       {g ? <><b>{t(g[0])}</b> — {t(g[1])}</> : code}

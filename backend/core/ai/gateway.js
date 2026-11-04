@@ -176,13 +176,22 @@ export function withStyle(req, mode = currentLearningMode()) {
 // voice, Kore, for every learner, page and reply. GEMINI_TTS_MODEL and
 // GEMINI_TTS_VOICE override the defaults.
 export const TTS_VOICE = 'Kore';
-const TTS_MODEL = () => process.env.GEMINI_TTS_MODEL || 'gemini-2.5-flash-preview-tts';
+// The speech model is chosen per key from the models it offers (adapters/gemini.js);
+// GEMINI_TTS_MODEL is only an override.
+const TTS_MODEL = () => process.env.GEMINI_TTS_MODEL || 'auto';
 const ttsCache = new Map(); // per instance; replays and repeated lines cost nothing
+export const _clearSpeechMemory = () => ttsCache.clear(); // tests: read from the database
 const TTS_CACHE_MAX = 64;
 // Lines up to this length (greetings, lesson explanations, scripted tutor
 // lines) are also kept in the database, so every instance starts them at once.
+// Pre-recorded lesson audio (npm run voice:prerender) is kept whatever its
+// length and is never evicted (hits start at PINNED).
 const STORED_SPEECH_MAX_CHARS = 600;
 const STORED_SPEECH_MAX_ROWS = 5000;
+export const PINNED = 1000000;
+// Cloud Text-to-Speech takes at most 5,000 bytes per request; Telugu and
+// Hindi use about 3 bytes a character. Longer text is spoken in parts.
+export const SPEECH_PART_BYTES = 4500;
 const speechKey = (key) => crypto.createHash('sha256').update(key).digest('hex');
 
 async function storedSpeech(key) {
@@ -190,18 +199,21 @@ async function storedSpeech(key) {
     const row = await dal.one('SELECT mime, audio_b64, engine FROM tts_cache WHERE key = ?', speechKey(key));
     if (!row) return null;
     dal.run('UPDATE tts_cache SET hits = hits + 1 WHERE key = ?', speechKey(key)).catch(() => {});
-    return { audio: Buffer.from(row.audio_b64, 'base64'), mimeType: row.mime, engine: row.engine };
+    let audio = Buffer.from(row.audio_b64, 'base64');
+    // Clips stored before 2 Nov could hold a WAV inside a WAV (a click at the start).
+    if (row.mime === 'audio/wav' && audio.indexOf('RIFF', 4) === 44) audio = audio.subarray(44);
+    return { audio, mimeType: row.mime, engine: row.engine };
   } catch { return null; }
 }
 
-async function storeSpeech(key, entry, text) {
-  if (String(text).length > STORED_SPEECH_MAX_CHARS || entry.engine === 'mock') return;
+async function storeSpeech(key, entry, text, { pinned = false } = {}) {
+  if ((!pinned && String(text).length > STORED_SPEECH_MAX_CHARS) || entry.engine === 'mock') return;
   try {
-    await dal.run('INSERT INTO tts_cache (key, mime, audio_b64, engine, bytes, created_at) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT (key) DO NOTHING',
-      speechKey(key), entry.mimeType, entry.audio.toString('base64'), entry.engine, entry.audio.length, dal.nowIso());
-    const n = await dal.one('SELECT COUNT(*) AS n FROM tts_cache');
+    await dal.run('INSERT INTO tts_cache (key, mime, audio_b64, engine, bytes, created_at, hits) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (key) DO NOTHING',
+      speechKey(key), entry.mimeType, entry.audio.toString('base64'), entry.engine, entry.audio.length, dal.nowIso(), pinned ? PINNED : 0);
+    const n = await dal.one('SELECT COUNT(*) AS n FROM tts_cache WHERE hits < ?', PINNED);
     if (Number(n.n) > STORED_SPEECH_MAX_ROWS) {
-      await dal.run('DELETE FROM tts_cache WHERE key IN (SELECT key FROM tts_cache ORDER BY hits, created_at LIMIT ?)', Number(n.n) - STORED_SPEECH_MAX_ROWS);
+      await dal.run('DELETE FROM tts_cache WHERE key IN (SELECT key FROM tts_cache WHERE hits < ? ORDER BY hits, created_at LIMIT ?)', PINNED, Number(n.n) - STORED_SPEECH_MAX_ROWS);
     }
   } catch (err) { logger.warn('tts.cache_store_failed', { error: err.message }); }
 }
@@ -228,13 +240,13 @@ export async function voiceStatus({ fresh = false } = {}) {
   if (r.adapter === 'mock') value = { voice: 'off', reason: 'test adapter', missing: [] };
   else if (!hasGeminiKey()) value = { voice: 'off', missing: ['GEMINI_API_KEY'], engines: [] };
   else {
-    const d = await gemini.voiceDiagnosis({ text: 'నమస్కారం', voice: process.env.GEMINI_TTS_VOICE || TTS_VOICE, language: 'telugu', model: TTS_MODEL() });
-    const ok = d.engines.find(e => e.ok);
-    const missing = [];
-    const cloud = d.engines.find(e => e.engine === 'cloud-tts');
-    if (cloud && !cloud.ok && [401, 403].includes(cloud.status)) missing.push('Cloud Text-to-Speech API turned on for the Google Cloud project that owns the voice key (GEMINI_API_KEY_2)');
-    if (!d.engines.some(e => e.ok && e.engine !== 'cloud-tts')) missing.push(d.models.length ? `GEMINI_TTS_MODEL (this key offers: ${d.models.join(', ')})` : 'a Gemini speech model for this key (none listed)');
-    value = { voice: ok ? 'server' : 'browser-fallback', engine: ok?.voice || null, engines: d.engines, models: d.models, missing: ok ? [] : missing };
+    // Every voice key × engine (slots by fingerprint, never keys), with
+    // Google's reason and what to do. The first working engine, in the order
+    // speech uses them, is the voice learners hear.
+    const d = await gemini.voiceDiagnosis({ voice: process.env.GEMINI_TTS_VOICE || TTS_VOICE, fresh });
+    const first = d.slots.flatMap(s => s.engines.filter(e => e.ok).map(e => ({ ...e, slot: s.slot })))[0] || null;
+    const todo = [...new Set(d.slots.flatMap(s => s.engines.filter(e => !e.ok && e.todo && e.reason !== 'NOT_FOUND').map(e => e.todo)))];
+    value = { voice: first ? 'server' : 'browser-fallback', engine: first?.voice || null, slot: first?.slot || null, slots: d.slots, missing: first ? [] : todo, todo };
   }
   voiceStatusCache = { at: Date.now(), value };
   return value;
@@ -244,29 +256,93 @@ export async function voiceStatus({ fresh = false } = {}) {
  * @param {{ text: string, language?: string, institutionId?: string|null }} req
  * @returns {Promise<{ audio: Buffer, mimeType: string, engine: string, cached: boolean }>}
  */
-export async function synthesize({ text, language = 'telugu', institutionId = null }) {
+export async function synthesize({ text, language = 'telugu', institutionId = null, fresh = false }) {
+  const parts = splitSpeechBytes(String(text), SPEECH_PART_BYTES);
+  if (parts.length <= 1) return synthesizeOne({ text, language, institutionId, fresh });
+  // Every part on the engine the first part used, then one clip.
+  const outs = [];
+  for (const part of parts) outs.push(await synthesizeOne({ text: part, language, institutionId, fresh, prefer: outs[0]?.engineName }));
+  return { ...joinAudio(outs), engine: outs[0].engine, cached: outs.every(o => o.cached) };
+}
+
+/** Sentence-boundary parts of at most maxBytes (UTF-8); a sentence that is too long is cut at a space. */
+export function splitSpeechBytes(text, maxBytes = SPEECH_PART_BYTES) {
+  const bytes = (x) => Buffer.byteLength(x, 'utf8');
+  if (bytes(text) <= maxBytes) return [text];
+  const sentences = text.match(/[^.!?।\n]+[.!?।]*\s*/g) || [text];
+  const out = [];
+  let cur = '';
+  const push = () => { if (cur.trim()) out.push(cur.trim()); cur = ''; };
+  for (const s of sentences) {
+    if (bytes(s) > maxBytes) {
+      push();
+      let piece = '';
+      for (const w of s.split(/(\s+)/)) {
+        if (bytes(piece + w) > maxBytes) { out.push(piece.trim()); piece = ''; }
+        piece += w;
+      }
+      cur = piece;
+      continue;
+    }
+    if (bytes(cur + s) > maxBytes) push();
+    cur += s;
+  }
+  push();
+  return out;
+}
+
+/** Parts of one text joined into one clip (MP3s end to end; WAVs as one PCM stream). */
+export function joinAudio(outs) {
+  const mime = outs[0].mimeType;
+  if (outs.some(o => o.mimeType !== mime)) throw new GatewayError('upstream', 'Speech parts came back in different formats');
+  if (mime !== 'audio/wav') return { audio: Buffer.concat(outs.map(o => o.audio)), mimeType: mime };
+  const parts = outs.map(o => gemini.pcmOf(o.audio));
+  return { audio: gemini.wavFromPcm(Buffer.concat(parts.map(p => p.pcm)), parts[0].rate), mimeType: mime };
+}
+
+async function synthesizeOne({ text, language = 'telugu', institutionId = null, prefer = null, pinned = false, fresh = false }) {
   const r = speechRoute();
   const voice = process.env.GEMINI_TTS_VOICE || TTS_VOICE;
   const key = `${r.adapter}|${voice}|${language}|${text}`;
-  const hit = ttsCache.get(key) || await storedSpeech(key);
-  if (hit) { ttsCache.set(key, hit); return { ...hit, cached: true }; }
+  const hit = fresh ? null : (ttsCache.get(key) || await storedSpeech(key));
+  if (hit) { ttsCache.set(key, hit); return { ...hit, cached: true, engineName: hit.engineName || engineNameOf(hit.engine) }; }
   // About 14 spoken characters a second, for the demo's voice budget.
   const sandbox = currentSandbox();
   if (sandbox) await chargeDemoAi(sandbox, { voiceSeconds: Math.max(1, Math.ceil(String(text).length / 14)) });
   const started = Date.now();
   const model = r.adapter === 'mock' ? 'mock' : TTS_MODEL();
   try {
-    const out = await withTimeout(ADAPTERS[r.adapter].speak({ model, text, voice, language }), Math.max(params.get('ai.timeoutMs'), 50000));
+    const out = await withTimeout(ADAPTERS[r.adapter].speak({ model, text, voice, language, prefer }), Math.max(params.get('ai.timeoutMs'), 50000));
     await logCall({ task: 'TEACH.speak', adapter: r.adapter, model, modelVersion: out.modelVersion, ms: Date.now() - started, status: 'ok', institutionId, tokensIn: text.length });
-    const entry = { audio: out.audio, mimeType: out.mimeType, engine: out.modelVersion };
-    ttsCache.set(key, entry);
-    if (ttsCache.size > TTS_CACHE_MAX) ttsCache.delete(ttsCache.keys().next().value);
-    await storeSpeech(key, entry, text);
-    return { ...entry, cached: false };
+    const entry = { audio: out.audio, mimeType: out.mimeType, engine: out.modelVersion, slot: out.slot || null };
+    if (!fresh) {
+      ttsCache.set(key, entry);
+      if (ttsCache.size > TTS_CACHE_MAX) ttsCache.delete(ttsCache.keys().next().value);
+      await storeSpeech(key, entry, text, { pinned });
+    }
+    return { ...entry, cached: false, engineName: out.engine || engineNameOf(out.modelVersion) };
   } catch (err) {
     await logCall({ task: 'TEACH.speak', adapter: r.adapter, model, ms: Date.now() - started, status: 'error', institutionId, error: String(err.message).slice(0, 300) });
     throw err instanceof GatewayError ? err : new GatewayError('upstream', 'Speech synthesis failed', err);
   }
+}
+
+// cloud-tts:te-IN-Chirp3-HD-Kore → cloud-tts; a Gemini model name stays itself.
+const engineNameOf = (modelVersion) => (String(modelVersion || '').startsWith('cloud-tts') ? 'cloud-tts' : modelVersion || null);
+
+/**
+ * Pre-record one fixed line (npm run voice:prerender, /dev → Record lesson
+ * audio): stored for good under the same key a learner's request uses, so the
+ * learner's page plays it without a live call. Already recorded → skipped.
+ * @returns {Promise<{ recorded: boolean, chars: number, bytes: number, mimeType?: string }>}
+ */
+export async function prerecord({ text, language }) {
+  const r = speechRoute();
+  const voice = process.env.GEMINI_TTS_VOICE || TTS_VOICE;
+  const key = `${r.adapter}|${voice}|${language}|${text}`;
+  if (await storedSpeech(key)) return { recorded: false, chars: 0, bytes: 0 };
+  const out = await synthesizeOne({ text, language, pinned: true });
+  return { recorded: true, chars: String(text).length, bytes: out.audio.length, mimeType: out.mimeType };
 }
 
 // ─── Voice speed telemetry ─────────────────────────────────────────────────────

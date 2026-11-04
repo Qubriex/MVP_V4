@@ -16,6 +16,7 @@ import { useAuth } from '../context/AuthContext';
 import { useUiLang, UI_LANGS } from '../context/UiLangContext';
 import { DEV_CARDS, JOURNEY_KEYS, cardFor, journeyFor, isDevLearner, openDevAccount, endDevSession, journeyControl } from '../utils/devAccess';
 import { useBarHeight } from '../utils/barHeight';
+import { isRecording } from '../utils/recording';
 
 // Controls whose effect needs fresh data on the page: reload after them.
 const RELOAD = new Set(['time', 'request', 'bridge', 'ready', 'tutor']);
@@ -76,7 +77,8 @@ export default function DevBar() {
   const [phoneHelp, setPhoneHelp] = useState(false);
   const [controls, setControls] = useState(false);
   const [error, setError] = useState('');
-  const dev = auth?.token ? auth.dev : null;
+  // Recording a walkthrough (?record=1): the developer bar is never filmed.
+  const dev = auth?.token && !isRecording() ? auth.dev : null;
 
   useEffect(() => {
     document.body.classList.toggle('has-devbar', !!dev);

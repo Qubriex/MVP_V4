@@ -5,5 +5,11 @@
   "description": "Vercel project root: the React site (frontend/) and the API function (api/ → backend/).",
   "engines": {
     "node": "22.x"
+  },
+  "scripts": {
+    "walkthrough:script": "node scripts/walkthrough/script.mjs",
+    "walkthrough:record": "node scripts/walkthrough/record.mjs",
+    "walkthrough:edit": "node scripts/walkthrough/edit.mjs",
+    "walkthrough:all": "node scripts/walkthrough/all.mjs"
   }
 }

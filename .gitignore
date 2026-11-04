@@ -19,3 +19,6 @@ backend/data/*
 .vercel
 backend/config/build-info.json
 frontend/public/vendor/
+
+# Walkthrough videos (scripts/walkthrough); never committed
+artifacts/walkthrough/

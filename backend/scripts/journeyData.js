@@ -162,7 +162,7 @@ function build(j, b) {
   if (s === 'S9') {
     pipe('dayone', { share: { asked: ['skills', 'resume', 'contact'], granted: ['skills', 'resume'] }, history: [{ stage: 'requested', at: at(9) }, { stage: 'access_granted', at: at(8) }, { stage: 'dayone', at: at(3) }] });
     b.add('dayone_runs', ['id', 'el_id', 'pipeline_id', 'role_title', 'status', 'checks_json', 'practice_at', 'created_at'],
-      [`${j.learnerId}-dayone`, j.elId, `${j.learnerId}-pipe`, 'Frontend developer (test)', 'practice_done', JSON.stringify({ quiet_room: true, camera: true, minutes: 45 }), at(1), at(3)]);
+      [`${j.learnerId}-dayone`, j.elId, `${j.learnerId}-pipe`, 'Frontend developer', 'practice_done', JSON.stringify({ quiet_room: true, camera: true, minutes: 45 }), at(1), at(3)]);
   }
   if (s === 'S10') {
     pipe('offer', { role: ROLE_FS, source: 'apply', createdDaysAgo: 14, interviewAt: at(4), share: { asked: ['skills', 'resume', 'contact'], granted: ['skills', 'resume', 'contact'] },
@@ -172,7 +172,7 @@ function build(j, b) {
     pipe('hired', { source: 'apply', createdDaysAgo: 120, share: { asked: ['skills', 'resume', 'contact'], granted: ['skills', 'resume', 'contact'] },
       history: [{ stage: 'applied', at: at(120) }, { stage: 'interview', at: at(112) }, { stage: 'offer', at: at(105) }, { stage: 'hired', at: at(100) }] });
     b.add('placements', ['id', 'institution_id', 'engagement_id', 'el_id', 'learner_id', 'employer_name', 'employer_id', 'role_title', 'status', 'salary_lpa', 'offer_date', 'joined_date', 'rating_90d', 'rating_note', 'rated_at', 'source', 'created_at'],
-      [`${j.learnerId}-placement`, INSTITUTION, j.engagementId, j.elId, j.learnerId, '[Company name] verified (test)', EMPLOYER, 'Frontend developer (test)', 'placed', 4.2, at(105).slice(0, 10), at(100).slice(0, 10), 4, 'Reliable, learns fast; React work is strong.', at(8), 'employer', at(100)]);
+      [`${j.learnerId}-placement`, INSTITUTION, j.engagementId, j.elId, j.learnerId, 'Kaveri Software (sample)', EMPLOYER, 'Frontend developer', 'placed', 4.2, at(105).slice(0, 10), at(100).slice(0, 10), 4, 'Reliable, learns fast; React work is strong.', at(8), 'employer', at(100)]);
     NODE_IDS.slice(0, 5).forEach(node => b.demo(node, 'employer', { daysAgo: 8, score: 0.9, level: 'L3', assurance: 'A3' }));
   }
   if (s === 'S12') {
@@ -229,7 +229,7 @@ export async function seedJourney({ only = null } = {}) {
 
   // A second test role with more skills, for "Nearly ready: 2 skills short".
   await dal.run(`INSERT INTO employer_roles (id, employer_id, title, city, jd_text, skills_json, bar, status, published, interview_promise, created_by, created_at)
-    VALUES (?, ?, 'Full-stack developer (test)', 'Hyderabad', 'Test role: HTML, CSS, JavaScript, React, Node.js, SQL, REST, Git.', ?, 80, 'open', 1, 1, 'test-employer-user-0002', ?)
+    VALUES (?, ?, 'Full-stack developer', 'Hyderabad', 'Test role: HTML, CSS, JavaScript, React, Node.js, SQL, REST, Git.', ?, 80, 'open', 1, 1, 'test-employer-user-0002', ?)
     ON CONFLICT (id) DO NOTHING`, ROLE_FS, EMPLOYER,
   JSON.stringify(['html_css', 'javascript', 'react', 'node', 'sql', 'rest', 'git'].map(k => ({ key: k, name: { html_css: 'HTML & CSS', javascript: 'JavaScript', react: 'React', node: 'Node.js', sql: 'SQL', rest: 'REST APIs', git: 'Git' }[k], required: true }))), dal.nowIso());
   await dal.run(`INSERT INTO bridge_programmes (id, institution_id, engagement_id, title, node_ids_json, scope, note, retest_at, status, created_by, created_at)

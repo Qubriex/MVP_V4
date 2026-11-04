@@ -101,7 +101,8 @@ try {
   // All pages: every route listed, ids filled from the seed; one click opens a
   // deep page signed in as the right test account.
   await page.goto(`${BASE}/dev`); await page.waitForSelector('.dx-pages');
-  await page.waitForFunction(() => !document.querySelector('.dx-page-list button code')?.textContent.includes(':'), null, { timeout: 8000 }).catch(() => {});
+  // Ids are filled in once /dev/route-ids answers: wait until no link is disabled.
+  await page.waitForFunction(() => { const bs = [...document.querySelectorAll('.dx-page-list button')]; return bs.length > 0 && bs.every(b => !b.disabled); }, null, { timeout: 15000 }).catch(() => {});
   const listed = await page.$$eval('.dx-page-list button', bs => bs.map(b => ({ text: b.textContent, disabled: b.disabled })));
   check('All pages lists every route with ids filled in', listed.length >= 75 && listed.every(b => !b.disabled && !/:/.test(b.text)), `${listed.length} links, ${listed.filter(b => b.disabled).length} without an id`);
   errors = [];
