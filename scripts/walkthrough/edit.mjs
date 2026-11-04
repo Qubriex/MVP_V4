@@ -95,7 +95,7 @@ try {
   if (want('full')) {
     const full = join([intro, ...chapterClips, closing], 'full');
     full.marks = [{ t: 0, title: 'Introduction' }, ...full.marks];
-    full.thumbTitle = 'See Qubirex in 15 minutes';
+    full.thumbTitle = 'See Qubirex in 12 minutes';
     await deliver('qubirex-walkthrough-full', full, { langs: ['en', 'te', 'hi'], kicker: 'Full walkthrough', thumbAt: intro.dur + 40 });
     // YouTube chapters: the first at 0:00, each at least 10 s long.
     fs.writeFileSync(path.join(OUT, 'chapters.txt'), `${full.marks.map(m => `${fmt(m.t)} ${m.title}`).join('\n')}\n${fmt(full.dur - closing.dur)} Talk to us\n`);
