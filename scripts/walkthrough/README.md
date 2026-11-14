@@ -16,6 +16,7 @@ Behind Vercel Deployment Protection, also set `VERCEL_BYPASS` (Protection Bypass
 - **One chapter:** `npm run walkthrough:record -- --chapter 3`. **Phone / internal:** `-- --cut phone`, `-- --cut internal`.
 - **Edit only some videos:** `npm run walkthrough:edit -- --only chapters,highlights` (`full`, `phone`, `internal`).
 - **Music bed:** `npm run walkthrough:edit -- --music path/to/licensed-bed.mp3` (quiet, under everything).
+- **Elevator pitch (under a minute, voiced, no subtitles):** `npm run walkthrough:pitch` (needs the Gemini keys for the voice-over; lines are cached).
 - **Script:** `npm run walkthrough:script` writes `narration-script.md` from the scene files.
 - Record Chapter 2 before Chapter 4: the employer sees the candidate who approved the request in Chapter 2. `walkthrough:all` resets the test data and records in order.
 
