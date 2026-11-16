@@ -105,11 +105,23 @@ if (!fs.existsSync(checkedFile)) {
 // ─── 2. Where each line starts ───────────────────────────────────────────────
 const startsFile = path.join(DIR, 'starts.json');
 if (!fs.existsSync(startsFile)) {
-  // Precise: phrases between pauses, transcribed, aligned word by word to the script.
-  const r = await alignSequential(story.lines.map(l => l.say), vo, voDur, path.join(DIR, 'tmp'));
-  const miss = r.report.filter(x => !x.matched);
-  if (miss.length) console.warn(`  timing: ${miss.length} line(s) estimated, not heard: ${miss.map(x => x.line).join(', ')}`);
-  fs.writeFileSync(startsFile, JSON.stringify(r.starts));
+  // Offline forced alignment of the script to the voice (pocketsphinx; set
+  // PYTHON to a Python with `pip install pocketsphinx`). Falls back to
+  // transcribing the words after each pause (needs the Gemini text quota).
+  let starts = null;
+  try {
+    const linesFile = path.join(DIR, 'lines.json');
+    fs.writeFileSync(linesFile, JSON.stringify(story.lines.map(l => l.say)));
+    const out = execFileSync(process.env.PYTHON || 'python3', ['-I', path.join(ROOT, 'scripts/walkthrough/lib/forced_align.py'), vo, linesFile]).toString().trim().split('\n').pop();
+    const r = JSON.parse(out);
+    if (r.aligned_words === r.script_words && r.starts.every(x => x != null)) starts = r.starts.map(x => Math.max(0, x - 0.05));
+    else console.warn(`  forced alignment incomplete (${r.aligned_words}/${r.script_words} words)`);
+  } catch (e) { console.warn(`  forced alignment unavailable: ${String(e.message).split('\n')[0]}`); }
+  if (!starts) {
+    const r = await alignSequential(story.lines.map(l => l.say), vo, voDur, path.join(DIR, 'tmp'));
+    starts = r.starts;
+  }
+  fs.writeFileSync(startsFile, JSON.stringify(starts));
 }
 const starts = JSON.parse(fs.readFileSync(startsFile, 'utf8')).map(x => x + LEAD);
 const total = LEAD + voDur + TAIL;
