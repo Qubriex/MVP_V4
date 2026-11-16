@@ -12,6 +12,7 @@
     "walkthrough:edit": "node scripts/walkthrough/edit.mjs",
     "walkthrough:all": "node scripts/walkthrough/all.mjs",
     "walkthrough:pitch": "node scripts/walkthrough/pitch.mjs",
-    "walkthrough:pitch-motion": "node scripts/walkthrough/pitch-motion.mjs"
+    "walkthrough:pitch-motion": "node scripts/walkthrough/pitch-motion.mjs",
+    "walkthrough:story": "node scripts/walkthrough/story.mjs"
   }
 }

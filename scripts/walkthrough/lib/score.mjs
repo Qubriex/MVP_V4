@@ -98,7 +98,7 @@ export function writeScore(file, total, at) {
     }
   };
   sweep(at.product - 2.2, 2.2, 0.9, true);
-  for (const t of [at.solution, at.product, at.whyNow, at.close]) sweep(t - 0.35, 0.9, 0.7, false);
+  for (const t of [at.solution, at.product, at.whyNow, at.close, ...(at.extra || [])]) sweep(t - 0.35, 0.9, 0.7, false);
 
   // Fade in and out, then write 16-bit stereo WAV.
   const fadeIn = SR * 1.5; const fadeOut = SR * 3;
