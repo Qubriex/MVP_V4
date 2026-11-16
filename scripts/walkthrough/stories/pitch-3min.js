@@ -4,6 +4,8 @@
 export default {
   name: 'qubirex-pitch-3min',
   maxSeconds: 180,
+  tempo: 0.94,   // calmer than the generated pace
+  // url: 'qubirex.in',   // shown on the end card; add once the domain is confirmed
   sections: [
     { id: 'problem', n: '01', title: 'Problem', theme: 'dark' },
     { id: 'solution', n: '02', title: 'Solution', theme: 'warm' },
@@ -18,14 +20,14 @@ export default {
     { section: 'problem', say: 'She is not alone. Every year, India produces about 1.1 crore graduates.', beat: { type: 'stat', value: 1.1, decimals: 1, suffix: ' crore', label: 'graduates every year', source: 'AISHE 2023-24' } },
     { section: 'problem', say: 'Only about half of them are judged ready for a job.', beat: { type: 'caps', pct: 56, label: 'judged job-ready', source: 'India Skills Report 2026 (56%)' } },
     { section: 'problem', say: 'And graduates are four times more likely to be jobless: thirteen percent, against three point two percent for all workers.', beat: { type: 'bars', rows: [['Graduates', 13], ['All workers', 3.2]], unit: '%', label: '4× more likely to be jobless', source: 'PLFS 2023-24' } },
-    { section: 'problem', say: 'Only one in ten Indians speaks English. Yet engineering is taught in English.', beat: { type: 'people', label: '1 in 10 Indians speaks English', source: 'Census 2011 (10.6%)' } },
+    { section: 'problem', say: 'Only one Indian in ten speaks English. Yet engineering is taught in English.', beat: { type: 'people', label: '1 in 10 Indians speaks English', source: 'Census 2011 (10.6%)' } },
     { section: 'problem', say: 'Forty-four percent of engineering students told AICTE they want to learn in their mother tongue.', beat: { type: 'donut', pct: 44, label: 'of engineering students want to learn in their mother tongue', source: 'AICTE survey, 2020' } },
     { section: 'solution', say: 'What if Priya could learn in her own language, and prove every skill she learns?', beat: { type: 'solution', lines: ['Learn in your own language.', 'Prove every skill.'] } },
     { section: 'solution', say: 'Not a translated course. A teacher who speaks the way she speaks: Telugu, Hindi, or the everyday Telugu-English mix.', beat: { type: 'mix' } },
     { section: 'product', say: "That's Qubirex.", beat: { type: 'logo' } },
     { section: 'product', say: 'Professor Qubirex explains each idea, walks through the code line by line, and answers her questions.', beat: { type: 'device', shots: [{ key: 'walk', kicker: 'In your language', title: 'Every line, explained' }] } },
     { section: 'product', say: 'She practises real code, with real tests, and a fresh check confirms she can do it herself.', beat: { type: 'device', shots: [{ key: 'practise', kicker: 'Practise', title: 'Real code, real tests' }] } },
-    { section: 'product', say: 'Every skill she proves goes on a signed Capability Passport. Anyone can verify it online.', beat: { type: 'device', shots: [{ key: 'passport', kicker: 'Capability Passport', title: 'Every skill, signed', zoom: true }, { key: 'verify', kicker: 'Verify', title: 'Anyone can check it' }] } },
+    { section: 'product', say: 'Every skill she proves goes on a signed Capability Passport. Anyone can verify it online.', beat: { type: 'device', shots: [{ key: 'passport', kicker: 'Capability Passport', title: 'Every skill, signed' }, { key: 'verify', kicker: 'Verify', title: 'Anyone can verify it online' }] } },
     { section: 'product', say: 'Colleges see who is ready and who needs help. Employers hire on proof.', beat: { type: 'device', shots: [{ key: 'college', kicker: 'Colleges', title: 'See who is ready' }, { key: 'employer', kicker: 'Employers', title: 'Hire on proof' }] } },
     { section: 'product', say: 'Learn, practise, prove, and get seen by employers. A to Z, in one place.', beat: { type: 'journey', steps: ['Learn', 'Practise', 'Prove', 'Get hired'] } },
     { section: 'whynow', say: 'Why now? Because IT fresher hiring has fallen eighty percent in three years, from six lakh to one point two lakh.', beat: { type: 'falling', from: 6, to: 1.2, unit: 'lakh', label: 'IT fresher hiring', fromLabel: 'FY22', toLabel: 'FY25', source: 'Xpheno, FY22–FY25' } },

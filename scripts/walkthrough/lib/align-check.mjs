@@ -6,6 +6,9 @@ import path from 'path';
 import { execFileSync } from 'child_process';
 import { pauses } from './align.mjs';
 
+// Text models to try in order (each has its own daily quota).
+export const TEXT_MODELS = ['gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-3.5-flash', 'gemini-flash-latest', 'gemini-3.1-flash-lite'];
+
 const norm = (s) => s.toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
 
 export async function alignByPhrases(lines, file, total, tmpDir) {
@@ -56,4 +59,111 @@ export async function alignByPhrases(lines, file, total, tmpDir) {
   });
   for (let i = 1; i < starts.length; i += 1) if (starts[i] <= starts[i - 1]) starts[i] = starts[i - 1] + 0.5;
   return { starts, segs, heard };
+}
+
+// Most reliable: estimate each boundary from line lengths, take every pause
+// within ±3 s as a candidate, transcribe the 3 s after each candidate, and
+// keep the candidate where the line's first words are actually heard.
+export async function alignBySnippets(lines, file, total, tmpDir) {
+  const ps = pauses(file).filter(p => p.len >= 0.12);
+  const speechStart = ps.length && ps[0].start < 0.05 ? ps[0].end : 0;
+  const end = ps.length && ps[ps.length - 1].end > total - 0.05 ? ps[ps.length - 1].start : total;
+  const w = lines.map(l => l.length + 10); const sum = w.reduce((a, b) => a + b, 0);
+  const est = []; let acc = 0;
+  for (let i = 0; i < lines.length; i += 1) { est.push(speechStart + ((end - speechStart) * acc) / sum); acc += w[i]; }
+  const cands = []; // { line, t }
+  for (let i = 1; i < lines.length; i += 1) for (const p of ps) if (Math.abs(p.end - est[i]) < 3.2) cands.push({ line: i, t: p.end });
+  fs.mkdirSync(tmpDir, { recursive: true });
+  const heard = new Array(cands.length).fill('');
+  for (let i = 0; i < cands.length; i += 18) {
+    const parts = [];
+    cands.slice(i, i + 18).forEach((c, k) => {
+      const f = path.join(tmpDir, `cand-${i + k}.mp3`);
+      execFileSync('ffmpeg', ['-v', 'error', '-y', '-ss', String(c.t - 0.03), '-t', '3', '-i', file, '-ac', '1', '-ar', '16000', f]);
+      parts.push({ text: `Clip ${k}:` }, { inline_data: { mime_type: 'audio/mp3', data: fs.readFileSync(f).toString('base64') } });
+      fs.rmSync(f);
+    });
+    parts.push({ text: `Each clip is 3 seconds of an English voice-over. For each clip write only the first five words spoken (or "" if silent). Return only JSON: an array of ${parts.length / 2} strings.` });
+    let got = null;
+    const keys = [process.env.GEMINI_API_KEY_2, process.env.GEMINI_API_KEY_3, process.env.GEMINI_API_KEY].filter(Boolean);
+    for (const key of [...keys, ...keys]) {
+      const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent', { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify({ contents: [{ parts }], generationConfig: { responseMimeType: 'application/json' } }) });
+      if (r.ok) { got = JSON.parse((await r.json()).candidates[0].content.parts[0].text); break; }
+      await new Promise(res => setTimeout(res, 8000));
+    }
+    if (!got) throw new Error('snippet transcription failed (text quota?)');
+    got.forEach((g, k) => { heard[i + k] = g; });
+  }
+  const canon = (t) => norm(t).split(' ').filter(Boolean).map(x => (/^(q|c|k)\w*(rex|rx|ex|ix)$/.test(x) ? 'qubirex' : ({ one: '1', ten: '10', three: '3', four: '4', six: '6' }[x] || x)));
+  const starts = [Math.max(0, speechStart - 0.05)];
+  const report = [];
+  for (let i = 1; i < lines.length; i += 1) {
+    const want = canon(lines[i]).slice(0, 3);
+    let best = null;
+    cands.forEach((c, k) => {
+      if (c.line !== i || c.t <= starts[i - 1] + 0.4) return;
+      const h = canon(heard[k]).slice(0, 3);
+      const score = want.filter((x, j) => h[j] === x).length * 10 - Math.abs(c.t - est[i]);
+      if (!best || score > best.score) best = { t: c.t, score, heard: heard[k] };
+    });
+    const ok = best && best.score > 15;
+    starts.push(ok ? Math.max(0, best.t - 0.05) : Math.max(est[i], starts[i - 1] + 0.6));
+    report.push({ line: i, t: starts[i], heard: best?.heard || '', matched: !!ok });
+  }
+  return { starts, report };
+}
+
+// Sequential and drift-proof: transcribe the 3 s after every pause once
+// (cached), then walk the script — each line takes the first pause after the
+// previous line where its own first words are heard.
+export async function alignSequential(lines, file, total, tmpDir) {
+  const ps = pauses(file).filter(p => p.len >= 0.12 && p.end < total - 0.3);
+  const speechStart = ps.length && ps[0].start < 0.05 ? ps[0].end : 0;
+  fs.mkdirSync(tmpDir, { recursive: true });
+  const cacheFile = path.join(tmpDir, 'after-pauses.json');
+  const sig = `${fs.statSync(file).size}:${ps.length}`;
+  let cache = fs.existsSync(cacheFile) ? JSON.parse(fs.readFileSync(cacheFile, 'utf8')) : null;
+  if (!cache || cache.sig !== sig) {
+    const heard = [];
+    for (let i = 0; i < ps.length; i += 18) {
+      const parts = [];
+      ps.slice(i, i + 18).forEach((p, k) => {
+        const f = path.join(tmpDir, `p-${i + k}.mp3`);
+        execFileSync('ffmpeg', ['-v', 'error', '-y', '-ss', String(p.end - 0.03), '-t', '3', '-i', file, '-ac', '1', '-ar', '16000', f]);
+        parts.push({ text: `Clip ${k}:` }, { inline_data: { mime_type: 'audio/mp3', data: fs.readFileSync(f).toString('base64') } });
+        fs.rmSync(f);
+      });
+      parts.push({ text: `Each clip is 3 seconds of an English voice-over. For each clip write only the first five words spoken (or "" if silent). Return only JSON: an array of ${parts.length / 2} strings.` });
+      let got = null;
+      const keys = [process.env.GEMINI_API_KEY_2, process.env.GEMINI_API_KEY_3, process.env.GEMINI_API_KEY].filter(Boolean);
+      // Quotas are per model: fall back to another text model.
+      const tries = TEXT_MODELS.flatMap(m => keys.map(k => [m, k]));
+      for (const [model, key] of tries) {
+        if (got) break;
+        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify({ contents: [{ parts }], generationConfig: { responseMimeType: 'application/json' } }), signal: AbortSignal.timeout(60000) }).catch(() => ({ ok: false }));
+        if (r.ok) { try { got = JSON.parse((await r.json()).candidates[0].content.parts[0].text); } catch { got = null; } }
+      }
+      if (!got) throw new Error('pause transcription failed (text quota?)');
+      heard.push(...got.slice(0, parts.length / 2));
+    }
+    cache = { sig, pauses: ps.map(p => p.end), heard };
+    fs.writeFileSync(cacheFile, JSON.stringify(cache));
+  }
+  const canon = (t) => norm(t).split(' ').filter(Boolean).map(x => (/^(q|c|k)\w*(rex|rx|ex|ix|rec|ec)$/.test(x) ? 'qubirex' : ({ one: '1', ten: '10', three: '3', four: '4', six: '6', nine: '9', eight: '8' }[x] || x)));
+  const starts = [Math.max(0, speechStart - 0.05)]; const report = [];
+  for (let i = 1; i < lines.length; i += 1) {
+    const want = canon(lines[i]).slice(0, 3);
+    let pick = null;
+    for (let k = 0; k < cache.pauses.length; k += 1) {
+      const t = cache.pauses[k];
+      if (t <= starts[i - 1] + 0.6) continue;
+      const h = canon(cache.heard[k] || '');
+      // The line's first words, at the start of the clip (or one or two words in).
+      const hit = [0, 1, 2].some(off => want.filter((x, j) => h[j + off] === x).length >= Math.min(2, want.length));
+      if (hit) { pick = { t, heard: cache.heard[k] }; break; }
+    }
+    starts.push(pick ? Math.max(0, pick.t - 0.05) : starts[i - 1] + 3);
+    report.push({ line: i, t: starts[i], heard: pick?.heard || '', matched: !!pick });
+  }
+  return { starts, report };
 }

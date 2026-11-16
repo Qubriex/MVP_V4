@@ -14,7 +14,7 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { width: 1920px; height: 1080px; overflow: hidden; background: #0b0c16; }
   body { font-family: Anek, 'Anek Telugu', 'Anek Devanagari', sans-serif; color: #fff; -webkit-font-smoothing: antialiased; }
-  .d { font-family: Outfit, 'Anek Telugu', 'Anek Devanagari', sans-serif; letter-spacing: -0.02em; }
+  .d { text-wrap: balance; font-family: Outfit, 'Anek Telugu', 'Anek Devanagari', sans-serif; letter-spacing: -0.02em; }
   .abs { position: absolute; }
   #stage { position: absolute; inset: 0; overflow: hidden; }
   #bg, #bubbles { position: absolute; inset: 0; }
@@ -28,12 +28,13 @@
   #sec .n { font-family: Outfit, sans-serif; font-weight: 700; color: #F89833; }
   #sec .t { font-family: Outfit, sans-serif; font-weight: 700; }
   #secLine { position: absolute; height: 8px; border-radius: 4px; background: linear-gradient(90deg, #BC1F3D, #E73B2B, #F89833); }
-  .device { position: absolute; left: 50%; top: 50%; width: 1240px; height: 738px; margin: -369px 0 0 -620px; border-radius: 22px; background: #15151a; box-shadow: 0 60px 120px rgba(60,20,10,.32); overflow: hidden; }
+  .device { position: absolute; left: 470px; top: 170px; width: 1340px; height: 794px; border-radius: 22px; background: #15151a; box-shadow: 0 60px 120px rgba(60,20,10,.32); overflow: hidden; }
   .device .bar { height: 40px; background: #1d1d22; display: flex; gap: 10px; align-items: center; padding-left: 18px; }
   .device .bar i { width: 13px; height: 13px; border-radius: 50%; background: #444; display: block; }
-  .device .screen { position: relative; width: 1240px; height: 698px; overflow: hidden; background: #fff; }
-  .device img { position: absolute; left: 0; top: 0; width: 1240px; height: 698px; transform-origin: 30% 30%; }
-  .kicker { position: absolute; width: 520px; font-family: Outfit, sans-serif; font-weight: 700; color: #1b1b1f; font-size: 60px; line-height: 1.04; }
+  .device .screen { position: relative; width: 1340px; height: 754px; overflow: hidden; background: #fff; }
+  .device img { position: absolute; left: 0; top: 0; width: 1340px; height: 754px; }
+  .device .tag { margin-left: auto; margin-right: 16px; font-size: 20px; font-weight: 600; letter-spacing: .08em; color: #FFD9B0; background: rgba(248,152,51,.18); border: 1px solid rgba(248,152,51,.45); padding: 3px 12px; border-radius: 999px; }
+  .kicker { position: absolute; width: 360px; text-wrap: balance; font-family: Outfit, sans-serif; font-weight: 700; color: #1b1b1f; font-size: 50px; line-height: 1.06; }
   .kicker small { display: block; font-size: 26px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: #E73B2B; margin-bottom: 14px; }
   .card { position: absolute; border-radius: 28px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16); backdrop-filter: blur(6px); }
   .chip { position: absolute; padding: 18px 42px; border-radius: 999px; font-size: 52px; font-weight: 600; background: #fff; color: #C4302A; box-shadow: 0 20px 50px rgba(0,0,0,.25); white-space: nowrap; }
@@ -77,27 +78,27 @@ const B = {};
 
 B.stat = (el, b) => {
   el.innerHTML = `<div class="abs big" style="left:0;right:0;top:330px;text-align:center;font-size:250px" data-n></div>
-    <div class="abs label" style="left:0;right:0;top:640px;text-align:center" data-l>${b.label}</div>
-    <svg class="abs" style="left:560px;top:290px" width="800" height="420"><ellipse cx="400" cy="210" rx="380" ry="190" fill="none" stroke="#F89833" stroke-width="6" stroke-dasharray="2400" data-ring/></svg>${SRC(b)}`;
+    <div class="abs label" style="left:0;right:0;top:660px;text-align:center" data-l>${b.label}</div>
+    <div class="abs" style="left:660px;top:610px;height:10px;border-radius:5px;background:linear-gradient(90deg,#BC1F3D,#E73B2B,#F89833)" data-ring></div>${SRC(b)}`;
   const n = el.querySelector('[data-n]'); const ring = el.querySelector('[data-ring]'); const l = el.querySelector('[data-l]');
-  return (t) => { const a = ENTER(b); const k = eo(p(t, a, a + 1.3)); n.textContent = fmt(b.value * k, b.decimals) + (b.suffix || ''); ring.style.strokeDashoffset = 2400 * (1 - eo(p(t, a + .2, a + 1.6))); vis(l, eo(p(t, a + .6, a + 1.1))); l.style.transform = `translateY(${(1 - eo(p(t, a + .6, a + 1.1))) * 30}px)`; };
+  return (t) => { const a = ENTER(b); const k = eo(p(t, a, a + 1.3)); n.textContent = fmt(b.value * k, b.decimals) + (b.suffix || ''); ring.style.width = `${600 * eo(p(t, a + .2, a + 1.2))}px`; vis(l, eo(p(t, a + .6, a + 1.1))); l.style.transform = `translateY(${(1 - eo(p(t, a + .6, a + 1.1))) * 30}px)`; };
 };
 const CAP = '<svg viewBox="0 0 100 100" width="130" height="130"><path d="M50 18 L96 38 L50 58 L4 38Z" fill="currentColor"/><path d="M24 48 V68 C24 80 76 80 76 68 V48 L50 60Z" fill="currentColor" opacity=".85"/><rect x="88" y="38" width="5" height="32" fill="currentColor"/></svg>';
 B.caps = (el, b) => {
-  el.innerHTML = `<div class="abs" style="left:310px;top:330px;width:1300px;display:flex;justify-content:space-between" data-row>${Array.from({ length: 10 }, () => `<span style="color:#3a3d66">${CAP}</span>`).join('')}</div>
+  el.innerHTML = `<div class="abs" style="left:310px;top:330px;width:1300px;display:flex;justify-content:space-between" data-row>${Array.from({ length: 10 }, () => `<span style="position:relative;display:block;width:130px;height:130px"><span style="position:absolute;inset:0;color:#3a3d66">${CAP}</span><span data-fill style="position:absolute;inset:0;color:#F89833;clip-path:inset(0 100% 0 0)">${CAP}</span></span>`).join('')}</div>
     <div class="abs big" style="left:0;right:0;top:520px;text-align:center;font-size:150px" data-n></div>
     <div class="abs label" style="left:0;right:0;top:700px;text-align:center">${b.label}</div>${SRC(b)}`;
-  const icons = [...el.querySelectorAll('[data-row] span')]; const n = el.querySelector('[data-n]');
-  return (t) => { const a = ENTER(b); const k = eo(p(t, a, a + 1.6)); const lit = (b.pct / 10) * k; icons.forEach((s, i) => { const f = clamp(lit - i); s.style.color = f > 0.5 ? '#F89833' : '#3a3d66'; s.style.transform = `translateY(${-back(p(t, a + i * .08, a + i * .08 + .5)) * 14 + 14}px) scale(${.9 + .1 * f})`; }); n.textContent = `${Math.round(b.pct * k)}%`; };
+  const icons = [...el.querySelectorAll('[data-row] > span')]; const n = el.querySelector('[data-n]');
+  return (t) => { const a = ENTER(b); const k = eo(p(t, a, a + 1.6)); const lit = (b.pct / 10) * k; icons.forEach((s, i) => { const f = clamp(lit - i); s.querySelector('[data-fill]').style.clipPath = `inset(0 ${100 - 100 * f}% 0 0)`; s.style.transform = `translateY(${-back(p(t, a + i * .08, a + i * .08 + .5)) * 14 + 14}px)`; }); n.textContent = `${Math.round(b.pct * k)}%`; };
 };
 const PERSON = '<svg viewBox="0 0 60 120" width="96" height="190"><circle cx="30" cy="22" r="18" fill="currentColor"/><path d="M6 120 V62 C6 46 54 46 54 62 V120Z" fill="currentColor"/></svg>';
 B.people = (el, b) => {
   el.innerHTML = `<div class="abs" style="left:300px;top:300px;width:1320px;display:flex;justify-content:space-between" data-row>${Array.from({ length: 10 }, () => `<span style="color:#3a3d66">${PERSON}</span>`).join('')}</div>
     <div class="abs big" style="left:0;right:0;top:560px;text-align:center;font-size:120px" data-n>1 in 10</div>
     <div class="abs label" style="left:0;right:0;top:710px;text-align:center">${b.label}</div>
-    <div class="abs" style="left:0;right:0;top:790px;text-align:center;font-size:38px;color:#F89833" data-y>…yet engineering is taught in English.</div>${SRC(b)}`;
+    <div class="abs d" style="left:0;right:0;top:800px;text-align:center;font-size:58px;font-weight:700;color:#FFD27A" data-y>Yet engineering is taught in English.</div>${SRC(b)}`;
   const icons = [...el.querySelectorAll('[data-row] span')]; const n = el.querySelector('[data-n]'); const y = el.querySelector('[data-y]');
-  return (t) => { const a = ENTER(b); icons.forEach((s, i) => { s.style.transform = `translateY(${(1 - back(p(t, a + i * .05, a + i * .05 + .5))) * 60}px)`; s.style.color = i === 0 && t > a + .9 ? '#F89833' : '#3a3d66'; vis(s, eo(p(t, a + i * .05, a + i * .05 + .3))); }); vis(n, eo(p(t, a + .9, a + 1.3))); n.style.transform = `scale(${.8 + .2 * back(p(t, a + .9, a + 1.4))})`; vis(y, eo(p(t, (b.start + b.end) / 2, (b.start + b.end) / 2 + .5))); };
+  return (t) => { const a = ENTER(b); icons.forEach((s, i) => { s.style.transform = `translateY(${(1 - back(p(t, a + i * .05, a + i * .05 + .5))) * 60}px)`; s.style.color = i === 0 && t > a + .9 ? '#F89833' : '#3a3d66'; vis(s, eo(p(t, a + i * .05, a + i * .05 + .3))); }); vis(n, eo(p(t, a + .9, a + 1.3))); n.style.transform = `scale(${.8 + .2 * back(p(t, a + .9, a + 1.4))})`; vis(y, eo(p(t, b.start + (b.end - b.start) * .42, b.start + (b.end - b.start) * .42 + .4))); y.style.transform = `translateY(${(1 - eo(p(t, b.start + (b.end - b.start) * .42, b.start + (b.end - b.start) * .42 + .5))) * 30}px)`; };
 };
 B.bars = (el, b) => {
   const max = Math.max(...b.rows.map(r => r[1]));
@@ -150,17 +151,21 @@ B.recipe = (el, b) => {
       <div style="font-size:30px;letter-spacing:.14em;color:#F89833;font-weight:600">YOU</div><div class="d" style="font-size:60px;font-weight:700">Still cook</div>
       <svg viewBox="0 0 200 160" width="300" height="240" style="margin:40px 0 0 60px"><path d="M30 70 H170 V120 C170 140 150 150 130 150 H70 C50 150 30 140 30 120Z" fill="#E73B2B"/><rect x="18" y="62" width="164" height="14" rx="7" fill="#C4302A"/><path data-steam d="M80 50 C70 35 90 25 80 8 M110 50 C100 35 120 25 110 8" stroke="#FFD9B0" stroke-width="6" fill="none" stroke-linecap="round"/></svg>
     </div>
-    <div class="card abs" style="left:1250px;top:250px;width:500px;height:520px;padding:40px" data-c3>
+    <div class="card abs" style="left:1250px;top:250px;width:500px;height:520px;padding:40px;overflow:hidden" data-c3>
       <div style="font-size:30px;letter-spacing:.14em;color:#F89833;font-weight:600">AI WRITES CODE</div><div class="d" style="font-size:60px;font-weight:700">You check it</div>
-      <div style="margin-top:34px;background:#0d0e18;border-radius:14px;padding:22px;font-family:monospace;font-size:28px;line-height:1.6;color:#cfd2ff">def total(p, q):<br>&nbsp;&nbsp;&nbsp;&nbsp;return p * q</div>
-      <svg viewBox="0 0 100 100" width="120" height="120" style="margin:26px 0 0 150px" data-tick><circle cx="50" cy="50" r="46" fill="#2e9e6b"/><path d="M28 52 L44 68 L74 36" stroke="#fff" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div style="margin-top:34px;background:#0d0e18;border-radius:14px;padding:22px;font-family:monospace;font-size:30px;line-height:1.6;color:#cfd2ff"># add two numbers<br>def add(a, b):<br>&nbsp;&nbsp;&nbsp;&nbsp;return a <span data-op style="padding:0 6px;border-radius:6px">*</span> b</div>
+      <div data-bug style="margin-top:14px;font-size:30px;font-weight:600;color:#ff8a7a">Bug: should be +</div>
+      <svg viewBox="0 0 100 100" width="96" height="96" style="position:absolute;right:34px;bottom:30px" data-tick><circle cx="50" cy="50" r="46" fill="#2e9e6b"/><path d="M28 52 L44 68 L74 36" stroke="#fff" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
     <div class="abs d" style="left:0;right:0;top:830px;text-align:center;font-size:74px;font-weight:700;color:#F89833" data-why>Why not you?</div>`;
-  const c = [1, 2, 3].map(i => el.querySelector(`[data-c${i}]`)); const why = el.querySelector('[data-why]'); const steam = el.querySelector('[data-steam]'); const tick = el.querySelector('[data-tick]');
+  const c = [1, 2, 3].map(i => el.querySelector(`[data-c${i}]`)); const why = el.querySelector('[data-why]'); const steam = el.querySelector('[data-steam]'); const tick = el.querySelector('[data-tick]'); const op = el.querySelector('[data-op]'); const bug = el.querySelector('[data-bug]');
   return (t) => { const a = ENTER(b); const span = b.end - b.start; const at = [a, a + span * .2, a + span * .42];
     c.forEach((x, i) => { vis(x, eo(p(t, at[i], at[i] + .5))); x.style.transform = `translateY(${(1 - back(p(t, at[i], at[i] + .6))) * 90}px)`; });
     steam.style.transform = `translateY(${-6 * Math.sin(t * 3)}px)`; steam.style.opacity = .6 + .4 * Math.sin(t * 2);
-    tick.style.transform = `scale(${back(p(t, at[2] + 1.0, at[2] + 1.5))})`;
+    // The bug is spotted (red), then fixed to + (green) and ticked.
+    const spot = t > at[2] + .8; const fixed = t > at[2] + 1.9;
+    op.textContent = fixed ? '+' : '*'; op.style.background = fixed ? 'rgba(46,158,107,.35)' : spot ? 'rgba(231,59,43,.55)' : 'transparent';
+    vis(bug, spot && !fixed ? 1 : 0); tick.style.transform = `scale(${back(p(t, at[2] + 1.9, at[2] + 2.4))})`;
     const w = b.start + span * .78; vis(why, eo(p(t, w, w + .4))); why.style.transform = `scale(${.85 + .15 * back(p(t, w, w + .6))})`; };
 };
 // Priya (original illustration) with English jargon closing in.
@@ -215,22 +220,27 @@ B.logo = (el, b) => {
   return (t) => { const a = b.start + (b.first ? 1.0 : 0); l.style.transform = `scale(${.55 + .45 * back(p(t, a, a + .6))})`; vis(l, eo(p(t, a, a + .25))); };
 };
 B.device = (el, b) => {
-  el.innerHTML = `<div class="device"><div class="bar"><i></i><i></i><i></i></div><div class="screen"><img></div></div><div class="kicker"></div>`;
+  el.innerHTML = `<div class="device"><div class="bar"><i></i><i></i><i></i><span class="tag">SAMPLE DATA</span></div><div class="screen"><img></div></div><div class="kicker"></div>`;
   const dev = el.querySelector('.device'); const img = el.querySelector('img'); const kick = el.querySelector('.kicker');
   return async (t) => {
     const s = b.shots.find(x => t >= x.start && t < x.end) || b.shots[b.shots.length - 1];
     const local = t - s.start; const idx = Math.min(s.frames, Math.max(1, Math.floor(local * 30) + 1));
     const src = `${FOOTAGE}/${s.key}/${String(idx).padStart(4, '0')}.jpg`;
     if (img.getAttribute('src') !== src) { img.src = src; await img.decode().catch(() => {}); }
-    const side = b.shots.indexOf(s) % 2 === 0 ? 1 : -1;
-    const k = eo(p(local, 0, .7)); const a = ENTER(b);
-    const enter = eo(p(t, a, a + .6));
-    // The whole screen stays in the frame: a gentle tilt, never a crop.
-    dev.style.transform = `perspective(2400px) translateX(${side * 250 + side * (1 - k) * 160}px) translateY(${(1 - enter) * 120}px) rotateY(${-side * (10 - 4 * k)}deg) rotateX(3deg) scale(${.8 + .02 * clamp(local / (s.end - s.start))})`;
+    const a = ENTER(b); const enter = eo(p(t, a, a + .6));
+    // Nearly flat, so text is readable; then a slow zoom into one area of the screen.
+    dev.style.transform = `perspective(2600px) translateY(${(1 - enter) * 100}px) rotateY(${-3 + 2 * eo(p(local, 0, 1.2))}deg) scale(${.97 + .03 * enter})`;
     vis(dev, enter);
-    img.style.transform = s.zoom ? `scale(${1 + .5 * eio(p(local, .8, 2.2))}) translate(${-4 * eio(p(local, .8, 2.2))}%, ${-1 * eio(p(local, .8, 2.2))}%)` : 'none';
+    // focus: a box [x0, y0, x1, y1] (fractions of the screen) that must stay fully in view.
+    const F = s.focus && s.focus.length === 4 ? s.focus : null;
+    const zMax = F ? Math.min(1 / (F[2] - F[0]), 1 / (F[3] - F[1])) * 0.97 : 1;
+    const z = 1 + (zMax - 1) * eio(p(local, .5, 1.7));
+    const fx = F ? (F[0] + F[2]) / 2 : .5; const fy = F ? (F[1] + F[3]) / 2 : .5;
+    // Keep the zoomed view inside the screen.
+    const tx = clamp(.5 - fx * z, 1 - z, 0) * 1340 + 0; const ty = clamp(.5 - fy * z, 1 - z, 0) * 754;
+    img.style.transformOrigin = '0 0'; img.style.transform = `translate(${F ? tx : 0}px, ${F ? ty : 0}px) scale(${z})`;
     kick.innerHTML = `<small>${s.kicker}</small>${s.title}`;
-    kick.style.left = side > 0 ? '110px' : '1310px'; kick.style.top = '440px';
+    kick.style.left = '80px'; kick.style.top = '430px';
     vis(kick, eo(p(local, .15, .6)) * enter); kick.style.transform = `translateY(${(1 - eo(p(local, .15, .7))) * 40}px)`;
   };
 };
@@ -245,7 +255,7 @@ B.journey = (el, b) => {
     vis(h, eo(p(t, a + span, a + span + .5))); };
 };
 B.compare = (el, b) => {
-  const rows = [['Language', 'Course translated', 'Taught in the mix students speak'], ['Proof', 'Completion certificate', 'Signed Capability Passport'], ['Colleges', 'Seat licences', 'Readiness by cohort'], ['Jobs', 'Somewhere else', 'Seen by employers, here']];
+  const rows = [['Language', 'Translated or dubbed', 'Taught in Telugu, Hindi or the Telugu-English mix'], ['Proof', 'Completion certificate', 'Signed Capability Passport'], ['Colleges', 'Seat licences', 'Readiness for every cohort'], ['Jobs', 'On another website', 'Employers see the proof directly']];
   el.innerHTML = `<div class="abs" style="left:230px;top:230px;width:1460px;display:grid;grid-template-columns:260px 1fr 1fr;gap:22px 30px;align-items:center;font-size:40px">
     <div></div><div class="d" style="font-size:44px;font-weight:700;color:#b9bce6">Translated courses</div><div class="d" style="font-size:44px;font-weight:700;color:#F89833">Qubirex</div>
     ${rows.map(r => `<div data-r style="color:#b9bce6;font-weight:600">${r[0]}</div><div data-r style="opacity:.75">${r[1]}</div><div data-r style="font-weight:600;background:rgba(248,152,51,.14);border:1px solid rgba(248,152,51,.4);border-radius:16px;padding:16px 22px">${r[2]}</div>`).join('')}</div>`;
@@ -258,7 +268,7 @@ const PILLAR_ICONS = [
   '<svg viewBox="0 0 100 100" width="120" height="120"><path d="M50 12 L94 32 L50 52 L6 32Z" fill="#E73B2B"/><path d="M22 42 V64 C22 78 78 78 78 64 V42 L50 54Z" fill="#E73B2B" opacity=".85"/></svg>'
 ];
 B.pillars = (el, b) => {
-  el.innerHTML = b.items.map((it, i) => `<div class="card abs" style="left:${170 + i * 540}px;top:330px;width:500px;height:440px;padding:50px 44px" data-c>${PILLAR_ICONS[i]}<div class="d" style="font-size:56px;font-weight:700;margin-top:34px;line-height:1.08">${it}</div></div>`).join('');
+  el.innerHTML = b.items.map(x => x.replace(/A to Z/g, 'A&nbsp;to&nbsp;Z')).map((it, i) => `<div class="card abs" style="left:${170 + i * 540}px;top:330px;width:500px;height:440px;padding:50px 44px" data-c>${PILLAR_ICONS[i]}<div class="d" style="font-size:56px;font-weight:700;margin-top:34px;line-height:1.08">${it}</div></div>`).join('');
   const cs = [...el.querySelectorAll('[data-c]')];
   return (t) => { const a = ENTER(b); const span = b.end - a; cs.forEach((c, i) => { const s = a + i * span * .22; vis(c, eo(p(t, s, s + .4))); c.style.transform = `translateY(${(1 - back(p(t, s, s + .6))) * 120}px)`; c.style.borderColor = t > s + .4 ? 'rgba(248,152,51,.55)' : 'rgba(255,255,255,.16)'; }); };
 };
@@ -268,12 +278,12 @@ B.pilot = (el, b) => {
       <div style="width:110px;height:110px;border-radius:50%;background:linear-gradient(135deg,#E73B2B,#F89833);color:#fff;display:grid;place-items:center;font-family:Outfit;font-size:56px;font-weight:700">${i + 1}</div>
       <div class="d" style="font-size:44px;font-weight:700;color:#1b1b1f;margin-top:28px;line-height:1.12">${s}</div></div>`).join('')}`;
   const ss = [...el.querySelectorAll('[data-s]')];
-  return (t) => { const a = ENTER(b); const span = b.end - a; ss.forEach((s, i) => { const st = a + i * span * .18; vis(s, eo(p(t, st, st + .4))); s.style.transform = `translateY(${(1 - back(p(t, st, st + .6))) * 70}px)`; }); };
+  return (t) => { const a = ENTER(b); const span = b.end - a; ss.forEach((s, i) => { const st = a + i * Math.min(1.2, span * .12); vis(s, eo(p(t, st, st + .4))); s.style.transform = `translateY(${(1 - back(p(t, st, st + .6))) * 70}px)`; }); };
 };
 B.close = (el, b) => {
   el.innerHTML = `<img class="abs" src="../../../frontend/public/brand/qubirex-logo-notag-on-dark-1280.png" style="left:50%;top:300px;width:820px;margin-left:-410px" data-l>
     <div class="abs d" style="left:0;right:0;text-align:center;top:580px;font-size:78px;font-weight:600" data-t>${['Your language.', 'Your skills.', 'Your future.'].map(w => `<span style="display:inline-block;margin:0 14px">${w}</span>`).join('')}</div>
-    <div class="abs" style="left:0;right:0;text-align:center;top:730px;font-size:46px;color:#FFD9B0;font-weight:600" data-u>qubirex.in</div>`;
+    <div class="abs" style="left:0;right:0;text-align:center;top:730px;font-size:46px;color:#FFD9B0;font-weight:600" data-u>${window.STORY.url || ''}</div>`;
   const l = el.querySelector('[data-l]'); const ws = [...el.querySelectorAll('[data-t] span')]; const u = el.querySelector('[data-u]');
   return (t) => { const a = b.start; const span = (TOTAL - a);
     vis(l, eo(p(t, a, a + .6))); l.style.transform = `scale(${.9 + .1 * eo(p(t, a, a + 1.2))})`; l.style.filter = `drop-shadow(0 0 ${30 * (1 - p(t, a + .5, a + 2))}px rgba(248,152,51,.8))`;

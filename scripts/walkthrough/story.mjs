@@ -20,7 +20,7 @@ import { launch } from './lib/runner.mjs';
 import { writeScore } from './lib/score.mjs';
 import { thumbnail, closeCards } from './lib/cards.mjs';
 import { duration } from './lib/narration.mjs';
-import { alignByPhrases } from './lib/align-check.mjs';
+import { alignSequential, TEXT_MODELS } from './lib/align-check.mjs';
 
 const FPS = 30;
 const storyFile = path.resolve(path.dirname(new URL(import.meta.url).pathname), process.argv[2] || 'stories/pitch-60s.js');
@@ -35,24 +35,80 @@ const dotenv = await import(path.join(ROOT, 'backend/node_modules/dotenv/lib/mai
 (dotenv.default || dotenv).config({ path: path.join(ROOT, 'backend/.env') });
 
 // ─── 1. Voice-over ───────────────────────────────────────────────────────────
-const STYLE = 'Read the following like a young Indian founder telling a true story to investors: warm, sincere, confident and hopeful, in a natural Indian English accent, at a lively but clear pace. Say numbers naturally. Pause briefly between paragraphs. Read only the paragraphs below.';
+// Only the script is sent: no instruction text (a speech model can read
+// instructions aloud). The accent comes from the voice settings (en-IN).
+// Names are spelled the way they should sound, so they are said the same
+// way every time (story.say, e.g. { Qubirex: 'Kyoobirex' }).
+const SAY = { Qubirex: 'Kyoobirex', 'Jensen Huang': 'Jensen Hwang', ...(story.say || {}) };
+const spoken = (t) => Object.entries(SAY).reduce((x, [w, v]) => x.split(w).join(v), t);
 const vo = path.join(DIR, 'voice.wav');
 if (!fs.existsSync(vo)) {
-  const { speak } = await import(path.join(ROOT, 'backend/core/ai/adapters/gemini.js'));
-  const out = await speak({ text: story.lines.map(l => l.say).join('\n\n'), voice: 'Kore', language: 'english', style: STYLE });
-  fs.writeFileSync(`${vo}.raw`, out.audio);
-  // story.tempo: a little quicker without changing the pitch.
-  execFileSync('ffmpeg', ['-v', 'error', '-y', '-i', `${vo}.raw`, ...(story.tempo ? ['-af', `atempo=${story.tempo}`] : []), '-ar', '48000', '-ac', '2', vo]);
-  fs.rmSync(`${vo}.raw`);
-  console.log(`voice: ${out.engine}, ${duration(vo).toFixed(1)} s`);
+  const keys = [process.env.GEMINI_API_KEY_2, process.env.GEMINI_API_KEY_3, process.env.GEMINI_API_KEY].filter(Boolean);
+  const text = story.lines.map(l => spoken(l.say)).join('\n\n');
+  let audio = null; let used = null;
+  for (const model of ['gemini-3.8-flash-tts', 'gemini-3.1-flash-tts-preview']) {
+    for (const key of keys) {
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+        method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
+        body: JSON.stringify({ contents: [{ parts: [{ text }] }], generationConfig: { responseModalities: ['AUDIO'], speechConfig: { languageCode: 'en-IN', voiceConfig: { prebuiltVoiceConfig: { voiceName: story.voice || 'Kore' } } } } })
+      });
+      if (!r.ok) continue;
+      const part = (await r.json()).candidates?.[0]?.content?.parts?.find(x => x.inlineData?.data);
+      if (!part) continue;
+      const raw = Buffer.from(part.inlineData.data, 'base64');
+      audio = raw.subarray(0, 4).toString() === 'RIFF' ? raw : (() => { const h = Buffer.alloc(44); const rate = Number(/rate=(\d+)/.exec(part.inlineData.mimeType || '')?.[1]) || 24000; h.write('RIFF', 0); h.writeUInt32LE(36 + raw.length, 4); h.write('WAVE', 8); h.write('fmt ', 12); h.writeUInt32LE(16, 16); h.writeUInt16LE(1, 20); h.writeUInt16LE(1, 22); h.writeUInt32LE(rate, 24); h.writeUInt32LE(rate * 2, 28); h.writeUInt16LE(2, 32); h.writeUInt16LE(16, 34); h.write('data', 36); h.writeUInt32LE(raw.length, 40); return Buffer.concat([h, raw]); })();
+      used = model; break;
+    }
+    if (audio) break;
+  }
+  if (!audio) throw new Error('No voice model answered (quota?). Try again later.');
+  fs.writeFileSync(`${vo}.raw.wav`, audio);
+  execFileSync('ffmpeg', ['-v', 'error', '-y', '-i', `${vo}.raw.wav`, ...(story.tempo ? ['-af', `atempo=${story.tempo}`] : []), '-ar', '48000', '-ac', '2', vo]);
+  fs.rmSync(`${vo}.raw.wav`);
+  fs.rmSync(path.join(DIR, 'starts.json'), { force: true });
+  fs.rmSync(path.join(DIR, 'checked.json'), { force: true });
+  console.log(`voice: ${used}, ${duration(vo).toFixed(1)} s`);
 }
 const voDur = duration(vo);
+
+// The gate: the whole voice-over is transcribed and must be the script, from
+// the first word, with nothing added (no instructions, no improvised lines).
+const checkedFile = path.join(DIR, 'checked.json');
+if (!fs.existsSync(checkedFile)) {
+  const mp3 = `${vo}.check.mp3`;
+  execFileSync('ffmpeg', ['-v', 'error', '-y', '-i', vo, '-ac', '1', '-ar', '16000', '-b:a', '48k', mp3]);
+  const b64 = fs.readFileSync(mp3).toString('base64'); fs.rmSync(mp3);
+  let heard = null;
+  const gateKeys = [process.env.GEMINI_API_KEY, process.env.GEMINI_API_KEY_3, process.env.GEMINI_API_KEY_2].filter(Boolean);
+  for (const [model, key] of TEXT_MODELS.flatMap(m => gateKeys.map(k => [m, k]))) {
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify({ contents: [{ parts: [{ inline_data: { mime_type: 'audio/mp3', data: b64 } }, { text: 'Transcribe this audio exactly, word for word, from the very first word to the last. Plain text only, no timestamps, no corrections.' }] }] }), signal: AbortSignal.timeout(90000) }).catch(() => ({ ok: false }));
+    if (r.ok) { heard = (await r.json()).candidates?.[0]?.content?.parts?.map(x => x.text).join(' '); if (heard) break; }
+  }
+  if (!heard) throw new Error('Could not transcribe the voice-over to check it (text quota?).');
+  const words = (t) => t.toLowerCase().replace(/[^a-z0-9% ]+/g, ' ').split(/\s+/).filter(Boolean)
+    .map(w => (/^(q|c|k)\w*(rex|rx|ex|ix|brix|bix)$/.test(w) ? 'qubirex' : ({ one: '1', ten: '10', three: '3', six: '6', four: '4', two: '2' }[w] || w)));
+  const want = words(story.lines.map(l => l.say).join(' ')); const got = words(heard);
+  const L = Array.from({ length: want.length + 1 }, () => new Int16Array(got.length + 1));
+  for (let i = want.length - 1; i >= 0; i -= 1) for (let j = got.length - 1; j >= 0; j -= 1) L[i][j] = want[i] === got[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+  const common = L[0][0];
+  const startsRight = got.slice(0, 4).join(' ') === want.slice(0, 4).join(' ');
+  const extra = got.length - common;
+  const report = { startsRight, script_words: want.length, heard_words: got.length, matched: common, extra_words: extra, first_heard: got.slice(0, 12).join(' '), heard };
+  fs.writeFileSync(path.join(DIR, 'transcript.json'), JSON.stringify(report, null, 1));
+  if (!startsRight || common / want.length < 0.92 || extra > want.length * 0.08 || /read the following|warm sincere|paragraphs below/.test(got.join(' '))) {
+    throw new Error(`The voice-over does not match the script (starts right: ${startsRight}, matched ${common}/${want.length}, extra ${extra}). First words heard: "${report.first_heard}". Delete ${vo} to re-voice.`);
+  }
+  fs.writeFileSync(checkedFile, JSON.stringify({ ok: true, ...report }));
+  console.log(`voice check: matches the script (${common}/${want.length} words, ${extra} extra)`);
+}
 
 // ─── 2. Where each line starts ───────────────────────────────────────────────
 const startsFile = path.join(DIR, 'starts.json');
 if (!fs.existsSync(startsFile)) {
   // Precise: phrases between pauses, transcribed, aligned word by word to the script.
-  const r = await alignByPhrases(story.lines.map(l => l.say), vo, voDur, path.join(DIR, 'tmp'));
+  const r = await alignSequential(story.lines.map(l => l.say), vo, voDur, path.join(DIR, 'tmp'));
+  const miss = r.report.filter(x => !x.matched);
+  if (miss.length) console.warn(`  timing: ${miss.length} line(s) estimated, not heard: ${miss.map(x => x.line).join(', ')}`);
   fs.writeFileSync(startsFile, JSON.stringify(r.starts));
 }
 const starts = JSON.parse(fs.readFileSync(startsFile, 'utf8')).map(x => x + LEAD);
@@ -70,13 +126,15 @@ for (const b of beats.filter(x => x.type === 'device')) {
 }
 
 // ─── 3. Footage (whole screen, never cropped) ────────────────────────────────
+// focus: the box [x0, y0, x1, y1] (fractions of the screen) each screen zooms
+// to, chosen so the text is readable and test labels stay out of view.
 const SOURCES = {
-  walk: { scene: 'c2-lesson-code', from: (c) => c.highlights[1].start + c.highlights[1].dur },
-  practise: { scene: 'c2-lesson-practise', from: (c) => c.highlights[1].start + 1.5 },
-  passport: { scene: 'c2-passport', from: (c) => c.highlights[0].start + 0.5 },
-  verify: { scene: 'c5-verify', from: (c) => c.highlights[0].start + 3 },
-  college: { scene: 'c3-heatmap', from: (c) => c.highlights[0].start + 0.3 },
-  employer: { scene: 'c4-candidate', from: (c) => c.highlights[0].start + 0.5 }
+  walk: { scene: 'c2-lesson-code', from: (c) => c.highlights[1].start + c.highlights[1].dur, focus: [0.21, 0.40, 0.96, 0.82] },
+  practise: { scene: 'c2-lesson-practise', from: (c) => c.highlights[1].start + 1.5, focus: [0.21, 0.02, 0.96, 0.66] },
+  passport: { scene: 'c2-passport', from: (c) => c.highlights[0].start + 0.5, focus: [0.20, 0.20, 0.98, 0.80] },
+  verify: { scene: 'c5-verify', from: (c) => c.highlights[0].start + 3, focus: [0.12, 0.07, 0.78, 0.66] },
+  college: { scene: 'c3-heatmap', from: (c) => c.highlights[0].start + 0.3, focus: [0.44, 0.18, 0.98, 0.72] },
+  employer: { scene: 'c4-candidate', from: (c) => c.highlights[0].start + 0.5, focus: [0.20, 0.18, 0.98, 0.98] }
 };
 const footage = path.join(WORK, 'story-footage', story.name);
 for (const b of beats.filter(x => x.type === 'device')) {
@@ -88,8 +146,9 @@ for (const b of beats.filter(x => x.type === 'device')) {
     const dir = path.join(footage, s.key);
     fs.rmSync(dir, { recursive: true, force: true });
     fs.mkdirSync(dir, { recursive: true });
-    ff(['-ss', from.toFixed(3), '-t', len.toFixed(3), '-i', clip.file, '-vf', `fps=${FPS},scale=1240:698`, '-q:v', '3', path.join(dir, '%04d.jpg')], `footage ${s.key}`);
+    ff(['-ss', from.toFixed(3), '-t', len.toFixed(3), '-i', clip.file, '-vf', `fps=${FPS},scale=1920:1080`, '-q:v', '2', path.join(dir, '%04d.jpg')], `footage ${s.key}`);
     s.frames = fs.readdirSync(dir).length;
+    s.focus = s.focus || src.focus;
   }
 }
 
@@ -105,7 +164,7 @@ fs.mkdirSync(frames, { recursive: true });
 const browser = await launch();
 const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
 page.on('pageerror', e => console.error('page error:', e.message));
-await page.addInitScript((d) => { window.STORY = d; }, { beats, sections, total, footage: pathToFileURL(footage).href });
+await page.addInitScript((d) => { window.STORY = d; }, { beats, sections, total, footage: pathToFileURL(footage).href, url: story.url || '' });
 await page.goto(pathToFileURL(path.join(ROOT, 'scripts/walkthrough/lib/story.html')).href);
 await page.evaluate(() => document.fonts.ready);
 if (process.env.PREVIEW) {
