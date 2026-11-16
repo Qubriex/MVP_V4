@@ -104,7 +104,7 @@ export function writeSubtitles(cues, base, langs = ['en']) {
 
 // ─── One scene ───────────────────────────────────────────────────────────────
 /** Builds work/<scene>.mp4 from raw/<scene>; returns { file, dur, cues, marks, highlights }. */
-export async function sceneClip(id) {
+export async function sceneClip(id, { labels = true } = {}) {
   const dir = path.join(RAW, id);
   const ev = JSON.parse(fs.readFileSync(path.join(dir, 'events.json'), 'utf8'));
   if (!ev.ok) throw new Error(`Scene ${id} did not record cleanly (${ev.error || 'unknown'}); re-record it before editing.`);
@@ -114,7 +114,7 @@ export async function sceneClip(id) {
   const at = mapper(ev, cuts);
   const total = at(ev.end);
   const phone = ev.viewport === 'phone';
-  const out = path.join(WORK, `${id}.mp4`);
+  const out = path.join(WORK, labels ? `${id}.mp4` : `${id}-clean.mp4`);
 
   // Video: frames at their real times → 30 fps, minus the cuts.
   const rel = cuts.map(([a, b]) => [(a - ev.start) / 1000, (b - ev.start) / 1000]);
@@ -131,7 +131,7 @@ export async function sceneClip(id) {
     v = '[pf]'; n += 2;
   }
   // Lower-thirds, faded in and out.
-  for (const [i, l] of ev.labels.entries()) {
+  for (const [i, l] of (labels ? ev.labels : []).entries()) {
     const s = Math.min(at(l.at), Math.max(0, total - 1));
     const d = Math.min(l.dur, Math.max(0.8, total - s - 0.2));
     inputs.push('-loop', '1', '-t', d.toFixed(2), '-i', await lowerThird(l.text, { phone }));

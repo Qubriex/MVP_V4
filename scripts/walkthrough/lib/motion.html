@@ -1,0 +1,248 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- The elevator pitch, as motion graphics: one timeline, drawn frame by
+     frame at exact times (window.render(t)). Original artwork only. -->
+<style>
+  @font-face { font-family: Outfit; src: url('../../../frontend/public/fonts/outfit-latin-600-normal.woff2'); font-weight: 600; }
+  @font-face { font-family: Outfit; src: url('../../../frontend/public/fonts/outfit-latin-700-normal.woff2'); font-weight: 700; }
+  @font-face { font-family: Anek; src: url('../../../frontend/public/fonts/anek-latin-latin-500-normal.woff2'); font-weight: 500; }
+  @font-face { font-family: 'Anek Telugu'; src: url('../../../frontend/public/fonts/anek-telugu-telugu-700-normal.woff2'); font-weight: 700; }
+  @font-face { font-family: 'Anek Devanagari'; src: url('../../../frontend/public/fonts/anek-devanagari-devanagari-700-normal.woff2'); font-weight: 700; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: #0e0f1a; }
+  body { font-family: Anek, sans-serif; color: #fff; -webkit-font-smoothing: antialiased; }
+  .d { font-family: Outfit, sans-serif; letter-spacing: -0.02em; }
+  .abs { position: absolute; }
+  #stage { position: absolute; inset: 0; overflow: hidden; }
+  #bg { position: absolute; inset: 0; }
+  .dot { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: #fff; }
+  .word { position: absolute; font-family: Outfit, sans-serif; font-weight: 600; color: #cfd2ff; white-space: nowrap; }
+  .chip { position: absolute; padding: 18px 40px; border-radius: 999px; font-size: 54px; font-weight: 700; font-family: Outfit, 'Anek Telugu', 'Anek Devanagari', sans-serif; background: #fff; color: #C4302A; box-shadow: 0 20px 50px rgba(0,0,0,.25); }
+  .device { position: absolute; left: 50%; top: 50%; width: 1240px; height: 760px; margin: -380px 0 0 -620px; border-radius: 26px; background: #111; box-shadow: 0 60px 120px rgba(40,10,10,.35); overflow: hidden; }
+  .device .bar { height: 40px; background: #1d1d22; display: flex; gap: 10px; align-items: center; padding-left: 18px; }
+  .device .bar i { width: 13px; height: 13px; border-radius: 50%; background: #444; display: block; }
+  .device img { display: block; width: 1240px; height: 720px; object-fit: cover; object-position: top center; }
+  .kicker { position: absolute; font-family: Outfit, sans-serif; font-weight: 700; color: #1b1b1f; font-size: 54px; line-height: 1.05; }
+  .kicker small { display: block; font-size: 24px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: #E73B2B; margin-bottom: 12px; }
+  .card { position: absolute; width: 470px; height: 420px; border-radius: 28px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.14); padding: 44px 40px; }
+  .card h3 { font-family: Outfit, sans-serif; font-size: 44px; line-height: 1.12; margin-top: 30px; font-weight: 700; }
+  .card svg { width: 110px; height: 110px; }
+  .bar2 { position: absolute; height: 26px; border-radius: 13px; }
+</style></head>
+<body><div id="stage">
+  <div id="bg"></div>
+  <div id="dots"></div>
+
+  <!-- PROBLEM: Priya (original, minimal illustration) -->
+  <svg id="priya" class="abs" width="520" height="620" viewBox="0 0 520 620" style="left:700px;top:260px">
+    <defs>
+      <radialGradient id="spark"><stop offset="0" stop-color="#FFD27A"/><stop offset=".45" stop-color="#F89833"/><stop offset="1" stop-color="#F89833" stop-opacity="0"/></radialGradient>
+      <linearGradient id="body" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3f7a"/><stop offset="1" stop-color="#23264a"/></linearGradient>
+    </defs>
+    <path d="M60 620 C 70 470, 160 400, 260 400 C 360 400, 450 470, 460 620 Z" fill="url(#body)"/>
+    <path d="M150 220 C 150 120, 370 120, 370 220 C 380 320, 330 330, 330 380 L 190 380 C 190 330, 140 320, 150 220 Z" fill="#1c1f3d"/>
+    <circle cx="260" cy="250" r="110" fill="#c98f6a"/>
+    <path d="M150 240 C 140 120, 380 110, 372 245 C 340 170, 250 165, 190 190 C 170 200, 160 220, 150 240 Z" fill="#1c1f3d"/>
+    <circle cx="222" cy="262" r="9" fill="#2a1d18"/><circle cx="298" cy="262" r="9" fill="#2a1d18"/>
+    <path id="mouth" d="M228 312 Q260 300 292 312" stroke="#7a3f2c" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <circle id="sparkC" cx="260" cy="150" r="80" fill="url(#spark)" opacity="0"/>
+  </svg>
+  <div id="wordsP"></div>
+  <div id="h1" class="abs d" style="left:0;right:0;text-align:center;font-weight:700;font-size:96px;top:110px"></div>
+  <div id="h1s" class="abs" style="left:0;right:0;text-align:center;font-size:38px;color:#b9bce6;top:230px"></div>
+  <div id="meters" class="abs" style="left:560px;top:880px;width:800px">
+    <div style="font-size:30px;color:#b9bce6;margin-bottom:10px">Understanding</div>
+    <div class="bar2" style="width:800px;background:rgba(255,255,255,.12);position:relative"></div>
+    <div id="mU" class="bar2" style="top:44px;left:0;background:#F89833"></div>
+  </div>
+  <div id="marks" class="abs" style="left:1330px;top:330px;width:360px;height:440px;border-radius:18px;background:#f4f1ea;color:#333;padding:34px">
+    <div class="d" style="font-size:34px;font-weight:700;color:#1b1b1f">Marksheet</div>
+    <div style="margin-top:24px;display:grid;gap:16px">
+      <div style="height:16px;background:#d9d4c8;border-radius:8px"></div><div style="height:16px;background:#d9d4c8;border-radius:8px;width:80%"></div>
+      <div style="height:16px;background:#d9d4c8;border-radius:8px;width:90%"></div><div style="height:16px;background:#d9d4c8;border-radius:8px;width:70%"></div>
+    </div>
+    <div id="q" class="d" style="position:absolute;left:0;right:0;bottom:30px;text-align:center;font-size:150px;font-weight:700;color:#E73B2B">?</div>
+  </div>
+
+  <!-- SOLUTION -->
+  <div id="sol1" class="abs d" style="left:0;right:0;text-align:center;top:300px;font-size:110px;font-weight:700;color:#fff"></div>
+  <div id="sol2" class="abs d" style="left:0;right:0;text-align:center;top:440px;font-size:110px;font-weight:700;color:#FFE0B8"></div>
+  <div id="chips"></div>
+
+  <!-- PRODUCT -->
+  <img id="logo" class="abs" src="../../../frontend/public/brand/qubirex-logo-notag-1280.png" style="left:50%;top:50%;width:900px;margin:-150px 0 0 -450px">
+  <div id="device" class="device"><div class="bar"><i></i><i></i><i></i></div><img id="shot"></div>
+  <div id="kick" class="kicker"></div>
+
+  <!-- WHY NOW -->
+  <div id="why" class="abs d" style="left:0;right:0;text-align:center;top:120px;font-size:120px;font-weight:700">Why now?</div>
+  <div id="cards"></div>
+
+  <!-- CLOSE -->
+  <img id="logoDark" class="abs" src="../../../frontend/public/brand/qubirex-logo-notag-on-dark-1280.png" style="left:50%;top:330px;width:820px;margin-left:-410px">
+  <div id="tag" class="abs d" style="left:0;right:0;text-align:center;top:600px;font-size:76px;font-weight:600"></div>
+  <div id="url" class="abs" style="left:0;right:0;text-align:center;top:740px;font-size:44px;color:#FFD9B0;font-weight:500">qubirex.in</div>
+</div>
+<script>
+const T = window.TIMES; // section and shot times, from the voice-over
+const $ = (id) => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const p = (t, a, b) => clamp((t - a) / (b - a));
+const eo = (x) => 1 - (1 - x) ** 3;                       // ease out
+const eio = (x) => (x < .5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2);
+const back = (x) => { const c = 1.7; return 1 + (c + 1) * (x - 1) ** 3 + c * (x - 1) ** 2; };
+const vis = (el, o) => { el.style.opacity = o; el.style.visibility = o > 0.001 ? 'visible' : 'hidden'; };
+// Visible from a to b, fading in and out.
+const win = (t, a, b, f = .45) => Math.min(eo(p(t, a, a + f)), 1 - eio(p(t, b - f, b)));
+
+// Floating particles (seeded, so every render is the same).
+let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const DOTS = Array.from({ length: 60 }, () => ({ x: rnd() * 1920, y: rnd() * 1080, s: .3 + rnd() * .9, v: 8 + rnd() * 22, ph: rnd() * 6 }));
+DOTS.forEach(() => $('dots').insertAdjacentHTML('beforeend', '<div class="dot"></div>'));
+const dotEls = [...document.querySelectorAll('.dot')];
+// English jargon swirling around Priya.
+const JARGON = ['recursion', 'polymorphism', 'return value', 'instantiate', 'iterate', 'parameter', 'inheritance', 'exception', 'abstraction', 'argument', 'scope', 'boolean'];
+const words = JARGON.map((w, i) => ({ w, a: (i / JARGON.length) * Math.PI * 2, r: 330 + (i % 3) * 70, size: 34 + (i % 4) * 10 }));
+words.forEach(o => $('wordsP').insertAdjacentHTML('beforeend', `<div class="word">${o.w}</div>`));
+const wordEls = [...document.querySelectorAll('.word')];
+const CHIPS = ['తెలుగు', 'हिंदी', 'English'];
+CHIPS.forEach(c => $('chips').insertAdjacentHTML('beforeend', `<div class="chip">${c}</div>`));
+const chipEls = [...document.querySelectorAll('.chip')];
+const ICONS = [
+  '<svg viewBox="0 0 100 100"><rect x="8" y="14" width="84" height="58" rx="14" fill="#F89833"/><path d="M28 72 L24 92 L46 72Z" fill="#F89833"/><text x="50" y="56" text-anchor="middle" font-size="36" font-weight="700" fill="#fff" font-family="Anek Telugu, Anek Devanagari, sans-serif">అ अ</text></svg>',
+  '<svg viewBox="0 0 100 100"><path d="M50 14 L94 34 L50 54 L6 34Z" fill="#E73B2B"/><path d="M24 44 V66 C24 78 76 78 76 66 V44 L50 56Z" fill="#E73B2B" opacity=".85"/><rect x="86" y="34" width="5" height="34" fill="#E73B2B"/></svg>',
+  '<svg viewBox="0 0 100 100"><rect x="10" y="30" width="80" height="56" rx="10" fill="#F1592D"/><rect x="36" y="18" width="28" height="16" rx="5" fill="none" stroke="#F1592D" stroke-width="6"/><path d="M34 58 L46 70 L68 46" stroke="#fff" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+];
+const CARD_TEXT = ['AI now speaks Indian languages', 'Colleges move to mother-tongue learning', 'Hiring on skills, not just marks'];
+CARD_TEXT.forEach((c, i) => $('cards').insertAdjacentHTML('beforeend', `<div class="card">${ICONS[i]}<h3>${c}</h3></div>`));
+const cardEls = [...document.querySelectorAll('.card')];
+const TAG = ['Your language.', 'Your skills.', 'Your future.'];
+$('tag').innerHTML = TAG.map(w => `<span style="display:inline-block;margin:0 14px">${w}</span>`).join('');
+const tagEls = [...$('tag').children];
+
+const typeOn = (el, text, t, a, cps = 26) => { const n = Math.floor(clamp((t - a) * cps, 0, text.length)); el.textContent = text.slice(0, n); };
+
+window.render = async function render(t) {
+  const S = T.s; // section starts
+  // Background by section.
+  let bg;
+  if (t < S.solution) bg = 'radial-gradient(1200px 800px at 50% 60%, #1b1d3a, #0b0c16)';
+  else if (t < S.product) {
+    const k = eio(p(t, S.solution, S.solution + 1.4));
+    bg = `radial-gradient(${400 + k * 2200}px ${300 + k * 1600}px at 50% 55%, #F89833, #E73B2B 45%, ${k > .99 ? '#BC1F3D' : '#0b0c16'} 75%)`;
+  } else if (t < S.whyNow) bg = 'radial-gradient(1400px 900px at 80% 110%, rgba(248,152,51,.25), transparent 60%), #FFF6F0';
+  else if (t < S.close) bg = 'radial-gradient(1200px 800px at 50% 40%, #232548, #0b0c16)';
+  else bg = 'radial-gradient(1100px 800px at 50% 45%, #2a1418, #0b0c16)';
+  $('bg').style.background = bg;
+
+  // Particles drift upwards; brighter in the solution.
+  const light = t >= S.product && t < S.whyNow;
+  dotEls.forEach((el, i) => {
+    const d = DOTS[i];
+    const y = ((d.y - t * d.v) % 1080 + 1080) % 1080;
+    el.style.transform = `translate(${d.x + Math.sin(t * .6 + d.ph) * 20}px, ${y}px) scale(${d.s})`;
+    el.style.opacity = light ? 0.0 : (t >= S.solution && t < S.product ? .55 : .22);
+  });
+
+  // ── PROBLEM ──
+  const L = T.lines;
+  const probOn = win(t, 0, S.solution, .6);
+  vis($('priya'), probOn);
+  const pull = eo(p(t, 0.2, 3));
+  $('priya').style.transform = `translateY(${(1 - pull) * 60}px) scale(${.96 + .04 * pull})`;
+  // The spark of understanding: glows at line 1, dims as she falls behind.
+  const spark = Math.min(eo(p(t, L[1] + .2, L[1] + 1.2)), 1 - .75 * eio(p(t, L[2] + .4, L[2] + 3.4)));
+  $('sparkC').setAttribute('opacity', spark * (0.85 + 0.15 * Math.sin(t * 6)));
+  const hope = eo(p(t, L[2] - .5, L[2] + 1.5));
+  $('mouth').setAttribute('d', `M228 312 Q260 ${318 - 16 * hope} 292 312`); // a small smile turns worried as she falls behind
+  // Headlines (short; not the words being spoken).
+  const h1 = $('h1'); const h1s = $('h1s');
+  if (t < L[1]) { h1.textContent = 'Priya'; h1s.textContent = 'Small town · Andhra Pradesh'; vis(h1, win(t, .6, L[1] - .1)); vis(h1s, win(t, 1.2, L[1] - .1)); }
+  else if (t < L[2]) { h1.textContent = 'Lost in translation'; h1s.textContent = ''; vis(h1, win(t, L[1] + 2.4, L[2] - .1)); vis(h1s, 0); }
+  else if (t < S.solution) { h1.textContent = 'Marks ≠ skills'; h1s.textContent = ''; vis(h1, win(t, L[2] + 2.6, S.solution - .1)); vis(h1s, 0); }
+  else { vis(h1, 0); vis(h1s, 0); }
+  h1.style.transform = `translateY(${(1 - eo(p(t, t < L[1] ? .6 : t < L[2] ? L[1] + 2.4 : L[2] + 2.6, (t < L[1] ? .6 : t < L[2] ? L[1] + 2.4 : L[2] + 2.6) + .6))) * 30}px)`;
+  // Jargon closes in around her.
+  const crowd = eio(p(t, L[1] + 1.6, L[2] + 1.0));
+  const wOn = win(t, L[1] + 1.4, S.solution, .5);
+  wordEls.forEach((el, i) => {
+    const o = words[i];
+    const a = o.a + t * (.18 + (i % 3) * .05);
+    const r = o.r * (1.25 - .45 * crowd);
+    el.style.fontSize = `${o.size}px`;
+    el.style.transform = `translate(${960 + Math.cos(a) * r * 1.35 - 80}px, ${560 + Math.sin(a) * r * .75}px)`;
+    el.style.filter = `blur(${(1 - crowd) * 3 + (i % 2) * 1.2}px)`;
+    vis(el, wOn * (.45 + .45 * crowd));
+  });
+  // Falling behind: understanding stalls.
+  const mOn = win(t, L[2] + .2, S.solution, .4);
+  vis($('meters'), mOn);
+  $('mU').style.width = `${800 * (0.08 + 0.24 * eo(p(t, L[2] + .3, L[2] + 2.2)))}px`;
+  // The marksheet that can't show what she can do.
+  vis($('marks'), win(t, L[2] + 1.6, S.solution, .5));
+  $('marks').style.transform = `translateX(${(1 - eo(p(t, L[2] + 1.6, L[2] + 2.4))) * 120}px) rotate(${3 - 3 * eo(p(t, L[2] + 1.6, L[2] + 2.4))}deg)`;
+  $('q').style.transform = `scale(${back(p(t, L[2] + 2.6, L[2] + 3.2))})`;
+
+  // ── SOLUTION ──
+  const solOn = win(t, S.solution + .3, S.product, .4);
+  vis($('sol1'), solOn); vis($('sol2'), win(t, S.solution + 1.9, S.product, .4));
+  $('sol1').textContent = 'Learn in your own language.';
+  $('sol2').textContent = 'Prove every skill.';
+  $('sol1').style.transform = `translateY(${(1 - eo(p(t, S.solution + .3, S.solution + 1))) * 50}px)`;
+  $('sol2').style.transform = `translateY(${(1 - eo(p(t, S.solution + 1.9, S.solution + 2.6))) * 50}px)`;
+  chipEls.forEach((el, i) => {
+    const a = S.solution + .9 + i * .35;
+    const k = back(p(t, a, a + .55));
+    vis(el, win(t, a, S.product, .3));
+    el.style.left = `${560 + i * 290}px`; el.style.top = '640px';
+    el.style.transform = `scale(${k}) translateY(${Math.sin(t * 2 + i) * 6}px)`;
+  });
+
+  // ── PRODUCT ──
+  // "That's Qubirex": the logo lands with a little overshoot, then lifts away.
+  const first = T.shots[0].start;
+  vis($('logo'), win(t, S.product, first + .15, .25));
+  $('logo').style.transform = `scale(${.6 + .4 * back(p(t, S.product, S.product + .6))})`;
+  // Device with footage: slides in, tilts gently, a new shot per feature.
+  const shot = T.shots.find(s => t >= s.start && t < s.end);
+  const dOn = win(t, T.shots[0].start, S.whyNow, .5);
+  vis($('device'), dOn); vis($('kick'), shot ? win(t, shot.start + .2, shot.end, .3) * dOn : 0);
+  if (shot) {
+    const local = t - shot.start;
+    const idx = Math.min(shot.frames, Math.max(1, Math.floor(local * 30) + 1));
+    const src = `${T.footage}/${shot.key}/${String(idx).padStart(4, '0')}.jpg`;
+    const img = $('shot');
+    if (img.getAttribute('src') !== src) { img.src = src; await img.decode().catch(() => {}); }
+    const k = eo(p(local, 0, .7));
+    const side = shot.side === 'left' ? -1 : 1;
+    $('device').style.transform = `perspective(2200px) translateX(${side * 260 + side * (1 - k) * 180}px) rotateY(${-side * (14 - 6 * k)}deg) rotateX(4deg) scale(${.82 + .03 * local / (shot.end - shot.start)})`;
+    $('kick').innerHTML = `<small>${shot.kicker}</small>${shot.title}`;
+    $('kick').style.left = side > 0 ? '110px' : '1330px';
+    $('kick').style.width = '520px';
+    $('kick').style.top = '420px';
+    $('kick').style.transform = `translateY(${(1 - eo(p(local, .1, .7))) * 40}px)`;
+  }
+
+  // ── WHY NOW ──
+  vis($('why'), win(t, S.whyNow + .1, S.close, .4));
+  $('why').style.transform = `scale(${.9 + .1 * back(p(t, S.whyNow + .1, S.whyNow + .7))})`;
+  cardEls.forEach((el, i) => {
+    const a = T.why[i];
+    vis(el, win(t, a, S.close, .4));
+    el.style.left = `${190 + i * 540}px`; el.style.top = '380px';
+    el.style.transform = `translateY(${(1 - back(p(t, a, a + .6))) * 140}px)`;
+    el.style.borderColor = t > a + .3 ? 'rgba(248,152,51,.55)' : 'rgba(255,255,255,.14)';
+  });
+
+  // ── CLOSE ──
+  vis($('logoDark'), win(t, S.close, 999, .6));
+  $('logoDark').style.transform = `scale(${.9 + .1 * eo(p(t, S.close, S.close + 1.2))})`;
+  $('logoDark').style.filter = `drop-shadow(0 0 ${30 * (1 - p(t, S.close + .5, S.close + 2))}px rgba(248,152,51,.8))`;
+  tagEls.forEach((el, i) => { const a = T.tag[i]; vis(el, eo(p(t, a, a + .4))); el.style.transform = `translateY(${(1 - eo(p(t, a, a + .5))) * 30}px)`; });
+  vis($('url'), eo(p(t, T.tag[2] + .9, T.tag[2] + 1.5)));
+
+  // A slow camera push-in per section.
+  const secStart = [0, S.solution, S.product, S.whyNow, S.close].filter(x => x <= t).pop();
+  $('stage').style.transform = `scale(${1 + .025 * clamp((t - secStart) / 6)})`;
+};
+</script></body></html>
