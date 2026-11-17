@@ -167,3 +167,73 @@ export async function alignSequential(lines, file, total, tmpDir) {
   }
   return { starts, report };
 }
+
+// For voices the offline aligner cannot read (Telugu, Hindi): walk the script
+// line by line. Each line is expected where the previous one started plus its
+// length (in letters) at the voice's own speaking rate; among the pauses near
+// that point, pick the one that is longest (the voice leaves a longer gap
+// between paragraphs), nearest, and — when the clip after it can be
+// transcribed — starts with the line's own opening letters.
+const letters = (t) => (t.match(/[అ-హअ-ह]/g) || []).length + 0.6 * (t.match(/[A-Za-z]/g) || []).length;
+const scriptOnly = (t) => (t || '').replace(/[^ఀ-౿ऀ-ॿ]+/g, '');
+const dice = (a, b) => {
+  const bg = (s) => { const m = new Map(); for (let i = 0; i < s.length - 1; i += 1) { const k = s.slice(i, i + 2); m.set(k, (m.get(k) || 0) + 1); } return m; };
+  const A = bg(a); const Bm = bg(b); let both = 0; let n = 0;
+  for (const [k, v] of A) { both += Math.min(v, Bm.get(k) || 0); n += v; }
+  for (const v of Bm.values()) n += v;
+  return n ? (2 * both) / n : 0;
+};
+export async function alignByRate(lines, file, total, tmpDir, { language = 'Telugu' } = {}) {
+  const ps = pauses(file).filter(p => p.len >= 0.12 && p.end < total - 0.3);
+  const speechStart = ps.length && ps[0].start < 0.05 ? ps[0].end : 0;
+  const all = pauses(file); const speechEnd = all.length && all[all.length - 1].end > total - 0.05 ? all[all.length - 1].start : total;
+  const w = lines.map(l => letters(l) + 4);
+  const rate = (speechEnd - speechStart) / w.reduce((a, b) => a + b, 0);
+  // Optional check: the first words after every pause (cached).
+  fs.mkdirSync(tmpDir, { recursive: true });
+  const cacheFile = path.join(tmpDir, 'after-pauses.json');
+  const sig = `${fs.statSync(file).size}:${ps.length}`;
+  let heard = null;
+  const cached = fs.existsSync(cacheFile) ? JSON.parse(fs.readFileSync(cacheFile, 'utf8')) : null;
+  if (cached && cached.sig === sig) heard = cached.heard;
+  else {
+    try {
+      heard = [];
+      const keys = [process.env.GEMINI_API_KEY_2, process.env.GEMINI_API_KEY_3, process.env.GEMINI_API_KEY].filter(Boolean);
+      for (let i = 0; i < ps.length; i += 18) {
+        const parts = [];
+        ps.slice(i, i + 18).forEach((p, k) => {
+          const f = path.join(tmpDir, `p-${i + k}.mp3`);
+          execFileSync('ffmpeg', ['-v', 'error', '-y', '-ss', String(p.end - 0.03), '-t', '2.5', '-i', file, '-ac', '1', '-ar', '16000', f]);
+          parts.push({ text: `Clip ${k}:` }, { inline_data: { mime_type: 'audio/mp3', data: fs.readFileSync(f).toString('base64') } });
+          fs.rmSync(f);
+        });
+        parts.push({ text: `Each clip is 2.5 seconds of a ${language} voice-over. For each clip write only the first four words spoken, in ${language} script (or "" if silent). Return only JSON: an array of ${parts.length / 2} strings.` });
+        let got = null;
+        for (const [model, key] of TEXT_MODELS.flatMap(m => keys.map(k => [m, k]))) {
+          if (got) break;
+          const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify({ contents: [{ parts }], generationConfig: { responseMimeType: 'application/json' } }), signal: AbortSignal.timeout(60000) }).catch(() => ({ ok: false }));
+          if (r.ok) { try { got = JSON.parse((await r.json()).candidates[0].content.parts[0].text); } catch { got = null; } }
+        }
+        if (!got) throw new Error('no transcription');
+        heard.push(...got.slice(0, parts.length / 2));
+      }
+      fs.writeFileSync(cacheFile, JSON.stringify({ sig, heard }));
+    } catch { heard = null; }
+  }
+  const starts = [Math.max(0, speechStart - 0.05)]; const report = [];
+  for (let i = 1; i < lines.length; i += 1) {
+    const est = starts[i - 1] + 0.05 + w[i - 1] * rate;
+    const want = scriptOnly(lines[i]).slice(0, 10);
+    let best = null;
+    ps.forEach((p, k) => {
+      if (p.end <= starts[i - 1] + 1.0 || Math.abs(p.end - est) > 6) return;
+      const d = heard && want.length >= 4 ? dice(want, scriptOnly(heard[k]).slice(0, 14)) : 0;
+      const score = Math.min(p.len, 1.2) * 4 - Math.abs(p.end - est) * 0.8 + d * 8;
+      if (!best || score > best.score) best = { t: p.end, score, len: p.len, d, heard: heard ? heard[k] : '' };
+    });
+    starts.push(best ? Math.max(0, best.t - 0.05) : est);
+    report.push({ line: i, est: +est.toFixed(2), t: +starts[i].toFixed(2), pause: best ? +best.len.toFixed(2) : null, match: best ? +best.d.toFixed(2) : null, heard: best?.heard || '' });
+  }
+  return { starts, report, transcribed: !!heard };
+}

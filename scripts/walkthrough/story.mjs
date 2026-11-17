@@ -20,7 +20,7 @@ import { launch } from './lib/runner.mjs';
 import { writeScore } from './lib/score.mjs';
 import { thumbnail, closeCards } from './lib/cards.mjs';
 import { duration } from './lib/narration.mjs';
-import { alignSequential, TEXT_MODELS } from './lib/align-check.mjs';
+import { alignSequential, alignByRate, TEXT_MODELS } from './lib/align-check.mjs';
 
 const FPS = 30;
 const storyFile = path.resolve(path.dirname(new URL(import.meta.url).pathname), process.argv[2] || 'stories/pitch-60s.js');
@@ -28,6 +28,11 @@ const story = (await import(pathToFileURL(storyFile).href)).default;
 const LEAD = story.lead ?? 0.6;   // picture before the first word
 const TAIL = story.tail ?? 2.6;   // after the last word
 const DIR = path.join(OUT, 'story', story.name);
+// Voice language: en-IN by default; te-IN gives a Telugu voice (the script
+// is then written in Telugu, and the checks compare letters, not words).
+const LANG = story.lang || 'en-IN';
+const ENGLISH = LANG.startsWith('en');
+const LANG_NAME = { 'te-IN': 'Telugu', 'hi-IN': 'Hindi' }[LANG] || 'English';
 fs.mkdirSync(DIR, { recursive: true });
 
 // The keys come from backend/.env (or the environment); never printed.
@@ -50,7 +55,7 @@ if (!fs.existsSync(vo)) {
     for (const key of keys) {
       const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
         method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
-        body: JSON.stringify({ contents: [{ parts: [{ text }] }], generationConfig: { responseModalities: ['AUDIO'], speechConfig: { languageCode: 'en-IN', voiceConfig: { prebuiltVoiceConfig: { voiceName: story.voice || 'Kore' } } } } })
+        body: JSON.stringify({ contents: [{ parts: [{ text }] }], generationConfig: { responseModalities: ['AUDIO'], speechConfig: { languageCode: LANG, voiceConfig: { prebuiltVoiceConfig: { voiceName: story.voice || 'Kore' } } } } })
       });
       if (!r.ok) continue;
       const part = (await r.json()).candidates?.[0]?.content?.parts?.find(x => x.inlineData?.data);
@@ -67,6 +72,7 @@ if (!fs.existsSync(vo)) {
   fs.rmSync(`${vo}.raw.wav`);
   fs.rmSync(path.join(DIR, 'starts.json'), { force: true });
   fs.rmSync(path.join(DIR, 'checked.json'), { force: true });
+  fs.rmSync(path.join(DIR, 'transcript.json'), { force: true });
   console.log(`voice: ${used}, ${duration(vo).toFixed(1)} s`);
 }
 const voDur = duration(vo);
@@ -78,28 +84,55 @@ if (!fs.existsSync(checkedFile)) {
   const mp3 = `${vo}.check.mp3`;
   execFileSync('ffmpeg', ['-v', 'error', '-y', '-i', vo, '-ac', '1', '-ar', '16000', '-b:a', '48k', mp3]);
   const b64 = fs.readFileSync(mp3).toString('base64'); fs.rmSync(mp3);
-  let heard = null;
+  // A transcript of this same voice is reused (it costs a request).
+  const prev = path.join(DIR, 'transcript.json');
+  let heard = fs.existsSync(prev) ? JSON.parse(fs.readFileSync(prev, 'utf8')).heard : null;
   const gateKeys = [process.env.GEMINI_API_KEY, process.env.GEMINI_API_KEY_3, process.env.GEMINI_API_KEY_2].filter(Boolean);
   for (const [model, key] of TEXT_MODELS.flatMap(m => gateKeys.map(k => [m, k]))) {
-    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify({ contents: [{ parts: [{ inline_data: { mime_type: 'audio/mp3', data: b64 } }, { text: 'Transcribe this audio exactly, word for word, from the very first word to the last. Plain text only, no timestamps, no corrections.' }] }] }), signal: AbortSignal.timeout(90000) }).catch(() => ({ ok: false }));
+    if (heard) break;
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify({ contents: [{ parts: [{ inline_data: { mime_type: 'audio/mp3', data: b64 } }, { text: `Transcribe this ${LANG_NAME} audio exactly, word for word, from the very first word to the last${ENGLISH ? '' : `, in ${LANG_NAME} script (English words in English letters)`}. Plain text only, no timestamps, no corrections.` }] }] }), signal: AbortSignal.timeout(90000) }).catch(() => ({ ok: false }));
     if (r.ok) { heard = (await r.json()).candidates?.[0]?.content?.parts?.map(x => x.text).join(' '); if (heard) break; }
   }
   if (!heard) throw new Error('Could not transcribe the voice-over to check it (text quota?).');
-  const words = (t) => t.toLowerCase().replace(/[^a-z0-9% ]+/g, ' ').split(/\s+/).filter(Boolean)
-    .map(w => (/^(q|c|k)\w*(rex|rx|ex|ix|brix|bix)$/.test(w) ? 'qubirex' : ({ one: '1', ten: '10', three: '3', six: '6', four: '4', two: '2' }[w] || w)));
-  const want = words(story.lines.map(l => l.say).join(' ')); const got = words(heard);
-  const L = Array.from({ length: want.length + 1 }, () => new Int16Array(got.length + 1));
-  for (let i = want.length - 1; i >= 0; i -= 1) for (let j = got.length - 1; j >= 0; j -= 1) L[i][j] = want[i] === got[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
-  const common = L[0][0];
-  const startsRight = got.slice(0, 4).join(' ') === want.slice(0, 4).join(' ');
-  const extra = got.length - common;
-  const report = { startsRight, script_words: want.length, heard_words: got.length, matched: common, extra_words: extra, first_heard: got.slice(0, 12).join(' '), heard };
-  fs.writeFileSync(path.join(DIR, 'transcript.json'), JSON.stringify(report, null, 1));
-  if (!startsRight || common / want.length < 0.92 || extra > want.length * 0.08 || /read the following|warm sincere|paragraphs below/.test(got.join(' '))) {
-    throw new Error(`The voice-over does not match the script (starts right: ${startsRight}, matched ${common}/${want.length}, extra ${extra}). First words heard: "${report.first_heard}". Delete ${vo} to re-voice.`);
+  if (!ENGLISH) {
+    // The transcript writes loanwords (graduates, skill) in English letters and
+    // numbers as digits, so compare only the Telugu (or Devanagari) letters, in
+    // order: every line must be clearly heard, and nothing may be added.
+    // The brand name is always written in English letters (Qubirex), so it is left out.
+    const only = (t) => t.replace(/క్యూబిరెక్స్|क्यूबिरेक्स/g, '').replace(/[^\u0C00-\u0C7F\u0900-\u097F]+/g, '');
+    const lineOf = []; let want = '';
+    story.lines.forEach((l, i) => { const x = only(l.say); want += x; for (let k = 0; k < x.length; k += 1) lineOf.push(i); });
+    const got = only(heard);
+    const L = Array.from({ length: want.length + 1 }, () => new Int16Array(got.length + 1));
+    for (let i = want.length - 1; i >= 0; i -= 1) for (let j = got.length - 1; j >= 0; j -= 1) L[i][j] = want[i] === got[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+    const common = L[0][0];
+    const hit = new Array(story.lines.length).fill(0);
+    for (let i = 0, j = 0; i < want.length && j < got.length;) { if (want[i] === got[j]) { hit[lineOf[i]] += 1; i += 1; j += 1; } else if (L[i + 1][j] >= L[i][j + 1]) i += 1; else j += 1; }
+    const perLine = story.lines.map((l, i) => +(hit[i] / Math.max(1, only(l.say).length)).toFixed(2));
+    const startsRight = perLine[0] >= 0.6 && [...want.slice(0, 8)].filter((c, k) => got.slice(0, 12).includes(c)).length >= 6;
+    const extra = got.length - common;
+    const report = { startsRight, script_letters: want.length, heard_letters: got.length, matched: common, extra_letters: extra, per_line: perLine, heard };
+    fs.writeFileSync(path.join(DIR, 'transcript.json'), JSON.stringify(report, null, 1));
+    if (!startsRight || Math.min(...perLine) < 0.5 || common / want.length < 0.65 || extra > want.length * 0.08) throw new Error(`The voice-over does not match the script (starts right: ${startsRight}, weakest line ${Math.min(...perLine)}, matched ${common}/${want.length} letters, extra ${extra}). Delete ${vo} to re-voice.`);
+    fs.writeFileSync(checkedFile, JSON.stringify({ ok: true, ...report }));
+    console.log(`voice check: matches the script (${common}/${want.length} letters, ${extra} extra)`);
+  } else {
+    const words = (t) => t.toLowerCase().replace(/[^a-z0-9% ]+/g, ' ').split(/\s+/).filter(Boolean)
+      .map(w => (/^(q|c|k)\w*(rex|rx|ex|ix|brix|bix)$/.test(w) ? 'qubirex' : ({ one: '1', ten: '10', three: '3', six: '6', four: '4', two: '2' }[w] || w)));
+    const want = words(story.lines.map(l => l.say).join(' ')); const got = words(heard);
+    const L = Array.from({ length: want.length + 1 }, () => new Int16Array(got.length + 1));
+    for (let i = want.length - 1; i >= 0; i -= 1) for (let j = got.length - 1; j >= 0; j -= 1) L[i][j] = want[i] === got[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+    const common = L[0][0];
+    const startsRight = got.slice(0, 4).join(' ') === want.slice(0, 4).join(' ');
+    const extra = got.length - common;
+    const report = { startsRight, script_words: want.length, heard_words: got.length, matched: common, extra_words: extra, first_heard: got.slice(0, 12).join(' '), heard };
+    fs.writeFileSync(path.join(DIR, 'transcript.json'), JSON.stringify(report, null, 1));
+    if (!startsRight || common / want.length < 0.92 || extra > want.length * 0.08 || /read the following|warm sincere|paragraphs below/.test(got.join(' '))) {
+      throw new Error(`The voice-over does not match the script (starts right: ${startsRight}, matched ${common}/${want.length}, extra ${extra}). First words heard: "${report.first_heard}". Delete ${vo} to re-voice.`);
+    }
+    fs.writeFileSync(checkedFile, JSON.stringify({ ok: true, ...report }));
+    console.log(`voice check: matches the script (${common}/${want.length} words, ${extra} extra)`);
   }
-  fs.writeFileSync(checkedFile, JSON.stringify({ ok: true, ...report }));
-  console.log(`voice check: matches the script (${common}/${want.length} words, ${extra} extra)`);
 }
 
 // ─── 2. Where each line starts ───────────────────────────────────────────────
@@ -109,7 +142,13 @@ if (!fs.existsSync(startsFile)) {
   // PYTHON to a Python with `pip install pocketsphinx`). Falls back to
   // transcribing the words after each pause (needs the Gemini text quota).
   let starts = null;
-  try {
+  if (!ENGLISH) {
+    const r = await alignByRate(story.lines.map(l => l.say), vo, voDur, path.join(DIR, 'tmp'), { language: LANG_NAME });
+    fs.writeFileSync(path.join(DIR, 'align-report.json'), JSON.stringify(r.report, null, 1));
+    console.log(`  line timing: speaking rate + pauses${r.transcribed ? ' + first words heard' : ''}`);
+    starts = r.starts;
+  }
+  if (!starts) try {
     const linesFile = path.join(DIR, 'lines.json');
     fs.writeFileSync(linesFile, JSON.stringify(story.lines.map(l => l.say)));
     const out = execFileSync(process.env.PYTHON || 'python3', ['-I', path.join(ROOT, 'scripts/walkthrough/lib/forced_align.py'), vo, linesFile]).toString().trim().split('\n').pop();
@@ -176,7 +215,7 @@ fs.mkdirSync(frames, { recursive: true });
 const browser = await launch();
 const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
 page.on('pageerror', e => console.error('page error:', e.message));
-await page.addInitScript((d) => { window.STORY = d; }, { beats, sections, total, footage: pathToFileURL(footage).href, url: story.url || '' });
+await page.addInitScript((d) => { window.STORY = d; }, { beats, sections, total, footage: pathToFileURL(footage).href, url: story.url || '', strings: story.strings || {} });
 await page.goto(pathToFileURL(path.join(ROOT, 'scripts/walkthrough/lib/story.html')).href);
 await page.evaluate(() => document.fonts.ready);
 if (process.env.PREVIEW) {
@@ -202,7 +241,7 @@ ff(['-framerate', String(FPS), '-i', path.join(frames, '%05d.jpg'), '-i', vo, '-
 const thumbAt = (beats.find(b => b.type === 'stat') || beats[1]).start + 1.6;
 const tf = path.join(WORK, `${story.name}-thumb.jpg`);
 ff(['-ss', thumbAt.toFixed(2), '-i', final, '-frames:v', '1', '-q:v', '2', tf], 'thumbnail');
-fs.copyFileSync(await thumbnail(story.name, tf, 'Your language. Your skills. Your future.', 'Qubirex · investor pitch'), path.join(OUT, `${story.name}.png`));
+fs.copyFileSync(await thumbnail(story.name, tf, ...(story.thumb || ['Your language. Your skills. Your future.', 'Qubirex · investor pitch'])), path.join(OUT, `${story.name}.png`));
 await closeCards();
 const l = loudness(final);
 console.log(`✓ ${story.name}.mp4 ${duration(final).toFixed(1)} s · ${(fs.statSync(final).size / 1048576).toFixed(1)} MB · ${l.lufs} LUFS`);
