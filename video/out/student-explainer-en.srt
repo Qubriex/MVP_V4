@@ -1,0 +1,41 @@
+1
+00:00:00,500 --> 00:00:02,543
+Learning to code is hard enough.
+
+2
+00:00:02,593 --> 00:00:06,140
+Learning it in a language you
+don't think in is harder.
+
+3
+00:00:10,500 --> 00:00:16,186
+Pick a topic, like Python loops. Professor
+Qubirex teaches it in Telugu,
+
+4
+00:00:16,236 --> 00:00:17,540
+Hindi or the mix.
+
+5
+00:00:25,500 --> 00:00:29,560
+See the code, line by line, with the
+voice walking you through it.
+
+6
+00:00:38,500 --> 00:00:41,330
+Practise with hints, and run real tests.
+
+7
+00:00:52,500 --> 00:00:56,260
+When you're ready, a fresh check proves
+you can do it on your own.
+
+8
+00:01:05,500 --> 00:01:09,320
+Every skill you prove goes on your
+signed Capability Passport.
+
+9
+00:01:18,500 --> 00:01:22,850
+Qubirex. Your language. Your
+skills. Your future.
