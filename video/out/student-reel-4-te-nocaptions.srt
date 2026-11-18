@@ -1,0 +1,21 @@
+1
+00:00:00,300 --> 00:00:03,280
+Doubt at 11 pm? No one to ask?
+
+2
+00:00:04,300 --> 00:00:10,056
+Why does my loop never stop? Your
+condition never becomes false.
+
+3
+00:00:10,106 --> 00:00:12,687
+Add one to i inside the loop.
+
+4
+00:00:20,300 --> 00:00:26,856
+Ask in Telugu, Hindi or English. Get
+the answer the way you speak.
+
+5
+00:00:30,300 --> 00:00:35,815
+Ask Professor Qubirex.
