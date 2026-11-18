@@ -1,6 +1,6 @@
 # student-reel-2 (English voice)
 
-File: `video/out/student-reel-2-en.mp4` · 36.9 s · language: English
+File: `video/out/student-reel-2-en-nocaptions.mp4` · 36.9 s · language: English
 
 - Voice: Gemini TTS gemini-3.1-flash-tts-preview (en-IN; Professor: Kore, Lecturer: Charon); Chirp 3 HD not reachable with API keys.
 - Script: scripts/en/student-reel-2.md.
