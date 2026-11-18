@@ -317,15 +317,13 @@
  },
  "student-reel-4-en": {
   "key": "student-reel-4-en",
-  "file": "qa/failed/student-reel-4-en.mp4",
+  "file": "out/student-reel-4-en.mp4",
   "duration": 36.27,
   "lufs": -14.6,
   "truePeak": -1.6,
   "engine": "Gemini TTS gemini-3.1-flash-tts-preview (en-IN; Professor: Kore, Student: Puck); Chirp 3 HD not reachable with API keys",
-  "pass": false,
-  "failed": [
-   "voice: numbers match the script and facts.json (heard but not in the script: 0. )"
-  ],
+  "pass": true,
+  "failed": [],
   "notes": ""
  },
  "student-reel-4-en-nocaptions": {

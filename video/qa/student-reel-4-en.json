@@ -1,6 +1,6 @@
 {
  "name": "student-reel-4-en",
- "pass": false,
+ "pass": true,
  "checks": [
   {
    "name": "voice: no style text read aloud",
@@ -9,8 +9,8 @@
   },
   {
    "name": "voice: numbers match the script and facts.json",
-   "ok": false,
-   "detail": "heard but not in the script: 0. "
+   "ok": true,
+   "detail": "all 0 fact numbers heard, no others"
   },
   {
    "name": "voice: \"Qubirex\" said one way",
@@ -49,5 +49,5 @@
    "dur": 0.79
   }
  ],
- "at": "2026-11-18T08:40:03.185Z"
+ "at": "2026-11-18T08:42:35.738Z"
 }
