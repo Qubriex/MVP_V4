@@ -1,0 +1,26 @@
+1
+00:00:00,300 --> 00:00:05,224
+This code has ONE mistake.
+Find it in 5 seconds.
+
+2
+00:00:11,174 --> 00:00:14,800
+The function is called add, so it should add
+two numbers. But star means multiply.
+
+3
+00:00:14,850 --> 00:00:15,608
+It should be plus.
+
+4
+00:00:18,628 --> 00:00:21,950
+Every line explained in your
+language. Then you practise,
+
+5
+00:00:22,000 --> 00:00:23,607
+and a fresh check proves it.
+
+6
+00:00:25,686 --> 00:00:35,918
+Practise free on Qubirex.

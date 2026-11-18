@@ -254,5 +254,27 @@
   "pass": true,
   "failed": [],
   "notes": "Telugu voice not yet native-reviewed; English text on screen"
+ },
+ "student-reel-3-en-nocaptions": {
+  "key": "student-reel-3-en-nocaptions",
+  "file": "out/student-reel-3-en-nocaptions.mp4",
+  "duration": 36.53,
+  "lufs": -14.6,
+  "truePeak": -2.2,
+  "engine": "Gemini TTS gemini-3.1-flash-tts-preview (en-IN; Professor: Kore); Chirp 3 HD not reachable with API keys",
+  "pass": true,
+  "failed": [],
+  "notes": ""
+ },
+ "student-reel-1-te-nocaptions": {
+  "key": "student-reel-1-te-nocaptions",
+  "file": "out/student-reel-1-te-nocaptions.mp4",
+  "duration": 39.27,
+  "lufs": -14,
+  "truePeak": -2,
+  "engine": "Gemini TTS gemini-3.1-flash-tts-preview (te-IN; Professor: Kore); Chirp 3 HD not reachable with API keys",
+  "pass": true,
+  "failed": [],
+  "notes": "Telugu voice not yet native-reviewed; English text on screen"
  }
 }
