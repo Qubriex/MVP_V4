@@ -1,6 +1,6 @@
 {
  "name": "employer-full-te",
- "pass": false,
+ "pass": true,
  "checks": [
   {
    "name": "voice: no style text read aloud",
@@ -9,8 +9,8 @@
   },
   {
    "name": "voice: numbers match facts.json",
-   "ok": false,
-   "detail": "heard numbers not in the facts: 0"
+   "ok": true,
+   "detail": "2 numbers heard, all in the facts"
   },
   {
    "name": "voice: \"Qubirex\" said one way",
@@ -43,5 +43,5 @@
  "duration": 87.11,
  "sheet": "video/qa/employer-full-te-sheet.jpg",
  "brand": [],
- "at": "2026-11-18T07:57:43.099Z"
+ "at": "2026-11-18T08:54:14.558Z"
 }
