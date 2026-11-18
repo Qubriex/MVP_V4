@@ -15,7 +15,7 @@
   {
    "name": "voice: \"Qubirex\" said one way",
    "ok": true,
-   "detail": "1 mentions at 33.1 s; every mention is the same recorded clip; the transcript wrote it as: cubicrex"
+   "detail": "1 mentions at 25.2 s; every mention is the same recorded clip; the transcript wrote it as: cubicrex"
   },
   {
    "name": "text: one title at a time",
@@ -25,7 +25,7 @@
   {
    "name": "text: read time held",
    "ok": true,
-   "detail": "17 text layers checked"
+   "detail": "18 text layers checked"
   },
   {
    "name": "code: the snippet runs (bug fails, fix passes)",
@@ -35,24 +35,47 @@
   {
    "name": "loudness: -14 LUFS ±1, true peak ≤ −1 dBTP",
    "ok": true,
-   "detail": "-14.9 LUFS, true peak -2.2 dBTP"
+   "detail": "-14.3 LUFS, true peak -2.8 dBTP"
   },
   {
    "name": "format: size, 30 fps, length",
    "ok": true,
-   "detail": "1080×1920, 30 fps, 37.57 s (allowed 29–40 s)"
+   "detail": "1080×1920, 30 fps, 29.67 s (max 40 s)"
+  },
+  {
+   "name": "sound: no sound effects (no >5 kHz noise > 0.5 s without speech)",
+   "ok": true,
+   "detail": "none found"
+  },
+  {
+   "name": "sound: no silence > 1.5 s mid-video",
+   "ok": true,
+   "detail": "longest pause 0.95 s (code card/timer hold 6.3 s, declared)"
+  },
+  {
+   "name": "picture: product shots inside the safe area",
+   "ok": true,
+   "detail": "174 frames with a product shot, all inside"
+  },
+  {
+   "name": "picture: no blue (≤ 2% of pixels, screenshots excluded)",
+   "ok": true,
+   "detail": "worst frame 0.00% at 0.0 s"
   }
  ],
- "lufs": -14.9,
- "truePeak": -2.2,
- "duration": 37.57,
+ "lufs": -14.3,
+ "truePeak": -2.8,
+ "duration": 29.67,
+ "sfx": "none",
+ "longestSilence": 0.95,
+ "longestHold": 6.25,
  "sheet": "video/qa/student-reel-1-en-sheet.jpg",
  "brand": [
   {
    "line": 3,
-   "t": 33.15,
+   "t": 25.24,
    "dur": 0.79
   }
  ],
- "at": "2026-11-18T07:23:48.757Z"
+ "at": "2026-11-18T11:25:15.703Z"
 }

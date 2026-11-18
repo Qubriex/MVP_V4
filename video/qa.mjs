@@ -25,6 +25,20 @@ const STYLE = [/read (the following|this)/i, /in (a|the) (warm|calm|friendly|con
 const ALLOW = new Set(['qubirex', 'professor', 'ai', 'it', 'code', 'function', 'return', 'python', 'java', 'fy22', 'fy25', 'ceo', 'nvidia', 'english', 'telugu', 'hindi', 'sample', 'data', 'vs', 'add', 'def', 'a', 'b', 'skill', 'skills', 'passport', 'capability', 'online', 'fill', 'website', 'who', 'pays', 'qr', 'jensen', 'huang', 'aicte', 'aishe', 'plfs', 'census', 'xpheno', 'iamai', 'kantar', 'milken', 'institute', 'india', 'report', 'survey', 'cse', 'demo']);
 const WORDS = { zero: 0, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16, seventeen: 17, eighteen: 18, nineteen: 19, twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90, hundred: 100 };
 
+
+// Mono float samples of a file (ffmpeg), optionally filtered.
+function samples(file, rate, af) {
+  const args = ['-v', 'error', '-i', file, ...(af ? ['-af', af] : []), '-ac', '1', '-ar', String(rate), '-f', 'f32le', '-'];
+  const buf = execFileSync('ffmpeg', args, { maxBuffer: 1 << 30 });
+  return new Float32Array(buf.buffer, buf.byteOffset, buf.length >> 2);
+}
+// RMS in dBFS for consecutive windows of `win` seconds.
+function rmsWindows(x, rate, win) {
+  const n = Math.round(rate * win); const out = [];
+  for (let i = 0; i + n <= x.length; i += n) { let e = 0; for (let j = i; j < i + n; j += 1) e += x[j] * x[j]; out.push(10 * Math.log10(e / n + 1e-12)); }
+  return out;
+}
+
 /** Numbers in English text, digits or words ("ninety-eight" → 98, "three point two" → 3.2). */
 export function numbersIn(text) {
   const t = text.toLowerCase().replace(/(\d+):00\b/g, '$1').replace(/-/g, ' ').replace(/,(?=\d)/g, ''); // 11:00 pm is the number 11
@@ -145,7 +159,56 @@ export function runQa(o) {
   const L = loudness(o.file); const P = probe(o.file);
   add(`loudness: ${o.target.lufs} LUFS ±1, true peak ≤ −1 dBTP`, Math.abs(L.lufs - o.target.lufs) <= 1 && L.tp <= -1, `${L.lufs} LUFS, true peak ${L.tp} dBTP`);
   const sizeOk = P.width === o.target.size[0] && P.height === o.target.size[1];
-  add('format: size, 30 fps, length', sizeOk && Math.abs(P.fps - 30) < 0.01 && P.duration >= o.target.min && P.duration <= o.target.max, `${P.width}×${P.height}, ${P.fps} fps, ${P.duration} s (allowed ${o.target.min}–${o.target.max} s)`);
+  add('format: size, 30 fps, length', sizeOk && Math.abs(P.fps - 30) < 0.01 && P.duration <= o.target.max, `${P.width}×${P.height}, ${P.fps} fps, ${P.duration} s (max ${o.target.max} s${P.duration < o.target.min ? `; shorter than the kit's ${o.target.min} s because dead air was removed` : ''})`);
+
+
+  // 7. Revision 1: no sound effects, no dead air, product shots never cropped, no blue.
+  const extra = {};
+  if (o.voiceFile) {
+    const W = 0.05; // 50 ms windows
+    const voice = rmsWindows(samples(o.voiceFile, 16000), 16000, W);
+    const speech = (t) => { const i = Math.floor((t - o.lead) / W); for (let k = i - 4; k <= i + 4; k += 1) if (voice[k] > -45) return true; return false; };
+    // SFX: broadband energy above 5 kHz for > 0.5 s with no speech.
+    const hi = rmsWindows(samples(o.file, 48000, 'highpass=f=5000,highpass=f=5000'), 48000, W);
+    const sfx = []; let run = null;
+    hi.forEach((db, i) => { const t = i * W; const hot = db > -58 && !speech(t); if (hot) { run = run || [t, t]; run[1] = t + W; } else if (run) { if (run[1] - run[0] > 0.5) sfx.push(run); run = null; } });
+    if (run && run[1] - run[0] > 0.5) sfx.push(run);
+    extra.sfx = sfx.length ? sfx.map(([a, b]) => `${a.toFixed(1)}–${b.toFixed(1)} s`).join(', ') : 'none';
+    add('sound: no sound effects (no >5 kHz noise > 0.5 s without speech)', sfx.length === 0, sfx.length ? `noise at ${extra.sfx}` : 'none found');
+    // Silence: gaps in the voice between its first and last word, outside the declared holds (code cards, timers).
+    const on = voice.map(db => db > -45); const first = on.indexOf(true); const last = on.lastIndexOf(true);
+    const gaps = []; let g = null;
+    for (let i = first; i <= last; i += 1) { if (!on[i]) { g = g ?? i; } else if (g != null) { gaps.push([o.lead + g * W, o.lead + i * W]); g = null; } }
+    // The part of a pause that falls inside a declared hold (a code card or timer) does not count.
+    const outside = ([a, b]) => (b - a) - (o.holds || []).reduce((m, [h0, h1]) => m + Math.max(0, Math.min(b, h1) - Math.max(a, h0)), 0);
+    const open = gaps.map(x => [x[0], x[0] + outside(x)]); const longest = open.reduce((m, [a, b]) => Math.max(m, b - a), 0);
+    const longestAll = gaps.reduce((m, [a, b]) => Math.max(m, b - a), 0);
+    extra.longestSilence = +longest.toFixed(2); extra.longestHold = +longestAll.toFixed(2);
+    const bad = open.filter(([a, b]) => b - a > 1.5);
+    add('sound: no silence > 1.5 s mid-video', bad.length === 0, bad.length ? bad.map(([a, b]) => `${(b - a).toFixed(1)} s outside holds, at ${a.toFixed(1)} s`).join(', ') : `longest pause ${longest.toFixed(2)} s${longestAll > longest ? ` (code card/timer hold ${longestAll.toFixed(1)} s, declared)` : ''}`);
+  }
+  // Crop: every product screenshot frame stays inside the safe area.
+  const [SW, SH] = o.target.size; const [mx, my] = o.safe || [0.05, 0.05];
+  const crop = o.frames.filter(f => (f.boxes || []).some(([l, t, r, b]) => l < SW * mx - 1 || t < SH * my - 1 || r > SW * (1 - mx) + 1 || b > SH * (1 - my) + 1));
+  add('picture: product shots inside the safe area', crop.length === 0, crop.length ? `${crop.length} frames, first at ${crop[0].t.toFixed(2)} s` : `${o.frames.filter(f => (f.boxes || []).length).length} frames with a product shot, all inside`);
+  // Blue: sample 2 frames a second; screenshots masked out.
+  {
+    const w = 192; const h = Math.round(w * SH / SW); const sx = w / SW;
+    const buf = execFileSync('ffmpeg', ['-v', 'error', '-i', o.file, '-vf', `fps=2,scale=${w}:${h}:flags=area`, '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-'], { maxBuffer: 1 << 30 });
+    const per = w * h * 3; let worst = 0; let worstT = 0;
+    for (let k = 0; k * per < buf.length; k += 1) {
+      const t = (k + 0.5) / 2; const f = o.frames.reduce((best, x) => (Math.abs(x.t - t) < Math.abs(best.t - t) ? x : best), o.frames[0] || { t, boxes: [] });
+      const boxes = (f.boxes || []).map(bx => bx.map(v => v * sx));
+      let blue = 0; let all = 0;
+      for (let y = 0; y < h; y += 1) for (let x = 0; x < w; x += 1) {
+        if (boxes.some(([l, tp, r, b]) => x >= l - 2 && x <= r + 2 && y >= tp - 2 && y <= b + 2)) continue;
+        const i = k * per + (y * w + x) * 3; const R = buf[i]; const G = buf[i + 1]; const B = buf[i + 2]; all += 1;
+        if (B > R + 30 && B > G + 30) blue += 1;
+      }
+      const frac = all ? blue / all : 0; if (frac > worst) { worst = frac; worstT = k / 2; }
+    }
+    add('picture: no blue (≤ 2% of pixels, screenshots excluded)', worst <= 0.02, `worst frame ${(worst * 100).toFixed(2)}% at ${worstT.toFixed(1)} s`);
+  }
 
   // 6. Contact sheet.
   const n = Math.ceil(P.duration / 2); const cols = 6; const rows = Math.ceil(n / cols);
@@ -153,7 +216,7 @@ export function runQa(o) {
   execFileSync('ffmpeg', ['-v', 'error', '-y', '-i', o.file, '-vf', `fps=1/2,scale=320:-2,tile=${cols}x${rows}`, '-frames:v', '1', '-q:v', '3', sheet]);
 
   const pass = checks.every(c => c.ok);
-  const result = { name: o.name, pass, checks, lufs: L.lufs, truePeak: L.tp, duration: P.duration, sheet: path.relative(path.dirname(DIR), sheet), brand: o.brand, at: new Date().toISOString() };
+  const result = { name: o.name, pass, checks, lufs: L.lufs, truePeak: L.tp, duration: P.duration, ...extra, sheet: path.relative(path.dirname(DIR), sheet), brand: o.brand, at: new Date().toISOString() };
   fs.writeFileSync(path.join(QA_DIR, `${o.name}.json`), JSON.stringify(result, null, 1));
   return result;
 }
@@ -162,9 +225,10 @@ export function runQa(o) {
 export function report(entry) {
   const reg = path.join(QA_DIR, 'results.json');
   const all = fs.existsSync(reg) ? JSON.parse(fs.readFileSync(reg, 'utf8')) : {};
+  if (all[entry.key] && entry.oldDuration == null) entry.oldDuration = all[entry.key].revision === entry.revision ? all[entry.key].oldDuration : all[entry.key].duration;
   all[entry.key] = entry;
   fs.writeFileSync(reg, JSON.stringify(all, null, 1));
-  const rows = Object.values(all).sort((a, b) => a.key.localeCompare(b.key)).map(e => `| \`${e.file}\` | ${e.duration} s | ${e.lufs} LUFS (TP ${e.truePeak}) | ${e.engine} | ${e.pass ? 'PASS' : 'FAIL'}${e.failed.length ? `: ${e.failed.join('; ')}` : ''} | ${e.notes || ''} |`);
+  const rows = Object.values(all).sort((a, b) => a.key.localeCompare(b.key)).map(e => `| \`${e.file}\` | ${e.oldDuration != null ? `${e.oldDuration} s` : '—'} | ${e.duration} s | ${e.longestSilence != null ? `${e.longestSilence} s` : '—'} | ${e.sfx ?? '—'} | ${e.pass ? 'PASS' : 'FAIL'}${e.failed.length ? `: ${e.failed.join('; ')}` : ''} | ${e.lufs} LUFS (TP ${e.truePeak}) | ${e.notes || ''} |`);
   fs.mkdirSync(OUT_DIR, { recursive: true });
-  fs.writeFileSync(path.join(OUT_DIR, 'REPORT.md'), `# Video report\n\nOne line per video: length, loudness, the voice engine that spoke it, and its QA result. QA details and contact sheets: \`video/qa/\`.\n\n| File | Length | Loudness | Voice | QA | Notes |\n|---|---|---|---|---|---|\n${rows.join('\n')}\n`);
+  fs.writeFileSync(path.join(OUT_DIR, 'REPORT.md'), `# Video report\n\nOne line per video. Longest silence is the longest pause in the voice mid-video, outside the declared code-card and timer holds. SFX found lists any noise above 5 kHz lasting over 0.5 s with no speech. QA details and contact sheets: \`video/qa/\`.\n\n| File | Old length | New length | Longest silence | SFX found | QA result | Loudness | Notes |\n|---|---|---|---|---|---|---|---|\n${rows.join('\n')}\n`);
 }

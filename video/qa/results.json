@@ -79,15 +79,19 @@
   "notes": ""
  },
  "student-reel-1-en": {
+  "revision": 1,
+  "longestSilence": 0.95,
+  "sfx": "none",
   "key": "student-reel-1-en",
   "file": "out/student-reel-1-en.mp4",
-  "duration": 37.57,
-  "lufs": -14.9,
-  "truePeak": -2.2,
+  "duration": 29.67,
+  "lufs": -14.3,
+  "truePeak": -2.8,
   "engine": "Gemini TTS gemini-3.8-flash-tts (en-IN; Professor: Kore); Chirp 3 HD not reachable with API keys",
   "pass": true,
   "failed": [],
-  "notes": ""
+  "notes": "",
+  "oldDuration": 37.57
  },
  "student-reel-2-en": {
   "key": "student-reel-2-en",

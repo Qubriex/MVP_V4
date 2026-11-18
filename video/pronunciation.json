@@ -33,6 +33,13 @@
    "word": "TPO",
    "say_en": "T-P-O (letters)",
    "tts_en": "T P O"
+  },
+  {
+   "word": "GUVI",
+   "say_en": "GOO-vee",
+   "tts_en": "Goo-vee",
+   "tts_te": "గూవీ",
+   "note": "Revision 1: team asked for GOO-vee"
   }
  ],
  "how": "Use the TTS engine's custom-pronunciation feature if supported (IPA). Otherwise send the say_en spelling in the TTS text. After rendering, the QA transcript must show the brand the same way at every mention.",

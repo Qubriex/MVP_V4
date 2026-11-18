@@ -33,7 +33,7 @@ function faded(x, ms = 6) {
  * @param {{ pads?: number[], overrides?: (Float32Array|null)[], brand?: {start:number,end:number,line:number}[] }} edits
  * @returns {{ pcm: Float32Array, starts: number[], scenes: Float32Array[], brand: {line:number,t:number,dur:number}[] , reference: Float32Array|null }}
  */
-export function edit(pcm, starts, { pads = [], overrides = [], brand = [] } = {}) {
+export function edit(pcm, starts, { pads = [], overrides = [], brand = [], refClip = null } = {}) {
   const total = pcm.length / RATE;
   // 1. Scenes: line i runs from its start to the next line's start.
   let scenes = starts.map((s, i) => pcm.slice(at(s), at(i + 1 < starts.length ? starts[i + 1] : total)));
@@ -43,7 +43,7 @@ export function edit(pcm, starts, { pads = [], overrides = [], brand = [] } = {}
   if (brand.length) {
     const sorted = [...brand].sort((a, b) => (a.end - a.start) - (b.end - b.start));
     const ref = sorted[Math.floor(sorted.length / 2)];
-    reference = faded(pcm.slice(at(ref.start - 0.02), at(ref.end + 0.02)));
+    reference = refClip ? faded(refClip) : faded(pcm.slice(at(ref.start - 0.02), at(ref.end + 0.02)));
     // Replace inside each scene, last mention first so earlier offsets stay right.
     const byLine = new Map();
     brand.forEach(b => { if (!overrides[b.line]) { if (!byLine.has(b.line)) byLine.set(b.line, []); byLine.get(b.line).push(b); } });
