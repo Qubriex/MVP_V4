@@ -55,7 +55,8 @@ const dotenv = await import(path.join(ROOT, 'backend/node_modules/dotenv/lib/mai
 const KEYS = [process.env.GEMINI_API_KEY_2, process.env.GEMINI_API_KEY_3, process.env.GEMINI_API_KEY].filter(Boolean);
 
 // A draft while any blank is open or founder footage is missing.
-const blanks = [...new Set((JSON.stringify(scenes.map(s => [s.beat, s.beats, s.screen])) + website() + (layout.usesContact ? (FILL.contact || '[FILL: contact]') : '')).match(/\[(FILL:[^\]]*|website)\]/g) || [])];
+// Blanks the founder has filled (contact, website) are no longer open.
+const blanks = [...new Set((JSON.stringify(scenes.map(s => [s.beat, s.beats, s.screen])) + website() + (layout.usesContact ? (FILL.contact || '[FILL: contact]') : '')).match(/\[(FILL:[^\]]*|website)\]/g) || [])].filter(b => !(b === '[FILL: contact]' && FILL.contact) && !(b === '[website]' && FILL.website));
 const founder = scenes.some(s => s.directions.some(d => /founder on camera/i.test(d)));
 const OUTNAME = `${ID}${blanks.length || founder ? '-DRAFT' : ''}`;
 
@@ -169,6 +170,11 @@ const overrides = voiced.map(v => { const f = path.join(WORK, 'scenes', `${Strin
 // less than its voice plus 0.3 s (kit §3.2).
 const rawPcm = readPcm(vo); const rawDur = seconds(rawPcm);
 const fitPads = voiced.map((v, k) => { const s = scenes[v.i]; const d = (k + 1 < voiced.length ? timing.starts[k + 1] : rawDur) - timing.starts[k]; return Math.max(s.pad || 0, 0.3, layout.fit === 'voice' || v.i === scenes.length - 1 ? 0 : (s.to - s.from) - d); }); // the end card's time is the 3 s hold
+// Keep the whole video inside the manifest's length: shrink the extra
+// script-time padding if needed (never below 0.3 s after a line).
+{ const silent = scenes.reduce((a, s, i) => a + (voiced.some(v => v.i === i) ? 0 : (s.hold ?? Math.max(2, s.to - s.from))), 0);
+  const est = LEAD + rawDur + fitPads.reduce((a, x) => a + x, 0) + silent + TAIL; const limit = TARGET.max - 0.5;
+  if (est > limit) { const extra = fitPads.reduce((a, x) => a + Math.max(0, x - 0.3), 0); const k = Math.max(0, 1 - (est - limit) / Math.max(extra, 1e-6)); fitPads.forEach((x, i) => { fitPads[i] = 0.3 + Math.max(0, x - 0.3) * k; }); } }
 const E = edit(rawPcm, timing.starts, { pads: fitPads, overrides, brand: timing.brand });
 if (E.reference) writeWav(path.join(QA_DIR, `${ID}-brand.wav`), E.reference);
 // Interleave silent scenes (timer, founder footage, open blanks) with a hold.
