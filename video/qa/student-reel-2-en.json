@@ -15,7 +15,7 @@
   {
    "name": "voice: \"Qubirex\" said one way",
    "ok": true,
-   "detail": "1 mentions at 18.6 s; every mention is the same recorded clip; the transcript wrote it as: qb rex"
+   "detail": "1 mentions at 18.1 s; every mention is the same recorded clip; the transcript wrote it as: qb rex"
   },
   {
    "name": "text: one title at a time",
@@ -35,7 +35,7 @@
   {
    "name": "format: size, 30 fps, length",
    "ok": true,
-   "detail": "1080×1920, 30 fps, 23.08 s (max 40 s; shorter than the kit's 29 s because dead air was removed)"
+   "detail": "1080×1920, 30 fps, 22.48 s (max 40 s; shorter than the kit's 29 s because dead air was removed)"
   },
   {
    "name": "sound: no sound effects (no >5 kHz noise > 0.5 s without speech)",
@@ -45,12 +45,12 @@
   {
    "name": "sound: no silence > 1.5 s mid-video",
    "ok": true,
-   "detail": "longest pause 1.20 s"
+   "detail": "longest pause 1.05 s"
   },
   {
    "name": "picture: product shots inside the safe area",
    "ok": true,
-   "detail": "136 frames with a product shot, all inside"
+   "detail": "131 frames with a product shot, all inside"
   },
   {
    "name": "picture: no blue (≤ 2% of pixels, screenshots excluded)",
@@ -60,17 +60,17 @@
  ],
  "lufs": -14,
  "truePeak": -2.8,
- "duration": 23.08,
+ "duration": 22.48,
  "sfx": "none",
- "longestSilence": 1.2,
- "longestHold": 1.2,
+ "longestSilence": 1.05,
+ "longestHold": 1.05,
  "sheet": "video/qa/student-reel-2-en-sheet.jpg",
  "brand": [
   {
    "line": 4,
-   "t": 18.65,
+   "t": 18.05,
    "dur": 0.86
   }
  ],
- "at": "2026-11-18T11:36:11.685Z"
+ "at": "2026-11-18T11:56:32.591Z"
 }

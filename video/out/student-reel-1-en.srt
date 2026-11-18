@@ -4,23 +4,23 @@ This code has ONE mistake.
 Find it in 5 seconds.
 
 2
-00:00:09,800 --> 00:00:16,302
+00:00:09,650 --> 00:00:16,152
 The function is called add, so it should add
 two numbers. But star means multiply.
 
 3
-00:00:16,352 --> 00:00:17,740
+00:00:16,202 --> 00:00:17,590
 It should be plus.
 
 4
-00:00:18,290 --> 00:00:21,794
+00:00:17,990 --> 00:00:21,494
 Every line explained in your
 language. Then you practise,
 
 5
-00:00:21,844 --> 00:00:23,540
+00:00:21,544 --> 00:00:23,240
 and a fresh check proves it.
 
 6
-00:00:24,090 --> 00:00:26,301
+00:00:23,640 --> 00:00:25,851
 Practise free on Qubirex.

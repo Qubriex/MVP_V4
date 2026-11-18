@@ -79,7 +79,7 @@ B.code = (el, b) => {
   return (t) => {
     items.forEach((x, i) => fade(x, t, b.start + .05 + i * .3));
     if (timer) { const left = Math.ceil(clamp(b.timer - (t - b.start - .3), 0, b.timer)); timer.textContent = left > 0 ? left : ''; vis(timer, left > 0 ? 1 : 0); }
-    const spot = b.spot ?? (b.end - b.start) * .25; const fix = b.fix ?? (b.end - b.start) * .62;
+    const spot = b.spot ?? (b.end - b.start) * .25; const fix = Math.max(spot + 1, Math.min(b.fix ?? (b.end - b.start) * .62, (b.end - b.start) - 5.6)); // the fixed code stays ≥ 5 s
     const s1 = b.reveal !== false && t > b.start + spot; const s2 = b.reveal !== false && t > b.start + fix; // the countdown keeps the bug
     op.textContent = s2 ? '+' : '*'; op.style.background = s2 ? 'rgba(46,158,107,.4)' : s1 ? 'rgba(231,59,43,.6)' : 'transparent';
     vis(bug, b.reveal !== false && s1 && !s2 ? 1 : 0); vis(tick, b.reveal !== false && s2 ? 1 : 0); tick.style.transform = `scale(${back(p(t, b.start + fix, b.start + fix + .5))})`;

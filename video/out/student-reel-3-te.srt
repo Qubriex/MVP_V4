@@ -3,14 +3,14 @@
 Marks show you passed. This shows you can.
 
 2
-00:00:06,549 --> 00:00:13,045
+00:00:06,399 --> 00:00:12,895
 Every skill you prove with a fresh check goes
 on your signed Capability Passport.
 
 3
-00:00:13,596 --> 00:00:16,667
+00:00:13,296 --> 00:00:16,367
 Employers scan it and see the proof.
 
 4
-00:00:17,217 --> 00:00:20,151
+00:00:16,767 --> 00:00:19,701
 Build yours on Qubirex.

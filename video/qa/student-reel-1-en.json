@@ -15,7 +15,7 @@
   {
    "name": "voice: \"Qubirex\" said one way",
    "ok": true,
-   "detail": "1 mentions at 25.2 s; every mention is the same recorded clip; the transcript wrote it as: cubicrex"
+   "detail": "1 mentions at 24.8 s; every mention is the same recorded clip; the transcript wrote it as: cubicrex"
   },
   {
    "name": "text: one title at a time",
@@ -35,12 +35,12 @@
   {
    "name": "loudness: -14 LUFS ±1, true peak ≤ −1 dBTP",
    "ok": true,
-   "detail": "-14.3 LUFS, true peak -2.8 dBTP"
+   "detail": "-14.3 LUFS, true peak -2.7 dBTP"
   },
   {
    "name": "format: size, 30 fps, length",
    "ok": true,
-   "detail": "1080×1920, 30 fps, 29.67 s (max 40 s)"
+   "detail": "1080×1920, 30 fps, 29.2 s (max 40 s)"
   },
   {
    "name": "sound: no sound effects (no >5 kHz noise > 0.5 s without speech)",
@@ -50,12 +50,12 @@
   {
    "name": "sound: no silence > 1.5 s mid-video",
    "ok": true,
-   "detail": "longest pause 0.95 s (code card/timer hold 6.3 s, declared)"
+   "detail": "longest pause 0.80 s (code card/timer hold 6.1 s, declared)"
   },
   {
    "name": "picture: product shots inside the safe area",
    "ok": true,
-   "detail": "174 frames with a product shot, all inside"
+   "detail": "169 frames with a product shot, all inside"
   },
   {
    "name": "picture: no blue (≤ 2% of pixels, screenshots excluded)",
@@ -64,18 +64,18 @@
   }
  ],
  "lufs": -14.3,
- "truePeak": -2.8,
- "duration": 29.67,
+ "truePeak": -2.7,
+ "duration": 29.2,
  "sfx": "none",
- "longestSilence": 0.95,
- "longestHold": 6.25,
+ "longestSilence": 0.8,
+ "longestHold": 6.1,
  "sheet": "video/qa/student-reel-1-en-sheet.jpg",
  "brand": [
   {
    "line": 3,
-   "t": 25.24,
+   "t": 24.79,
    "dur": 0.79
   }
  ],
- "at": "2026-11-18T11:25:15.703Z"
+ "at": "2026-11-18T11:55:51.329Z"
 }

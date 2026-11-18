@@ -190,7 +190,7 @@ export function runQa(o) {
   // Crop: every product screenshot frame stays inside the safe area.
   const [SW, SH] = o.target.size; const [mx, my] = o.safe || [0.05, 0.05];
   const crop = o.frames.filter(f => (f.boxes || []).some(([l, t, r, b]) => l < SW * mx - 1 || t < SH * my - 1 || r > SW * (1 - mx) + 1 || b > SH * (1 - my) + 1));
-  add('picture: product shots inside the safe area', crop.length === 0, crop.length ? `${crop.length} frames, first at ${crop[0].t.toFixed(2)} s` : `${o.frames.filter(f => (f.boxes || []).length).length} frames with a product shot, all inside`);
+  add('picture: product shots inside the safe area', crop.length === 0, crop.length ? `${crop.length} frames, first at ${crop[0].t.toFixed(2)} s: box ${crop[0].boxes.map(b => b.map(Math.round).join(',')).join(' / ')}` : `${o.frames.filter(f => (f.boxes || []).length).length} frames with a product shot, all inside`);
   // Blue: sample 2 frames a second; screenshots masked out.
   {
     const w = 192; const h = Math.round(w * SH / SW); const sx = w / SW;

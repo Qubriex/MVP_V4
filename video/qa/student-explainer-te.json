@@ -30,12 +30,12 @@
   {
    "name": "loudness: -16 LUFS ±1, true peak ≤ −1 dBTP",
    "ok": true,
-   "detail": "-16 LUFS, true peak -2.5 dBTP"
+   "detail": "-16 LUFS, true peak -2.9 dBTP"
   },
   {
    "name": "format: size, 30 fps, length",
    "ok": true,
-   "detail": "1920×1080, 30 fps, 45.22 s (max 90 s; shorter than the kit's 74 s because dead air was removed)"
+   "detail": "1920×1080, 30 fps, 44.32 s (max 90 s; shorter than the kit's 74 s because dead air was removed)"
   },
   {
    "name": "sound: no sound effects (no >5 kHz noise > 0.5 s without speech)",
@@ -45,12 +45,12 @@
   {
    "name": "sound: no silence > 1.5 s mid-video",
    "ok": true,
-   "detail": "longest pause 1.35 s"
+   "detail": "longest pause 1.20 s"
   },
   {
    "name": "picture: product shots inside the safe area",
    "ok": false,
-   "detail": "905 frames, first at 7.23 s"
+   "detail": "883 frames, first at 7.07 s"
   },
   {
    "name": "picture: no blue (≤ 2% of pixels, screenshots excluded)",
@@ -59,12 +59,12 @@
   }
  ],
  "lufs": -16,
- "truePeak": -2.5,
- "duration": 45.22,
+ "truePeak": -2.9,
+ "duration": 44.32,
  "sfx": "none",
- "longestSilence": 1.35,
- "longestHold": 1.35,
+ "longestSilence": 1.2,
+ "longestHold": 1.2,
  "sheet": "video/qa/student-explainer-te-sheet.jpg",
  "brand": [],
- "at": "2026-11-18T11:41:56.451Z"
+ "at": "2026-11-18T11:52:27.990Z"
 }

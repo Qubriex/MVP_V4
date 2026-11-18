@@ -15,7 +15,7 @@
   {
    "name": "voice: \"Qubirex\" said one way",
    "ok": true,
-   "detail": "2 mentions at 7.3 s, 28.6 s; every mention is the same recorded clip; the transcript wrote it as: qubirex"
+   "detail": "2 mentions at 7.2 s, 28.0 s; every mention is the same recorded clip; the transcript wrote it as: qubirex"
   },
   {
    "name": "text: one title at a time",
@@ -30,12 +30,12 @@
   {
    "name": "loudness: -14 LUFS ±1, true peak ≤ −1 dBTP",
    "ok": true,
-   "detail": "-14 LUFS, true peak -2.8 dBTP"
+   "detail": "-14 LUFS, true peak -2.9 dBTP"
   },
   {
    "name": "format: size, 30 fps, length",
    "ok": true,
-   "detail": "1080×1080, 30 fps, 34.6 s (max 90 s; shorter than the kit's 59 s because dead air was removed)"
+   "detail": "1080×1080, 30 fps, 34 s (max 90 s; shorter than the kit's 59 s because dead air was removed)"
   },
   {
    "name": "sound: no sound effects (no >5 kHz noise > 0.5 s without speech)",
@@ -45,12 +45,12 @@
   {
    "name": "sound: no silence > 1.5 s mid-video",
    "ok": true,
-   "detail": "longest pause 1.05 s"
+   "detail": "longest pause 0.90 s"
   },
   {
    "name": "picture: product shots inside the safe area",
    "ok": true,
-   "detail": "448 frames with a product shot, all inside"
+   "detail": "440 frames with a product shot, all inside"
   },
   {
    "name": "picture: no blue (≤ 2% of pixels, screenshots excluded)",
@@ -59,23 +59,23 @@
   }
  ],
  "lufs": -14,
- "truePeak": -2.8,
- "duration": 34.6,
+ "truePeak": -2.9,
+ "duration": 34,
  "sfx": "none",
- "longestSilence": 1.05,
- "longestHold": 1.05,
+ "longestSilence": 0.9,
+ "longestHold": 0.9,
  "sheet": "video/qa/employer-square-en-sheet.jpg",
  "brand": [
   {
    "line": 1,
-   "t": 7.33,
+   "t": 7.18,
    "dur": 0.73
   },
   {
    "line": 4,
-   "t": 28.61,
+   "t": 28.01,
    "dur": 0.73
   }
  ],
- "at": "2026-11-18T11:35:29.679Z"
+ "at": "2026-11-18T11:55:02.862Z"
 }

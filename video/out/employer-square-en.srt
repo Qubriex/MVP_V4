@@ -4,25 +4,25 @@
 ones can actually code?
 
 2
-00:00:06,830 --> 00:00:11,370
+00:00:06,680 --> 00:00:11,220
 Scan a Qubirex Capability Passport. See
 every skill the student proved,
 
 3
-00:00:11,420 --> 00:00:15,830
+00:00:11,270 --> 00:00:15,680
 the evidence behind it, and the fresh
 check they passed on their own.
 
 4
-00:00:16,380 --> 00:00:21,260
+00:00:16,080 --> 00:00:20,960
 Search candidates by proven skill, see who is
 ready, and invite them to interview.
 
 5
-00:00:21,810 --> 00:00:28,030
+00:00:21,360 --> 00:00:27,580
 Signed records. Fresh checks. Anyone can
 verify. Test fewer, test the right ones.
 
 6
-00:00:28,580 --> 00:00:31,240
+00:00:27,980 --> 00:00:30,640
 Qubirex. Request candidate access.

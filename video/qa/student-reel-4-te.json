@@ -30,12 +30,12 @@
   {
    "name": "loudness: -14 LUFS ±1, true peak ≤ −1 dBTP",
    "ok": true,
-   "detail": "-14 LUFS, true peak -3.7 dBTP"
+   "detail": "-14 LUFS, true peak -3.8 dBTP"
   },
   {
    "name": "format: size, 30 fps, length",
    "ok": true,
-   "detail": "1080×1920, 30 fps, 28.74 s (max 40 s; shorter than the kit's 29 s because dead air was removed)"
+   "detail": "1080×1920, 30 fps, 28.3 s (max 40 s; shorter than the kit's 29 s because dead air was removed)"
   },
   {
    "name": "sound: no sound effects (no >5 kHz noise > 0.5 s without speech)",
@@ -45,12 +45,12 @@
   {
    "name": "sound: no silence > 1.5 s mid-video",
    "ok": true,
-   "detail": "longest pause 1.00 s"
+   "detail": "longest pause 0.95 s"
   },
   {
    "name": "picture: product shots inside the safe area",
    "ok": true,
-   "detail": "267 frames with a product shot, all inside"
+   "detail": "263 frames with a product shot, all inside"
   },
   {
    "name": "picture: no blue (≤ 2% of pixels, screenshots excluded)",
@@ -59,12 +59,12 @@
   }
  ],
  "lufs": -14,
- "truePeak": -3.7,
- "duration": 28.74,
+ "truePeak": -3.8,
+ "duration": 28.3,
  "sfx": "none",
- "longestSilence": 1,
- "longestHold": 1,
+ "longestSilence": 0.95,
+ "longestHold": 0.95,
  "sheet": "video/qa/student-reel-4-te-sheet.jpg",
  "brand": [],
- "at": "2026-11-18T11:40:15.171Z"
+ "at": "2026-11-18T11:58:36.824Z"
 }

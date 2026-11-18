@@ -1,6 +1,6 @@
 {
  "name": "institution-60s-en",
- "pass": false,
+ "pass": true,
  "checks": [
   {
    "name": "voice: no style text read aloud",
@@ -15,7 +15,7 @@
   {
    "name": "voice: \"Qubirex\" said one way",
    "ok": true,
-   "detail": "2 mentions at 5.2 s, 20.8 s; every mention is the same recorded clip; the transcript wrote it as: —"
+   "detail": "2 mentions at 5.1 s, 20.4 s; every mention is the same recorded clip; the transcript wrote it as: —"
   },
   {
    "name": "text: one title at a time",
@@ -30,12 +30,12 @@
   {
    "name": "loudness: -16 LUFS ±1, true peak ≤ −1 dBTP",
    "ok": true,
-   "detail": "-16 LUFS, true peak -3 dBTP"
+   "detail": "-16 LUFS, true peak -2.4 dBTP"
   },
   {
    "name": "format: size, 30 fps, length",
    "ok": true,
-   "detail": "1920×1080, 30 fps, 25.9 s (max 60 s; shorter than the kit's 49 s because dead air was removed)"
+   "detail": "1920×1080, 30 fps, 25.47 s (max 60 s; shorter than the kit's 49 s because dead air was removed)"
   },
   {
    "name": "sound: no sound effects (no >5 kHz noise > 0.5 s without speech)",
@@ -45,12 +45,12 @@
   {
    "name": "sound: no silence > 1.5 s mid-video",
    "ok": true,
-   "detail": "longest pause 1.20 s"
+   "detail": "longest pause 1.05 s"
   },
   {
    "name": "picture: product shots inside the safe area",
-   "ok": false,
-   "detail": "311 frames, first at 5.70 s"
+   "ok": true,
+   "detail": "320 frames with a product shot, all inside"
   },
   {
    "name": "picture: no blue (≤ 2% of pixels, screenshots excluded)",
@@ -59,23 +59,23 @@
   }
  ],
  "lufs": -16,
- "truePeak": -3,
- "duration": 25.9,
+ "truePeak": -2.4,
+ "duration": 25.47,
  "sfx": "none",
- "longestSilence": 1.2,
- "longestHold": 1.2,
+ "longestSilence": 1.05,
+ "longestHold": 1.05,
  "sheet": "video/qa/institution-60s-en-sheet.jpg",
  "brand": [
   {
    "line": 1,
-   "t": 5.24,
+   "t": 5.09,
    "dur": 0.65
   },
   {
    "line": 3,
-   "t": 20.83,
+   "t": 20.38,
    "dur": 0.65
   }
  ],
- "at": "2026-11-18T11:32:38.297Z"
+ "at": "2026-11-18T12:02:39.565Z"
 }

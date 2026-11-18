@@ -230,7 +230,7 @@ const sections = (layout.sections || []).map(sec => ({ ...sec, start: beats.find
 beats.forEach((b, i) => { b.first = i === 0 || beats[i - 1].section !== b.section; if (b.type === 'split') b.mid = b.midAt === 'start' ? b.start + .1 : b.midAt === 'never' ? 1e9 : b.start + (b.end - b.start) * .45; });
 for (const b of beats.filter(x => (x.type === 'device' || x.type === 'shot') && x.shots)) {
   const n = b.shots.length; const span = (b.end - b.start) / n;
-  b.shots.forEach((s, j) => { s.start = b.start + j * span; s.end = b.start + (j + 1) * span; s.still = `${s.key === 'qr' ? 'passport' : s.key}.png`; s.frames = 1; s.focus = s.focus || (WIDE ? FOCUS[s.key] : FOCUS_TALL[s.key] || FOCUS[s.key]); if (!fs.existsSync(path.join(SHOTS, s.still))) throw new Error(`No product shot ${s.still}: run node video/shots.mjs`); });
+  b.shots.forEach((s, j) => { s.start = b.start + j * span; s.end = b.start + (j + 1) * span; s.still = `${s.key === 'qr' ? 'passport' : s.key}.png`; s.frames = 1; s.focus = s.focus || FOCUS_TALL[s.key] || FOCUS[s.key]; if (!fs.existsSync(path.join(SHOTS, s.still))) throw new Error(`No product shot ${s.still}: run node video/shots.mjs`); });
   if (b.type === 'shot') b.shots.forEach(s => { s.key = s.still.replace('.png', ''); });
 }
 // Captions: what is said, in English (Telugu versions show the English meaning).

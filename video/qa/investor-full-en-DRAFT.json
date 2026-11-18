@@ -15,7 +15,7 @@
   {
    "name": "voice: \"Qubirex\" said one way",
    "ok": true,
-   "detail": "0 mentions at —; not spliced; the transcript wrote it as: qube rex"
+   "detail": "0 mentions at —; not spliced; the transcript wrote it as: cuborex"
   },
   {
    "name": "text: one title at a time",
@@ -25,17 +25,17 @@
   {
    "name": "text: read time held",
    "ok": false,
-   "detail": "\"Learn\" 1.4 s < 2.0 s; \"Pilot result\" 1.2 s < 2.0 s; \"[FILL: before X% -> after Y%, N students\" 1.2 s < 3.3 s; \"Gross margin\" 1.5 s < 2.0 s; \"[FILL: gross margin]\" 1.5 s < 2.0 s; \"Traction\" 1.3 s < 2.0 s"
+   "detail": "\"The ask (founder footage to come)\" 0.6 s < 2.0 s; \"Founder on camera\" 0.6 s < 2.0 s; \"Founder introduction\" 0.5 s < 2.0 s; \"Placeholder: film this clip (video/asset\" 0.5 s < 2.0 s"
   },
   {
    "name": "loudness: -16 LUFS ±1, true peak ≤ −1 dBTP",
    "ok": true,
-   "detail": "-16 LUFS, true peak -2.8 dBTP"
+   "detail": "-16 LUFS, true peak -2.9 dBTP"
   },
   {
    "name": "format: size, 30 fps, length",
    "ok": true,
-   "detail": "1920×1080, 30 fps, 90.18 s (max 270 s; shorter than the kit's 209 s because dead air was removed)"
+   "detail": "1920×1080, 30 fps, 101.2 s (max 270 s; shorter than the kit's 209 s because dead air was removed)"
   },
   {
    "name": "sound: no sound effects (no >5 kHz noise > 0.5 s without speech)",
@@ -44,13 +44,13 @@
   },
   {
    "name": "sound: no silence > 1.5 s mid-video",
-   "ok": false,
-   "detail": "1.6 s outside holds, at 59.0 s"
+   "ok": true,
+   "detail": "longest pause 1.05 s"
   },
   {
    "name": "picture: product shots inside the safe area",
    "ok": false,
-   "detail": "412 frames, first at 33.13 s"
+   "detail": "396 frames, first at 33.03 s"
   },
   {
    "name": "picture: no blue (≤ 2% of pixels, screenshots excluded)",
@@ -59,12 +59,12 @@
   }
  ],
  "lufs": -16,
- "truePeak": -2.8,
- "duration": 90.18,
+ "truePeak": -2.9,
+ "duration": 101.2,
  "sfx": "none",
- "longestSilence": 1.65,
- "longestHold": 1.65,
+ "longestSilence": 1.05,
+ "longestHold": 1.05,
  "sheet": "video/qa/investor-full-en-DRAFT-sheet.jpg",
  "brand": [],
- "at": "2026-11-18T11:31:30.984Z"
+ "at": "2026-11-18T11:47:46.796Z"
 }

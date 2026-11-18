@@ -252,8 +252,8 @@ B.logo = (el, b) => {
 // shadow, browser bar). After a moment the page dims to 35%, an orange
 // outline marks the area being talked about, and a 2x callout of that area
 // sits beside the page, joined by a thin line.
-const PAGE = { x: 96, y: 200, w: 1100 }; PAGE.h = PAGE.w * 900 / 1440;
-const CALL = { x: 1262, y: 380, w: 556, h: 420 }; // border included (box-sizing), right edge 1818 < 1824
+const PAGE = { x: 116, y: 200, w: 1086 }; PAGE.h = PAGE.w * 900 / 1440;
+const CALL = { x: 1262, y: 380, w: 540, h: 420 }; // border included; room for the 1–2% scale of a beat fade
 B.device = (el, b) => {
   el.innerHTML = `<div class="abs" style="left:${PAGE.x}px;top:${PAGE.y - 36}px;width:${PAGE.w}px;height:${PAGE.h + 36}px;border-radius:18px;background:#2a2421;box-shadow:0 40px 90px rgba(0,0,0,.45);overflow:hidden" data-qa-shot data-frame>
       <div style="height:36px;display:flex;align-items:center;gap:9px;padding-left:16px;background:#2a2421"><i style="width:12px;height:12px;border-radius:50%;background:#E23B2D;display:block"></i><i style="width:12px;height:12px;border-radius:50%;background:#F26A21;display:block"></i><i style="width:12px;height:12px;border-radius:50%;background:#BEB4AC;display:block"></i><span style="margin-left:auto;margin-right:14px;font-size:17px;font-weight:700;letter-spacing:.08em;color:#FFD9B0">${S('sample', 'SAMPLE DATA')}</span></div>
