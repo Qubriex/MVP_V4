@@ -103,7 +103,7 @@ async function transcribe(file) {
   const mp3 = `${file}.check.mp3`;
   execFileSync('ffmpeg', ['-v', 'error', '-y', '-i', file, '-ac', '1', '-ar', '16000', '-b:a', '48k', mp3]);
   const b64 = fs.readFileSync(mp3).toString('base64'); fs.rmSync(mp3);
-  const ask = `Transcribe this ${LANG_NAME} audio exactly, word for word, from the very first word to the last${LANG === 'te' ? ', in Telugu script (English words in English letters)' : ''}. Write numbers exactly as spoken. Plain text only, no speaker names, no timestamps, no corrections.`;
+  const ask = `Transcribe this ${LANG_NAME} audio exactly, word for word, from the very first word to the last${LANG === 'te' ? ', in Telugu script (English words in English letters)' : ''}. Write every number in digits, the way it would be printed (for example 1,83,532 or 2024-25 or 98%). Plain text only, no speaker names, no timestamps, no corrections.`;
   for (const [model, key] of TEXT_MODELS.flatMap(m => KEYS.map(k => [m, k]))) {
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify({ contents: [{ parts: [{ inline_data: { mime_type: 'audio/mp3', data: b64 } }, { text: ask }] }] }), signal: AbortSignal.timeout(90000) }).catch(() => ({ ok: false }));
     if (r.ok) { const h = (await r.json()).candidates?.[0]?.content?.parts?.map(x => x.text).join(' '); if (h) return h; }
@@ -136,10 +136,11 @@ const scriptText = voiced.map(v => v.parts.map(p => p.text).join(' '));
     // the brand (however the transcript spells it) left out.
     const ONES = 'zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen'.split(' ');
     const TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+    const NUMWORD = new Set([...ONES, ...TENS.filter(Boolean), 'hundred', 'thousand', 'lakh', 'lakhs', 'crore', 'point', 'percent']);
     const say = (n) => (n < 20 ? ONES[n] : n < 100 ? `${TENS[Math.floor(n / 10)]} ${n % 10 ? ONES[n % 10] : ''}` : n < 1000 ? `${ONES[Math.floor(n / 100)]} hundred ${n % 100 ? say(n % 100) : ''}` : n < 100000 ? `${say(Math.floor(n / 1000))} thousand ${n % 1000 ? say(n % 1000) : ''}` : String(n));
     const w = (t) => t.toLowerCase().replace(/\b([ap])\.m\./g, '$1m').replace(/(\d[\d,]*)(?:\.(\d+))?(%?)/g, (m, i, d, pc) => ` ${say(Number(i.replace(/,/g, '')))}${d ? ` point ${[...d].map(x => ONES[x]).join(' ')}` : ''}${pc ? ' percent' : ''} `)
       .replace(/\b(?:q|c|k)[a-z0-9]*[\s-]?(?:bi|by|be|bee)?[\s-]?(?:rex|rx|ex|ix|bricks|brix|rix|3x)\b/g, ' ')
-      .replace(/\b([a-z])\s+(?=[a-z]\b)/g, '$1').replace(/-/g, ' ').replace(/[^a-z0-9 ]+/g, ' ').split(/\s+/).filter(x => x && x !== 'a' && x !== 'and');
+      .replace(/\b([a-z])\s+(?=[a-z]\b)/g, '$1').replace(/-/g, ' ').replace(/[^a-z0-9 ]+/g, ' ').split(/\s+/).filter(x => x && x !== 'a' && x !== 'and' && !NUMWORD.has(x)); // numbers are checked on their own, in QA
     const a = w(scriptText.join(' ').replace(/Qubirex/g, '')); const b = w(heard);
     const L = Array.from({ length: a.length + 1 }, () => new Int16Array(b.length + 1));
     for (let i = a.length - 1; i >= 0; i -= 1) for (let j = b.length - 1; j >= 0; j -= 1) L[i][j] = a[i] === b[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
