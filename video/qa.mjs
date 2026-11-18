@@ -30,11 +30,18 @@ export function numbersIn(text) {
   const t = text.toLowerCase().replace(/-/g, ' ').replace(/,(?=\d)/g, '');
   const out = [];
   t.replace(/\d+(\.\d+)?/g, (m) => { out.push(String(Number(m))); return m; });
-  const toks = t.replace(/[^a-z ]/g, ' ').split(/\s+/).filter(Boolean);
+  const toks = t.replace(/[.,;:!?]/g, ' | ').replace(/[^a-z| ]/g, ' ').split(/\s+/).filter(Boolean); // '|' ends a number
+  const SCALE = { hundred: 100, thousand: 1000, lakh: 100000, lakhs: 100000 };
   for (let i = 0; i < toks.length; i += 1) {
     if (!(toks[i] in WORDS)) continue;
-    let n = WORDS[toks[i]]; let j = i + 1;
-    if (n >= 20 && n < 100 && toks[j] in WORDS && WORDS[toks[j]] < 10) { n += WORDS[toks[j]]; j += 1; }
+    // One spoken number: "two thousand", "ninety eight", "three point two".
+    let total = 0; let cur = 0; let j = i;
+    while (j < toks.length && (toks[j] in WORDS || toks[j] in SCALE)) {
+      const w = toks[j];
+      if (w in SCALE) { if (SCALE[w] === 100) cur = (cur || 1) * 100; else { total += (cur || 1) * SCALE[w]; cur = 0; } } else cur += WORDS[w];
+      j += 1;
+    }
+    let n = total + cur;
     if (toks[j] === 'point' && toks[j + 1] in WORDS && WORDS[toks[j + 1]] < 10) { n = Number(`${n}.${WORDS[toks[j + 1]]}`); j += 2; }
     out.push(String(n)); i = j - 1;
   }
