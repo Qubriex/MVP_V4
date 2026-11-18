@@ -58,7 +58,9 @@ const KEYS = [process.env.GEMINI_API_KEY_2, process.env.GEMINI_API_KEY_3, proces
 // Blanks the founder has filled (contact, website) are no longer open.
 const blanks = [...new Set((JSON.stringify(scenes.map(s => [s.beat, s.beats, s.screen])) + website() + (layout.usesContact ? (FILL.contact || '[FILL: contact]') : '')).match(/\[(FILL:[^\]]*|website)\]/g) || [])].filter(b => !(b === '[FILL: contact]' && FILL.contact) && !(b === '[website]' && FILL.website));
 const founder = scenes.some(s => s.directions.some(d => /founder on camera/i.test(d)));
-const OUTNAME = `${ID}${blanks.length || founder ? '-DRAFT' : ''}`;
+// NOCAPS=1: a copy without burned-in captions (the .srt still comes with it).
+const NOCAPS = !!process.env.NOCAPS && !WIDE;
+const OUTNAME = `${ID}${NOCAPS ? '-nocaptions' : ''}${blanks.length || founder ? '-DRAFT' : ''}`;
 
 // ─── Voice ───────────────────────────────────────────────────────────────────
 // Who speaks a part of a scene: [Student…] → Student, [Top half] → Lecturer,
@@ -231,18 +233,18 @@ for (const b of beats.filter(x => (x.type === 'device' || x.type === 'shot') && 
 const capLines = scenes.map((s, i) => ({ text: (LANG === 'te' ? s.en.say : s.say) || '', start: sceneStart[i], end: sceneStart[i] + (sceneVoice[i] || 0) })).filter(c => c.text && c.end > c.start);
 
 // ─── Music, frames, sound ───────────────────────────────────────────────────
-const score = path.join(WORK, 'score.wav');
+const score = path.join(WORK, NOCAPS ? 'score-nocaps.wav' : 'score.wav');
 // The score changes chord at the sections (or, without sections, through the video).
 const cue = (k, f) => sections[k]?.start ?? total * f;
 writeScore(score, total, { solution: cue(1, .2), product: cue(2, .45), whyNow: cue(3, .7), close: Math.max(beats[beats.length - 1].start, cue(3, .7) + .1), extra: [] });
-const frames = path.join(WORK, 'frames'); fs.rmSync(frames, { recursive: true, force: true }); fs.mkdirSync(frames, { recursive: true });
+const frames = path.join(WORK, NOCAPS ? 'frames-nocaps' : 'frames'); fs.rmSync(frames, { recursive: true, force: true }); fs.mkdirSync(frames, { recursive: true });
 const srt = path.join(WORK, `${OUTNAME}.srt`); writeSrt(srt, capLines);
 const cues = fs.readFileSync(srt, 'utf8').split(/\n\n+/).filter(Boolean).map(c => { const [, tm, ...txt] = c.split('\n'); const [x, y] = tm.split(' --> ').map(v => { const [h, m, r] = v.split(':'); return Number(h) * 3600 + Number(m) * 60 + Number(r.replace(',', '.')); }); return { start: x, end: y, text: txt.join('\n') }; });
 const browser = await launch();
 const page = await browser.newPage({ viewport: { width: W, height: H } });
 page.on('pageerror', e => console.error('page error:', e.message));
 const engine = WIDE ? path.join(WT, 'story.html') : path.join(VDIR, 'lib/flex.html');
-await page.addInitScript((d) => { window.STORY = d; }, { beats, sections, total, footage: pathToFileURL(SHOTS).href, url: website(), strings: {}, size: [W, H], captions: WIDE ? [] : cues, captionSize: entry.aspect === '1:1' ? 44 : 52 });
+await page.addInitScript((d) => { window.STORY = d; }, { beats, sections, total, footage: pathToFileURL(SHOTS).href, url: website(), strings: {}, size: [W, H], captions: WIDE || NOCAPS ? [] : cues, captionSize: entry.aspect === '1:1' ? 44 : 52 });
 await page.goto(pathToFileURL(engine).href);
 await page.evaluate(() => document.fonts.ready);
 if (process.env.PREVIEW) {
@@ -257,13 +259,13 @@ for (let i = 0; i < n; i += 1) {
   await page.screenshot({ path: path.join(frames, `${String(i + 1).padStart(5, '0')}.jpg`), type: 'jpeg', quality: 92 });
 }
 await browser.close();
-const mix = path.join(WORK, 'mix.wav');
+const mix = path.join(WORK, NOCAPS ? 'mix-nocaps.wav' : 'mix.wav');
 execFileSync('ffmpeg', ['-v', 'error', '-y', '-i', voFinal, '-i', score, '-filter_complex',
   `[0:a]apad,atrim=duration=${total.toFixed(3)},asplit=2[v][key];[1:a]volume=0.9[m];[m][key]sidechaincompress=threshold=0.02:ratio=8:attack=20:release=500:makeup=1[md];[v][md]amix=inputs=2:normalize=0:duration=first[a]`, '-map', '[a]', '-ar', '48000', mix]);
 const LUFS = TARGET.lufs;
 const measured = spawnSync('ffmpeg', ['-hide_banner', '-nostats', '-i', mix, '-af', `loudnorm=I=${LUFS}:TP=-3:LRA=11:print_format=json`, '-f', 'null', '-'], { encoding: 'utf8' }).stderr;
 const meas = JSON.parse(measured.slice(measured.lastIndexOf('{')));
-const mixN = path.join(WORK, 'mix-norm.wav');
+const mixN = path.join(WORK, NOCAPS ? 'mix-norm-nocaps.wav' : 'mix-norm.wav');
 execFileSync('ffmpeg', ['-v', 'error', '-y', '-i', mix, '-af', `loudnorm=I=${LUFS}:TP=-3:LRA=11:measured_I=${meas.input_i}:measured_TP=${meas.input_tp}:measured_LRA=${meas.input_lra}:measured_thresh=${meas.input_thresh}:offset=${meas.target_offset}:linear=true,aresample=48000`, mixN]);
 const final = path.join(WORK, `${OUTNAME}.mp4`);
 execFileSync('ffmpeg', ['-v', 'error', '-y', '-framerate', String(FPS), '-i', path.join(frames, '%05d.jpg'), '-i', mixN, '-map', '0:v', '-map', '1:a', '-c:v', 'libx264', '-profile:v', 'high', '-preset', 'medium', '-crf', '18', '-pix_fmt', 'yuv420p', '-r', String(FPS), '-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-movflags', '+faststart', '-t', total.toFixed(3), final]);
@@ -284,6 +286,7 @@ for (const c of qa.checks) console.log(`  ${c.ok ? '✓' : '✗'} ${c.name}: ${c
 const dest = qa.pass ? OUT_DIR : path.join(QA_DIR, 'failed');
 fs.mkdirSync(dest, { recursive: true });
 fs.copyFileSync(final, path.join(dest, `${OUTNAME}.mp4`)); fs.copyFileSync(srt, path.join(dest, `${OUTNAME}.srt`));
-if (qa.pass) for (const old of fs.readdirSync(OUT_DIR).filter(f => f.startsWith(`${ID}.`) || f.startsWith(`${ID}-DRAFT.`))) if (!old.startsWith(`${OUTNAME}.`)) fs.rmSync(path.join(OUT_DIR, old));
-report({ key: ID, file: `${path.relative(VDIR, dest)}/${OUTNAME}.mp4`, duration: qa.duration, lufs: qa.lufs, truePeak: qa.truePeak, engine: ENGINE, pass: qa.pass, failed: qa.checks.filter(c => !c.ok).map(c => `${c.name} (${c.detail})`), notes: [...(blanks.length ? [`blanks: ${blanks.join(', ')}`] : []), ...(founder ? ['founder footage missing'] : []), ...(LANG === 'te' ? ['Telugu voice not yet native-reviewed; English text on screen'] : [])].join('; ') });
+const base = `${ID}${NOCAPS ? '-nocaptions' : ''}`;
+if (qa.pass) for (const old of fs.readdirSync(OUT_DIR).filter(f => f.startsWith(`${base}.`) || f.startsWith(`${base}-DRAFT.`))) if (!old.startsWith(`${OUTNAME}.`)) fs.rmSync(path.join(OUT_DIR, old));
+report({ key: base, file: `${path.relative(VDIR, dest)}/${OUTNAME}.mp4`, duration: qa.duration, lufs: qa.lufs, truePeak: qa.truePeak, engine: ENGINE, pass: qa.pass, failed: qa.checks.filter(c => !c.ok).map(c => `${c.name} (${c.detail})`), notes: [...(blanks.length ? [`blanks: ${blanks.join(', ')}`] : []), ...(founder ? ['founder footage missing'] : []), ...(LANG === 'te' ? ['Telugu voice not yet native-reviewed; English text on screen'] : [])].join('; ') });
 console.log(`${qa.pass ? '✓ QA passed' : '✗ QA failed'}: ${path.relative(ROOT, path.join(dest, `${OUTNAME}.mp4`))} · ${qa.duration} s · ${qa.lufs} LUFS · sheet ${qa.sheet}`);
