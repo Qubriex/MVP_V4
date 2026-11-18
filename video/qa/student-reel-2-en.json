@@ -1,0 +1,53 @@
+{
+ "name": "student-reel-2-en",
+ "pass": true,
+ "checks": [
+  {
+   "name": "voice: no style text read aloud",
+   "ok": true,
+   "detail": "none heard"
+  },
+  {
+   "name": "voice: numbers match the script and facts.json",
+   "ok": true,
+   "detail": "all 0 fact numbers heard, no others"
+  },
+  {
+   "name": "voice: \"Qubirex\" said one way",
+   "ok": true,
+   "detail": "1 mentions at 32.4 s; every mention is the same recorded clip; the transcript wrote it as: qb rex"
+  },
+  {
+   "name": "text: one title at a time",
+   "ok": true,
+   "detail": "no frame with two titles"
+  },
+  {
+   "name": "text: read time held",
+   "ok": true,
+   "detail": "17 text layers checked"
+  },
+  {
+   "name": "loudness: -14 LUFS ±1, true peak ≤ −1 dBTP",
+   "ok": true,
+   "detail": "-14.7 LUFS, true peak -1.6 dBTP"
+  },
+  {
+   "name": "format: size, 30 fps, length",
+   "ok": true,
+   "detail": "1080×1920, 30 fps, 36.87 s (allowed 29–40 s)"
+  }
+ ],
+ "lufs": -14.7,
+ "truePeak": -1.6,
+ "duration": 36.87,
+ "sheet": "video/qa/student-reel-2-en-sheet.jpg",
+ "brand": [
+  {
+   "line": 4,
+   "t": 32.44,
+   "dur": 0.86
+  }
+ ],
+ "at": "2026-11-18T07:28:30.432Z"
+}

@@ -12,3 +12,4 @@ One line per video: length, loudness, the voice engine that spoke it, and its QA
 | `out/pitch-60s-en-DRAFT.mp4` | 53.04 s | -16.1 LUFS (TP -2.3) | Gemini TTS gemini-3.8-flash-tts (en-IN, Kore); Chirp 3 HD not reachable with API keys | PASS | blanks: [website] |
 | `out/pitch-60s-te-DRAFT.mp4` | 54.67 s | -16 LUFS (TP -3.6) | Gemini TTS gemini-3.8-flash-tts (te-IN, Kore) (earlier recording, reused) | PASS | blanks: [website]; native-speaker check of the Telugu lines (⚠ quote, line 7), then a new voice-over with the agreed brand pronunciation |
 | `out/student-reel-1-en.mp4` | 37.57 s | -14.9 LUFS (TP -2.2) | Gemini TTS gemini-3.8-flash-tts (en-IN; Professor: Kore); Chirp 3 HD not reachable with API keys | PASS |  |
+| `out/student-reel-2-en.mp4` | 36.87 s | -14.7 LUFS (TP -1.6) | Gemini TTS gemini-3.1-flash-tts-preview (en-IN; Professor: Kore, Lecturer: Charon); Chirp 3 HD not reachable with API keys | PASS |  |
