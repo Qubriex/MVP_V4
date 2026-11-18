@@ -4,7 +4,7 @@ One line per video: length, loudness, the voice engine that spoke it, and its QA
 
 | File | Length | Loudness | Voice | QA | Notes |
 |---|---|---|---|---|---|
-| `qa/failed/employer-full-en.mp4` | 86.51 s | -16.3 LUFS (TP -2.5) | Gemini TTS gemini-3.1-flash-tts-preview (en-IN; Professor: Kore); Chirp 3 HD not reachable with API keys | FAIL: voice: numbers match the script and facts.json (heard but not in the script: 2. ) |  |
+| `out/employer-full-en.mp4` | 86.51 s | -16.3 LUFS (TP -2.5) | Gemini TTS gemini-3.1-flash-tts-preview (en-IN; Professor: Kore); Chirp 3 HD not reachable with API keys | PASS |  |
 | `qa/failed/employer-full-te.mp4` | 87.11 s | -16.4 LUFS (TP -2.6) | Gemini TTS gemini-3.1-flash-tts-preview (te-IN; Professor: Kore); Chirp 3 HD not reachable with API keys | FAIL: voice: numbers match facts.json (heard numbers not in the facts: 0) | Telugu voice not yet native-reviewed; English text on screen |
 | `qa/failed/employer-square-en.mp4` | 86.51 s | -14.5 LUFS (TP -2.6) | Gemini TTS gemini-3.1-flash-tts-preview (en-IN; Professor: Kore); Chirp 3 HD not reachable with API keys | FAIL: voice: numbers match the script and facts.json (heard but not in the script: 2. ) |  |
 | `qa/failed/employer-square-te.mp4` | 87.11 s | -15 LUFS (TP -1.6) | Gemini TTS gemini-3.1-flash-tts-preview (te-IN; Professor: Kore); Chirp 3 HD not reachable with API keys | FAIL: voice: numbers match facts.json (heard numbers not in the facts: 0) | Telugu voice not yet native-reviewed; English text on screen |
