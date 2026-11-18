@@ -1,176 +1,219 @@
 {
- "_note": "The only place numbers live. Scenes read from here; QA checks the voice against it. Add a statistic only when the founder supplies it with a source.",
- "graduates": {
-  "value": 1.1,
-  "decimals": 1,
-  "unit": {
-   "en": " crore",
-   "te": " కోట్లు"
-  },
-  "screen": {
-   "en": "1.1 crore",
-   "te": "1.1 కోట్లు"
-  },
-  "voice": {
-   "en": "about 1.1 crore graduates"
-  },
-  "label": {
-   "en": "graduates every year",
-   "te": "ప్రతి సంవత్సరం గ్రాడ్యుయేట్లు"
-  },
-  "source": "AISHE 2023–24",
-  "numbers": [
-   "1.1"
-  ]
- },
- "jobReady": {
-  "pct": 56,
-  "screen": {
-   "en": "56%",
-   "te": "56%"
-  },
-  "voice": {
-   "en": "only about half"
-  },
-  "label": {
-   "en": "judged job-ready",
-   "te": "ఉద్యోగానికి సిద్ధం"
-  },
-  "source": "India Skills Report 2026",
-  "numbers": []
- },
- "jobless": {
-  "rows": [
-   [
-    "graduates",
-    13.0
+ "_rules": "The ONLY numbers allowed in any video. Voice, chart, label and source line must all come from here. Add a fact only with a source the founder approves.",
+ "facts": {
+  "graduates": {
+   "screen": "1.1 crore",
+   "voice_en": "about 1.1 crore graduates",
+   "source": "Source: AISHE 2023-24",
+   "value": 1.1,
+   "decimals": 1,
+   "unit": {
+    "en": " crore",
+    "te": " కోట్లు"
+   },
+   "label": {
+    "en": "graduates every year",
+    "te": "ప్రతి సంవత్సరం గ్రాడ్యుయేట్లు"
+   },
+   "numbers": [
+    "1.1"
    ],
-   [
-    "all",
-    3.2
-   ]
-  ],
-  "rowLabels": {
-   "en": [
-    "Graduates",
-    "All workers"
+   "screen_parts": {
+    "en": "1.1 crore",
+    "te": "1.1 కోట్లు"
+   }
+  },
+  "jobReady": {
+   "screen": "56%",
+   "voice_en": "only about half",
+   "source": "Source: India Skills Report 2026",
+   "label": {
+    "en": "judged job-ready",
+    "te": "ఉద్యోగానికి సిద్ధం"
+   },
+   "pct": 56,
+   "numbers": [],
+   "screen_parts": {
+    "en": "56%",
+    "te": "56%"
+   }
+  },
+  "jobless": {
+   "screen": "13.0% vs 3.2%",
+   "voice_en": "four times more likely to be jobless",
+   "source": "Source: PLFS 2023-24",
+   "label": {
+    "en": "4× more likely to be jobless",
+    "te": "నిరుద్యోగం 4 రెట్లు ఎక్కువ"
+   },
+   "rows": [
+    [
+     "graduates",
+     13.0
+    ],
+    [
+     "all",
+     3.2
+    ]
    ],
-   "te": [
-    "గ్రాడ్యుయేట్లు",
-    "మొత్తం కార్మికులు"
-   ]
+   "rowLabels": {
+    "en": [
+     "Graduates",
+     "All workers"
+    ],
+    "te": [
+     "గ్రాడ్యుయేట్లు",
+     "మొత్తం కార్మికులు"
+    ]
+   },
+   "numbers": [
+    "13",
+    "3.2",
+    "4"
+   ],
+   "screen_parts": {
+    "en": "13.0% vs 3.2%",
+    "te": "13.0% vs 3.2%"
+   }
   },
-  "screen": {
-   "en": "13.0% vs 3.2%",
-   "te": "13.0% vs 3.2%"
+  "english": {
+   "screen": "1 in 10 (10.6%)",
+   "voice_en": "only 1 in 10 Indians speak English",
+   "source": "Source: Census 2011",
+   "label": {
+    "en": "Indians speak English (10.6%)",
+    "te": "భారతీయులు ఇంగ్లీష్ మాట్లాడతారు (10.6%)"
+   },
+   "pct": 10.6,
+   "numbers": [
+    "1",
+    "10"
+   ],
+   "screen_parts": {
+    "en": "1 in 10",
+    "te": "10 లో 1"
+   }
   },
-  "voice": {
-   "en": "four times more likely to be jobless"
+  "motherTongue": {
+   "screen": "44%",
+   "voice_en": "44% of engineering students want to learn in their mother tongue",
+   "source": "Source: AICTE survey",
+   "label": {
+    "en": "of engineering students want to learn in their mother tongue",
+    "te": "ఇంజనీరింగ్ విద్యార్థులు మాతృభాషలో నేర్చుకోవాలనుకుంటున్నారు"
+   },
+   "pct": 44,
+   "numbers": [
+    "44"
+   ],
+   "screen_parts": {
+    "en": "44%",
+    "te": "44%"
+   }
   },
-  "label": {
-   "en": "4× more likely to be jobless",
-   "te": "నిరుద్యోగం 4 రెట్లు ఎక్కువ"
+  "indicContent": {
+   "screen": "98%",
+   "voice_en": "98% of India's internet users",
+   "source": "Source: IAMAI-Kantar 2024",
+   "label": {
+    "en": "of internet users use Indian-language content",
+    "te": "ఇంటర్నెట్ యూజర్లు భారతీయ భాషల కంటెంట్ వాడుతున్నారు"
+   },
+   "pct": 98,
+   "numbers": [
+    "98"
+   ],
+   "screen_parts": {
+    "en": "98%",
+    "te": "98%"
+   }
   },
-  "source": "PLFS 2023–24",
-  "numbers": [
-   "13",
-   "3.2",
-   "4"
-  ]
- },
- "english": {
-  "pct": 10.6,
-  "screen": {
-   "en": "1 in 10",
-   "te": "10 లో 1"
+  "fresherHiring": {
+   "screen": "6 lakh (FY22) -> 1.2 lakh (FY25), -80%",
+   "voice_en": "fallen 80% in three years, from 6 lakh to 1.2 lakh",
+   "source": "Source: Xpheno, via Business Today",
+   "chart": {
+    "FY22": 600000,
+    "FY25": 120000
+   },
+   "unit": {
+    "en": "lakh",
+    "te": "లక్షలు"
+   },
+   "label": {
+    "en": "IT fresher hiring",
+    "te": "IT ఫ్రెషర్ నియామకాలు"
+   },
+   "from": 6,
+   "to": 1.2,
+   "change": -80,
+   "fromLabel": "FY22",
+   "toLabel": "FY25",
+   "numbers": [
+    "80"
+   ],
+   "screen_parts": {
+    "en": "6 lakh (FY22) → 1.2 lakh (FY25), −80%",
+    "te": "6 లక్షలు (FY22) → 1.2 లక్షలు (FY25), −80%"
+   }
   },
-  "voice": {
-   "en": "only 1 in 10 Indians speak English"
+  "quote": {
+   "screen": "\"You're not going to lose your job to an AI, but you're going to lose your job to someone who uses AI.\"",
+   "voice_en": "same as screen",
+   "source": "Jensen Huang, Milken Institute, May 2025",
+   "numbers": [],
+   "text": "You're not going to lose your job to an AI, but you're going to lose your job to someone who uses AI.",
+   "whoLine": {
+    "en": "Jensen Huang, CEO, Nvidia",
+    "te": "జెన్సెన్ హువాంగ్, CEO, Nvidia"
+   },
+   "where": "Milken Institute, May 2025",
+   "screen_parts": {
+    "en": "You're not going to lose your job to an AI, but you're going to lose your job to someone who uses AI."
+   }
   },
-  "label": {
-   "en": "Indians speak English (10.6%)",
-   "te": "భారతీయులు ఇంగ్లీష్ మాట్లాడతారు (10.6%)"
+  "btechSeats": {
+   "screen": "14.9 lakh BTech seats (2024-25)",
+   "voice_en": "14.9 lakh BTech seats in 2024-25",
+   "source": "Source: AICTE, via EducationPost",
+   "numbers": [
+    "14.9"
+   ],
+   "label": {
+    "en": "BTech seats approved, India (2024-25)"
+   }
   },
-  "source": "Census 2011",
-  "numbers": [
-   "1",
-   "10"
-  ]
- },
- "motherTongue": {
-  "pct": 44,
-  "screen": {
-   "en": "44%",
-   "te": "44%"
+  "apSeats": {
+   "screen": "AP: 1,83,532 seats (2024-25)",
+   "voice_en": "1,83,532 approved seats in Andhra Pradesh",
+   "source": "Source: AICTE, via EducationPost",
+   "numbers": [],
+   "label": {
+    "en": "approved seats, Andhra Pradesh (2024-25)"
+   }
   },
-  "voice": {
-   "en": "44% of engineering students want to learn in their mother tongue"
-  },
-  "label": {
-   "en": "of engineering students want to learn in their mother tongue",
-   "te": "ఇంజనీరింగ్ విద్యార్థులు మాతృభాషలో నేర్చుకోవాలనుకుంటున్నారు"
-  },
-  "source": "AICTE survey",
-  "numbers": [
-   "44"
-  ]
- },
- "indicContent": {
-  "pct": 98,
-  "screen": {
-   "en": "98%",
-   "te": "98%"
-  },
-  "voice": {
-   "en": "98% of internet users"
-  },
-  "label": {
-   "en": "of internet users use Indian-language content",
-   "te": "ఇంటర్నెట్ యూజర్లు భారతీయ భాషల కంటెంట్ వాడుతున్నారు"
-  },
-  "source": "IAMAI–Kantar 2024",
-  "numbers": [
-   "98"
-  ]
- },
- "fresherHiring": {
-  "from": 6,
-  "to": 1.2,
-  "change": -80,
-  "fromLabel": "FY22",
-  "toLabel": "FY25",
-  "unit": {
-   "en": "lakh",
-   "te": "లక్షలు"
-  },
-  "screen": {
-   "en": "6 lakh (FY22) → 1.2 lakh (FY25), −80%",
-   "te": "6 లక్షలు (FY22) → 1.2 లక్షలు (FY25), −80%"
-  },
-  "voice": {
-   "en": "fallen 80% in three years"
-  },
-  "label": {
-   "en": "IT fresher hiring",
-   "te": "IT ఫ్రెషర్ నియామకాలు"
-  },
-  "source": "Xpheno, via Business Today",
-  "numbers": [
-   "80"
-  ]
- },
- "quote": {
-  "text": "You're not going to lose your job to an AI, but you're going to lose your job to someone who uses AI.",
-  "who": "Jensen Huang",
-  "where": "Milken Institute, May 2025",
-  "screen": {
-   "en": "You're not going to lose your job to an AI, but you're going to lose your job to someone who uses AI."
-  },
-  "source": "Jensen Huang, Milken Institute, May 2025",
-  "numbers": [],
-  "whoLine": {
-   "en": "Jensen Huang, CEO, Nvidia",
-   "te": "జెన్సెన్ హువాంగ్, CEO, Nvidia"
+  "tgSeats": {
+   "screen": "Telangana: 1,16,877 seats (2025-26)",
+   "voice_en": "1,16,877 in Telangana",
+   "source": "Source: Telangana Today",
+   "numbers": [],
+   "label": {
+    "en": "seats, Telangana (2025-26)"
+   }
   }
+ },
+ "founder_fill": {
+  "_note": "Empty = not known yet. Scripts show [FILL] and export as -DRAFT until filled.",
+  "pricePerStudentYear": "",
+  "costPerLearnerMonth": "",
+  "grossMargin": "",
+  "pilotResult": "",
+  "traction": "",
+  "team": "",
+  "ask": "",
+  "useOfFunds": "",
+  "contact": "+91 99639 99836 · +91 93924 31154",
+  "website": "https://inferexaa-official-website.vercel.app/",
+  "_contact_note": "The two directors' mobile numbers, as the founder asked (18 Nov 2026)."
  }
 }

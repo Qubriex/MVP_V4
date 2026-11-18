@@ -22,9 +22,11 @@ Brand in Telugu script: క్యూబిరెక్స్ (Qubirex).
 
 | # | Time | English voice-over (meaning to keep) | Telugu voice-over | Back-translation | English on-screen text | Telugu on-screen text |
 |---|---|---|---|---|---|---|
-| 1 | 0:00-0:04 | Doubt at 11 pm? No one to ask? | *draft:* Raatri 11 ki doubt vachinda? |  | Doubt at 11 pm? |  |
-| 2 | 0:04-0:20 | [Student, by voice] Why does my loop never stop? [Professor Qubirex] Your condition never becomes false. Add one to i inside the loop. |  |  | Voice question / Answer in your language / Sample |  |
-| 3 | 0:20-0:30 | Ask in Telugu, Hindi or English. Get the answer the way you speak. |  |  | Ask in your language |  |
-| 4 | 0:30-0:35 | Ask Professor Qubirex. |  |  | [website] |  |
+| 1 | 0:00-0:04 | Doubt at 11 pm? No one to ask? | *draft (Claude):* రాత్రి పదకొండు గంటలకు doubt వచ్చిందా? అడగడానికి ఎవరూ లేరా? | Got a doubt at eleven at night? No one to ask? | Doubt at 11 pm? | (English on screen: founder decision, 18 Nov 2026) |
+| 2 | 0:04-0:20 | [Student, by voice] Why does my loop never stop? [Professor Qubirex] Your condition never becomes false. Add one to i inside the loop. | *draft (Claude):* [Student, by voice] నా loop ఎందుకు ఆగడం లేదు? [Professor Qubirex] మీ condition ఎప్పటికీ false అవ్వడం లేదు. Loop లోపల i కి ఒకటి కలపండి. | Student: Why doesn't my loop stop? Professor: Your condition never becomes false. Add one to i inside the loop. | Voice question / Answer in your language / Sample | (English on screen: founder decision, 18 Nov 2026) |
+| 3 | 0:20-0:30 | Ask in Telugu, Hindi or English. Get the answer the way you speak. | *draft (Claude):* తెలుగు, హిందీ, లేదా ఇంగ్లీష్‌లో అడగండి. మీరు మాట్లాడే విధంగానే answer పొందండి. | Ask in Telugu, Hindi or English. Get the answer the way you speak. | Ask in your language | (English on screen: founder decision, 18 Nov 2026) |
+| 4 | 0:30-0:35 | Ask Professor Qubirex. | *draft (Claude):* ప్రొఫెసర్ క్యూబిరెక్స్‌ని అడగండి. | Ask Professor Qubirex. | [website] | (English on screen: founder decision, 18 Nov 2026) |
+
+**Voiced before review on the founder's go-ahead (18 Nov 2026); a native reviewer should still check every line.**
 
 **Native reviewer sign-off:** Name: ______  Date: ______  Approved: yes / no

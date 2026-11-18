@@ -1,9 +1,24 @@
 {
-  "_rules": "Fill from frontend/src/styles/tokens.css and the existing pitch videos. Claude Code: read tokens.css and replace the placeholders, then keep them fixed.",
-  "colors": {"background": "[from tokens.css / existing videos: dark navy bokeh]", "accent": "[orange used for section numbers]", "text": "[white]", "muted": "[grey]", "success": "[green tick]", "placeholderFill": "#FF8A00"},
-  "fonts": {"headings": "[existing heading font]", "body": "[existing body font]", "telugu": "Noto Sans Telugu (or the app's Telugu font)", "code": "[monospace used in the app]"},
-  "logo": "frontend/public/[logo file] (flame mark + wordmark)",
-  "tagline_en": "Your language. Your skills. Your future.",
-  "tagline_te": "[native writer to provide]",
-  "section_title_style": "orange 2-digit number + white title, e.g. 01 The problem"
+ "_rules": "Fill from frontend/src/styles/tokens.css and the existing pitch videos. Claude Code: read tokens.css and replace the placeholders, then keep them fixed.",
+ "colors": {
+  "background": "radial-gradient #1d1f3e → #0b0c16 (dark navy bokeh)",
+  "accent": "#F89833 (orange section numbers)",
+  "primary": "#E73B2B",
+  "crimson": "#BC1F3D",
+  "text": "#FFFFFF",
+  "muted": "#B9BCE6",
+  "success": "#2E9E6B",
+  "placeholderFill": "#FF8A00"
+ },
+ "fonts": {
+  "headings": "Outfit 600/700 (frontend/public/fonts)",
+  "body": "Anek Latin 500/600",
+  "telugu": "Anek Telugu 600/700 (the app's Telugu font)",
+  "code": "monospace"
+ },
+ "logo": "frontend/public/brand/qubirex-logo-notag-1280.png and qubirex-logo-notag-on-dark-1280.png (flame mark + wordmark)",
+ "tagline_en": "Your language. Your skills. Your future.",
+ "tagline_te": "మీ భాష. మీ స్కిల్స్. మీ భవిష్యత్తు. (draft; not shown on screen: Telugu versions use English on-screen text by founder decision, 18 Nov 2026)",
+ "section_title_style": "orange 2-digit number + white title, e.g. 01 The problem",
+ "_filled": "Filled from frontend/src/styles/tokens.css, frontend/public and the pitch-video engine (scripts/walkthrough/lib/story.html)."
 }

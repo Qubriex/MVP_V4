@@ -287,22 +287,22 @@ const PILLAR_ICONS = [
   '<svg viewBox="0 0 100 100" width="120" height="120"><path d="M50 12 L94 32 L50 52 L6 32Z" fill="#E73B2B"/><path d="M22 42 V64 C22 78 78 78 78 64 V42 L50 54Z" fill="#E73B2B" opacity=".85"/></svg>'
 ];
 B.pillars = (el, b) => {
-  el.innerHTML = b.items.map(x => x.replace(/A to Z/g, 'A&nbsp;to&nbsp;Z')).map((it, i) => `<div class="card abs" style="left:${170 + i * 540}px;top:330px;width:500px;height:440px;padding:50px 44px" data-c>${PILLAR_ICONS[i]}<div class="d" style="font-size:56px;font-weight:700;margin-top:34px;line-height:1.08">${it}</div></div>`).join('');
+  el.innerHTML = (b.header ? `<div class="abs d" style="left:0;right:0;text-align:center;top:190px;font-size:64px;font-weight:700">${F(b.header)}</div>` : '') + b.items.map(x => F(x).replace(/A to Z/g, 'A&nbsp;to&nbsp;Z')).map((it, i) => `<div class="card abs" style="left:${170 + i * 540}px;top:330px;width:500px;height:440px;padding:50px 44px" data-c>${(b.icons ? EXTRA_ICONS[b.icons[i]] : PILLAR_ICONS[i]) || ''}<div class="d" style="font-size:56px;font-weight:700;margin-top:34px;line-height:1.08">${it}</div></div>`).join('');
   const cs = [...el.querySelectorAll('[data-c]')];
-  return (t) => { const a = ENTER(b); const span = b.end - a; cs.forEach((c, i) => { const s = a + i * span * .22; vis(c, eo(p(t, s, s + .4))); c.style.transform = `translateY(${(1 - back(p(t, s, s + .6))) * 120}px)`; c.style.borderColor = t > s + .4 ? 'rgba(248,152,51,.55)' : 'rgba(255,255,255,.16)'; }); };
+  return (t) => { const a = ENTER(b); const span = b.end - a; cs.forEach((c, i) => { const s = a + i * Math.min(span * .22, 1.2); vis(c, eo(p(t, s, s + .4))); c.style.transform = `translateY(${(1 - back(p(t, s, s + .6))) * 120}px)`; c.style.borderColor = t > s + .4 ? 'rgba(248,152,51,.55)' : 'rgba(255,255,255,.16)'; }); };
 };
 B.pilot = (el, b) => {
-  el.innerHTML = `<div class="abs d" style="left:0;right:0;text-align:center;top:230px;font-size:76px;font-weight:700;color:#1b1b1f">${S('pilot', 'A pilot to measure it')}</div>
-    ${b.steps.map((s, i) => `<div class="abs" style="left:${200 + i * 400}px;top:420px;width:360px" data-s>
+  el.innerHTML = `<div class="abs d" style="left:0;right:0;text-align:center;top:230px;font-size:76px;font-weight:700;color:#1b1b1f">${F(b.header ?? S('pilot', 'A pilot to measure it'))}</div>
+    ${b.steps.map((s, i) => `<div class="abs" style="left:${(1920 - b.steps.length * 400) / 2 + 20 + i * 400}px;top:420px;width:360px" data-s>
       <div style="width:110px;height:110px;border-radius:50%;background:linear-gradient(135deg,#E73B2B,#F89833);color:#fff;display:grid;place-items:center;font-family:Outfit;font-size:56px;font-weight:700">${i + 1}</div>
-      <div class="d" style="font-size:44px;font-weight:700;color:#1b1b1f;margin-top:28px;line-height:1.12">${s}</div></div>`).join('')}`;
+      <div class="d" style="font-size:44px;font-weight:700;color:#1b1b1f;margin-top:28px;line-height:1.12">${F(s)}</div></div>`).join('')}`;
   const ss = [...el.querySelectorAll('[data-s]')];
-  return (t) => { const a = ENTER(b); const span = b.end - a; ss.forEach((s, i) => { const st = a + i * Math.min(1.2, span * .12); vis(s, eo(p(t, st, st + .4))); s.style.transform = `translateY(${(1 - back(p(t, st, st + .6))) * 70}px)`; }); };
+  return (t) => { const a = ENTER(b); const span = b.end - a; ss.forEach((s, i) => { const st = a + i * (b.stagger ?? Math.min(1.2, span * .12)); vis(s, eo(p(t, st, st + .4))); s.style.transform = `translateY(${(1 - back(p(t, st, st + .6))) * 70}px)`; }); };
 };
 B.close = (el, b) => {
   el.innerHTML = `<img class="abs" src="../../../frontend/public/brand/qubirex-logo-notag-on-dark-1280.png" style="left:50%;top:300px;width:820px;margin-left:-410px" data-l>
-    <div class="abs d" style="left:0;right:0;text-align:center;top:580px;font-size:78px;font-weight:600" data-t>${S('tagline', ['Your language.', 'Your skills.', 'Your future.']).map(w => `<span style="display:inline-block;margin:0 14px">${w}</span>`).join('')}</div>
-    <div class="abs" style="left:0;right:0;text-align:center;top:730px;font-size:46px;color:#FFD9B0;font-weight:600" data-u>${F(b.action || '')}${b.action ? ' · ' : ''}${F(window.STORY.url || '[website]')}</div>`;
+    <div class="abs d" style="left:0;right:0;text-align:center;top:580px;font-size:78px;font-weight:600" data-t>${(b.tagline || S('tagline', ['Your language.', 'Your skills.', 'Your future.'])).map(w => `<span style="display:inline-block;margin:0 14px">${w}</span>`).join('')}</div>
+    <div class="abs" style="left:0;right:0;text-align:center;top:730px;font-size:46px;color:#FFD9B0;font-weight:600" data-u>${F(b.action || '')}${b.action ? ' · ' : ''}${F(window.STORY.url || '[website]')}${b.contact ? `<div style="margin-top:14px;font-size:38px;color:#FFE3C4">${F(b.contact)}</div>` : ''}</div>`;
   const l = el.querySelector('[data-l]'); const ws = [...el.querySelectorAll('[data-t] span')]; const u = el.querySelector('[data-u]');
   return (t) => { const a = b.start; const span = (TOTAL - a);
     vis(l, eo(p(t, a, a + .6))); l.style.transform = `scale(${.9 + .1 * eo(p(t, a, a + 1.2))})`; l.style.filter = `drop-shadow(0 0 ${30 * (1 - p(t, a + .5, a + 2))}px rgba(248,152,51,.8))`;
@@ -329,6 +329,91 @@ window.qaLayers = () => {
     out.push({ id: QA_ID.get(el), kind, group, op: +op.toFixed(2), text: (el.closest('[data-n]') ? el.closest('[data-n]').textContent : el.textContent).trim().slice(0, 160), code: !!el.closest('[style*=monospace]') });
   }
   return out;
+};
+
+// ── Beats for the audience videos ──
+const EXTRA_ICONS = {
+  signed: '<svg viewBox="0 0 100 100" width="120" height="120"><path d="M50 8 L86 22 V50 C86 72 70 86 50 94 C30 86 14 72 14 50 V22Z" fill="#E73B2B"/><path d="M34 52 L46 64 L68 40" stroke="#fff" stroke-width="9" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  fresh: '<svg viewBox="0 0 100 100" width="120" height="120"><circle cx="50" cy="50" r="38" fill="none" stroke="#F89833" stroke-width="12"/><path d="M50 26 V52 L66 62" stroke="#F89833" stroke-width="10" fill="none" stroke-linecap="round"/></svg>',
+  verify: '<svg viewBox="0 0 100 100" width="120" height="120"><rect x="12" y="12" width="32" height="32" rx="4" fill="#BC1F3D"/><rect x="56" y="12" width="32" height="32" rx="4" fill="#BC1F3D"/><rect x="12" y="56" width="32" height="32" rx="4" fill="#BC1F3D"/><circle cx="72" cy="72" r="16" fill="#2e9e6b"/><path d="M64 72 L70 78 L80 66" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round"/></svg>',
+  college: '<svg viewBox="0 0 100 100" width="120" height="120"><path d="M50 12 L94 32 L50 52 L6 32Z" fill="#E73B2B"/><path d="M22 42 V64 C22 78 78 78 78 64 V42 L50 54Z" fill="#E73B2B" opacity=".85"/></svg>',
+  employer: '<svg viewBox="0 0 100 100" width="120" height="120"><rect x="14" y="32" width="72" height="52" rx="8" fill="#F89833"/><rect x="36" y="18" width="28" height="18" rx="4" fill="none" stroke="#F89833" stroke-width="7"/></svg>',
+  student: '<svg viewBox="0 0 100 100" width="120" height="120"><circle cx="50" cy="30" r="18" fill="#BC1F3D"/><path d="M16 92 C16 66 84 66 84 92Z" fill="#BC1F3D"/></svg>'
+};
+// One or more lines of text, a heading, an optional tag and source.
+B.text = (el, b) => {
+  const lines = b.lines || [];
+  el.innerHTML = `${b.heading ? `<div class="abs d" style="left:160px;right:160px;text-align:center;top:${b.top ?? 300}px;font-size:${b.size ?? 96}px;font-weight:700;line-height:1.1" data-h>${F(b.heading)}</div>` : ''}
+    <div class="abs" style="left:160px;right:160px;top:${(b.top ?? 300) + (b.heading ? (b.size ?? 96) * 1.3 * Math.ceil(b.heading.length / 28) + 50 : 0)}px;display:flex;flex-direction:column;align-items:center;gap:22px">${lines.map(l => `<div class="d" style="font-size:${b.lineSize ?? 52}px;font-weight:700;text-align:center;color:${b.lineColor || 'inherit'}" data-l>${F(l)}</div>`).join('')}</div>
+    ${b.tag ? `<div class="illus">${F(b.tag)}</div>` : ''}${SRC(b)}`;
+  const h = el.querySelector('[data-h]'); const ls = [...el.querySelectorAll('[data-l]')];
+  return (t) => { const a = ENTER(b); if (h) { vis(h, eo(p(t, a, a + .4))); h.style.transform = `translateY(${(1 - eo(p(t, a, a + .5))) * 30}px)`; }
+    const st = b.stagger ?? Math.min(.8, (b.end - a) * .5 / Math.max(1, ls.length));
+    ls.forEach((l, i) => { const s0 = a + (h ? .4 : 0) + i * st; vis(l, eo(p(t, s0, s0 + .35))); l.style.transform = `translateY(${(1 - eo(p(t, s0, s0 + .45))) * 24}px)`; }); };
+};
+// An illustrated person at a desk with a spreadsheet, and their question.
+B.persona = (el, b) => {
+  el.innerHTML = `<svg class="abs" width="640" height="560" viewBox="0 0 640 560" style="left:150px;top:300px" data-p>
+      <rect x="40" y="380" width="560" height="26" rx="10" fill="#3a3f7a"/><rect x="80" y="406" width="22" height="150" fill="#2b2f5c"/><rect x="538" y="406" width="22" height="150" fill="#2b2f5c"/>
+      <rect x="300" y="190" width="270" height="180" rx="14" fill="#f4f1ff"/>${Array.from({ length: 5 }, (_, r) => Array.from({ length: 4 }, (_, c) => `<rect x="${318 + c * 62}" y="${212 + r * 30}" width="54" height="20" rx="3" fill="${(r + c) % 3 === 0 ? '#F89833' : '#c9cdf2'}" opacity="${r === 0 ? 1 : .7}"/>`).join('')).join('')}
+      <path d="M90 380 C 95 300, 150 270, 200 270 C 250 270, 300 300, 300 380 Z" fill="#E73B2B"/>
+      <circle cx="200" cy="200" r="58" fill="#c98f6a"/><path d="M142 196 C 140 130, 262 128, 258 200 C 240 160, 190 150, 142 196 Z" fill="#1c1f3d"/>
+      <circle cx="182" cy="206" r="6" fill="#2a1d18"/><circle cx="220" cy="206" r="6" fill="#2a1d18"/><path d="M186 232 Q201 238 216 232" stroke="#7a3f2c" stroke-width="5" fill="none" stroke-linecap="round"/></svg>
+    <div class="abs d" style="left:860px;top:300px;width:900px;font-size:40px;font-weight:600;color:#FFD9B0;letter-spacing:.06em;text-transform:uppercase" data-k>${F(b.kicker || '')}</div>
+    <div class="abs d" style="left:860px;top:370px;width:900px;font-size:66px;font-weight:700;line-height:1.15" data-q>${F(b.question)}</div>
+    <div class="illus">${S('illustrative', 'Illustrative story')}</div>`;
+  const P = el.querySelector('[data-p]'); const k = el.querySelector('[data-k]'); const q = el.querySelector('[data-q]');
+  return (t) => { const a = ENTER(b); P.style.transform = `translateY(${(1 - eo(p(t, a, a + .8))) * 40}px)`; vis(P, eo(p(t, a, a + .5))); vis(k, eo(p(t, a + .2, a + .6))); vis(q, eo(p(t, a + .4, a + .9))); q.style.transform = `translateX(${(1 - eo(p(t, a + .4, a + 1))) * 40}px)`; };
+};
+// A pile of résumé cards falling onto the desk, under the heading.
+B.resumes = (el, b) => {
+  const cards = Array.from({ length: 18 }, (_, i) => ({ x: 560 + ((i * 97) % 640), r: ((i * 37) % 30) - 15, d: i * .09 }));
+  el.innerHTML = `${cards.map((c, i) => `<div class="abs" style="left:${c.x}px;top:520px;width:260px;height:320px;border-radius:14px;background:#f4f1ff;box-shadow:0 18px 40px rgba(0,0,0,.35);padding:26px" data-r="${i}"><div style="height:22px;width:60%;background:#5c6199;border-radius:6px"></div>${Array.from({ length: 6 }, (_, j) => `<div style="margin-top:18px;height:12px;width:${90 - j * 9}%;background:#c9cdf2;border-radius:6px"></div>`).join('')}</div>`).join('')}
+    <div class="abs d" style="left:0;right:0;text-align:center;top:190px;font-size:104px;font-weight:700" data-h>${F(b.heading)}</div>`;
+  const rs = [...el.querySelectorAll('[data-r]')]; const h = el.querySelector('[data-h]');
+  return (t) => { const a = ENTER(b); rs.forEach((r, i) => { const k = eo(p(t, a + cards[i].d, a + cards[i].d + .5)); r.style.transform = `translateY(${(1 - k) * -700}px) rotate(${cards[i].r * k}deg)`; vis(r, k > 0 ? 1 : 0); }); vis(h, eo(p(t, a + .3, a + .7))); };
+};
+// Rows of a table: name, what it does, and (highlighted) what it misses.
+B.table = (el, b) => {
+  const cols = b.cols || ['', '', ''];
+  el.innerHTML = `${b.heading ? `<div class="abs d" style="left:230px;top:200px;font-size:64px;font-weight:700">${F(b.heading)}</div>` : ''}
+    <div class="abs" style="left:230px;top:${b.heading ? 320 : 230}px;width:1460px;display:grid;grid-template-columns:${b.grid || '320px 1fr'};gap:20px 30px;align-items:center;font-size:40px">
+    ${cols.some(Boolean) ? cols.map(c => `<div class="d" style="font-size:34px;font-weight:700;color:#b9bce6">${F(c)}</div>`).join('') : ''}
+    ${b.rows.map(r => r.map((c, j) => `<div data-r style="${j === 0 ? 'font-weight:700' : ''}${r.hi || (b.hiLast && r === b.rows[b.rows.length - 1]) ? ';background:rgba(248,152,51,.16);border:1px solid rgba(248,152,51,.45);border-radius:14px;padding:12px 18px;font-weight:600' : ''}">${F(c)}</div>`).join('')).join('')}</div>${SRC(b)}`;
+  const cells = [...el.querySelectorAll('[data-r]')]; const per = b.rows[0].length;
+  return (t) => { const a = ENTER(b); const st = Math.min(.9, (b.end - a) * .6 / b.rows.length); cells.forEach((c, i) => { const s0 = a + .2 + Math.floor(i / per) * st; vis(c, eo(p(t, s0, s0 + .35))); c.style.transform = `translateX(${(1 - eo(p(t, s0, s0 + .45))) * 30}px)`; }); };
+};
+// Cards with a label and a value (values may be [FILL] blanks).
+B.cards = (el, b) => {
+  const n = b.items.length; const w = Math.min(500, (1580 - (n - 1) * 30) / n);
+  el.innerHTML = `${b.heading ? `<div class="abs d" style="left:0;right:0;text-align:center;top:210px;font-size:72px;font-weight:700">${F(b.heading)}</div>` : ''}
+    ${b.items.map((it, i) => `<div class="card abs" style="left:${(1920 - (n * w + (n - 1) * 30)) / 2 + i * (w + 30)}px;top:380px;width:${w}px;min-height:300px;padding:40px 36px" data-c>${it.icon ? EXTRA_ICONS[it.icon] : ''}<div class="d" style="font-size:46px;font-weight:700;margin-top:${it.icon ? 22 : 0}px">${F(it.label)}</div>${it.value ? `<div style="font-size:38px;margin-top:18px;line-height:1.3">${F(it.value)}</div>` : ''}</div>`).join('')}${SRC(b)}`;
+  const cs = [...el.querySelectorAll('[data-c]')];
+  return (t) => { const a = ENTER(b); cs.forEach((c, i) => { const s0 = a + i * .45; vis(c, eo(p(t, s0, s0 + .4))); c.style.transform = `translateY(${(1 - back(p(t, s0, s0 + .6))) * 70}px)`; }); };
+};
+// A funnel from the whole market to the first target (values from facts.json).
+B.funnel = (el, b) => {
+  el.innerHTML = `${b.heading ? `<div class="abs d" style="left:0;right:0;text-align:center;top:180px;font-size:68px;font-weight:700">${F(b.heading)}</div>` : ''}
+    ${b.rows.map((r, i) => `<div class="abs" style="left:${260 + i * 150}px;right:${260 + i * 150}px;top:${330 + i * 190}px;height:150px;border-radius:20px;background:${['#5c6199', 'linear-gradient(90deg,#E73B2B,#F89833)', 'rgba(248,152,51,.22)'][i]};display:flex;align-items:center;justify-content:space-between;padding:0 44px;font-size:42px;font-weight:700" data-f><span>${F(r[0])}</span><span class="big" style="font-size:52px">${F(r[1])}</span></div>`).join('')}${SRC(b)}`;
+  const fs = [...el.querySelectorAll('[data-f]')];
+  return (t) => { const a = ENTER(b); const st = Math.min(1.6, (b.end - a) * .3); fs.forEach((f, i) => { const s0 = a + .2 + i * st; vis(f, eo(p(t, s0, s0 + .4))); f.style.transform = `scaleX(${.85 + .15 * eo(p(t, s0, s0 + .6))})`; }); };
+};
+// Three stat chips (number + label + source).
+B.chips3 = (el, b) => {
+  el.innerHTML = `${b.items.map((it, i) => `<div class="card abs" style="left:${200 + i * 520}px;top:380px;width:480px;height:320px;padding:44px" data-c><div class="big" style="font-size:110px;color:#F89833">${it.big}</div><div style="font-size:36px;font-weight:600;margin-top:10px">${it.label}</div><div style="font-size:24px;opacity:.75;margin-top:16px">${S('source', 'Source:')} ${it.source}</div></div>`).join('')}`;
+  const cs = [...el.querySelectorAll('[data-c]')];
+  return (t) => { const a = ENTER(b); cs.forEach((c, i) => { const s0 = a + i * 1.0; vis(c, eo(p(t, s0, s0 + .35))); c.style.transform = `translateY(${(1 - back(p(t, s0, s0 + .55))) * 60}px)`; }); };
+};
+// Where founder footage goes, until it is filmed.
+B.founder = (el, b) => {
+  el.innerHTML = `<div class="abs" style="left:260px;top:170px;width:1400px;height:700px;border-radius:28px;border:4px dashed #FF8A00;background:rgba(255,138,0,.08);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;text-align:center;padding:60px" data-c>
+      <svg viewBox="0 0 100 100" width="140" height="140"><rect x="8" y="26" width="62" height="48" rx="8" fill="#FF8A00"/><path d="M72 42 L94 30 V70 L72 58Z" fill="#FF8A00"/></svg>
+      <div class="d" style="font-size:64px;font-weight:700;color:#FF8A00">Founder on camera</div>
+      <div style="font-size:34px;line-height:1.35;max-width:1100px;opacity:.9">${F(b.line || '')}</div>
+      <div style="font-size:26px;opacity:.7">Placeholder: film this clip (video/assets/founder/HOW_TO_FILM.md)</div></div>
+    ${b.lower ? `<div class="abs" style="left:120px;top:900px;background:rgba(11,12,22,.85);border-left:8px solid #F89833;padding:18px 30px;font-size:34px;font-weight:600">${F(b.lower)}</div>` : ''}`;
+  const c = el.querySelector('[data-c]');
+  return (t) => { const a = ENTER(b); vis(c, eo(p(t, a, a + .4))); };
 };
 
 // Build every beat.

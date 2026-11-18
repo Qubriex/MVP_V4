@@ -2,7 +2,7 @@
   "name": "qubirex",
   "private": true,
   "type": "module",
-  "description": "Vercel project root: the React site (frontend/) and the API function (api/ → backend/).",
+  "description": "Vercel project root: the React site (frontend/) and the API function (api/ \u2192 backend/).",
   "engines": {
     "node": "22.x"
   },
@@ -13,6 +13,10 @@
     "walkthrough:all": "node scripts/walkthrough/all.mjs",
     "walkthrough:pitch": "node scripts/walkthrough/pitch.mjs",
     "walkthrough:pitch-motion": "node scripts/walkthrough/pitch-motion.mjs",
-    "walkthrough:story": "node scripts/walkthrough/story.mjs"
+    "walkthrough:story": "node scripts/walkthrough/story.mjs",
+    "video:parse": "node video/lib/parse-script.mjs",
+    "video:record": "node video/shots.mjs --lang te",
+    "video:render": "node video/make.mjs",
+    "video:all": "bash video/render-all.sh"
   }
 }

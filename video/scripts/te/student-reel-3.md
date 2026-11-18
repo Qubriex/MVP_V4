@@ -22,9 +22,11 @@ Brand in Telugu script: క్యూబిరెక్స్ (Qubirex).
 
 | # | Time | English voice-over (meaning to keep) | Telugu voice-over | Back-translation | English on-screen text | Telugu on-screen text |
 |---|---|---|---|---|---|---|
-| 1 | 0:00-0:04 | Marks show you passed. This shows you can. | *draft:* Marks meeru pass ayyarani chupistayi. Idi meeru cheyagalarani chupistundi. |  | Marks show you passed. This shows you can. |  |
-| 2 | 0:04-0:20 | Every skill you prove with a fresh check goes on your signed Capability Passport. |  |  | Capability Passport / Sample |  |
-| 3 | 0:20-0:30 | Employers scan it and see the proof. |  |  | Scan -> Verify |  |
-| 4 | 0:30-0:35 | Build yours on Qubirex. |  |  | Build yours / [website] |  |
+| 1 | 0:00-0:04 | Marks show you passed. This shows you can. | *draft (Claude):* Marks మీరు pass అయ్యారని చూపిస్తాయి. ఇది మీరు చేయగలరని చూపిస్తుంది. | Marks show that you passed. This shows that you can do it. | Marks show you passed. This shows you can. | (English on screen: founder decision, 18 Nov 2026) |
+| 2 | 0:04-0:20 | Every skill you prove with a fresh check goes on your signed Capability Passport. | *draft (Claude):* Fresh check తో మీరు నిరూపించిన ప్రతి స్కిల్, సంతకంతో ఉన్న మీ కేపబిలిటీ పాస్‌పోర్ట్‌లో చేరుతుంది. | Every skill you prove with a fresh check goes into your signed Capability Passport. | Capability Passport / Sample | (English on screen: founder decision, 18 Nov 2026) |
+| 3 | 0:20-0:30 | Employers scan it and see the proof. | *draft (Claude):* కంపెనీలు దాన్ని scan చేసి, proof చూస్తాయి. | Companies scan it and see the proof. | Scan -> Verify | (English on screen: founder decision, 18 Nov 2026) |
+| 4 | 0:30-0:35 | Build yours on Qubirex. | *draft (Claude):* క్యూబిరెక్స్‌లో మీ పాస్‌పోర్ట్ తయారు చేసుకోండి. | Build your passport on Qubirex. | Build yours / [website] | (English on screen: founder decision, 18 Nov 2026) |
+
+**Voiced before review on the founder's go-ahead (18 Nov 2026); a native reviewer should still check every line.**
 
 **Native reviewer sign-off:** Name: ______  Date: ______  Approved: yes / no

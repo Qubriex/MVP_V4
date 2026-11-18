@@ -78,7 +78,8 @@ export function runQa(o) {
   const add = (name, ok, detail) => checks.push({ name, ok, detail });
 
   // 1. Voice.
-  const style = STYLE.filter(re => re.test(o.heard)).map(String);
+  const banned = [...STYLE, ...(o.banned || []).map(x => new RegExp(x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'))];
+  const style = banned.filter(re => re.test(o.heard)).map(String);
   add('voice: no style text read aloud', style.length === 0, style.length ? `heard: ${style.join(', ')}` : 'none heard');
   if (o.lang === 'en') {
     const want = new Set(o.script.flatMap(numbersIn));
@@ -100,7 +101,7 @@ export function runQa(o) {
   const spans = new Map(); // id → { kind, text, code, runs: [[a,b]] }
   const overlaps = [];
   for (const f of o.frames) {
-    const titles = f.layers.filter(l => l.kind === 'title' && l.op > 0.1);
+    const titles = f.layers.filter(l => l.kind === 'title' && l.op > 0.1 && l.group !== 'caption');
     const groups = new Set(titles.map(l => l.group));
     if (groups.size > 1) overlaps.push({ t: f.t, texts: titles.map(l => l.text.slice(0, 40)) });
     for (const l of f.layers) {
@@ -109,7 +110,7 @@ export function runQa(o) {
       if (l.op > 0.5) { const last = sp.runs[sp.runs.length - 1]; if (last && f.t - last[1] < 0.07) last[1] = f.t; else sp.runs.push([f.t, f.t]); }
     }
   }
-  if (o.lang === 'te') {
+  if (o.lang === 'te' && o.teluguText !== false) {
     const bad = [...new Set([...spans.values()].filter(s => ['title', 'label', 'chip'].includes(s.kind) && !s.code && englishOnly(s.text)).map(s => s.text))];
     add('text: no English-only titles, labels or captions', bad.length === 0, bad.length ? `English-only: ${bad.slice(0, 8).map(x => `"${x.slice(0, 50)}"`).join(', ')}` : 'all Telugu (tech words and brand allowed)');
   }
@@ -117,14 +118,21 @@ export function runQa(o) {
   const end = o.frames.length ? o.frames[o.frames.length - 1].t : 0;
   const short = [];
   for (const s of spans.values()) {
-    if (s.kind === 'deco' || !s.runs.length) continue;
+    if (s.kind === 'deco' || s.kind === 'caption' || !s.runs.length) continue;
     const longest = Math.max(...s.runs.map(([a, b]) => b - a + 1 / 30));
     const words = s.text.split(/\s+/).filter(Boolean).length;
-    const need = s.code ? 4.5 : Math.max(2, words / 3);
+    const need = s.code ? (o.codeHold ?? 4.5) : Math.max(2, words / 3);
     const lastRun = s.runs[s.runs.length - 1];
     if (longest + 0.05 < need && !(lastRun[1] >= end - 0.05)) short.push(`"${s.text.slice(0, 40)}" ${longest.toFixed(1)} s < ${need.toFixed(1)} s`);
   }
   add('text: read time held', short.length === 0, short.length ? short.slice(0, 6).join('; ') : `${spans.size} text layers checked`);
+
+  // Code shown on screen runs: the bug really is a bug, and the fix works.
+  if (o.codeTest) {
+    const py = 'def add(a, b):\n    return a * b\nassert add(2, 3) != 5\ndef add(a, b):\n    return a + b\nassert add(2, 3) == 5 and add(-1, 1) == 0\nprint("ok")';
+    const r = spawnSync('python3', ['-I', '-c', py], { encoding: 'utf8' });
+    add('code: the snippet runs (bug fails, fix passes)', r.stdout.trim() === 'ok', r.stdout.trim() === 'ok' ? 'add(a, b): "a * b" fails the test, "a + b" passes' : (r.stderr || 'did not run').slice(0, 200));
+  }
 
   // 5. Loudness and format.
   const L = loudness(o.file); const P = probe(o.file);

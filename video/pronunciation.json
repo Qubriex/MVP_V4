@@ -1,5 +1,40 @@
 {
-  "_note": "How names are said. Agreed spelling until the founder confirms otherwise. Gemini TTS has no custom-pronunciation field, so the brand is written phonetically in the text sent to TTS; Cloud TTS Chirp 3 HD (which has one) is not reachable with API keys. Every mention in a video is then the same recorded clip (see story.mjs: brand splice).",
-  "Qubirex": { "say": "KYOO-bih-rex", "ipa": "ˈkjuː.bɪ.rɛks", "tts": { "en": "Kyoobirex", "te": "క్యూబిరెక్స్" }, "screen": { "en": "Qubirex", "te": "Qubirex" } },
-  "Jensen Huang": { "say": "JEN-sen HWAHNG", "tts": { "en": "Jensen Hwahng", "te": "జెన్సెన్ హ్వాంగ్" } }
+ "_rules": "Every engine must say these the same way in every video. Founder to confirm 'Qubirex' before Phase 1 voicing.",
+ "terms": [
+  {
+   "word": "Qubirex",
+   "say_en": "CUBE-bi-rex",
+   "ipa": "ˈkjuːb.bɪ.rɛks",
+   "te_script": "క్యూబిరెక్స్",
+   "confirmed_by_founder": true,
+   "confirmed": "18 Nov 2026: \"cube-bi-rex is right\"",
+   "tts_en": "Cube-bi-rex",
+   "tts_te": "క్యూబిరెక్స్"
+  },
+  {
+   "word": "Jensen Huang",
+   "say_en": "JEN-sen HWAHNG",
+   "ipa": "ˈdʒɛnsən ˈhwɑːŋ",
+   "te_script": "జెన్సెన్ హువాంగ్",
+   "tts_en": "Jensen Hwahng",
+   "tts_te": "జెన్సెన్ హువాంగ్"
+  },
+  {
+   "word": "AICTE",
+   "say_en": "A-I-C-T-E (letters)",
+   "tts_en": "A I C T E"
+  },
+  {
+   "word": "IAMAI",
+   "say_en": "I-A-M-A-I (letters)",
+   "tts_en": "I A M A I"
+  },
+  {
+   "word": "TPO",
+   "say_en": "T-P-O (letters)",
+   "tts_en": "T P O"
+  }
+ ],
+ "how": "Use the TTS engine's custom-pronunciation feature if supported (IPA). Otherwise send the say_en spelling in the TTS text. After rendering, the QA transcript must show the brand the same way at every mention.",
+ "engine_note": "Gemini TTS has no custom-pronunciation field (Chirp 3 HD, which has one, is not reachable with API keys), so the tts_en / tts_te spelling is sent; every brand mention in a video is then the same recorded clip."
 }

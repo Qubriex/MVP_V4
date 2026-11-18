@@ -22,10 +22,12 @@ Brand in Telugu script: క్యూబిరెక్స్ (Qubirex).
 
 | # | Time | English voice-over (meaning to keep) | Telugu voice-over | Back-translation | English on-screen text | Telugu on-screen text |
 |---|---|---|---|---|---|---|
-| 1 | 0:00-0:10 | 2,000 resumes. 20 seats. Which ones can actually code? |  |  | 2,000 resumes. 20 seats. |  |
-| 2 | 0:10-0:40 | Scan a Qubirex Capability Passport. See every skill the student proved, the evidence behind it, and the fresh check they passed on their own. |  |  | Scan -> Verify -> Evidence per skill / Sample passport |  |
-| 3 | 0:40-1:05 | Search candidates by proven skill, see who is ready, and invite them to interview. |  |  | Search by skill / Readiness / Invite / Sample data |  |
-| 4 | 1:05-1:20 | Signed records. Fresh checks. Anyone can verify. Test fewer, test the right ones. |  |  | Signed / Fresh checks / Verifiable |  |
-| 5 | 1:20-1:26 | Qubirex. Request candidate access. |  |  | [FILL: contact] / [website] |  |
+| 1 | 0:00-0:10 | 2,000 resumes. 20 seats. Which ones can actually code? | *draft (Claude):* రెండు వేల resumes. ఇరవై seats. వీళ్లలో నిజంగా కోడ్ చేయగలిగేది ఎవరు? | Two thousand resumes. Twenty seats. Which of them can really code? | 2,000 resumes. 20 seats. | (English on screen: founder decision, 18 Nov 2026) |
+| 2 | 0:10-0:40 | Scan a Qubirex Capability Passport. See every skill the student proved, the evidence behind it, and the fresh check they passed on their own. | *draft (Claude):* క్యూబిరెక్స్ కేపబిలిటీ పాస్‌పోర్ట్‌ని scan చేయండి. విద్యార్థి నిరూపించిన ప్రతి స్కిల్, దాని వెనక ఉన్న evidence, వాళ్లు సొంతంగా పాస్ అయిన fresh check, అన్నీ చూడొచ్చు. | Scan a Qubirex Capability Passport. You can see every skill the student proved, the evidence behind it, and the fresh check they passed on their own. | Scan -> Verify -> Evidence per skill / Sample passport | (English on screen: founder decision, 18 Nov 2026) |
+| 3 | 0:40-1:05 | Search candidates by proven skill, see who is ready, and invite them to interview. | *draft (Claude):* నిరూపించిన స్కిల్‌తో candidates ని వెతకండి, ఎవరు రెడీగా ఉన్నారో చూడండి, interview కి పిలవండి. | Search for candidates by proven skill, see who is ready, and invite them to interview. | Search by skill / Readiness / Invite / Sample data | (English on screen: founder decision, 18 Nov 2026) |
+| 4 | 1:05-1:20 | Signed records. Fresh checks. Anyone can verify. Test fewer, test the right ones. | *draft (Claude):* సంతకంతో ఉన్న records. Fresh checks. ఎవరైనా వెరిఫై చేయొచ్చు. తక్కువ మందిని test చేయండి, సరైన వాళ్లనే test చేయండి. | Signed records. Fresh checks. Anyone can verify. Test fewer people; test only the right ones. | Signed / Fresh checks / Verifiable | (English on screen: founder decision, 18 Nov 2026) |
+| 5 | 1:20-1:26 | Qubirex. Request candidate access. | *draft (Claude):* క్యూబిరెక్స్. Candidate access కోసం request చేయండి. | Qubirex. Request candidate access. | [FILL: contact] / [website] | (English on screen: founder decision, 18 Nov 2026) |
+
+**Voiced before review on the founder's go-ahead (18 Nov 2026); a native reviewer should still check every line.**
 
 **Native reviewer sign-off:** Name: ______  Date: ______  Approved: yes / no

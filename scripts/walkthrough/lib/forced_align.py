@@ -33,6 +33,22 @@ def main(wav, lines_file):
     d = Decoder(samprate=16000, bestpath=False)
     for w, ph in EXTRA.items():
         d.add_word(w, ph, True)
+    # Words the dictionary lacks: try the base word ("cohort's" -> "cohort"),
+    # else leave the word out (its neighbours still place the line).
+    def known(w):
+        try:
+            return d.lookup_word(w) is not None
+        except Exception:
+            return False
+    fixed = []
+    for w, li in seq:
+        if known(w):
+            fixed.append((w, li))
+        else:
+            base = re.sub(r"'s$|'$|s'$", '', w)
+            if base != w and known(base):
+                fixed.append((base, li))
+    seq = fixed
     d.set_align_text(' '.join(w for w, _ in seq))
     d.start_utt(); d.process_raw(raw, full_utt=True); d.end_utt()
     got = [s for s in d.seg() if s.word not in ('<s>', '</s>', '<sil>', '(NULL)')]

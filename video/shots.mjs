@@ -39,6 +39,20 @@ const SHOTS = {
     persona: 'lakshmi', learning,
     run: async (page) => { await lessonTo(page, 'code'); const notes = page.locator('main summary:has-text("All line notes")').first(); if (await notes.count()) { await notes.click(); await page.waitForTimeout(400); } }
   },
+  lesson: { persona: 'lakshmi', learning, run: (page) => lessonTo(page) },
+  courses: { persona: 'lakshmi', learning, run: async (page) => { await page.goto(`${BASE}/learn/courses`); await page.waitForLoadState('networkidle'); } },
+  ask: {
+    // A doubt typed in Telugu during the lesson, and Professor Qubirex's answer.
+    persona: 'lakshmi', learning,
+    run: async (page) => {
+      await lessonTo(page);
+      await page.fill('[data-ask] input', 'నా loop ఎందుకు ఆగడం లేదు? while i < 5 లో print(i) మాత్రమే ఉంది.');
+      await page.click('[data-ask] button[type=submit]');
+      await page.waitForSelector('[data-ask-answer="0"]', { timeout: 90000 });
+      await page.waitForTimeout(1500);
+      await page.locator('[data-ask]').scrollIntoViewIfNeeded();
+    }
+  },
   practise: {
     persona: 'lakshmi', learning,
     run: async (page) => {
@@ -49,6 +63,16 @@ const SHOTS = {
       await ed.fill('def multiply(a, b):\n    return a * b\n');
       await page.click('[data-run-tests]'); await page.waitForSelector('[data-practice-result="pass"]', { timeout: 90000 });
       await page.locator('[data-test-results]').scrollIntoViewIfNeeded();
+    }
+  },
+  check: {
+    persona: 'lakshmi', learning,
+    run: async (page) => {
+      await lessonTo(page, 'code');
+      await page.click('.lj-stepper [data-step="practise"] button'); await page.waitForSelector('[data-editor]');
+      await page.locator('[data-editor] textarea, textarea[data-editor]').first().fill('def multiply(a, b):\n    return a * b\n');
+      await page.click('[data-run-tests]'); await page.waitForSelector('[data-practice-result="pass"]', { timeout: 90000 });
+      await page.click('.lj-stepper [data-step="check"] button'); await page.waitForLoadState('networkidle'); await page.waitForTimeout(800);
     }
   },
   passport: { persona: 'lakshmi', learning, run: async (page) => { await page.goto(`${BASE}/learn/passport`); await page.waitForSelector('h2:has-text("Skills")'); } },
@@ -64,6 +88,15 @@ const SHOTS = {
     // The Telugu cohort's readiness table: who is ready, and why not.
     persona: 'placement',
     run: async (page) => { await page.goto(`${BASE}/institution/home`); await page.waitForLoadState('networkidle'); const href = await page.locator('main a[href$="-eng-te?tab=Readiness"]').first().getAttribute('href'); await page.goto(`${BASE}${href}`); await page.waitForSelector('main table'); }
+  },
+  whynot: {
+    // "Why not ready?" for one student in the Telugu cohort.
+    persona: 'placement',
+    run: async (page) => { await page.goto(`${BASE}/institution/home`); await page.waitForLoadState('networkidle'); const href = await page.locator('main a[href$="-eng-te?tab=Readiness"]').first().getAttribute('href'); await page.goto(`${BASE}${href}`); await page.waitForSelector('main table'); await page.locator('main table button:has-text("Why not ready?")').nth(1).click(); await page.waitForTimeout(1200); }
+  },
+  overview: {
+    persona: 'placement',
+    run: async (page) => { await page.goto(`${BASE}/institution/home`); await page.waitForLoadState('networkidle'); const href = await page.locator('main a[href$="-eng-te?tab=Readiness"]').first().getAttribute('href'); await page.goto(`${BASE}${href.replace('Readiness', 'Overview')}`); await page.waitForLoadState('networkidle'); await page.waitForTimeout(800); }
   },
   employer: {
     persona: 'recruiter',
