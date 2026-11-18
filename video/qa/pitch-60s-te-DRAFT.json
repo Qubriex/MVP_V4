@@ -1,0 +1,52 @@
+{
+ "name": "pitch-60s-te-DRAFT",
+ "pass": false,
+ "checks": [
+  {
+   "name": "voice: no style text read aloud",
+   "ok": true,
+   "detail": "none heard"
+  },
+  {
+   "name": "voice: numbers match facts.json",
+   "ok": true,
+   "detail": "4 numbers heard, all in the facts"
+  },
+  {
+   "name": "voice: \"Qubirex\" said one way",
+   "ok": true,
+   "detail": "0 mentions at —; not spliced; the transcript wrote it as: cuberex"
+  },
+  {
+   "name": "text: no English-only titles, labels or captions",
+   "ok": false,
+   "detail": "English-only: \"# add two numbersdef add(a, b):    return a + b\""
+  },
+  {
+   "name": "text: one title at a time",
+   "ok": true,
+   "detail": "no frame with two titles"
+  },
+  {
+   "name": "text: read time held",
+   "ok": false,
+   "detail": "\"0.0 కోట్లు\" 0.0 s < 2.0 s; \"0.1 కోట్లు\" 0.0 s < 2.0 s; \"0.2 కోట్లు\" 0.0 s < 2.0 s; \"0.3 కోట్లు\" 0.0 s < 2.0 s; \"0.3 కోట్లు\" 0.0 s < 2.0 s; \"0.4 కోట్లు\" 0.0 s < 2.0 s"
+  },
+  {
+   "name": "loudness: -16 LUFS ±1, true peak ≤ −1 dBTP",
+   "ok": true,
+   "detail": "-16 LUFS, true peak -4.4 dBTP"
+  },
+  {
+   "name": "format: size, 30 fps, length",
+   "ok": false,
+   "detail": "1920×1080, 30 fps, 55.07 s (allowed 30–55 s)"
+  }
+ ],
+ "lufs": -16,
+ "truePeak": -4.4,
+ "duration": 55.07,
+ "sheet": "video/qa/pitch-60s-te-DRAFT-sheet.jpg",
+ "brand": [],
+ "at": "2026-11-18T04:49:59.788Z"
+}

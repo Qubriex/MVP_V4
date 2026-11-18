@@ -1,0 +1,73 @@
+{
+ "name": "pitch-3min-en-DRAFT",
+ "pass": false,
+ "checks": [
+  {
+   "name": "voice: no style text read aloud",
+   "ok": true,
+   "detail": "none heard"
+  },
+  {
+   "name": "voice: numbers match the script and facts.json",
+   "ok": true,
+   "detail": "all 9 fact numbers heard, no others"
+  },
+  {
+   "name": "voice: \"Qubirex\" said one way",
+   "ok": true,
+   "detail": "5 mentions at 49.0 s, 51.4 s, 114.3 s, 118.0 s, 130.9 s; every mention is the same recorded clip; the transcript wrote it as: quberx"
+  },
+  {
+   "name": "text: one title at a time",
+   "ok": true,
+   "detail": "no frame with two titles"
+  },
+  {
+   "name": "text: read time held",
+   "ok": false,
+   "detail": "\"हिंदी\" 1.9 s < 2.0 s; \"English\" 1.8 s < 2.0 s; \"Employers\" 1.9 s < 2.0 s; \"D\" 1.4 s < 2.0 s; \"A to Z, in one place\" 1.4 s < 2.0 s; \"Get hired\" 1.2 s < 2.0 s"
+  },
+  {
+   "name": "loudness: -16 LUFS ±1, true peak ≤ −1 dBTP",
+   "ok": true,
+   "detail": "-16 LUFS, true peak -1.3 dBTP"
+  },
+  {
+   "name": "format: size, 30 fps, length",
+   "ok": true,
+   "detail": "1920×1080, 30 fps, 138.6 s (allowed 90–160 s)"
+  }
+ ],
+ "lufs": -16,
+ "truePeak": -1.3,
+ "duration": 138.6,
+ "sheet": "video/qa/pitch-3min-en-DRAFT-sheet.jpg",
+ "brand": [
+  {
+   "line": 8,
+   "t": 49.03,
+   "dur": 0.67
+  },
+  {
+   "line": 9,
+   "t": 51.39,
+   "dur": 0.67
+  },
+  {
+   "line": 18,
+   "t": 114.29,
+   "dur": 0.67
+  },
+  {
+   "line": 19,
+   "t": 117.97,
+   "dur": 0.67
+  },
+  {
+   "line": 21,
+   "t": 130.93,
+   "dur": 0.67
+  }
+ ],
+ "at": "2026-11-18T04:47:21.610Z"
+}

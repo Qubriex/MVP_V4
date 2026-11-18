@@ -2,14 +2,57 @@
  "pitch-60s-en": {
   "key": "pitch-60s-en",
   "file": "qa/failed/pitch-60s-en-DRAFT.mp4",
-  "duration": 50.24,
+  "duration": 51.24,
   "lufs": -16,
-  "truePeak": -1.5,
+  "truePeak": -1.2,
   "engine": "Gemini TTS gemini-3.8-flash-tts (en-IN, Kore); Chirp 3 HD not reachable with API keys",
   "pass": false,
   "failed": [
-   "text: read time held (\"Source: AISHE 2023–24\" 1.8 s < 2.0 s; \"Source: India Skills Report 2026\" 1.9 s < 2.0 s; \"తెలుగు\" 1.8 s < 2.0 s; \"हिंदी\" 1.5 s < 2.0 s; \"English\" 1.2 s < 2.0 s; \"In your language\" 0.0 s < 2.0 s)"
+   "text: read time held (\"1.2 lakh\" 1.4 s < 2.0 s; \"−80%\" 0.5 s < 2.0 s; \"job\" 1.8 s < 2.0 s; \"to\" 1.5 s < 2.0 s; \"someone\" 1.3 s < 2.0 s; \"who\" 1.0 s < 2.0 s)"
   ],
   "notes": "blanks: [website]"
+ },
+ "pitch-3min-en": {
+  "key": "pitch-3min-en",
+  "file": "qa/failed/pitch-3min-en-DRAFT.mp4",
+  "duration": 138.6,
+  "lufs": -16,
+  "truePeak": -1.3,
+  "engine": "Gemini TTS gemini-3.8-flash-tts (en-IN, Kore); Chirp 3 HD not reachable with API keys",
+  "pass": false,
+  "failed": [
+   "text: read time held (\"हिंदी\" 1.9 s < 2.0 s; \"English\" 1.8 s < 2.0 s; \"Employers\" 1.9 s < 2.0 s; \"D\" 1.4 s < 2.0 s; \"A to Z, in one place\" 1.4 s < 2.0 s; \"Get hired\" 1.2 s < 2.0 s)"
+  ],
+  "notes": "blanks: [FILL: who pays], [website]"
+ },
+ "pitch-60s-te": {
+  "key": "pitch-60s-te",
+  "file": "qa/failed/pitch-60s-te-DRAFT.mp4",
+  "duration": 55.07,
+  "lufs": -16,
+  "truePeak": -4.4,
+  "engine": "Gemini TTS gemini-3.8-flash-tts (te-IN, Kore) (earlier recording, reused)",
+  "pass": false,
+  "failed": [
+   "text: no English-only titles, labels or captions (English-only: \"# add two numbersdef add(a, b):    return a + b\")",
+   "text: read time held (\"0.0 కోట్లు\" 0.0 s < 2.0 s; \"0.1 కోట్లు\" 0.0 s < 2.0 s; \"0.2 కోట్లు\" 0.0 s < 2.0 s; \"0.3 కోట్లు\" 0.0 s < 2.0 s; \"0.3 కోట్లు\" 0.0 s < 2.0 s; \"0.4 కోట్లు\" 0.0 s < 2.0 s)",
+   "format: size, 30 fps, length (1920×1080, 30 fps, 55.07 s (allowed 30–55 s))"
+  ],
+  "notes": "blanks: [website]; native-speaker check of the Telugu lines (⚠ quote, line 7), then a new voice-over with the agreed brand pronunciation"
+ },
+ "pitch-3min-te": {
+  "key": "pitch-3min-te",
+  "file": "qa/failed/pitch-3min-te-DRAFT.mp4",
+  "duration": 178.34,
+  "lufs": -16,
+  "truePeak": -3.6,
+  "engine": "Gemini TTS gemini-3.8-flash-tts (te-IN, Kore) (earlier recording, reused)",
+  "pass": false,
+  "failed": [
+   "text: no English-only titles, labels or captions (English-only: \"C\", \"D\", \"# add two numbersdef add(a, b):    return a + b\")",
+   "text: read time held (\"0.0 కోట్లు\" 0.0 s < 2.0 s; \"0.0 కోట్లు\" 0.0 s < 2.0 s; \"0.0 కోట్లు\" 0.0 s < 2.0 s; \"0.0 కోట్లు\" 0.0 s < 2.0 s; \"0.0 కోట్లు\" 0.0 s < 2.0 s; \"0.1 కోట్లు\" 0.0 s < 2.0 s)",
+   "format: size, 30 fps, length (1920×1080, 30 fps, 178.34 s (allowed 90–160 s))"
+  ],
+  "notes": "blanks: [FILL: who pays], [website]; native-speaker check of the Telugu lines (⚠ quote line 16; \"translating\" line 19), then a new voice-over from the proposed tightened script (≤ 2:40)"
  }
 }

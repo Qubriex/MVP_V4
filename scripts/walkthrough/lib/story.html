@@ -90,11 +90,12 @@ const B = {};
 B.stat = (el, b) => {
   // Telugu units have letters that hang below the line: give them room.
   const low = /[^\x00-\x7F]/.test(b.suffix || '') ? 50 : 0;
-  el.innerHTML = `<div class="abs big" style="left:0;right:0;top:330px;text-align:center;font-size:250px" data-n></div>
+  const wide = /[^\x00-\x7F]/.test(b.suffix || '');
+  el.innerHTML = `<div class="abs big" style="left:0;right:0;top:330px;text-align:center;font-size:250px" data-n><span data-num></span><span${wide ? ' style="font-size:.55em"' : ''}>${b.suffix || ''}</span></div>
     <div class="abs label" style="left:0;right:0;top:${660 + low}px;text-align:center" data-l>${F(b.label)}</div>
     <div class="abs" style="left:660px;top:${610 + low}px;height:10px;border-radius:5px;background:linear-gradient(90deg,#BC1F3D,#E73B2B,#F89833)" data-ring></div>${SRC(b)}`;
   const n = el.querySelector('[data-n]'); const ring = el.querySelector('[data-ring]'); const l = el.querySelector('[data-l]');
-  return (t) => { const a = ENTER(b); const k = eo(p(t, a, a + 1.3)); n.innerHTML = fmt(b.value * k, b.decimals) + (/[^\x00-\x7F]/.test(b.suffix || '') ? `<span style="font-size:.55em">${b.suffix}</span>` : (b.suffix || '')); ring.style.width = `${600 * eo(p(t, a + .2, a + 1.2))}px`; vis(l, eo(p(t, a - .05, a + .25))); }; // the label is there from the count-up's first frame
+  return (t) => { const a = ENTER(b); const k = eo(p(t, a, a + 1.3)); n.querySelector('[data-num]').textContent = fmt(b.value * k, b.decimals); ring.style.width = `${600 * eo(p(t, a + .2, a + 1.2))}px`; vis(l, eo(p(t, a - .05, a + .25))); }; // the label is there from the count-up's first frame
 };
 const CAP = '<svg viewBox="0 0 100 100" width="130" height="130"><path d="M50 18 L96 38 L50 58 L4 38Z" fill="currentColor"/><path d="M24 48 V68 C24 80 76 80 76 68 V48 L50 60Z" fill="currentColor" opacity=".85"/><rect x="88" y="38" width="5" height="32" fill="currentColor"/></svg>';
 B.caps = (el, b) => {
@@ -144,9 +145,9 @@ B.falling = (el, b) => {
   const A = el.querySelector('[data-a]'); const Bb = el.querySelector('[data-b]'); const av = el.querySelector('[data-av]'); const bv = el.querySelector('[data-bv]'); const pc = el.querySelector('[data-pct]');
   const H = 440; const dec = (v) => (Number.isInteger(v) ? 0 : 1);
   return (t) => { const a = ENTER(b);
-    const ka = eo(p(t, a, a + .7)); A.style.height = `${H * ka}px`; av.style.bottom = `${260 + H * ka + 12}px`; av.textContent = `${fmt(b.from * ka, dec(b.from))} ${b.unit}`; vis(av, ka > 0 ? 1 : 0);
-    const kb = eo(p(t, a + .9, a + 1.6)); const hb = H * (b.to / b.from) * kb; Bb.style.height = `${hb}px`; bv.style.bottom = `${260 + hb + 12}px`; bv.textContent = `${fmt(b.to * kb, dec(b.to))} ${b.unit}`; vis(bv, kb > 0 ? 1 : 0);
-    vis(pc, eo(p(t, a + 1.8, a + 2.2))); pc.style.transform = `scale(${.7 + .3 * back(p(t, a + 1.8, a + 2.4))})`; };
+    const ka = eo(p(t, a, a + .5)); A.style.height = `${H * ka}px`; av.style.bottom = `${260 + H * ka + 12}px`; av.textContent = `${fmt(b.from * ka, dec(b.from))} ${b.unit}`; vis(av, ka > 0 ? 1 : 0);
+    const kb = eo(p(t, a + .55, a + 1.1)); const hb = H * (b.to / b.from) * kb; Bb.style.height = `${hb}px`; bv.style.bottom = `${260 + hb + 12}px`; bv.textContent = `${fmt(b.to * kb, dec(b.to))} ${b.unit}`; vis(bv, kb > 0 ? 1 : 0);
+    vis(pc, eo(p(t, a + 1.15, a + 1.45))); pc.style.transform = `scale(${.7 + .3 * back(p(t, a + 1.15, a + 1.7))})`; };
 };
 B.quote = (el, b) => {
   const words = b.text.split(' ');
@@ -259,7 +260,7 @@ B.device = (el, b) => {
     img.style.transformOrigin = '0 0'; img.style.transform = `translate(${F ? tx : 0}px, ${F ? ty : 0}px) scale(${z})`;
     const kh = `<small>${s.kicker}</small>${s.title}`; if (kick.dataset.k !== kh) { kick.innerHTML = kh; kick.dataset.k = kh; } // only when the shot changes
     kick.style.left = '80px'; kick.style.top = '430px';
-    vis(kick, eo(p(local, .15, .6)) * enter); kick.style.transform = `translateY(${(1 - eo(p(local, .15, .7))) * 40}px)`;
+    vis(kick, eo(p(local, 0, .3)) * enter); kick.style.transform = `translateY(${(1 - eo(p(local, 0, .35))) * 40}px)`;
   };
 };
 B.journey = (el, b) => {
@@ -268,7 +269,7 @@ B.journey = (el, b) => {
     <div class="abs d" style="left:${300 + i * 440 - 160}px;width:320px;top:690px;text-align:center;font-size:48px;font-weight:700;color:#1b1b1f" data-s>${s}</div>`).join('')}
     <div class="abs d" style="left:0;right:0;text-align:center;top:250px;font-size:84px;font-weight:700;color:#1b1b1f" data-h>${S('aToZ', 'A to Z, in one place')}</div>`;
   const line = el.querySelector('[data-line]'); const ns = [...el.querySelectorAll('[data-n]')]; const ss = [...el.querySelectorAll('[data-s]')]; const h = el.querySelector('[data-h]');
-  return (t) => { const a = ENTER(b); const span = (b.end - a) * .7; line.style.strokeDashoffset = 1320 * (1 - eio(p(t, a, a + span)));
+  return (t) => { const a = ENTER(b); const span = Math.min((b.end - a) * .45, 2.4); line.style.strokeDashoffset = 1320 * (1 - eio(p(t, a, a + span)));
     ns.forEach((n, i) => { const s = a + (i / 3) * span; n.style.transform = `scale(${back(p(t, s, s + .5))})`; vis(n, eo(p(t, s, s + .2))); vis(ss[i], eo(p(t, s + .2, s + .6))); });
     vis(h, eo(p(t, a + span, a + span + .5))); };
 };
@@ -316,13 +317,14 @@ window.qaLayers = () => {
   const out = [];
   const opacityOf = (el) => { let o = 1; for (let e = el; e && e !== document.body; e = e.parentElement) { const cs = getComputedStyle(e); if (cs.visibility === 'hidden' || cs.display === 'none') return 0; o *= Number(cs.opacity); } return o; };
   for (const el of document.querySelectorAll('#beats .beat *, #sec, #sec *')) {
-    const own = [...el.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join('').trim();
+    if (el.closest('[data-q]') && !el.matches('[data-q]')) continue; // the quote is read as one layer
+    const own = el.matches('[data-q]') ? el.textContent.trim() : [...el.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join('').trim();
     if (!own || el.closest('.device .screen')) continue;
     const op = opacityOf(el); if (op < 0.05) continue;
     if (!QA_ID.has(el)) QA_ID.set(el, qaNext++);
     const size = parseFloat(getComputedStyle(el).fontSize);
     const inSec = !!el.closest('#sec');
-    const kind = el.closest('.src') ? 'source' : el.closest('[data-q]') ? 'quote' : el.classList.contains('word') ? 'deco' : inSec ? (size > 70 ? 'title' : 'chip') : el.closest('.fill') ? 'fill' : size >= 70 ? 'title' : 'label';
+    const kind = el.closest('.src') ? 'source' : el.matches('[data-q]') ? 'quote' : el.classList.contains('word') ? 'deco' : inSec ? (size > 70 ? 'title' : 'chip') : el.closest('.fill') ? 'fill' : size >= 70 ? 'title' : 'label';
     const beat = el.closest('.beat'); const group = inSec ? 'section' : String([...document.querySelectorAll('#beats .beat')].indexOf(beat));
     out.push({ id: QA_ID.get(el), kind, group, op: +op.toFixed(2), text: (el.closest('[data-n]') ? el.closest('[data-n]').textContent : el.textContent).trim().slice(0, 160), code: !!el.closest('[style*=monospace]') });
   }

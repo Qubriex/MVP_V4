@@ -21,6 +21,7 @@ export const OUT_DIR = path.join(DIR, 'out');
 // Sentences that would mean a style prompt was read aloud.
 const STYLE = [/read (the following|this)/i, /in (a|the) (warm|calm|friendly|confident)/i, /young indian founder/i, /speak(ing)? like/i, /\btone\b/i, /\bnarrat(e|or)\b/i, /paragraphs? below/i, /voice[- ]over/i, /పై వాక్యాలు|కింది వాక్యాలను/];
 // English words allowed on screen in Telugu videos (tech words, brand, names).
+// Code itself stays in English (brief §2.1) and is not checked.
 const ALLOW = new Set(['qubirex', 'professor', 'ai', 'it', 'code', 'function', 'return', 'python', 'java', 'fy22', 'fy25', 'ceo', 'nvidia', 'english', 'telugu', 'hindi', 'sample', 'data', 'vs', 'add', 'def', 'a', 'b', 'skill', 'skills', 'passport', 'capability', 'online', 'fill', 'website', 'who', 'pays', 'qr', 'jensen', 'huang', 'aicte', 'aishe', 'plfs', 'census', 'xpheno', 'iamai', 'kantar', 'milken', 'institute', 'india', 'report', 'survey', 'cse', 'demo']);
 const WORDS = { zero: 0, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16, seventeen: 17, eighteen: 18, nineteen: 19, twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90, hundred: 100 };
 
@@ -44,7 +45,7 @@ const telugu = (s) => /[\u0C00-\u0C7F]/.test(s);
 function englishOnly(text) {
   if (telugu(text) || /[\u0900-\u097F]/.test(text)) return false;
   const words = text.toLowerCase().replace(/\[fill:[^\]]*\]|\[website\]/g, ' ').match(/[a-z][a-z0-9']*/g) || [];
-  return words.some(w => !ALLOW.has(w.replace(/'s$/, '')));
+  return words.some(w => w.length > 1 && !ALLOW.has(w.replace(/'s$/, ''))); // single letters (journey A–D) are not words
 }
 
 function loudness(file) {
@@ -109,7 +110,7 @@ export function runQa(o) {
     }
   }
   if (o.lang === 'te') {
-    const bad = [...new Set([...spans.values()].filter(s => ['title', 'label', 'chip'].includes(s.kind) && englishOnly(s.text)).map(s => s.text))];
+    const bad = [...new Set([...spans.values()].filter(s => ['title', 'label', 'chip'].includes(s.kind) && !s.code && englishOnly(s.text)).map(s => s.text))];
     add('text: no English-only titles, labels or captions', bad.length === 0, bad.length ? `English-only: ${bad.slice(0, 8).map(x => `"${x.slice(0, 50)}"`).join(', ')}` : 'all Telugu (tech words and brand allowed)');
   }
   add('text: one title at a time', overlaps.length === 0, overlaps.length ? `${overlaps.length} frames, first at ${overlaps[0].t.toFixed(2)} s: ${overlaps[0].texts.join(' | ')}` : 'no frame with two titles');

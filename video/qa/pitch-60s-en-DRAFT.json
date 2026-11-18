@@ -15,7 +15,7 @@
   {
    "name": "voice: \"Qubirex\" said one way",
    "ok": true,
-   "detail": "3 mentions at 13.4 s, 18.9 s, 44.1 s; every mention is the same recorded clip; the transcript wrote it as: qubrix"
+   "detail": "3 mentions at 13.4 s, 19.9 s, 45.1 s; every mention is the same recorded clip; the transcript wrote it as: qubrix"
   },
   {
    "name": "text: one title at a time",
@@ -25,22 +25,22 @@
   {
    "name": "text: read time held",
    "ok": false,
-   "detail": "\"Source: AISHE 2023–24\" 1.8 s < 2.0 s; \"Source: India Skills Report 2026\" 1.9 s < 2.0 s; \"తెలుగు\" 1.8 s < 2.0 s; \"हिंदी\" 1.5 s < 2.0 s; \"English\" 1.2 s < 2.0 s; \"In your language\" 0.0 s < 2.0 s"
+   "detail": "\"1.2 lakh\" 1.4 s < 2.0 s; \"−80%\" 0.5 s < 2.0 s; \"job\" 1.8 s < 2.0 s; \"to\" 1.5 s < 2.0 s; \"someone\" 1.3 s < 2.0 s; \"who\" 1.0 s < 2.0 s"
   },
   {
    "name": "loudness: -16 LUFS ±1, true peak ≤ −1 dBTP",
    "ok": true,
-   "detail": "-16 LUFS, true peak -1.5 dBTP"
+   "detail": "-16 LUFS, true peak -1.2 dBTP"
   },
   {
    "name": "format: size, 30 fps, length",
    "ok": true,
-   "detail": "1920×1080, 30 fps, 50.24 s (allowed 30–55 s)"
+   "detail": "1920×1080, 30 fps, 51.24 s (allowed 30–55 s)"
   }
  ],
  "lufs": -16,
- "truePeak": -1.5,
- "duration": 50.24,
+ "truePeak": -1.2,
+ "duration": 51.24,
  "sheet": "video/qa/pitch-60s-en-DRAFT-sheet.jpg",
  "brand": [
   {
@@ -50,14 +50,14 @@
   },
   {
    "line": 4,
-   "t": 18.93,
+   "t": 19.93,
    "dur": 0.54
   },
   {
    "line": 8,
-   "t": 44.09,
+   "t": 45.09,
    "dur": 0.54
   }
  ],
- "at": "2026-11-18T04:37:20.221Z"
+ "at": "2026-11-18T04:41:10.789Z"
 }
