@@ -1,0 +1,58 @@
+{
+ "name": "institution-60s-en",
+ "pass": true,
+ "checks": [
+  {
+   "name": "voice: no style text read aloud",
+   "ok": true,
+   "detail": "none heard"
+  },
+  {
+   "name": "voice: numbers match the script and facts.json",
+   "ok": true,
+   "detail": "all 0 fact numbers heard, no others"
+  },
+  {
+   "name": "voice: \"Qubirex\" said one way",
+   "ok": true,
+   "detail": "2 mentions at 12.3 s, 54.4 s; every mention is the same recorded clip; the transcript wrote it as: —"
+  },
+  {
+   "name": "text: one title at a time",
+   "ok": true,
+   "detail": "no frame with two titles"
+  },
+  {
+   "name": "text: read time held",
+   "ok": true,
+   "detail": "19 text layers checked"
+  },
+  {
+   "name": "loudness: -16 LUFS ±1, true peak ≤ −1 dBTP",
+   "ok": true,
+   "detail": "-16.7 LUFS, true peak -2.9 dBTP"
+  },
+  {
+   "name": "format: size, 30 fps, length",
+   "ok": true,
+   "detail": "1920×1080, 30 fps, 59.43 s (allowed 49–60 s)"
+  }
+ ],
+ "lufs": -16.7,
+ "truePeak": -2.9,
+ "duration": 59.43,
+ "sheet": "video/qa/institution-60s-en-sheet.jpg",
+ "brand": [
+  {
+   "line": 1,
+   "t": 12.27,
+   "dur": 0.65
+  },
+  {
+   "line": 3,
+   "t": 54.35,
+   "dur": 0.65
+  }
+ ],
+ "at": "2026-11-18T08:23:31.458Z"
+}

@@ -1,0 +1,22 @@
+1
+00:00:00,300 --> 00:00:04,600
+Same concept. Two ways to learn it.
+
+2
+00:00:04,950 --> 00:00:10,234
+A function returns a value to its caller
+upon completion of execution.
+
+3
+00:00:14,950 --> 00:00:20,925
+A function finishes its work and hands the
+answer back to you. That's return.
+
+4
+00:00:26,950 --> 00:00:32,441
+Learn by topic: Python, Java.
+In your language.
+
+5
+00:00:33,950 --> 00:00:34,909
+Qubirex.

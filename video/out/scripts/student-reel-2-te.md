@@ -1,6 +1,6 @@
 # student-reel-2 (Telugu voice)
 
-File: `video/out/student-reel-2-te.mp4` · 38.3 s · language: Telugu (Telugu-English mix)
+File: `video/out/student-reel-2-te-nocaptions.mp4` · 38.3 s · language: Telugu (Telugu-English mix)
 
 - Voice: Gemini TTS gemini-3.1-flash-tts-preview (te-IN; Professor: Kore, Lecturer: Charon); Chirp 3 HD not reachable with API keys.
 - Script: scripts/te/student-reel-2.md (Telugu voice lines voiced before native review, on the founder's go-ahead; on-screen text in English).
