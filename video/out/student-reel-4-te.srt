@@ -3,19 +3,19 @@
 Doubt at 11 pm? No one to ask?
 
 2
-00:00:04,300 --> 00:00:10,056
+00:00:03,830 --> 00:00:09,586
 Why does my loop never stop? Your
 condition never becomes false.
 
 3
-00:00:10,106 --> 00:00:12,687
+00:00:09,636 --> 00:00:12,217
 Add one to i inside the loop.
 
 4
-00:00:20,300 --> 00:00:26,856
+00:00:12,767 --> 00:00:19,322
 Ask in Telugu, Hindi or English. Get
 the answer the way you speak.
 
 5
-00:00:30,300 --> 00:00:35,815
+00:00:19,872 --> 00:00:25,387
 Ask Professor Qubirex.

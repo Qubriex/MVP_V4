@@ -46,15 +46,21 @@
   "notes": "blanks: [FILL: who pays], [website]; native-speaker check of the Telugu lines (⚠ quote line 16; \"translating\" line 19), then a new voice-over from the proposed tightened script (≤ 2:40)"
  },
  "institution-60s-en": {
+  "revision": 1,
+  "longestSilence": 1.2,
+  "sfx": "none",
   "key": "institution-60s-en",
-  "file": "out/institution-60s-en.mp4",
-  "duration": 59.43,
-  "lufs": -16.7,
-  "truePeak": -2.9,
+  "file": "qa/failed/institution-60s-en.mp4",
+  "duration": 25.9,
+  "lufs": -16,
+  "truePeak": -3,
   "engine": "Gemini TTS gemini-3.8-flash-tts (en-IN; Professor: Kore); Chirp 3 HD not reachable with API keys",
-  "pass": true,
-  "failed": [],
-  "notes": ""
+  "pass": false,
+  "failed": [
+   "picture: product shots inside the safe area (311 frames, first at 5.70 s)"
+  ],
+  "notes": "",
+  "oldDuration": 59.43
  },
  "employer-full-en": {
   "key": "employer-full-en",
@@ -68,15 +74,19 @@
   "notes": ""
  },
  "employer-square-en": {
+  "revision": 1,
+  "longestSilence": 1.05,
+  "sfx": "none",
   "key": "employer-square-en",
   "file": "out/employer-square-en.mp4",
-  "duration": 86.51,
-  "lufs": -14.5,
-  "truePeak": -2.6,
+  "duration": 34.6,
+  "lufs": -14,
+  "truePeak": -2.8,
   "engine": "Gemini TTS gemini-3.1-flash-tts-preview (en-IN; Professor: Kore); Chirp 3 HD not reachable with API keys",
   "pass": true,
   "failed": [],
-  "notes": ""
+  "notes": "",
+  "oldDuration": 86.51
  },
  "student-reel-1-en": {
   "revision": 1,
@@ -94,26 +104,34 @@
   "oldDuration": 37.57
  },
  "student-reel-2-en": {
+  "revision": 1,
+  "longestSilence": 1.2,
+  "sfx": "none",
   "key": "student-reel-2-en",
   "file": "out/student-reel-2-en.mp4",
-  "duration": 36.87,
-  "lufs": -14.7,
-  "truePeak": -1.6,
+  "duration": 23.08,
+  "lufs": -14,
+  "truePeak": -2.8,
   "engine": "Gemini TTS gemini-3.1-flash-tts-preview (en-IN; Professor: Kore, Lecturer: Charon); Chirp 3 HD not reachable with API keys",
   "pass": true,
   "failed": [],
-  "notes": ""
+  "notes": "",
+  "oldDuration": 36.87
  },
  "student-reel-3-en": {
+  "revision": 1,
+  "longestSilence": 0.65,
+  "sfx": "none",
   "key": "student-reel-3-en",
   "file": "out/student-reel-3-en.mp4",
-  "duration": 36.53,
-  "lufs": -14.6,
-  "truePeak": -2.2,
+  "duration": 19.5,
+  "lufs": -14,
+  "truePeak": -3,
   "engine": "Gemini TTS gemini-3.1-flash-tts-preview (en-IN; Professor: Kore); Chirp 3 HD not reachable with API keys",
   "pass": true,
   "failed": [],
-  "notes": ""
+  "notes": "",
+  "oldDuration": 36.53
  },
  "student-explainer-en": {
   "key": "student-explainer-en",
@@ -171,48 +189,68 @@
   "notes": "Telugu voice not yet native-reviewed; English text on screen"
  },
  "student-reel-1-te": {
+  "revision": 1,
+  "longestSilence": 1.4,
+  "sfx": "none",
   "key": "student-reel-1-te",
-  "file": "out/student-reel-1-te.mp4",
-  "duration": 39.27,
+  "file": "qa/failed/student-reel-1-te.mp4",
+  "duration": 35.1,
   "lufs": -14,
-  "truePeak": -2,
+  "truePeak": -2.8,
   "engine": "Gemini TTS gemini-3.1-flash-tts-preview (te-IN; Professor: Kore); Chirp 3 HD not reachable with API keys",
-  "pass": true,
-  "failed": [],
-  "notes": "Telugu voice not yet native-reviewed; English text on screen"
+  "pass": false,
+  "failed": [
+   "text: read time held (\"def add(a, b):\n    return a + b\" 4.8 s < 5.0 s; \"+\" 4.8 s < 5.0 s)"
+  ],
+  "notes": "Telugu voice not yet native-reviewed; English text on screen",
+  "oldDuration": 39.27
  },
  "student-reel-2-te": {
+  "revision": 1,
+  "longestSilence": 1.55,
+  "sfx": "none",
   "key": "student-reel-2-te",
-  "file": "out/student-reel-2-te.mp4",
-  "duration": 38.27,
-  "lufs": -14.7,
+  "file": "qa/failed/student-reel-2-te.mp4",
+  "duration": 27.87,
+  "lufs": -14,
   "truePeak": -2.8,
   "engine": "Gemini TTS gemini-3.1-flash-tts-preview (te-IN; Professor: Kore, Lecturer: Charon); Chirp 3 HD not reachable with API keys",
-  "pass": true,
-  "failed": [],
-  "notes": "Telugu voice not yet native-reviewed; English text on screen"
+  "pass": false,
+  "failed": [
+   "sound: no silence > 1.5 s mid-video (1.6 s outside holds, at 9.6 s)"
+  ],
+  "notes": "Telugu voice not yet native-reviewed; English text on screen",
+  "oldDuration": 38.27
  },
  "student-reel-3-te": {
+  "revision": 1,
+  "longestSilence": 1.15,
+  "sfx": "none",
   "key": "student-reel-3-te",
   "file": "out/student-reel-3-te.mp4",
-  "duration": 38.63,
-  "lufs": -14.7,
-  "truePeak": -2.7,
+  "duration": 23.5,
+  "lufs": -14,
+  "truePeak": -2.8,
   "engine": "Gemini TTS gemini-3.8-flash-tts (te-IN; Professor: Kore); Chirp 3 HD not reachable with API keys",
   "pass": true,
   "failed": [],
-  "notes": "Telugu voice not yet native-reviewed; English text on screen"
+  "notes": "Telugu voice not yet native-reviewed; English text on screen",
+  "oldDuration": 38.63
  },
  "student-reel-4-te": {
+  "revision": 1,
+  "longestSilence": 1,
+  "sfx": "none",
   "key": "student-reel-4-te",
   "file": "out/student-reel-4-te.mp4",
-  "duration": 39.17,
+  "duration": 28.74,
   "lufs": -14,
-  "truePeak": -1.4,
+  "truePeak": -3.7,
   "engine": "Gemini TTS gemini-3.1-flash-tts-preview (te-IN; Professor: Kore, Student: Puck); Chirp 3 HD not reachable with API keys",
   "pass": true,
   "failed": [],
-  "notes": "Telugu voice not yet native-reviewed; English text on screen"
+  "notes": "Telugu voice not yet native-reviewed; English text on screen",
+  "oldDuration": 39.17
  },
  "student-reel-1-en-nocaptions": {
   "key": "student-reel-1-en-nocaptions",
@@ -237,15 +275,21 @@
   "notes": ""
  },
  "student-explainer-te": {
+  "revision": 1,
+  "longestSilence": 1.35,
+  "sfx": "none",
   "key": "student-explainer-te",
-  "file": "out/student-explainer-te.mp4",
-  "duration": 86.2,
-  "lufs": -16.4,
-  "truePeak": -2.8,
+  "file": "qa/failed/student-explainer-te.mp4",
+  "duration": 45.22,
+  "lufs": -16,
+  "truePeak": -2.5,
   "engine": "Gemini TTS gemini-3.8-flash-tts (te-IN; Professor: Kore); Chirp 3 HD not reachable with API keys",
-  "pass": true,
-  "failed": [],
-  "notes": "Telugu voice not yet native-reviewed; English text on screen"
+  "pass": false,
+  "failed": [
+   "picture: product shots inside the safe area (905 frames, first at 7.23 s)"
+  ],
+  "notes": "Telugu voice not yet native-reviewed; English text on screen",
+  "oldDuration": 86.2
  },
  "student-reel-3-en-nocaptions": {
   "key": "student-reel-3-en-nocaptions",
@@ -303,15 +347,21 @@
   "notes": "Telugu voice not yet native-reviewed; English text on screen"
  },
  "institution-full-en": {
+  "revision": 1,
+  "longestSilence": 1.1,
+  "sfx": "none",
   "key": "institution-full-en",
-  "file": "out/institution-full-en.mp4",
-  "duration": 146.57,
-  "lufs": -16.7,
-  "truePeak": -2.3,
+  "file": "qa/failed/institution-full-en.mp4",
+  "duration": 50.37,
+  "lufs": -16,
+  "truePeak": -2.7,
   "engine": "Gemini TTS gemini-3.8-flash-tts (en-IN; Professor: Kore); Chirp 3 HD not reachable with API keys",
-  "pass": true,
-  "failed": [],
-  "notes": ""
+  "pass": false,
+  "failed": [
+   "picture: product shots inside the safe area (568 frames, first at 18.53 s)"
+  ],
+  "notes": "",
+  "oldDuration": 146.57
  },
  "student-reel-4-en": {
   "key": "student-reel-4-en",
@@ -336,14 +386,22 @@
   "notes": ""
  },
  "investor-full-en": {
+  "revision": 1,
+  "longestSilence": 1.65,
+  "sfx": "none",
   "key": "investor-full-en",
-  "file": "out/investor-full-en-DRAFT.mp4",
-  "duration": 263.5,
-  "lufs": -16.2,
-  "truePeak": -2.1,
-  "engine": "Gemini TTS gemini-3.1-flash-tts-preview (en-IN; Professor: Kore); Chirp 3 HD not reachable with API keys",
-  "pass": true,
-  "failed": [],
-  "notes": "blanks: [FILL: before X% -> after Y%, N students, Z weeks], [FILL: who pays], [FILL: price per student per year], [FILL: from usage logs], [FILL: gross margin], [FILL: first target], [FILL: pilots, LOIs, colleges in talks], [FILL: one line per person], [FILL: We're raising Rs __ to reach __ colleges and __ paying students in 18 months.], [FILL: Rs __], [FILL: product %, sales %, content %]; founder footage missing"
+  "file": "qa/failed/investor-full-en-DRAFT.mp4",
+  "duration": 90.18,
+  "lufs": -16,
+  "truePeak": -2.8,
+  "engine": "Gemini TTS gemini-3.8-flash-tts (en-IN; Professor: Kore); Chirp 3 HD not reachable with API keys",
+  "pass": false,
+  "failed": [
+   "text: read time held (\"Learn\" 1.4 s < 2.0 s; \"Pilot result\" 1.2 s < 2.0 s; \"[FILL: before X% -> after Y%, N students\" 1.2 s < 3.3 s; \"Gross margin\" 1.5 s < 2.0 s; \"[FILL: gross margin]\" 1.5 s < 2.0 s; \"Traction\" 1.3 s < 2.0 s)",
+   "sound: no silence > 1.5 s mid-video (1.6 s outside holds, at 59.0 s)",
+   "picture: product shots inside the safe area (412 frames, first at 33.13 s)"
+  ],
+  "notes": "blanks: [FILL: before X% -> after Y%, N students, Z weeks], [FILL: who pays], [FILL: price per student per year], [FILL: from usage logs], [FILL: gross margin], [FILL: first target], [FILL: pilots, LOIs, colleges in talks], [FILL: one line per person], [FILL: Rs __], [FILL: product %, sales %, content %]; founder footage missing",
+  "oldDuration": 263.5
  }
 }

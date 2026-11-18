@@ -1,6 +1,6 @@
 {
  "name": "investor-full-en-DRAFT",
- "pass": true,
+ "pass": false,
  "checks": [
   {
    "name": "voice: no style text read aloud",
@@ -15,7 +15,7 @@
   {
    "name": "voice: \"Qubirex\" said one way",
    "ok": true,
-   "detail": "0 mentions at —; not spliced; the transcript wrote it as: qurex"
+   "detail": "0 mentions at —; not spliced; the transcript wrote it as: qube rex"
   },
   {
    "name": "text: one title at a time",
@@ -24,24 +24,47 @@
   },
   {
    "name": "text: read time held",
-   "ok": true,
-   "detail": "71 text layers checked"
+   "ok": false,
+   "detail": "\"Learn\" 1.4 s < 2.0 s; \"Pilot result\" 1.2 s < 2.0 s; \"[FILL: before X% -> after Y%, N students\" 1.2 s < 3.3 s; \"Gross margin\" 1.5 s < 2.0 s; \"[FILL: gross margin]\" 1.5 s < 2.0 s; \"Traction\" 1.3 s < 2.0 s"
   },
   {
    "name": "loudness: -16 LUFS ±1, true peak ≤ −1 dBTP",
    "ok": true,
-   "detail": "-16.2 LUFS, true peak -2.1 dBTP"
+   "detail": "-16 LUFS, true peak -2.8 dBTP"
   },
   {
    "name": "format: size, 30 fps, length",
    "ok": true,
-   "detail": "1920×1080, 30 fps, 263.5 s (allowed 209–270 s)"
+   "detail": "1920×1080, 30 fps, 90.18 s (max 270 s; shorter than the kit's 209 s because dead air was removed)"
+  },
+  {
+   "name": "sound: no sound effects (no >5 kHz noise > 0.5 s without speech)",
+   "ok": true,
+   "detail": "none found"
+  },
+  {
+   "name": "sound: no silence > 1.5 s mid-video",
+   "ok": false,
+   "detail": "1.6 s outside holds, at 59.0 s"
+  },
+  {
+   "name": "picture: product shots inside the safe area",
+   "ok": false,
+   "detail": "412 frames, first at 33.13 s"
+  },
+  {
+   "name": "picture: no blue (≤ 2% of pixels, screenshots excluded)",
+   "ok": true,
+   "detail": "worst frame 0.00% at 0.0 s"
   }
  ],
- "lufs": -16.2,
- "truePeak": -2.1,
- "duration": 263.5,
+ "lufs": -16,
+ "truePeak": -2.8,
+ "duration": 90.18,
+ "sfx": "none",
+ "longestSilence": 1.65,
+ "longestHold": 1.65,
  "sheet": "video/qa/investor-full-en-DRAFT-sheet.jpg",
  "brand": [],
- "at": "2026-11-18T08:56:54.416Z"
+ "at": "2026-11-18T11:31:30.984Z"
 }

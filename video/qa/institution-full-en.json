@@ -1,6 +1,6 @@
 {
  "name": "institution-full-en",
- "pass": true,
+ "pass": false,
  "checks": [
   {
    "name": "voice: no style text read aloud",
@@ -15,7 +15,7 @@
   {
    "name": "voice: \"Qubirex\" said one way",
    "ok": true,
-   "detail": "2 mentions at 50.5 s, 140.5 s; every mention is the same recorded clip; the transcript wrote it as: —"
+   "detail": "2 mentions at 18.1 s, 44.3 s; every mention is the same recorded clip; the transcript wrote it as: —"
   },
   {
    "name": "text: one title at a time",
@@ -30,29 +30,52 @@
   {
    "name": "loudness: -16 LUFS ±1, true peak ≤ −1 dBTP",
    "ok": true,
-   "detail": "-16.7 LUFS, true peak -2.3 dBTP"
+   "detail": "-16 LUFS, true peak -2.7 dBTP"
   },
   {
    "name": "format: size, 30 fps, length",
    "ok": true,
-   "detail": "1920×1080, 30 fps, 146.57 s (allowed 119–150 s)"
+   "detail": "1920×1080, 30 fps, 50.37 s (max 150 s; shorter than the kit's 119 s because dead air was removed)"
+  },
+  {
+   "name": "sound: no sound effects (no >5 kHz noise > 0.5 s without speech)",
+   "ok": true,
+   "detail": "none found"
+  },
+  {
+   "name": "sound: no silence > 1.5 s mid-video",
+   "ok": true,
+   "detail": "longest pause 1.10 s"
+  },
+  {
+   "name": "picture: product shots inside the safe area",
+   "ok": false,
+   "detail": "568 frames, first at 18.53 s"
+  },
+  {
+   "name": "picture: no blue (≤ 2% of pixels, screenshots excluded)",
+   "ok": true,
+   "detail": "worst frame 0.00% at 0.0 s"
   }
  ],
- "lufs": -16.7,
- "truePeak": -2.3,
- "duration": 146.57,
+ "lufs": -16,
+ "truePeak": -2.7,
+ "duration": 50.37,
+ "sfx": "none",
+ "longestSilence": 1.1,
+ "longestHold": 1.1,
  "sheet": "video/qa/institution-full-en-sheet.jpg",
  "brand": [
   {
    "line": 2,
-   "t": 50.53,
+   "t": 18.08,
    "dur": 0.84
   },
   {
    "line": 5,
-   "t": 140.53,
+   "t": 44.32,
    "dur": 0.84
   }
  ],
- "at": "2026-11-18T08:29:28.192Z"
+ "at": "2026-11-18T11:34:35.538Z"
 }

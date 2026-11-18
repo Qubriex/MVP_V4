@@ -1,6 +1,6 @@
 # institution-60s (English voice)
 
-File: `video/out/institution-60s-en.mp4` · 59.4 s · language: English
+File: `video/out/institution-60s-en.mp4` · 25.9 s · language: English
 
 - Voice: Gemini TTS gemini-3.8-flash-tts (en-IN; Professor: Kore); Chirp 3 HD not reachable with API keys.
 - Script: scripts/en/institution-60s.md.
@@ -8,6 +8,6 @@ File: `video/out/institution-60s-en.mp4` · 59.4 s · language: English
 | # | Time | Section | Voice | On screen |
 |---|---|---|---|---|
 | 1 | 0:00.5–0:04.7 | q | Placement season starts in three months. Which of your students are ready? | Which students are ready? / Tag: "Illustrative story" |
-| 2 | 0:12.2–0:22.6 | product | Qubirex shows each cohort's readiness, why each student isn't ready yet, and the topics they struggle with, while students learn in Telugu, Hindi or the mix. | Readiness / Why not ready? / Topic gaps / Sample data |
-| 3 | 0:41.6–0:45.8 | pilot | Start with a one-semester pilot for 100 students, measured from day one. | Pilot: 100 students, one semester |
-| 4 | 0:54.3–0:56.1 | close | Qubirex. Book a demo. | [FILL: contact] / [website] |
+| 2 | 0:05.2–0:15.6 | product | Qubirex shows each cohort's readiness, why each student isn't ready yet, and the topics they struggle with, while students learn in Telugu, Hindi or the mix. | Readiness / Why not ready? / Topic gaps / Sample data |
+| 3 | 0:16.1–0:20.3 | pilot | Start with a one-semester pilot for 100 students, measured from day one. | Pilot: 100 students, one semester |
+| 4 | 0:20.8–0:22.6 | close | Qubirex. Book a demo. | [FILL: contact] / [website] |

@@ -1,6 +1,6 @@
 {
  "name": "student-reel-2-te",
- "pass": true,
+ "pass": false,
  "checks": [
   {
    "name": "voice: no style text read aloud",
@@ -25,23 +25,46 @@
   {
    "name": "text: read time held",
    "ok": true,
-   "detail": "17 text layers checked"
+   "detail": "18 text layers checked"
   },
   {
    "name": "loudness: -14 LUFS ±1, true peak ≤ −1 dBTP",
    "ok": true,
-   "detail": "-14.7 LUFS, true peak -2.8 dBTP"
+   "detail": "-14 LUFS, true peak -2.8 dBTP"
   },
   {
    "name": "format: size, 30 fps, length",
    "ok": true,
-   "detail": "1080×1920, 30 fps, 38.27 s (allowed 29–40 s)"
+   "detail": "1080×1920, 30 fps, 27.87 s (max 40 s; shorter than the kit's 29 s because dead air was removed)"
+  },
+  {
+   "name": "sound: no sound effects (no >5 kHz noise > 0.5 s without speech)",
+   "ok": true,
+   "detail": "none found"
+  },
+  {
+   "name": "sound: no silence > 1.5 s mid-video",
+   "ok": false,
+   "detail": "1.6 s outside holds, at 9.6 s"
+  },
+  {
+   "name": "picture: product shots inside the safe area",
+   "ok": true,
+   "detail": "181 frames with a product shot, all inside"
+  },
+  {
+   "name": "picture: no blue (≤ 2% of pixels, screenshots excluded)",
+   "ok": true,
+   "detail": "worst frame 0.00% at 0.0 s"
   }
  ],
- "lufs": -14.7,
+ "lufs": -14,
  "truePeak": -2.8,
- "duration": 38.27,
+ "duration": 27.87,
+ "sfx": "none",
+ "longestSilence": 1.55,
+ "longestHold": 1.55,
  "sheet": "video/qa/student-reel-2-te-sheet.jpg",
  "brand": [],
- "at": "2026-11-18T08:06:01.396Z"
+ "at": "2026-11-18T11:38:40.753Z"
 }

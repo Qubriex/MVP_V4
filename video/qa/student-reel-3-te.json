@@ -25,23 +25,46 @@
   {
    "name": "text: read time held",
    "ok": true,
-   "detail": "11 text layers checked"
+   "detail": "13 text layers checked"
   },
   {
    "name": "loudness: -14 LUFS ±1, true peak ≤ −1 dBTP",
    "ok": true,
-   "detail": "-14.7 LUFS, true peak -2.7 dBTP"
+   "detail": "-14 LUFS, true peak -2.8 dBTP"
   },
   {
    "name": "format: size, 30 fps, length",
    "ok": true,
-   "detail": "1080×1920, 30 fps, 38.63 s (allowed 29–40 s)"
+   "detail": "1080×1920, 30 fps, 23.5 s (max 40 s; shorter than the kit's 29 s because dead air was removed)"
+  },
+  {
+   "name": "sound: no sound effects (no >5 kHz noise > 0.5 s without speech)",
+   "ok": true,
+   "detail": "none found"
+  },
+  {
+   "name": "sound: no silence > 1.5 s mid-video",
+   "ok": true,
+   "detail": "longest pause 1.15 s"
+  },
+  {
+   "name": "picture: product shots inside the safe area",
+   "ok": true,
+   "detail": "319 frames with a product shot, all inside"
+  },
+  {
+   "name": "picture: no blue (≤ 2% of pixels, screenshots excluded)",
+   "ok": true,
+   "detail": "worst frame 0.00% at 0.0 s"
   }
  ],
- "lufs": -14.7,
- "truePeak": -2.7,
- "duration": 38.63,
+ "lufs": -14,
+ "truePeak": -2.8,
+ "duration": 23.5,
+ "sfx": "none",
+ "longestSilence": 1.15,
+ "longestHold": 1.15,
  "sheet": "video/qa/student-reel-3-te-sheet.jpg",
  "brand": [],
- "at": "2026-11-18T08:11:11.224Z"
+ "at": "2026-11-18T11:39:26.305Z"
 }
