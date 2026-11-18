@@ -8,34 +8,34 @@ Learning it in a language you
 don't think in is harder.
 
 3
-00:00:10,500 --> 00:00:16,486
+00:00:06,591 --> 00:00:12,577
 Pick a topic, like Python loops. Professor
 Qubirex teaches it in Telugu,
 
 4
-00:00:16,536 --> 00:00:17,911
+00:00:12,627 --> 00:00:14,002
 Hindi or the mix.
 
 5
-00:00:25,500 --> 00:00:31,046
+00:00:14,402 --> 00:00:19,948
 See the code, line by line, with the
 voice walking you through it.
 
 6
-00:00:38,500 --> 00:00:42,532
+00:00:20,348 --> 00:00:24,380
 Practise with hints, and run real tests.
 
 7
-00:00:52,500 --> 00:00:57,601
+00:00:24,780 --> 00:00:29,881
 When you're ready, a fresh check proves
 you can do it on your own.
 
 8
-00:01:05,500 --> 00:01:11,440
+00:00:30,281 --> 00:00:36,221
 Every skill you prove goes on your
 signed Capability Passport.
 
 9
-00:01:18,500 --> 00:01:22,845
+00:00:36,621 --> 00:00:40,966
 Qubirex. Your language. Your
 skills. Your future.

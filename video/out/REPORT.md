@@ -18,11 +18,10 @@ One line per video. Longest silence is the longest pause in the voice mid-video,
 | `out/pitch-60s-en-DRAFT.mp4` | — | 53.04 s | — | — | PASS | -16.1 LUFS (TP -2.3) | blanks: [website] |
 | `out/pitch-60s-te-DRAFT.mp4` | — | 54.67 s | — | — | PASS | -16 LUFS (TP -3.6) | blanks: [website]; native-speaker check of the Telugu lines (⚠ quote, line 7), then a new voice-over with the agreed brand pronunciation |
 | `out/student-explainer-en.mp4` | — | 86.2 s | — | — | PASS | -16.3 LUFS (TP -2.4) |  |
-| `qa/failed/student-explainer-te.mp4` | 86.2 s | 44.32 s | 1.2 s | none | FAIL: picture: product shots inside the safe area (883 frames, first at 7.07 s) | -16 LUFS (TP -2.9) | Telugu voice not yet native-reviewed; English text on screen |
-| `out/student-reel-1-en.mp4` | 37.57 s | 29.2 s | 0.8 s | none | PASS | -14.3 LUFS (TP -2.7) |  |
+| `out/student-explainer-te.mp4` | 86.2 s | 44.32 s | 1.2 s | none | PASS | -16 LUFS (TP -2.9) | Telugu voice not yet native-reviewed; English text on screen |
+| `out/student-reel-1-en.mp4` | 37.57 s | 29.47 s | 0.8 s | none | PASS | -14.3 LUFS (TP -2.8) |  |
 | `out/student-reel-1-en-nocaptions.mp4` | — | 37.57 s | — | — | PASS | -14.9 LUFS (TP -2.2) |  |
-| `qa/failed/student-reel-1-te.mp4` | 39.27 s | 34.8 s | 1.25 s | none | FAIL: text: read time held ("def add(a, b):
-    return a + b" 4.8 s < 5.0 s; "+" 4.8 s < 5.0 s) | -14 LUFS (TP -2.9) | Telugu voice not yet native-reviewed; English text on screen |
+| `out/student-reel-1-te.mp4` | 39.27 s | 38.4 s | 1.25 s | none | PASS | -14.1 LUFS (TP -2.8) | Telugu voice not yet native-reviewed; English text on screen |
 | `out/student-reel-1-te-nocaptions.mp4` | — | 39.27 s | — | — | PASS | -14 LUFS (TP -2) | Telugu voice not yet native-reviewed; English text on screen |
 | `out/student-reel-2-en.mp4` | 36.87 s | 22.48 s | 1.05 s | none | PASS | -14 LUFS (TP -2.8) |  |
 | `out/student-reel-2-en-nocaptions.mp4` | — | 36.87 s | — | — | PASS | -14.7 LUFS (TP -1.6) |  |

@@ -1,6 +1,6 @@
 {
  "name": "student-reel-1-te",
- "pass": false,
+ "pass": true,
  "checks": [
   {
    "name": "voice: no style text read aloud",
@@ -24,8 +24,8 @@
   },
   {
    "name": "text: read time held",
-   "ok": false,
-   "detail": "\"def add(a, b):\n    return a + b\" 4.8 s < 5.0 s; \"+\" 4.8 s < 5.0 s"
+   "ok": true,
+   "detail": "18 text layers checked"
   },
   {
    "name": "code: the snippet runs (bug fails, fix passes)",
@@ -35,12 +35,12 @@
   {
    "name": "loudness: -14 LUFS ±1, true peak ≤ −1 dBTP",
    "ok": true,
-   "detail": "-14 LUFS, true peak -2.9 dBTP"
+   "detail": "-14.1 LUFS, true peak -2.8 dBTP"
   },
   {
    "name": "format: size, 30 fps, length",
    "ok": true,
-   "detail": "1080×1920, 30 fps, 34.8 s (max 40 s)"
+   "detail": "1080×1920, 30 fps, 38.4 s (max 40 s)"
   },
   {
    "name": "sound: no sound effects (no >5 kHz noise > 0.5 s without speech)",
@@ -63,13 +63,13 @@
    "detail": "worst frame 0.00% at 0.0 s"
   }
  ],
- "lufs": -14,
- "truePeak": -2.9,
- "duration": 34.8,
+ "lufs": -14.1,
+ "truePeak": -2.8,
+ "duration": 38.4,
  "sfx": "none",
  "longestSilence": 1.25,
  "longestHold": 6.4,
  "sheet": "video/qa/student-reel-1-te-sheet.jpg",
  "brand": [],
- "at": "2026-11-18T11:53:26.511Z"
+ "at": "2026-11-18T12:14:29.463Z"
 }

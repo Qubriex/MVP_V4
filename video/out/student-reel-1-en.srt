@@ -13,14 +13,14 @@ two numbers. But star means multiply.
 It should be plus.
 
 4
-00:00:17,990 --> 00:00:21,494
+00:00:18,250 --> 00:00:21,754
 Every line explained in your
 language. Then you practise,
 
 5
-00:00:21,544 --> 00:00:23,240
+00:00:21,804 --> 00:00:23,500
 and a fresh check proves it.
 
 6
-00:00:23,640 --> 00:00:25,851
+00:00:23,900 --> 00:00:26,111
 Practise free on Qubirex.

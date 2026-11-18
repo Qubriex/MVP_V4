@@ -187,7 +187,7 @@ const rawPcm = readPcm(vo); const rawDur = seconds(rawPcm);
 // stay at least 5 s, placeholder scenes at least 3 s; the end card holds 3 s
 // after the voice (TAIL).
 const isCode = (s) => [s.beat, ...(s.beats || [])].some(b => b && (b.type === 'code' || b.type === 'recipe'));
-const fitPads = voiced.map((v, k) => { const s = scenes[v.i]; const d = (k + 1 < voiced.length ? timing.starts[k + 1] : rawDur) - timing.starts[k]; const min = isCode(s) ? 5 : s.placeholderLine ? 3 : (s.minHold || 0); return v.i === scenes.length - 1 ? 0.3 : Math.max(0.35, min - d); }); // the voice clip already ends with ~0.15–0.3 s of room tone, so scene ≈ voice + 0.5 s
+const fitPads = voiced.map((v, k) => { const s = scenes[v.i]; const d = (k + 1 < voiced.length ? timing.starts[k + 1] : rawDur) - timing.starts[k]; const min = Math.max(isCode(s) ? 5 : 0, s.placeholderLine ? 3 : 0, s.minHold || 0); return v.i === scenes.length - 1 ? 0.3 : Math.max(0.35, min - d); }); // the voice clip already ends with ~0.15–0.3 s of room tone, so scene ≈ voice + 0.5 s
 // A layout may name an approved brand clip (another video's) so the name sounds the same everywhere.
 const refClip = layout.brandRef && LANG === 'en' ? readPcm(path.join(VDIR, layout.brandRef)) : null;
 const E = edit(rawPcm, timing.starts, { pads: fitPads, overrides, brand: timing.brand, refClip });

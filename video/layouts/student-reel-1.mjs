@@ -4,7 +4,7 @@ export default ({ scenes: s }) => ({
   scenes: [
     { beat: { type: 'text', lines: [s[0].screen[0]] } },
     { silent: true, hold: 5.2, beat: { type: 'code', timer: 5, reveal: false } },
-    { beat: { type: 'code', spot: 0.6, fix: 3.6 } },
+    { minHold: 8.6, beat: { type: 'code', spot: 0.6, fix: 3.6 } },
     { beat: { type: 'shot', lines: s[3].screen.slice(0, 1).concat(['Practise · Fresh check']), shots: [{ key: 'walk' }, { key: 'practise' }, { key: 'check' }] } },
     { beat: { type: 'end', lines: [s[4].screen[0]] } }
   ]

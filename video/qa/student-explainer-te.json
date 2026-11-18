@@ -1,6 +1,6 @@
 {
  "name": "student-explainer-te",
- "pass": false,
+ "pass": true,
  "checks": [
   {
    "name": "voice: no style text read aloud",
@@ -49,8 +49,8 @@
   },
   {
    "name": "picture: product shots inside the safe area",
-   "ok": false,
-   "detail": "883 frames, first at 7.07 s"
+   "ok": true,
+   "detail": "896 frames with a product shot, all inside"
   },
   {
    "name": "picture: no blue (≤ 2% of pixels, screenshots excluded)",
@@ -66,5 +66,5 @@
  "longestHold": 1.2,
  "sheet": "video/qa/student-explainer-te-sheet.jpg",
  "brand": [],
- "at": "2026-11-18T11:52:27.990Z"
+ "at": "2026-11-18T12:11:12.584Z"
 }
