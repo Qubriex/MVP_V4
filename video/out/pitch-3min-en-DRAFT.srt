@@ -1,0 +1,172 @@
+1
+00:00:00,600 --> 00:00:05,059
+Imagine Priya. A bright student from a
+small town in Andhra Pradesh.
+
+2
+00:00:05,109 --> 00:00:09,038
+She understands logic, but every
+coding class is in English,
+
+3
+00:00:09,088 --> 00:00:11,160
+a language she doesn't think in.
+
+4
+00:00:11,260 --> 00:00:16,040
+She is not alone. Every year, India
+produces about 1.1 crore graduates.
+
+5
+00:00:16,140 --> 00:00:18,990
+Only about half of them are
+judged ready for a job.
+
+6
+00:00:19,090 --> 00:00:24,260
+And graduates are four times more likely to
+be jobless: 13 percent, against 3.
+
+7
+00:00:24,310 --> 00:00:26,000
+2 percent for all workers.
+
+8
+00:00:26,100 --> 00:00:30,840
+Only 1 in 10 Indians speak English. Yet
+engineering is taught in English.
+
+9
+00:00:30,940 --> 00:00:35,800
+44 percent of engineering students told AICTE
+they want to learn in their mother
+
+10
+00:00:35,850 --> 00:00:36,230
+tongue.
+
+11
+00:00:36,330 --> 00:00:40,990
+What if Priya could learn in her own language,
+and prove every skill she learns?
+
+12
+00:00:41,690 --> 00:00:46,871
+Not a translated course. A teacher who speaks
+the way she speaks: Telugu, Hindi,
+
+13
+00:00:46,921 --> 00:00:49,160
+or the everyday Telugu-English mix.
+
+14
+00:00:49,260 --> 00:00:50,420
+That's Qubirex.
+
+15
+00:00:51,520 --> 00:00:56,199
+Professor Qubirex explains each idea, walks
+through the code line by line,
+
+16
+00:00:56,249 --> 00:00:57,860
+and answers her questions.
+
+17
+00:00:57,960 --> 00:01:00,425
+She practises real code, with real tests,
+
+18
+00:01:00,475 --> 00:01:03,430
+and a fresh check confirms she
+can do it herself.
+
+19
+00:01:03,530 --> 00:01:07,135
+Every skill she proves goes on a
+signed Capability Passport.
+
+20
+00:01:07,185 --> 00:01:08,840
+Anyone can verify it online.
+
+21
+00:01:08,940 --> 00:01:13,530
+Colleges see who is ready and who needs
+help. Employers hire on proof.
+
+22
+00:01:14,430 --> 00:01:19,990
+Learn, practise, prove, and get seen by
+employers. A to Z, in one place.
+
+23
+00:01:21,290 --> 00:01:27,797
+Why now? Because IT fresher hiring has fallen
+80% in three years, from 6 lakh to 1.
+
+24
+00:01:27,847 --> 00:01:28,350
+2 lakh.
+
+25
+00:01:29,050 --> 00:01:32,333
+A degree alone is no longer enough.
+As Jensen Huang said:
+
+26
+00:01:32,383 --> 00:01:34,847
+you're not going to lose
+your job to an AI,
+
+27
+00:01:34,897 --> 00:01:38,180
+but you're going to lose your job
+to someone who uses AI.
+
+28
+00:01:38,280 --> 00:01:43,300
+AI is like a recipe. It gives the steps, but
+you still cook. AI writes code,
+
+29
+00:01:43,350 --> 00:01:47,370
+but someone must check it. Why
+shouldn't that someone be you?
+
+30
+00:01:48,470 --> 00:01:53,310
+And 98 percent of India's internet users
+already use Indian-language content.
+
+31
+00:01:53,410 --> 00:01:56,947
+Other platforms already teach coding,
+some in Indian languages.
+
+32
+00:01:56,997 --> 00:01:58,940
+Qubirex is different in three ways.
+
+33
+00:02:00,540 --> 00:02:04,803
+Qubirex gives proof of skills, one
+journey from learning to hiring,
+
+34
+00:02:04,853 --> 00:02:06,670
+and tools built for colleges.
+
+35
+00:02:06,770 --> 00:02:09,095
+Next, a pilot with one partner college,
+
+36
+00:02:09,145 --> 00:02:12,200
+to measure exactly how many more
+students get jobs.
+
+37
+00:02:13,500 --> 00:02:18,497
+Qubirex. Your language. Your
+skills. Your future.

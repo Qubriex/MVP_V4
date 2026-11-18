@@ -1,6 +1,6 @@
 {
  "name": "pitch-3min-en-DRAFT",
- "pass": false,
+ "pass": true,
  "checks": [
   {
    "name": "voice: no style text read aloud",
@@ -24,13 +24,13 @@
   },
   {
    "name": "text: read time held",
-   "ok": false,
-   "detail": "\"Bug: should be +\" 1.8 s < 2.0 s"
+   "ok": true,
+   "detail": "127 text layers checked"
   },
   {
    "name": "loudness: -16 LUFS ±1, true peak ≤ −1 dBTP",
-   "ok": false,
-   "detail": "-16 LUFS, true peak -0.8 dBTP"
+   "ok": true,
+   "detail": "-16 LUFS, true peak -2.3 dBTP"
   },
   {
    "name": "format: size, 30 fps, length",
@@ -39,7 +39,7 @@
   }
  ],
  "lufs": -16,
- "truePeak": -0.8,
+ "truePeak": -2.3,
  "duration": 141.2,
  "sheet": "video/qa/pitch-3min-en-DRAFT-sheet.jpg",
  "brand": [
@@ -69,5 +69,5 @@
    "dur": 0.67
   }
  ],
- "at": "2026-11-18T05:08:35.070Z"
+ "at": "2026-11-18T05:28:54.203Z"
 }
