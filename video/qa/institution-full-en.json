@@ -1,6 +1,6 @@
 {
  "name": "institution-full-en",
- "pass": false,
+ "pass": true,
  "checks": [
   {
    "name": "voice: no style text read aloud",
@@ -49,8 +49,8 @@
   },
   {
    "name": "picture: product shots inside the safe area",
-   "ok": false,
-   "detail": "559 frames, first at 18.23 s"
+   "ok": true,
+   "detail": "572 frames with a product shot, all inside"
   },
   {
    "name": "picture: no blue (≤ 2% of pixels, screenshots excluded)",
@@ -77,5 +77,5 @@
    "dur": 0.84
   }
  ],
- "at": "2026-11-18T11:50:50.176Z"
+ "at": "2026-11-18T12:09:31.750Z"
 }

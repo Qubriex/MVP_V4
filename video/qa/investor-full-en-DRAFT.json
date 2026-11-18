@@ -1,6 +1,6 @@
 {
  "name": "investor-full-en-DRAFT",
- "pass": false,
+ "pass": true,
  "checks": [
   {
    "name": "voice: no style text read aloud",
@@ -15,7 +15,7 @@
   {
    "name": "voice: \"Qubirex\" said one way",
    "ok": true,
-   "detail": "0 mentions at —; not spliced; the transcript wrote it as: cuborex"
+   "detail": "0 mentions at —; not spliced; the transcript wrote it as: qb rex"
   },
   {
    "name": "text: one title at a time",
@@ -24,18 +24,18 @@
   },
   {
    "name": "text: read time held",
-   "ok": false,
-   "detail": "\"The ask (founder footage to come)\" 0.6 s < 2.0 s; \"Founder on camera\" 0.6 s < 2.0 s; \"Founder introduction\" 0.5 s < 2.0 s; \"Placeholder: film this clip (video/asset\" 0.5 s < 2.0 s"
+   "ok": true,
+   "detail": "70 text layers checked"
   },
   {
    "name": "loudness: -16 LUFS ±1, true peak ≤ −1 dBTP",
    "ok": true,
-   "detail": "-16 LUFS, true peak -2.9 dBTP"
+   "detail": "-16 LUFS, true peak -2.6 dBTP"
   },
   {
    "name": "format: size, 30 fps, length",
    "ok": true,
-   "detail": "1920×1080, 30 fps, 101.2 s (max 270 s; shorter than the kit's 209 s because dead air was removed)"
+   "detail": "1920×1080, 30 fps, 111.23 s (max 270 s; shorter than the kit's 209 s because dead air was removed)"
   },
   {
    "name": "sound: no sound effects (no >5 kHz noise > 0.5 s without speech)",
@@ -45,12 +45,12 @@
   {
    "name": "sound: no silence > 1.5 s mid-video",
    "ok": true,
-   "detail": "longest pause 1.05 s"
+   "detail": "longest pause 1.20 s"
   },
   {
    "name": "picture: product shots inside the safe area",
-   "ok": false,
-   "detail": "396 frames, first at 33.03 s"
+   "ok": true,
+   "detail": "442 frames with a product shot, all inside"
   },
   {
    "name": "picture: no blue (≤ 2% of pixels, screenshots excluded)",
@@ -59,12 +59,12 @@
   }
  ],
  "lufs": -16,
- "truePeak": -2.9,
- "duration": 101.2,
+ "truePeak": -2.6,
+ "duration": 111.23,
  "sfx": "none",
- "longestSilence": 1.05,
- "longestHold": 1.05,
+ "longestSilence": 1.2,
+ "longestHold": 1.2,
  "sheet": "video/qa/investor-full-en-DRAFT-sheet.jpg",
  "brand": [],
- "at": "2026-11-18T11:47:46.796Z"
+ "at": "2026-11-18T12:07:39.136Z"
 }

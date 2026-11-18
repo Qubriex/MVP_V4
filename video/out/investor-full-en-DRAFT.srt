@@ -1,67 +1,134 @@
 1
-00:00:25,500 --> 00:00:31,075
+00:00:00,500 --> 00:00:03,889
+Every year India produces about
+1.1 crore graduates.
+
+2
+00:00:03,939 --> 00:00:06,337
+Only about half are judged job-ready,
+
+3
+00:00:06,387 --> 00:00:09,776
+and IT fresher hiring has fallen
+80% in three years.
+
+4
+00:00:09,826 --> 00:00:15,067
+Most of these students think in Telugu or
+Hindi, but are taught only in English.
+
+5
+00:00:15,467 --> 00:00:20,218
 Platforms already teach coding in Indian
 languages; NxtWave and GUVI do this well.
 
-2
-00:00:31,125 --> 00:00:35,123
+6
+00:00:20,268 --> 00:00:23,672
 Testing platforms like HackerRank
 check skills, in English.
 
-3
-00:00:35,173 --> 00:00:40,679
+7
+00:00:23,722 --> 00:00:28,414
 But no one teaches the way students actually
 speak and then proves the skill in a
 
-4
-00:00:40,729 --> 00:00:43,492
+8
+00:00:28,464 --> 00:00:30,814
 record that colleges and employers trust.
 
-5
-00:00:55,500 --> 00:00:58,278
+9
+00:00:31,214 --> 00:00:33,814
 Qubirex is a learning-to-hiring platform.
 
-6
-00:00:58,328 --> 00:01:03,314
+10
+00:00:33,864 --> 00:00:38,531
 Professor Qubirex teaches each line in
 Telugu, Hindi or the everyday mix.
 
-7
-00:01:03,364 --> 00:01:07,866
+11
+00:00:38,581 --> 00:00:42,796
 Students practise with real tests, a
 fresh check proves the skill,
 
-8
-00:01:07,916 --> 00:01:12,488
+12
+00:00:42,846 --> 00:00:47,125
 and it goes on a signed Capability
 Passport that anyone can verify.
 
-9
-00:01:35,500 --> 00:01:40,926
+13
+00:00:47,525 --> 00:00:52,797
 Three things set us apart: proof, not
 completion certificates; tools for colleges,
 
-10
-00:01:40,976 --> 00:01:46,069
+14
+00:00:52,847 --> 00:00:57,793
 not just courses for students; and one record
 from first lesson to job offer.
 
-11
-00:03:15,500 --> 00:03:18,588
+15
+00:00:58,193 --> 00:01:01,565
+Pilot results will be added here: the
+score before and after,
+
+16
+00:01:01,615 --> 00:01:04,538
+how many students took part, and
+over how many weeks.
+
+17
+00:01:04,938 --> 00:01:08,993
+Who pays will be added here, for each of
+our three customers: colleges,
+
+18
+00:01:09,043 --> 00:01:10,323
+employers and students.
+
+19
+00:01:10,723 --> 00:01:13,572
+Our price per student, our AI
+cost per learner,
+
+20
+00:01:13,622 --> 00:01:17,951
+and the expected gross margin will be
+added here, from real usage logs.
+
+21
+00:01:18,351 --> 00:01:20,238
 India approved 14.9 lakh BTech
 seats in 2024-25.
 
-12
-00:03:18,638 --> 00:03:23,885
-We start in Andhra Pradesh and Telangana:
-1,83,532 approved seats in AP and 1,16,
+22
+00:01:20,288 --> 00:01:22,255
+We start in Andhra Pradesh and
+Telangana: about 1.
 
-13
-00:03:23,935 --> 00:03:26,696
-877 in Telangana. [FILL:
-first target, e.g.
+23
+00:01:22,305 --> 00:01:25,644
+8 lakh seats in Andhra Pradesh and about 1.2
+lakh in Telangana. [FILL: first target,
 
-14
-00:03:26,746 --> 00:03:30,031
-50 colleges x 600 students x
+24
+00:01:25,694 --> 00:01:27,904
+e.g. 50 colleges x 600 students x
 price = Rs __ a year.]
+
+25
+00:01:28,304 --> 00:01:33,412
+Traction will be added here: our pilots,
+letters of intent and colleges in talks.
+
+26
+00:01:33,462 --> 00:01:35,895
+Then a line on each person in the team.
+
+27
+00:01:36,295 --> 00:01:42,535
+Our funding ask will be added here: how much
+we are raising, what it will reach,
+
+28
+00:01:42,585 --> 00:01:47,881
+and how we will use it across product,
+sales and content. Thank you.
