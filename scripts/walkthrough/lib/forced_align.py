@@ -22,7 +22,23 @@ def say_num(m):
     out = say_int(int(whole)) + (' point ' + ' '.join(ONES[int(d)] for d in frac) if frac else '')
     return ' ' + out + (' percent' if m.group(2) else '') + ' '
 
+def say_big(n):
+    # Indian grouping, as an Indian English voice reads it: 1,83,532 -> one lakh eighty three thousand five hundred thirty two
+    out = []
+    for size, name in ((10000000, 'crore'), (100000, 'lakh'), (1000, 'thousand')):
+        if n >= size:
+            out.append(say_int(n // size) + ' ' + name); n %= size
+    if n:
+        out.append(say_int(n))
+    return ' '.join(out)
+
+def say_year(y):
+    return say_int(y // 100) + ' ' + (say_int(y % 100) if y % 100 else 'hundred')
+
 def words(t):
+    t = re.sub(r'\b(\d{4})-(\d{2})\b', lambda m: ' ' + say_year(int(m.group(1))) + ' ' + say_int(int(m.group(2))) + ' ', t)
+    t = re.sub(r'\b(19|20)(\d{2})\b', lambda m: ' ' + say_year(int(m.group(0))) + ' ', t)
+    t = re.sub(r'\b\d{1,2}(?:,\d{2})*,\d{3}\b', lambda m: ' ' + say_big(int(m.group(0).replace(',', ''))) + ' ', t)
     t = re.sub(r'(\d+(?:\.\d+)?)(%?)', say_num, t)
     return [w for w in re.sub(r"[^a-z' ]+", ' ', t.lower().replace('-', ' ')).split() if w]
 

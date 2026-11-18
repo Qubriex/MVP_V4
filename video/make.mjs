@@ -159,9 +159,10 @@ if (!fs.existsSync(tmFile)) {
   const voDur = seconds(readPcm(vo)); let res;
   if (LANG === 'en') {
     const lf = path.join(WORK, 'lines.json'); fs.writeFileSync(lf, JSON.stringify(scriptText));
-    const r = JSON.parse(execFileSync(process.env.PYTHON || 'python3', ['-I', path.join(WT, 'forced_align.py'), vo, lf]).toString().trim().split('\n').pop());
-    if (r.starts.some(x => x == null)) throw new Error(`forced alignment incomplete (${r.aligned_words}/${r.script_words} words)`);
-    res = { starts: r.starts.map(x => Math.max(0, x - 0.05)), words: r.words, brand: r.words.filter(x => x.w === 'qubirex') };
+    let r = null;
+    try { r = JSON.parse(execFileSync(process.env.PYTHON || 'python3', ['-I', path.join(WT, 'forced_align.py'), vo, lf], { stdio: ['ignore', 'pipe', 'pipe'] }).toString().trim().split('\n').pop()); } catch (e) { console.warn(`  offline alignment failed (${String(e.message).split('\n').pop().slice(0, 120)}); timing by pauses instead`); }
+    if (r && r.starts.every(x => x != null)) res = { starts: r.starts.map(x => Math.max(0, x - 0.05)), words: r.words, brand: r.words.filter(x => x.w === 'qubirex') };
+    else { const q = await alignByRate(scriptText, vo, voDur, path.join(WORK, 'tmp'), { language: 'English' }); res = { starts: q.starts, words: [], brand: [], report: q.report }; }
   } else {
     const r = await alignByRate(scriptText, vo, voDur, path.join(WORK, 'tmp'), { language: LANG_NAME });
     res = { starts: r.starts, words: [], brand: [], report: r.report };
