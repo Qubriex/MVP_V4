@@ -1,0 +1,58 @@
+{
+ "name": "student-reel-1-en-nocaptions",
+ "pass": true,
+ "checks": [
+  {
+   "name": "voice: no style text read aloud",
+   "ok": true,
+   "detail": "none heard"
+  },
+  {
+   "name": "voice: numbers match the script and facts.json",
+   "ok": true,
+   "detail": "all 0 fact numbers heard, no others"
+  },
+  {
+   "name": "voice: \"Qubirex\" said one way",
+   "ok": true,
+   "detail": "1 mentions at 33.1 s; every mention is the same recorded clip; the transcript wrote it as: cubicrex"
+  },
+  {
+   "name": "text: one title at a time",
+   "ok": true,
+   "detail": "no frame with two titles"
+  },
+  {
+   "name": "text: read time held",
+   "ok": true,
+   "detail": "11 text layers checked"
+  },
+  {
+   "name": "code: the snippet runs (bug fails, fix passes)",
+   "ok": true,
+   "detail": "add(a, b): \"a * b\" fails the test, \"a + b\" passes"
+  },
+  {
+   "name": "loudness: -14 LUFS ±1, true peak ≤ −1 dBTP",
+   "ok": true,
+   "detail": "-14.9 LUFS, true peak -2.2 dBTP"
+  },
+  {
+   "name": "format: size, 30 fps, length",
+   "ok": true,
+   "detail": "1080×1920, 30 fps, 37.57 s (allowed 29–40 s)"
+  }
+ ],
+ "lufs": -14.9,
+ "truePeak": -2.2,
+ "duration": 37.57,
+ "sheet": "video/qa/student-reel-1-en-nocaptions-sheet.jpg",
+ "brand": [
+  {
+   "line": 3,
+   "t": 33.15,
+   "dur": 0.79
+  }
+ ],
+ "at": "2026-11-18T08:18:03.277Z"
+}
