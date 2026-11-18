@@ -279,7 +279,7 @@ writeScript(path.join(OUT_DIR, 'scripts', `${ID}.md`), {
 // ─── QA, then out/ ───────────────────────────────────────────────────────────
 const factKeys = [...new Set(beats.map(b => b.fact).filter(Boolean))];
 const codeScenes = beats.some(b => b.type === 'code' || b.type === 'recipe');
-const qa = runQa({ name: OUTNAME, file: final, lang: LANG, heard: heardFinal, script: scriptText, factKeys, brand, brandSpliced: !!E.reference, frames: layers, target: TARGET, banned: CONFIG.bannedSpokenPhrases, codeHold: CONFIG.minCodeHoldSeconds, teluguText: false, codeTest: codeScenes });
+const qa = runQa({ name: OUTNAME, file: final, lang: LANG, heard: heardFinal, script: LANG === 'te' ? scriptText.concat(scenes.map(s => s.en.say || '')) : scriptText, factKeys, brand, brandSpliced: !!E.reference, frames: layers, target: TARGET, banned: CONFIG.bannedSpokenPhrases, codeHold: CONFIG.minCodeHoldSeconds, teluguText: false, codeTest: codeScenes });
 for (const c of qa.checks) console.log(`  ${c.ok ? '✓' : '✗'} ${c.name}: ${c.detail}`);
 const dest = qa.pass ? OUT_DIR : path.join(QA_DIR, 'failed');
 fs.mkdirSync(dest, { recursive: true });
