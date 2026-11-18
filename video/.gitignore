@@ -1,0 +1,7 @@
+# Videos and working files are never committed.
+out/*.mp4
+out/*.wav
+work/
+qa/*.jpg
+qa/*.wav
+qa/failed/

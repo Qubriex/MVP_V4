@@ -1,0 +1,80 @@
+// Voice-over editing on raw samples (48 kHz mono float), with every timing
+// moved along with the edits:
+//   - one file per scene (a bad line can be voiced again on its own),
+//   - holds (silence after a line, so a card can stay on screen),
+//   - the brand: every "Qubirex" is the same recorded clip, so it is said
+//     the same way every time.
+import fs from 'fs';
+import { execFileSync } from 'child_process';
+
+export const RATE = 48000;
+
+export function readPcm(file) {
+  const raw = execFileSync('ffmpeg', ['-v', 'error', '-i', file, '-ac', '1', '-ar', String(RATE), '-f', 'f32le', '-'], { maxBuffer: 1 << 30 });
+  return new Float32Array(raw.buffer, raw.byteOffset, raw.length / 4).slice();
+}
+
+export function writeWav(file, pcm) {
+  execFileSync('ffmpeg', ['-v', 'error', '-y', '-f', 'f32le', '-ar', String(RATE), '-ac', '1', '-i', '-', '-ar', String(RATE), '-ac', '2', '-c:a', 'pcm_s16le', file], { input: Buffer.from(pcm.buffer, pcm.byteOffset, pcm.byteLength) });
+}
+
+const at = (t) => Math.max(0, Math.round(t * RATE));
+const concat = (parts) => { const n = parts.reduce((a, p) => a + p.length, 0); const out = new Float32Array(n); let o = 0; for (const p of parts) { out.set(p, o); o += p.length; } return out; };
+// A short fade at each cut, so no click.
+function faded(x, ms = 6) {
+  const y = x.slice(); const n = Math.min(Math.round(RATE * ms / 1000), Math.floor(y.length / 2));
+  for (let i = 0; i < n; i += 1) { const g = i / n; y[i] *= g; y[y.length - 1 - i] *= g; }
+  return y;
+}
+
+/**
+ * @param {Float32Array} pcm  the whole voice-over
+ * @param {number[]} starts   line starts (s) in pcm
+ * @param {{ pads?: number[], overrides?: (Float32Array|null)[], brand?: {start:number,end:number,line:number}[] }} edits
+ * @returns {{ pcm: Float32Array, starts: number[], scenes: Float32Array[], brand: {line:number,t:number,dur:number}[] , reference: Float32Array|null }}
+ */
+export function edit(pcm, starts, { pads = [], overrides = [], brand = [] } = {}) {
+  const total = pcm.length / RATE;
+  // 1. Scenes: line i runs from its start to the next line's start.
+  let scenes = starts.map((s, i) => pcm.slice(at(s), at(i + 1 < starts.length ? starts[i + 1] : total)));
+  // 2. The brand clip: the mention whose length is the median of all
+  //    mentions (a typical one), with 20 ms either side.
+  let reference = null; const marks = [];
+  if (brand.length) {
+    const sorted = [...brand].sort((a, b) => (a.end - a.start) - (b.end - b.start));
+    const ref = sorted[Math.floor(sorted.length / 2)];
+    reference = faded(pcm.slice(at(ref.start - 0.02), at(ref.end + 0.02)));
+    // Replace inside each scene, last mention first so earlier offsets stay right.
+    const byLine = new Map();
+    brand.forEach(b => { if (!overrides[b.line]) { if (!byLine.has(b.line)) byLine.set(b.line, []); byLine.get(b.line).push(b); } });
+    for (const [li, list] of byLine) {
+      let sc = scenes[li]; const s0 = starts[li];
+      for (const b of [...list].sort((x, y) => y.start - x.start)) {
+        const a = at(b.start - 0.02 - s0); const e = at(b.end + 0.02 - s0);
+        sc = concat([faded(sc.slice(0, a)), reference, faded(sc.slice(e))]);
+      }
+      scenes[li] = sc;
+    }
+  }
+  // 3. Lines voiced again on their own replace their scene.
+  scenes = scenes.map((sc, i) => overrides[i] || sc);
+  // 4. Holds after a line.
+  scenes = scenes.map((sc, i) => (pads[i] ? concat([sc, new Float32Array(at(pads[i]))]) : sc));
+  // New starts, and where each brand mention now sits.
+  const newStarts = []; let t = 0;
+  scenes.forEach(sc => { newStarts.push(t); t += sc.length / RATE; });
+  const out = [];
+  if (reference) {
+    for (const b of brand) {
+      if (overrides[b.line]) continue;
+      // Position inside the edited scene: earlier mentions in the same line shift it.
+      const before = brand.filter(x => x.line === b.line && x.start < b.start && !overrides[x.line]);
+      const shift = before.reduce((acc, x) => acc + reference.length / RATE - (x.end - x.start + 0.04), 0);
+      out.push({ line: b.line, t: +(newStarts[b.line] + (b.start - 0.02 - starts[b.line]) + shift).toFixed(2), dur: +(reference.length / RATE).toFixed(2) });
+    }
+  }
+  return { pcm: concat(scenes), starts: newStarts, scenes, brand: out, reference };
+}
+
+export const seconds = (pcm) => pcm.length / RATE;
+export const exists = (f) => fs.existsSync(f);

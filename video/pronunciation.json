@@ -1,0 +1,5 @@
+{
+  "_note": "How names are said. Agreed spelling until the founder confirms otherwise. Gemini TTS has no custom-pronunciation field, so the brand is written phonetically in the text sent to TTS; Cloud TTS Chirp 3 HD (which has one) is not reachable with API keys. Every mention in a video is then the same recorded clip (see story.mjs: brand splice).",
+  "Qubirex": { "say": "KYOO-bih-rex", "ipa": "ˈkjuː.bɪ.rɛks", "tts": { "en": "Kyoobirex", "te": "క్యూబిరెక్స్" }, "screen": { "en": "Qubirex", "te": "Qubirex" } },
+  "Jensen Huang": { "say": "JEN-sen HWAHNG", "tts": { "en": "Jensen Hwahng", "te": "జెన్సెన్ హ్వాంగ్" } }
+}
