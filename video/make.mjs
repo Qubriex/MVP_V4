@@ -137,14 +137,15 @@ const scriptText = voiced.map(v => v.parts.map(p => p.text).join(' '));
     const ONES = 'zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen'.split(' ');
     const TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
     const say = (n) => (n < 20 ? ONES[n] : n < 100 ? `${TENS[Math.floor(n / 10)]} ${n % 10 ? ONES[n % 10] : ''}` : n < 1000 ? `${ONES[Math.floor(n / 100)]} hundred ${n % 100 ? say(n % 100) : ''}` : n < 100000 ? `${say(Math.floor(n / 1000))} thousand ${n % 1000 ? say(n % 1000) : ''}` : String(n));
-    const w = (t) => t.toLowerCase().replace(/(\d[\d,]*)(?:\.(\d+))?(%?)/g, (m, i, d, pc) => ` ${say(Number(i.replace(/,/g, '')))}${d ? ` point ${[...d].map(x => ONES[x]).join(' ')}` : ''}${pc ? ' percent' : ''} `)
-      .replace(/\b(?:q|c|k)[a-z]*[\s-]?(?:bi|by|be|bee)?[\s-]?(?:rex|rx|ex|ix|bricks|brix|rix)\b/g, ' ')
+    const w = (t) => t.toLowerCase().replace(/\b([ap])\.m\./g, '$1m').replace(/(\d[\d,]*)(?:\.(\d+))?(%?)/g, (m, i, d, pc) => ` ${say(Number(i.replace(/,/g, '')))}${d ? ` point ${[...d].map(x => ONES[x]).join(' ')}` : ''}${pc ? ' percent' : ''} `)
+      .replace(/\b(?:q|c|k)[a-z0-9]*[\s-]?(?:bi|by|be|bee)?[\s-]?(?:rex|rx|ex|ix|bricks|brix|rix|3x)\b/g, ' ')
       .replace(/\b([a-z])\s+(?=[a-z]\b)/g, '$1').replace(/-/g, ' ').replace(/[^a-z0-9 ]+/g, ' ').split(/\s+/).filter(x => x && x !== 'a' && x !== 'and');
     const a = w(scriptText.join(' ').replace(/Qubirex/g, '')); const b = w(heard);
     const L = Array.from({ length: a.length + 1 }, () => new Int16Array(b.length + 1));
     for (let i = a.length - 1; i >= 0; i -= 1) for (let j = b.length - 1; j >= 0; j -= 1) L[i][j] = a[i] === b[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
     const ratio = L[0][0] / a.length;
-    if (ratio < 0.85 || b.length - L[0][0] > a.length * 0.1) throw new Error(`The voice does not match the script (${(ratio * 100).toFixed(0)}% of words heard in order). Delete ${vo} to re-voice.`);
+    const redone = fs.readdirSync(path.join(WORK, 'scenes')).some(f => f.endsWith('.override.wav')) || process.env.REDO;
+    if (!redone && (ratio < 0.85 || b.length - L[0][0] > a.length * 0.1)) throw new Error(`The voice does not match the script (${(ratio * 100).toFixed(0)}% of words heard in order). Delete ${vo} to re-voice.`);
     console.log(`voice check: ${(ratio * 100).toFixed(0)}% of script words heard, in order`);
   } else console.log('voice check: Telugu letters compared in QA');
 }
@@ -170,7 +171,7 @@ const timing = JSON.parse(fs.readFileSync(tmFile, 'utf8'));
 const redo = (process.env.REDO || '').split(',').filter(Boolean).map(Number);
 for (const n of redo) {
   const k = voiced.findIndex(v => scenes[v.i].n === n); if (k < 0) continue;
-  const r = await tts(spoken(scriptText[k], LANG)); toWav(r.file, r.rate, path.join(WORK, 'scenes', `${String(n).padStart(2, '0')}.override.wav`));
+  const r = await tts(MULTI ? voiced[k].parts.map(p => `${p.who}: ${spoken(p.text, LANG)}`).join('\n') : spoken(scriptText[k], LANG)); toWav(r.file, r.rate, path.join(WORK, 'scenes', `${String(n).padStart(2, '0')}.override.wav`));
 }
 const overrides = voiced.map(v => { const f = path.join(WORK, 'scenes', `${String(scenes[v.i].n).padStart(2, '0')}.override.wav`); return fs.existsSync(f) ? readPcm(f) : null; });
 // Each scene lasts as long as the script plans (its time column), and never
@@ -198,6 +199,8 @@ scenes.forEach((s, i) => {
 });
 const pcm = new Float32Array(pcmParts.reduce((a, x) => a + x.length, 0)); { let o = 0; pcmParts.forEach(x => { pcm.set(x, o); o += x.length; }); }
 const voFinal = path.join(WORK, 'voice-final.wav'); writeWav(voFinal, pcm);
+let heardFinal = heard;
+if (overrides.some(Boolean)) { const tf = path.join(WORK, 'transcript-final.json'); if (!fs.existsSync(tf) || process.env.REDO) fs.writeFileSync(tf, JSON.stringify({ heard: await transcribe(voFinal) })); heardFinal = JSON.parse(fs.readFileSync(tf, 'utf8')).heard; console.log(`final voice heard: ${heardFinal}`); }
 const total = t0 + TAIL;
 console.log(`${ID}: ${scenes.length} scenes, voice ${seconds(pcm).toFixed(1)} s → video ${total.toFixed(1)} s · ${brand.length} brand mentions${E.reference ? ', one clip' : ''}`);
 
@@ -275,7 +278,7 @@ writeScript(path.join(OUT_DIR, 'scripts', `${ID}.md`), {
 // ─── QA, then out/ ───────────────────────────────────────────────────────────
 const factKeys = [...new Set(beats.map(b => b.fact).filter(Boolean))];
 const codeScenes = beats.some(b => b.type === 'code' || b.type === 'recipe');
-const qa = runQa({ name: OUTNAME, file: final, lang: LANG, heard, script: scriptText, factKeys, brand, brandSpliced: !!E.reference, frames: layers, target: TARGET, banned: CONFIG.bannedSpokenPhrases, codeHold: CONFIG.minCodeHoldSeconds, teluguText: false, codeTest: codeScenes });
+const qa = runQa({ name: OUTNAME, file: final, lang: LANG, heard: heardFinal, script: scriptText, factKeys, brand, brandSpliced: !!E.reference, frames: layers, target: TARGET, banned: CONFIG.bannedSpokenPhrases, codeHold: CONFIG.minCodeHoldSeconds, teluguText: false, codeTest: codeScenes });
 for (const c of qa.checks) console.log(`  ${c.ok ? '✓' : '✗'} ${c.name}: ${c.detail}`);
 const dest = qa.pass ? OUT_DIR : path.join(QA_DIR, 'failed');
 fs.mkdirSync(dest, { recursive: true });
