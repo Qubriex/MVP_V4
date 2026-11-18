@@ -1,0 +1,47 @@
+{
+ "name": "investor-full-en-DRAFT",
+ "pass": true,
+ "checks": [
+  {
+   "name": "voice: no style text read aloud",
+   "ok": true,
+   "detail": "none heard"
+  },
+  {
+   "name": "voice: numbers match the script and facts.json",
+   "ok": true,
+   "detail": "all 1 fact numbers heard, no others"
+  },
+  {
+   "name": "voice: \"Qubirex\" said one way",
+   "ok": true,
+   "detail": "0 mentions at —; not spliced; the transcript wrote it as: qurex"
+  },
+  {
+   "name": "text: one title at a time",
+   "ok": true,
+   "detail": "no frame with two titles"
+  },
+  {
+   "name": "text: read time held",
+   "ok": true,
+   "detail": "71 text layers checked"
+  },
+  {
+   "name": "loudness: -16 LUFS ±1, true peak ≤ −1 dBTP",
+   "ok": true,
+   "detail": "-16.2 LUFS, true peak -2.1 dBTP"
+  },
+  {
+   "name": "format: size, 30 fps, length",
+   "ok": true,
+   "detail": "1920×1080, 30 fps, 263.5 s (allowed 209–270 s)"
+  }
+ ],
+ "lufs": -16.2,
+ "truePeak": -2.1,
+ "duration": 263.5,
+ "sheet": "video/qa/investor-full-en-DRAFT-sheet.jpg",
+ "brand": [],
+ "at": "2026-11-18T08:56:54.416Z"
+}
