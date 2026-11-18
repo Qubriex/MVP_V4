@@ -29,8 +29,8 @@
   },
   {
    "name": "text: read time held",
-   "ok": false,
-   "detail": "\"తప్పు: + ఉండాలి\" 1.8 s < 2.0 s"
+   "ok": true,
+   "detail": "127 text layers checked"
   },
   {
    "name": "loudness: -16 LUFS ±1, true peak ≤ −1 dBTP",
@@ -48,5 +48,5 @@
  "duration": 180.94,
  "sheet": "video/qa/pitch-3min-te-DRAFT-sheet.jpg",
  "brand": [],
- "at": "2026-11-18T05:19:29.589Z"
+ "at": "2026-11-18T05:39:26.571Z"
 }

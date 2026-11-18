@@ -1,6 +1,6 @@
 {
  "name": "pitch-60s-te-DRAFT",
- "pass": false,
+ "pass": true,
  "checks": [
   {
    "name": "voice: no style text read aloud",
@@ -29,13 +29,13 @@
   },
   {
    "name": "text: read time held",
-   "ok": false,
-   "detail": "\"మీ భాషలో\" 1.7 s < 2.0 s; \"“You're not going to lose your job to an\" 5.5 s < 7.3 s; \"తప్పు: + ఉండాలి\" 1.8 s < 2.0 s; \"ఆ వ్యక్తి మీరే ఎందుకు కాకూడదు?\" 1.8 s < 2.0 s"
+   "ok": true,
+   "detail": "52 text layers checked"
   },
   {
    "name": "loudness: -16 LUFS ±1, true peak ≤ −1 dBTP",
    "ok": true,
-   "detail": "-16 LUFS, true peak -3.7 dBTP"
+   "detail": "-16 LUFS, true peak -3.6 dBTP"
   },
   {
    "name": "format: size, 30 fps, length",
@@ -44,9 +44,9 @@
   }
  ],
  "lufs": -16,
- "truePeak": -3.7,
+ "truePeak": -3.6,
  "duration": 54.67,
  "sheet": "video/qa/pitch-60s-te-DRAFT-sheet.jpg",
  "brand": [],
- "at": "2026-11-18T05:11:11.044Z"
+ "at": "2026-11-18T05:31:25.013Z"
 }

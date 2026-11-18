@@ -23,15 +23,13 @@
  },
  "pitch-60s-te": {
   "key": "pitch-60s-te",
-  "file": "qa/failed/pitch-60s-te-DRAFT.mp4",
+  "file": "out/pitch-60s-te-DRAFT.mp4",
   "duration": 54.67,
   "lufs": -16,
-  "truePeak": -3.7,
+  "truePeak": -3.6,
   "engine": "Gemini TTS gemini-3.8-flash-tts (te-IN, Kore) (earlier recording, reused)",
-  "pass": false,
-  "failed": [
-   "text: read time held (\"మీ భాషలో\" 1.7 s < 2.0 s; \"“You're not going to lose your job to an\" 5.5 s < 7.3 s; \"తప్పు: + ఉండాలి\" 1.8 s < 2.0 s; \"ఆ వ్యక్తి మీరే ఎందుకు కాకూడదు?\" 1.8 s < 2.0 s)"
-  ],
+  "pass": true,
+  "failed": [],
   "notes": "blanks: [website]; native-speaker check of the Telugu lines (⚠ quote, line 7), then a new voice-over with the agreed brand pronunciation"
  },
  "pitch-3min-te": {
@@ -43,7 +41,6 @@
   "engine": "Gemini TTS gemini-3.8-flash-tts (te-IN, Kore) (earlier recording, reused)",
   "pass": false,
   "failed": [
-   "text: read time held (\"తప్పు: + ఉండాలి\" 1.8 s < 2.0 s)",
    "format: size, 30 fps, length (1920×1080, 30 fps, 180.94 s (allowed 90–160 s))"
   ],
   "notes": "blanks: [FILL: who pays], [website]; native-speaker check of the Telugu lines (⚠ quote line 16; \"translating\" line 19), then a new voice-over from the proposed tightened script (≤ 2:40)"
