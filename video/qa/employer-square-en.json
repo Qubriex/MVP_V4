@@ -1,0 +1,58 @@
+{
+ "name": "employer-square-en",
+ "pass": false,
+ "checks": [
+  {
+   "name": "voice: no style text read aloud",
+   "ok": true,
+   "detail": "none heard"
+  },
+  {
+   "name": "voice: numbers match the script and facts.json",
+   "ok": false,
+   "detail": "heard but not in the script: 2. "
+  },
+  {
+   "name": "voice: \"Qubirex\" said one way",
+   "ok": true,
+   "detail": "2 mentions at 11.0 s, 80.5 s; every mention is the same recorded clip; the transcript wrote it as: qubirex"
+  },
+  {
+   "name": "text: one title at a time",
+   "ok": true,
+   "detail": "no frame with two titles"
+  },
+  {
+   "name": "text: read time held",
+   "ok": true,
+   "detail": "17 text layers checked"
+  },
+  {
+   "name": "loudness: -14 LUFS ±1, true peak ≤ −1 dBTP",
+   "ok": true,
+   "detail": "-14.5 LUFS, true peak -2.6 dBTP"
+  },
+  {
+   "name": "format: size, 30 fps, length",
+   "ok": true,
+   "detail": "1080×1080, 30 fps, 86.51 s (allowed 59–90 s)"
+  }
+ ],
+ "lufs": -14.5,
+ "truePeak": -2.6,
+ "duration": 86.51,
+ "sheet": "video/qa/employer-square-en-sheet.jpg",
+ "brand": [
+  {
+   "line": 1,
+   "t": 11,
+   "dur": 0.73
+  },
+  {
+   "line": 4,
+   "t": 80.53,
+   "dur": 0.73
+  }
+ ],
+ "at": "2026-11-18T07:22:33.293Z"
+}
