@@ -1,0 +1,9 @@
+{
+  "_rules": "Fill from frontend/src/styles/tokens.css and the existing pitch videos. Claude Code: read tokens.css and replace the placeholders, then keep them fixed.",
+  "colors": {"background": "[from tokens.css / existing videos: dark navy bokeh]", "accent": "[orange used for section numbers]", "text": "[white]", "muted": "[grey]", "success": "[green tick]", "placeholderFill": "#FF8A00"},
+  "fonts": {"headings": "[existing heading font]", "body": "[existing body font]", "telugu": "Noto Sans Telugu (or the app's Telugu font)", "code": "[monospace used in the app]"},
+  "logo": "frontend/public/[logo file] (flame mark + wordmark)",
+  "tagline_en": "Your language. Your skills. Your future.",
+  "tagline_te": "[native writer to provide]",
+  "section_title_style": "orange 2-digit number + white title, e.g. 01 The problem"
+}

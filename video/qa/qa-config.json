@@ -1,0 +1,10 @@
+{
+  "readTimeSecondsPerWord": 0.34,
+  "minTextHoldSeconds": 2,
+  "minCodeHoldSeconds": 5,
+  "maxTitleOverlapOpacity": 0.1,
+  "loudness": {"vertical_and_square": -14, "landscape": -16, "toleranceLU": 1, "maxTruePeakDbtp": -1},
+  "fps": 30,
+  "bannedSpokenPhrases": ["read the following", "warm, sincere", "read only the paragraphs", "young indian founder", "tone:", "style:"],
+  "teluguAllowListEnglish": ["Qubirex", "Python", "Java", "code", "function", "loop", "return", "AI", "AICTE", "IAMAI", "PLFS", "AISHE", "FY22", "FY25", "QR"]
+}
