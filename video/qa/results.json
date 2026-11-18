@@ -127,5 +127,16 @@
   "pass": true,
   "failed": [],
   "notes": ""
+ },
+ "institution-60s-te": {
+  "key": "institution-60s-te",
+  "file": "out/institution-60s-te.mp4",
+  "duration": 59.2,
+  "lufs": -16.1,
+  "truePeak": -2.2,
+  "engine": "Gemini TTS gemini-3.1-flash-tts-preview (te-IN; Professor: Kore); Chirp 3 HD not reachable with API keys",
+  "pass": true,
+  "failed": [],
+  "notes": "Telugu voice not yet native-reviewed; English text on screen"
  }
 }

@@ -1,0 +1,47 @@
+{
+ "name": "institution-60s-te",
+ "pass": true,
+ "checks": [
+  {
+   "name": "voice: no style text read aloud",
+   "ok": true,
+   "detail": "none heard"
+  },
+  {
+   "name": "voice: numbers match facts.json",
+   "ok": true,
+   "detail": "0 numbers heard, all in the facts"
+  },
+  {
+   "name": "voice: \"Qubirex\" said one way",
+   "ok": true,
+   "detail": "0 mentions at —; not spliced; the transcript wrote it as: qubirex"
+  },
+  {
+   "name": "text: one title at a time",
+   "ok": true,
+   "detail": "no frame with two titles"
+  },
+  {
+   "name": "text: read time held",
+   "ok": true,
+   "detail": "19 text layers checked"
+  },
+  {
+   "name": "loudness: -16 LUFS ±1, true peak ≤ −1 dBTP",
+   "ok": true,
+   "detail": "-16.1 LUFS, true peak -2.2 dBTP"
+  },
+  {
+   "name": "format: size, 30 fps, length",
+   "ok": true,
+   "detail": "1920×1080, 30 fps, 59.2 s (allowed 49–60 s)"
+  }
+ ],
+ "lufs": -16.1,
+ "truePeak": -2.2,
+ "duration": 59.2,
+ "sheet": "video/qa/institution-60s-te-sheet.jpg",
+ "brand": [],
+ "at": "2026-11-18T07:45:34.768Z"
+}
