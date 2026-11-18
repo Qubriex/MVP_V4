@@ -15,7 +15,7 @@
   {
    "name": "voice: \"Qubirex\" said one way",
    "ok": true,
-   "detail": "3 mentions at 13.4 s, 19.9 s, 45.1 s; every mention is the same recorded clip; the transcript wrote it as: qubrix"
+   "detail": "3 mentions at 13.4 s, 19.9 s, 45.7 s; every mention is the same recorded clip; the transcript wrote it as: qubrix"
   },
   {
    "name": "text: one title at a time",
@@ -25,22 +25,22 @@
   {
    "name": "text: read time held",
    "ok": false,
-   "detail": "\"1.2 lakh\" 1.4 s < 2.0 s; \"−80%\" 0.5 s < 2.0 s; \"job\" 1.8 s < 2.0 s; \"to\" 1.5 s < 2.0 s; \"someone\" 1.3 s < 2.0 s; \"who\" 1.0 s < 2.0 s"
+   "detail": "\"−80%\" 1.7 s < 2.0 s; \"You're not going to lose your job to an \" 7.2 s < 7.3 s; \"Bug: should be +\" 1.8 s < 2.0 s; \"Why not you?\" 1.2 s < 2.0 s"
   },
   {
    "name": "loudness: -16 LUFS ±1, true peak ≤ −1 dBTP",
    "ok": true,
-   "detail": "-16 LUFS, true peak -1.2 dBTP"
+   "detail": "-16 LUFS, true peak -1 dBTP"
   },
   {
    "name": "format: size, 30 fps, length",
    "ok": true,
-   "detail": "1920×1080, 30 fps, 51.24 s (allowed 30–55 s)"
+   "detail": "1920×1080, 30 fps, 51.84 s (allowed 30–55 s)"
   }
  ],
  "lufs": -16,
- "truePeak": -1.2,
- "duration": 51.24,
+ "truePeak": -1,
+ "duration": 51.84,
  "sheet": "video/qa/pitch-60s-en-DRAFT-sheet.jpg",
  "brand": [
   {
@@ -55,9 +55,9 @@
   },
   {
    "line": 8,
-   "t": 45.09,
+   "t": 45.69,
    "dur": 0.54
   }
  ],
- "at": "2026-11-18T04:41:10.789Z"
+ "at": "2026-11-18T05:01:43.601Z"
 }

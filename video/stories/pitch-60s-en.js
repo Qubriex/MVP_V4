@@ -22,8 +22,8 @@ export default {
     { section: 'problem', say: 'Only 1 in 10 Indians speak English. Yet engineering is taught in English.', beat: f.people('english') },
     { section: 'solution', say: 'Qubirex teaches in Telugu, Hindi, or the mix students actually speak.', beat: { type: 'solution', lines: ['Learn in your own language.', 'Prove every skill.'] }, pad: 1.0 },
     { section: 'product', say: 'Professor Qubirex explains every line, and every skill students prove goes on a signed Capability Passport.', beat: { type: 'device', shots: [{ key: 'walk', kicker: 'In your language', title: 'Every line, explained' }, { key: 'passport', kicker: 'Capability Passport', title: 'Every skill, signed' }] } },
-    { section: 'whynow', say: 'IT fresher hiring has fallen 80% in three years.', beat: f.falling('fresherHiring'), pad: 1.4 },
-    { section: 'whynow', say: "As Jensen Huang said: you're not going to lose your job to an AI, but you're going to lose your job to someone who uses AI.", beat: f.quote() },
+    { section: 'whynow', say: 'IT fresher hiring has fallen 80% in three years.', beat: f.falling('fresherHiring'), pad: 2.0 },
+    { section: 'whynow', say: "As Jensen Huang said: you're not going to lose your job to an AI, but you're going to lose your job to someone who uses AI.", beat: f.quote(), pad: 0.6 },
     { section: 'whynow', say: "AI is the recipe. You still cook. Why shouldn't that be you?", beat: { type: 'recipe' }, pad: 2.6 },
     { section: 'close', say: 'Qubirex. Your language. Your skills. Your future.', beat: { type: 'close', action: 'Talk to us' } }
   ]

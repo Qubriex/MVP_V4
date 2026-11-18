@@ -19,8 +19,8 @@
   },
   {
    "name": "text: no English-only titles, labels or captions",
-   "ok": false,
-   "detail": "English-only: \"C\", \"D\", \"# add two numbersdef add(a, b):    return a + b\""
+   "ok": true,
+   "detail": "all Telugu (tech words and brand allowed)"
   },
   {
    "name": "text: one title at a time",
@@ -30,23 +30,23 @@
   {
    "name": "text: read time held",
    "ok": false,
-   "detail": "\"0.0 కోట్లు\" 0.0 s < 2.0 s; \"0.0 కోట్లు\" 0.0 s < 2.0 s; \"0.0 కోట్లు\" 0.0 s < 2.0 s; \"0.0 కోట్లు\" 0.0 s < 2.0 s; \"0.0 కోట్లు\" 0.0 s < 2.0 s; \"0.1 కోట్లు\" 0.0 s < 2.0 s"
+   "detail": "\"తప్పు: + ఉండాలి\" 1.8 s < 2.0 s"
   },
   {
    "name": "loudness: -16 LUFS ±1, true peak ≤ −1 dBTP",
    "ok": true,
-   "detail": "-16 LUFS, true peak -3.6 dBTP"
+   "detail": "-16 LUFS, true peak -4.4 dBTP"
   },
   {
    "name": "format: size, 30 fps, length",
    "ok": false,
-   "detail": "1920×1080, 30 fps, 178.34 s (allowed 90–160 s)"
+   "detail": "1920×1080, 30 fps, 180.94 s (allowed 90–160 s)"
   }
  ],
  "lufs": -16,
- "truePeak": -3.6,
- "duration": 178.34,
+ "truePeak": -4.4,
+ "duration": 180.94,
  "sheet": "video/qa/pitch-3min-te-DRAFT-sheet.jpg",
  "brand": [],
- "at": "2026-11-18T04:58:19.846Z"
+ "at": "2026-11-18T05:19:29.589Z"
 }

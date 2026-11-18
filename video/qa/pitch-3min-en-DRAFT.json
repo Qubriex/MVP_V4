@@ -15,7 +15,7 @@
   {
    "name": "voice: \"Qubirex\" said one way",
    "ok": true,
-   "detail": "5 mentions at 49.0 s, 51.4 s, 114.3 s, 118.0 s, 130.9 s; every mention is the same recorded clip; the transcript wrote it as: quberx"
+   "detail": "5 mentions at 49.6 s, 52.0 s, 116.9 s, 120.6 s, 133.5 s; every mention is the same recorded clip; the transcript wrote it as: quberx"
   },
   {
    "name": "text: one title at a time",
@@ -25,49 +25,49 @@
   {
    "name": "text: read time held",
    "ok": false,
-   "detail": "\"हिंदी\" 1.9 s < 2.0 s; \"English\" 1.8 s < 2.0 s; \"Employers\" 1.9 s < 2.0 s; \"D\" 1.4 s < 2.0 s; \"A to Z, in one place\" 1.4 s < 2.0 s; \"Get hired\" 1.2 s < 2.0 s"
+   "detail": "\"Bug: should be +\" 1.8 s < 2.0 s"
   },
   {
    "name": "loudness: -16 LUFS ±1, true peak ≤ −1 dBTP",
-   "ok": true,
-   "detail": "-16 LUFS, true peak -1.3 dBTP"
+   "ok": false,
+   "detail": "-16 LUFS, true peak -0.8 dBTP"
   },
   {
    "name": "format: size, 30 fps, length",
    "ok": true,
-   "detail": "1920×1080, 30 fps, 138.6 s (allowed 90–160 s)"
+   "detail": "1920×1080, 30 fps, 141.2 s (allowed 90–160 s)"
   }
  ],
  "lufs": -16,
- "truePeak": -1.3,
- "duration": 138.6,
+ "truePeak": -0.8,
+ "duration": 141.2,
  "sheet": "video/qa/pitch-3min-en-DRAFT-sheet.jpg",
  "brand": [
   {
    "line": 8,
-   "t": 49.03,
+   "t": 49.63,
    "dur": 0.67
   },
   {
    "line": 9,
-   "t": 51.39,
+   "t": 51.99,
    "dur": 0.67
   },
   {
    "line": 18,
-   "t": 114.29,
+   "t": 116.89,
    "dur": 0.67
   },
   {
    "line": 19,
-   "t": 117.97,
+   "t": 120.57,
    "dur": 0.67
   },
   {
    "line": 21,
-   "t": 130.93,
+   "t": 133.53,
    "dur": 0.67
   }
  ],
- "at": "2026-11-18T04:47:21.610Z"
+ "at": "2026-11-18T05:08:35.070Z"
 }

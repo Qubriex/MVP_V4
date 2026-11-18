@@ -181,10 +181,10 @@ B.recipe = (el, b) => {
     c.forEach((x, i) => { vis(x, eo(p(t, at[i], at[i] + .5))); x.style.transform = `translateY(${(1 - back(p(t, at[i], at[i] + .6))) * 90}px)`; });
     steam.style.transform = `translateY(${-6 * Math.sin(t * 3)}px)`; steam.style.opacity = .6 + .4 * Math.sin(t * 2);
     // The bug is spotted (red), then fixed to + (green) and ticked.
-    const spot = t > at[2] + 1.0; const fixed = t > at[2] + 2.8;
+    const spot = t > at[2] + .8; const fixed = t > at[2] + 3.0; // the bug stays up 2.2 s
     op.textContent = fixed ? '+' : '*'; op.style.background = fixed ? 'rgba(46,158,107,.35)' : spot ? 'rgba(231,59,43,.55)' : 'transparent';
-    vis(bug, spot && !fixed ? 1 : 0); tick.style.transform = `scale(${back(p(t, at[2] + 2.8, at[2] + 3.3))})`;
-    const w = Math.max(b.start + span * .72, at[2] + 3.6); vis(why, eo(p(t, w, w + .4))); why.style.transform = `scale(${.85 + .15 * back(p(t, w, w + .6))})`; };
+    vis(bug, spot && !fixed ? 1 : 0); tick.style.transform = `scale(${back(p(t, at[2] + 3.0, at[2] + 3.5))})`;
+    const w = Math.min(Math.max(b.start + span * .72, at[2] + 3.4), b.end - 2.3); vis(why, eo(p(t, w, w + .4))); why.style.transform = `scale(${.85 + .15 * back(p(t, w, w + .6))})`; };
 };
 // Priya (original illustration) with English jargon closing in.
 B.priya = (el, b) => {

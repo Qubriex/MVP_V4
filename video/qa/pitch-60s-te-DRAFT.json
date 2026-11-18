@@ -19,8 +19,8 @@
   },
   {
    "name": "text: no English-only titles, labels or captions",
-   "ok": false,
-   "detail": "English-only: \"# add two numbersdef add(a, b):    return a + b\""
+   "ok": true,
+   "detail": "all Telugu (tech words and brand allowed)"
   },
   {
    "name": "text: one title at a time",
@@ -30,23 +30,23 @@
   {
    "name": "text: read time held",
    "ok": false,
-   "detail": "\"0.0 కోట్లు\" 0.0 s < 2.0 s; \"0.1 కోట్లు\" 0.0 s < 2.0 s; \"0.2 కోట్లు\" 0.0 s < 2.0 s; \"0.3 కోట్లు\" 0.0 s < 2.0 s; \"0.3 కోట్లు\" 0.0 s < 2.0 s; \"0.4 కోట్లు\" 0.0 s < 2.0 s"
+   "detail": "\"మీ భాషలో\" 1.7 s < 2.0 s; \"“You're not going to lose your job to an\" 5.5 s < 7.3 s; \"తప్పు: + ఉండాలి\" 1.8 s < 2.0 s; \"ఆ వ్యక్తి మీరే ఎందుకు కాకూడదు?\" 1.8 s < 2.0 s"
   },
   {
    "name": "loudness: -16 LUFS ±1, true peak ≤ −1 dBTP",
    "ok": true,
-   "detail": "-16 LUFS, true peak -4.4 dBTP"
+   "detail": "-16 LUFS, true peak -3.7 dBTP"
   },
   {
    "name": "format: size, 30 fps, length",
-   "ok": false,
-   "detail": "1920×1080, 30 fps, 55.07 s (allowed 30–55 s)"
+   "ok": true,
+   "detail": "1920×1080, 30 fps, 54.67 s (allowed 30–55 s)"
   }
  ],
  "lufs": -16,
- "truePeak": -4.4,
- "duration": 55.07,
+ "truePeak": -3.7,
+ "duration": 54.67,
  "sheet": "video/qa/pitch-60s-te-DRAFT-sheet.jpg",
  "brand": [],
- "at": "2026-11-18T04:49:59.788Z"
+ "at": "2026-11-18T05:11:11.044Z"
 }

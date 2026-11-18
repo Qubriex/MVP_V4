@@ -189,10 +189,10 @@ execFileSync('ffmpeg', ['-v', 'error', '-y', '-i', voFinal, '-i', score, '-filte
   '-map', '[a]', '-ar', '48000', mix]);
 const LUFS = story.target?.lufs ?? -16;
 // Pass 1 measures, pass 2 applies the measured values (linear, no pumping).
-const measured = spawnSync('ffmpeg', ['-hide_banner', '-nostats', '-i', mix, '-af', `loudnorm=I=${LUFS}:TP=-2:LRA=11:print_format=json`, '-f', 'null', '-'], { encoding: 'utf8' }).stderr;
+const measured = spawnSync('ffmpeg', ['-hide_banner', '-nostats', '-i', mix, '-af', `loudnorm=I=${LUFS}:TP=-3:LRA=11:print_format=json`, '-f', 'null', '-'], { encoding: 'utf8' }).stderr;
 const meas = JSON.parse(measured.slice(measured.lastIndexOf('{')));
 const mixN = path.join(WORK, 'mix-norm.wav');
-execFileSync('ffmpeg', ['-v', 'error', '-y', '-i', mix, '-af', `loudnorm=I=${LUFS}:TP=-2:LRA=11:measured_I=${meas.input_i}:measured_TP=${meas.input_tp}:measured_LRA=${meas.input_lra}:measured_thresh=${meas.input_thresh}:offset=${meas.target_offset}:linear=true,aresample=48000`, mixN]);
+execFileSync('ffmpeg', ['-v', 'error', '-y', '-i', mix, '-af', `loudnorm=I=${LUFS}:TP=-3:LRA=11:measured_I=${meas.input_i}:measured_TP=${meas.input_tp}:measured_LRA=${meas.input_lra}:measured_thresh=${meas.input_thresh}:offset=${meas.target_offset}:linear=true,aresample=48000`, mixN]);
 const final = path.join(WORK, `${OUTNAME}.mp4`);
 execFileSync('ffmpeg', ['-v', 'error', '-y', '-framerate', String(FPS), '-i', path.join(frames, '%05d.jpg'), '-i', mixN, '-map', '0:v', '-map', '1:a', '-c:v', 'libx264', '-preset', 'medium', '-crf', '18', '-pix_fmt', 'yuv420p', '-r', String(FPS), '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', '-t', total.toFixed(3), final]);
 
