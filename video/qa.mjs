@@ -27,7 +27,7 @@ const WORDS = { zero: 0, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, sev
 
 /** Numbers in English text, digits or words ("ninety-eight" → 98, "three point two" → 3.2). */
 export function numbersIn(text) {
-  const t = text.toLowerCase().replace(/-/g, ' ').replace(/,(?=\d)/g, '');
+  const t = text.toLowerCase().replace(/(\d+):00\b/g, '$1').replace(/-/g, ' ').replace(/,(?=\d)/g, ''); // 11:00 pm is the number 11
   const out = [];
   t.replace(/\d+(\.\d+)?/g, (m) => { out.push(String(Number(m))); return m; });
   const toks = t.replace(/[.,;:!?]/g, ' | ').replace(/[^a-z| ]/g, ' ').split(/\s+/).filter(Boolean); // '|' ends a number
