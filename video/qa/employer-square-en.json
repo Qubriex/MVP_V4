@@ -1,6 +1,6 @@
 {
  "name": "employer-square-en",
- "pass": false,
+ "pass": true,
  "checks": [
   {
    "name": "voice: no style text read aloud",
@@ -9,8 +9,8 @@
   },
   {
    "name": "voice: numbers match the script and facts.json",
-   "ok": false,
-   "detail": "heard but not in the script: 2. "
+   "ok": true,
+   "detail": "all 0 fact numbers heard, no others"
   },
   {
    "name": "voice: \"Qubirex\" said one way",
@@ -54,5 +54,5 @@
    "dur": 0.73
   }
  ],
- "at": "2026-11-18T07:22:33.293Z"
+ "at": "2026-11-18T08:35:06.337Z"
 }
