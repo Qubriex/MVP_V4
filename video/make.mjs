@@ -132,7 +132,14 @@ const heard = JSON.parse(fs.readFileSync(tFile, 'utf8')).heard;
 const scriptText = voiced.map(v => v.parts.map(p => p.text).join(' '));
 { // The transcript must be the script, from the first word.
   if (LANG === 'en') {
-    const w = (t) => t.toLowerCase().replace(/\b(?:q|c|k)[a-z]*[\s-]?(?:bi[\s-]?)?(?:rex|rx|ex|ix|bricks|brix|rix)\b/g, ' ').replace(/[^a-z0-9 ]+/g, ' ').split(/\s+/).filter(Boolean);
+    // Both sides the same way: numbers as words, spelled-out letters joined,
+    // the brand (however the transcript spells it) left out.
+    const ONES = 'zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen'.split(' ');
+    const TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+    const say = (n) => (n < 20 ? ONES[n] : n < 100 ? `${TENS[Math.floor(n / 10)]} ${n % 10 ? ONES[n % 10] : ''}` : n < 1000 ? `${ONES[Math.floor(n / 100)]} hundred ${n % 100 ? say(n % 100) : ''}` : n < 100000 ? `${say(Math.floor(n / 1000))} thousand ${n % 1000 ? say(n % 1000) : ''}` : String(n));
+    const w = (t) => t.toLowerCase().replace(/(\d[\d,]*)(?:\.(\d+))?(%?)/g, (m, i, d, pc) => ` ${say(Number(i.replace(/,/g, '')))}${d ? ` point ${[...d].map(x => ONES[x]).join(' ')}` : ''}${pc ? ' percent' : ''} `)
+      .replace(/\b(?:q|c|k)[a-z]*[\s-]?(?:bi|by|be|bee)?[\s-]?(?:rex|rx|ex|ix|bricks|brix|rix)\b/g, ' ')
+      .replace(/\b([a-z])\s+(?=[a-z]\b)/g, '$1').replace(/-/g, ' ').replace(/[^a-z0-9 ]+/g, ' ').split(/\s+/).filter(x => x && x !== 'a' && x !== 'and');
     const a = w(scriptText.join(' ').replace(/Qubirex/g, '')); const b = w(heard);
     const L = Array.from({ length: a.length + 1 }, () => new Int16Array(b.length + 1));
     for (let i = a.length - 1; i >= 0; i -= 1) for (let j = b.length - 1; j >= 0; j -= 1) L[i][j] = a[i] === b[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
