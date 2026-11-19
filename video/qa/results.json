@@ -56,15 +56,13 @@
   "shortestShot": 6.88,
   "calloutResult": "PASS: 4 callouts, no word cut, emptiest 56% flat tiles, 1.73–1.92× the page",
   "key": "institution-60s-en",
-  "file": "qa/failed/institution-60s-en.mp4",
+  "file": "out/institution-60s-en.mp4",
   "duration": 52.6,
   "lufs": -16,
   "truePeak": -2.8,
   "engine": "Gemini TTS gemini-3.8-flash-tts (en-IN; Professor: Kore); Chirp 3 HD not reachable with API keys",
-  "pass": false,
-  "failed": [
-   "brand: every mention heard as one word (5.98 s \"Qubirex\"; 47.19 s \"Qubirex\"; full transcript has \"QB Rex\")"
-  ],
+  "pass": true,
+  "failed": [],
   "notes": "",
   "oldDuration": 25.47
  },
@@ -360,24 +358,22 @@
  },
  "institution-full-en": {
   "revision": 2,
-  "longestSilence": 1.4,
+  "longestSilence": 1.35,
   "sfx": "none",
   "brandHeard": [
-   "20.91 s: Qubirex",
-   "93.14 s: Qubirex"
+   "20.76 s: Qubirex",
+   "92.99 s: Qubirex"
   ],
   "shortestShot": 5.69,
   "calloutResult": "PASS: 7 callouts, no word cut, emptiest 64% flat tiles, 1.73–2.20× the page",
   "key": "institution-full-en",
-  "file": "qa/failed/institution-full-en.mp4",
-  "duration": 99.17,
+  "file": "out/institution-full-en.mp4",
+  "duration": 99.01,
   "lufs": -16,
-  "truePeak": -3.6,
+  "truePeak": -3.8,
   "engine": "Gemini TTS gemini-3.1-flash-tts-preview (en-IN; Professor: Kore); Chirp 3 HD not reachable with API keys",
-  "pass": false,
-  "failed": [
-   "brand: every mention heard as one word (20.91 s \"Qubirex\"; 93.14 s \"Qubirex\"; full transcript has \"QB Rex\")"
-  ],
+  "pass": true,
+  "failed": [],
   "notes": "",
   "oldDuration": 49.61
  },

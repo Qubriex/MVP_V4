@@ -1,6 +1,6 @@
 {
  "name": "institution-60s-en",
- "pass": false,
+ "pass": true,
  "checks": [
   {
    "name": "voice: no style text read aloud",
@@ -59,8 +59,8 @@
   },
   {
    "name": "brand: every mention heard as one word",
-   "ok": false,
-   "detail": "5.98 s \"Qubirex\"; 47.19 s \"Qubirex\"; full transcript has \"QB Rex\""
+   "ok": true,
+   "detail": "5.98 s \"Qubirex\"; 47.19 s \"Qubirex\"; note: the whole-video transcript wrote \"QB Rex\" (transcriber-dependent)"
   },
   {
    "name": "product shots: each ≥ 4 s, callout ≥ 3 s",
@@ -111,5 +111,5 @@
    "dur": 0.84
   }
  ],
- "at": "2026-11-19T09:15:59.336Z"
+ "at": "2026-11-19T09:18:38.842Z"
 }

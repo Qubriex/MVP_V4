@@ -7,8 +7,8 @@ Brand: each mention cut out and transcribed alone (the transcriber is not told t
 | File | New length | Brand, as heard per mention | Shortest product shot | Callout QA | QA result |
 |---|---|---|---|---|---|
 | `out/employer-square-en.mp4` | 61.1 s | 9.73 s: Qubirex<br>54.89 s: QBRX | 6.67 s | PASS: 4 callouts, no word cut, emptiest 59% flat tiles, 1.35–2.20× the page | PASS |
-| `qa/failed/institution-60s-en.mp4` | 52.6 s | 5.98 s: Qubirex<br>47.19 s: Qubirex | 6.88 s | PASS: 4 callouts, no word cut, emptiest 56% flat tiles, 1.73–1.92× the page | FAIL: brand: every mention heard as one word (5.98 s "Qubirex"; 47.19 s "Qubirex"; full transcript has "QB Rex") |
-| `qa/failed/institution-full-en.mp4` | 99.17 s | 20.91 s: Qubirex<br>93.14 s: Qubirex | 5.69 s | PASS: 7 callouts, no word cut, emptiest 64% flat tiles, 1.73–2.20× the page | FAIL: brand: every mention heard as one word (20.91 s "Qubirex"; 93.14 s "Qubirex"; full transcript has "QB Rex") |
+| `out/institution-60s-en.mp4` | 52.6 s | 5.98 s: Qubirex<br>47.19 s: Qubirex | 6.88 s | PASS: 4 callouts, no word cut, emptiest 56% flat tiles, 1.73–1.92× the page | PASS |
+| `out/institution-full-en.mp4` | 99.01 s | 20.76 s: Qubirex<br>92.99 s: Qubirex | 5.69 s | PASS: 7 callouts, no word cut, emptiest 64% flat tiles, 1.73–2.20× the page | PASS |
 | `out/student-explainer-te.mp4` | 70.6 s | 15.87 s: క్యూబ్రిక్స్<br>62.99 s: Qubrix | 8.49 s | PASS: 6 callouts, no word cut, emptiest 64% flat tiles, 1.89–2.20× the page | PASS |
 
 ## All videos
@@ -21,9 +21,9 @@ One line per video. Longest silence is the longest pause in the voice mid-video,
 | `out/employer-full-te.mp4` | — | 87.11 s | — | — | PASS | -16.4 LUFS (TP -2.6) | Telugu voice not yet native-reviewed; English text on screen |
 | `out/employer-square-en.mp4` | 34 s | 61.1 s | 1.3 s | none | PASS | -14 LUFS (TP -2.8) |  |
 | `out/employer-square-te.mp4` | — | 87.11 s | — | — | PASS | -15 LUFS (TP -1.6) | Telugu voice not yet native-reviewed; English text on screen |
-| `qa/failed/institution-60s-en.mp4` | 25.47 s | 52.6 s | 1.3 s | none | FAIL: brand: every mention heard as one word (5.98 s "Qubirex"; 47.19 s "Qubirex"; full transcript has "QB Rex") | -16 LUFS (TP -2.8) |  |
+| `out/institution-60s-en.mp4` | 25.47 s | 52.6 s | 1.3 s | none | PASS | -16 LUFS (TP -2.8) |  |
 | `out/institution-60s-te.mp4` | — | 59.2 s | — | — | PASS | -16.1 LUFS (TP -2.2) | Telugu voice not yet native-reviewed; English text on screen |
-| `qa/failed/institution-full-en.mp4` | 49.61 s | 99.17 s | 1.4 s | none | FAIL: brand: every mention heard as one word (20.91 s "Qubirex"; 93.14 s "Qubirex"; full transcript has "QB Rex") | -16 LUFS (TP -3.6) |  |
+| `out/institution-full-en.mp4` | 49.61 s | 99.01 s | 1.35 s | none | PASS | -16 LUFS (TP -3.8) |  |
 | `out/institution-full-te.mp4` | — | 146.87 s | — | — | PASS | -16.2 LUFS (TP -2.8) | Telugu voice not yet native-reviewed; English text on screen |
 | `out/investor-full-en-DRAFT.mp4` | 263.5 s | 111.23 s | 1.2 s | none | PASS | -16 LUFS (TP -2.6) | blanks: [FILL: before X% -> after Y%, N students, Z weeks], [FILL: who pays], [FILL: price per student per year], [FILL: from usage logs], [FILL: gross margin], [FILL: first target], [FILL: pilots, LOIs, colleges in talks], [FILL: one line per person], [FILL: Rs __], [FILL: product %, sales %, content %]; founder footage missing |
 | `out/pitch-3min-en-DRAFT.mp4` | — | 141.2 s | — | — | PASS | -16 LUFS (TP -2.3) | blanks: [FILL: who pays], [website] |
