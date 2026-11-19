@@ -46,7 +46,9 @@ const script = loadScript(SID, LANG); const en = loadScript(SID, 'en');
 // Telugu on-screen text (revision 2: "do not ship English text in a Telugu file"):
 // used when the Telugu script's on-screen column is filled. Until a native
 // reviewer signs off, the frame carries a [TE pending] tag and the file is -DRAFT.
-const TE_TEXT = LANG === 'te' && script.scenes.length === en.scenes.length && script.scenes.every(x => x.screenTe && !/^\(English on screen/i.test(x.screenTe));
+// Founder, 19 Nov 2026: "no need of videos with Telugu text on screen": English
+// on-screen text in every file (TE_SCREEN=1 turns the Telugu column back on).
+const TE_TEXT = !!process.env.TE_SCREEN && LANG === 'te' && script.scenes.length === en.scenes.length && script.scenes.every(x => x.screenTe && !/^\(English on screen/i.test(x.screenTe));
 const TE_PENDING = TE_TEXT && !script.signoff;
 const screenScenes = TE_TEXT ? en.scenes.map((x, i) => ({ ...x, screen: script.scenes[i].screenTe.split(/\s*(?:\/|<br>)\s*/).filter(Boolean) })) : en.scenes;
 const TE_STRINGS = TE_TEXT ? { sample: 'నమూనా డేటా', tagline: ['మీ భాష.', 'మీ స్కిల్స్.', 'మీ భవిష్యత్తు.'], source: 'మూలం:', illustrative: 'ఉదాహరణ కథ' } : {};
@@ -70,8 +72,10 @@ const KEYS = [process.env.GEMINI_API_KEY_2, process.env.GEMINI_API_KEY_3, proces
 const blanks = [...new Set((JSON.stringify(scenes.map(s => [s.beat, s.beats, s.screen])) + website() + (layout.usesContact ? (FILL.contact || '[FILL: contact]') : '')).match(/\[(FILL:[^\]]*|website)\]/g) || [])].filter(b => !(b === '[FILL: contact]' && FILL.contact) && !(b === '[website]' && FILL.website));
 const founder = scenes.some(s => s.directions.some(d => /founder on camera/i.test(d)));
 // NOCAPS=1: a copy without burned-in captions (the .srt still comes with it).
-const NOCAPS = !!process.env.NOCAPS && !WIDE;
-const OUTNAME = `${ID}${NOCAPS ? '-nocaptions' : ''}${blanks.length || founder || TE_PENDING ? '-DRAFT' : ''}`;
+// Founder, 19 Nov 2026: "don't add any subtitles in any videos": no burned-in
+// captions by default (CAPTIONS=1 adds them, as a -captions copy). The .srt is still written in work/.
+const NOCAPS = !process.env.CAPTIONS || WIDE;
+const OUTNAME = `${ID}${NOCAPS ? '' : '-captions'}${blanks.length || founder || TE_PENDING ? '-DRAFT' : ''}`;
 
 // ─── Voice ───────────────────────────────────────────────────────────────────
 // Who speaks a part of a scene: [Student…] → Student, [Top half] → Lecturer,
@@ -197,6 +201,7 @@ if (!fs.existsSync(tmFile)) {
   fs.writeFileSync(tmFile, JSON.stringify(res, null, 1));
 }
 const timing = JSON.parse(fs.readFileSync(tmFile, 'utf8'));
+if (LANG === 'en' && !DRY && !(timing.words || []).length) { fs.rmSync(tmFile); throw new Error('Word alignment failed (no word timing, so the brand cannot be checked or spliced). Run with PYTHON set to a Python that has pocketsphinx, e.g. via video/render-all.sh.'); }
 
 // ─── Audio: per-scene files, holds, silent scenes, the brand clip ───────────
 const redo = (process.env.REDO || '').split(',').filter(Boolean).map(Number);
@@ -218,7 +223,9 @@ const shotCount = (s) => [s.beat, ...(s.beats || [])].reduce((n, b) => n + ((b &
 const SHOT_MIN = 4.3;
 const fitPads = voiced.map((v, k) => { const s = scenes[v.i]; const d = (k + 1 < voiced.length ? timing.starts[k + 1] : rawDur) - timing.starts[k]; const min = Math.max(isCode(s) ? 5 : 0, s.placeholderLine ? 3 : 0, s.minHold || 0, shotCount(s) * SHOT_MIN); return v.i === scenes.length - 1 ? 0.3 : Math.max(0.65, min - d); }); // the clip ends with ~0.15–0.3 s of room tone: scene ≈ voice + 0.8 s
 // A layout may name an approved brand clip (another video's) so the name sounds the same everywhere.
-const refClip = layout.brandRef && LANG === 'en' ? readPcm(path.join(VDIR, layout.brandRef)) : null;
+// Revision 2: every English mention is the same approved clip, "Cue-bi-rex" from
+// the brand test (heard as "Qubirex" 3 of 3), cut at the video's 0.95 speed.
+const refClip = LANG === 'en' ? readPcm(path.join(VDIR, layout.brandRef || 'assets/voice/qubirex-en.wav')) : null;
 const E = edit(rawPcm, timing.starts, { pads: fitPads, overrides, brand: timing.brand, refClip });
 if (E.reference) writeWav(path.join(QA_DIR, `${ID}-brand.wav`), E.reference);
 // Interleave silent scenes (timer, founder footage, open blanks) with a hold.
@@ -354,7 +361,7 @@ async function asrClip(file) {
   return null;
 }
 const brandWindows = LANG === 'en'
-  ? brand.map(b => ({ t: b.t, a: b.t - LEAD - 0.12, b: b.t - LEAD + b.dur + 0.12 }))
+  ? brand.map(b => ({ t: b.t, a: b.t - LEAD - 0.6, b: b.t - LEAD + b.dur + 0.6 })) // with a word or two around it: a lone name is too short for the transcriber
   : scenes.map((s, i) => ({ s, i })).filter(({ s }) => (s.say || '').includes(TE_BRAND)).map(({ i }) => ({ t: +sceneStart[i].toFixed(2), a: sceneStart[i] - LEAD, b: sceneStart[i] - LEAD + (sceneVoice[i] || 3), scene: scenes[i].n }));
 const bhFile = path.join(WORK, 'brand-heard.json');
 const bhKey = `${fs.statSync(voFinal).size}:${brandWindows.map(w => `${w.a.toFixed(2)}-${w.b.toFixed(2)}`).join(',')}`;
@@ -365,7 +372,8 @@ if (!brandHeard || brandHeard.key !== bhKey) {
     const clip = path.join(WORK, `brand-${k + 1}.wav`);
     execFileSync('ffmpeg', ['-v', 'error', '-y', '-i', voFinal, '-ss', Math.max(0, w.a).toFixed(3), '-to', w.b.toFixed(3), clip]);
     const heard = await asrClip(clip); const bt = brandToken(heard || '');
-    list.push({ t: w.t, ...(w.scene ? { scene: w.scene } : {}), heard, token: bt.token, words: bt.words });
+    // Nothing close to the name (more than half the letters wrong) counts as not heard.
+    list.push({ t: w.t, ...(w.scene ? { scene: w.scene } : {}), heard, token: bt.d > 0.5 ? `(not heard: ${bt.token})` : bt.token, words: bt.d > 0.5 ? 0 : bt.words });
   }
   brandHeard = { key: bhKey, list }; fs.writeFileSync(bhFile, JSON.stringify(brandHeard, null, 1));
 }
@@ -384,8 +392,8 @@ for (const c of qa.checks) console.log(`  ${c.ok ? '✓' : '✗'} ${c.name}: ${c
 if (DRY) { console.log(`DRY RUN: QA ${qa.pass ? 'passed' : 'failed'} (nothing copied to out/, no report line): ${final}`); process.exit(0); }
 const dest = qa.pass ? OUT_DIR : path.join(QA_DIR, 'failed');
 fs.mkdirSync(dest, { recursive: true });
-fs.copyFileSync(final, path.join(dest, `${OUTNAME}.mp4`)); fs.copyFileSync(srt, path.join(dest, `${OUTNAME}.srt`));
-const base = `${ID}${NOCAPS ? '-nocaptions' : ''}`;
+fs.copyFileSync(final, path.join(dest, `${OUTNAME}.mp4`)); // no subtitle file shipped (founder, 19 Nov 2026)
+const base = `${ID}${NOCAPS ? '' : '-captions'}`;
 if (qa.pass) for (const old of fs.readdirSync(OUT_DIR).filter(f => f.startsWith(`${base}.`) || f.startsWith(`${base}-DRAFT.`))) if (!old.startsWith(`${OUTNAME}.`)) fs.rmSync(path.join(OUT_DIR, old));
 report({ revision: 2, longestSilence: qa.longestSilence, sfx: qa.sfx, brandHeard: brandHeard.list.map(m => `${m.t} s: ${m.token || '?'}`), shortestShot: qa.shortestShot, calloutResult: qa.calloutResult, key: base, file: `${path.relative(VDIR, dest)}/${OUTNAME}.mp4`, duration: qa.duration, lufs: qa.lufs, truePeak: qa.truePeak, engine: ENGINE, pass: qa.pass, failed: qa.checks.filter(c => !c.ok).map(c => `${c.name} (${c.detail})`), notes: [...(blanks.length ? [`blanks: ${blanks.join(', ')}`] : []), ...(founder ? ['founder footage missing'] : []), ...(LANG === 'te' ? [TE_TEXT ? `Telugu voice and on-screen text are Claude drafts${TE_PENDING ? ' ([TE pending]: no native sign-off yet)' : ''}` : 'Telugu voice not yet native-reviewed; English text on screen'] : [])].join('; ') });
 console.log(`${qa.pass ? '✓ QA passed' : '✗ QA failed'}: ${path.relative(ROOT, path.join(dest, `${OUTNAME}.mp4`))} · ${qa.duration} s · ${qa.lufs} LUFS · sheet ${qa.sheet}`);
