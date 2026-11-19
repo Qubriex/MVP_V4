@@ -19,7 +19,7 @@ import { pathToFileURL, fileURLToPath } from 'url';
 import { execFileSync, spawnSync } from 'child_process';
 import { spoken, website, FILL } from './lib/facts.mjs';
 import { loadScript } from './lib/parse-script.mjs';
-import { readPcm, writeWav, edit, seconds, RATE, trimTailBurst, bursts, snapStarts, levels } from './lib/audio.mjs';
+import { readPcm, writeWav, edit, seconds, RATE, trimTailBurst, bursts, snapStarts, levels, tightenLines } from './lib/audio.mjs';
 import { writeSrt, writeScript } from './lib/captions.mjs';
 import { runQa, report, QA_DIR, OUT_DIR } from './qa.mjs';
 
@@ -213,6 +213,8 @@ const overrides = voiced.map(v => { const f = path.join(WORK, 'scenes', `${Strin
 // Each scene lasts as long as the script plans (its time column), and never
 // less than its voice plus 0.3 s (kit §3.2).
 const rawPcm = readPcm(vo); const rawDur = seconds(rawPcm);
+// Every line tightened to its speech, so the pause between scenes is exactly the pad (no long breaths).
+const TL = tightenLines(rawPcm, snapStarts(rawPcm, timing.starts)); const tlDur = TL.pcm.length / RATE;
 // Each scene lasts as long as its voice plus 0.5 s (no dead air). Code cards
 // stay at least 5 s, placeholder scenes at least 3 s; the end card holds 3 s
 // after the voice (TAIL).
@@ -221,7 +223,7 @@ const isCode = (s) => [s.beat, ...(s.beats || [])].some(b => b && (b.type === 'c
 // holds at least 4 s (its callout at least 3 s); the voice fills that time.
 const shotCount = (s) => [s.beat, ...(s.beats || [])].reduce((n, b) => n + ((b && (b.type === 'device' || b.type === 'shot') && b.shots) ? b.shots.length : 0), 0);
 const SHOT_MIN = 4.3;
-let fitPads = voiced.map((v, k) => { const s = scenes[v.i]; const d = (k + 1 < voiced.length ? timing.starts[k + 1] : rawDur) - timing.starts[k]; const min = Math.max(isCode(s) ? 5 : 0, s.placeholderLine ? 3 : 0, s.minHold || 0, shotCount(s) * SHOT_MIN); return v.i === scenes.length - 1 ? 0.3 : Math.max(0.65, min - d); }); // the clip ends with ~0.15–0.3 s of room tone: scene ≈ voice + 0.8 s
+let fitPads = voiced.map((v, k) => { const s = scenes[v.i]; const d = (k + 1 < voiced.length ? TL.starts[k + 1] : tlDur) - TL.starts[k]; const min = Math.max(isCode(s) ? 5 : 0, s.placeholderLine ? 3 : 0, s.minHold || 0, shotCount(s) * SHOT_MIN); return v.i === scenes.length - 1 ? 0.3 : Math.max(0.65, min - d); }); // the clip ends with ~0.15–0.3 s of room tone: scene ≈ voice + 0.8 s
 // No gap over 1.5 s: where the voice's own silence at the end of one scene and
 // the start of the next, plus the pause, would pass 1.3 s, the pause shrinks
 // (the "no silence over 1.5 s" rule outranks the extra 0.3 s).
@@ -236,7 +238,8 @@ let fitPads = voiced.map((v, k) => { const s = scenes[v.i]; const d = (k + 1 < v
 // Revision 2: every English mention is the same approved clip, "Cue-bi-rex" from
 // the brand test (heard as "Qubirex" 3 of 3), cut at the video's 0.95 speed.
 const refClip = LANG === 'en' ? readPcm(path.join(VDIR, layout.brandRef || 'assets/voice/qubirex-en.wav')) : null;
-const E = edit(rawPcm, snapStarts(rawPcm, timing.starts), { pads: fitPads, overrides, brand: timing.brand, refClip });
+const tBrand = (timing.brand || []).map(b => ({ ...b, start: TL.map(b.start, b.line), end: TL.map(b.end, b.line) }));
+const E = edit(TL.pcm, TL.starts, { pads: fitPads, overrides, brand: tBrand, refClip });
 if (E.reference) writeWav(path.join(QA_DIR, `${ID}-brand.wav`), E.reference);
 // Interleave silent scenes (timer, founder footage, open blanks) with a hold.
 const pcmParts = []; const sceneStart = []; const sceneVoice = []; let t0 = LEAD; let k = 0;

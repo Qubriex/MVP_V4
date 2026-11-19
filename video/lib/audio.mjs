@@ -115,6 +115,24 @@ export function trimTailBurst(pcm) {
   return { pcm: out, cut: tail || bs[0], all: bs };
 }
 export const exists = (f) => fs.existsSync(f);
+/**
+ * Tightens every line to its speech: from 0.1 s before the first sound to 0.25 s
+ * after the last (runs of at least 60 ms above −40 dB count as speech; a breath
+ * blip does not). Returns the new buffer, line starts, and a mapper for times in
+ * the old buffer (brand marks).
+ */
+export function tightenLines(pcm, starts, { pre = 0.1, post = 0.25 } = {}) {
+  const L = levels(pcm, 0.01); const total = pcm.length / RATE; const W = 0.01;
+  const speech = (a, b) => { let first = null; let last = null; let run = 0;
+    for (let t = a; t < b - 1e-9; t += W) { const k = Math.round(t / W); if (k < L.length && L[k] > -40) { run += 1; if (run >= 6) { if (first == null) first = t - (run - 1) * W; last = t + W; } } else run = 0; }
+    return [first ?? a, last ?? b]; };
+  const segs = starts.map((a, i) => { const b = i + 1 < starts.length ? starts[i + 1] : total; const [f0, l0] = speech(a, b); return [Math.max(a, f0 - pre), Math.min(b, l0 + post)]; });
+  const parts = []; const newStarts = []; let o = 0;
+  segs.forEach(([a, b]) => { newStarts.push(o / RATE); const x = pcm.slice(Math.round(a * RATE), Math.round(b * RATE)); parts.push(x); o += x.length; });
+  const out = new Float32Array(o); let p = 0; parts.forEach(x => { out.set(x, p); p += x.length; });
+  const map = (t, line) => newStarts[line] + (t - segs[line][0]);
+  return { pcm: out, starts: newStarts, map, segs };
+}
 /** Scene boundaries at the quietest 10 ms near each aligned start (−0.3 to +0.1 s), so no word is split between scenes. */
 export function snapStarts(pcm, starts) {
   const L = levels(pcm, 0.01);
