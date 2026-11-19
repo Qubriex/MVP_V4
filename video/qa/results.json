@@ -78,19 +78,22 @@
   "notes": ""
  },
  "employer-square-en": {
-  "revision": 1,
-  "longestSilence": 0.9,
+  "revision": 2,
+  "longestSilence": 1.3,
   "sfx": "none",
+  "brandHeard": [],
+  "shortestShot": 6.58,
+  "calloutResult": "PASS: 4 callouts, no word cut, emptiest 59% flat tiles, 1.35–2.20× the page",
   "key": "employer-square-en",
   "file": "out/employer-square-en.mp4",
-  "duration": 34,
+  "duration": 60.91,
   "lufs": -14,
-  "truePeak": -2.9,
+  "truePeak": -2.6,
   "engine": "Gemini TTS gemini-3.1-flash-tts-preview (en-IN; Professor: Kore); Chirp 3 HD not reachable with API keys",
   "pass": true,
   "failed": [],
   "notes": "",
-  "oldDuration": 86.51
+  "oldDuration": 34
  },
  "student-reel-1-en": {
   "revision": 1,

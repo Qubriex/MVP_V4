@@ -1,28 +1,66 @@
 1
-00:00:00,500 --> 00:00:06,280
+00:00:00,500 --> 00:00:03,403
 2,000 resumes. 20 seats. Which
 ones can actually code?
 
 2
-00:00:06,680 --> 00:00:11,220
-Scan a Qubirex Capability Passport. See
-every skill the student proved,
+00:00:03,453 --> 00:00:05,427
+A degree and a resume don't tell you.
 
 3
-00:00:11,270 --> 00:00:15,680
-the evidence behind it, and the fresh
-check they passed on their own.
+00:00:06,127 --> 00:00:10,233
+Scan a Qubirex Capability Passport. The QR
+code opens the student's record,
 
 4
-00:00:16,080 --> 00:00:20,960
-Search candidates by proven skill, see who is
-ready, and invite them to interview.
+00:00:10,283 --> 00:00:12,007
+and the badge shows it is valid.
 
 5
-00:00:21,360 --> 00:00:27,580
-Signed records. Fresh checks. Anyone can
-verify. Test fewer, test the right ones.
+00:00:12,707 --> 00:00:16,768
+See every skill the student proved,
+the evidence behind it,
 
 6
-00:00:27,980 --> 00:00:30,640
+00:00:16,818 --> 00:00:19,904
+and the fresh check they
+passed on their own.
+
+7
+00:00:19,954 --> 00:00:23,807
+The page confirms the passport is
+genuine and unchanged.
+
+8
+00:00:24,507 --> 00:00:28,439
+Search candidates by proven
+skill, across colleges.
+
+9
+00:00:28,489 --> 00:00:34,762
+Each one shows a readiness score for the role,
+and the skills they have verified.
+
+10
+00:00:35,462 --> 00:00:39,618
+See who is ready, what each one
+is still missing,
+
+11
+00:00:39,668 --> 00:00:43,394
+and invite them to interview
+with one click.
+
+12
+00:00:44,094 --> 00:00:49,088
+Signed records, that can't be edited.
+Fresh checks, taken without help.
+
+13
+00:00:49,138 --> 00:00:54,132
+And anyone can verify them in seconds.
+Test fewer, test the right ones.
+
+14
+00:00:54,832 --> 00:00:57,562
 Qubirex. Request candidate access.
