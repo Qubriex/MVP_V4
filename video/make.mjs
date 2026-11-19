@@ -19,7 +19,7 @@ import { pathToFileURL, fileURLToPath } from 'url';
 import { execFileSync, spawnSync } from 'child_process';
 import { spoken, website, FILL } from './lib/facts.mjs';
 import { loadScript } from './lib/parse-script.mjs';
-import { readPcm, writeWav, edit, seconds, RATE, trimTailBurst, bursts, snapStarts } from './lib/audio.mjs';
+import { readPcm, writeWav, edit, seconds, RATE, trimTailBurst, bursts, snapStarts, levels } from './lib/audio.mjs';
 import { writeSrt, writeScript } from './lib/captions.mjs';
 import { runQa, report, QA_DIR, OUT_DIR } from './qa.mjs';
 
@@ -221,7 +221,17 @@ const isCode = (s) => [s.beat, ...(s.beats || [])].some(b => b && (b.type === 'c
 // holds at least 4 s (its callout at least 3 s); the voice fills that time.
 const shotCount = (s) => [s.beat, ...(s.beats || [])].reduce((n, b) => n + ((b && (b.type === 'device' || b.type === 'shot') && b.shots) ? b.shots.length : 0), 0);
 const SHOT_MIN = 4.3;
-const fitPads = voiced.map((v, k) => { const s = scenes[v.i]; const d = (k + 1 < voiced.length ? timing.starts[k + 1] : rawDur) - timing.starts[k]; const min = Math.max(isCode(s) ? 5 : 0, s.placeholderLine ? 3 : 0, s.minHold || 0, shotCount(s) * SHOT_MIN); return v.i === scenes.length - 1 ? 0.3 : Math.max(0.65, min - d); }); // the clip ends with ~0.15–0.3 s of room tone: scene ≈ voice + 0.8 s
+let fitPads = voiced.map((v, k) => { const s = scenes[v.i]; const d = (k + 1 < voiced.length ? timing.starts[k + 1] : rawDur) - timing.starts[k]; const min = Math.max(isCode(s) ? 5 : 0, s.placeholderLine ? 3 : 0, s.minHold || 0, shotCount(s) * SHOT_MIN); return v.i === scenes.length - 1 ? 0.3 : Math.max(0.65, min - d); }); // the clip ends with ~0.15–0.3 s of room tone: scene ≈ voice + 0.8 s
+// No gap over 1.5 s: where the voice's own silence at the end of one scene and
+// the start of the next, plus the pause, would pass 1.3 s, the pause shrinks
+// (the "no silence over 1.5 s" rule outranks the extra 0.3 s).
+{ const snapped = snapStarts(rawPcm, timing.starts); const L = levels(rawPcm, 0.01); const quietRun = (a, b, dir) => { let n = 0; for (let t = dir > 0 ? a : b - 0.01; dir > 0 ? t < b : t >= a; t += dir * 0.01) { const k = Math.round(t / 0.01); if (k < 0 || k >= L.length || L[k] > -45) break; n += 0.01; } return n; };
+  for (let k = 0; k + 1 < voiced.length; k += 1) {
+    const a0 = snapped[k]; const b0 = snapped[k + 1]; const c0 = k + 2 < voiced.length ? snapped[k + 2] : rawDur;
+    const tail = quietRun(a0, b0, -1); const head = quietRun(b0, c0, 1);
+    const want = Math.max(0.15, 1.3 - tail - head);
+    if (fitPads[k] > want && fitPads[k] <= 0.65 + 1e-6) fitPads[k] = +want.toFixed(3);
+  } }
 // A layout may name an approved brand clip (another video's) so the name sounds the same everywhere.
 // Revision 2: every English mention is the same approved clip, "Cue-bi-rex" from
 // the brand test (heard as "Qubirex" 3 of 3), cut at the video's 0.95 speed.
