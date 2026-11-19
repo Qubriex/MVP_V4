@@ -6,7 +6,7 @@ Brand: each mention cut out and transcribed alone (the transcriber is not told t
 
 | File | New length | Brand, as heard per mention | Shortest product shot | Callout QA | QA result |
 |---|---|---|---|---|---|
-| `qa/failed/employer-square-en.mp4` | 61.1 s | 9.73 s: (not heard: scan)<br>54.89 s: (not heard: Recur) | 6.67 s | PASS: 4 callouts, no word cut, emptiest 59% flat tiles, 1.35–2.20× the page | FAIL: sound: no silence > 1.5 s mid-video (2.3 s outside holds, at 53.8 s); brand: every mention heard as one word (9.73 s "(not heard: scan)"; 54.89 s "(not heard: Recur)") |
+| `out/employer-square-en.mp4` | 61.1 s | 9.73 s: Qubirex<br>54.89 s: QBRX | 6.67 s | PASS: 4 callouts, no word cut, emptiest 59% flat tiles, 1.35–2.20× the page | PASS |
 | `qa/failed/institution-60s-en.mp4` | 47.91 s | — | 4.3 s | PASS: 4 callouts, no word cut, emptiest 56% flat tiles, 1.73–1.96× the page | FAIL: sound: no silence > 1.5 s mid-video (1.6 s outside holds, at 33.3 s); picture: product shots inside the safe area (110 frames, first at 31.13 s: box 399,220,1521,958 / 93,158,1827,509) |
 | `qa/failed/institution-full-en.mp4` | 98.83 s | — | 5.65 s | PASS: 7 callouts, no word cut, emptiest 64% flat tiles, 1.73–2.20× the page | FAIL: brand: every mention heard as one word (no mentions; full transcript has "QB Rex") |
 | `out/student-explainer-te.mp4` | 70.6 s | 15.87 s: క్యూబ్రిక్స్<br>62.99 s: Qubrix | 8.49 s | PASS: 6 callouts, no word cut, emptiest 64% flat tiles, 1.89–2.20× the page | PASS |
@@ -19,7 +19,7 @@ One line per video. Longest silence is the longest pause in the voice mid-video,
 |---|---|---|---|---|---|---|---|
 | `out/employer-full-en.mp4` | — | 86.51 s | — | — | PASS | -16.3 LUFS (TP -2.5) |  |
 | `out/employer-full-te.mp4` | — | 87.11 s | — | — | PASS | -16.4 LUFS (TP -2.6) | Telugu voice not yet native-reviewed; English text on screen |
-| `qa/failed/employer-square-en.mp4` | 34 s | 61.1 s | 2.3 s | none | FAIL: sound: no silence > 1.5 s mid-video (2.3 s outside holds, at 53.8 s); brand: every mention heard as one word (9.73 s "(not heard: scan)"; 54.89 s "(not heard: Recur)") | -14 LUFS (TP -2.8) |  |
+| `out/employer-square-en.mp4` | 34 s | 61.1 s | 1.3 s | none | PASS | -14 LUFS (TP -2.8) |  |
 | `out/employer-square-te.mp4` | — | 87.11 s | — | — | PASS | -15 LUFS (TP -1.6) | Telugu voice not yet native-reviewed; English text on screen |
 | `qa/failed/institution-60s-en.mp4` | 25.47 s | 47.91 s | 1.6 s | none | FAIL: sound: no silence > 1.5 s mid-video (1.6 s outside holds, at 33.3 s); picture: product shots inside the safe area (110 frames, first at 31.13 s: box 399,220,1521,958 / 93,158,1827,509) | -16 LUFS (TP -3) |  |
 | `out/institution-60s-te.mp4` | — | 59.2 s | — | — | PASS | -16.1 LUFS (TP -2.2) | Telugu voice not yet native-reviewed; English text on screen |
