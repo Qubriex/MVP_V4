@@ -1,6 +1,6 @@
 {
  "name": "institution-full-en",
- "pass": true,
+ "pass": false,
  "checks": [
   {
    "name": "voice: no style text read aloud",
@@ -15,7 +15,7 @@
   {
    "name": "voice: \"Qubirex\" said one way",
    "ok": true,
-   "detail": "2 mentions at 17.8 s, 43.6 s; every mention is the same recorded clip; the transcript wrote it as: —"
+   "detail": "0 mentions at —; not spliced; the transcript wrote it as: qb rex"
   },
   {
    "name": "text: one title at a time",
@@ -25,17 +25,17 @@
   {
    "name": "text: read time held",
    "ok": true,
-   "detail": "27 text layers checked"
+   "detail": "25 text layers checked"
   },
   {
    "name": "loudness: -16 LUFS ±1, true peak ≤ −1 dBTP",
    "ok": true,
-   "detail": "-16 LUFS, true peak -2.7 dBTP"
+   "detail": "-16 LUFS, true peak -3.5 dBTP"
   },
   {
    "name": "format: size, 30 fps, length",
    "ok": true,
-   "detail": "1920×1080, 30 fps, 49.61 s (max 150 s; shorter than the kit's 119 s because dead air was removed)"
+   "detail": "1920×1080, 30 fps, 98.83 s (max 150 s; shorter than the kit's 119 s because dead air was removed)"
   },
   {
    "name": "sound: no sound effects (no >5 kHz noise > 0.5 s without speech)",
@@ -45,37 +45,60 @@
   {
    "name": "sound: no silence > 1.5 s mid-video",
    "ok": true,
-   "detail": "longest pause 0.95 s"
+   "detail": "longest pause 1.40 s"
   },
   {
    "name": "picture: product shots inside the safe area",
    "ok": true,
-   "detail": "572 frames with a product shot, all inside"
+   "detail": "1921 frames with a product shot, all inside"
   },
   {
    "name": "picture: no blue (≤ 2% of pixels, screenshots excluded)",
    "ok": true,
    "detail": "worst frame 0.00% at 0.0 s"
+  },
+  {
+   "name": "brand: every mention heard as one word",
+   "ok": false,
+   "detail": "no mentions; full transcript has \"QB Rex\""
+  },
+  {
+   "name": "product shots: each ≥ 4 s, callout ≥ 3 s",
+   "ok": true,
+   "detail": "7 shots; shortest 5.7 s, shortest callout 5.0 s"
+  },
+  {
+   "name": "callouts: no edge through a word, not empty (≤ 70% flat)",
+   "ok": true,
+   "detail": "PASS: 7 callouts, no word cut, emptiest 64% flat tiles, 1.73–2.20× the page"
+  },
+  {
+   "name": "captions never over a callout",
+   "ok": true,
+   "detail": "no overlap"
+  },
+  {
+   "name": "sound: no clicks or pops (isolated bursts)",
+   "ok": true,
+   "detail": "none"
+  },
+  {
+   "name": "sound: closing music after the last line < −20 LUFS",
+   "ok": true,
+   "detail": "-32 LUFS over the last 3.0 s"
   }
  ],
  "lufs": -16,
- "truePeak": -2.7,
- "duration": 49.61,
+ "truePeak": -3.5,
+ "duration": 98.83,
  "sfx": "none",
- "longestSilence": 0.95,
- "longestHold": 0.95,
+ "longestSilence": 1.4,
+ "longestHold": 1.4,
+ "shortestShot": 5.65,
+ "shortestCallout": 5.05,
+ "calloutResult": "PASS: 7 callouts, no word cut, emptiest 64% flat tiles, 1.73–2.20× the page",
+ "tailLufs": -32,
  "sheet": "video/qa/institution-full-en-sheet.jpg",
- "brand": [
-  {
-   "line": 2,
-   "t": 17.78,
-   "dur": 0.84
-  },
-  {
-   "line": 5,
-   "t": 43.57,
-   "dur": 0.84
-  }
- ],
- "at": "2026-11-18T12:09:31.750Z"
+ "brand": [],
+ "at": "2026-11-19T08:48:25.542Z"
 }
