@@ -1,6 +1,6 @@
 {
  "name": "institution-60s-en",
- "pass": true,
+ "pass": false,
  "checks": [
   {
    "name": "voice: no style text read aloud",
@@ -15,7 +15,7 @@
   {
    "name": "voice: \"Qubirex\" said one way",
    "ok": true,
-   "detail": "2 mentions at 5.1 s, 20.4 s; every mention is the same recorded clip; the transcript wrote it as: —"
+   "detail": "0 mentions at —; not spliced; the transcript wrote it as: —"
   },
   {
    "name": "text: one title at a time",
@@ -30,12 +30,12 @@
   {
    "name": "loudness: -16 LUFS ±1, true peak ≤ −1 dBTP",
    "ok": true,
-   "detail": "-16 LUFS, true peak -2.4 dBTP"
+   "detail": "-16 LUFS, true peak -3 dBTP"
   },
   {
    "name": "format: size, 30 fps, length",
    "ok": true,
-   "detail": "1920×1080, 30 fps, 25.47 s (max 60 s; shorter than the kit's 49 s because dead air was removed)"
+   "detail": "1920×1080, 30 fps, 47.91 s (max 60 s; shorter than the kit's 49 s because dead air was removed)"
   },
   {
    "name": "sound: no sound effects (no >5 kHz noise > 0.5 s without speech)",
@@ -44,38 +44,61 @@
   },
   {
    "name": "sound: no silence > 1.5 s mid-video",
-   "ok": true,
-   "detail": "longest pause 1.05 s"
+   "ok": false,
+   "detail": "1.6 s outside holds, at 33.3 s"
   },
   {
    "name": "picture: product shots inside the safe area",
-   "ok": true,
-   "detail": "320 frames with a product shot, all inside"
+   "ok": false,
+   "detail": "110 frames, first at 31.13 s: box 399,220,1521,958 / 93,158,1827,509"
   },
   {
    "name": "picture: no blue (≤ 2% of pixels, screenshots excluded)",
    "ok": true,
    "detail": "worst frame 0.00% at 0.0 s"
+  },
+  {
+   "name": "brand: every mention heard as one word",
+   "ok": true,
+   "detail": "no mentions"
+  },
+  {
+   "name": "product shots: each ≥ 4 s, callout ≥ 3 s",
+   "ok": true,
+   "detail": "4 shots; shortest 4.3 s, shortest callout 3.7 s"
+  },
+  {
+   "name": "callouts: no edge through a word, not empty (≤ 70% flat)",
+   "ok": true,
+   "detail": "PASS: 4 callouts, no word cut, emptiest 56% flat tiles, 1.73–1.96× the page"
+  },
+  {
+   "name": "captions never over a callout",
+   "ok": true,
+   "detail": "no overlap"
+  },
+  {
+   "name": "sound: no clicks or pops (isolated bursts)",
+   "ok": true,
+   "detail": "none"
+  },
+  {
+   "name": "sound: closing music after the last line < −20 LUFS",
+   "ok": true,
+   "detail": "-29.8 LUFS over the last 3.0 s"
   }
  ],
  "lufs": -16,
- "truePeak": -2.4,
- "duration": 25.47,
+ "truePeak": -3,
+ "duration": 47.91,
  "sfx": "none",
- "longestSilence": 1.05,
- "longestHold": 1.05,
+ "longestSilence": 1.6,
+ "longestHold": 1.6,
+ "shortestShot": 4.3,
+ "shortestCallout": 3.7,
+ "calloutResult": "PASS: 4 callouts, no word cut, emptiest 56% flat tiles, 1.73–1.96× the page",
+ "tailLufs": -29.8,
  "sheet": "video/qa/institution-60s-en-sheet.jpg",
- "brand": [
-  {
-   "line": 1,
-   "t": 5.09,
-   "dur": 0.65
-  },
-  {
-   "line": 3,
-   "t": 20.38,
-   "dur": 0.65
-  }
- ],
- "at": "2026-11-18T12:02:39.565Z"
+ "brand": [],
+ "at": "2026-11-19T08:40:54.401Z"
 }

@@ -18,7 +18,7 @@ Rules: numbers only from `video/facts.json`; brand said as in `video/pronunciati
 | 2 | 0:06-0:14 | Qubirex shows each cohort's readiness. [new] Every student gets a score, and Kavya, at 71, is nearly ready. | Readiness / Sample data | Readiness table; callout: student and readiness columns |
 | 3 | 0:14-0:23 | It shows why each student isn't ready yet. [new] Divya still has five skills to verify, and one click starts a bridge programme. | Why not ready? / Sample data | Why-not-ready panel |
 | 4 | 0:23-0:30 | [new] It shows the topics a cohort struggles with, like React components and array methods. | Topic gaps / Sample data | Cohort overview; callout: hardest lessons |
-| 5 | 0:30-0:35 | Meanwhile, students learn in Telugu, Hindi or the mix. | Learn in Telugu / Sample data | Telugu lesson |
+| 5 | 0:30-0:35 | Meanwhile, students learn in Telugu, Hindi or the mix. [new] Each lesson starts with the idea in one line. | Learn in Telugu / Sample data | Telugu lesson |
 | 6 | 0:35-0:43 | Start with a one-semester pilot for 100 students, measured from day one, [new] with a fresh check at the end. | Pilot: 100 students, one semester | 3 steps |
 | 7 | 0:43-0:48 | Qubirex. Book a demo. | [FILL: contact] / [website] | End card |
 
