@@ -2,6 +2,8 @@
 
 ## Revision 2 (19 Nov 2026)
 
+Founder, 19 Nov: English text on screen in every file (the Telugu file keeps its Telugu voice) and no subtitles. Brand: every English mention is one approved clip, "Kyoobirex" test recording #2 (heard as "Qubirex" in 12 of 12 transcriptions inside real lines); the founder should confirm by ear. A transcription of a whole video can still write "QB Rex": that varies with the transcriber (another model writes "Qbrex"). Clips: video/qa/brand-tests/.
+
 Brand: each mention cut out and transcribed alone (the transcriber is not told the name); one word passes. Shortest shot: the shortest time any product screen stays up (its callout shows from 0.6 s). Callout QA: no callout edge cuts through a word, and no callout is more than 70% flat tiles (empty).
 
 | File | New length | Brand, as heard per mention | Shortest product shot | Callout QA | QA result |
@@ -9,7 +11,7 @@ Brand: each mention cut out and transcribed alone (the transcriber is not told t
 | `out/employer-square-en.mp4` | 61 s | 9.73 s: Qubirex<br>54.83 s: Qubirex | 6.67 s | PASS: 4 callouts, no word cut, emptiest 59% flat tiles, 1.35–2.20× the page | PASS |
 | `out/institution-60s-en.mp4` | 52.53 s | 5.98 s: Qubirex<br>47.16 s: Qubirex | 6.88 s | PASS: 4 callouts, no word cut, emptiest 56% flat tiles, 1.73–1.92× the page | PASS |
 | `out/institution-full-en.mp4` | 98.95 s | 20.76 s: Qubirex<br>92.96 s: Qubirex | 5.69 s | PASS: 7 callouts, no word cut, emptiest 64% flat tiles, 1.73–2.20× the page | PASS |
-| `qa/failed/investor-full-en-DRAFT.mp4` | 129.57 s | 34.41 s: Qubirex<br>38.08 s: Qubirex | 5.6 s | PASS: 4 callouts, no word cut, emptiest 64% flat tiles, 1.92–2.20× the page | FAIL: sound: no silence > 1.5 s mid-video (1.7 s outside holds, at 73.5 s, 1.5 s outside holds, at 95.1 s) |
+| `out/investor-full-en-DRAFT.mp4` | 122.14 s | 32.91 s: QBRX<br>36.58 s: Qubirex | 5.14 s | PASS: 4 callouts, no word cut, emptiest 64% flat tiles, 1.92–2.20× the page | PASS |
 | `out/student-explainer-te.mp4` | 70.6 s | 15.87 s: క్యూబ్రిక్స్<br>62.99 s: Qubrix | 8.49 s | PASS: 6 callouts, no word cut, emptiest 64% flat tiles, 1.89–2.20× the page | PASS |
 
 ## All videos
@@ -26,7 +28,7 @@ One line per video. Longest silence is the longest pause in the voice mid-video,
 | `out/institution-60s-te.mp4` | — | 59.2 s | — | — | PASS | -16.1 LUFS (TP -2.2) | Telugu voice not yet native-reviewed; English text on screen |
 | `out/institution-full-en.mp4` | 49.61 s | 98.95 s | 1.35 s | none | PASS | -16 LUFS (TP -3.5) |  |
 | `out/institution-full-te.mp4` | — | 146.87 s | — | — | PASS | -16.2 LUFS (TP -2.8) | Telugu voice not yet native-reviewed; English text on screen |
-| `qa/failed/investor-full-en-DRAFT.mp4` | 111.23 s | 129.57 s | 1.7 s | none | FAIL: sound: no silence > 1.5 s mid-video (1.7 s outside holds, at 73.5 s, 1.5 s outside holds, at 95.1 s) | -16 LUFS (TP -2.8) | blanks: [FILL: before X% -> after Y%, N students, Z weeks], [FILL: who pays], [FILL: price per student per year], [FILL: from usage logs], [FILL: gross margin], [FILL: first target], [FILL: pilots, LOIs, colleges in talks], [FILL: one line per person], [FILL: Rs __], [FILL: product %, sales %, content %]; founder footage missing |
+| `out/investor-full-en-DRAFT.mp4` | 111.23 s | 122.14 s | 1 s | none | PASS | -16 LUFS (TP -2.8) | blanks: [FILL: before X% -> after Y%, N students, Z weeks], [FILL: who pays], [FILL: price per student per year], [FILL: from usage logs], [FILL: gross margin], [FILL: first target], [FILL: pilots, LOIs, colleges in talks], [FILL: one line per person], [FILL: Rs __], [FILL: product %, sales %, content %]; founder footage missing |
 | `out/pitch-3min-en-DRAFT.mp4` | — | 141.2 s | — | — | PASS | -16 LUFS (TP -2.3) | blanks: [FILL: who pays], [website] |
 | `qa/failed/pitch-3min-te-DRAFT.mp4` | — | 180.94 s | — | — | FAIL: format: size, 30 fps, length (1920×1080, 30 fps, 180.94 s (allowed 90–160 s)) | -16 LUFS (TP -4.4) | blanks: [FILL: who pays], [website]; native-speaker check of the Telugu lines (⚠ quote line 16; "translating" line 19), then a new voice-over from the proposed tightened script (≤ 2:40) |
 | `out/pitch-60s-en-DRAFT.mp4` | — | 53.04 s | — | — | PASS | -16.1 LUFS (TP -2.3) | blanks: [website] |
