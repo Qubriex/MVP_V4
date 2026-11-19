@@ -47,23 +47,23 @@
  },
  "institution-60s-en": {
   "revision": 2,
-  "longestSilence": 1.6,
+  "longestSilence": 1.3,
   "sfx": "none",
   "brandHeard": [
-   "6.31 s: QBRex",
-   "47.58 s: Qubirex"
+   "5.98 s: Qubirex",
+   "47.19 s: Qubirex"
   ],
   "shortestShot": 6.88,
   "calloutResult": "PASS: 4 callouts, no word cut, emptiest 56% flat tiles, 1.73–1.92× the page",
   "key": "institution-60s-en",
   "file": "qa/failed/institution-60s-en.mp4",
-  "duration": 52.98,
+  "duration": 52.6,
   "lufs": -16,
   "truePeak": -2.8,
   "engine": "Gemini TTS gemini-3.8-flash-tts (en-IN; Professor: Kore); Chirp 3 HD not reachable with API keys",
   "pass": false,
   "failed": [
-   "sound: no silence > 1.5 s mid-video (1.6 s outside holds, at 4.8 s)"
+   "brand: every mention heard as one word (5.98 s \"Qubirex\"; 47.19 s \"Qubirex\"; full transcript has \"QB Rex\")"
   ],
   "notes": "",
   "oldDuration": 25.47
@@ -360,24 +360,23 @@
  },
  "institution-full-en": {
   "revision": 2,
-  "longestSilence": 1.5,
+  "longestSilence": 1.4,
   "sfx": "none",
   "brandHeard": [
    "20.91 s: Qubirex",
-   "93.17 s: QBRX"
+   "93.14 s: Qubirex"
   ],
-  "shortestShot": 5.68,
+  "shortestShot": 5.69,
   "calloutResult": "PASS: 7 callouts, no word cut, emptiest 64% flat tiles, 1.73–2.20× the page",
   "key": "institution-full-en",
   "file": "qa/failed/institution-full-en.mp4",
-  "duration": 99.23,
+  "duration": 99.17,
   "lufs": -16,
-  "truePeak": -3.4,
+  "truePeak": -3.6,
   "engine": "Gemini TTS gemini-3.1-flash-tts-preview (en-IN; Professor: Kore); Chirp 3 HD not reachable with API keys",
   "pass": false,
   "failed": [
-   "brand: every mention heard as one word (20.91 s \"Qubirex\"; 93.17 s \"QBRX\"; full transcript has \"QB Rex\")",
-   "sound: no clicks or pops (isolated bursts) (69.56 s (-13.9 dB))"
+   "brand: every mention heard as one word (20.91 s \"Qubirex\"; 93.14 s \"Qubirex\"; full transcript has \"QB Rex\")"
   ],
   "notes": "",
   "oldDuration": 49.61

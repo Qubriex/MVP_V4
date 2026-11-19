@@ -15,7 +15,7 @@
   {
    "name": "voice: \"Qubirex\" said one way",
    "ok": true,
-   "detail": "2 mentions at 20.9 s, 93.2 s; every mention is the same recorded clip; the transcript wrote it as: qb rex"
+   "detail": "2 mentions at 20.9 s, 93.1 s; every mention is the same recorded clip; the transcript wrote it as: qb rex"
   },
   {
    "name": "text: one title at a time",
@@ -30,12 +30,12 @@
   {
    "name": "loudness: -16 LUFS ±1, true peak ≤ −1 dBTP",
    "ok": true,
-   "detail": "-16 LUFS, true peak -3.4 dBTP"
+   "detail": "-16 LUFS, true peak -3.6 dBTP"
   },
   {
    "name": "format: size, 30 fps, length",
    "ok": true,
-   "detail": "1920×1080, 30 fps, 99.23 s (max 150 s; shorter than the kit's 119 s because dead air was removed)"
+   "detail": "1920×1080, 30 fps, 99.17 s (max 150 s; shorter than the kit's 119 s because dead air was removed)"
   },
   {
    "name": "sound: no sound effects (no >5 kHz noise > 0.5 s without speech)",
@@ -45,12 +45,12 @@
   {
    "name": "sound: no silence > 1.5 s mid-video",
    "ok": true,
-   "detail": "longest pause 1.50 s"
+   "detail": "longest pause 1.40 s"
   },
   {
    "name": "picture: product shots inside the safe area",
    "ok": true,
-   "detail": "1934 frames with a product shot, all inside"
+   "detail": "1925 frames with a product shot, all inside"
   },
   {
    "name": "picture: no blue (≤ 2% of pixels, screenshots excluded)",
@@ -60,7 +60,7 @@
   {
    "name": "brand: every mention heard as one word",
    "ok": false,
-   "detail": "20.91 s \"Qubirex\"; 93.17 s \"QBRX\"; full transcript has \"QB Rex\""
+   "detail": "20.91 s \"Qubirex\"; 93.14 s \"Qubirex\"; full transcript has \"QB Rex\""
   },
   {
    "name": "product shots: each ≥ 4 s, callout ≥ 3 s",
@@ -79,37 +79,37 @@
   },
   {
    "name": "sound: no clicks or pops (isolated bursts)",
-   "ok": false,
-   "detail": "69.56 s (-13.9 dB)"
+   "ok": true,
+   "detail": "none"
   },
   {
    "name": "sound: closing music after the last line < −20 LUFS",
    "ok": true,
-   "detail": "-31.6 LUFS over the last 3.0 s"
+   "detail": "-31.7 LUFS over the last 3.0 s"
   }
  ],
  "lufs": -16,
- "truePeak": -3.4,
- "duration": 99.23,
+ "truePeak": -3.6,
+ "duration": 99.17,
  "sfx": "none",
- "longestSilence": 1.5,
- "longestHold": 1.5,
- "shortestShot": 5.68,
- "shortestCallout": 5.08,
+ "longestSilence": 1.4,
+ "longestHold": 1.4,
+ "shortestShot": 5.69,
+ "shortestCallout": 5.09,
  "calloutResult": "PASS: 7 callouts, no word cut, emptiest 64% flat tiles, 1.73–2.20× the page",
- "tailLufs": -31.6,
+ "tailLufs": -31.7,
  "sheet": "video/qa/institution-full-en-sheet.jpg",
  "brand": [
   {
    "line": 2,
    "t": 20.91,
-   "dur": 0.87
+   "dur": 0.84
   },
   {
    "line": 10,
-   "t": 93.17,
-   "dur": 0.87
+   "t": 93.14,
+   "dur": 0.84
   }
  ],
- "at": "2026-11-19T09:02:17.304Z"
+ "at": "2026-11-19T09:14:52.627Z"
 }

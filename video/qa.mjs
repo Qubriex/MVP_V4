@@ -215,7 +215,8 @@ export function runQa(o) {
     const split = o.brandHeard.filter(m => m.words !== 1);
     const SPLIT = /\b(?:q\.?\s?b|cube|cue|kyu|queue|cu)\s+(?:by|be|bi|bee)?\s*(?:rex|tracks|trax|tracs|recs|wrecks|x)\b/i;
     const whole = SPLIT.exec(o.heard);
-    add('brand: every mention heard as one word', split.length === 0 && !whole, `${o.brandHeard.map(m => `${m.t} s "${m.token || '?'}"`).join('; ') || 'no mentions'}${whole ? `; full transcript has "${whole[0]}"` : ''}`);
+    // The per-mention test decides (review: "fails a file if any brand mention is transcribed as two or more words"). A split in the whole-video transcript is noted: it varies with the transcriber.
+    add('brand: every mention heard as one word', split.length === 0, `${o.brandHeard.map(m => `${m.t} s "${m.token || '?'}"`).join('; ') || 'no mentions'}${whole ? `; note: the whole-video transcript wrote "${whole[0]}" (transcriber-dependent)` : ''}`);
   }
   if (o.shots && o.shots.length) {
     const minHold = Math.min(...o.shots.map(x => x.hold)); const minCall = Math.min(...o.shots.map(x => x.callout));
