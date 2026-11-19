@@ -1,0 +1,109 @@
+{
+ "name": "student-explainer-te-DRAFT",
+ "pass": false,
+ "checks": [
+  {
+   "name": "voice: no style text read aloud",
+   "ok": true,
+   "detail": "none heard"
+  },
+  {
+   "name": "voice: numbers match facts.json",
+   "ok": true,
+   "detail": "0 numbers heard, all in the facts"
+  },
+  {
+   "name": "voice: \"Qubirex\" said one way",
+   "ok": true,
+   "detail": "0 mentions at —; not spliced; the transcript wrote it as: క్యూబరిక్స్"
+  },
+  {
+   "name": "text: no English-only titles, labels or captions",
+   "ok": true,
+   "detail": "all Telugu (tech words and brand allowed)"
+  },
+  {
+   "name": "text: one title at a time",
+   "ok": true,
+   "detail": "no frame with two titles"
+  },
+  {
+   "name": "text: read time held",
+   "ok": true,
+   "detail": "13 text layers checked"
+  },
+  {
+   "name": "loudness: -16 LUFS ±1, true peak ≤ −1 dBTP",
+   "ok": true,
+   "detail": "-16 LUFS, true peak -6 dBTP"
+  },
+  {
+   "name": "format: size, 30 fps, length",
+   "ok": true,
+   "detail": "1920×1080, 30 fps, 70.6 s (max 90 s; shorter than the kit's 74 s because dead air was removed)"
+  },
+  {
+   "name": "sound: no sound effects (no >5 kHz noise > 0.5 s without speech)",
+   "ok": true,
+   "detail": "none found"
+  },
+  {
+   "name": "sound: no silence > 1.5 s mid-video",
+   "ok": true,
+   "detail": "longest pause 1.45 s"
+  },
+  {
+   "name": "picture: product shots inside the safe area",
+   "ok": false,
+   "detail": "793 frames, first at 16.50 s: box 399,220,1521,958 / 93,158,1827,509"
+  },
+  {
+   "name": "picture: no blue (≤ 2% of pixels, screenshots excluded)",
+   "ok": true,
+   "detail": "worst frame 0.00% at 0.0 s"
+  },
+  {
+   "name": "brand: every mention heard as one word",
+   "ok": true,
+   "detail": "15.87 s \"క్యూబ్రిక్స్\"; 62.99 s \"Qubrix\""
+  },
+  {
+   "name": "product shots: each ≥ 4 s, callout ≥ 3 s",
+   "ok": true,
+   "detail": "6 shots; shortest 8.5 s, shortest callout 7.9 s"
+  },
+  {
+   "name": "callouts: no edge through a word, not empty (≤ 70% flat)",
+   "ok": true,
+   "detail": "PASS: 6 callouts, no word cut, emptiest 64% flat tiles, 1.89–2.20× the page"
+  },
+  {
+   "name": "captions never over a callout",
+   "ok": true,
+   "detail": "no overlap"
+  },
+  {
+   "name": "sound: no clicks or pops (isolated bursts)",
+   "ok": true,
+   "detail": "none"
+  },
+  {
+   "name": "sound: closing music after the last line < −20 LUFS",
+   "ok": true,
+   "detail": "-30.6 LUFS over the last 3.0 s"
+  }
+ ],
+ "lufs": -16,
+ "truePeak": -6,
+ "duration": 70.6,
+ "sfx": "none",
+ "longestSilence": 1.45,
+ "longestHold": 1.45,
+ "shortestShot": 8.49,
+ "shortestCallout": 7.89,
+ "calloutResult": "PASS: 6 callouts, no word cut, emptiest 64% flat tiles, 1.89–2.20× the page",
+ "tailLufs": -30.6,
+ "sheet": "video/qa/student-explainer-te-DRAFT-sheet.jpg",
+ "brand": [],
+ "at": "2026-11-19T08:39:49.841Z"
+}

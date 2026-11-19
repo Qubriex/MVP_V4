@@ -269,19 +269,27 @@
   "notes": ""
  },
  "student-explainer-te": {
-  "revision": 1,
-  "longestSilence": 1.2,
+  "revision": 2,
+  "longestSilence": 1.45,
   "sfx": "none",
+  "brandHeard": [
+   "15.87 s: క్యూబ్రిక్స్",
+   "62.99 s: Qubrix"
+  ],
+  "shortestShot": 8.49,
+  "calloutResult": "PASS: 6 callouts, no word cut, emptiest 64% flat tiles, 1.89–2.20× the page",
   "key": "student-explainer-te",
-  "file": "out/student-explainer-te.mp4",
-  "duration": 44.32,
+  "file": "qa/failed/student-explainer-te-DRAFT.mp4",
+  "duration": 70.6,
   "lufs": -16,
-  "truePeak": -2.9,
+  "truePeak": -6,
   "engine": "Gemini TTS gemini-3.8-flash-tts (te-IN; Professor: Kore); Chirp 3 HD not reachable with API keys",
-  "pass": true,
-  "failed": [],
-  "notes": "Telugu voice not yet native-reviewed; English text on screen",
-  "oldDuration": 86.2
+  "pass": false,
+  "failed": [
+   "picture: product shots inside the safe area (793 frames, first at 16.50 s: box 399,220,1521,958 / 93,158,1827,509)"
+  ],
+  "notes": "Telugu voice and on-screen text are Claude drafts ([TE pending]: no native sign-off yet)",
+  "oldDuration": 44.32
  },
  "student-reel-3-en-nocaptions": {
   "key": "student-reel-3-en-nocaptions",

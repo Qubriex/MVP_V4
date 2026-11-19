@@ -256,7 +256,7 @@ B.logo = (el, b) => {
 // box measured by the recorder, 16 px padding) at up to 2.2×, floating above
 // or below it, joined by a dashed line. The kicker sits top right.
 const PAGE = { x: 410, y: 262, w: 1100 }; PAGE.h = PAGE.w * 900 / 1440;
-const SAFE16 = { l: 110, t: 150, r: 1810, b: 1010 };
+const SAFE16 = { l: 130, t: 150, r: 1790, b: 1005 }; // inside the 5% safe area even at the 2% camera push-in
 B.device = (el, b) => {
   el.innerHTML = `<div class="abs" style="left:${PAGE.x}px;top:${PAGE.y - 36}px;width:${PAGE.w}px;height:${PAGE.h + 36}px;border-radius:18px;background:#2a2421;box-shadow:0 40px 90px rgba(0,0,0,.45);overflow:hidden" data-qa-shot data-frame>
       <div style="height:36px;display:flex;align-items:center;gap:9px;padding-left:16px;background:#2a2421"><i style="width:12px;height:12px;border-radius:50%;background:#E23B2D;display:block"></i><i style="width:12px;height:12px;border-radius:50%;background:#F26A21;display:block"></i><i style="width:12px;height:12px;border-radius:50%;background:#BEB4AC;display:block"></i><span style="margin-left:auto;margin-right:14px;font-size:17px;font-weight:700;letter-spacing:${/[\u0C00-\u0C7F]/.test(S('sample', '')) ? 0 : '.08em'};color:#FFD9B0">${S('sample', 'SAMPLE DATA')}</span></div>

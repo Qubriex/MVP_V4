@@ -1,5 +1,15 @@
 # Video report
 
+## Revision 2 (19 Nov 2026)
+
+Brand: each mention cut out and transcribed alone (the transcriber is not told the name); one word passes. Shortest shot: the shortest time any product screen stays up (its callout shows from 0.6 s). Callout QA: no callout edge cuts through a word, and no callout is more than 70% flat tiles (empty).
+
+| File | New length | Brand, as heard per mention | Shortest product shot | Callout QA | QA result |
+|---|---|---|---|---|---|
+| `qa/failed/student-explainer-te-DRAFT.mp4` | 70.6 s | 15.87 s: క్యూబ్రిక్స్<br>62.99 s: Qubrix | 8.49 s | PASS: 6 callouts, no word cut, emptiest 64% flat tiles, 1.89–2.20× the page | FAIL: picture: product shots inside the safe area (793 frames, first at 16.50 s: box 399,220,1521,958 / 93,158,1827,509) |
+
+## All videos
+
 One line per video. Longest silence is the longest pause in the voice mid-video, outside the declared code-card and timer holds. SFX found lists any noise above 5 kHz lasting over 0.5 s with no speech. QA details and contact sheets: `video/qa/`.
 
 | File | Old length | New length | Longest silence | SFX found | QA result | Loudness | Notes |
@@ -18,7 +28,7 @@ One line per video. Longest silence is the longest pause in the voice mid-video,
 | `out/pitch-60s-en-DRAFT.mp4` | — | 53.04 s | — | — | PASS | -16.1 LUFS (TP -2.3) | blanks: [website] |
 | `out/pitch-60s-te-DRAFT.mp4` | — | 54.67 s | — | — | PASS | -16 LUFS (TP -3.6) | blanks: [website]; native-speaker check of the Telugu lines (⚠ quote, line 7), then a new voice-over with the agreed brand pronunciation |
 | `out/student-explainer-en.mp4` | — | 86.2 s | — | — | PASS | -16.3 LUFS (TP -2.4) |  |
-| `out/student-explainer-te.mp4` | 86.2 s | 44.32 s | 1.2 s | none | PASS | -16 LUFS (TP -2.9) | Telugu voice not yet native-reviewed; English text on screen |
+| `qa/failed/student-explainer-te-DRAFT.mp4` | 44.32 s | 70.6 s | 1.45 s | none | FAIL: picture: product shots inside the safe area (793 frames, first at 16.50 s: box 399,220,1521,958 / 93,158,1827,509) | -16 LUFS (TP -6) | Telugu voice and on-screen text are Claude drafts ([TE pending]: no native sign-off yet) |
 | `out/student-reel-1-en.mp4` | 37.57 s | 29.47 s | 0.8 s | none | PASS | -14.3 LUFS (TP -2.8) |  |
 | `out/student-reel-1-en-nocaptions.mp4` | — | 37.57 s | — | — | PASS | -14.9 LUFS (TP -2.2) |  |
 | `out/student-reel-1-te.mp4` | 39.27 s | 38.4 s | 1.25 s | none | PASS | -14.1 LUFS (TP -2.8) | Telugu voice not yet native-reviewed; English text on screen |
