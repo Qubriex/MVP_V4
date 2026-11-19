@@ -15,7 +15,7 @@
   {
    "name": "voice: \"Qubirex\" said one way",
    "ok": true,
-   "detail": "0 mentions at —; not spliced; the transcript wrote it as: —"
+   "detail": "2 mentions at 6.3 s, 47.6 s; every mention is the same recorded clip; the transcript wrote it as: qbrix"
   },
   {
    "name": "text: one title at a time",
@@ -30,12 +30,12 @@
   {
    "name": "loudness: -16 LUFS ±1, true peak ≤ −1 dBTP",
    "ok": true,
-   "detail": "-16 LUFS, true peak -3 dBTP"
+   "detail": "-16 LUFS, true peak -2.7 dBTP"
   },
   {
    "name": "format: size, 30 fps, length",
    "ok": true,
-   "detail": "1920×1080, 30 fps, 47.91 s (max 60 s; shorter than the kit's 49 s because dead air was removed)"
+   "detail": "1920×1080, 30 fps, 53.01 s (max 60 s)"
   },
   {
    "name": "sound: no sound effects (no >5 kHz noise > 0.5 s without speech)",
@@ -45,12 +45,12 @@
   {
    "name": "sound: no silence > 1.5 s mid-video",
    "ok": false,
-   "detail": "1.6 s outside holds, at 33.3 s"
+   "detail": "1.7 s outside holds, at 4.8 s"
   },
   {
    "name": "picture: product shots inside the safe area",
-   "ok": false,
-   "detail": "110 frames, first at 31.13 s: box 399,220,1521,958 / 93,158,1827,509"
+   "ok": true,
+   "detail": "997 frames with a product shot, all inside"
   },
   {
    "name": "picture: no blue (≤ 2% of pixels, screenshots excluded)",
@@ -59,18 +59,18 @@
   },
   {
    "name": "brand: every mention heard as one word",
-   "ok": true,
-   "detail": "no mentions"
+   "ok": false,
+   "detail": "6.31 s \"QBRX\"; 47.58 s \"QB Rex\""
   },
   {
    "name": "product shots: each ≥ 4 s, callout ≥ 3 s",
    "ok": true,
-   "detail": "4 shots; shortest 4.3 s, shortest callout 3.7 s"
+   "detail": "4 shots; shortest 6.9 s, shortest callout 6.3 s"
   },
   {
    "name": "callouts: no edge through a word, not empty (≤ 70% flat)",
    "ok": true,
-   "detail": "PASS: 4 callouts, no word cut, emptiest 56% flat tiles, 1.73–1.96× the page"
+   "detail": "PASS: 4 callouts, no word cut, emptiest 56% flat tiles, 1.73–1.92× the page"
   },
   {
    "name": "captions never over a callout",
@@ -85,20 +85,31 @@
   {
    "name": "sound: closing music after the last line < −20 LUFS",
    "ok": true,
-   "detail": "-29.8 LUFS over the last 3.0 s"
+   "detail": "-31.4 LUFS over the last 3.0 s"
   }
  ],
  "lufs": -16,
- "truePeak": -3,
- "duration": 47.91,
+ "truePeak": -2.7,
+ "duration": 53.01,
  "sfx": "none",
- "longestSilence": 1.6,
- "longestHold": 1.6,
- "shortestShot": 4.3,
- "shortestCallout": 3.7,
- "calloutResult": "PASS: 4 callouts, no word cut, emptiest 56% flat tiles, 1.73–1.96× the page",
- "tailLufs": -29.8,
+ "longestSilence": 1.65,
+ "longestHold": 1.65,
+ "shortestShot": 6.89,
+ "shortestCallout": 6.29,
+ "calloutResult": "PASS: 4 callouts, no word cut, emptiest 56% flat tiles, 1.73–1.92× the page",
+ "tailLufs": -31.4,
  "sheet": "video/qa/institution-60s-en-sheet.jpg",
- "brand": [],
- "at": "2026-11-19T08:40:54.401Z"
+ "brand": [
+  {
+   "line": 1,
+   "t": 6.31,
+   "dur": 0.87
+  },
+  {
+   "line": 6,
+   "t": 47.58,
+   "dur": 0.87
+  }
+ ],
+ "at": "2026-11-19T08:59:24.266Z"
 }
