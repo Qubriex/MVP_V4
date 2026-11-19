@@ -41,7 +41,8 @@ function brandToken(text) {
 // Candidate clips: the first brand word in each test recording.
 const T = path.join(VDIR, 'qa/brand-tests');
 const cands = [];
-for (const f of fs.readdirSync(T).filter(x => /^\d-.*\.wav$/.test(x)).sort()) {
+const ONLY = (process.env.ONLY || '').split(',').filter(Boolean);
+for (const f of fs.readdirSync(T).filter(x => /^\d-.*\.wav$/.test(x) && (!ONLY.length || ONLY.includes(x.replace('.wav', '')))).sort()) {
   const slow = path.join(TMP, f); execFileSync('ffmpeg', ['-v', 'error', '-y', '-i', path.join(T, f), '-af', 'atempo=0.95', '-ar', '48000', '-ac', '1', slow]);
   const lf = path.join(TMP, 'lines.json'); fs.writeFileSync(lf, JSON.stringify(['Meet Qubirex.', 'With Qubirex, every student learns to code in their own language.']));
   let w; try { w = JSON.parse(execFileSync(PY, ['-I', path.join(ROOT, 'scripts/walkthrough/lib/forced_align.py'), slow, lf], { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim().split('\n').pop()).words.find(x => x.w === 'qubirex'); } catch { continue; }
@@ -67,11 +68,12 @@ for (const c of cands) {
     }
   }
   const ok = heard.filter(h => h.words === 1).length;
-  results.push({ clip: c.name, oneWord: ok, of: heard.length, heard: heard.map(h => h.token || '?') });
+  const dist = heard.reduce((sum, h) => sum + lev((h.token || '').toLowerCase().replace(/[^a-z]/g, ''), 'qubirex'), 0) / heard.length;
+  results.push({ clip: c.name, oneWord: ok, of: heard.length, meanDistance: +dist.toFixed(2), heard: heard.map(h => h.token || '?') });
   console.log(`${c.name}: ${ok}/${heard.length} one word  [${heard.map(h => h.token || '?').join(' | ')}]`);
 }
-results.sort((a, b) => b.oneWord / b.of - a.oneWord / a.of);
-fs.writeFileSync(path.join(T, 'pick.json'), JSON.stringify(results, null, 1));
+results.sort((a, b) => (b.oneWord / b.of - a.oneWord / a.of) || (a.meanDistance - b.meanDistance)); // ties: closest to "Qubirex"
+fs.writeFileSync(path.join(T, ONLY.length ? 'pick-final.json' : 'pick.json'), JSON.stringify(results, null, 1));
 const win = cands.find(c => c.name === results[0].clip);
 writeWav(path.join(VDIR, 'assets/voice/qubirex-en.wav'), win.pcm);
 console.log(`winner: ${results[0].clip} (${results[0].oneWord}/${results[0].of}) → video/assets/voice/qubirex-en.wav`);
