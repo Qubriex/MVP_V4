@@ -55,7 +55,7 @@ for (const [n, sp] of SPELLINGS.entries()) {
       const raw = path.join(OUT, `${slug}-${k}.raw`); fs.writeFileSync(raw, r.pcm);
       execFileSync('ffmpeg', ['-v', 'error', '-y', '-f', 's16le', '-ar', String(r.rate), '-ac', '1', '-i', raw, wav]); fs.rmSync(raw);
     }
-    const heard = await asr(wav); const b = brandOf(heard); const words = b.split(/[\s-]+/).filter(Boolean).length;
+    const cacheF = `${wav}.asr.txt`; const heard = fs.existsSync(cacheF) ? fs.readFileSync(cacheF, 'utf8') : await asr(wav); fs.writeFileSync(cacheF, heard); const b = brandOf(heard); const words = b.split(/[\s-]+/).filter(Boolean).length;
     tries.push({ file: path.relative(VDIR, wav), heard, brand: b, words, distance: lev(b.toLowerCase().replace(/[^a-z]/g, ''), 'qubirex') });
     console.log(`${sp} #${k}: heard "${b}" (${words} word${words > 1 ? 's' : ''})`);
   }
