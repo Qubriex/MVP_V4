@@ -5,7 +5,6 @@ import { facts, fill } from '../lib/facts.mjs';
 const shot = (key, kicker, title) => ({ key, kicker, title });
 export default ({ scenes: s, contact }) => ({
   usesContact: true,
-  brandRef: 'assets/voice/qubirex-en.wav', // the investor voice was heard as "QB Rex"
   sections: [
     { id: 'intro', n: '01', title: 'The problem', theme: 'dark' }, { id: 'gap', n: '02', title: 'Market gap', theme: 'dark' }, { id: 'solution', n: '03', title: 'Solution', theme: 'light' },
     { id: 'why', n: '04', title: 'Why Qubirex', theme: 'dark' }, { id: 'proof', n: '05', title: 'Product proof', theme: 'dark' }, { id: 'customers', n: '06', title: 'Customers', theme: 'dark' },

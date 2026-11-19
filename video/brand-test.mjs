@@ -16,7 +16,8 @@ const dotenv = await import(path.join(ROOT, 'backend/node_modules/dotenv/lib/mai
 const KEYS = [process.env.GEMINI_API_KEY_2, process.env.GEMINI_API_KEY_3, process.env.GEMINI_API_KEY].filter(Boolean);
 const { TEXT_MODELS } = await import(pathToFileURL(path.join(ROOT, 'scripts/walkthrough/lib/align-check.mjs')).href);
 
-const SPELLINGS = (process.env.SPELLINGS || 'Kyoo-bih-rex|Kyoobirex|Cue-bi-rex|ˈkjuːbɪrɛks').split('|');
+// The four candidates from the review, plus the current spelling as a baseline.
+const SPELLINGS = (process.env.SPELLINGS || 'Cube-bi-rex|Kyoo-bih-rex|Kyoobirex|Cue-bi-rex|ˈkjuːbɪrɛks').split('|');
 const TRIES = 3;
 const sentence = (w) => `Meet ${w}. With ${w}, every student learns to code in their own language.`;
 
@@ -48,17 +49,19 @@ for (const [n, sp] of SPELLINGS.entries()) {
   const slug = `${n + 1}-${sp.replace(/[^a-z]+/gi, '-').replace(/^-|-$/g, '') || 'ipa'}`;
   const tries = [];
   for (let k = 1; k <= TRIES; k += 1) {
-    const r = await tts(sentence(sp));
-    const raw = path.join(OUT, `${slug}-${k}.raw`); fs.writeFileSync(raw, r.pcm);
     const wav = path.join(OUT, `${slug}-${k}.wav`);
-    execFileSync('ffmpeg', ['-v', 'error', '-y', '-f', 's16le', '-ar', String(r.rate), '-ac', '1', '-i', raw, wav]); fs.rmSync(raw);
+    if (!fs.existsSync(wav)) { // resumable: clips already made are kept
+      const r = await tts(sentence(sp));
+      const raw = path.join(OUT, `${slug}-${k}.raw`); fs.writeFileSync(raw, r.pcm);
+      execFileSync('ffmpeg', ['-v', 'error', '-y', '-f', 's16le', '-ar', String(r.rate), '-ac', '1', '-i', raw, wav]); fs.rmSync(raw);
+    }
     const heard = await asr(wav); const b = brandOf(heard); const words = b.split(/[\s-]+/).filter(Boolean).length;
     tries.push({ file: path.relative(VDIR, wav), heard, brand: b, words, distance: lev(b.toLowerCase().replace(/[^a-z]/g, ''), 'qubirex') });
     console.log(`${sp} #${k}: heard "${b}" (${words} word${words > 1 ? 's' : ''})`);
   }
   results.push({ spelling: sp, oneWordAll: tries.every(t => t.words === 1), meanDistance: +(tries.reduce((s, t) => s + t.distance, 0) / TRIES).toFixed(2), tries });
 }
-const ok = results.filter(r => r.oneWordAll).sort((a, b) => a.meanDistance - b.meanDistance);
+const ok = results.filter(r => r.oneWordAll && r.spelling !== 'Cube-bi-rex').sort((a, b) => a.meanDistance - b.meanDistance); // pick among the four candidates
 const pick = ok[0]?.spelling || null;
 fs.writeFileSync(path.join(OUT, 'results.json'), JSON.stringify({ sentence: sentence('<brand>'), pick, results }, null, 1));
 console.log(pick ? `pick: ${pick}` : 'no spelling was heard as one word in 3 of 3 tries');
