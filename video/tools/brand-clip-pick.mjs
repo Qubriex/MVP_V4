@@ -54,7 +54,7 @@ for (const f of fs.readdirSync(T).filter(x => /^\d-.*\.wav$/.test(x) && (!ONLY.l
   cands.push({ name: f.replace('.wav', ''), pcm });
 }
 // Contexts: real voices with their word timing.
-const CTX = ['institution-60s-en', 'employer-square-en'].map(id => ({ id, pcm: readPcm(path.join(VDIR, 'work', id, 'voice.wav')), t: JSON.parse(fs.readFileSync(path.join(VDIR, 'work', id, 'timing.json'), 'utf8')) }));
+const CTX = (process.env.CTX ? process.env.CTX.split(',') : ['institution-60s-en', 'employer-square-en']).map(id => ({ id, pcm: readPcm(path.join(VDIR, 'work', id, 'voice.wav')), t: JSON.parse(fs.readFileSync(path.join(VDIR, 'work', id, 'timing.json'), 'utf8')) }));
 const results = [];
 for (const c of cands) {
   const heard = [];

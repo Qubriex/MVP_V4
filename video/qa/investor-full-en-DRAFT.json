@@ -1,6 +1,6 @@
 {
  "name": "investor-full-en-DRAFT",
- "pass": true,
+ "pass": false,
  "checks": [
   {
    "name": "voice: no style text read aloud",
@@ -15,7 +15,7 @@
   {
    "name": "voice: \"Qubirex\" said one way",
    "ok": true,
-   "detail": "0 mentions at —; not spliced; the transcript wrote it as: qb rex"
+   "detail": "2 mentions at 34.4 s, 38.1 s; every mention is the same recorded clip; the transcript wrote it as: qb rex"
   },
   {
    "name": "text: one title at a time",
@@ -30,12 +30,12 @@
   {
    "name": "loudness: -16 LUFS ±1, true peak ≤ −1 dBTP",
    "ok": true,
-   "detail": "-16 LUFS, true peak -2.6 dBTP"
+   "detail": "-16 LUFS, true peak -2.9 dBTP"
   },
   {
    "name": "format: size, 30 fps, length",
    "ok": true,
-   "detail": "1920×1080, 30 fps, 111.23 s (max 270 s; shorter than the kit's 209 s because dead air was removed)"
+   "detail": "1920×1080, 30 fps, 129.63 s (max 270 s; shorter than the kit's 209 s because dead air was removed)"
   },
   {
    "name": "sound: no sound effects (no >5 kHz noise > 0.5 s without speech)",
@@ -45,26 +45,71 @@
   {
    "name": "sound: no silence > 1.5 s mid-video",
    "ok": true,
-   "detail": "longest pause 1.20 s"
+   "detail": "longest pause 1.50 s"
   },
   {
    "name": "picture: product shots inside the safe area",
    "ok": true,
-   "detail": "442 frames with a product shot, all inside"
+   "detail": "826 frames with a product shot, all inside"
   },
   {
    "name": "picture: no blue (≤ 2% of pixels, screenshots excluded)",
    "ok": true,
    "detail": "worst frame 0.00% at 0.0 s"
+  },
+  {
+   "name": "brand: every mention heard as one word",
+   "ok": false,
+   "detail": "34.41 s \"Qubirex\"; 38.11 s \"Q B Rex\"; note: the whole-video transcript wrote \"QB Rex\" (transcriber-dependent)"
+  },
+  {
+   "name": "product shots: each ≥ 4 s, callout ≥ 3 s",
+   "ok": true,
+   "detail": "4 shots; shortest 5.6 s, shortest callout 5.0 s"
+  },
+  {
+   "name": "callouts: no edge through a word, not empty (≤ 70% flat)",
+   "ok": true,
+   "detail": "PASS: 4 callouts, no word cut, emptiest 64% flat tiles, 1.92–2.20× the page"
+  },
+  {
+   "name": "captions never over a callout",
+   "ok": true,
+   "detail": "no overlap"
+  },
+  {
+   "name": "sound: no clicks or pops (isolated bursts)",
+   "ok": true,
+   "detail": "none"
+  },
+  {
+   "name": "sound: closing music after the last line < −20 LUFS",
+   "ok": true,
+   "detail": "-27.9 LUFS over the last 3.0 s"
   }
  ],
  "lufs": -16,
- "truePeak": -2.6,
- "duration": 111.23,
+ "truePeak": -2.9,
+ "duration": 129.63,
  "sfx": "none",
- "longestSilence": 1.2,
- "longestHold": 1.2,
+ "longestSilence": 1.5,
+ "longestHold": 1.5,
+ "shortestShot": 5.6,
+ "shortestCallout": 5,
+ "calloutResult": "PASS: 4 callouts, no word cut, emptiest 64% flat tiles, 1.92–2.20× the page",
+ "tailLufs": -27.9,
  "sheet": "video/qa/investor-full-en-DRAFT-sheet.jpg",
- "brand": [],
- "at": "2026-11-18T12:07:39.136Z"
+ "brand": [
+  {
+   "line": 2,
+   "t": 34.41,
+   "dur": 0.84
+  },
+  {
+   "line": 2,
+   "t": 38.11,
+   "dur": 0.84
+  }
+ ],
+ "at": "2026-11-19T09:26:12.991Z"
 }

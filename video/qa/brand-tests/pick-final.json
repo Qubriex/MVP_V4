@@ -1,25 +1,5 @@
 [
  {
-  "clip": "2-Kyoo-bih-rex-1",
-  "oneWord": 12,
-  "of": 12,
-  "meanDistance": 0,
-  "heard": [
-   "Qubirex",
-   "Qubirex",
-   "Qubirex",
-   "Qubirex",
-   "Qubirex",
-   "Qubirex",
-   "Qubirex",
-   "Qubirex",
-   "Qubirex",
-   "Qubirex",
-   "Qubirex",
-   "Qubirex"
-  ]
- },
- {
   "clip": "3-Kyoobirex-2",
   "oneWord": 12,
   "of": 12,
@@ -40,15 +20,35 @@
   ]
  },
  {
-  "clip": "5-kju-b-r-ks-2",
-  "oneWord": 12,
+  "clip": "2-Kyoo-bih-rex-1",
+  "oneWord": 10,
   "of": 12,
-  "meanDistance": 0,
+  "meanDistance": 0.33,
   "heard": [
    "Qubirex",
    "Qubirex",
+   "Q B Rex",
+   "Q B Rex",
    "Qubirex",
    "Qubirex",
+   "Qubirex",
+   "Qubirex",
+   "Qubirex",
+   "Qubirex",
+   "Qubirex",
+   "Qubirex"
+  ]
+ },
+ {
+  "clip": "5-kju-b-r-ks-2",
+  "oneWord": 10,
+  "of": 12,
+  "meanDistance": 0.33,
+  "heard": [
+   "Qubirex",
+   "Qubirex",
+   "Q B Rex",
+   "Q B Rex",
    "Qubirex",
    "Qubirex",
    "Qubirex",
