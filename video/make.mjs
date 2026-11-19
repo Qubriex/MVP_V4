@@ -322,7 +322,7 @@ execFileSync('ffmpeg', ['-v', 'error', '-y', '-framerate', String(FPS), '-i', pa
 
 // ─── Script with timings ─────────────────────────────────────────────────────
 fs.mkdirSync(path.join(OUT_DIR, 'scripts'), { recursive: true });
-writeScript(path.join(OUT_DIR, 'scripts', `${ID}.md`), {
+if (!DRY) writeScript(path.join(OUT_DIR, 'scripts', `${ID}.md`), {
   title: `${en.meta['script id'] || SID} (${LANG_NAME} voice)`, name: OUTNAME, lang: LANG, total,
   notes: [`Voice: ${ENGINE}.`, `Script: ${script.file}${LANG === 'te' ? ` (Telugu voice lines voiced before native review, on the founder's go-ahead; on-screen text ${TE_TEXT ? 'in Telugu (draft)' : 'in English'})` : ''}.`, ...(blanks.length ? [`Blanks still open: ${blanks.join(', ')}.`] : []), ...(founder ? ['Founder footage not filmed yet: placeholder cards.'] : [])],
   lines: scenes.map((s, i) => ({ section: s.section || '', text: s.say || `(no voice: ${s.directions.join(', ') || 'hold'})`, back: s.back, start: sceneStart[i], end: sceneStart[i] + (sceneVoice[i] || (i + 1 < scenes.length ? sceneStart[i + 1] - sceneStart[i] : TAIL)), screen: s.screen.join(' / ') }))
