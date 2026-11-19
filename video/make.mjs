@@ -364,7 +364,7 @@ const brandWindows = LANG === 'en'
   ? brand.map(b => ({ t: b.t, a: b.t - LEAD - 0.6, b: b.t - LEAD + b.dur + 0.6 })) // with a word or two around it: a lone name is too short for the transcriber
   : scenes.map((s, i) => ({ s, i })).filter(({ s }) => (s.say || '').includes(TE_BRAND)).map(({ i }) => ({ t: +sceneStart[i].toFixed(2), a: sceneStart[i] - LEAD, b: sceneStart[i] - LEAD + (sceneVoice[i] || 3), scene: scenes[i].n }));
 const bhFile = path.join(WORK, 'brand-heard.json');
-const bhKey = `${fs.statSync(voFinal).size}:${brandWindows.map(w => `${w.a.toFixed(2)}-${w.b.toFixed(2)}`).join(',')}`;
+const bhKey = `${fs.statSync(voFinal).size}:${fs.statSync(voFinal).mtimeMs}:${brandWindows.map(w => `${w.a.toFixed(2)}-${w.b.toFixed(2)}`).join(',')}`;
 let brandHeard = fs.existsSync(bhFile) ? JSON.parse(fs.readFileSync(bhFile, 'utf8')) : null;
 if (!brandHeard || brandHeard.key !== bhKey) {
   const list = [];

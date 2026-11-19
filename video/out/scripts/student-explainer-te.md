@@ -1,9 +1,9 @@
 # student-explainer (Telugu voice)
 
-File: `video/out/student-explainer-te-DRAFT.mp4` · 70.6 s · language: Telugu (Telugu-English mix)
+File: `video/out/student-explainer-te.mp4` · 70.6 s · language: Telugu (Telugu-English mix)
 
 - Voice: Gemini TTS gemini-3.8-flash-tts (te-IN; Professor: Kore); Chirp 3 HD not reachable with API keys.
-- Script: scripts/te/student-explainer.md (Telugu voice lines voiced before native review, on the founder's go-ahead; on-screen text in Telugu (draft)).
+- Script: scripts/te/student-explainer.md (Telugu voice lines voiced before native review, on the founder's go-ahead; on-screen text in English).
 
 | # | Time | Section | Telugu (spoken) | English back-translation | On screen |
 |---|---|---|---|---|---|

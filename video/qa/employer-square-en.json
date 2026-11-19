@@ -1,6 +1,6 @@
 {
  "name": "employer-square-en",
- "pass": true,
+ "pass": false,
  "checks": [
   {
    "name": "voice: no style text read aloud",
@@ -15,7 +15,7 @@
   {
    "name": "voice: \"Qubirex\" said one way",
    "ok": true,
-   "detail": "0 mentions at —; not spliced; the transcript wrote it as: qbrex"
+   "detail": "2 mentions at 9.7 s, 54.9 s; every mention is the same recorded clip; the transcript wrote it as: qbrex"
   },
   {
    "name": "text: one title at a time",
@@ -25,17 +25,17 @@
   {
    "name": "text: read time held",
    "ok": true,
-   "detail": "30 text layers checked"
+   "detail": "16 text layers checked"
   },
   {
    "name": "loudness: -14 LUFS ±1, true peak ≤ −1 dBTP",
    "ok": true,
-   "detail": "-14 LUFS, true peak -2.6 dBTP"
+   "detail": "-14 LUFS, true peak -2.8 dBTP"
   },
   {
    "name": "format: size, 30 fps, length",
    "ok": true,
-   "detail": "1080×1080, 30 fps, 60.91 s (max 90 s)"
+   "detail": "1080×1080, 30 fps, 61.1 s (max 90 s)"
   },
   {
    "name": "sound: no sound effects (no >5 kHz noise > 0.5 s without speech)",
@@ -44,13 +44,13 @@
   },
   {
    "name": "sound: no silence > 1.5 s mid-video",
-   "ok": true,
-   "detail": "longest pause 1.30 s"
+   "ok": false,
+   "detail": "2.3 s outside holds, at 53.8 s"
   },
   {
    "name": "picture: product shots inside the safe area",
    "ok": true,
-   "detail": "1139 frames with a product shot, all inside"
+   "detail": "1056 frames with a product shot, all inside"
   },
   {
    "name": "picture: no blue (≤ 2% of pixels, screenshots excluded)",
@@ -59,13 +59,13 @@
   },
   {
    "name": "brand: every mention heard as one word",
-   "ok": true,
-   "detail": "no mentions"
+   "ok": false,
+   "detail": "9.73 s \"(not heard: scan)\"; 54.89 s \"(not heard: Recur)\""
   },
   {
    "name": "product shots: each ≥ 4 s, callout ≥ 3 s",
    "ok": true,
-   "detail": "4 shots; shortest 6.6 s, shortest callout 6.0 s"
+   "detail": "4 shots; shortest 6.7 s, shortest callout 6.1 s"
   },
   {
    "name": "callouts: no edge through a word, not empty (≤ 70% flat)",
@@ -85,20 +85,31 @@
   {
    "name": "sound: closing music after the last line < −20 LUFS",
    "ok": true,
-   "detail": "-27.5 LUFS over the last 3.0 s"
+   "detail": "-27.8 LUFS over the last 3.0 s"
   }
  ],
  "lufs": -14,
- "truePeak": -2.6,
- "duration": 60.91,
+ "truePeak": -2.8,
+ "duration": 61.1,
  "sfx": "none",
- "longestSilence": 1.3,
- "longestHold": 1.3,
- "shortestShot": 6.58,
- "shortestCallout": 5.98,
+ "longestSilence": 2.3,
+ "longestHold": 2.3,
+ "shortestShot": 6.67,
+ "shortestCallout": 6.07,
  "calloutResult": "PASS: 4 callouts, no word cut, emptiest 59% flat tiles, 1.35–2.20× the page",
- "tailLufs": -27.5,
+ "tailLufs": -27.8,
  "sheet": "video/qa/employer-square-en-sheet.jpg",
- "brand": [],
- "at": "2026-11-19T08:43:24.100Z"
+ "brand": [
+  {
+   "line": 1,
+   "t": 9.73,
+   "dur": 0.87
+  },
+  {
+   "line": 6,
+   "t": 54.89,
+   "dur": 0.87
+  }
+ ],
+ "at": "2026-11-19T08:55:27.091Z"
 }
