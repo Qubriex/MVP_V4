@@ -6,7 +6,7 @@ Brand: each mention cut out and transcribed alone (the transcriber is not told t
 
 | File | New length | Brand, as heard per mention | Shortest product shot | Callout QA | QA result |
 |---|---|---|---|---|---|
-| `out/employer-square-en.mp4` | 61.1 s | 9.73 s: Qubirex<br>54.89 s: QBRX | 6.67 s | PASS: 4 callouts, no word cut, emptiest 59% flat tiles, 1.35–2.20× the page | PASS |
+| `out/employer-square-en.mp4` | 61.07 s | 9.73 s: Qubirex<br>54.86 s: Qubirex | 6.67 s | PASS: 4 callouts, no word cut, emptiest 59% flat tiles, 1.35–2.20× the page | PASS |
 | `out/institution-60s-en.mp4` | 52.6 s | 5.98 s: Qubirex<br>47.19 s: Qubirex | 6.88 s | PASS: 4 callouts, no word cut, emptiest 56% flat tiles, 1.73–1.92× the page | PASS |
 | `out/institution-full-en.mp4` | 99.01 s | 20.76 s: Qubirex<br>92.99 s: Qubirex | 5.69 s | PASS: 7 callouts, no word cut, emptiest 64% flat tiles, 1.73–2.20× the page | PASS |
 | `out/student-explainer-te.mp4` | 70.6 s | 15.87 s: క్యూబ్రిక్స్<br>62.99 s: Qubrix | 8.49 s | PASS: 6 callouts, no word cut, emptiest 64% flat tiles, 1.89–2.20× the page | PASS |
@@ -19,7 +19,7 @@ One line per video. Longest silence is the longest pause in the voice mid-video,
 |---|---|---|---|---|---|---|---|
 | `out/employer-full-en.mp4` | — | 86.51 s | — | — | PASS | -16.3 LUFS (TP -2.5) |  |
 | `out/employer-full-te.mp4` | — | 87.11 s | — | — | PASS | -16.4 LUFS (TP -2.6) | Telugu voice not yet native-reviewed; English text on screen |
-| `out/employer-square-en.mp4` | 34 s | 61.1 s | 1.3 s | none | PASS | -14 LUFS (TP -2.8) |  |
+| `out/employer-square-en.mp4` | 34 s | 61.07 s | 1.3 s | none | PASS | -14 LUFS (TP -2.5) |  |
 | `out/employer-square-te.mp4` | — | 87.11 s | — | — | PASS | -15 LUFS (TP -1.6) | Telugu voice not yet native-reviewed; English text on screen |
 | `out/institution-60s-en.mp4` | 25.47 s | 52.6 s | 1.3 s | none | PASS | -16 LUFS (TP -2.8) |  |
 | `out/institution-60s-te.mp4` | — | 59.2 s | — | — | PASS | -16.1 LUFS (TP -2.2) | Telugu voice not yet native-reviewed; English text on screen |
