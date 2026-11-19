@@ -1,0 +1,146 @@
+{
+ "sentence": "Meet <brand>. With <brand>, every student learns to code in their own language.",
+ "pick": "Cue-bi-rex",
+ "results": [
+  {
+   "spelling": "Cube-bi-rex",
+   "oneWordAll": true,
+   "meanDistance": 0.33,
+   "tries": [
+    {
+     "file": "qa/brand-tests/1-Cube-bi-rex-1.wav",
+     "heard": "Meet Cubirex. With Cubirex, every student learns to code in their own language.",
+     "brand": "Cubirex",
+     "words": 1,
+     "distance": 1
+    },
+    {
+     "file": "qa/brand-tests/1-Cube-bi-rex-2.wav",
+     "heard": "Meet Qubirex. With Qubirex, every student learns to code in their own language.",
+     "brand": "Qubirex",
+     "words": 1,
+     "distance": 0
+    },
+    {
+     "file": "qa/brand-tests/1-Cube-bi-rex-3.wav",
+     "heard": "Meet Qubirex. With Qubirex, every student learns to code in their own language.",
+     "brand": "Qubirex",
+     "words": 1,
+     "distance": 0
+    }
+   ]
+  },
+  {
+   "spelling": "Kyoo-bih-rex",
+   "oneWordAll": true,
+   "meanDistance": 1.33,
+   "tries": [
+    {
+     "file": "qa/brand-tests/2-Kyoo-bih-rex-1.wav",
+     "heard": "Meet Qubirex. With Qubirex, every student learns to code in their own language.",
+     "brand": "Qubirex",
+     "words": 1,
+     "distance": 0
+    },
+    {
+     "file": "qa/brand-tests/2-Kyoo-bih-rex-2.wav",
+     "heard": "Meet Cuborex. With Cuborex, every student learns to code in their own language.",
+     "brand": "Cuborex",
+     "words": 1,
+     "distance": 2
+    },
+    {
+     "file": "qa/brand-tests/2-Kyoo-bih-rex-3.wav",
+     "heard": "Meet Cuberex. With Cuberex, every student learns to code in their own language.",
+     "brand": "Cuberex",
+     "words": 1,
+     "distance": 2
+    }
+   ]
+  },
+  {
+   "spelling": "Kyoobirex",
+   "oneWordAll": true,
+   "meanDistance": 1,
+   "tries": [
+    {
+     "file": "qa/brand-tests/3-Kyoobirex-1.wav",
+     "heard": "Meet Qubirex. With Qubirex, every student learns to code in their own language.",
+     "brand": "Qubirex",
+     "words": 1,
+     "distance": 0
+    },
+    {
+     "file": "qa/brand-tests/3-Kyoobirex-2.wav",
+     "heard": "Meet Cubirex. With Cubirex, every student learns to code in their own language.",
+     "brand": "Cubirex",
+     "words": 1,
+     "distance": 1
+    },
+    {
+     "file": "qa/brand-tests/3-Kyoobirex-3.wav",
+     "heard": "Meet Cuberex. With Cuberex, every student learns to code in their own language.",
+     "brand": "Cuberex",
+     "words": 1,
+     "distance": 2
+    }
+   ]
+  },
+  {
+   "spelling": "Cue-bi-rex",
+   "oneWordAll": true,
+   "meanDistance": 0,
+   "tries": [
+    {
+     "file": "qa/brand-tests/4-Cue-bi-rex-1.wav",
+     "heard": "Meet Qubirex. With Qubirex, every student learns to code in their own language.",
+     "brand": "Qubirex",
+     "words": 1,
+     "distance": 0
+    },
+    {
+     "file": "qa/brand-tests/4-Cue-bi-rex-2.wav",
+     "heard": "Meet Qubirex. With Qubirex, every student learns to code in their own language.",
+     "brand": "Qubirex",
+     "words": 1,
+     "distance": 0
+    },
+    {
+     "file": "qa/brand-tests/4-Cue-bi-rex-3.wav",
+     "heard": "Meet Qubirex. With Qubirex, every student learns to code in their own language.",
+     "brand": "Qubirex",
+     "words": 1,
+     "distance": 0
+    }
+   ]
+  },
+  {
+   "spelling": "ˈkjuːbɪrɛks",
+   "oneWordAll": true,
+   "meanDistance": 1.33,
+   "tries": [
+    {
+     "file": "qa/brand-tests/5-kju-b-r-ks-1.wav",
+     "heard": "Meet CubeRex. With CubeRex, every student learns to code in their own language.",
+     "brand": "CubeRex",
+     "words": 1,
+     "distance": 2
+    },
+    {
+     "file": "qa/brand-tests/5-kju-b-r-ks-2.wav",
+     "heard": "Meet Qubirex. With Qubirex, every student learns to code in their own language.",
+     "brand": "Qubirex",
+     "words": 1,
+     "distance": 0
+    },
+    {
+     "file": "qa/brand-tests/5-kju-b-r-ks-3.wav",
+     "heard": "Meet Cuberex. With Cuberex, every student learns to code in their own language.",
+     "brand": "Cuberex",
+     "words": 1,
+     "distance": 2
+    }
+   ]
+  }
+ ]
+}
