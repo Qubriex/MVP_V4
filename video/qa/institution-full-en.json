@@ -15,7 +15,7 @@
   {
    "name": "voice: \"Qubirex\" said one way",
    "ok": true,
-   "detail": "0 mentions at —; not spliced; the transcript wrote it as: qb rex"
+   "detail": "2 mentions at 20.9 s, 93.2 s; every mention is the same recorded clip; the transcript wrote it as: qb rex"
   },
   {
    "name": "text: one title at a time",
@@ -30,12 +30,12 @@
   {
    "name": "loudness: -16 LUFS ±1, true peak ≤ −1 dBTP",
    "ok": true,
-   "detail": "-16 LUFS, true peak -3.5 dBTP"
+   "detail": "-16 LUFS, true peak -3.4 dBTP"
   },
   {
    "name": "format: size, 30 fps, length",
    "ok": true,
-   "detail": "1920×1080, 30 fps, 98.83 s (max 150 s; shorter than the kit's 119 s because dead air was removed)"
+   "detail": "1920×1080, 30 fps, 99.23 s (max 150 s; shorter than the kit's 119 s because dead air was removed)"
   },
   {
    "name": "sound: no sound effects (no >5 kHz noise > 0.5 s without speech)",
@@ -45,12 +45,12 @@
   {
    "name": "sound: no silence > 1.5 s mid-video",
    "ok": true,
-   "detail": "longest pause 1.40 s"
+   "detail": "longest pause 1.50 s"
   },
   {
    "name": "picture: product shots inside the safe area",
    "ok": true,
-   "detail": "1921 frames with a product shot, all inside"
+   "detail": "1934 frames with a product shot, all inside"
   },
   {
    "name": "picture: no blue (≤ 2% of pixels, screenshots excluded)",
@@ -60,12 +60,12 @@
   {
    "name": "brand: every mention heard as one word",
    "ok": false,
-   "detail": "no mentions; full transcript has \"QB Rex\""
+   "detail": "20.91 s \"Qubirex\"; 93.17 s \"QBRX\"; full transcript has \"QB Rex\""
   },
   {
    "name": "product shots: each ≥ 4 s, callout ≥ 3 s",
    "ok": true,
-   "detail": "7 shots; shortest 5.7 s, shortest callout 5.0 s"
+   "detail": "7 shots; shortest 5.7 s, shortest callout 5.1 s"
   },
   {
    "name": "callouts: no edge through a word, not empty (≤ 70% flat)",
@@ -79,26 +79,37 @@
   },
   {
    "name": "sound: no clicks or pops (isolated bursts)",
-   "ok": true,
-   "detail": "none"
+   "ok": false,
+   "detail": "69.56 s (-13.9 dB)"
   },
   {
    "name": "sound: closing music after the last line < −20 LUFS",
    "ok": true,
-   "detail": "-32 LUFS over the last 3.0 s"
+   "detail": "-31.6 LUFS over the last 3.0 s"
   }
  ],
  "lufs": -16,
- "truePeak": -3.5,
- "duration": 98.83,
+ "truePeak": -3.4,
+ "duration": 99.23,
  "sfx": "none",
- "longestSilence": 1.4,
- "longestHold": 1.4,
- "shortestShot": 5.65,
- "shortestCallout": 5.05,
+ "longestSilence": 1.5,
+ "longestHold": 1.5,
+ "shortestShot": 5.68,
+ "shortestCallout": 5.08,
  "calloutResult": "PASS: 7 callouts, no word cut, emptiest 64% flat tiles, 1.73–2.20× the page",
- "tailLufs": -32,
+ "tailLufs": -31.6,
  "sheet": "video/qa/institution-full-en-sheet.jpg",
- "brand": [],
- "at": "2026-11-19T08:48:25.542Z"
+ "brand": [
+  {
+   "line": 2,
+   "t": 20.91,
+   "dur": 0.87
+  },
+  {
+   "line": 10,
+   "t": 93.17,
+   "dur": 0.87
+  }
+ ],
+ "at": "2026-11-19T09:02:17.304Z"
 }

@@ -115,3 +115,8 @@ export function trimTailBurst(pcm) {
   return { pcm: out, cut: tail || bs[0], all: bs };
 }
 export const exists = (f) => fs.existsSync(f);
+/** Scene boundaries at the quietest 10 ms near each aligned start (−0.3 to +0.1 s), so no word is split between scenes. */
+export function snapStarts(pcm, starts) {
+  const L = levels(pcm, 0.01);
+  return starts.map((s, i) => { if (i === 0) return s; let best = s; let lo = Infinity; for (let t = s - 0.3; t <= s + 0.1; t += 0.01) { const k = Math.round(t / 0.01); if (k >= 0 && k < L.length && L[k] < lo) { lo = L[k]; best = t; } } return +best.toFixed(3); });
+}

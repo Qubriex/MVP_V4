@@ -19,7 +19,7 @@ import { pathToFileURL, fileURLToPath } from 'url';
 import { execFileSync, spawnSync } from 'child_process';
 import { spoken, website, FILL } from './lib/facts.mjs';
 import { loadScript } from './lib/parse-script.mjs';
-import { readPcm, writeWav, edit, seconds, RATE, trimTailBurst, bursts } from './lib/audio.mjs';
+import { readPcm, writeWav, edit, seconds, RATE, trimTailBurst, bursts, snapStarts } from './lib/audio.mjs';
 import { writeSrt, writeScript } from './lib/captions.mjs';
 import { runQa, report, QA_DIR, OUT_DIR } from './qa.mjs';
 
@@ -226,7 +226,7 @@ const fitPads = voiced.map((v, k) => { const s = scenes[v.i]; const d = (k + 1 <
 // Revision 2: every English mention is the same approved clip, "Cue-bi-rex" from
 // the brand test (heard as "Qubirex" 3 of 3), cut at the video's 0.95 speed.
 const refClip = LANG === 'en' ? readPcm(path.join(VDIR, layout.brandRef || 'assets/voice/qubirex-en.wav')) : null;
-const E = edit(rawPcm, timing.starts, { pads: fitPads, overrides, brand: timing.brand, refClip });
+const E = edit(rawPcm, snapStarts(rawPcm, timing.starts), { pads: fitPads, overrides, brand: timing.brand, refClip });
 if (E.reference) writeWav(path.join(QA_DIR, `${ID}-brand.wav`), E.reference);
 // Interleave silent scenes (timer, founder footage, open blanks) with a hold.
 const pcmParts = []; const sceneStart = []; const sceneVoice = []; let t0 = LEAD; let k = 0;
@@ -243,7 +243,8 @@ scenes.forEach((s, i) => {
 const pcm = new Float32Array(pcmParts.reduce((a, x) => a + x.length, 0)); { let o = 0; pcmParts.forEach(x => { pcm.set(x, o); o += x.length; }); }
 const voFinal = path.join(WORK, 'voice-final.wav'); writeWav(voFinal, pcm);
 let heardFinal = heard;
-if (overrides.some(Boolean)) { const tf = path.join(WORK, 'transcript-final.json'); if (!fs.existsSync(tf) || process.env.REDO) fs.writeFileSync(tf, JSON.stringify({ heard: await transcribe(voFinal) })); heardFinal = JSON.parse(fs.readFileSync(tf, 'utf8')).heard; console.log(`final voice heard: ${heardFinal}`); }
+// The final voice (brand clip spliced in) is transcribed again, so the voice checks hear what ships.
+if (overrides.some(Boolean) || E.reference) { const tf = path.join(WORK, 'transcript-final.json'); const tkey = `${fs.statSync(voFinal).size}`; if (!fs.existsSync(tf) || process.env.REDO || JSON.parse(fs.readFileSync(tf, 'utf8')).key !== tkey) fs.writeFileSync(tf, JSON.stringify({ key: `${fs.statSync(voFinal).size}`, heard: await transcribe(voFinal) })); heardFinal = JSON.parse(fs.readFileSync(tf, 'utf8')).heard; console.log(`final voice heard: ${heardFinal}`); }
 const total = t0 + TAIL;
 console.log(`scene starts: ${sceneStart.map((x, i) => `${scenes[i].n}@${x.toFixed(1)}`).join(' ')}`);
 console.log(`${ID}: ${scenes.length} scenes, voice ${seconds(pcm).toFixed(1)} s → video ${total.toFixed(1)} s · ${brand.length} brand mentions${E.reference ? ', one clip' : ''}`);
