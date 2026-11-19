@@ -294,14 +294,14 @@
   "shortestShot": 8.49,
   "calloutResult": "PASS: 6 callouts, no word cut, emptiest 64% flat tiles, 1.89–2.20× the page",
   "key": "student-explainer-te",
-  "file": "out/student-explainer-te-DRAFT.mp4",
+  "file": "out/student-explainer-te.mp4",
   "duration": 70.6,
   "lufs": -16,
   "truePeak": -6,
   "engine": "Gemini TTS gemini-3.8-flash-tts (te-IN; Professor: Kore); Chirp 3 HD not reachable with API keys",
   "pass": true,
   "failed": [],
-  "notes": "Telugu voice and on-screen text are Claude drafts ([TE pending]: no native sign-off yet)",
+  "notes": "Telugu voice not yet native-reviewed; English text on screen",
   "oldDuration": 44.32
  },
  "student-reel-3-en-nocaptions": {

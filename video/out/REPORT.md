@@ -9,7 +9,7 @@ Brand: each mention cut out and transcribed alone (the transcriber is not told t
 | `qa/failed/employer-square-en.mp4` | 61.1 s | 9.73 s: (not heard: scan)<br>54.89 s: (not heard: Recur) | 6.67 s | PASS: 4 callouts, no word cut, emptiest 59% flat tiles, 1.35–2.20× the page | FAIL: sound: no silence > 1.5 s mid-video (2.3 s outside holds, at 53.8 s); brand: every mention heard as one word (9.73 s "(not heard: scan)"; 54.89 s "(not heard: Recur)") |
 | `qa/failed/institution-60s-en.mp4` | 47.91 s | — | 4.3 s | PASS: 4 callouts, no word cut, emptiest 56% flat tiles, 1.73–1.96× the page | FAIL: sound: no silence > 1.5 s mid-video (1.6 s outside holds, at 33.3 s); picture: product shots inside the safe area (110 frames, first at 31.13 s: box 399,220,1521,958 / 93,158,1827,509) |
 | `qa/failed/institution-full-en.mp4` | 98.83 s | — | 5.65 s | PASS: 7 callouts, no word cut, emptiest 64% flat tiles, 1.73–2.20× the page | FAIL: brand: every mention heard as one word (no mentions; full transcript has "QB Rex") |
-| `out/student-explainer-te-DRAFT.mp4` | 70.6 s | 15.87 s: క్యూబ్రిక్స్<br>62.99 s: Qubrix | 8.49 s | PASS: 6 callouts, no word cut, emptiest 64% flat tiles, 1.89–2.20× the page | PASS |
+| `out/student-explainer-te.mp4` | 70.6 s | 15.87 s: క్యూబ్రిక్స్<br>62.99 s: Qubrix | 8.49 s | PASS: 6 callouts, no word cut, emptiest 64% flat tiles, 1.89–2.20× the page | PASS |
 
 ## All videos
 
@@ -31,7 +31,7 @@ One line per video. Longest silence is the longest pause in the voice mid-video,
 | `out/pitch-60s-en-DRAFT.mp4` | — | 53.04 s | — | — | PASS | -16.1 LUFS (TP -2.3) | blanks: [website] |
 | `out/pitch-60s-te-DRAFT.mp4` | — | 54.67 s | — | — | PASS | -16 LUFS (TP -3.6) | blanks: [website]; native-speaker check of the Telugu lines (⚠ quote, line 7), then a new voice-over with the agreed brand pronunciation |
 | `out/student-explainer-en.mp4` | — | 86.2 s | — | — | PASS | -16.3 LUFS (TP -2.4) |  |
-| `out/student-explainer-te-DRAFT.mp4` | 44.32 s | 70.6 s | 1.45 s | none | PASS | -16 LUFS (TP -6) | Telugu voice and on-screen text are Claude drafts ([TE pending]: no native sign-off yet) |
+| `out/student-explainer-te.mp4` | 44.32 s | 70.6 s | 1.45 s | none | PASS | -16 LUFS (TP -6) | Telugu voice not yet native-reviewed; English text on screen |
 | `out/student-reel-1-en.mp4` | 37.57 s | 29.47 s | 0.8 s | none | PASS | -14.3 LUFS (TP -2.8) |  |
 | `out/student-reel-1-en-nocaptions.mp4` | — | 37.57 s | — | — | PASS | -14.9 LUFS (TP -2.2) |  |
 | `out/student-reel-1-te.mp4` | 39.27 s | 38.4 s | 1.25 s | none | PASS | -14.1 LUFS (TP -2.8) | Telugu voice not yet native-reviewed; English text on screen |
