@@ -65,7 +65,7 @@ export function numbersIn(text) {
 const telugu = (s) => /[\u0C00-\u0C7F]/.test(s);
 function englishOnly(text) {
   if (telugu(text) || /[\u0900-\u097F]/.test(text)) return false;
-  const words = text.toLowerCase().replace(/\[fill:[^\]]*\]|\[website\]/g, ' ').match(/[a-z][a-z0-9']*/g) || [];
+  const words = text.toLowerCase().replace(/\[fill:[^\]]*\]|\[website\]|\[te pending\]/g, ' ').replace(/\b[\w-]+(\.[\w-]+)+\.(app|com|in|org|ai)\b/g, ' ').replace(/\+?\d[\d\s-]{7,}\d/g, ' ').match(/[a-z][a-z0-9']*/g) || [];
   return words.some(w => w.length > 1 && !ALLOW.has(w.replace(/'s$/, ''))); // single letters (journey A–D) are not words
 }
 
@@ -210,6 +210,35 @@ export function runQa(o) {
     add('picture: no blue (≤ 2% of pixels, screenshots excluded)', worst <= 0.02, `worst frame ${(worst * 100).toFixed(2)}% at ${worstT.toFixed(1)} s`);
   }
 
+  // 8. Revision 2: brand per mention, product-shot holds, callouts, captions, clicks, the closing sting.
+  if (o.brandHeard) {
+    const split = o.brandHeard.filter(m => m.words !== 1);
+    const SPLIT = /\b(?:q\.?\s?b|cube|cue|kyu|queue|cu)\s+(?:by|be|bi|bee)?\s*(?:rex|tracks|trax|tracs|recs|wrecks|x)\b/i;
+    const whole = SPLIT.exec(o.heard);
+    add('brand: every mention heard as one word', split.length === 0 && !whole, `${o.brandHeard.map(m => `${m.t} s "${m.token || '?'}"`).join('; ') || 'no mentions'}${whole ? `; full transcript has "${whole[0]}"` : ''}`);
+  }
+  if (o.shots && o.shots.length) {
+    const minHold = Math.min(...o.shots.map(x => x.hold)); const minCall = Math.min(...o.shots.map(x => x.callout));
+    extra.shortestShot = +minHold.toFixed(2); extra.shortestCallout = +minCall.toFixed(2);
+    add('product shots: each ≥ 4 s, callout ≥ 3 s', minHold >= 4 && minCall >= 3, `${o.shots.length} shots; shortest ${minHold.toFixed(1)} s, shortest callout ${minCall.toFixed(1)} s`);
+    const bad = o.shots.filter(x => !x.ok);
+    const mags = o.frames.flatMap(f => (f.calls || []).map(c => c[4])).filter(Boolean);
+    const minMag = mags.length ? Math.min(...mags) : null;
+    extra.calloutResult = bad.length ? `FAIL: ${bad.map(x => `${x.key}/${x.call}${x.cut.length ? ` cuts "${x.cut.slice(0, 3).join(' ')}"` : ''}${x.flat > 0.7 ? ` ${(x.flat * 100).toFixed(0)}% flat` : ''}`).join('; ')}` : `PASS: ${o.shots.length} callouts, no word cut, emptiest ${(Math.max(...o.shots.map(x => x.flat)) * 100).toFixed(0)}% flat tiles${minMag ? `, ${minMag.toFixed(2)}–${Math.max(...mags).toFixed(2)}× the page` : ''}`;
+    add('callouts: no edge through a word, not empty (≤ 70% flat)', bad.length === 0, extra.calloutResult);
+  }
+  {
+    const hit = o.frames.find(f => f.cap && (f.calls || []).some(([l, t, r, b]) => l < f.cap[2] && r > f.cap[0] && t < f.cap[3] && b > f.cap[1]));
+    add('captions never over a callout', !hit, hit ? `overlap at ${hit.t.toFixed(2)} s` : 'no overlap');
+  }
+  if (o.clicks) add('sound: no clicks or pops (isolated bursts)', o.clicks.length === 0, o.clicks.length ? o.clicks.map(c => `${c.t} s (${c.db} dB)`).join(', ') : 'none');
+  if (o.tailFrom != null) {
+    const r = spawnSync('ffmpeg', ['-hide_banner', '-nostats', '-ss', String(Math.max(0, o.tailFrom)), '-i', o.file, '-af', 'ebur128', '-f', 'null', '-'], { encoding: 'utf8' }).stderr;
+    const I = Number((/I:\s+(-?[\d.]+) LUFS/.exec(r.slice(r.lastIndexOf('Summary'))) || [])[1]);
+    extra.tailLufs = Number.isFinite(I) ? I : null;
+    add('sound: closing music after the last line < −20 LUFS', !Number.isFinite(I) || I < -20, Number.isFinite(I) ? `${I} LUFS over the last ${(P.duration - o.tailFrom).toFixed(1)} s` : 'too short to measure');
+  }
+
   // 6. Contact sheet.
   const n = Math.ceil(P.duration / 2); const cols = 6; const rows = Math.ceil(n / cols);
   const sheet = path.join(QA_DIR, `${o.name}-sheet.jpg`);
@@ -230,5 +259,7 @@ export function report(entry) {
   fs.writeFileSync(reg, JSON.stringify(all, null, 1));
   const rows = Object.values(all).sort((a, b) => a.key.localeCompare(b.key)).map(e => `| \`${e.file}\` | ${e.oldDuration != null ? `${e.oldDuration} s` : '—'} | ${e.duration} s | ${e.longestSilence != null ? `${e.longestSilence} s` : '—'} | ${e.sfx ?? '—'} | ${e.pass ? 'PASS' : 'FAIL'}${e.failed.length ? `: ${e.failed.join('; ')}` : ''} | ${e.lufs} LUFS (TP ${e.truePeak}) | ${e.notes || ''} |`);
   fs.mkdirSync(OUT_DIR, { recursive: true });
-  fs.writeFileSync(path.join(OUT_DIR, 'REPORT.md'), `# Video report\n\nOne line per video. Longest silence is the longest pause in the voice mid-video, outside the declared code-card and timer holds. SFX found lists any noise above 5 kHz lasting over 0.5 s with no speech. QA details and contact sheets: \`video/qa/\`.\n\n| File | Old length | New length | Longest silence | SFX found | QA result | Loudness | Notes |\n|---|---|---|---|---|---|---|---|\n${rows.join('\n')}\n`);
+  const r2 = Object.values(all).filter(e => e.revision === 2).sort((a, b) => a.key.localeCompare(b.key)).map(e => `| \`${e.file}\` | ${e.duration} s | ${(e.brandHeard || []).join('<br>') || '—'} | ${e.shortestShot != null ? `${e.shortestShot} s` : '—'} | ${e.calloutResult || '—'} | ${e.pass ? 'PASS' : 'FAIL'}${e.failed.length ? `: ${e.failed.join('; ')}` : ''} |`);
+  const rev2 = r2.length ? `## Revision 2 (19 Nov 2026)\n\nBrand: each mention cut out and transcribed alone (the transcriber is not told the name); one word passes. Shortest shot: the shortest time any product screen stays up (its callout shows from 0.6 s). Callout QA: no callout edge cuts through a word, and no callout is more than 70% flat tiles (empty).\n\n| File | New length | Brand, as heard per mention | Shortest product shot | Callout QA | QA result |\n|---|---|---|---|---|---|\n${r2.join('\n')}\n\n## All videos\n\n` : '';
+  fs.writeFileSync(path.join(OUT_DIR, 'REPORT.md'), `# Video report\n\n${rev2}One line per video. Longest silence is the longest pause in the voice mid-video, outside the declared code-card and timer holds. SFX found lists any noise above 5 kHz lasting over 0.5 s with no speech. QA details and contact sheets: \`video/qa/\`.\n\n| File | Old length | New length | Longest silence | SFX found | QA result | Loudness | Notes |\n|---|---|---|---|---|---|---|---|\n${rows.join('\n')}\n`);
 }

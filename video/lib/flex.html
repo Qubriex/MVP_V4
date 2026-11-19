@@ -45,6 +45,8 @@ const F = (s) => String(s ?? '').replace(/\[(FILL:[^\]]*|website)\]/g, (m) => `<
 // Safe area: 9:16 → middle 80% width, y from 12% to 80%; 1:1 → 6% margins.
 const TALL = H > W * 1.2;
 const SAFE = TALL ? { x: W * .1, y: H * .12, w: W * .8, h: H * (CAPS.length ? .58 : .68) } : { x: W * .06, y: H * .06, w: W * .88, h: H * .88 - (CAPS.length ? H * .12 : 0) };
+// Where burned-in captions start: callouts stay above this line.
+const CAP_TOP = TALL ? H * .8 - captionSize * U * 2.9 : H * .94 - captionSize * U * 2.8;
 const box = (el) => Object.assign(el.style, { left: `${SAFE.x}px`, top: `${SAFE.y}px`, width: `${SAFE.w}px`, height: `${SAFE.h}px` });
 let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
 const BGS = {
@@ -90,41 +92,63 @@ B.code = (el, b) => {
 // the area being talked about, and a 2x callout of that area sits below it,
 // joined by a thin line.
 B.shot = (el, b) => {
+  // The full page (never cropped), then the page dims, the measured element
+  // gets an orange outline, and a callout shows exactly that element (its box
+  // from the recorder, 16 px padding) at up to 2.2× the page. 9:16: page in
+  // the top half, callout below. 1:1: a bigger page, the callout floating over
+  // it, above or below the outlined element. Callouts stay above the captions.
+  // Each shot brings its own title lines.
   const IW = 1440, IH = 900;
-  const pw = TALL ? W * .88 : W * .6; const ph = pw * IH / IW; const bar = 30 * U;
-  const lineH = (b.lines || []).length ? 150 * U : 0;
-  const top = TALL ? SAFE.y : SAFE.y;
+  const pw = TALL ? W * .88 : W * .8; const ph = pw * IH / IW; const bar = 30 * U;
+  const lineH = b.shots.some(x => (x.lines || b.lines || []).length) ? 150 * U : 0;
+  const top = SAFE.y;
   const px = (W - pw) / 2; const py = top + lineH + 20 * U + bar;
-  const cw = TALL ? W * .88 : W * .88; const cy = py + ph + 40 * U;
-  const ch = Math.max(160 * U, (TALL ? SAFE.y + SAFE.h : SAFE.y + SAFE.h) - cy);
-  const cx = (W - cw) / 2;
-  el.innerHTML = `<div style="position:absolute;left:${SAFE.x}px;top:${top}px;width:${SAFE.w}px;text-align:center">${(b.lines || []).map((l, i) => `<div class="${i ? 'lab' : 'mid'} d" data-i>${F(l)}</div>`).join('')}</div>
+  const s0 = pw / IW;
+  const floorY = CAPS.length ? CAP_TOP - 24 * U : SAFE.y + SAFE.h;
+  el.innerHTML = `<div data-lines style="position:absolute;left:${SAFE.x}px;top:${top}px;width:${SAFE.w}px;text-align:center"></div>
     <div style="position:absolute;left:${px}px;top:${py - bar}px;width:${pw}px;height:${ph + bar}px;border-radius:${16 * U}px;background:#2a2421;box-shadow:0 30px 70px rgba(0,0,0,.45);overflow:hidden" data-qa-shot data-frame>
       <div style="height:${bar}px;display:flex;align-items:center;gap:${8 * U}px;padding-left:${14 * U}px"><i style="width:${10 * U}px;height:${10 * U}px;border-radius:50%;background:#E23B2D;display:block"></i><i style="width:${10 * U}px;height:${10 * U}px;border-radius:50%;background:#F26A21;display:block"></i><i style="width:${10 * U}px;height:${10 * U}px;border-radius:50%;background:#BEB4AC;display:block"></i><span style="margin-left:auto;margin-right:${12 * U}px;font-size:${18 * U}px;font-weight:700;letter-spacing:.08em;color:#FFD9B0">SAMPLE DATA</span></div>
-      <div style="position:relative;width:${pw}px;height:${ph}px;overflow:hidden;background:#fff"><img data-img style="position:absolute;left:0;top:0;width:${pw}px;height:${ph}px"><div data-hl style="position:absolute;border:${4 * U}px solid #F26A21;border-radius:${6 * U}px;box-shadow:0 0 0 3000px rgba(21,17,15,.65)"></div></div></div>
+      <div style="position:relative;width:${pw}px;height:${ph}px;overflow:hidden;background:#fff"><img data-img style="position:absolute;left:0;top:0;width:${pw}px;height:${ph}px"><div data-hl style="position:absolute;box-sizing:border-box;border:${4 * U}px solid #F26A21;border-radius:${6 * U}px;box-shadow:0 0 0 3000px rgba(21,17,15,.65)"></div></div></div>
     <svg style="position:absolute;left:0;top:0;overflow:visible" width="${W}" height="${H}"><line data-ln stroke="#F26A21" stroke-width="${3 * U}" stroke-dasharray="6 6"/></svg>
-    <div style="position:absolute;left:${cx}px;top:${cy}px;width:${cw}px;height:${ch}px;border-radius:${14 * U}px;border:${4 * U}px solid #F26A21;background:#fff;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.5)" data-qa-shot data-call><img data-cimg style="position:absolute;left:0;top:0;transform-origin:0 0"></div>`;
+    <div style="position:absolute;box-sizing:border-box;border-radius:${14 * U}px;border:${4 * U}px solid #F26A21;background:#fff;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.55)" data-qa-shot data-qa-call data-call><img data-cimg style="position:absolute;left:0;top:0;transform-origin:0 0"></div>`;
   const img = el.querySelector('[data-img]'); const cimg = el.querySelector('[data-cimg]'); const hl = el.querySelector('[data-hl]'); const ln = el.querySelector('[data-ln]');
-  const frame = el.querySelector('[data-frame]'); const call = el.querySelector('[data-call]'); const items = [...el.querySelectorAll('[data-i]')];
-  const s0 = pw / IW; const M = 2.0;
+  const frame = el.querySelector('[data-frame]'); const call = el.querySelector('[data-call]'); const linesEl = el.querySelector('[data-lines]');
   return async (t) => {
-    items.forEach((x, i) => fade(x, t, b.start + .05 + i * .3));
-    const n = b.shots.length; const k = Math.min(n - 1, Math.floor((t - b.start) / ((b.end - b.start) / n))); const sh0 = b.shots[Math.max(0, k)];
-    const src = `${FOOTAGE}/${sh0.key}.png`;
+    const sh0 = b.shots.find(x => t >= x.start && t < x.end) || b.shots[t < b.shots[0].start ? 0 : b.shots.length - 1];
+    const L = sh0.lines || b.lines || []; const key = L.join('|');
+    if (linesEl.dataset.k !== key) { linesEl.innerHTML = L.map((l, i) => `<div class="${i ? 'lab' : 'mid'} d" data-i>${F(l)}</div>`).join(''); linesEl.dataset.k = key; }
+    [...linesEl.children].forEach((x, i) => fade(x, t, sh0.start + .05 + i * .3));
+    const src = `${FOOTAGE}/${sh0.still || `${sh0.key}.png`}`;
     if (img.getAttribute('src') !== src) { img.src = src; cimg.src = src; await Promise.all([img.decode().catch(() => {}), cimg.decode().catch(() => {})]); }
-    const local = t - (b.start + Math.max(0, k) * (b.end - b.start) / n);
+    const local = t - sh0.start;
     const enter = eo(p(t, b.start, b.start + .35)); vis(frame, enter);
-    const F0 = sh0.focus || [0.25, 0.25, 0.75, 0.75];
-    const cs = s0 * M * (1 + .04 * clamp(local / 5));
-    const sw = cw / cs; const shh = ch / cs;
-    const cxx = clamp((F0[0] + F0[2]) / 2 * IW, sw / 2, Math.max(sw / 2, IW - sw / 2)); const cyy = clamp((F0[1] + F0[3]) / 2 * IH, shh / 2, Math.max(shh / 2, IH - shh / 2));
-    const rx = cxx - sw / 2; const ry = cyy - shh / 2;
-    Object.assign(hl.style, { left: `${rx * s0}px`, top: `${ry * s0}px`, width: `${sw * s0}px`, height: `${shh * s0}px` });
-    const on = eo(p(local, .8, 1.2)) * enter; vis(hl, on); vis(call, on); vis(ln, on);
-    cimg.style.width = `${IW}px`; cimg.style.height = `${IH}px`; cimg.style.transform = `translate(${-rx * cs}px, ${-ry * cs}px) scale(${cs})`;
-    ln.setAttribute('x1', px + (rx + sw / 2) * s0); ln.setAttribute('y1', py + (ry + shh) * s0); ln.setAttribute('x2', W / 2); ln.setAttribute('y2', cy);
+    const [fl, ft, fr, fb] = (sh0.focus || [0.25, 0.25, 0.75, 0.75]).map((v, i) => v * (i % 2 ? IH : IW));
+    const fw = fr - fl; const fh = fb - ft; const B = 4 * U;
+    const R = { l: px + fl * s0, t: py + ft * s0, r: px + fr * s0, b: py + fb * s0 };
+    let cs, cw, chh, cx, cyy;
+    if (TALL) {
+      const areaTop = py + ph + 36 * U;
+      cs = Math.min(2.2 * s0, (SAFE.w - 2 * B) / fw, (floorY - areaTop - 2 * B) / fh);
+      cw = fw * cs + 2 * B; chh = fh * cs + 2 * B; cx = (W - cw) / 2; cyy = areaTop + Math.max(0, (floorY - areaTop - chh) / 2);
+    } else {
+      const ceil = top + lineH; const room = Math.max(R.t - 20 * U - ceil, floorY - (R.b + 20 * U));
+      cs = Math.min(2.2 * s0, (SAFE.w - 2 * B) / fw, (Math.max(room, (floorY - ceil) * .55) - 2 * B) / fh);
+      cw = fw * cs + 2 * B; chh = fh * cs + 2 * B;
+      const below = floorY - (R.b + 20 * U); const above = R.t - 20 * U - ceil;
+      cyy = below >= chh ? R.b + 20 * U : above >= chh ? R.t - 20 * U - chh : (below >= above ? floorY - chh : ceil);
+      cyy = clamp(cyy, ceil, floorY - chh); cx = clamp((R.l + R.r) / 2 - cw / 2, SAFE.x, SAFE.x + SAFE.w - cw);
+    }
+    Object.assign(call.style, { left: `${cx}px`, top: `${cyy}px`, width: `${cw}px`, height: `${chh}px` }); call.dataset.mag = (cs / s0).toFixed(2);
+    Object.assign(hl.style, { left: `${fl * s0 - B}px`, top: `${ft * s0 - B}px`, width: `${fw * s0 + 2 * B}px`, height: `${fh * s0 + 2 * B}px` });
+    const on = eo(p(local, .6, .95)) * enter; vis(hl, on); vis(call, on); vis(ln, on);
+    cimg.style.width = `${IW}px`; cimg.style.height = `${IH}px`; cimg.style.transform = `translate(${-fl * cs}px, ${-ft * cs}px) scale(${cs})`;
+    const up = cyy + chh / 2 < (R.t + R.b) / 2;
+    ln.setAttribute('x1', (R.l + R.r) / 2); ln.setAttribute('y1', up ? R.t : R.b); ln.setAttribute('x2', clamp((R.l + R.r) / 2, cx + 20, cx + cw - 20)); ln.setAttribute('y2', up ? cyy + chh : cyy);
   };
 };
+// QA: the caption's box while it shows (callouts must not overlap it).
+window.qaCap = () => { const c = document.getElementById('cap'); if (!c || !c.textContent.trim() || Number(getComputedStyle(c).opacity) < .05 || getComputedStyle(c).visibility === 'hidden') return null; const k = c.firstElementChild || c; const r = k.getBoundingClientRect(); return r.width > 2 ? [r.left, r.top, r.right, r.bottom] : null; };
+window.qaCalls = () => [...document.querySelectorAll('.beat [data-qa-call]')].filter(e => getComputedStyle(e.closest('.beat')).visibility !== 'hidden' && Number(getComputedStyle(e).opacity) > .05).map(e => { const r = e.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom, Number(e.dataset.mag || 0)]; });
 window.qaBoxes = () => [...document.querySelectorAll('.beat [data-qa-shot]')].filter(e => getComputedStyle(e.closest('.beat')).visibility !== 'hidden' && Number(getComputedStyle(e).opacity) > .05).map(e => { const r = e.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom]; });
 // Split screen: the dense English lecture (top), then Professor Qubirex (bottom).
 B.split = (el, b) => {
@@ -165,7 +189,7 @@ B.end = (el, b) => {
 
 const built = BEATS.map((b) => { const el = document.createElement('div'); el.className = 'beat'; $('beats').appendChild(el); return { b, el, up: B[b.type](el, b) }; });
 const cap = $('cap');
-Object.assign(cap.style, { top: TALL ? `${H * .8 - captionSize * U * 2.9}px` : `${H * .94 - captionSize * U * 2.8}px`, padding: `0 ${W * (TALL ? .1 : .06)}px`, fontSize: `${captionSize * U}px` });
+Object.assign(cap.style, { top: `${CAP_TOP}px`, padding: `0 ${W * (TALL ? .1 : .06)}px`, fontSize: `${captionSize * U}px` });
 
 const QA_ID = new WeakMap(); let qaNext = 1;
 window.qaLayers = () => {

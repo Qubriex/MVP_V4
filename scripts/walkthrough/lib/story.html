@@ -88,6 +88,8 @@ const sectionAt = (t) => SECTIONS.filter(s => s.start <= t).pop() || SECTIONS[0]
 // ── Beat builders: each returns update(t, b) ──
 // On-screen words: English by default; a story can replace any of them (window.STORY.strings).
 const S = (k, d) => ((window.STORY.strings || {})[k] ?? d);
+// A Telugu file whose words have no native sign-off yet carries this tag (kit rule).
+if (window.STORY.tePending) addEventListener('DOMContentLoaded', () => { const t = document.createElement('div'); t.textContent = '[TE pending]'; t.dataset.qaSkip = '1'; Object.assign(t.style, { position: 'absolute', left: '110px', top: '60px', zIndex: 50, padding: '6px 14px', borderRadius: '10px', background: 'rgba(242,106,33,.9)', color: '#15110F', font: '700 22px Outfit, sans-serif', letterSpacing: '.04em' }); (document.getElementById('stage') || document.body).appendChild(t); });
 // [FILL: …] and [website] blanks render as visible orange placeholders.
 const F = (s) => String(s ?? '').replace(/\[(FILL:[^\]]*|website)\]/g, (m) => `<span class="fill">${m}</span>`);
 const SRC = (b) => (b.source ? `<div class="src">${S('source', 'Source:')} ${b.source}</div>` : '');
@@ -249,44 +251,53 @@ B.logo = (el, b) => {
   return (t) => { const a = b.start + (b.first ? 1.0 : 0); l.style.transform = `scale(${.55 + .45 * back(p(t, a, a + .6))})`; vis(l, eo(p(t, a, a + .25))); };
 };
 // A product screen: the whole Qubirex page, never cropped (rounded frame,
-// shadow, browser bar). After a moment the page dims to 35%, an orange
-// outline marks the area being talked about, and a 2x callout of that area
-// sits beside the page, joined by a thin line.
-const PAGE = { x: 116, y: 200, w: 1086 }; PAGE.h = PAGE.w * 900 / 1440;
-const CALL = { x: 1262, y: 380, w: 540, h: 420 }; // border included; room for the 1–2% scale of a beat fade
+// shadow, browser bar). 0.6 s in, the page dims, an orange outline marks the
+// element being talked about, and a callout shows exactly that element (its
+// box measured by the recorder, 16 px padding) at up to 2.2×, floating above
+// or below it, joined by a dashed line. The kicker sits top right.
+const PAGE = { x: 410, y: 262, w: 1100 }; PAGE.h = PAGE.w * 900 / 1440;
+const SAFE16 = { l: 110, t: 150, r: 1810, b: 1010 };
 B.device = (el, b) => {
   el.innerHTML = `<div class="abs" style="left:${PAGE.x}px;top:${PAGE.y - 36}px;width:${PAGE.w}px;height:${PAGE.h + 36}px;border-radius:18px;background:#2a2421;box-shadow:0 40px 90px rgba(0,0,0,.45);overflow:hidden" data-qa-shot data-frame>
-      <div style="height:36px;display:flex;align-items:center;gap:9px;padding-left:16px;background:#2a2421"><i style="width:12px;height:12px;border-radius:50%;background:#E23B2D;display:block"></i><i style="width:12px;height:12px;border-radius:50%;background:#F26A21;display:block"></i><i style="width:12px;height:12px;border-radius:50%;background:#BEB4AC;display:block"></i><span style="margin-left:auto;margin-right:14px;font-size:17px;font-weight:700;letter-spacing:.08em;color:#FFD9B0">${S('sample', 'SAMPLE DATA')}</span></div>
-      <div style="position:relative;width:${PAGE.w}px;height:${PAGE.h}px;overflow:hidden;background:#fff"><img data-img style="position:absolute;left:0;top:0;width:${PAGE.w}px;height:${PAGE.h}px"><div data-hl style="position:absolute;border:4px solid #F26A21;border-radius:8px;box-shadow:0 0 0 2000px rgba(21,17,15,.65)"></div></div></div>
+      <div style="height:36px;display:flex;align-items:center;gap:9px;padding-left:16px;background:#2a2421"><i style="width:12px;height:12px;border-radius:50%;background:#E23B2D;display:block"></i><i style="width:12px;height:12px;border-radius:50%;background:#F26A21;display:block"></i><i style="width:12px;height:12px;border-radius:50%;background:#BEB4AC;display:block"></i><span style="margin-left:auto;margin-right:14px;font-size:17px;font-weight:700;letter-spacing:${/[\u0C00-\u0C7F]/.test(S('sample', '')) ? 0 : '.08em'};color:#FFD9B0">${S('sample', 'SAMPLE DATA')}</span></div>
+      <div style="position:relative;width:${PAGE.w}px;height:${PAGE.h}px;overflow:hidden;background:#fff"><img data-img style="position:absolute;left:0;top:0;width:${PAGE.w}px;height:${PAGE.h}px"><div data-hl style="position:absolute;box-sizing:border-box;border:4px solid #F26A21;border-radius:8px;box-shadow:0 0 0 2000px rgba(21,17,15,.65)"></div></div></div>
     <svg class="abs" style="left:0;top:0;overflow:visible" width="1920" height="1080"><line data-ln stroke="#F26A21" stroke-width="3" stroke-dasharray="6 6"/></svg>
-    <div class="abs" style="left:${CALL.x}px;top:${CALL.y}px;width:${CALL.w}px;height:${CALL.h}px;box-sizing:border-box;border-radius:16px;border:4px solid #F26A21;background:#fff;overflow:hidden;box-shadow:0 30px 70px rgba(0,0,0,.5)" data-qa-shot data-call><img data-cimg style="position:absolute;left:0;top:0;transform-origin:0 0"></div>
-    <div class="kicker" style="left:${CALL.x}px;top:200px;width:${CALL.w}px"></div>`;
+    <div class="abs" style="box-sizing:border-box;border-radius:16px;border:4px solid #F26A21;background:#fff;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6)" data-qa-shot data-qa-call data-call><img data-cimg style="position:absolute;left:0;top:0;transform-origin:0 0"></div>
+    <div class="kicker" style="left:auto;right:110px;top:60px;width:760px;text-align:right"></div>`;
   const img = el.querySelector('[data-img]'); const cimg = el.querySelector('[data-cimg]'); const hl = el.querySelector('[data-hl]'); const ln = el.querySelector('[data-ln]');
   const frame = el.querySelector('[data-frame]'); const call = el.querySelector('[data-call]'); const kick = el.querySelector('.kicker');
-  const s0 = PAGE.w / 1440; const M = 2.0; // the callout is 2x the page
+  const s0 = PAGE.w / 1440; const BD = 4;
   return async (t) => {
-    const s = b.shots.find(x => t >= x.start && t < x.end) || b.shots[b.shots.length - 1];
+    const s = b.shots.find(x => t >= x.start && t < x.end) || b.shots[t < b.shots[0].start ? 0 : b.shots.length - 1];
     const src = `${FOOTAGE}/${s.still}`;
     if (img.getAttribute('src') !== src) { img.src = src; cimg.src = src; await Promise.all([img.decode().catch(() => {}), cimg.decode().catch(() => {})]); }
     const a = ENTER(b); const local = t - Math.max(s.start, a); const enter = eo(p(t, a, a + .4));
-    vis(frame, enter); frame.style.transform = `translateY(${(1 - enter) * 40}px)`;
-    // The source area of the callout: centred on the shot's focus, inside the page.
-    const F0 = s.focus || [0.25, 0.25, 0.75, 0.75];
-    const cs = s0 * M * (1 + .04 * clamp(local / 5)); // slow 4% push-in
-    const sw = CALL.w / cs; const sh = CALL.h / cs;
-    const cx = clamp((F0[0] + F0[2]) / 2 * 1440, sw / 2, 1440 - sw / 2); const cy = clamp((F0[1] + F0[3]) / 2 * 900, sh / 2, 900 - sh / 2);
-    const rx = cx - sw / 2; const ry = cy - sh / 2;
-    Object.assign(hl.style, { left: `${rx * s0}px`, top: `${ry * s0}px`, width: `${sw * s0}px`, height: `${sh * s0}px` });
-    const on = eo(p(local, .8, 1.2)) * enter; // full page first, then the highlight
+    vis(frame, enter); frame.style.transform = `translateY(${(1 - enter) * 30}px)`;
+    const [fl, ft, fr, fb] = (s.focus || [0.25, 0.25, 0.75, 0.75]).map((v, i) => v * (i % 2 ? 900 : 1440));
+    const fw = fr - fl; const fh = fb - ft;
+    // Region on screen, and room above / below it for the callout.
+    const R = { l: PAGE.x + fl * s0, t: PAGE.y + ft * s0, r: PAGE.x + fr * s0, b: PAGE.y + fb * s0 };
+    const below = SAFE16.b - (R.b + 24); const above = (R.t - 24) - SAFE16.t; const room = Math.max(below, above, 300);
+    const cs = Math.min(2.2 * s0, (SAFE16.r - SAFE16.l - 2 * BD) / fw, (Math.max(room, 420) - 2 * BD) / fh);
+    const cw = fw * cs + 2 * BD; const ch = fh * cs + 2 * BD;
+    let cy = below >= ch ? R.b + 24 : above >= ch ? R.t - 24 - ch : (below >= above ? SAFE16.b - ch : SAFE16.t);
+    cy = clamp(cy, SAFE16.t, SAFE16.b - ch);
+    const cx = clamp((R.l + R.r) / 2 - cw / 2, SAFE16.l, SAFE16.r - cw);
+    Object.assign(call.style, { left: `${cx}px`, top: `${cy}px`, width: `${cw}px`, height: `${ch}px` }); call.dataset.mag = (cs / s0).toFixed(2);
+    Object.assign(hl.style, { left: `${fl * s0 - BD}px`, top: `${ft * s0 - BD}px`, width: `${fw * s0 + 2 * BD}px`, height: `${fh * s0 + 2 * BD}px` });
+    const on = eo(p(local, .6, .95)) * enter; // full page first, then the callout
     vis(hl, on); vis(call, on); vis(ln, on);
     cimg.style.width = '1440px'; cimg.style.height = '900px';
-    cimg.style.transform = `translate(${-rx * cs}px, ${-ry * cs}px) scale(${cs})`;
-    ln.setAttribute('x1', PAGE.x + (rx + sw) * s0); ln.setAttribute('y1', PAGE.y + (ry + sh / 2) * s0); ln.setAttribute('x2', CALL.x); ln.setAttribute('y2', CALL.y + CALL.h / 2);
-    const kh = `<small>${s.kicker}</small>${s.title}`; if (kick.dataset.k !== kh) { kick.innerHTML = kh; kick.dataset.k = kh; }
+    cimg.style.transform = `translate(${-fl * cs}px, ${-ft * cs}px) scale(${cs})`;
+    const up = cy + ch / 2 < (R.t + R.b) / 2;
+    ln.setAttribute('x1', (R.l + R.r) / 2); ln.setAttribute('y1', up ? R.t : R.b); ln.setAttribute('x2', clamp((R.l + R.r) / 2, cx + 20, cx + cw - 20)); ln.setAttribute('y2', up ? cy + ch : cy);
+    const kh = `<small${/[\u0C00-\u0C7F]/.test(s.kicker) ? ' style="letter-spacing:0;text-transform:none"' : ''}>${s.kicker}</small>${s.title}`; if (kick.dataset.k !== kh) { kick.innerHTML = kh; kick.dataset.k = kh; }
     vis(kick, eo(p(local, 0, .3)) * enter);
   };
 };
 // QA: where every product screen sits in this frame (it must stay inside the safe area).
+window.qaCalls = () => [...document.querySelectorAll('.beat [data-qa-call]')].filter(e => getComputedStyle(e.closest('.beat')).visibility !== 'hidden' && Number(getComputedStyle(e).opacity) > .05).map(e => { const r = e.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom, Number(e.dataset.mag || 0)]; });
+window.qaCap = () => null;
 window.qaBoxes = () => [...document.querySelectorAll('.beat [data-qa-shot]')].filter(e => getComputedStyle(e.closest('.beat')).visibility !== 'hidden' && Number(getComputedStyle(e).opacity) > .05).map(e => { const r = e.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom]; });
 B.journey = (el, b) => {
   el.innerHTML = `<svg class="abs" style="left:0;top:0" width="1920" height="1080"><path d="M300 560 H1620" stroke="#E73B2B" stroke-width="10" stroke-linecap="round" stroke-dasharray="1320" data-line fill="none"/></svg>
@@ -411,20 +422,30 @@ B.table = (el, b) => {
 };
 // Cards with a label and a value (values may be [FILL] blanks).
 B.cards = (el, b) => {
-  // Centred in the frame, both ways; label 52 px, value 44 px.
-  const n = b.items.length; const w = Math.min(540, (1600 - (n - 1) * 36) / n);
+  // Centred both ways. Cards with [FILL] blanks are wide rows (at least half
+  // the frame), stacked, label 40 px+, so a draft never shows small empty boxes.
+  const n = b.items.length; const blank = b.items.some(it => /\[FILL/.test(String(it.value || '')));
+  const w = blank ? 1160 : Math.min(540, (1600 - (n - 1) * 36) / n);
   el.innerHTML = `${b.heading ? `<div class="abs d" style="left:0;right:0;text-align:center;top:200px;font-size:72px;font-weight:700">${F(b.heading)}</div>` : ''}
-    <div class="abs" style="left:0;right:0;top:${b.heading ? 320 : 230}px;bottom:150px;display:flex;align-items:center;justify-content:center;gap:36px">
-    ${b.items.map((it) => `<div class="card" style="position:relative;width:${w}px;min-height:320px;padding:48px 40px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center" data-c>${it.icon ? EXTRA_ICONS[it.icon] : ''}<div class="d" style="font-size:52px;font-weight:700;margin-top:${it.icon ? 24 : 0}px">${F(it.label)}</div>${it.value ? `<div style="font-size:44px;margin-top:20px;line-height:1.3">${F(it.value)}</div>` : ''}</div>`).join('')}</div>${SRC(b)}`;
+    <div class="abs" style="left:0;right:0;top:${b.heading ? 320 : 230}px;bottom:150px;display:flex;flex-direction:${blank ? 'column' : 'row'};align-items:center;justify-content:center;gap:${blank ? 26 : 36}px">
+    ${b.items.map((it) => blank
+      ? `<div class="card" style="position:relative;width:${w}px;padding:30px 44px;display:grid;grid-template-columns:${it.icon ? '90px ' : ''}380px 1fr;align-items:center;column-gap:30px" data-c>${it.icon ? `<div style="transform:scale(.7);transform-origin:left center">${EXTRA_ICONS[it.icon]}</div>` : ''}<div class="d" style="font-size:44px;font-weight:700">${F(it.label)}</div><div style="font-size:40px;line-height:1.3">${F(it.value || '')}</div></div>`
+      : `<div class="card" style="position:relative;width:${w}px;min-height:320px;padding:48px 40px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center" data-c>${it.icon ? EXTRA_ICONS[it.icon] : ''}<div class="d" style="font-size:52px;font-weight:700;margin-top:${it.icon ? 24 : 0}px">${F(it.label)}</div>${it.value ? `<div style="font-size:44px;margin-top:20px;line-height:1.3">${F(it.value)}</div>` : ''}</div>`).join('')}</div>${SRC(b)}`;
   const cs = [...el.querySelectorAll('[data-c]')];
   return (t) => { const a = ENTER(b); cs.forEach((c, i) => { const s0 = a + i * .45; vis(c, eo(p(t, s0, s0 + .4))); c.style.transform = `translateY(${(1 - back(p(t, s0, s0 + .6))) * 70}px)`; }); };
 };
-// A funnel from the whole market to the first target (values from facts.json).
+// Market bars: widths in proportion to the values (row[2]); the label sits
+// above each bar and the value to its right. A row with no value (a [FILL]
+// target) is a dashed outline.
 B.funnel = (el, b) => {
+  const max = Math.max(...b.rows.map(r => Number(r[2]) || 0)); const FULL = 1300; const X = 200;
   el.innerHTML = `${b.heading ? `<div class="abs d" style="left:0;right:0;text-align:center;top:180px;font-size:68px;font-weight:700">${F(b.heading)}</div>` : ''}
-    ${b.rows.map((r, i) => `<div class="abs" style="left:${260 + i * 150}px;right:${260 + i * 150}px;top:${330 + i * 190}px;height:150px;border-radius:20px;background:${['#6E5F57', 'linear-gradient(90deg,#E73B2B,#F89833)', 'rgba(248,152,51,.22)'][i]};display:flex;align-items:center;justify-content:space-between;padding:0 44px;font-size:42px;font-weight:700" data-f><span>${F(r[0])}</span><span class="big" style="font-size:52px">${F(r[1])}</span></div>`).join('')}${SRC(b)}`;
-  const fs = [...el.querySelectorAll('[data-f]')];
-  return (t) => { const a = ENTER(b); const st = Math.min(1.6, (b.end - a) * .3); fs.forEach((f, i) => { const s0 = a + .2 + i * st; vis(f, eo(p(t, s0, s0 + .4))); f.style.transform = `scaleX(${.85 + .15 * eo(p(t, s0, s0 + .6))})`; }); };
+    ${b.rows.map((r, i) => { const v = Number(r[2]) || 0; const w = v ? Math.max(24, FULL * v / max) : 420; const y = 260 + i * 220;
+      return `<div class="abs" style="left:${X}px;top:${y}px;font-size:42px;font-weight:600" data-f>${F(r[0])}</div>
+      <div class="abs" style="left:${X}px;top:${y + 64}px;width:${w}px;height:96px;border-radius:16px;${v ? `background:${i === 0 ? '#6E5F57' : 'linear-gradient(90deg,#E23B2D,#F26A21)'}` : 'border:3px dashed rgba(242,106,33,.8)'};transform-origin:left center" data-bar></div>
+      <div class="abs" style="left:${X + w + 30}px;top:${y + 70}px;font-size:52px;font-weight:800;white-space:nowrap" data-v>${F(r[1])}</div>`; }).join('')}${SRC(b)}`;
+  const ls = [...el.querySelectorAll('[data-f]')]; const bars = [...el.querySelectorAll('[data-bar]')]; const vs = [...el.querySelectorAll('[data-v]')];
+  return (t) => { const a = ENTER(b); const st = Math.min(1.6, (b.end - a) * .3); bars.forEach((f, i) => { const s0 = a + .2 + i * st; vis(ls[i], eo(p(t, s0, s0 + .3))); vis(f, eo(p(t, s0, s0 + .3))); f.style.transform = `scaleX(${eo(p(t, s0, s0 + .7))})`; vis(vs[i], eo(p(t, s0 + .5, s0 + .8))); }); };
 };
 // Three stat chips (number + label + source).
 B.chips3 = (el, b) => {

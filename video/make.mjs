@@ -19,7 +19,7 @@ import { pathToFileURL, fileURLToPath } from 'url';
 import { execFileSync, spawnSync } from 'child_process';
 import { spoken, website, FILL } from './lib/facts.mjs';
 import { loadScript } from './lib/parse-script.mjs';
-import { readPcm, writeWav, edit, seconds, RATE } from './lib/audio.mjs';
+import { readPcm, writeWav, edit, seconds, RATE, trimTailBurst, bursts } from './lib/audio.mjs';
 import { writeSrt, writeScript } from './lib/captions.mjs';
 import { runQa, report, QA_DIR, OUT_DIR } from './qa.mjs';
 
@@ -43,13 +43,23 @@ const TARGET = { lufs: entry.loudness_lufs, size: [W, H], min: range[0] - 1, max
 const LANGCODE = LANG === 'te' ? 'te-IN' : 'en-IN'; const LANG_NAME = LANG === 'te' ? 'Telugu' : 'English';
 
 const script = loadScript(SID, LANG); const en = loadScript(SID, 'en');
-const layout = (await import(pathToFileURL(path.join(VDIR, 'layouts', `${SID}.mjs`)).href)).default({ lang: LANG, wide: WIDE, scenes: en.scenes, website: website(), contact: FILL.contact || '[FILL: contact]' });
+// Telugu on-screen text (revision 2: "do not ship English text in a Telugu file"):
+// used when the Telugu script's on-screen column is filled. Until a native
+// reviewer signs off, the frame carries a [TE pending] tag and the file is -DRAFT.
+const TE_TEXT = LANG === 'te' && script.scenes.length === en.scenes.length && script.scenes.every(x => x.screenTe && !/^\(English on screen/i.test(x.screenTe));
+const TE_PENDING = TE_TEXT && !script.signoff;
+const screenScenes = TE_TEXT ? en.scenes.map((x, i) => ({ ...x, screen: script.scenes[i].screenTe.split(/\s*(?:\/|<br>)\s*/).filter(Boolean) })) : en.scenes;
+const TE_STRINGS = TE_TEXT ? { sample: 'నమూనా డేటా', tagline: ['మీ భాష.', 'మీ స్కిల్స్.', 'మీ భవిష్యత్తు.'], source: 'మూలం:', illustrative: 'ఉదాహరణ కథ' } : {};
+const layout = (await import(pathToFileURL(path.join(VDIR, 'layouts', `${SID}.mjs`)).href)).default({ lang: LANG, wide: WIDE, scenes: screenScenes, website: website(), contact: FILL.contact || '[FILL: contact]' });
 const scenes = script.scenes.map((s, i) => { const L = layout.scenes[i]; const ph = !!L.placeholder; return { ...s, ...L, say: ph ? L.placeholder : s.say, placeholderLine: ph ? L.placeholder : null, silent: ph ? false : L.silent, en: en.scenes[i] }; });
 const BRAND = JSON.parse(fs.readFileSync(path.join(VDIR, 'brand.json'), 'utf8'));
 if (scenes.some(s => !s.beat && !s.beats)) throw new Error(`layouts/${SID}.mjs has no visual for every scene`);
 const LEAD = layout.lead ?? 0.5; const TAIL = layout.tail ?? 3.0; // the end card holds 3 s after the voice
 
-const WORK = path.join(VDIR, 'work', ID);
+// DRYVOICE=1: silent stand-in voice (≈2.5 words/s per line) in work/<id>-dry, to
+// check layouts and QA without the voice engine. Never copied to out/.
+const DRY = !!process.env.DRYVOICE;
+const WORK = path.join(VDIR, 'work', ID + (DRY ? '-dry' : ''));
 fs.mkdirSync(path.join(WORK, 'scenes'), { recursive: true });
 const dotenv = await import(path.join(ROOT, 'backend/node_modules/dotenv/lib/main.js'));
 (dotenv.default || dotenv).config({ path: path.join(ROOT, 'backend/.env') });
@@ -61,7 +71,7 @@ const blanks = [...new Set((JSON.stringify(scenes.map(s => [s.beat, s.beats, s.s
 const founder = scenes.some(s => s.directions.some(d => /founder on camera/i.test(d)));
 // NOCAPS=1: a copy without burned-in captions (the .srt still comes with it).
 const NOCAPS = !!process.env.NOCAPS && !WIDE;
-const OUTNAME = `${ID}${NOCAPS ? '-nocaptions' : ''}${blanks.length || founder ? '-DRAFT' : ''}`;
+const OUTNAME = `${ID}${NOCAPS ? '-nocaptions' : ''}${blanks.length || founder || TE_PENDING ? '-DRAFT' : ''}`;
 
 // ─── Voice ───────────────────────────────────────────────────────────────────
 // Who speaks a part of a scene: [Student…] → Student, [Top half] → Lecturer,
@@ -100,7 +110,9 @@ async function tts(text) {
   }
   throw new Error('No voice model answered (daily quota?). Try again later; nothing else was changed.');
 }
-const toWav = (raw, rate, out) => { execFileSync('ffmpeg', ['-v', 'error', '-y', '-f', 's16le', '-ar', String(rate), '-ac', '1', '-i', raw, ...(layout.tempo ? ['-af', `atempo=${layout.tempo}`] : []), '-ar', String(RATE), '-ac', '2', out]); fs.rmSync(raw); };
+// Speaking rate 0.95 (revision 2): a touch slower, pitch unchanged.
+const TEMPO = layout.tempo ?? 0.95;
+const toWav = (raw, rate, out) => { execFileSync('ffmpeg', ['-v', 'error', '-y', '-f', 's16le', '-ar', String(rate), '-ac', '1', '-i', raw, ...(TEMPO !== 1 ? ['-af', `atempo=${TEMPO}`] : []), '-ar', String(RATE), '-ac', '2', out]); fs.rmSync(raw); };
 const ttsText = () => (MULTI ? voiced.flatMap(v => v.parts.map(p => `${p.who}: ${spoken(p.text, LANG)}`)).join('\n') : voiced.map(v => spoken(v.parts.map(p => p.text).join(' '), LANG)).join('\n\n'));
 
 async function transcribe(file) {
@@ -117,18 +129,31 @@ async function transcribe(file) {
 
 const vo = path.join(WORK, 'voice.wav'); const meta = path.join(WORK, 'voice.json');
 const want = ttsText();
-if (fs.existsSync(meta) && JSON.parse(fs.readFileSync(meta, 'utf8')).text !== want) for (const f of ['voice.wav', 'voice.json', 'transcript.json', 'timing.json']) fs.rmSync(path.join(WORK, f), { force: true });
+// Log the exact text sent to the voice engine for every line with the brand.
+{ const BR = /Qubirex|Cube-bi-rex|Kyoo|Kyoobirex|Cue-bi-rex|క్యూబిరెక్స్/; const lines = want.split(/\n+/).filter(l => BR.test(l)); fs.writeFileSync(path.join(WORK, 'tts-brand-lines.txt'), lines.join('\n') + '\n'); lines.forEach(l => console.log(`tts text (brand): ${l}`)); }
+const sameVoice = (m) => m.text === want && (m.tempo ?? 1) === TEMPO && (DRY || !/^DRY RUN/.test(m.engine || '')); // a real render never takes a dry-run voice
+if (fs.existsSync(meta) && !sameVoice(JSON.parse(fs.readFileSync(meta, 'utf8')))) for (const f of ['voice.wav', 'voice.json', 'transcript.json', 'timing.json']) fs.rmSync(path.join(WORK, f), { force: true });
 // The same words in the same language were voiced for another cut (the square
 // employer video uses the widescreen one's voice): reuse it.
 if (!fs.existsSync(vo)) for (const other of fs.readdirSync(path.join(VDIR, 'work'))) {
   const m = path.join(VDIR, 'work', other, 'voice.json');
-  if (other !== ID && fs.existsSync(m) && JSON.parse(fs.readFileSync(m, 'utf8')).text === want) { for (const f of ['voice.wav', 'voice.json', 'transcript.json', 'timing.json']) if (fs.existsSync(path.join(VDIR, 'work', other, f))) fs.copyFileSync(path.join(VDIR, 'work', other, f), path.join(WORK, f)); console.log(`voice: reused from ${other}`); break; }
+  if (other !== ID && !other.endsWith('-dry') && !DRY && fs.existsSync(m) && sameVoice(JSON.parse(fs.readFileSync(m, 'utf8')))) { for (const f of ['voice.wav', 'voice.json', 'transcript.json', 'timing.json']) if (fs.existsSync(path.join(VDIR, 'work', other, f))) fs.copyFileSync(path.join(VDIR, 'work', other, f), path.join(WORK, f)); console.log(`voice: reused from ${other}`); break; }
+}
+if (DRY && !fs.existsSync(vo)) {
+  const lens = voiced.map(v => Math.max(1.2, v.parts.map(p => p.text).join(' ').split(/\s+/).length / 2.5));
+  const pcmD = new Float32Array(Math.round((lens.reduce((a, b) => a + b, 0) + 0.3) * RATE));
+  let o = 0; const starts = []; lens.forEach(L => { starts.push(o / RATE); for (let i = 0; i < L * RATE; i += 1) pcmD[o + i] = 0.05 * Math.sin(2 * Math.PI * 220 * i / RATE); o += Math.round(L * RATE); });
+  writeWav(vo, pcmD); fs.writeFileSync(meta, JSON.stringify({ text: want, tempo: TEMPO, engine: 'DRY RUN (no voice)' }));
+  fs.writeFileSync(path.join(WORK, 'transcript.json'), JSON.stringify({ heard: voiced.map(v => v.parts.map(p => p.text).join(' ')).join(' ') }));
+  fs.writeFileSync(path.join(WORK, 'timing.json'), JSON.stringify({ starts, words: [], brand: [] }));
 }
 if (!fs.existsSync(vo)) {
   const r = await tts(want); toWav(r.file, r.rate, vo);
-  fs.writeFileSync(meta, JSON.stringify({ text: want, engine: `Gemini TTS ${r.model} (${LANGCODE}; ${speakers.map(s => `${s}: ${VOICES[s]}`).join(', ')}); Chirp 3 HD not reachable with API keys` }));
+  { const tb = trimTailBurst(readPcm(vo)); if (tb.cut) { writeWav(vo, tb.pcm); console.log(`voice: removed the engine's clicks at ${tb.all.map(x => `${x.t} s (${x.db} dB)`).join(', ')}`); } }
+  fs.writeFileSync(meta, JSON.stringify({ text: want, tempo: TEMPO, engine: `Gemini TTS ${r.model} (${LANGCODE}; ${speakers.map(s => `${s}: ${VOICES[s]}`).join(', ')}); Chirp 3 HD not reachable with API keys` }));
   console.log(`voice: ${seconds(readPcm(vo)).toFixed(1)} s`);
 }
+{ const tb = trimTailBurst(readPcm(vo)); if (tb.cut) { writeWav(vo, tb.pcm); console.log(`voice: removed the engine's clicks at ${tb.all.map(x => `${x.t} s (${x.db} dB)`).join(', ')}`); } }
 const ENGINE = JSON.parse(fs.readFileSync(meta, 'utf8')).engine;
 const tFile = path.join(WORK, 'transcript.json');
 if (!fs.existsSync(tFile)) fs.writeFileSync(tFile, JSON.stringify({ heard: await transcribe(vo) }));
@@ -177,7 +202,7 @@ const timing = JSON.parse(fs.readFileSync(tmFile, 'utf8'));
 const redo = (process.env.REDO || '').split(',').filter(Boolean).map(Number);
 for (const n of redo) {
   const k = voiced.findIndex(v => scenes[v.i].n === n); if (k < 0) continue;
-  const r = await tts(MULTI ? voiced[k].parts.map(p => `${p.who}: ${spoken(p.text, LANG)}`).join('\n') : spoken(scriptText[k], LANG)); toWav(r.file, r.rate, path.join(WORK, 'scenes', `${String(n).padStart(2, '0')}.override.wav`));
+  const r = await tts(MULTI ? voiced[k].parts.map(p => `${p.who}: ${spoken(p.text, LANG)}`).join('\n') : spoken(scriptText[k], LANG)); { const of = path.join(WORK, 'scenes', `${String(n).padStart(2, '0')}.override.wav`); toWav(r.file, r.rate, of); const tb = trimTailBurst(readPcm(of)); if (tb.cut) writeWav(of, tb.pcm); }
 }
 const overrides = voiced.map(v => { const f = path.join(WORK, 'scenes', `${String(scenes[v.i].n).padStart(2, '0')}.override.wav`); return fs.existsSync(f) ? readPcm(f) : null; });
 // Each scene lasts as long as the script plans (its time column), and never
@@ -187,7 +212,11 @@ const rawPcm = readPcm(vo); const rawDur = seconds(rawPcm);
 // stay at least 5 s, placeholder scenes at least 3 s; the end card holds 3 s
 // after the voice (TAIL).
 const isCode = (s) => [s.beat, ...(s.beats || [])].some(b => b && (b.type === 'code' || b.type === 'recipe'));
-const fitPads = voiced.map((v, k) => { const s = scenes[v.i]; const d = (k + 1 < voiced.length ? timing.starts[k + 1] : rawDur) - timing.starts[k]; const min = Math.max(isCode(s) ? 5 : 0, s.placeholderLine ? 3 : 0, s.minHold || 0); return v.i === scenes.length - 1 ? 0.3 : Math.max(0.35, min - d); }); // the voice clip already ends with ~0.15–0.3 s of room tone, so scene ≈ voice + 0.5 s
+// Revision 2: a further 0.3 s pause between scenes, and every product shot
+// holds at least 4 s (its callout at least 3 s); the voice fills that time.
+const shotCount = (s) => [s.beat, ...(s.beats || [])].reduce((n, b) => n + ((b && (b.type === 'device' || b.type === 'shot') && b.shots) ? b.shots.length : 0), 0);
+const SHOT_MIN = 4.3;
+const fitPads = voiced.map((v, k) => { const s = scenes[v.i]; const d = (k + 1 < voiced.length ? timing.starts[k + 1] : rawDur) - timing.starts[k]; const min = Math.max(isCode(s) ? 5 : 0, s.placeholderLine ? 3 : 0, s.minHold || 0, shotCount(s) * SHOT_MIN); return v.i === scenes.length - 1 ? 0.3 : Math.max(0.65, min - d); }); // the clip ends with ~0.15–0.3 s of room tone: scene ≈ voice + 0.8 s
 // A layout may name an approved brand clip (another video's) so the name sounds the same everywhere.
 const refClip = layout.brandRef && LANG === 'en' ? readPcm(path.join(VDIR, layout.brandRef)) : null;
 const E = edit(rawPcm, timing.starts, { pads: fitPads, overrides, brand: timing.brand, refClip });
@@ -209,12 +238,13 @@ const voFinal = path.join(WORK, 'voice-final.wav'); writeWav(voFinal, pcm);
 let heardFinal = heard;
 if (overrides.some(Boolean)) { const tf = path.join(WORK, 'transcript-final.json'); if (!fs.existsSync(tf) || process.env.REDO) fs.writeFileSync(tf, JSON.stringify({ heard: await transcribe(voFinal) })); heardFinal = JSON.parse(fs.readFileSync(tf, 'utf8')).heard; console.log(`final voice heard: ${heardFinal}`); }
 const total = t0 + TAIL;
+console.log(`scene starts: ${sceneStart.map((x, i) => `${scenes[i].n}@${x.toFixed(1)}`).join(' ')}`);
 console.log(`${ID}: ${scenes.length} scenes, voice ${seconds(pcm).toFixed(1)} s → video ${total.toFixed(1)} s · ${brand.length} brand mentions${E.reference ? ', one clip' : ''}`);
 
 // ─── Beats ───────────────────────────────────────────────────────────────────
-const FOCUS = { walk: [0.21, 0.36, 0.97, 0.80], practise: [0.22, 0.05, 0.97, 0.62], passport: [0.21, 0.38, 0.97, 0.73], verify: [0.10, 0.12, 0.90, 0.80], college: [0.21, 0.50, 0.97, 1.0], employer: [0.20, 0.12, 0.97, 0.75], lesson: [0.21, 0.40, 0.97, 1.0], courses: [0.20, 0.40, 0.80, 0.80], ask: [0.21, 0.80, 0.97, 0.98], check: [0.21, 0.33, 0.97, 0.68], whynot: [0.69, 0.0, 1.0, 0.42], overview: [0.20, 0.48, 0.99, 1.0], qr: [0.62, 0.36, 0.97, 0.70] };
-// On a phone-shaped frame each shot zooms much tighter, to one readable area.
-const FOCUS_TALL = { walk: [0.21, 0.40, 0.60, 0.62], practise: [0.22, 0.25, 0.62, 0.43], check: [0.21, 0.36, 0.62, 0.50], passport: [0.21, 0.40, 0.62, 0.72], verify: [0.10, 0.45, 0.55, 0.78], employer: [0.20, 0.37, 0.56, 0.95], courses: [0.20, 0.30, 0.55, 0.50], lesson: [0.21, 0.28, 0.62, 0.40], ask: [0.21, 0.80, 0.62, 0.98], college: [0.21, 0.50, 0.60, 1.0], qr: [0.74, 0.36, 0.97, 0.62] };
+// Callout boxes: measured on the real page by video/shots.mjs (element boxes + 16 px).
+const SHOT_REPORT = JSON.parse(fs.readFileSync(path.join(VDIR, 'work/shots/te/report.json'), 'utf8'));
+const ALIAS = { qr: ['passport', 'qr'] }; // a shot key that is another still's second callout
 const SHOTS = path.join(VDIR, 'work/shots/te');
 const beats = [];
 scenes.forEach((s, i) => {
@@ -230,9 +260,21 @@ const sections = (layout.sections || []).map(sec => ({ ...sec, start: beats.find
 beats.forEach((b, i) => { b.first = i === 0 || beats[i - 1].section !== b.section; if (b.type === 'split') b.mid = b.midAt === 'start' ? b.start + .1 : b.midAt === 'never' ? 1e9 : b.start + (b.end - b.start) * .45; });
 for (const b of beats.filter(x => (x.type === 'device' || x.type === 'shot') && x.shots)) {
   const n = b.shots.length; const span = (b.end - b.start) / n;
-  b.shots.forEach((s, j) => { s.start = b.start + j * span; s.end = b.start + (j + 1) * span; s.still = `${s.key === 'qr' ? 'passport' : s.key}.png`; s.frames = 1; s.focus = s.focus || FOCUS_TALL[s.key] || FOCUS[s.key]; if (!fs.existsSync(path.join(SHOTS, s.still))) throw new Error(`No product shot ${s.still}: run node video/shots.mjs`); });
-  if (b.type === 'shot') b.shots.forEach(s => { s.key = s.still.replace('.png', ''); });
+  b.shots.forEach((s, j) => {
+    s.start = b.start + j * span; s.end = b.start + (j + 1) * span; s.frames = 1;
+    const [still, call] = ALIAS[s.key] || [s.key, s.call || 'default'];
+    s.still = `${still}.png`; s.stillKey = still; s.call = call;
+    const box = SHOT_REPORT[still]?.focus?.[call];
+    if (!box) throw new Error(`No measured callout "${call}" for shot ${still}: run node video/shots.mjs`);
+    s.box = box; s.focus = [box[0] / 1440, box[1] / 900, box[2] / 1440, box[3] / 900];
+    if (!fs.existsSync(path.join(SHOTS, s.still))) throw new Error(`No product shot ${s.still}: run node video/shots.mjs`);
+  });
 }
+// Consecutive product scenes marked join: one beat, so the frame stays put
+// while each shot (and its callout) changes with its own voice line.
+for (const b of beats.filter(x => x.shots)) b.shots.forEach(sh => { if (!sh.lines && b.lines) sh.lines = b.lines; });
+for (let i = beats.length - 1; i > 0; i -= 1) { const b = beats[i]; const a = beats[i - 1]; if (b.join && a.type === b.type && a.shots && b.shots) { a.shots.push(...b.shots); a.end = b.end; a.last = b.last; beats.splice(i, 1); } }
+const shotHolds = beats.filter(b => b.shots).flatMap(b => b.shots.map(s => ({ key: s.stillKey, call: s.call, start: +s.start.toFixed(2), end: +s.end.toFixed(2), hold: +(s.end - s.start).toFixed(2), callout: +(s.end - s.start - 0.6).toFixed(2), box: s.box })));
 // Captions: what is said, in English (Telugu versions show the English meaning).
 const capLines = scenes.map((s, i) => ({ text: (LANG === 'te' ? s.en.say : s.say) || '', start: sceneStart[i], end: sceneStart[i] + (sceneVoice[i] || 0) })).filter(c => c.text && c.end > c.start);
 
@@ -246,7 +288,7 @@ const browser = await launch();
 const page = await browser.newPage({ viewport: { width: W, height: H } });
 page.on('pageerror', e => console.error('page error:', e.message));
 const engine = WIDE ? path.join(WT, 'story.html') : path.join(VDIR, 'lib/flex.html');
-await page.addInitScript((d) => { window.STORY = d; }, { beats, sections, total, background: BRAND.background || 'A', footage: pathToFileURL(SHOTS).href, url: website(), strings: {}, size: [W, H], captions: WIDE || NOCAPS ? [] : cues, captionSize: entry.aspect === '1:1' ? 44 : 52 });
+await page.addInitScript((d) => { window.STORY = d; }, { beats, sections, total, background: BRAND.background || 'A', footage: pathToFileURL(SHOTS).href, url: website(), strings: TE_STRINGS, tePending: TE_PENDING, size: [W, H], captions: WIDE || NOCAPS ? [] : cues, captionSize: entry.aspect === '1:1' ? 44 : 52 });
 await page.goto(pathToFileURL(engine).href);
 await page.evaluate(() => document.fonts.ready);
 if (process.env.PREVIEW) {
@@ -257,7 +299,7 @@ const n = Math.round(total * FPS); const layers = [];
 for (let i = 0; i < n; i += 1) {
   const t = i / FPS;
   await page.evaluate((x) => window.render(x), t);
-  layers.push({ t, layers: await page.evaluate(() => window.qaLayers()), boxes: await page.evaluate(() => (window.qaBoxes ? window.qaBoxes() : [])) });
+  layers.push({ t, layers: await page.evaluate(() => window.qaLayers()), boxes: await page.evaluate(() => (window.qaBoxes ? window.qaBoxes() : [])), calls: await page.evaluate(() => (window.qaCalls ? window.qaCalls() : [])), cap: await page.evaluate(() => (window.qaCap ? window.qaCap() : null)) });
   await page.screenshot({ path: path.join(frames, `${String(i + 1).padStart(5, '0')}.jpg`), type: 'jpeg', quality: 92 });
 }
 await browser.close();
@@ -282,19 +324,68 @@ execFileSync('ffmpeg', ['-v', 'error', '-y', '-framerate', String(FPS), '-i', pa
 fs.mkdirSync(path.join(OUT_DIR, 'scripts'), { recursive: true });
 writeScript(path.join(OUT_DIR, 'scripts', `${ID}.md`), {
   title: `${en.meta['script id'] || SID} (${LANG_NAME} voice)`, name: OUTNAME, lang: LANG, total,
-  notes: [`Voice: ${ENGINE}.`, `Script: ${script.file}${LANG === 'te' ? ' (Telugu voice lines voiced before native review, on the founder\'s go-ahead; on-screen text in English)' : ''}.`, ...(blanks.length ? [`Blanks still open: ${blanks.join(', ')}.`] : []), ...(founder ? ['Founder footage not filmed yet: placeholder cards.'] : [])],
+  notes: [`Voice: ${ENGINE}.`, `Script: ${script.file}${LANG === 'te' ? ` (Telugu voice lines voiced before native review, on the founder's go-ahead; on-screen text ${TE_TEXT ? 'in Telugu (draft)' : 'in English'})` : ''}.`, ...(blanks.length ? [`Blanks still open: ${blanks.join(', ')}.`] : []), ...(founder ? ['Founder footage not filmed yet: placeholder cards.'] : [])],
   lines: scenes.map((s, i) => ({ section: s.section || '', text: s.say || `(no voice: ${s.directions.join(', ') || 'hold'})`, back: s.back, start: sceneStart[i], end: sceneStart[i] + (sceneVoice[i] || (i + 1 < scenes.length ? sceneStart[i + 1] - sceneStart[i] : TAIL)), screen: s.screen.join(' / ') }))
 });
+
+// ─── Revision 2 QA inputs ────────────────────────────────────────────────────
+// Brand, per mention: each mention cut out and transcribed alone by a prompt
+// that is not told the brand. The 1–3 words closest to "qubirex" are the
+// mention as heard; two or more words (e.g. "QB Rex") fail QA.
+const lev = (a, b) => { const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]); for (let j = 1; j <= b.length; j += 1) d[0][j] = j; for (let i = 1; i <= a.length; i += 1) for (let j = 1; j <= b.length; j += 1) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); return d[a.length][b.length]; };
+const TE_BRAND = 'క్యూబిరెక్స్';
+function brandToken(text) {
+  const toks = String(text).replace(/[.,!?;:"“”()]/g, ' ').split(/\s+/).filter(Boolean);
+  let best = null;
+  for (let i = 0; i < toks.length; i += 1) for (let n = 1; n <= 3 && i + n <= toks.length; n += 1) {
+    const span = toks.slice(i, i + n); const joined = span.join('').toLowerCase().replace(/-/g, '');
+    const d = /[ఀ-౿]/.test(joined) ? lev(joined, TE_BRAND) / TE_BRAND.length : lev(joined.replace(/[^a-z]/g, ''), 'qubirex') / 7;
+    if (!best || d < best.d - 1e-9 || (Math.abs(d - best.d) < 1e-9 && n < best.words)) best = { d, token: span.join(' '), words: n };
+  }
+  return best || { d: 1, token: '', words: 0 };
+}
+async function asrClip(file) {
+  const b64 = execFileSync('ffmpeg', ['-v', 'error', '-i', file, '-ac', '1', '-ar', '16000', '-b:a', '48k', '-f', 'mp3', '-']).toString('base64');
+  const ask = `Transcribe this short ${LANG_NAME} audio clip exactly as you hear it, word for word${LANG === 'te' ? ' (Telugu words in Telugu script, English words in English letters)' : ''}. If a word is a name you do not know, spell it the way it sounds. Plain text only.`;
+  for (const [model, key] of TEXT_MODELS.flatMap(m => KEYS.map(k => [m, k]))) {
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify({ contents: [{ parts: [{ inline_data: { mime_type: 'audio/mp3', data: b64 } }, { text: ask }] }], generationConfig: { temperature: 0 } }), signal: AbortSignal.timeout(60000) }).catch(() => ({ ok: false }));
+    if (r.ok) { const h = (await r.json()).candidates?.[0]?.content?.parts?.map(x => x.text).join(' ').trim(); if (h) return h; }
+  }
+  return null;
+}
+const brandWindows = LANG === 'en'
+  ? brand.map(b => ({ t: b.t, a: b.t - LEAD - 0.12, b: b.t - LEAD + b.dur + 0.12 }))
+  : scenes.map((s, i) => ({ s, i })).filter(({ s }) => (s.say || '').includes(TE_BRAND)).map(({ i }) => ({ t: +sceneStart[i].toFixed(2), a: sceneStart[i] - LEAD, b: sceneStart[i] - LEAD + (sceneVoice[i] || 3), scene: scenes[i].n }));
+const bhFile = path.join(WORK, 'brand-heard.json');
+const bhKey = `${fs.statSync(voFinal).size}:${brandWindows.map(w => `${w.a.toFixed(2)}-${w.b.toFixed(2)}`).join(',')}`;
+let brandHeard = fs.existsSync(bhFile) ? JSON.parse(fs.readFileSync(bhFile, 'utf8')) : null;
+if (!brandHeard || brandHeard.key !== bhKey) {
+  const list = [];
+  for (const [k, w] of brandWindows.entries()) {
+    const clip = path.join(WORK, `brand-${k + 1}.wav`);
+    execFileSync('ffmpeg', ['-v', 'error', '-y', '-i', voFinal, '-ss', Math.max(0, w.a).toFixed(3), '-to', w.b.toFixed(3), clip]);
+    const heard = await asrClip(clip); const bt = brandToken(heard || '');
+    list.push({ t: w.t, ...(w.scene ? { scene: w.scene } : {}), heard, token: bt.token, words: bt.words });
+  }
+  brandHeard = { key: bhKey, list }; fs.writeFileSync(bhFile, JSON.stringify(brandHeard, null, 1));
+}
+brandHeard.list.forEach(m => console.log(`brand at ${m.t} s heard as "${m.token}" (${m.words} word${m.words === 1 ? '' : 's'}; clip: "${(m.heard || '').slice(0, 60)}")`));
+// Callouts: no edge through a word, not mostly empty (video/lib/callout-qa.mjs).
+const { calloutQa } = await import('./lib/callout-qa.mjs');
+const calloutChecks = shotHolds.map(h => ({ ...h, ...calloutQa(path.join(SHOTS, `${h.key}.png`), path.join(SHOTS, `${h.key}.words.json`), h.box) }));
+// Clicks: isolated bursts left in the final voice track.
+const clicks = bursts(readPcm(voFinal)).map(x => ({ ...x, t: +(x.t + LEAD).toFixed(2) }));
 
 // ─── QA, then out/ ───────────────────────────────────────────────────────────
 const factKeys = [...new Set(beats.map(b => b.fact).filter(Boolean))];
 const codeScenes = beats.some(b => b.type === 'code' || b.type === 'recipe');
-const qa = runQa({ voiceFile: voFinal, lead: LEAD, holds: scenes.map((s, i) => (isCode(s) || (!voiced.some(v => v.i === i)) ? [sceneStart[i], i + 1 < scenes.length ? sceneStart[i + 1] : total] : null)).filter(Boolean), framesDir: frames, safe: WIDE ? [0.05, 0.05] : [0.06, 0.06], name: OUTNAME, file: final, lang: LANG, heard: heardFinal, script: LANG === 'te' ? scriptText.concat(scenes.map(s => s.en.say || '')) : scriptText, factKeys, brand, brandSpliced: !!E.reference, frames: layers, target: TARGET, banned: CONFIG.bannedSpokenPhrases, codeHold: CONFIG.minCodeHoldSeconds, teluguText: false, codeTest: codeScenes });
+const qa = runQa({ name: DRY ? `${OUTNAME}-dry` : OUTNAME, brandHeard: brandHeard.list, shots: calloutChecks, clicks, tailFrom: t0, voiceFile: voFinal, lead: LEAD, holds: scenes.map((s, i) => (isCode(s) || (!voiced.some(v => v.i === i)) ? [sceneStart[i], i + 1 < scenes.length ? sceneStart[i + 1] : total] : null)).filter(Boolean), framesDir: frames, safe: WIDE ? [0.05, 0.05] : [0.06, 0.06], file: final, lang: LANG, heard: heardFinal, script: LANG === 'te' ? scriptText.concat(scenes.map(s => s.en.say || '')) : scriptText, factKeys, brand, brandSpliced: !!E.reference, frames: layers, target: TARGET, banned: CONFIG.bannedSpokenPhrases, codeHold: CONFIG.minCodeHoldSeconds, teluguText: TE_TEXT, codeTest: codeScenes });
 for (const c of qa.checks) console.log(`  ${c.ok ? '✓' : '✗'} ${c.name}: ${c.detail}`);
+if (DRY) { console.log(`DRY RUN: QA ${qa.pass ? 'passed' : 'failed'} (nothing copied to out/, no report line): ${final}`); process.exit(0); }
 const dest = qa.pass ? OUT_DIR : path.join(QA_DIR, 'failed');
 fs.mkdirSync(dest, { recursive: true });
 fs.copyFileSync(final, path.join(dest, `${OUTNAME}.mp4`)); fs.copyFileSync(srt, path.join(dest, `${OUTNAME}.srt`));
 const base = `${ID}${NOCAPS ? '-nocaptions' : ''}`;
 if (qa.pass) for (const old of fs.readdirSync(OUT_DIR).filter(f => f.startsWith(`${base}.`) || f.startsWith(`${base}-DRAFT.`))) if (!old.startsWith(`${OUTNAME}.`)) fs.rmSync(path.join(OUT_DIR, old));
-report({ revision: 1, longestSilence: qa.longestSilence, sfx: qa.sfx, key: base, file: `${path.relative(VDIR, dest)}/${OUTNAME}.mp4`, duration: qa.duration, lufs: qa.lufs, truePeak: qa.truePeak, engine: ENGINE, pass: qa.pass, failed: qa.checks.filter(c => !c.ok).map(c => `${c.name} (${c.detail})`), notes: [...(blanks.length ? [`blanks: ${blanks.join(', ')}`] : []), ...(founder ? ['founder footage missing'] : []), ...(LANG === 'te' ? ['Telugu voice not yet native-reviewed; English text on screen'] : [])].join('; ') });
+report({ revision: 2, longestSilence: qa.longestSilence, sfx: qa.sfx, brandHeard: brandHeard.list.map(m => `${m.t} s: ${m.token || '?'}`), shortestShot: qa.shortestShot, calloutResult: qa.calloutResult, key: base, file: `${path.relative(VDIR, dest)}/${OUTNAME}.mp4`, duration: qa.duration, lufs: qa.lufs, truePeak: qa.truePeak, engine: ENGINE, pass: qa.pass, failed: qa.checks.filter(c => !c.ok).map(c => `${c.name} (${c.detail})`), notes: [...(blanks.length ? [`blanks: ${blanks.join(', ')}`] : []), ...(founder ? ['founder footage missing'] : []), ...(LANG === 'te' ? [TE_TEXT ? `Telugu voice and on-screen text are Claude drafts${TE_PENDING ? ' ([TE pending]: no native sign-off yet)' : ''}` : 'Telugu voice not yet native-reviewed; English text on screen'] : [])].join('; ') });
 console.log(`${qa.pass ? '✓ QA passed' : '✗ QA failed'}: ${path.relative(ROOT, path.join(dest, `${OUTNAME}.mp4`))} · ${qa.duration} s · ${qa.lufs} LUFS · sheet ${qa.sheet}`);

@@ -34,9 +34,16 @@ export const facts = {
   source: (key) => src(get(key))
 };
 
-/** The words sent to the voice: names spelled the agreed way (pronunciation.json). */
-export const spoken = (text, lang) => PRON.terms.reduce((t, term) => {
+// Whole numbers before a word, as words (revision 2: "100 students" was heard
+// as "Hundreds students"). Decimals, percentages, years and lakh figures stay.
+const ONES = 'zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen'.split(' ');
+const TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+export const numberWords = (n) => (n < 20 ? ONES[n] : n < 100 ? TENS[Math.floor(n / 10)] + (n % 10 ? `-${ONES[n % 10]}` : '') : n < 1000 ? `${ONES[Math.floor(n / 100)]} hundred${n % 100 ? ` and ${numberWords(n % 100)}` : ''}` : `${numberWords(Math.floor(n / 1000))} thousand${n % 1000 ? ` ${n % 1000 < 100 ? 'and ' : ''}${numberWords(n % 1000)}` : ''}`);
+export const wordsForNumbers = (text) => text.replace(/(^|[^\d.,%-])(\d{1,2},\d{3}|\d{1,5})(?=[ -][A-Za-z])(?![ -](?:lakh|crore|percent)\b)/g, (m, pre, num) => { const n = Number(num.replace(/,/g, '')); return n >= 1900 && n <= 2100 && !num.includes(',') ? m : pre + numberWords(n); });
+
+/** The words sent to the voice: names spelled the agreed way (pronunciation.json); in English, numbers before a word as words. */
+export const spoken = (text, lang) => [...PRON.terms].reduce((t, term) => {
   const say = term[`tts_${lang}`];
   if (!say) return t;
   return lang === 'en' ? t.replace(new RegExp(`\\b${term.word}\\b`, 'g'), say) : t.split(term.word).join(say);
-}, text);
+}, lang === 'en' ? wordsForNumbers(text) : text);

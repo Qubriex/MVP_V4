@@ -14,10 +14,13 @@ Rules: numbers only from `video/facts.json`; brand said as in `video/pronunciati
 
 | # | Time | Voice-over | On-screen text (/ = new line) | Visual / notes |
 |---|---|---|---|---|
-| 1 | 0:00-0:10 | Learning to code is hard enough. Learning it in a language you don't think in is harder. | Learn in your language | Title |
-| 2 | 0:10-0:25 | Pick a topic, like Python loops. Professor Qubirex teaches it in Telugu, Hindi or the mix. | 1 Learn | Topic page, lesson playing (Telugu mode) |
-| 3 | 0:25-0:38 | See the code, line by line, with the voice walking you through it. | 2 See the code | Line highlights |
-| 4 | 0:38-0:52 | Practise with hints, and run real tests. | 3 Practise | Editor, hints, tests passing |
-| 5 | 0:52-1:05 | When you're ready, a fresh check proves you can do it on your own. | 4 Check | Check screen, pass |
-| 6 | 1:05-1:18 | Every skill you prove goes on your signed Capability Passport. | 5 Passport | Passport card |
-| 7 | 1:18-1:25 | Qubirex. Your language. Your skills. Your future. | Start free / [website] | End card |
+| 1 | 0:00-0:08 | Learning to code is hard enough. Learning it in a language you don't think in is harder. | Learn in your language | Title |
+| 2 | 0:08-0:17 | [new] Pick a topic, like Python. Each topic is its own course, with modules and lessons in a clear order. | 1 Learn / Pick a topic | Topics page; callout: Python course card |
+| 3 | 0:17-0:27 | Professor Qubirex teaches it in Telugu, Hindi or the mix. [new] Every lesson starts with the idea in one line, in your language. | 1 Learn / In Telugu | Lesson (Telugu mode); callout: the one-line idea |
+| 4 | 0:27-0:36 | See the code, line by line, [new] with the voice walking you through every line of this small function. | 2 See the code / Line by line | Code step; callout: the code |
+| 5 | 0:36-0:45 | Practise with hints, and run real tests. [new] Hidden tests check the answer, not just the sample. | 3 Practise / Hints and real tests | Practise; callout: test results |
+| 6 | 0:45-0:55 | When you're ready, a fresh check proves you can do it on your own: [new] a new question, answered in your own words. | 4 Check / A fresh check | Check card |
+| 7 | 0:55-1:05 | Every skill you prove goes on your signed Capability Passport, [new] with an evidence ID that anyone can verify. | 5 Passport / Signed, verifiable | Passport; callout: evidence ID |
+| 8 | 1:05-1:12 | Qubirex. Your language. Your skills. Your future. | Start free / [website] | End card |
+
+**Revision 2 (19 Nov 2026):** one row per product shot, so each screen holds at least 4 s with a voice line that says what is on it. Sentences marked `[new]` were added in this revision.
