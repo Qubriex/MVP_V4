@@ -79,19 +79,19 @@
  },
  "employer-square-en": {
   "revision": 2,
-  "longestSilence": 1.3,
+  "longestSilence": 1.25,
   "sfx": "none",
   "brandHeard": [
    "9.73 s: Qubirex",
-   "54.86 s: Qubirex"
+   "54.83 s: Qubirex"
   ],
   "shortestShot": 6.67,
   "calloutResult": "PASS: 4 callouts, no word cut, emptiest 59% flat tiles, 1.35–2.20× the page",
   "key": "employer-square-en",
   "file": "out/employer-square-en.mp4",
-  "duration": 61.07,
-  "lufs": -14,
-  "truePeak": -2.5,
+  "duration": 61,
+  "lufs": -14.1,
+  "truePeak": -2.6,
   "engine": "Gemini TTS gemini-3.1-flash-tts-preview (en-IN; Professor: Kore); Chirp 3 HD not reachable with API keys",
   "pass": true,
   "failed": [],
@@ -362,15 +362,15 @@
   "sfx": "none",
   "brandHeard": [
    "20.76 s: Qubirex",
-   "92.99 s: Qubirex"
+   "92.96 s: Qubirex"
   ],
   "shortestShot": 5.69,
   "calloutResult": "PASS: 7 callouts, no word cut, emptiest 64% flat tiles, 1.73–2.20× the page",
   "key": "institution-full-en",
   "file": "out/institution-full-en.mp4",
-  "duration": 99.01,
+  "duration": 98.95,
   "lufs": -16,
-  "truePeak": -3.8,
+  "truePeak": -3.5,
   "engine": "Gemini TTS gemini-3.1-flash-tts-preview (en-IN; Professor: Kore); Chirp 3 HD not reachable with API keys",
   "pass": true,
   "failed": [],
@@ -401,23 +401,23 @@
  },
  "investor-full-en": {
   "revision": 2,
-  "longestSilence": 1.5,
+  "longestSilence": 1.7,
   "sfx": "none",
   "brandHeard": [
    "34.41 s: Qubirex",
-   "38.11 s: Q B Rex"
+   "38.08 s: Qubirex"
   ],
   "shortestShot": 5.6,
   "calloutResult": "PASS: 4 callouts, no word cut, emptiest 64% flat tiles, 1.92–2.20× the page",
   "key": "investor-full-en",
   "file": "qa/failed/investor-full-en-DRAFT.mp4",
-  "duration": 129.63,
+  "duration": 129.57,
   "lufs": -16,
-  "truePeak": -2.9,
+  "truePeak": -2.8,
   "engine": "Gemini TTS gemini-3.8-flash-tts (en-IN; Professor: Kore); Chirp 3 HD not reachable with API keys",
   "pass": false,
   "failed": [
-   "brand: every mention heard as one word (34.41 s \"Qubirex\"; 38.11 s \"Q B Rex\"; note: the whole-video transcript wrote \"QB Rex\" (transcriber-dependent))"
+   "sound: no silence > 1.5 s mid-video (1.7 s outside holds, at 73.5 s, 1.5 s outside holds, at 95.1 s)"
   ],
   "notes": "blanks: [FILL: before X% -> after Y%, N students, Z weeks], [FILL: who pays], [FILL: price per student per year], [FILL: from usage logs], [FILL: gross margin], [FILL: first target], [FILL: pilots, LOIs, colleges in talks], [FILL: one line per person], [FILL: Rs __], [FILL: product %, sales %, content %]; founder footage missing",
   "oldDuration": 111.23

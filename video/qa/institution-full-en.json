@@ -15,7 +15,7 @@
   {
    "name": "voice: \"Qubirex\" said one way",
    "ok": true,
-   "detail": "2 mentions at 20.8 s, 93.0 s; every mention is the same recorded clip; the transcript wrote it as: qb rex / qbrex"
+   "detail": "2 mentions at 20.8 s, 93.0 s; every mention is the same recorded clip; the transcript wrote it as: qb rex"
   },
   {
    "name": "text: one title at a time",
@@ -30,12 +30,12 @@
   {
    "name": "loudness: -16 LUFS ±1, true peak ≤ −1 dBTP",
    "ok": true,
-   "detail": "-16 LUFS, true peak -3.8 dBTP"
+   "detail": "-16 LUFS, true peak -3.5 dBTP"
   },
   {
    "name": "format: size, 30 fps, length",
    "ok": true,
-   "detail": "1920×1080, 30 fps, 99.01 s (max 150 s; shorter than the kit's 119 s because dead air was removed)"
+   "detail": "1920×1080, 30 fps, 98.95 s (max 150 s; shorter than the kit's 119 s because dead air was removed)"
   },
   {
    "name": "sound: no sound effects (no >5 kHz noise > 0.5 s without speech)",
@@ -50,7 +50,7 @@
   {
    "name": "picture: product shots inside the safe area",
    "ok": true,
-   "detail": "1925 frames with a product shot, all inside"
+   "detail": "1924 frames with a product shot, all inside"
   },
   {
    "name": "picture: no blue (≤ 2% of pixels, screenshots excluded)",
@@ -60,7 +60,7 @@
   {
    "name": "brand: every mention heard as one word",
    "ok": true,
-   "detail": "20.76 s \"Qubirex\"; 92.99 s \"Qubirex\"; note: the whole-video transcript wrote \"QB Rex\" (transcriber-dependent)"
+   "detail": "20.76 s \"Qubirex\"; 92.96 s \"Qubirex\"; note: the whole-video transcript wrote \"QB Rex\" (transcriber-dependent)"
   },
   {
    "name": "product shots: each ≥ 4 s, callout ≥ 3 s",
@@ -85,31 +85,31 @@
   {
    "name": "sound: closing music after the last line < −20 LUFS",
    "ok": true,
-   "detail": "-31.6 LUFS over the last 3.0 s"
+   "detail": "-31.5 LUFS over the last 3.0 s"
   }
  ],
  "lufs": -16,
- "truePeak": -3.8,
- "duration": 99.01,
+ "truePeak": -3.5,
+ "duration": 98.95,
  "sfx": "none",
  "longestSilence": 1.35,
  "longestHold": 1.35,
  "shortestShot": 5.69,
  "shortestCallout": 5.09,
  "calloutResult": "PASS: 7 callouts, no word cut, emptiest 64% flat tiles, 1.73–2.20× the page",
- "tailLufs": -31.6,
+ "tailLufs": -31.5,
  "sheet": "video/qa/institution-full-en-sheet.jpg",
  "brand": [
   {
    "line": 2,
    "t": 20.76,
-   "dur": 0.84
+   "dur": 0.81
   },
   {
    "line": 10,
-   "t": 92.99,
-   "dur": 0.84
+   "t": 92.96,
+   "dur": 0.81
   }
  ],
- "at": "2026-11-19T09:20:27.263Z"
+ "at": "2026-11-19T09:34:38.038Z"
 }
