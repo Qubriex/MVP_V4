@@ -15,7 +15,7 @@
   {
    "name": "voice: \"Qubirex\" said one way",
    "ok": true,
-   "detail": "0 mentions at —; not spliced; the transcript wrote it as: qubirex"
+   "detail": "0 mentions at —; not spliced; the transcript wrote it as: —"
   },
   {
    "name": "text: one title at a time",
@@ -25,23 +25,80 @@
   {
    "name": "text: read time held",
    "ok": true,
-   "detail": "17 text layers checked"
+   "detail": "255 text layers checked"
   },
   {
    "name": "loudness: -14 LUFS ±1, true peak ≤ −1 dBTP",
    "ok": true,
-   "detail": "-15 LUFS, true peak -1.6 dBTP"
+   "detail": "-14 LUFS, true peak -3.6 dBTP"
   },
   {
    "name": "format: size, 30 fps, length",
    "ok": true,
-   "detail": "1080×1080, 30 fps, 87.11 s (allowed 59–90 s)"
+   "detail": "1080×1080, 30 fps, 67.11 s (max 90 s)"
+  },
+  {
+   "name": "sound: no sound effects (no >5 kHz noise > 0.5 s without speech)",
+   "ok": true,
+   "detail": "none found"
+  },
+  {
+   "name": "sound: no silence > 1.5 s mid-video",
+   "ok": true,
+   "detail": "longest pause 0.95 s"
+  },
+  {
+   "name": "picture: product shots inside the safe area",
+   "ok": true,
+   "detail": "1126 frames with a product shot, all inside"
+  },
+  {
+   "name": "picture: no blue (≤ 2% of pixels, screenshots excluded)",
+   "ok": true,
+   "detail": "worst frame 0.00% at 0.0 s"
+  },
+  {
+   "name": "brand: every mention heard as one word",
+   "ok": true,
+   "detail": "10.23 s \"క్యూబ్రిక్స్\"; 60.68 s \"Qubrix\""
+  },
+  {
+   "name": "product shots: each ≥ 4 s, callout ≥ 3 s",
+   "ok": true,
+   "detail": "4 shots; shortest 6.9 s, shortest callout 6.3 s"
+  },
+  {
+   "name": "callouts: no edge through a word, not empty (≤ 70% flat)",
+   "ok": true,
+   "detail": "PASS: 4 callouts, no word cut, emptiest 59% flat tiles, 1.35–2.20× the page"
+  },
+  {
+   "name": "captions never over a callout",
+   "ok": true,
+   "detail": "no overlap"
+  },
+  {
+   "name": "sound: no clicks or pops (isolated bursts)",
+   "ok": true,
+   "detail": "none"
+  },
+  {
+   "name": "sound: closing music after the last line < −20 LUFS",
+   "ok": true,
+   "detail": "-29.8 LUFS over the last 3.0 s"
   }
  ],
- "lufs": -15,
- "truePeak": -1.6,
- "duration": 87.11,
+ "lufs": -14,
+ "truePeak": -3.6,
+ "duration": 67.11,
+ "sfx": "none",
+ "longestSilence": 0.95,
+ "longestHold": 0.95,
+ "shortestShot": 6.93,
+ "shortestCallout": 6.33,
+ "calloutResult": "PASS: 4 callouts, no word cut, emptiest 59% flat tiles, 1.35–2.20× the page",
+ "tailLufs": -29.8,
  "sheet": "video/qa/employer-square-te-sheet.jpg",
  "brand": [],
- "at": "2026-11-18T08:56:47.771Z"
+ "at": "2026-11-20T01:23:56.164Z"
 }

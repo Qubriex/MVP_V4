@@ -155,15 +155,27 @@
   "notes": ""
  },
  "institution-60s-te": {
+  "revision": 2,
+  "longestSilence": 0.95,
+  "sfx": "none",
+  "brandHeard": [
+   "6.67 s: Quberex",
+   "51.29 s: Qubirex"
+  ],
+  "shortestShot": 5.89,
+  "calloutResult": "PASS: 4 callouts, no word cut, emptiest 56% flat tiles, 1.73–1.92× the page",
   "key": "institution-60s-te",
-  "file": "out/institution-60s-te.mp4",
-  "duration": 59.2,
-  "lufs": -16.1,
-  "truePeak": -2.2,
-  "engine": "Gemini TTS gemini-3.1-flash-tts-preview (te-IN; Professor: Kore); Chirp 3 HD not reachable with API keys",
-  "pass": true,
-  "failed": [],
-  "notes": "Telugu voice not yet native-reviewed; English text on screen"
+  "file": "qa/failed/institution-60s-te.mp4",
+  "duration": 57.05,
+  "lufs": -16,
+  "truePeak": -3.9,
+  "engine": "Gemini TTS gemini-3.8-flash-tts (te-IN; Professor: Kore); Chirp 3 HD not reachable with API keys",
+  "pass": false,
+  "failed": [
+   "voice: numbers match facts.json (heard numbers not in the facts: 5)"
+  ],
+  "notes": "Telugu voice not yet native-reviewed; English text on screen",
+  "oldDuration": 59.2
  },
  "institution-full-te": {
   "key": "institution-full-te",
@@ -188,15 +200,25 @@
   "notes": "Telugu voice not yet native-reviewed; English text on screen"
  },
  "employer-square-te": {
+  "revision": 2,
+  "longestSilence": 0.95,
+  "sfx": "none",
+  "brandHeard": [
+   "10.23 s: క్యూబ్రిక్స్",
+   "60.68 s: Qubrix"
+  ],
+  "shortestShot": 6.93,
+  "calloutResult": "PASS: 4 callouts, no word cut, emptiest 59% flat tiles, 1.35–2.20× the page",
   "key": "employer-square-te",
   "file": "out/employer-square-te.mp4",
-  "duration": 87.11,
-  "lufs": -15,
-  "truePeak": -1.6,
-  "engine": "Gemini TTS gemini-3.1-flash-tts-preview (te-IN; Professor: Kore); Chirp 3 HD not reachable with API keys",
+  "duration": 67.11,
+  "lufs": -14,
+  "truePeak": -3.6,
+  "engine": "Gemini TTS gemini-3.8-flash-tts (te-IN; Professor: Kore); Chirp 3 HD not reachable with API keys",
   "pass": true,
   "failed": [],
-  "notes": "Telugu voice not yet native-reviewed; English text on screen"
+  "notes": "Telugu voice not yet native-reviewed; English text on screen",
+  "oldDuration": 87.11
  },
  "student-reel-1-te": {
   "revision": 1,
