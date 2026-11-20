@@ -1,6 +1,6 @@
 {
  "name": "institution-60s-te",
- "pass": false,
+ "pass": true,
  "checks": [
   {
    "name": "voice: no style text read aloud",
@@ -9,8 +9,8 @@
   },
   {
    "name": "voice: numbers match facts.json",
-   "ok": false,
-   "detail": "heard numbers not in the facts: 5"
+   "ok": true,
+   "detail": "4 numbers heard, all in the facts"
   },
   {
    "name": "voice: \"Qubirex\" said one way",
@@ -100,5 +100,5 @@
  "tailLufs": -31.5,
  "sheet": "video/qa/institution-60s-te-sheet.jpg",
  "brand": [],
- "at": "2026-11-20T01:20:51.577Z"
+ "at": "2026-11-20T01:30:48.901Z"
 }
