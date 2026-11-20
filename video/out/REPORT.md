@@ -13,6 +13,7 @@ Brand: each mention cut out and transcribed alone (the transcriber is not told t
 | `out/institution-60s-en.mp4` | 52.53 s | 5.98 s: Qubirex<br>47.16 s: Qubirex | 6.88 s | PASS: 4 callouts, no word cut, emptiest 56% flat tiles, 1.73–1.92× the page | PASS |
 | `qa/failed/institution-60s-te.mp4` | 57.05 s | 6.67 s: Quberex<br>51.29 s: Qubirex | 5.89 s | PASS: 4 callouts, no word cut, emptiest 56% flat tiles, 1.73–1.92× the page | FAIL: voice: numbers match facts.json (heard numbers not in the facts: 5) |
 | `out/institution-full-en.mp4` | 98.95 s | 20.76 s: Qubirex<br>92.96 s: Qubirex | 5.69 s | PASS: 7 callouts, no word cut, emptiest 64% flat tiles, 1.73–2.20× the page | PASS |
+| `out/institution-full-te.mp4` | 110.95 s | 25.07 s: Qubirix<br>104.63 s: Qubirex | 6.76 s | PASS: 7 callouts, no word cut, emptiest 64% flat tiles, 1.73–2.20× the page | PASS |
 | `out/investor-full-en-DRAFT.mp4` | 122.14 s | 32.91 s: QBRX<br>36.58 s: Qubirex | 5.14 s | PASS: 4 callouts, no word cut, emptiest 64% flat tiles, 1.92–2.20× the page | PASS |
 | `out/student-explainer-te.mp4` | 70.6 s | 15.87 s: క్యూబ్రిక్స్<br>62.99 s: Qubrix | 8.49 s | PASS: 6 callouts, no word cut, emptiest 64% flat tiles, 1.89–2.20× the page | PASS |
 
@@ -29,7 +30,7 @@ One line per video. Longest silence is the longest pause in the voice mid-video,
 | `out/institution-60s-en.mp4` | 25.47 s | 52.53 s | 1.35 s | none | PASS | -16 LUFS (TP -2.7) |  |
 | `qa/failed/institution-60s-te.mp4` | 59.2 s | 57.05 s | 0.95 s | none | FAIL: voice: numbers match facts.json (heard numbers not in the facts: 5) | -16 LUFS (TP -3.9) | Telugu voice not yet native-reviewed; English text on screen |
 | `out/institution-full-en.mp4` | 49.61 s | 98.95 s | 1.35 s | none | PASS | -16 LUFS (TP -3.5) |  |
-| `out/institution-full-te.mp4` | — | 146.87 s | — | — | PASS | -16.2 LUFS (TP -2.8) | Telugu voice not yet native-reviewed; English text on screen |
+| `out/institution-full-te.mp4` | 146.87 s | 110.95 s | 1 s | none | PASS | -16 LUFS (TP -4.9) | Telugu voice not yet native-reviewed; English text on screen |
 | `out/investor-full-en-DRAFT.mp4` | 111.23 s | 122.14 s | 1 s | none | PASS | -16 LUFS (TP -2.8) | blanks: [FILL: before X% -> after Y%, N students, Z weeks], [FILL: who pays], [FILL: price per student per year], [FILL: from usage logs], [FILL: gross margin], [FILL: first target], [FILL: pilots, LOIs, colleges in talks], [FILL: one line per person], [FILL: Rs __], [FILL: product %, sales %, content %]; founder footage missing |
 | `out/pitch-3min-en-DRAFT.mp4` | — | 141.2 s | — | — | PASS | -16 LUFS (TP -2.3) | blanks: [FILL: who pays], [website] |
 | `qa/failed/pitch-3min-te-DRAFT.mp4` | — | 180.94 s | — | — | FAIL: format: size, 30 fps, length (1920×1080, 30 fps, 180.94 s (allowed 90–160 s)) | -16 LUFS (TP -4.4) | blanks: [FILL: who pays], [website]; native-speaker check of the Telugu lines (⚠ quote line 16; "translating" line 19), then a new voice-over from the proposed tightened script (≤ 2:40) |

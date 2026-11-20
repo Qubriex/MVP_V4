@@ -178,15 +178,25 @@
   "oldDuration": 59.2
  },
  "institution-full-te": {
+  "revision": 2,
+  "longestSilence": 1,
+  "sfx": "none",
+  "brandHeard": [
+   "25.07 s: Qubirix",
+   "104.63 s: Qubirex"
+  ],
+  "shortestShot": 6.76,
+  "calloutResult": "PASS: 7 callouts, no word cut, emptiest 64% flat tiles, 1.73–2.20× the page",
   "key": "institution-full-te",
   "file": "out/institution-full-te.mp4",
-  "duration": 146.87,
-  "lufs": -16.2,
-  "truePeak": -2.8,
-  "engine": "Gemini TTS gemini-3.1-flash-tts-preview (te-IN; Professor: Kore); Chirp 3 HD not reachable with API keys",
+  "duration": 110.95,
+  "lufs": -16,
+  "truePeak": -4.9,
+  "engine": "Gemini TTS gemini-3.8-flash-tts (te-IN; Professor: Kore); Chirp 3 HD not reachable with API keys",
   "pass": true,
   "failed": [],
-  "notes": "Telugu voice not yet native-reviewed; English text on screen"
+  "notes": "Telugu voice not yet native-reviewed; English text on screen",
+  "oldDuration": 146.87
  },
  "employer-full-te": {
   "key": "employer-full-te",

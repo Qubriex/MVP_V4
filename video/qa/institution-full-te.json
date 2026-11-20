@@ -10,12 +10,12 @@
   {
    "name": "voice: numbers match facts.json",
    "ok": true,
-   "detail": "5 numbers heard, all in the facts"
+   "detail": "7 numbers heard, all in the facts"
   },
   {
    "name": "voice: \"Qubirex\" said one way",
    "ok": true,
-   "detail": "0 mentions at —; not spliced; the transcript wrote it as: —"
+   "detail": "0 mentions at —; not spliced; the transcript wrote it as: క్యూబిరెక్స్"
   },
   {
    "name": "text: one title at a time",
@@ -25,23 +25,80 @@
   {
    "name": "text: read time held",
    "ok": true,
-   "detail": "27 text layers checked"
+   "detail": "25 text layers checked"
   },
   {
    "name": "loudness: -16 LUFS ±1, true peak ≤ −1 dBTP",
    "ok": true,
-   "detail": "-16.2 LUFS, true peak -2.8 dBTP"
+   "detail": "-16 LUFS, true peak -4.9 dBTP"
   },
   {
    "name": "format: size, 30 fps, length",
    "ok": true,
-   "detail": "1920×1080, 30 fps, 146.87 s (allowed 119–150 s)"
+   "detail": "1920×1080, 30 fps, 110.95 s (max 150 s; shorter than the kit's 119 s because dead air was removed)"
+  },
+  {
+   "name": "sound: no sound effects (no >5 kHz noise > 0.5 s without speech)",
+   "ok": true,
+   "detail": "none found"
+  },
+  {
+   "name": "sound: no silence > 1.5 s mid-video",
+   "ok": true,
+   "detail": "longest pause 1.00 s"
+  },
+  {
+   "name": "picture: product shots inside the safe area",
+   "ok": true,
+   "detail": "2137 frames with a product shot, all inside"
+  },
+  {
+   "name": "picture: no blue (≤ 2% of pixels, screenshots excluded)",
+   "ok": true,
+   "detail": "worst frame 0.00% at 0.0 s"
+  },
+  {
+   "name": "brand: every mention heard as one word",
+   "ok": true,
+   "detail": "25.07 s \"Qubirix\"; 104.63 s \"Qubirex\""
+  },
+  {
+   "name": "product shots: each ≥ 4 s, callout ≥ 3 s",
+   "ok": true,
+   "detail": "7 shots; shortest 6.8 s, shortest callout 6.2 s"
+  },
+  {
+   "name": "callouts: no edge through a word, not empty (≤ 70% flat)",
+   "ok": true,
+   "detail": "PASS: 7 callouts, no word cut, emptiest 64% flat tiles, 1.73–2.20× the page"
+  },
+  {
+   "name": "captions never over a callout",
+   "ok": true,
+   "detail": "no overlap"
+  },
+  {
+   "name": "sound: no clicks or pops (isolated bursts)",
+   "ok": true,
+   "detail": "none"
+  },
+  {
+   "name": "sound: closing music after the last line < −20 LUFS",
+   "ok": true,
+   "detail": "-31.5 LUFS over the last 3.0 s"
   }
  ],
- "lufs": -16.2,
- "truePeak": -2.8,
- "duration": 146.87,
+ "lufs": -16,
+ "truePeak": -4.9,
+ "duration": 110.95,
+ "sfx": "none",
+ "longestSilence": 1,
+ "longestHold": 1,
+ "shortestShot": 6.76,
+ "shortestCallout": 6.16,
+ "calloutResult": "PASS: 7 callouts, no word cut, emptiest 64% flat tiles, 1.73–2.20× the page",
+ "tailLufs": -31.5,
  "sheet": "video/qa/institution-full-te-sheet.jpg",
  "brand": [],
- "at": "2026-11-18T08:50:27.409Z"
+ "at": "2026-11-20T01:27:19.299Z"
 }

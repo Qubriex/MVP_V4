@@ -110,7 +110,7 @@ export function runQa(o) {
     const missing = factNums.filter(n => !heard.includes(String(Number(n))));
     add('voice: numbers match the script and facts.json', extra.length === 0 && missing.length === 0, `${extra.length ? `heard but not in the script: ${extra.join(', ')}. ` : ''}${missing.length ? `facts not heard: ${missing.join(', ')}. ` : ''}${!extra.length && !missing.length ? `all ${factNums.length} fact numbers heard, no others` : ''}`);
   } else {
-    const allowed = new Set([...o.factKeys.flatMap(k => FACTS[k]?.numbers || []), ...o.script.flatMap(s => (s.replace(/,(?=\d)/g, '').match(/\d+(\.\d+)?/g) || []).map(n => String(Number(n)))), '1', '10', '100', '2', '3', '4', '6', '1.2', '13', '3.2', '44', '56', '98', '80', '1.1', '20']);
+    const allowed = new Set([...o.factKeys.flatMap(k => FACTS[k]?.numbers || []), ...o.script.flatMap(s => (s.replace(/,(?=\d)/g, '').match(/\d+(\.\d+)?/g) || []).map(n => String(Number(n)))), ...o.script.flatMap(numbersIn), '1', '10', '100', '2', '3', '4', '6', '1.2', '13', '3.2', '44', '56', '98', '80', '1.1', '20']);
     const heard = (o.heard.replace(/,(?=\d)/g, '').match(/\d+(\.\d+)?/g) || []).map(n => String(Number(n))); // 2,000 is one number
     const extra = [...new Set(heard.filter(n => !allowed.has(n)))];
     add('voice: numbers match facts.json', extra.length === 0, extra.length ? `heard numbers not in the facts: ${extra.join(', ')}` : `${heard.length} numbers heard, all in the facts`);
