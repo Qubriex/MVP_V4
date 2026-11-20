@@ -15,7 +15,7 @@
   {
    "name": "voice: \"Qubirex\" said one way",
    "ok": true,
-   "detail": "2 mentions at 9.7 s, 54.8 s; every mention is the same recorded clip; the transcript wrote it as: —"
+   "detail": "2 mentions at 9.4 s, 52.6 s; every mention is the same recorded clip; the transcript wrote it as: cubirex"
   },
   {
    "name": "text: one title at a time",
@@ -25,17 +25,17 @@
   {
    "name": "text: read time held",
    "ok": true,
-   "detail": "16 text layers checked"
+   "detail": "255 text layers checked"
   },
   {
    "name": "loudness: -14 LUFS ±1, true peak ≤ −1 dBTP",
    "ok": true,
-   "detail": "-14.1 LUFS, true peak -2.6 dBTP"
+   "detail": "-14 LUFS, true peak -3 dBTP"
   },
   {
    "name": "format: size, 30 fps, length",
    "ok": true,
-   "detail": "1080×1080, 30 fps, 61 s (max 90 s)"
+   "detail": "1080×1080, 30 fps, 58.74 s (max 90 s; shorter than the kit's 59 s because dead air was removed)"
   },
   {
    "name": "sound: no sound effects (no >5 kHz noise > 0.5 s without speech)",
@@ -45,12 +45,12 @@
   {
    "name": "sound: no silence > 1.5 s mid-video",
    "ok": true,
-   "detail": "longest pause 1.25 s"
+   "detail": "longest pause 0.95 s"
   },
   {
    "name": "picture: product shots inside the safe area",
    "ok": true,
-   "detail": "1054 frames with a product shot, all inside"
+   "detail": "1006 frames with a product shot, all inside"
   },
   {
    "name": "picture: no blue (≤ 2% of pixels, screenshots excluded)",
@@ -60,12 +60,12 @@
   {
    "name": "brand: every mention heard as one word",
    "ok": true,
-   "detail": "9.73 s \"Qubirex\"; 54.83 s \"Qubirex\""
+   "detail": "9.36 s \"Cubirex\"; 52.63 s \"Cubirex\""
   },
   {
    "name": "product shots: each ≥ 4 s, callout ≥ 3 s",
    "ok": true,
-   "detail": "4 shots; shortest 6.7 s, shortest callout 6.1 s"
+   "detail": "4 shots; shortest 6.2 s, shortest callout 5.6 s"
   },
   {
    "name": "callouts: no edge through a word, not empty (≤ 70% flat)",
@@ -85,31 +85,31 @@
   {
    "name": "sound: closing music after the last line < −20 LUFS",
    "ok": true,
-   "detail": "-27.5 LUFS over the last 3.0 s"
+   "detail": "-28.8 LUFS over the last 3.0 s"
   }
  ],
- "lufs": -14.1,
- "truePeak": -2.6,
- "duration": 61,
+ "lufs": -14,
+ "truePeak": -3,
+ "duration": 58.74,
  "sfx": "none",
- "longestSilence": 1.25,
- "longestHold": 1.25,
- "shortestShot": 6.67,
- "shortestCallout": 6.07,
+ "longestSilence": 0.95,
+ "longestHold": 0.95,
+ "shortestShot": 6.22,
+ "shortestCallout": 5.62,
  "calloutResult": "PASS: 4 callouts, no word cut, emptiest 59% flat tiles, 1.35–2.20× the page",
- "tailLufs": -27.5,
+ "tailLufs": -28.8,
  "sheet": "video/qa/employer-square-en-sheet.jpg",
  "brand": [
   {
    "line": 1,
-   "t": 9.73,
+   "t": 9.36,
    "dur": 0.81
   },
   {
    "line": 6,
-   "t": 54.83,
+   "t": 52.63,
    "dur": 0.81
   }
  ],
- "at": "2026-11-19T09:36:52.346Z"
+ "at": "2026-11-20T01:20:02.362Z"
 }

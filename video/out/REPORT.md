@@ -8,7 +8,7 @@ Brand: each mention cut out and transcribed alone (the transcriber is not told t
 
 | File | New length | Brand, as heard per mention | Shortest product shot | Callout QA | QA result |
 |---|---|---|---|---|---|
-| `out/employer-square-en.mp4` | 61 s | 9.73 s: Qubirex<br>54.83 s: Qubirex | 6.67 s | PASS: 4 callouts, no word cut, emptiest 59% flat tiles, 1.35–2.20× the page | PASS |
+| `out/employer-square-en.mp4` | 58.74 s | 9.36 s: Cubirex<br>52.63 s: Cubirex | 6.22 s | PASS: 4 callouts, no word cut, emptiest 59% flat tiles, 1.35–2.20× the page | PASS |
 | `out/institution-60s-en.mp4` | 52.53 s | 5.98 s: Qubirex<br>47.16 s: Qubirex | 6.88 s | PASS: 4 callouts, no word cut, emptiest 56% flat tiles, 1.73–1.92× the page | PASS |
 | `out/institution-full-en.mp4` | 98.95 s | 20.76 s: Qubirex<br>92.96 s: Qubirex | 5.69 s | PASS: 7 callouts, no word cut, emptiest 64% flat tiles, 1.73–2.20× the page | PASS |
 | `out/investor-full-en-DRAFT.mp4` | 122.14 s | 32.91 s: QBRX<br>36.58 s: Qubirex | 5.14 s | PASS: 4 callouts, no word cut, emptiest 64% flat tiles, 1.92–2.20× the page | PASS |
@@ -22,7 +22,7 @@ One line per video. Longest silence is the longest pause in the voice mid-video,
 |---|---|---|---|---|---|---|---|
 | `out/employer-full-en.mp4` | — | 86.51 s | — | — | PASS | -16.3 LUFS (TP -2.5) |  |
 | `out/employer-full-te.mp4` | — | 87.11 s | — | — | PASS | -16.4 LUFS (TP -2.6) | Telugu voice not yet native-reviewed; English text on screen |
-| `out/employer-square-en.mp4` | 34 s | 61 s | 1.25 s | none | PASS | -14.1 LUFS (TP -2.6) |  |
+| `out/employer-square-en.mp4` | 34 s | 58.74 s | 0.95 s | none | PASS | -14 LUFS (TP -3) |  |
 | `out/employer-square-te.mp4` | — | 87.11 s | — | — | PASS | -15 LUFS (TP -1.6) | Telugu voice not yet native-reviewed; English text on screen |
 | `out/institution-60s-en.mp4` | 25.47 s | 52.53 s | 1.35 s | none | PASS | -16 LUFS (TP -2.7) |  |
 | `out/institution-60s-te.mp4` | — | 59.2 s | — | — | PASS | -16.1 LUFS (TP -2.2) | Telugu voice not yet native-reviewed; English text on screen |
