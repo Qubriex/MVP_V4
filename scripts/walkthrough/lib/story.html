@@ -402,10 +402,37 @@ B.persona = (el, b) => {
   return (t) => { const a = ENTER(b); P.style.transform = `translateY(${(1 - eo(p(t, a, a + .8))) * 40}px)`; vis(P, eo(p(t, a, a + .5))); vis(k, eo(p(t, a + .2, a + .6))); vis(q, eo(p(t, a + .4, a + .9))); q.style.transform = `translateX(${(1 - eo(p(t, a + .4, a + 1))) * 40}px)`; };
 };
 // A pile of résumé cards falling onto the desk, under the heading.
+// A sample resume for the "2,000 resumes" pile: invented people, fixed per card
+// (the same card always shows the same data). k = scale (1 = a 260 px wide card).
+const RESUME = (() => {
+  const N = ['Ravi Teja', 'Sneha Reddy', 'Arjun Varma', 'Priya Naidu', 'Kiran Kumar', 'Anusha Rao', 'Sai Charan', 'Divya Sree', 'Rahul Goud', 'Meghana K', 'Vamsi Krishna', 'Lavanya P', 'Harsha V', 'Keerthi S', 'Manoj B', 'Swathi M', 'Nikhil R', 'Bhavana T'];
+  const DEG = ['B.Tech CSE', 'B.Tech IT', 'B.Tech ECE', 'B.Tech CSE (AI)', 'B.Tech EEE', 'MCA'];
+  const SK = ['Python', 'Java', 'C', 'SQL', 'HTML/CSS', 'JavaScript', 'React', 'Git', 'DSA', 'Excel', 'Node.js', 'C++'];
+  const PR = ['Library management app', 'Attendance tracker', 'Weather dashboard', 'Online quiz portal', 'Expense splitter', 'Chat app (sockets)', 'Hostel room booking', 'Portfolio website', 'Bus pass system', 'Movie ticket clone'];
+  const CE = ['NPTEL: Python for Data Science', 'Coursera: SQL Basics', 'HackerRank: Java (Basic)', 'NPTEL: Data Structures', 'AWS Cloud Practitioner (in progress)'];
+  const IN = ['Intern, local startup (2 months)', 'NSS volunteer', 'Hackathon finalist', 'Web dev workshop', 'NPTEL: Java (Elite)', 'Coding club member'];
+  return (i, k = 1) => {
+    const px = (v) => `${(v * k).toFixed(1)}px`;
+    const skills = [0, 1, 2, 3].map(j => SK[(i * 5 + j * 3) % SK.length]);
+    const cg = (7 + ((i * 37) % 26) / 10).toFixed(1);
+    const lab = (t) => `<div style="margin-top:${px(10)};font-size:${px(8.5)};font-weight:800;letter-spacing:.12em;color:#B34A1C">${t}</div>`;
+    return `<div style="font-family:Outfit,Inter,sans-serif;color:#2a2421;text-align:left;line-height:1.25">
+      <div style="display:flex;align-items:center;gap:${px(8)}"><div style="width:${px(30)};height:${px(30)};border-radius:50%;background:#E8DED6;flex:none"></div>
+        <div><div style="font-size:${px(16)};font-weight:800">${N[i % N.length]}</div><div style="font-size:${px(9.5)};color:#6E5F57">${DEG[i % DEG.length]} · 2026 · Hyderabad</div></div></div>
+      <div style="height:${px(2)};background:#F26A21;margin-top:${px(8)};border-radius:2px"></div>
+      ${lab('EDUCATION')}<div style="font-size:${px(10)}">Sample Engineering College · CGPA ${cg}</div>
+      ${lab('SKILLS')}<div style="display:flex;flex-wrap:wrap;gap:${px(4)};margin-top:${px(3)}">${skills.map(x => `<span style="font-size:${px(9)};padding:${px(1.5)} ${px(5)};border-radius:${px(6)};background:#F3ECE6">${x}</span>`).join('')}</div>
+      ${lab('PROJECTS')}<div style="font-size:${px(9.5)}">• ${PR[i % PR.length]}<br>• ${PR[(i + 5) % PR.length]}</div>
+      ${lab('EXPERIENCE')}<div style="font-size:${px(9.5)}">• ${IN[i % IN.length]}<br>• ${IN[(i + 3) % IN.length]}</div>
+      ${lab('CERTIFICATIONS')}<div style="font-size:${px(9.5)}">• ${CE[i % CE.length]}</div>
+      ${lab('LANGUAGES')}<div style="font-size:${px(9.5)}">Telugu, English${i % 3 ? ', Hindi' : ''}</div></div>`;
+  };
+})();
 B.resumes = (el, b) => {
   const cards = Array.from({ length: 18 }, (_, i) => ({ x: 560 + ((i * 97) % 640), r: ((i * 37) % 30) - 15, d: i * .09 }));
-  el.innerHTML = `${cards.map((c, i) => `<div class="abs" style="left:${c.x}px;top:520px;width:260px;height:320px;border-radius:14px;background:#f4f1ff;box-shadow:0 18px 40px rgba(0,0,0,.35);padding:26px" data-r="${i}"><div style="height:22px;width:60%;background:#6E5F57;border-radius:6px"></div>${Array.from({ length: 6 }, (_, j) => `<div style="margin-top:18px;height:12px;width:${90 - j * 9}%;background:#E8DED6;border-radius:6px"></div>`).join('')}</div>`).join('')}
-    <div class="abs d" style="left:0;right:0;text-align:center;top:190px;font-size:104px;font-weight:700" data-h>${F(b.heading)}</div>`;
+  el.innerHTML = `${cards.map((c, i) => `<div class="abs" style="left:${c.x}px;top:500px;width:280px;height:360px;border-radius:14px;background:#FBF6EF;box-shadow:0 18px 40px rgba(0,0,0,.35);padding:20px;box-sizing:border-box;overflow:hidden" data-r="${i}">${RESUME(i, 280 / 260 * .92)}</div>`).join('')}
+    <div class="abs d" style="left:0;right:0;text-align:center;top:190px;font-size:104px;font-weight:700" data-h>${F(b.heading)}</div>
+    <div class="abs" style="left:110px;bottom:70px;font-size:24px;font-weight:600;padding:6px 14px;border-radius:10px;background:rgba(251,246,239,.12);color:#FBF6EF" data-tag>Sample resumes</div>`;
   const rs = [...el.querySelectorAll('[data-r]')]; const h = el.querySelector('[data-h]');
   return (t) => { const a = ENTER(b); rs.forEach((r, i) => { const k = eo(p(t, a + cards[i].d, a + cards[i].d + .5)); r.style.transform = `translateY(${(1 - k) * -700}px) rotate(${cards[i].r * k}deg)`; vis(r, k > 0 ? 1 : 0); }); vis(h, eo(p(t, a + .3, a + .7))); };
 };

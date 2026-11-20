@@ -172,11 +172,39 @@ B.icons = (el, b) => {
   return (t) => items.forEach((x, i) => fade(x, t, b.start + .1 + i * Math.min(1.2, (b.end - b.start) * .2)));
 };
 // A pile of résumés falling in, under the headline.
+// A sample resume for the "2,000 resumes" pile: invented people, fixed per card
+// (the same card always shows the same data). k = scale (1 = a 260 px wide card).
+const RESUME = (() => {
+  const N = ['Ravi Teja', 'Sneha Reddy', 'Arjun Varma', 'Priya Naidu', 'Kiran Kumar', 'Anusha Rao', 'Sai Charan', 'Divya Sree', 'Rahul Goud', 'Meghana K', 'Vamsi Krishna', 'Lavanya P', 'Harsha V', 'Keerthi S', 'Manoj B', 'Swathi M', 'Nikhil R', 'Bhavana T'];
+  const DEG = ['B.Tech CSE', 'B.Tech IT', 'B.Tech ECE', 'B.Tech CSE (AI)', 'B.Tech EEE', 'MCA'];
+  const SK = ['Python', 'Java', 'C', 'SQL', 'HTML/CSS', 'JavaScript', 'React', 'Git', 'DSA', 'Excel', 'Node.js', 'C++'];
+  const PR = ['Library management app', 'Attendance tracker', 'Weather dashboard', 'Online quiz portal', 'Expense splitter', 'Chat app (sockets)', 'Hostel room booking', 'Portfolio website', 'Bus pass system', 'Movie ticket clone'];
+  const CE = ['NPTEL: Python for Data Science', 'Coursera: SQL Basics', 'HackerRank: Java (Basic)', 'NPTEL: Data Structures', 'AWS Cloud Practitioner (in progress)'];
+  const IN = ['Intern, local startup (2 months)', 'NSS volunteer', 'Hackathon finalist', 'Web dev workshop', 'NPTEL: Java (Elite)', 'Coding club member'];
+  return (i, k = 1) => {
+    const px = (v) => `${(v * k).toFixed(1)}px`;
+    const skills = [0, 1, 2, 3].map(j => SK[(i * 5 + j * 3) % SK.length]);
+    const cg = (7 + ((i * 37) % 26) / 10).toFixed(1);
+    const lab = (t) => `<div style="margin-top:${px(10)};font-size:${px(8.5)};font-weight:800;letter-spacing:.12em;color:#B34A1C">${t}</div>`;
+    return `<div style="font-family:Outfit,Inter,sans-serif;color:#2a2421;text-align:left;line-height:1.25">
+      <div style="display:flex;align-items:center;gap:${px(8)}"><div style="width:${px(30)};height:${px(30)};border-radius:50%;background:#E8DED6;flex:none"></div>
+        <div><div style="font-size:${px(16)};font-weight:800">${N[i % N.length]}</div><div style="font-size:${px(9.5)};color:#6E5F57">${DEG[i % DEG.length]} · 2026 · Hyderabad</div></div></div>
+      <div style="height:${px(2)};background:#F26A21;margin-top:${px(8)};border-radius:2px"></div>
+      ${lab('EDUCATION')}<div style="font-size:${px(10)}">Sample Engineering College · CGPA ${cg}</div>
+      ${lab('SKILLS')}<div style="display:flex;flex-wrap:wrap;gap:${px(4)};margin-top:${px(3)}">${skills.map(x => `<span style="font-size:${px(9)};padding:${px(1.5)} ${px(5)};border-radius:${px(6)};background:#F3ECE6">${x}</span>`).join('')}</div>
+      ${lab('PROJECTS')}<div style="font-size:${px(9.5)}">• ${PR[i % PR.length]}<br>• ${PR[(i + 5) % PR.length]}</div>
+      ${lab('EXPERIENCE')}<div style="font-size:${px(9.5)}">• ${IN[i % IN.length]}<br>• ${IN[(i + 3) % IN.length]}</div>
+      ${lab('CERTIFICATIONS')}<div style="font-size:${px(9.5)}">• ${CE[i % CE.length]}</div>
+      ${lab('LANGUAGES')}<div style="font-size:${px(9.5)}">Telugu, English${i % 3 ? ', Hindi' : ''}</div></div>`;
+  };
+})();
 B.resumes = (el, b) => {
   const s = document.createElement('div'); s.className = 'safe'; box(s); el.appendChild(s);
   s.innerHTML = `<div class="big d" data-h>${F(b.lines[0])}</div><div style="position:relative;width:100%;height:${SAFE.h * .55}px" data-pile></div>`;
   const pile = s.querySelector('[data-pile]'); const h = s.querySelector('[data-h]');
-  const cards = Array.from({ length: 14 }, (_, i) => { const d = document.createElement('div'); Object.assign(d.style, { position: 'absolute', left: `${SAFE.w * .1 + ((i * 97) % (SAFE.w * .55))}px`, top: `${SAFE.h * .1}px`, width: `${SAFE.w * .32}px`, height: `${SAFE.w * .4}px`, background: '#f4f1ff', borderRadius: `${14 * U}px`, boxShadow: '0 18px 40px rgba(0,0,0,.35)' }); pile.appendChild(d); return { d, r: ((i * 37) % 30) - 15, del: i * .08 }; });
+  const cw = SAFE.w * .36; const ch = cw * 1.3;
+  const cards = Array.from({ length: 14 }, (_, i) => { const d = document.createElement('div'); Object.assign(d.style, { position: 'absolute', left: `${SAFE.w * .06 + ((i * 97 * U) % (SAFE.w * .58))}px`, top: `${SAFE.h * .04}px`, width: `${cw}px`, height: `${ch}px`, background: '#FBF6EF', borderRadius: `${14 * U}px`, boxShadow: '0 18px 40px rgba(0,0,0,.35)', padding: `${cw * .07}px`, boxSizing: 'border-box', overflow: 'hidden' }); d.innerHTML = RESUME(i, cw / 260 * .92); pile.appendChild(d); return { d, r: ((i * 37) % 30) - 15, del: i * .08 }; });
+  { const tg = document.createElement('div'); tg.textContent = 'Sample resumes'; Object.assign(tg.style, { position: 'absolute', left: 0, bottom: `${-40 * U}px`, fontSize: `${22 * U}px`, fontWeight: 600, padding: `${5 * U}px ${12 * U}px`, borderRadius: `${10 * U}px`, background: 'rgba(251,246,239,.12)', color: '#FBF6EF' }); pile.appendChild(tg); }
   return (t) => { fade(h, t, b.start + .1); cards.forEach(c => { const k = eo(p(t, b.start + c.del, b.start + c.del + .5)); c.d.style.transform = `translateY(${(1 - k) * -H}px) rotate(${c.r * k}deg)`; }); };
 };
 // The end card: logo, lines, website, contact.
